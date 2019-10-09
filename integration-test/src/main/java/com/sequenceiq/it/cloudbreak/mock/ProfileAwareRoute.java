@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.mock;
 
-import java.util.List;
+import java.util.Set;
 
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.spark.StatefulRoute;
@@ -15,17 +15,17 @@ public class ProfileAwareRoute implements StatefulRoute {
 
     private final StatefulRoute statefulHappyResponseHandler;
 
-    private final List<String> activeProfiles;
+    private final Set<String> activeProfiles;
 
     private int callCounter;
 
-    public ProfileAwareRoute(Route happyResponseHandler, List<String> activeProfiles) {
+    public ProfileAwareRoute(Route happyResponseHandler, Set<String> activeProfiles) {
         this.happyResponseHandler = happyResponseHandler;
         statefulHappyResponseHandler = null;
         this.activeProfiles = activeProfiles;
     }
 
-    public ProfileAwareRoute(StatefulRoute statefulHappyResponseHandler, List<String> activeProfiles) {
+    public ProfileAwareRoute(StatefulRoute statefulHappyResponseHandler, Set<String> activeProfiles) {
         happyResponseHandler = null;
         this.statefulHappyResponseHandler = statefulHappyResponseHandler;
         this.activeProfiles = activeProfiles;

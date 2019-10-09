@@ -4,24 +4,47 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.KeyStoreUtil;
 
-@Service
-public class ClouderaManagerClientProvider {
+@Component
+public class ClouderaManagerApiClientProvider {
 
     public static final String API_V_31 = "/api/v31";
 
     public static final String API_ROOT = "/api";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClientProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerApiClientProvider.class);
+
+    public ApiClient getDefaultClient(Integer gatewayPort, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
+        return getClouderaManagerClient(clientConfig, gatewayPort, "admin", "admin");
+    }
+
+    public ApiClient getClient(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
+        if (StringUtils.isNoneBlank(user, password)) {
+            return getClouderaManagerClient(clientConfig,
+                    gatewayPort, user, password);
+        } else {
+            return getDefaultClient(gatewayPort, clientConfig);
+        }
+    }
+
+    public ApiClient getRootClient(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
+        if (StringUtils.isNoneBlank(user, password)) {
+            return getClouderaManagerRootClient(clientConfig,
+                    gatewayPort, user, password);
+        } else {
+            return getClouderaManagerRootClient(clientConfig, gatewayPort, "admin", "admin");
+        }
+    }
 
     public ApiClient getClouderaManagerClient(HttpClientConfig clientConfig, Integer port, String userName, String password)
             throws ClouderaManagerClientInitException {

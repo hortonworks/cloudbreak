@@ -12,7 +12,7 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
@@ -20,8 +20,8 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerCom
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerHostStatusChecker.class);
 
-    public ClouderaManagerHostStatusChecker(ClouderaManagerClientFactory clouderaManagerClientFactory) {
-        super(clouderaManagerClientFactory);
+    public ClouderaManagerHostStatusChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory) {
+        super(clouderaManagerApiPojoFactory);
     }
 
     @Override

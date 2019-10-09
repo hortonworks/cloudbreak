@@ -25,7 +25,8 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -54,7 +55,10 @@ public class ClouderaManagerKerberosServiceTest {
     private ClustersResourceApi clustersResourceApi;
 
     @Mock
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
+
+    @Mock
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     @Mock
     private ClouderaManagerClusterDecomissionService decommissionService;
@@ -84,9 +88,9 @@ public class ClouderaManagerKerberosServiceTest {
         cluster.setCloudbreakAmbariPassword("password");
         stack.setCluster(cluster);
         clientConfig = new HttpClientConfig("1.2.3.4", null, null, null);
-        when(clouderaManagerClientFactory.getClient(anyInt(), anyString(), anyString(), any())).thenReturn(client);
-        when(clouderaManagerClientFactory.getClouderaManagerResourceApi(client)).thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerClientFactory.getClustersResourceApi(client)).thenReturn(clustersResourceApi);
+        when(clouderaManagerApiClientProvider.getClient(anyInt(), anyString(), anyString(), any())).thenReturn(client);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(client)).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerApiFactory.getClustersResourceApi(client)).thenReturn(clustersResourceApi);
         when(applicationContext.getBean(eq(ClouderaManagerModificationService.class), eq(stack), eq(clientConfig))).thenReturn(modificationService);
         when(applicationContext.getBean(eq(ClouderaManagerClusterDecomissionService.class), eq(stack), eq(clientConfig))).thenReturn(decommissionService);
     }
@@ -120,7 +124,7 @@ public class ClouderaManagerKerberosServiceTest {
 
     @Test
     public void deleteCredentials() throws ApiException, CloudbreakException, ClouderaManagerClientInitException {
-        when(clouderaManagerClientFactory.getClouderaManagerResourceApi(client)).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(client)).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.deleteCredentialsCommand("all")).thenReturn(new ApiCommand().id(BigDecimal.ZERO));
 
         underTest.deleteCredentials(clientConfig, stack);

@@ -41,7 +41,8 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataExtendedState;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
@@ -80,7 +81,10 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     );
 
     @Inject
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
+
+    @Inject
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     private final Stack stack;
 
@@ -99,7 +103,8 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         String cloudbreakAmbariUser = cluster.getCloudbreakAmbariUser();
         String cloudbreakAmbariPassword = cluster.getCloudbreakAmbariPassword();
         try {
-            client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), cloudbreakAmbariUser, cloudbreakAmbariPassword, clientConfig);
+            client = clouderaManagerApiClientProvider
+                    .getClient(stack.getGatewayPort(), cloudbreakAmbariUser, cloudbreakAmbariPassword, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
@@ -188,7 +193,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     }
 
     private Collection<ApiService> readServices(Stack stack) throws ApiException {
-        ServicesResourceApi api = clouderaManagerClientFactory.getServicesResourceApi(client);
+        ServicesResourceApi api = clouderaManagerApiFactory.getServicesResourceApi(client);
         return api.readServices(stack.getCluster().getName(), FULL_VIEW).getItems();
     }
 
@@ -200,7 +205,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     }
 
     private Map<ClusterStatus, List<String>> groupRolesByState(Stack stack, Collection<String> services) {
-        RolesResourceApi api = clouderaManagerClientFactory.getRolesResourceApi(client);
+        RolesResourceApi api = clouderaManagerApiFactory.getRolesResourceApi(client);
         return services.stream()
                 .flatMap(service -> readRoles(api, stack, service))
                 .filter(role -> !IGNORED_ROLE_STATES.contains(role.getRoleState()))
@@ -221,7 +226,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
 
     private boolean isCMRunning() {
         try {
-            clouderaManagerClientFactory.getClouderaManagerResourceApi(client).getVersion();
+            clouderaManagerApiFactory.getClouderaManagerResourceApi(client).getVersion();
             return true;
         } catch (ApiException e) {
             return false;
@@ -233,7 +238,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
      * Currently this is the best indicator of host availability.
      */
     private Map<String, ApiHealthSummary> getHostHealthSummary() {
-        HostsResourceApi api = clouderaManagerClientFactory.getHostsResourceApi(client);
+        HostsResourceApi api = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
             return api.readHosts(FULL_VIEW).getItems().stream()
                     .filter(host -> host.getHealthChecks() != null)
@@ -251,7 +256,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     }
 
     private Map<String, ApiHealthCheck> getHostHealth() {
-        HostsResourceApi api = clouderaManagerClientFactory.getHostsResourceApi(client);
+        HostsResourceApi api = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
             return api.readHosts(FULL_VIEW).getItems().stream()
                     .filter(host -> host.getHealthChecks() != null)

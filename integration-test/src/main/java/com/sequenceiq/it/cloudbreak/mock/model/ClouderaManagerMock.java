@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -122,9 +123,9 @@ public class ClouderaManagerMock extends AbstractModelMock {
 
     private DynamicRouteStack dynamicRouteStack;
 
-    private final List<String> activeProfiles;
+    private final Set<String> activeProfiles;
 
-    public ClouderaManagerMock(Service sparkService, DefaultModel defaultModel, List<String> activeProfiles) {
+    public ClouderaManagerMock(Service sparkService, DefaultModel defaultModel, Set<String> activeProfiles) {
         super(sparkService, defaultModel);
         dynamicRouteStack = new DynamicRouteStack(sparkService, defaultModel);
         this.activeProfiles = activeProfiles;
@@ -419,7 +420,7 @@ public class ClouderaManagerMock extends AbstractModelMock {
             }
             return apiHostList;
         }, activeProfiles));
-        dynamicRouteStack.get(HOSTS, (request, response, model) -> getHosts(model));
+        dynamicRouteStack.get(HOSTS, new ProfileAwareRoute((request, response, model) -> getHosts(model), activeProfiles));
     }
 
     private void getHostById() {

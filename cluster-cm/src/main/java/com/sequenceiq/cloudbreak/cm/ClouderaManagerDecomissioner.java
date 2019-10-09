@@ -49,7 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.service.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -72,7 +72,7 @@ public class ClouderaManagerDecomissioner {
     private ResourceAttributeUtil resourceAttributeUtil;
 
     @Inject
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     private final Comparator<? super ApiHost> hostHealthComparator = (host1, host2) -> {
         boolean host1Healthy = ApiHealthSummary.GOOD.equals(host1.getHealthSummary());
@@ -89,7 +89,7 @@ public class ClouderaManagerDecomissioner {
 
     public void verifyNodesAreRemovable(Stack stack, Multimap<Long, HostMetadata> hostGroupWithInstances, Set<HostGroup> hostGroups, ApiClient client) {
         try {
-            HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerClientFactory.getHostTemplatesResourceApi(client);
+            HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(client);
             ApiHostTemplateList hostTemplates = hostTemplatesResourceApi.readHostTemplates(stack.getName());
 
             for (HostGroup hostGroup : hostGroups) {
@@ -109,10 +109,10 @@ public class ClouderaManagerDecomissioner {
             Set<InstanceMetaData> instanceMetaDatasInStack) {
         LOGGER.debug("Collecting downscale candidates");
         List<String> hostsInHostGroup = hostGroup.getHostMetadata().stream().map(HostMetadata::getHostName).collect(Collectors.toList());
-        ClustersResourceApi clustersResourceApi = clouderaManagerClientFactory.getClustersResourceApi(client);
-        HostsResourceApi hostsResourceApi = clouderaManagerClientFactory.getHostsResourceApi(client);
+        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
+        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
-            HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerClientFactory.getHostTemplatesResourceApi(client);
+            HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(client);
             ApiHostTemplateList hostTemplates = hostTemplatesResourceApi.readHostTemplates(stack.getName());
             int replication = hostGroupNodesAreDataNodes(hostTemplates, hostGroup.getName()) ? getReplicationFactor(client, stack.getName()) : 0;
             verifyNodeCount(replication, scalingAdjustment, hostGroup.getHostMetadata().size(), 0, stack);
@@ -197,7 +197,7 @@ public class ClouderaManagerDecomissioner {
 
     private int getReplicationFactor(ApiClient client, String clusterName) {
         try {
-            ServicesResourceApi servicesResourceApi = clouderaManagerClientFactory.getServicesResourceApi(client);
+            ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
             ApiServiceConfig apiServiceConfig = servicesResourceApi.readServiceConfig(clusterName, "hdfs", "full");
             Optional<ApiConfig> dfsReplicationConfig =
                     apiServiceConfig.getItems().stream().filter(apiConfig -> "dfs_replication".equals(apiConfig.getName())).findFirst();

@@ -21,7 +21,7 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
@@ -35,7 +35,7 @@ class ClouderaManagerRoleRefreshService {
     private static final String GENERATE_CREDENTIALS_COMMAND_NAME = "GenerateCredentials";
 
     @Inject
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
@@ -43,7 +43,7 @@ class ClouderaManagerRoleRefreshService {
     void refreshClusterRoles(ApiClient client, Stack stack) throws ApiException, CloudbreakException {
         LOGGER.debug("Cluster role refresh has been started.");
         waitForGenerateCredentialsToFinish(stack, client);
-        ClustersResourceApi clustersResourceApi = clouderaManagerClientFactory.getClustersResourceApi(client);
+        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
         ApiCommand refreshCommand = clustersResourceApi.refresh(stack.getCluster().getName());
         pollingRefresh(refreshCommand, client, stack);
         LOGGER.debug("Cluster role refresh finished successfully.");
@@ -60,7 +60,7 @@ class ClouderaManagerRoleRefreshService {
 
     private void waitForGenerateCredentialsToFinish(Stack stack, ApiClient client) throws ApiException {
         LOGGER.debug("Wait if Generate Credentials command is still active.");
-        ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerClientFactory.getClouderaManagerResourceApi(client);
+        ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
         ApiCommandList apiCommandList = clouderaManagerResourceApi.listActiveCommands(DataView.SUMMARY.name());
         Optional<BigDecimal> generateCredentialsCommandId = apiCommandList.getItems().stream()
                 .filter(toGenerateCredentialsCommand()).map(ApiCommand::getId).findFirst();

@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.mock;
 
 import java.util.List;
+import java.util.Set;
 
 import com.cloudera.api.swagger.model.ApiProductVersion;
 
@@ -18,7 +19,7 @@ public abstract class MockModel {
         this.mockServerAddress = mockServerAddress;
     }
 
-    public abstract void startModel(Service sparkService, String mockServerAddress, List<String> activeProfiles);
+    public abstract void startModel(Service sparkService, String mockServerAddress, Set<String> activeProfiles);
 
     public abstract String getClusterName();
 

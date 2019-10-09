@@ -42,7 +42,8 @@ import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataExtendedState;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
@@ -59,7 +60,10 @@ public class ClouderaManagerClusterStatusServiceTest {
     private ApiClient client;
 
     @Mock
-    private ClouderaManagerClientFactory clientFactory;
+    private ClouderaManagerApiFactory clientFactory;
+
+    @Mock
+    private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
 
     @Mock
     private ClouderaManagerResourceApi cmApi;
@@ -88,7 +92,8 @@ public class ClouderaManagerClusterStatusServiceTest {
 
         MockitoAnnotations.initMocks(this);
 
-        when(clientFactory.getClient(stack.getGatewayPort(), cluster.getCloudbreakAmbariUser(), cluster.getPassword(), clientConfig)).thenReturn(client);
+        when(clouderaManagerApiClientProvider.getClient(stack.getGatewayPort(), cluster.getCloudbreakAmbariUser(),
+                cluster.getPassword(), clientConfig)).thenReturn(client);
         when(clientFactory.getClouderaManagerResourceApi(client)).thenReturn(cmApi);
         when(clientFactory.getServicesResourceApi(client)).thenReturn(servicesApi);
         when(clientFactory.getRolesResourceApi(client)).thenReturn(rolesApi);

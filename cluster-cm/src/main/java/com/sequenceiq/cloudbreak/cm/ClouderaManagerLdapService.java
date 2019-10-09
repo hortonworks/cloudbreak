@@ -22,8 +22,9 @@ import com.cloudera.api.swagger.model.ApiExternalUserMapping;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingList;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.LdapView;
@@ -39,19 +40,22 @@ public class ClouderaManagerLdapService {
     private String userRole;
 
     @Inject
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
+
+    @Inject
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     public void setupLdap(Stack stack, Cluster cluster, HttpClientConfig clientConfig, LdapView ldapView)
             throws ApiException, ClouderaManagerClientInitException {
         if (ldapView != null) {
             String user = cluster.getCloudbreakAmbariUser();
             String password = cluster.getCloudbreakAmbariPassword();
-            ApiClient client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
+            ApiClient client = clouderaManagerApiClientProvider.getClient(stack.getGatewayPort(), user, password, clientConfig);
 
             LOGGER.debug("Setup LDAP on ClouderaManager API for stack: {}", stack.getId());
             ExternalUserMappingsResourceApi externalUserMappingsResourceApi =
-                    clouderaManagerClientFactory.getExternalUserMappingsResourceApi(client);
-            AuthRolesResourceApi authRolesResourceApi = clouderaManagerClientFactory.getAuthRolesResourceApi(client);
+                    clouderaManagerApiFactory.getExternalUserMappingsResourceApi(client);
+            AuthRolesResourceApi authRolesResourceApi = clouderaManagerApiFactory.getAuthRolesResourceApi(client);
             ApiAuthRoleMetadataList roleMetadataList = authRolesResourceApi.readAuthRolesMetadata(null);
             if (roleMetadataList.getItems() != null) {
                 Optional<ApiAuthRoleMetadata> adminMetadata = roleMetadataList.getItems().stream().filter(toRole(adminRole)).findFirst();

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.cloudera.api.swagger.model.ApiProductVersion;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -41,7 +42,7 @@ public class DefaultModel extends MockModel {
     private List<ApiProductVersion> products;
 
     @Override
-    public void startModel(Service sparkService, String mockServerAddress, List<String> activeProfiles) {
+    public void startModel(Service sparkService, String mockServerAddress, Set<String> activeProfiles) {
         setMockServerAddress(mockServerAddress);
         initInstanceMap(2200);
 

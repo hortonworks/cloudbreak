@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 
 
+import static com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock.PROFILE_RETURN_HTTP_500;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 
@@ -52,9 +53,9 @@ import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.util.HostNameUtil;
 import com.sequenceiq.it.util.ResourceUtil;
 
-public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
+public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerUpscaleTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CMUpscaleWithHttp500ResponsesTest.class);
 
     private static final BigDecimal DEPLOY_CLIENT_CONFIG_COMMAND_ID = new BigDecimal(100);
 
@@ -196,6 +197,11 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
                         .resolve())
                         .exactTimes(1))
                 .validate();
+    }
+
+    @Override
+    protected List<String> testProfiles() {
+        return List.of(PROFILE_RETURN_HTTP_500);
     }
 
     private void addClouderaManagerMocks(MockedTestContext testContext) {

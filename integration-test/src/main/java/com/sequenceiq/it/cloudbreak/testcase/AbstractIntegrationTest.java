@@ -4,7 +4,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -20,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.ITestContext;
@@ -68,6 +66,7 @@ import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestCaseDescriptionMissingException;
+import com.sequenceiq.it.cloudbreak.mock.ThreadLocalProfiles;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
@@ -134,20 +133,9 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     public void createSharedObjects() {
         String testClassName = getClass().getSimpleName();
         MDC.put("testlabel", "Purge: " + testClassName);
-        setActiveProfiles();
+        // TODO: refactor this mechanism
+        testProfiles().forEach(ThreadLocalProfiles::setProfile);
         applicationContext.getBean(PurgeGarbageService.class).purge();
-    }
-
-    private void setActiveProfiles() {
-        StandardEnvironment environment = (StandardEnvironment) applicationContext.getEnvironment();
-        List<String> profilesToSet = profilesBeforeTestContext();
-        List<String> activeProfiles = new ArrayList<>(List.of(environment.getActiveProfiles()));
-        activeProfiles.addAll(profilesToSet);
-        String[] result = new String[activeProfiles.size()];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = activeProfiles.get(i);
-        }
-        environment.setActiveProfiles(result);
     }
 
     @BeforeMethod
@@ -219,6 +207,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @AfterClass(alwaysRun = true)
     public void cleanSharedObjects() {
+        ThreadLocalProfiles.clearProfiles();
         closableBeans.forEach(b -> {
             try {
                 b.close();
@@ -417,7 +406,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         return networkReq;
     }
 
-    protected List<String> profilesBeforeTestContext() {
+    protected List<String> testProfiles() {
         return Collections.emptyList();
     }
 }

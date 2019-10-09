@@ -22,7 +22,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import org.springframework.test.context.TestPropertySource;
 
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.aspects.RequestLogging;
@@ -63,7 +63,7 @@ public class StackCollectorContext {
                     })
     )
     @MockBean({ClusterService.class, AmbariClientProvider.class, CloudbreakClientConfiguration.class, TlsSecurityService.class, HistoryService.class,
-            HttpNotificationSender.class, MetricUtils.class, Clock.class, ClouderaManagerClientFactory.class, SecretService.class})
+            HttpNotificationSender.class, MetricUtils.class, Clock.class, ClouderaManagerApiFactory.class, SecretService.class})
     @EnableAsync
     public static class StackCollectorSpringConfig implements AsyncConfigurer {
 

@@ -9,7 +9,7 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 
 public abstract class AbstractClouderaManagerCommandCheckerTask<T extends ClouderaManagerPollerObject> extends ClusterBasedStatusCheckerTask<T> {
@@ -23,19 +23,19 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
     private static final int INTERNAL_SERVER_ERROR_LIMIT = 5;
 
     //CHECKSTYLE:OFF
-    protected final ClouderaManagerClientFactory clouderaManagerClientFactory;
+    protected final ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
 
     private int internalServerErrorCounter = 0;
     //CHECKSTYLE:ON
 
-    protected AbstractClouderaManagerCommandCheckerTask(ClouderaManagerClientFactory clouderaManagerClientFactory) {
-        this.clouderaManagerClientFactory = clouderaManagerClientFactory;
+    protected AbstractClouderaManagerCommandCheckerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory) {
+        this.clouderaManagerApiPojoFactory = clouderaManagerApiPojoFactory;
     }
 
     @Override
     public final boolean checkStatus(T pollerObject) {
         ApiClient apiClient = pollerObject.getApiClient();
-        CommandsResourceApi commandsResourceApi = clouderaManagerClientFactory.getCommandsResourceApi(apiClient);
+        CommandsResourceApi commandsResourceApi = clouderaManagerApiPojoFactory.getCommandsResourceApi(apiClient);
         try {
             return doStatusCheck(pollerObject, commandsResourceApi);
         } catch (ApiException e) {

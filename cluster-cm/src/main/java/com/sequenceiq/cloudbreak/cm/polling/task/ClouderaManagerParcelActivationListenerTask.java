@@ -19,7 +19,7 @@ import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelList;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -34,8 +34,8 @@ public class ClouderaManagerParcelActivationListenerTask extends AbstractClouder
 
     private static final String PARCEL_ACTIVATED_STAGE = "ACTIVATED";
 
-    public ClouderaManagerParcelActivationListenerTask(ClouderaManagerClientFactory clouderaManagerClientFactory) {
-        super(clouderaManagerClientFactory);
+    public ClouderaManagerParcelActivationListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory) {
+        super(clouderaManagerApiPojoFactory);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class ClouderaManagerParcelActivationListenerTask extends AbstractClouder
     }
 
     private ApiParcelList getClouderaManagerParcels(ApiClient apiClient, String stackName) throws ApiException {
-        ParcelsResourceApi parcelsResourceApi = clouderaManagerClientFactory.getParcelsResourceApi(apiClient);
+        ParcelsResourceApi parcelsResourceApi = clouderaManagerApiPojoFactory.getParcelsResourceApi(apiClient);
         return parcelsResourceApi.readParcels(stackName, "summary");
     }
 

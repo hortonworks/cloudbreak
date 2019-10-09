@@ -3,8 +3,11 @@ package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STOPPED;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock.PROFILE_RETURN_HTTP_500;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.OK;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -24,7 +27,7 @@ import com.sequenceiq.it.cloudbreak.mock.model.SPIMock;
 import com.sequenceiq.it.cloudbreak.mock.spi.CloudVmInstanceStatuses;
 import com.sequenceiq.it.cloudbreak.spark.StatefulRoute;
 
-public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
+public class CMStartStopWithHttp500ResponsesTest extends AbstractClouderaManagerTest {
 
     private static final String CLOUD_INSTANCE_STATUSES = ITResponse.MOCK_ROOT + SPIMock.CLOUD_INSTANCE_STATUSES;
 
@@ -37,9 +40,9 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a Cloudera Manager cluster",
-            when = "the cluster is stoppend and started",
+            when = "the Cloudera Manager responds with HTTP 500 for each API call for the first time, but the cluster is stopped and started",
             then = "the cluster should be available")
-    public void createRegularClouderaManagerClusterThenWaitForAvailableThenStopThenStartThenWaitForAvailableThenNoExceptionOccurs(
+    public void testCreateStartStopWithHttp500ErrorsForEachApiCallForTheFirstTime(
             MockedTestContext testContext) {
         mockSpi(testContext);
         String name = testContext.get(BlueprintTestDto.class).getRequest().getName();
@@ -98,5 +101,10 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
     @Override
     protected BlueprintTestClient blueprintTestClient() {
         return blueprintTestClient;
+    }
+
+    @Override
+    protected List<String> testProfiles() {
+        return List.of(PROFILE_RETURN_HTTP_500);
     }
 }

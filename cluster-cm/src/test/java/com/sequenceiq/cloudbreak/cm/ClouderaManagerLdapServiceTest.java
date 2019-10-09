@@ -28,7 +28,8 @@ import com.cloudera.api.swagger.model.ApiExternalUserMappingList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -46,7 +47,10 @@ public class ClouderaManagerLdapServiceTest {
     private AuthRolesResourceApi authRolesResourceApi;
 
     @Mock
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
+
+    @Mock
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     @Mock
     private GrpcUmsClient umsClient;
@@ -78,10 +82,10 @@ public class ClouderaManagerLdapServiceTest {
         MockitoAnnotations.initMocks(this);
         String cmUser = cluster.getCloudbreakAmbariUser();
         String cmPassword = cluster.getCloudbreakAmbariPassword();
-        when(clouderaManagerClientFactory.getClient(stack.getGatewayPort(), cmUser, cmPassword, httpClientConfig)).thenReturn(apiClient);
-        when(clouderaManagerClientFactory.getClouderaManagerResourceApi(apiClient)).thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerClientFactory.getExternalUserMappingsResourceApi(apiClient)).thenReturn(externalUserMappingsResourceApi);
-        when(clouderaManagerClientFactory.getAuthRolesResourceApi(apiClient)).thenReturn(authRolesResourceApi);
+        when(clouderaManagerApiClientProvider.getClient(stack.getGatewayPort(), cmUser, cmPassword, httpClientConfig)).thenReturn(apiClient);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient)).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerApiFactory.getExternalUserMappingsResourceApi(apiClient)).thenReturn(externalUserMappingsResourceApi);
+        when(clouderaManagerApiFactory.getAuthRolesResourceApi(apiClient)).thenReturn(authRolesResourceApi);
     }
 
     @Test

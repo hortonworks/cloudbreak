@@ -24,7 +24,7 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelList;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -66,7 +66,7 @@ class ClouderaManagerParcelActivationListenerTaskTest {
     private static final String SUMMARY = "summary";
 
     @Mock
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
 
     @Mock
     private ApiClient apiClientMock;
@@ -82,7 +82,7 @@ class ClouderaManagerParcelActivationListenerTaskTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new ClouderaManagerParcelActivationListenerTask(clouderaManagerClientFactory);
+        underTest = new ClouderaManagerParcelActivationListenerTask(clouderaManagerApiPojoFactory);
         stack = new Stack();
         cluster = new Cluster();
 
@@ -102,7 +102,7 @@ class ClouderaManagerParcelActivationListenerTaskTest {
 
     @Test
     void checkStatusOneActivating() throws ApiException {
-        when(clouderaManagerClientFactory.getParcelsResourceApi(apiClientMock)).thenReturn(parcelsResourcesApi);
+        when(clouderaManagerApiPojoFactory.getParcelsResourceApi(apiClientMock)).thenReturn(parcelsResourcesApi);
         ClouderaManagerPollerObject clouderaManagerPollerObject = new ClouderaManagerPollerObject(stack, apiClientMock, COMMAND_ID);
 
         ApiParcel apiParcel1 = new ApiParcel().product(CDH).version(CDH_VERSION).stage(ACTIVATED);
@@ -114,7 +114,7 @@ class ClouderaManagerParcelActivationListenerTaskTest {
 
     @Test
     void checkStatusBothActivating() throws ApiException {
-        when(clouderaManagerClientFactory.getParcelsResourceApi(eq(apiClientMock))).thenReturn(parcelsResourcesApi);
+        when(clouderaManagerApiPojoFactory.getParcelsResourceApi(eq(apiClientMock))).thenReturn(parcelsResourcesApi);
         ClouderaManagerPollerObject clouderaManagerPollerObject = new ClouderaManagerPollerObject(stack, apiClientMock, COMMAND_ID);
 
         ApiParcel apiParcel1 = new ApiParcel().product(CDH).version(CDH_VERSION).stage(ACTIVATING);
@@ -126,7 +126,7 @@ class ClouderaManagerParcelActivationListenerTaskTest {
 
     @Test
     void checkStatusMissing() throws ApiException {
-        when(clouderaManagerClientFactory.getParcelsResourceApi(eq(apiClientMock))).thenReturn(parcelsResourcesApi);
+        when(clouderaManagerApiPojoFactory.getParcelsResourceApi(eq(apiClientMock))).thenReturn(parcelsResourcesApi);
         ClouderaManagerPollerObject clouderaManagerPollerObject = new ClouderaManagerPollerObject(stack, apiClientMock, COMMAND_ID);
 
         ApiParcel apiParcel1 = new ApiParcel().product(CDH).version(CDH_VERSION).stage(ACTIVATED);
@@ -137,7 +137,7 @@ class ClouderaManagerParcelActivationListenerTaskTest {
 
     @Test
     void checkStatusActivated() throws ApiException {
-        when(clouderaManagerClientFactory.getParcelsResourceApi(eq(apiClientMock))).thenReturn(parcelsResourcesApi);
+        when(clouderaManagerApiPojoFactory.getParcelsResourceApi(eq(apiClientMock))).thenReturn(parcelsResourcesApi);
         ClouderaManagerPollerObject clouderaManagerPollerObject = new ClouderaManagerPollerObject(stack, apiClientMock, COMMAND_ID);
 
         ApiParcel apiParcel1 = new ApiParcel().product(CDH).version(CDH_VERSION).stage(ACTIVATED);
