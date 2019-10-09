@@ -165,7 +165,7 @@ public class WorkspaceModificationVerifierService {
             throw new BadRequestException(String.format("The following workspace '%s' could not deleted because this is your default workspace.",
                     workspaceForDelete.getName()));
         }
-        if (!stackService.findAllForWorkspace(workspaceForDelete.getId()).isEmpty()) {
+        if (stackService.anyStackInWorkspace(workspaceForDelete.getId())) {
             LOGGER.info("The requested {} workspace has already existing clusters. We can not delete them until those will be deleted",
                     workspaceForDelete.getName());
             throw new BadRequestException(String.format("The requested '%s' workspace has already existing clusters. "

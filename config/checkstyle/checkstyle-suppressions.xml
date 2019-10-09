@@ -57,6 +57,8 @@
     <!-- suppress everything in package level JavaDoc files -->
     <suppress checks=".*" files="package-info.java"/>
 
+    <suppress checks=".*" files="yarn-service/src/main/java/org/apache/cb/yarn/service/api/.*"/>
+
     <!-- suppressing checks in Autoscale -->
     <suppress checks="HideUtilityClassConstructor" files="PeriscopeApplication.java" />
     <suppress id="string-instantiation" files="AmbariConfigurationService.java"/>
