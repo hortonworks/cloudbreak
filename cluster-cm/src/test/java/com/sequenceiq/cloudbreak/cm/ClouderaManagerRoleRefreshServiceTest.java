@@ -19,7 +19,7 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -37,7 +37,7 @@ public class ClouderaManagerRoleRefreshServiceTest {
     private ClouderaManagerRoleRefreshService underTest;
 
     @Mock
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     @Mock
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
@@ -51,9 +51,9 @@ public class ClouderaManagerRoleRefreshServiceTest {
         ApiCommand apiCommand = createApiCommand();
         ApiCommandList apiCommandList = createApiCommandList();
 
-        when(clouderaManagerClientFactory.getClouderaManagerResourceApi(apiClient)).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient)).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.listActiveCommands(DataView.SUMMARY.name())).thenReturn(apiCommandList);
-        when(clouderaManagerClientFactory.getClustersResourceApi(apiClient)).thenReturn(clustersResourceApi);
+        when(clouderaManagerApiFactory.getClustersResourceApi(apiClient)).thenReturn(clustersResourceApi);
         when(clustersResourceApi.refresh(CLUSTER_NAME)).thenReturn(apiCommand);
         when(clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(stack, apiClient, COMMAND_ID)).thenReturn(PollingResult.SUCCESS);
 

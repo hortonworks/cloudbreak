@@ -29,7 +29,7 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.service.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -48,7 +48,7 @@ public class ClouderaManagerDecommisionerTest {
     private ResourceAttributeUtil resourceAttributeUtil;
 
     @Mock
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     @Mock
     private HostTemplatesResourceApi hostTemplatesResourceApi;
@@ -67,7 +67,7 @@ public class ClouderaManagerDecommisionerTest {
         Set<HostGroup> hostGroups = createTestHostGroups(1, 3);
         Multimap<Long, HostMetadata> hostGroupWithInstances = createTestHostGroupWithInstances();
         ApiHostTemplateList hostTemplates = createEmptyHostTemplates();
-        Mockito.when(clouderaManagerClientFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
+        Mockito.when(clouderaManagerApiFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
         Mockito.when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
         Mockito.when(resourceAttributeUtil.getTypedAttributes(Mockito.any(Resource.class), Mockito.any(Class.class)))
                 .thenReturn(Optional.of(volumeSetAttributes));
@@ -84,7 +84,7 @@ public class ClouderaManagerDecommisionerTest {
         Set<HostGroup> hostGroups = createTestHostGroups(1, 1);
         Multimap<Long, HostMetadata> hostGroupWithInstances = createTestHostGroupWithInstances();
         ApiHostTemplateList hostTemplates = createEmptyHostTemplates();
-        Mockito.when(clouderaManagerClientFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
+        Mockito.when(clouderaManagerApiFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
         Mockito.when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
         Mockito.when(resourceAttributeUtil.getTypedAttributes(stack.getDiskResources().get(0), VolumeSetAttributes.class))
                 .thenReturn(Optional.of(volumeSetAttributes));
@@ -101,7 +101,7 @@ public class ClouderaManagerDecommisionerTest {
         Set<HostGroup> hostGroups = createTestHostGroups(1, 1);
         Multimap<Long, HostMetadata> hostGroupWithInstances = createTestHostGroupWithInstances();
         ApiHostTemplateList hostTemplates = createEmptyHostTemplates();
-        Mockito.when(clouderaManagerClientFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
+        Mockito.when(clouderaManagerApiFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
         Mockito.when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
         Mockito.when(resourceAttributeUtil.getTypedAttributes(stack.getDiskResources().get(0), VolumeSetAttributes.class))
                 .thenReturn(Optional.of(volumeSetAttributes));
@@ -120,11 +120,11 @@ public class ClouderaManagerDecommisionerTest {
         Multimap<Long, HostMetadata> hostGroupWithInstances = createTestHostGroupWithInstances();
         ApiServiceConfig apiServiceConfig = createApiServiceConfigWithReplication("3", true);
         ApiHostTemplateList hostTemplates = createHostTemplatesWithDataNodes(hostGroups.stream().findFirst().get().getName());
-        Mockito.when(clouderaManagerClientFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
+        Mockito.when(clouderaManagerApiFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
         Mockito.when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
         Mockito.when(resourceAttributeUtil.getTypedAttributes(stack.getDiskResources().get(0), VolumeSetAttributes.class))
                 .thenReturn(Optional.of(volumeSetAttributes));
-        Mockito.when(clouderaManagerClientFactory.getServicesResourceApi(Mockito.any(ApiClient.class))).thenReturn(servicesResourceApi);
+        Mockito.when(clouderaManagerApiFactory.getServicesResourceApi(Mockito.any(ApiClient.class))).thenReturn(servicesResourceApi);
         Mockito.when(servicesResourceApi.readServiceConfig(stack.getName(), "hdfs", "full")).thenReturn(apiServiceConfig);
         // WHEN
         underTest.verifyNodesAreRemovable(stack, hostGroupWithInstances, hostGroups, new ApiClient());
@@ -140,11 +140,11 @@ public class ClouderaManagerDecommisionerTest {
         Multimap<Long, HostMetadata> hostGroupWithInstances = createTestHostGroupWithInstances();
         ApiServiceConfig apiServiceConfig = createApiServiceConfigWithReplication("3", true);
         ApiHostTemplateList hostTemplates = createHostTemplatesWithDataNodes(hostGroups.stream().findFirst().get().getName());
-        Mockito.when(clouderaManagerClientFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
+        Mockito.when(clouderaManagerApiFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
         Mockito.when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
         Mockito.when(resourceAttributeUtil.getTypedAttributes(stack.getDiskResources().get(0), VolumeSetAttributes.class))
                 .thenReturn(Optional.of(volumeSetAttributes));
-        Mockito.when(clouderaManagerClientFactory.getServicesResourceApi(Mockito.any(ApiClient.class))).thenReturn(servicesResourceApi);
+        Mockito.when(clouderaManagerApiFactory.getServicesResourceApi(Mockito.any(ApiClient.class))).thenReturn(servicesResourceApi);
         Mockito.when(servicesResourceApi.readServiceConfig(stack.getName(), "hdfs", "full")).thenReturn(apiServiceConfig);
         // WHEN
         underTest.verifyNodesAreRemovable(stack, hostGroupWithInstances, hostGroups, new ApiClient());

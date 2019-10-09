@@ -16,7 +16,8 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -37,7 +38,10 @@ public class ClouderaManagerKerberosService {
     private static final String FREEIPA_FEATURE_FLAG = "FEATURE_FLAG_redhat_ipa";
 
     @Inject
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
+
+    @Inject
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
@@ -53,9 +57,9 @@ public class ClouderaManagerKerberosService {
         Cluster cluster = stack.getCluster();
         if (kerberosDetailService.isAdJoinable(kerberosConfig) || kerberosDetailService.isIpaJoinable(kerberosConfig)) {
             ClouderaManagerModificationService modificationService = applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig);
-            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerClientFactory.getClouderaManagerResourceApi(client);
+            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
             modificationService.stopCluster();
-            ClustersResourceApi clustersResourceApi = clouderaManagerClientFactory.getClustersResourceApi(client);
+            ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
             ApiCommand configureForKerberos = clustersResourceApi.configureForKerberos(cluster.getName(), new ApiConfigureForKerberosArguments());
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, configureForKerberos.getId());
             ApiCommand generateCredentials = clouderaManagerResourceApi.generateCredentialsCommand();
@@ -71,8 +75,8 @@ public class ClouderaManagerKerberosService {
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {
-            ApiClient client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
-            ClouderaManagerResourceApi apiInstance = clouderaManagerClientFactory.getClouderaManagerResourceApi(client);
+            ApiClient client = clouderaManagerApiClientProvider.getClient(stack.getGatewayPort(), user, password, clientConfig);
+            ClouderaManagerResourceApi apiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
             ClouderaManagerModificationService modificationService = applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig);
             modificationService.stopCluster();
 

@@ -13,7 +13,7 @@ import com.cloudera.api.swagger.ToolsResourceApi;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiEcho;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 
 public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
@@ -24,8 +24,8 @@ public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerC
 
     private static final String[] CONNECTION_MESSAGES = {"Connection refused", "connect timed out", "Failed to connect"};
 
-    public ClouderaManagerStartupListenerTask(ClouderaManagerClientFactory clouderaManagerClientFactory) {
-        super(clouderaManagerClientFactory);
+    public ClouderaManagerStartupListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory) {
+        super(clouderaManagerApiPojoFactory);
     }
 
     @Override

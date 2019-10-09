@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,13 +19,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.api.swagger.UsersResourceApi;
+import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiAuthRoleRef;
 import com.cloudera.api.swagger.model.ApiUser2;
 import com.cloudera.api.swagger.model.ApiUser2List;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -38,25 +41,32 @@ public class ClouderaManagerSecurityServiceTest {
 
     private static final boolean LDAP_DISABLED = false;
 
-    private ClouderaManagerClientFactory clouderaManagerClientFactory = mock(ClouderaManagerClientFactory.class);
+    private static final String ADMIN = "admin";
 
-    private ClouderaManagerSecurityConfigProvider securityConfigProvider = mock(ClouderaManagerSecurityConfigProvider.class);
+    private final ClouderaManagerApiFactory clouderaManagerApiFactory = mock(ClouderaManagerApiFactory.class);
 
-    private ClouderaManagerKerberosService kerberosService = mock(ClouderaManagerKerberosService.class);
+    private final ClouderaManagerApiClientProvider clouderaManagerApiClientProvider = mock(ClouderaManagerApiClientProvider.class);
 
-    private ClouderaManagerLdapService ldapService = mock(ClouderaManagerLdapService.class);
+    private final ClouderaManagerSecurityConfigProvider securityConfigProvider = mock(ClouderaManagerSecurityConfigProvider.class);
+
+    private final ClouderaManagerKerberosService kerberosService = mock(ClouderaManagerKerberosService.class);
+
+    private final ClouderaManagerLdapService ldapService = mock(ClouderaManagerLdapService.class);
+
+    private final ApiClient apiClient = mock(ApiClient.class);
 
     @InjectMocks
     private ClouderaManagerSecurityService underTest;
 
     private Stack stack;
 
-    private HttpClientConfig clientConfig = new HttpClientConfig("localhost");
+    private final HttpClientConfig clientConfig = new HttpClientConfig("localhost");
 
-    public void createUnderTest(String userName) {
+    public void initTestInput(String userName) {
         stack = createStack(userName);
         underTest = new ClouderaManagerSecurityService(stack, clientConfig);
-        ReflectionTestUtils.setField(underTest, "clouderaManagerClientFactory", clouderaManagerClientFactory);
+        ReflectionTestUtils.setField(underTest, "clouderaManagerApiFactory", clouderaManagerApiFactory);
+        ReflectionTestUtils.setField(underTest, "clouderaManagerApiClientProvider", clouderaManagerApiClientProvider);
         ReflectionTestUtils.setField(underTest, "securityConfigProvider", securityConfigProvider);
         ReflectionTestUtils.setField(underTest, "kerberosService", kerberosService);
         ReflectionTestUtils.setField(underTest, "ldapService", ldapService);
@@ -65,16 +75,17 @@ public class ClouderaManagerSecurityServiceTest {
     @Test
     public void testChangeOriginalCredentialsAndCreateCloudbreakUserWhenLdapIsConfiguredAndAdminUserIsProvided()
             throws CloudbreakException, ApiException, ClouderaManagerClientInitException {
-        createUnderTest("admin");
+        initTestInput(ADMIN);
         UsersResourceApi usersResourceApi = mock(UsersResourceApi.class);
         ApiUser2List oldUserList = createApiUser2List();
 
-        when(clouderaManagerClientFactory.getDefaultUsersResourceApi(GATEWAY_PORT, clientConfig)).thenReturn(usersResourceApi);
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, ADMIN, ADMIN)).thenReturn(apiClient);
+        when(clouderaManagerApiFactory.getUserResourceApi(any())).thenReturn(usersResourceApi);
         when(usersResourceApi.readUsers2("SUMMARY")).thenReturn(oldUserList);
 
         underTest.changeOriginalCredentialsAndCreateCloudbreakUser(LDAP_ENABLED);
 
-        verify(clouderaManagerClientFactory).getDefaultUsersResourceApi(GATEWAY_PORT, clientConfig);
+        verify(clouderaManagerApiFactory).getUserResourceApi(apiClient);
         verify(usersResourceApi).readUsers2("SUMMARY");
 
         ArgumentCaptor<ApiUser2List> argumentCaptor = ArgumentCaptor.forClass(ApiUser2List.class);
@@ -86,29 +97,33 @@ public class ClouderaManagerSecurityServiceTest {
         Assert.assertEquals(stack.getCluster().getDpAmbariPassword(), createdUsers.get(1).getItems().get(0).getPassword());
 
         verify(usersResourceApi).updateUser2(oldUserList.getItems().get(0).getName(), oldUserList.getItems().get(0));
-        verifyNoMoreInteractions(clouderaManagerClientFactory);
     }
 
     @Test
     public void testChangeOriginalCredentialsAndCreateCloudbreakUserWhenLdapIsNotConfiguredAndTheGivenUserIsNotAdmin()
             throws CloudbreakException, ApiException, ClouderaManagerClientInitException {
-        createUnderTest("ambariUser");
+        initTestInput("ambariUser");
         UsersResourceApi usersResourceApi = mock(UsersResourceApi.class);
         UsersResourceApi newUsersResourceApi = mock(UsersResourceApi.class);
+        ApiClient newApiClient = mock(ApiClient.class);
         ApiUser2List oldUserList = createApiUser2List();
 
-        when(clouderaManagerClientFactory.getDefaultUsersResourceApi(GATEWAY_PORT, clientConfig)).thenReturn(usersResourceApi);
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, ADMIN, ADMIN)).thenReturn(apiClient);
+        when(clouderaManagerApiFactory.getUserResourceApi(apiClient)).thenReturn(usersResourceApi);
+
         when(usersResourceApi.readUsers2("SUMMARY")).thenReturn(oldUserList);
-        when(clouderaManagerClientFactory.getUserResourceApi(GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), clientConfig)).thenReturn(newUsersResourceApi);
+
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
+                stack.getCluster().getCloudbreakAmbariPassword())).thenReturn(newApiClient);
+        when(clouderaManagerApiFactory.getUserResourceApi(newApiClient)).thenReturn(newUsersResourceApi);
 
         underTest.changeOriginalCredentialsAndCreateCloudbreakUser(LDAP_DISABLED);
 
-        verify(clouderaManagerClientFactory).getDefaultUsersResourceApi(GATEWAY_PORT, clientConfig);
+        verify(clouderaManagerApiClientProvider).getClouderaManagerClient(clientConfig, GATEWAY_PORT, ADMIN, ADMIN);
         verify(usersResourceApi).readUsers2("SUMMARY");
 
-        verify(clouderaManagerClientFactory).getUserResourceApi(GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), clientConfig);
+        verify(clouderaManagerApiClientProvider).getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
+                stack.getCluster().getCloudbreakAmbariPassword());
 
         ArgumentCaptor<ApiUser2List> createUserCaptor = ArgumentCaptor.forClass(ApiUser2List.class);
         verify(usersResourceApi, times(2)).createUsers2(createUserCaptor.capture());
@@ -124,29 +139,33 @@ public class ClouderaManagerSecurityServiceTest {
         Assert.assertEquals(stack.getCluster().getUserName(), createdNewUser.get(0).getItems().get(0).getName());
         Assert.assertEquals(stack.getCluster().getPassword(), createdNewUser.get(0).getItems().get(0).getPassword());
 
-        verifyNoMoreInteractions(clouderaManagerClientFactory);
+        verifyNoMoreInteractions(clouderaManagerApiClientProvider);
     }
 
     @Test
     public void testChangeOriginalCredentialsAndCreateCloudbreakUserWhenLdapIsConfiguredAndTheGivenUserIsNotAdmin()
             throws CloudbreakException, ApiException, ClouderaManagerClientInitException {
-        createUnderTest("ambariUser");
+        initTestInput("ambariUser");
         UsersResourceApi usersResourceApi = mock(UsersResourceApi.class);
         UsersResourceApi newUsersResourceApi = mock(UsersResourceApi.class);
+        ApiClient newApiClient = mock(ApiClient.class);
         ApiUser2List oldUserList = createApiUser2List();
 
-        when(clouderaManagerClientFactory.getDefaultUsersResourceApi(GATEWAY_PORT, clientConfig)).thenReturn(usersResourceApi);
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, ADMIN, ADMIN)).thenReturn(apiClient);
+        when(clouderaManagerApiFactory.getUserResourceApi(apiClient)).thenReturn(usersResourceApi);
+
         when(usersResourceApi.readUsers2("SUMMARY")).thenReturn(oldUserList);
-        when(clouderaManagerClientFactory.getUserResourceApi(GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), clientConfig)).thenReturn(newUsersResourceApi);
+
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
+                stack.getCluster().getCloudbreakAmbariPassword())).thenReturn(newApiClient);
+        when(clouderaManagerApiFactory.getUserResourceApi(newApiClient)).thenReturn(newUsersResourceApi);
 
         underTest.changeOriginalCredentialsAndCreateCloudbreakUser(LDAP_ENABLED);
 
-        verify(clouderaManagerClientFactory).getDefaultUsersResourceApi(GATEWAY_PORT, clientConfig);
+        verify(clouderaManagerApiClientProvider).getClouderaManagerClient(clientConfig, GATEWAY_PORT, ADMIN, ADMIN);
         verify(usersResourceApi).readUsers2("SUMMARY");
-
-        verify(clouderaManagerClientFactory, times(2)).getUserResourceApi(GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), clientConfig);
+        verify(clouderaManagerApiClientProvider, times(2)).getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
+                stack.getCluster().getCloudbreakAmbariPassword());
 
         ArgumentCaptor<ApiUser2List> createUserCaptor = ArgumentCaptor.forClass(ApiUser2List.class);
         verify(usersResourceApi, times(2)).createUsers2(createUserCaptor.capture());
@@ -162,7 +181,7 @@ public class ClouderaManagerSecurityServiceTest {
         Assert.assertEquals(stack.getCluster().getUserName(), createdNewUser.get(0).getItems().get(0).getName());
         Assert.assertEquals(stack.getCluster().getPassword(), createdNewUser.get(0).getItems().get(0).getPassword());
 
-        verify(newUsersResourceApi).deleteUser2("admin");
+        verify(newUsersResourceApi).deleteUser2(ADMIN);
     }
 
     private Stack createStack(String userName) {
@@ -186,7 +205,7 @@ public class ClouderaManagerSecurityServiceTest {
     private ApiUser2List createApiUser2List() {
         ApiUser2List apiUser2List = new ApiUser2List();
         ApiUser2 admin = new ApiUser2();
-        admin.setName("admin");
+        admin.setName(ADMIN);
         admin.setAuthRoles(Collections.singletonList(new ApiAuthRoleRef()));
         apiUser2List.setItems(List.of(admin));
         return apiUser2List;

@@ -16,20 +16,20 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 
 public class ClouderaManagerTemplateInstallationChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerTemplateInstallationChecker.class);
 
-    public ClouderaManagerTemplateInstallationChecker(ClouderaManagerClientFactory clouderaManagerClientFactory) {
-        super(clouderaManagerClientFactory);
+    public ClouderaManagerTemplateInstallationChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory) {
+        super(clouderaManagerApiPojoFactory);
     }
 
     @Override
     protected boolean doStatusCheck(ClouderaManagerPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
-        commandsResourceApi = clouderaManagerClientFactory.getCommandsResourceApi(pollerObject.getApiClient());
+        commandsResourceApi = clouderaManagerApiPojoFactory.getCommandsResourceApi(pollerObject.getApiClient());
         ApiCommand apiCommand = commandsResourceApi.readCommand(pollerObject.getId());
         if (apiCommand.getActive()) {
             LOGGER.debug("Command [" + getCommandName() + "] with id [" + pollerObject.getId() + "] is active, so it hasn't finished yet");

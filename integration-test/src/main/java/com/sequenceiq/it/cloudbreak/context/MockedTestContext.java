@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.context;
 
-import java.util.Arrays;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -13,6 +11,7 @@ import org.springframework.context.ApplicationContext;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
+import com.sequenceiq.it.cloudbreak.mock.ThreadLocalProfiles;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.cloudbreak.spark.SparkServer;
 import com.sequenceiq.it.cloudbreak.spark.SparkServerFactory;
@@ -43,8 +42,7 @@ public class MockedTestContext extends TestContext implements AutoCloseable {
         sparkServer = sparkServerFactory.construct();
         imageCatalogMockServerSetup.configureImgCatalogMock();
         model = new DefaultModel();
-        String[] activeProfiles = applicationContext.getEnvironment().getActiveProfiles();
-        model.startModel(sparkServer.getSparkService(), mockServerAddress, Arrays.asList(activeProfiles));
+        model.startModel(sparkServer.getSparkService(), mockServerAddress, ThreadLocalProfiles.getActiveProfiles());
     }
 
     public DefaultModel getModel() {

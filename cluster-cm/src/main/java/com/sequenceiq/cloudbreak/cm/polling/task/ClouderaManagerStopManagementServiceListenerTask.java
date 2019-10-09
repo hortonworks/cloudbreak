@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 
 public class ClouderaManagerStopManagementServiceListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
 
-    public ClouderaManagerStopManagementServiceListenerTask(ClouderaManagerClientFactory clouderaManagerClientFactory) {
-        super(clouderaManagerClientFactory);
+    public ClouderaManagerStopManagementServiceListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory) {
+        super(clouderaManagerApiPojoFactory);
     }
 
     @Override

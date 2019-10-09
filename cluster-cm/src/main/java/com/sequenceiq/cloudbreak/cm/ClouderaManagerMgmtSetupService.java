@@ -36,6 +36,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.database.DatabaseProperties;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
@@ -81,11 +82,14 @@ public class ClouderaManagerMgmtSetupService {
     @Inject
     private CmMgmtServiceLogConfigService cmMgmtServiceLogConfigService;
 
+    @Inject
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
+
     /**
-     * Sets up the management services using the given Cloudera Manager client.
+     * Sets up the management services using the given Cloudera Manager apiClient.
      *
      * @param stack      the stack
-     * @param client     the CM API client
+     * @param apiClient     the CM API apiClient
      * @param cmHostRef  reference to the CM host
      * @param rdsConfigs the set of all database configs
      * @param telemetry  telemetry (logging/workload/billing etc.) details
@@ -93,13 +97,13 @@ public class ClouderaManagerMgmtSetupService {
      * @param sdxStackCrn sdx stack crn holder
      * @throws ApiException if there's a problem setting up management services
      */
-    public void setupMgmtServices(Stack stack, ApiClient client, ApiHostRef cmHostRef,
+    public void setupMgmtServices(Stack stack, ApiClient apiClient, ApiHostRef cmHostRef,
             Set<RDSConfig> rdsConfigs, Telemetry telemetry, String sdxContextName, String sdxStackCrn)
             throws ApiException {
         LOGGER.debug("Setting up Cloudera Management Services.");
         licenseService.validateClouderaManagerLicense(stack.getCreator());
-        MgmtServiceResourceApi mgmtServiceResourceApi = new MgmtServiceResourceApi(client);
-        MgmtRolesResourceApi mgmtRolesResourceApi = new MgmtRolesResourceApi(client);
+        MgmtServiceResourceApi mgmtServiceResourceApi = clouderaManagerApiFactory.getMgmtServiceResourceApi(apiClient);
+        MgmtRolesResourceApi mgmtRolesResourceApi = clouderaManagerApiFactory.getMgmtRolesResourceApi(apiClient);
 
         ApiService mgmtService = new ApiService();
         mgmtService.setName(MGMT_SERVICE);
@@ -121,21 +125,21 @@ public class ClouderaManagerMgmtSetupService {
         }
         cmMgmtServiceConfigLocationService.setConfigLocations(stack, mgmtRoles);
         cmMgmtServiceLogConfigService.setLogConfig(mgmtRoles);
-        telemetryService.setupTelemetryRole(stack, client, cmHostRef, mgmtRoles, telemetry);
+        telemetryService.setupTelemetryRole(stack, apiClient, cmHostRef, mgmtRoles, telemetry);
         createMgmtRoles(mgmtRolesResourceApi, mgmtRoles);
-        telemetryService.updateTelemetryConfigs(stack, client, telemetry, sdxContextName, sdxStackCrn);
-        createMgmtDatabases(client, rdsConfigs);
-        waitForGenerateCredentialsToFinish(stack, client);
-        startMgmtServices(stack, client, mgmtServiceResourceApi);
+        telemetryService.updateTelemetryConfigs(stack, apiClient, telemetry, sdxContextName, sdxStackCrn);
+        createMgmtDatabases(apiClient, rdsConfigs);
+        waitForGenerateCredentialsToFinish(stack, apiClient);
+        startMgmtServices(stack, apiClient, mgmtServiceResourceApi);
     }
 
-    private void waitForGenerateCredentialsToFinish(Stack stack, ApiClient client) throws ApiException {
+    private void waitForGenerateCredentialsToFinish(Stack stack, ApiClient apiClient) throws ApiException {
         LOGGER.debug("Wait if Generate Credentials command is still active.");
-        ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
+        ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
         ApiCommandList apiCommandList = clouderaManagerResourceApi.listActiveCommands(DataView.SUMMARY.name());
         Optional<BigDecimal> generateCredentialsCommandId = apiCommandList.getItems().stream()
                 .filter(toGenerateCredentialsCommand()).map(ApiCommand::getId).findFirst();
-        generateCredentialsCommandId.ifPresent(pollCredentialGeneration(stack, client));
+        generateCredentialsCommandId.ifPresent(pollCredentialGeneration(stack, apiClient));
     }
 
     private Consumer<BigDecimal> pollCredentialGeneration(Stack stack, ApiClient client) {
@@ -160,7 +164,7 @@ public class ClouderaManagerMgmtSetupService {
         }
     }
 
-    private void startMgmtServices(Stack stack, ApiClient client, MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException {
+    private void startMgmtServices(Stack stack, ApiClient apiClient, MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException {
         ApiService mgmtService = mgmtServiceResourceApi.readService(DataView.SUMMARY.name());
         Optional<ApiCommand> startCommand = Optional.empty();
         if (mgmtService.getServiceState() == ApiServiceState.STARTING) {
@@ -169,7 +173,7 @@ public class ClouderaManagerMgmtSetupService {
         } else if (mgmtService.getServiceState() != ApiServiceState.STARTED) {
             startCommand = Optional.of(mgmtServiceResourceApi.startCommand());
         }
-        startCommand.ifPresent(sc -> clouderaManagerPollingServiceProvider.startPollingCmManagementServiceStartup(stack, client, sc.getId()));
+        startCommand.ifPresent(sc -> clouderaManagerPollingServiceProvider.startPollingCmManagementServiceStartup(stack, apiClient, sc.getId()));
     }
 
     private void setupCMS(MgmtServiceResourceApi mgmtServiceResourceApi, ApiService mgmtService) throws ApiException {
@@ -182,11 +186,9 @@ public class ClouderaManagerMgmtSetupService {
         }
     }
 
-    private void createMgmtDatabases(ApiClient client, Set<RDSConfig> rdsConfigs) throws ApiException {
-        MgmtRolesResourceApi mgmtRolesResourceApi = new MgmtRolesResourceApi(client);
-
+    private void createMgmtDatabases(ApiClient apiClient, Set<RDSConfig> rdsConfigs) throws ApiException {
+        MgmtRolesResourceApi mgmtRolesResourceApi = clouderaManagerApiFactory.getMgmtRolesResourceApi(apiClient);
         List<ApiRole> installedRoles = mgmtRolesResourceApi.readRoles().getItems();
-
         for (ApiRole role : installedRoles) {
             String roleType = role.getType();
             Optional<RDSConfig> rdsConfig = Optional.empty();
@@ -194,7 +196,7 @@ public class ClouderaManagerMgmtSetupService {
                 rdsConfig = findDbConfig(DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER, rdsConfigs);
             }
             if (rdsConfig.isPresent()) {
-                updateDatabaseForComponent(client, roleType, rdsConfig.get());
+                updateDatabaseForComponent(apiClient, roleType, rdsConfig.get());
             }
         }
     }
@@ -205,9 +207,9 @@ public class ClouderaManagerMgmtSetupService {
                 .findFirst();
     }
 
-    private void updateDatabaseForComponent(ApiClient client, String roleType, RDSConfig rdsConfig)
+    private void updateDatabaseForComponent(ApiClient apiClient, String roleType, RDSConfig rdsConfig)
             throws ApiException {
-        MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = new MgmtRoleConfigGroupsResourceApi(client);
+        MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(apiClient);
         String internalRoleTypeName = ROLE_TYPE_TO_INTERNAL_NAME.get(roleType);
         mgmtRoleConfigGroupsResourceApi.updateConfig(getBaseRoleConfigGroupName(roleType),
                 "Adding database settings",

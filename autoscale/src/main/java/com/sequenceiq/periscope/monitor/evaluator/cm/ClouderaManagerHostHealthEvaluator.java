@@ -18,7 +18,8 @@ import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.DataView;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -41,7 +42,10 @@ public class ClouderaManagerHostHealthEvaluator implements ClusterManagerSpecifi
     private TlsSecurityService tlsSecurityService;
 
     @Inject
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
+
+    @Inject
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     @Inject
     private EventPublisher eventPublisher;
@@ -65,8 +69,8 @@ public class ClouderaManagerHostHealthEvaluator implements ClusterManagerSpecifi
             ClusterManager cm = cluster.getClusterManager();
             String user = secretService.get(cm.getUser());
             String pass = secretService.get(cm.getPass());
-            ApiClient client = clouderaManagerClientFactory.getClient(Integer.valueOf(cm.getPort()), user, pass, httpClientConfig);
-            HostsResourceApi hostsResourceApi = new HostsResourceApi(client);
+            ApiClient client = clouderaManagerApiClientProvider.getClient(Integer.valueOf(cm.getPort()), user, pass, httpClientConfig);
+            HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
             return hostsResourceApi.readHosts(DataView.FULL.name()).getItems()
                     .stream()
                     .filter(isAlertStateMet())

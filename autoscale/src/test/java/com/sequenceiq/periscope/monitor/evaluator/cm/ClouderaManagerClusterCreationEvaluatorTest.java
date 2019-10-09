@@ -27,10 +27,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
@@ -60,7 +62,10 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
     private ClusterService clusterService;
 
     @Mock
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
+
+    @Mock
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     @Mock
     private TlsSecurityService tlsSecurityService;
@@ -191,6 +196,7 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
             when(historyService.createEntry(any(), anyString(), anyInt(), any(Cluster.class))).thenReturn(history);
         }
         when(clusterService.update(anyLong(), any(), any(), anyBoolean())).thenReturn(cluster);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(new ClouderaManagerResourceApi());
     }
 
     private AutoscaleStackV4Response getStackResponse() {

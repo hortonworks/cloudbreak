@@ -19,7 +19,8 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
@@ -50,7 +51,10 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
     private ClusterService clusterService;
 
     @Inject
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
+
+    @Inject
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     @Inject
     private TlsSecurityService tlsSecurityService;
@@ -148,8 +152,8 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
             HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(cluster);
             String user = secretService.get(cm.getUser());
             String pass = secretService.get(cm.getPass());
-            ApiClient client = clouderaManagerClientFactory.getClient(Integer.valueOf(cm.getPort()), user, pass, httpClientConfig);
-            ClouderaManagerResourceApi resourceApi = new ClouderaManagerResourceApi(client);
+            ApiClient client = clouderaManagerApiClientProvider.getClient(Integer.valueOf(cm.getPort()), user, pass, httpClientConfig);
+            ClouderaManagerResourceApi resourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
             Boolean healthCheckResult = requestLogging.logging(() -> {
                 try {
                     ApiVersionInfo version = resourceApi.getVersion();

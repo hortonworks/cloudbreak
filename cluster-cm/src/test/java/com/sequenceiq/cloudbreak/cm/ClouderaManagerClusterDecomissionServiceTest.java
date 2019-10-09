@@ -27,7 +27,8 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -46,7 +47,10 @@ public class ClouderaManagerClusterDecomissionServiceTest {
     private static final String PASSWORD = "admin123";
 
     @Mock
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
+
+    @Mock
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     @Mock
     private ClouderaManagerDecomissioner clouderaManagerDecomissioner;
@@ -68,7 +72,8 @@ public class ClouderaManagerClusterDecomissionServiceTest {
     @Before
     public void before() {
         underTest = new ClouderaManagerClusterDecomissionService(stack, clientConfig);
-        ReflectionTestUtils.setField(underTest, "clouderaManagerClientFactory", clouderaManagerClientFactory);
+        ReflectionTestUtils.setField(underTest, "clouderaManagerApiFactory", clouderaManagerApiFactory);
+        ReflectionTestUtils.setField(underTest, "clouderaManagerApiClientProvider", clouderaManagerApiClientProvider);
         ReflectionTestUtils.setField(underTest, "clouderaManagerDecomissioner", clouderaManagerDecomissioner);
         ReflectionTestUtils.setField(underTest, "applicationContext", applicationContext);
         ReflectionTestUtils.setField(underTest, "client", apiClient);
@@ -78,12 +83,12 @@ public class ClouderaManagerClusterDecomissionServiceTest {
     public void testInitApiClientShouldCreateTheApiClient() throws ClusterClientInitException, ClouderaManagerClientInitException {
         ReflectionTestUtils.setField(underTest, "client", null);
         ApiClient client = Mockito.mock(ApiClient.class);
-        when(clouderaManagerClientFactory.getClient(GATEWAY_PORT, USER, PASSWORD, clientConfig)).thenReturn(client);
+        when(clouderaManagerApiClientProvider.getClient(GATEWAY_PORT, USER, PASSWORD, clientConfig)).thenReturn(client);
 
         underTest.initApiClient();
 
         assertEquals(client, ReflectionTestUtils.getField(underTest, "client"));
-        verify(clouderaManagerClientFactory).getClient(GATEWAY_PORT, USER, PASSWORD, clientConfig);
+        verify(clouderaManagerApiClientProvider).getClient(GATEWAY_PORT, USER, PASSWORD, clientConfig);
     }
 
     @Test
@@ -160,14 +165,14 @@ public class ClouderaManagerClusterDecomissionServiceTest {
         MgmtServiceResourceApi mgmtServiceResourceApi = Mockito.mock(MgmtServiceResourceApi.class);
         ClustersResourceApi clustersResourceApi = Mockito.mock(ClustersResourceApi.class);
         when(applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig)).thenReturn(modificationService);
-        when(clouderaManagerClientFactory.getMgmtServiceResourceApi(apiClient)).thenReturn(mgmtServiceResourceApi);
-        when(clouderaManagerClientFactory.getClustersResourceApi(apiClient)).thenReturn(clustersResourceApi);
+        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(apiClient)).thenReturn(mgmtServiceResourceApi);
+        when(clouderaManagerApiFactory.getClustersResourceApi(apiClient)).thenReturn(clustersResourceApi);
 
         underTest.restartStaleServices();
 
         verify(applicationContext).getBean(ClouderaManagerModificationService.class, stack, clientConfig);
-        verify(clouderaManagerClientFactory).getMgmtServiceResourceApi(apiClient);
-        verify(clouderaManagerClientFactory).getClustersResourceApi(apiClient);
+        verify(clouderaManagerApiFactory).getMgmtServiceResourceApi(apiClient);
+        verify(clouderaManagerApiFactory).getClustersResourceApi(apiClient);
         verify(modificationService).restartStaleServices(mgmtServiceResourceApi, clustersResourceApi);
     }
 

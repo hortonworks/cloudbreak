@@ -1,6 +1,9 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 
+import static com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock.PROFILE_RETURN_HTTP_500;
+
 import java.math.BigDecimal;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -24,9 +27,9 @@ import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.util.cleanup.ParcelGeneratorUtil;
 import com.sequenceiq.it.util.cleanup.ParcelMockActivatorUtil;
 
-public class ClouderaManagerDownscaleTest extends AbstractIntegrationTest {
+public class CMDownscaleWithHttp500ResponsesTest extends AbstractIntegrationTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerDownscaleTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CMDownscaleWithHttp500ResponsesTest.class);
 
     private static final BigDecimal DEPLOY_CLIENT_CONFIG_COMMAND_ID = new BigDecimal(100);
 
@@ -82,4 +85,8 @@ public class ClouderaManagerDownscaleTest extends AbstractIntegrationTest {
                 .validate();
     }
 
+    @Override
+    protected List<String> testProfiles() {
+        return List.of(PROFILE_RETURN_HTTP_500);
+    }
 }

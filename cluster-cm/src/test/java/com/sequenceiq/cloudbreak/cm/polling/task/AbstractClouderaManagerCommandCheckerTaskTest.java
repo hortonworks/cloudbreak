@@ -18,7 +18,7 @@ import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
@@ -36,15 +36,15 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
 
     private final ApiClient apiClient = Mockito.mock(ApiClient.class);
 
-    private final ClouderaManagerClientFactory clouderaManagerClientFactory = Mockito.mock(ClouderaManagerClientFactory.class);
+    private final ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory = Mockito.mock(ClouderaManagerApiPojoFactory.class);
 
     private final CommandsResourceApi commandsResourceApi = Mockito.mock(CommandsResourceApi.class);
 
-    private final AbstractClouderaManagerCommandCheckerTask underTest = new ClouderaManagerDecommissionHostListenerTask(clouderaManagerClientFactory);
+    private final AbstractClouderaManagerCommandCheckerTask underTest = new ClouderaManagerDecommissionHostListenerTask(clouderaManagerApiPojoFactory);
 
     @Before
     public void setup() {
-        when(clouderaManagerClientFactory.getCommandsResourceApi(apiClient)).thenReturn(commandsResourceApi);
+        when(clouderaManagerApiPojoFactory.getCommandsResourceApi(apiClient)).thenReturn(commandsResourceApi);
     }
 
     @Test

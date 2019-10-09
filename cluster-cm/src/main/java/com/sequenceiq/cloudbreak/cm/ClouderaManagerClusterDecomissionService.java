@@ -20,7 +20,8 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
-import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -36,7 +37,10 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClusterDecomissionService.class);
 
     @Inject
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
+
+    @Inject
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     @Inject
     private ClouderaManagerDecomissioner clouderaManagerDecomissioner;
@@ -61,7 +65,7 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {
-            client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
+            client = clouderaManagerApiClientProvider.getClient(stack.getGatewayPort(), user, password, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
@@ -104,8 +108,8 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
     public void restartStaleServices() throws CloudbreakException {
         try {
             applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig)
-                    .restartStaleServices(clouderaManagerClientFactory.getMgmtServiceResourceApi(client),
-                            clouderaManagerClientFactory.getClustersResourceApi(client));
+                    .restartStaleServices(clouderaManagerApiFactory.getMgmtServiceResourceApi(client),
+                            clouderaManagerApiFactory.getClustersResourceApi(client));
         } catch (ApiException e) {
             LOGGER.error("Couldn't restart stale services", e);
             throw new CloudbreakException("Couldn't restart stale services", e);
