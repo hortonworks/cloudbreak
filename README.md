@@ -395,26 +395,13 @@ Gradle is used for build and dependency management. The Gradle wrapper is added 
 ./gradlew clean build
 ```
 
-## How to use with DPS
+## How to reach CM UI directly(not through Knox)
+With the current design on the cluster's gateway node there is an NGiNX which is responsible for routing requests through Knox by default. 
+But there are cases when the CM UI needs to be reached directly. It is possible on the same port by the same NGiNX on the `clouderamanager/` path of the provisioned cluster.
 
-Clone DPS repository from https://github.com/hortonworks/dps-platform .
+For example: `https://tb-nt-local.tb-local.xcu2-8y8x.workload-dev.cloudera.com/clouderamamanger/`
 
-Put `dps-platform` path into your `Profile`:
-```
-export DPS_REPO=/Users/YOUR_USERNAME/DPS_PROJECT_DIR
-```
-By default it will build docker images from your `dps-platform` directory, but if you want to use a
-specific version of DPS you can put the `DPS_VERSION` env variable into your `Profile` file.
-In this case it will download images from the repository instead of building them.
-```
-export DPS_VERSION=2.0.0.0-132
-```
-If you want to force build the project with `docker build` use the `FORCE_BUILD` env variable.
-```
-export FORCE_BUILD=true
-```
+> Be aware of that this routing mechanism is based on cookies, so if you have problems to reach the CM UI directly especially when you reached any service through Knox previously then the deletion of cookies could solve your issues.
 
 ## Additional info
-
-> * [Retrieve OAuth Bearer Token via Cloudbreak REST API](https://github.com/hortonworks/cloudbreak/blob/master/docs/common/retrieve_oauth_token.md)
 > * [Cloudbreak Service Provider Interface (SPI)](https://github.com/hortonworks/cloudbreak/blob/master/docs/spi.md)
