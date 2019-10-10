@@ -46,9 +46,11 @@ import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsCreateStackStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 @MockBeans(@MockBean(AwsCreateStackStatusCheckerTask.class))
 public class AwsLaunchTest extends AwsComponentTest {
@@ -101,6 +103,8 @@ public class AwsLaunchTest extends AwsComponentTest {
         setupCreateVolumeResponse();
         setupDescribeVolumeResponse();
         setupDescribeSubnetResponse();
+
+        InMemoryStateStore.putStack(1L, PollGroup.POLLABLE);
 
         awsResourceConnector.launch(getAuthenticatedContext(), getStackForLaunch(InstanceStatus.CREATE_REQUESTED, InstanceStatus.CREATE_REQUESTED),
                 persistenceNotifier, AdjustmentType.EXACT, Long.MAX_VALUE);
