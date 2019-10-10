@@ -138,8 +138,9 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @CheckPermissionsByWorkspaceId
     @Query("SELECT s.id as id, s.name as name, b.name as blueprintName, b.stackType as stackType, b.stackVersion as stackVersion, ss.status as stackStatus, "
-            + "s.platformVariant as cloudPlatform, c.status as clusterStatus, s.created as created, s.datalakeId as sharedClusterId, b.tags as blueprintTags,"
-            + "crd.govCloud as govCloud "
+            + "s.cloudPlatform as cloudPlatform, c.status as clusterStatus, s.created as created, s.datalakeId as sharedClusterId, b.tags as blueprintTags,"
+            + "crd.govCloud as govCloud, c.id as clusterId, crd.name as credentialName, s.platformVariant as platformVariant, c.secure as secure, "
+            + "c.ambariIp as ambariIp, b.id as blueprintId, b.hostGroupCount as hostGroupCount, b.status as blueprintStatus, s.terminated as terminated "
             + "FROM Stack s LEFT JOIN s.cluster c LEFT JOIN c.blueprint b LEFT JOIN s.stackStatus ss LEFT JOIN s.credential crd "
             + "WHERE s.workspace.id= :id AND s.terminated = null")
     Set<StackListItem> findByWorkspaceId(@Param("id") Long id);

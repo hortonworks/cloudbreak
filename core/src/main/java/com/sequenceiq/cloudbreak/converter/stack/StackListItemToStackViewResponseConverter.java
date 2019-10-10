@@ -24,17 +24,23 @@ public class StackListItemToStackViewResponseConverter {
         response.setId(item.getId());
         response.setName(item.getName());
         response.setCloudPlatform(item.getCloudPlatform());
+        response.setPlatformVariant(item.getPlatformVariant());
         response.setCreated(item.getCreated());
         response.setStatus(item.getStackStatus());
         response.setCluster(getClusterViewResponse(item, sharedClusterName));
         response.setNodeCount(stackInstanceCounts.get(item.getId()));
         response.setUnhealthyNodeCount(stackUnhealthyInstanceCounts.get(item.getId()));
         response.setCredential(getCredentialViewResponse(item));
+        response.setTerminated(item.getTerminated());
         return response;
     }
 
     private ClusterViewResponse getClusterViewResponse(StackListItem item, String sharedClusterName) {
         ClusterViewResponse clusterResponse = new ClusterViewResponse();
+        clusterResponse.setId(item.getClusterId());
+        clusterResponse.setName(item.getName());
+        clusterResponse.setSecure(item.getSecure());
+        clusterResponse.setAmbariServerIp(item.getAmbariIp());
         clusterResponse.setBlueprint(getBlueprintViewResponse(item));
         clusterResponse.setStatus(item.getClusterStatus());
         clusterResponse.setSharedServiceResponse(getSharedServiceResponse(item, sharedClusterName));
@@ -43,9 +49,12 @@ public class StackListItemToStackViewResponseConverter {
 
     private BlueprintViewResponse getBlueprintViewResponse(StackListItem item) {
         BlueprintViewResponse blueprintResponse = new BlueprintViewResponse();
+        blueprintResponse.setId(item.getBlueprintId());
         blueprintResponse.setName(item.getBlueprintName());
         blueprintResponse.setStackType(item.getStackType());
         blueprintResponse.setStackVersion(item.getStackVersion());
+        blueprintResponse.setHostGroupCount(item.getHostGroupCount());
+        blueprintResponse.setStatus(item.getBlueprintStatus());
         Map<String, Object> tags = item.getBlueprintTags().getMap();
         blueprintResponse.setTags(tags);
         return blueprintResponse;
@@ -60,6 +69,7 @@ public class StackListItemToStackViewResponseConverter {
 
     private CredentialViewResponse getCredentialViewResponse(StackListItem item) {
         CredentialViewResponse credential = new CredentialViewResponse();
+        credential.setName(item.getCredentialName());
         credential.setCloudPlatform(item.getCloudPlatform());
         credential.setGovCloud(item.getGovCloud());
         return credential;

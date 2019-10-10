@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.resource;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -39,5 +40,9 @@ public class ResourceService {
 
     public Collection<Resource> getAllByStackId(Long stackId) {
         return resourceRepository.findAllByStackId(stackId);
+    }
+
+    public Set<Resource> getNotInstanceRelatedByStackId(Long stackId) {
+        return resourceRepository.findAllByStackIdNotInstanceOrDisk(stackId);
     }
 }
