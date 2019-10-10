@@ -3,6 +3,7 @@ package com.sequenceiq.distrox.v1.distrox;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -251,6 +252,10 @@ public class StackOperation {
         }
     }
 
+    public void deleteInstances(StackAccessDto stackAccessDto, Long workspaceId, List<String> instanceIds, boolean forced) {
+        stackCommonService.deleteMultipleInstancesByNameInWorkspace(stackAccessDto.getName(), workspaceId, instanceIds, forced);
+    }
+
     public void putPassword(@NotNull StackAccessDto stackAccessDto, Long workspaceId, @Valid UserNamePasswordV4Request userNamePasswordJson) {
         Stack stack;
         if (isNotEmpty(stackAccessDto.getName())) {
@@ -306,5 +311,4 @@ public class StackOperation {
             throw new BadRequestException("A stack name or crn must be provided. One and only one of them.");
         }
     }
-
 }

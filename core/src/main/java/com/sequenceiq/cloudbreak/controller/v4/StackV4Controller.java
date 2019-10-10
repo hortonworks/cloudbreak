@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller.v4;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.dto.StackAccessDto.StackAccessDtoBuilder.aStackAccessDtoBuilder;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -116,6 +117,11 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     public void deleteInstance(Long workspaceId, String name, Boolean forced, String instanceId) {
         stackOperation.deleteInstance(aStackAccessDtoBuilder().withName(name).build(), workspaceId, forced, instanceId);
+    }
+
+    @Override
+    public void deleteMultipleInstances(Long workspaceId, String name, List<String> instanceIds, boolean forced) {
+        stackOperation.deleteInstances(aStackAccessDtoBuilder().withName(name).build(), workspaceId, instanceIds, forced);
     }
 
     @Override
