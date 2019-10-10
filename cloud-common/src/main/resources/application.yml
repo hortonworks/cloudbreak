@@ -386,7 +386,7 @@ cb:
               - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel/NIFI-1.10.0.2.0.0.0-22.jar
               - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel/NIFICA-1.10.0.2.0.0.0-22.jar
               - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-22.jar
-        version: 7.0.2-1.cdh7.0.2.p0.1459920-el7.parcel
+        version: 7.0.2-1.cdh7.0.2.p0.1459920
         minCM: 7.0
         repo:
           stack:
