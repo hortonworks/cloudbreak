@@ -344,20 +344,20 @@ public class CmCloudStorageConfigDetailsTest {
 
         Assert.assertEquals(1, profilerAdmin.size());
         Assert.assertTrue(profilerAdmin.stream().map(ConfigQueryEntry::getDefaultPath)
-                .anyMatch("hwx-remote"::equals));
+                .anyMatch("hwx-remote/dpprofiler"::equals));
         Assert.assertTrue(profilerAdmin.stream().map(ConfigQueryEntry::getPropertyName)
                 .anyMatch("file_system_uri"::equals));
 
 
         Assert.assertEquals(1, profilerMetrics.size());
         Assert.assertTrue(profilerMetrics.stream().map(ConfigQueryEntry::getDefaultPath)
-                .anyMatch("hwx-remote"::equals));
+                .anyMatch("hwx-remote/dpprofiler"::equals));
         Assert.assertTrue(profilerMetrics.stream().map(ConfigQueryEntry::getPropertyName)
                 .anyMatch("file_system_uri"::equals));
 
         Assert.assertEquals(1, profilerScheduler.size());
         Assert.assertTrue(profilerScheduler.stream().map(ConfigQueryEntry::getDefaultPath)
-                .anyMatch("hwx-remote"::equals));
+                .anyMatch("hwx-remote/dpprofiler"::equals));
         Assert.assertTrue(profilerScheduler.stream().map(ConfigQueryEntry::getPropertyName)
                 .anyMatch("file_system_uri"::equals));
     }

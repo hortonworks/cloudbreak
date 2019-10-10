@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.profileradmin;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -40,7 +40,7 @@ public class ProfilerAdminRoleConfigProviderTest {
                 underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         List<ApiClusterTemplateConfig>
                 profilerAdmin =
-                roleConfigs.get("profiler_admin-PROFILER_ADMIN_AGENT-BASE");
+                roleConfigs.get("profiler_manager-PROFILER_ADMIN_AGENT-BASE");
 
         assertEquals(5, profilerAdmin.size());
         assertEquals("profiler_admin_database_host", profilerAdmin.get(0).getName());
