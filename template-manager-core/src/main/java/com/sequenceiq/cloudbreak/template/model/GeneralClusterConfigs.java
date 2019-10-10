@@ -47,6 +47,8 @@ public class GeneralClusterConfigs {
 
     private boolean knoxUserFacingCertConfigured;
 
+    private String externalFQDN;
+
     public OrchestratorType getOrchestratorType() {
         return orchestratorType;
     }

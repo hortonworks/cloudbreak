@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,8 +20,10 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
+import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 
 public class HueConfigProviderTest {
 
@@ -62,6 +65,30 @@ public class HueConfigProviderTest {
     }
 
     @Test
+    public void getServiceConfigsWhenKnoxConfiguredToExternalDomain() {
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setExternalFQDN("myaddress.cloudera.site");
+        generalClusterConfigs.setKnoxUserFacingCertConfigured(true);
+        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("private-gateway.cloudera.site"));
+        TemplatePreparationObject tpo = new Builder()
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withGateway(new Gateway(), "")
+                .build();
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
+        Map<String, String> paramToVariable =
+                result.stream().collect(Collectors.toMap(ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getVariable));
+        assertThat(paramToVariable).containsOnly(
+                new SimpleEntry<>("database_host", "hue-hue_database_host"),
+                new SimpleEntry<>("database_port", "hue-hue_database_port"),
+                new SimpleEntry<>("database_name", "hue-hue_database_name"),
+                new SimpleEntry<>("database_type", "hue-hue_database_type"),
+                new SimpleEntry<>("database_user", "hue-hue_database_user"),
+                new SimpleEntry<>("database_password", "hue-hue_database_password"),
+                new SimpleEntry<>("hue_service_safety_valve", "hue-hue_service_safety_valve")
+        );
+    }
+
+    @Test
     public void getServiceConfigVariables() {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setType(HUE);
@@ -80,6 +107,42 @@ public class HueConfigProviderTest {
                 new SimpleEntry<>("hue-hue_database_type", DB_PROVIDER),
                 new SimpleEntry<>("hue-hue_database_user", USER_NAME),
                 new SimpleEntry<>("hue-hue_database_password", PASSWORD));
+    }
+
+    @Test
+    public void getServiceConfigVariablesWhenKnoxConfiguredToExternalDomain() {
+        RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setType(HUE);
+        rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        rdsConfig.setConnectionUserName(USER_NAME);
+        rdsConfig.setConnectionPassword(PASSWORD);
+
+        String expectedExternalFQDN = "myaddress.cloudera.site";
+        String expectedInternalFQDN = "private-gateway.cloudera.site";
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setExternalFQDN(expectedExternalFQDN);
+        generalClusterConfigs.setKnoxUserFacingCertConfigured(true);
+        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(expectedInternalFQDN));
+
+        TemplatePreparationObject tpo = new Builder()
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withGateway(new Gateway(), "")
+                .withRdsConfigs(Set.of(rdsConfig))
+                .build();
+
+        List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
+        Map<String, String> paramToVariable =
+                result.stream().collect(Collectors.toMap(ApiClusterTemplateVariable::getName, ApiClusterTemplateVariable::getValue));
+        String proxyHostsExpected = String.join(",", expectedInternalFQDN, expectedExternalFQDN);
+        String expectedSafetyValveValue = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected);
+        assertThat(paramToVariable).containsOnly(
+                new SimpleEntry<>("hue-hue_database_host", HOST),
+                new SimpleEntry<>("hue-hue_database_port", PORT),
+                new SimpleEntry<>("hue-hue_database_name", DB_NAME),
+                new SimpleEntry<>("hue-hue_database_type", DB_PROVIDER),
+                new SimpleEntry<>("hue-hue_database_user", USER_NAME),
+                new SimpleEntry<>("hue-hue_database_password", PASSWORD),
+                new SimpleEntry<>("hue-hue_service_safety_valve", expectedSafetyValveValue));
     }
 
     @Test
