@@ -26,7 +26,7 @@ public class RepoConfigValidationTest extends AbstractIntegrationTest {
     protected void setupTest(TestContext testContext) {
     }
 
-    @Test(dataProvider = DATA_PROVIDER_FOR_REPO_CONFIG_TEST)
+    @Test(dataProvider = DATA_PROVIDER_FOR_REPO_CONFIG_TEST, enabled = false)
     public void testPostRepositoryConfigValidationAgainstDifferentlyParameterizedRequest(
             MockedTestContext testContext,
             RepoConfigValidationTestAssertion testData,
