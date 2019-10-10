@@ -183,22 +183,16 @@
       ]
     },
     {
-      "refName": "profiler_admin",
-      "serviceType": "PROFILER_ADMIN",
+      "refName": "profiler_manager",
+      "serviceType": "PROFILER_MANAGER",
       "roleConfigGroups": [
         {
-          "refName": "profiler_admin-PROFILER_ADMIN_AGENT-BASE",
+          "refName": "profiler_manager-PROFILER_ADMIN_AGENT-BASE",
           "roleType": "PROFILER_ADMIN_AGENT",
           "base": true
-        }
-      ]
-    },
-    {
-      "refName": "profiler_metrics",
-      "serviceType": "PROFILER_METRICS",
-      "roleConfigGroups": [
+        },
         {
-          "refName": "profiler_metrics-PROFILER_METRICS_AGENT-BASE",
+          "refName": "profiler_manager-PROFILER_METRICS_AGENT-BASE",
           "roleType": "PROFILER_METRICS_AGENT",
           "base": true
         }
@@ -236,8 +230,8 @@
         "yarn-JOBHISTORY-BASE",
         "yarn-RESOURCEMANAGER-BASE",
         "zookeeper-SERVER-BASE",
-        "profiler_admin-PROFILER_ADMIN_AGENT-BASE",
-        "profiler_metrics-PROFILER_METRICS_AGENT-BASE",
+        "profiler_manager-PROFILER_ADMIN_AGENT-BASE",
+        "profiler_manager-PROFILER_METRICS_AGENT-BASE",
         "profiler_scheduler-PROFILER_SCHEDULER_AGENT-BASE"
       ]
     },
