@@ -24,14 +24,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -41,7 +38,6 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.StateStatus;
-import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 @Service
@@ -195,19 +191,5 @@ public class SdxRepairService {
                 && cluster != null
                 && cluster.getStatus() != null
                 && cluster.getStatus().isAvailable();
-    }
-
-    private boolean isCloudStorageConfigured(SdxClusterRequest clusterRequest) {
-        return clusterRequest.getCloudStorage() != null
-                && StringUtils.isNotEmpty(clusterRequest.getCloudStorage().getBaseLocation());
-    }
-
-    private String getAccountIdFromCrn(String userCrn) {
-        try {
-            Crn crn = Crn.safeFromString(userCrn);
-            return crn.getAccountId();
-        } catch (NullPointerException | CrnParseException e) {
-            throw new BadRequestException("Can not parse CRN to find account ID: " + userCrn);
-        }
     }
 }
