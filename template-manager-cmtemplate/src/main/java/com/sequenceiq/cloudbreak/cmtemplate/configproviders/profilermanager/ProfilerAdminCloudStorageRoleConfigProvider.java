@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.profileradmin;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -18,7 +18,7 @@ public class ProfilerAdminCloudStorageRoleConfigProvider extends AbstractRoleCon
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject templatePreparationObject) {
         switch (roleType) {
-            case ProfilerAdminRoles.PROFILER_ADMIN_AGENT:
+            case ProfilerManagerRoles.PROFILER_ADMIN_AGENT:
                 return ConfigUtils.getStorageLocationForServiceProperty(templatePreparationObject, FILE_SYSTEM_URI)
                         .map(location -> List.of(config(FILE_SYSTEM_URI, location.getValue())))
                         .orElseGet(List::of);
@@ -29,12 +29,12 @@ public class ProfilerAdminCloudStorageRoleConfigProvider extends AbstractRoleCon
 
     @Override
     public String getServiceType() {
-        return ProfilerAdminRoles.PROFILER_ADMIN;
+        return ProfilerManagerRoles.PROFILER_MANAGER;
     }
 
     @Override
     public List<String> getRoleTypes() {
-        return List.of(ProfilerAdminRoles.PROFILER_ADMIN_AGENT);
+        return List.of(ProfilerManagerRoles.PROFILER_ADMIN_AGENT);
     }
 
     @Override
