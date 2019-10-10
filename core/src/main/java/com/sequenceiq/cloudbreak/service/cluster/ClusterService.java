@@ -694,6 +694,32 @@ public class ClusterService {
         triggerRepair(stackId, failedNodeMap, removeOnly, repairedEntities);
     }
 
+    public boolean repairSupported(Stack stack) {
+        try {
+            checkReattachSupportedOnProvider(stack, true);
+        } catch (BadRequestException ex) {
+            LOGGER.debug("Repair not supported {}", ex.getMessage());
+            return false;
+        }
+        Cluster cluster = stack.getCluster();
+        Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipesAndHostmetadata(cluster.getId());
+        for (HostGroup hg : hostGroups) {
+            if (hg.getRecoveryMode() == RecoveryMode.MANUAL) {
+                for (HostMetadata hmd : hg.getHostMetadata()) {
+                    try {
+                        checkReattachSupportForGateways(stack, true, cluster, hmd);
+                        checkDiskTypeSupported(stack, true, hg);
+                        validateRepair(stack, hmd, true);
+                    } catch (BadRequestException ex) {
+                        LOGGER.debug("Repair not supported {}", ex.getMessage());
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     public Map<String, List<String>> collectFailedNodeMap(Stack stack, ManualClusterRepairMode repairMode, boolean repairWithReattach,
             List<String> repairedHostGroups, List<String> nodeIds) {
         Map<String, List<String>> failedNodeMap = new HashMap<>();

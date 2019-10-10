@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOption;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
@@ -18,6 +19,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxRetryService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.SdxUpgradeService;
 import com.sequenceiq.datalake.service.sdx.start.SdxStartService;
 import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
@@ -41,6 +43,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private SdxRepairService repairService;
+
+    @Inject
+    private SdxUpgradeService sdxUpgradeService;
 
     @Inject
     private SdxClusterConverter sdxClusterConverter;
@@ -124,6 +129,30 @@ public class SdxController implements SdxEndpoint {
     public void repairClusterByCrn(String clusterCrn, SdxRepairRequest clusterRepairRequest) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         repairService.triggerRepairByCrn(userCrn, clusterCrn, clusterRepairRequest);
+    }
+
+    @Override
+    public UpgradeOption checkForUpgrade(String clusterName) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        return sdxUpgradeService.checkForUpgradeByName(userCrn, clusterName);
+    }
+
+    @Override
+    public UpgradeOption checkForUpgradeByCrn(String clusterCrn) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        return sdxUpgradeService.checkForUpgradeByCrn(userCrn, clusterCrn);
+    }
+
+    @Override
+    public void upgradeCluster(String clusterName) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        sdxUpgradeService.triggerUpgradeByName(userCrn, clusterName);
+    }
+
+    @Override
+    public void upgradeClusterByCrn(String clusterCrn) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        sdxUpgradeService.triggerUpgradeByCrn(userCrn, clusterCrn);
     }
 
     @Override
