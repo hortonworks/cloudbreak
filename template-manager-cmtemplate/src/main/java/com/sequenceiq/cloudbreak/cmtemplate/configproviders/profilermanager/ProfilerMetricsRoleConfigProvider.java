@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermetrics;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -18,14 +18,13 @@ public class ProfilerMetricsRoleConfigProvider extends AbstractRdsRoleConfigProv
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
-            case ProfilerMetricsRoles.PROFILER_METRICS_AGENT:
-                RdsView profilerMetricsRdsView = getRdsView(source);
-                return List.of(config("profiler_metrics_database_host", profilerMetricsRdsView.getHost()),
-                        config("profiler_metrics_database_name", profilerMetricsRdsView.getDatabaseName()),
-                        config("profiler_metrics_database_type", ConfigUtils.getDbTypePostgres(profilerMetricsRdsView, ProfilerMetricsRoles.PROFILER_METRICS)),
-                        config("profiler_metrics_database_user",
-                                profilerMetricsRdsView.getConnectionUserName()),
-                        config("profiler_metrics_database_password", profilerMetricsRdsView.getConnectionPassword()));
+            case ProfilerManagerRoles.PROFILER_METRICS_AGENT:
+                RdsView profilerManagerRdsView = getRdsView(source);
+                return List.of(config("profiler_metrics_database_host", profilerManagerRdsView.getHost()),
+                        config("profiler_metrics_database_name", profilerManagerRdsView.getDatabaseName()),
+                        config("profiler_metrics_database_type", ConfigUtils.getDbTypePostgres(profilerManagerRdsView, ProfilerManagerRoles.PROFILER_MANAGER)),
+                        config("profiler_metrics_database_user", profilerManagerRdsView.getConnectionUserName()),
+                        config("profiler_metrics_database_password", profilerManagerRdsView.getConnectionPassword()));
             default:
                 return List.of();
         }
@@ -33,12 +32,12 @@ public class ProfilerMetricsRoleConfigProvider extends AbstractRdsRoleConfigProv
 
     @Override
     public String getServiceType() {
-        return ProfilerMetricsRoles.PROFILER_METRICS;
+        return ProfilerManagerRoles.PROFILER_MANAGER;
     }
 
     @Override
     public List<String> getRoleTypes() {
-        return List.of(ProfilerMetricsRoles.PROFILER_METRICS_AGENT);
+        return List.of(ProfilerManagerRoles.PROFILER_METRICS_AGENT);
     }
 
     @Override

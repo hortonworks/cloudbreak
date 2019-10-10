@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermetrics;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -40,11 +40,11 @@ public class ProfilerMetricsCloudStorageRoleConfigProviderTest {
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
 
-        List<ApiClusterTemplateConfig> serviceConfigs = roleConfigs.get("profiler_metrics-PROFILER_METRICS_AGENT-BASE");
+        List<ApiClusterTemplateConfig> serviceConfigs = roleConfigs.get("profiler_manager-PROFILER_METRICS_AGENT-BASE");
 
         assertEquals(1, serviceConfigs.size());
         assertEquals("file_system_uri", serviceConfigs.get(0).getName());
-        assertEquals("s3a://bucket", serviceConfigs.get(0).getValue());
+        assertEquals("s3a://bucket/dpprofiler", serviceConfigs.get(0).getValue());
     }
 
     @Test
@@ -54,7 +54,7 @@ public class ProfilerMetricsCloudStorageRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
-        List<ApiClusterTemplateConfig> profilerMetricsConfigs = roleConfigs.get("profiler_metrics-PROFILER_METRICS_AGENT-BASE");
+        List<ApiClusterTemplateConfig> profilerMetricsConfigs = roleConfigs.get("profiler_manager-PROFILER_METRICS_AGENT-BASE");
 
         assertEquals(0, profilerMetricsConfigs.size());
     }
@@ -78,7 +78,7 @@ public class ProfilerMetricsCloudStorageRoleConfigProviderTest {
     private StorageLocation getProfilerMetricsFileSystemUri() {
         StorageLocation profilerMetricsFileSystemUri = new StorageLocation();
         profilerMetricsFileSystemUri.setProperty("file_system_uri");
-        profilerMetricsFileSystemUri.setValue("s3a://bucket");
+        profilerMetricsFileSystemUri.setValue("s3a://bucket/dpprofiler");
         return profilerMetricsFileSystemUri;
     }
 

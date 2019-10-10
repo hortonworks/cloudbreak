@@ -44,7 +44,7 @@ public class ProfilerSchedulerCloudStorageRoleConfigProviderTest {
 
         assertEquals(1, serviceConfigs.size());
         assertEquals("file_system_uri", serviceConfigs.get(0).getName());
-        assertEquals("s3a://bucket", serviceConfigs.get(0).getValue());
+        assertEquals("s3a://bucket/dpprofiler", serviceConfigs.get(0).getValue());
     }
 
     @Test
@@ -78,7 +78,7 @@ public class ProfilerSchedulerCloudStorageRoleConfigProviderTest {
     private StorageLocation getProfilerSchedulerFileSystemUri() {
         StorageLocation profilerSchedulerFileSystemUri = new StorageLocation();
         profilerSchedulerFileSystemUri.setProperty("file_system_uri");
-        profilerSchedulerFileSystemUri.setValue("s3a://bucket");
+        profilerSchedulerFileSystemUri.setValue("s3a://bucket/dpprofiler");
         return profilerSchedulerFileSystemUri;
     }
 

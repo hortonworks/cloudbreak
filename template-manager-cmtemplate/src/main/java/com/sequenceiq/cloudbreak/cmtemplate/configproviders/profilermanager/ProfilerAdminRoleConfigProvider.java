@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.profileradmin;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -18,14 +18,13 @@ public class ProfilerAdminRoleConfigProvider extends AbstractRdsRoleConfigProvid
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
-            case ProfilerAdminRoles.PROFILER_ADMIN_AGENT:
-                RdsView profilerAdminRdsView = getRdsView(source);
-                return List.of(config("profiler_admin_database_host", profilerAdminRdsView.getHost()),
-                        config("profiler_admin_database_name", profilerAdminRdsView.getDatabaseName()),
-                        config("profiler_admin_database_type", ConfigUtils.getDbTypePostgres(profilerAdminRdsView, ProfilerAdminRoles.PROFILER_ADMIN)),
-                        config("profiler_admin_database_user",
-                                profilerAdminRdsView.getConnectionUserName()),
-                        config("profiler_admin_database_password", profilerAdminRdsView.getConnectionPassword()));
+            case ProfilerManagerRoles.PROFILER_ADMIN_AGENT:
+                RdsView profilerManagerRdsView = getRdsView(source);
+                return List.of(config("profiler_admin_database_host", profilerManagerRdsView.getHost()),
+                        config("profiler_admin_database_name", profilerManagerRdsView.getDatabaseName()),
+                        config("profiler_admin_database_type", ConfigUtils.getDbTypePostgres(profilerManagerRdsView, ProfilerManagerRoles.PROFILER_MANAGER)),
+                        config("profiler_admin_database_user", profilerManagerRdsView.getConnectionUserName()),
+                        config("profiler_admin_database_password", profilerManagerRdsView.getConnectionPassword()));
             default:
                 return List.of();
         }
@@ -33,12 +32,12 @@ public class ProfilerAdminRoleConfigProvider extends AbstractRdsRoleConfigProvid
 
     @Override
     public String getServiceType() {
-        return ProfilerAdminRoles.PROFILER_ADMIN;
+        return ProfilerManagerRoles.PROFILER_MANAGER;
     }
 
     @Override
     public List<String> getRoleTypes() {
-        return List.of(ProfilerAdminRoles.PROFILER_ADMIN_AGENT);
+        return List.of(ProfilerManagerRoles.PROFILER_ADMIN_AGENT);
     }
 
     @Override

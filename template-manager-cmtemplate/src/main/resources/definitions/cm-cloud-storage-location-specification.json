@@ -82,7 +82,7 @@
       "propertyName": "file_system_uri",
       "propertyFile": "dpprofiler.properties",
       "description": "This is the file system URI for Profiler Service",
-      "defaultPath": "{{{ defaultPath }}}",
+      "defaultPath": "{{{ defaultPath }}}/dpprofiler",
       "propertyDisplayName": "Profiler Service file system URI",
       "relatedServices": ["PROFILER_ADMIN_AGENT", "PROFILER_METRICS_AGENT", "PROFILER_SCHEDULER_AGENT"],
       "requiredForAttachedCluster": true,
