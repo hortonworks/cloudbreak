@@ -51,6 +51,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -118,6 +120,8 @@ public class AwsRepairTest extends AwsComponentTest {
                 createVolumeResource(VOLUME_ID_1, null, SIZE_DISK_1, FSTAB_1),
                 createVolumeResource(VOLUME_ID_2, null, SIZE_DISK_2, FSTAB_2),
                 createVolumeResource(VOLUME_ID_3, INSTANCE_ID_3, SIZE_DISK_2, FSTAB_2));
+
+        InMemoryStateStore.putStack(1L, PollGroup.POLLABLE);
 
         when(amazonCloudFormationRetryClient.describeStackResource(any()))
                 .thenReturn(new DescribeStackResourceResult()

@@ -236,6 +236,8 @@ cb:
   gcp:
     hostkey.verify: false
     disk.encryption.url: https://cloud-certs.storage.googleapis.com/google-cloud-csek-ingress.pem
+    stopStart.batch.size: 10
+    create.batch.size: 5
 
   nginx:
     port: 9443

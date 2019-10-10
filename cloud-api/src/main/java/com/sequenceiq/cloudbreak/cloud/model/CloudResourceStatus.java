@@ -6,12 +6,16 @@ public class CloudResourceStatus {
 
     private ResourceStatus status;
 
-    private final String statusReason;
+    private String statusReason;
 
     private Long privateId;
 
     public CloudResourceStatus(CloudResource cloudResource, ResourceStatus status) {
-        this(cloudResource, status, null);
+        this(cloudResource, status, null, null);
+    }
+
+    public CloudResourceStatus(CloudResource cloudResource, ResourceStatus status, Long privateId) {
+        this(cloudResource, status, null, privateId);
     }
 
     public CloudResourceStatus(CloudResource cloudResource, ResourceStatus status, String statusReason) {
@@ -35,6 +39,10 @@ public class CloudResourceStatus {
 
     public String getStatusReason() {
         return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 
     public Long getPrivateId() {

@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -44,6 +45,7 @@ import com.google.api.services.compute.model.Tags;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpNetworkInterfaceProvider;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskEncryptionService;
@@ -92,6 +94,9 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Inject
     private PersistenceNotifier persistenceNotifier;
+
+    @Inject
+    private GcpNetworkInterfaceProvider gcpNetworkInterfaceProvider;
 
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -214,8 +219,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         String email = cloudFileSystem.getServiceAccountEmail();
         return StringUtils.isEmpty(email) ? null
                 : singletonList(new ServiceAccount()
-                        .setEmail(email)
-                        .setScopes(singletonList("https://www.googleapis.com/auth/cloud-platform")));
+                .setEmail(email)
+                .setScopes(singletonList("https://www.googleapis.com/auth/cloud-platform")));
     }
 
     private boolean noFileSystemIsConfigured(CloudStack cloudStack) {
@@ -237,18 +242,33 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Override
     public List<CloudVmInstanceStatus> checkInstances(GcpContext context, AuthenticatedContext auth, List<CloudInstance> instances) {
-        CloudInstance cloudInstance = instances.get(0);
-        try {
-            LOGGER.debug("Checking instance: {}", cloudInstance);
-            Operation operation = check(context, cloudInstance.getStringParameter(OPERATION_ID));
-            boolean finished = operation == null || GcpStackUtil.isOperationFinished(operation);
-            InstanceStatus status = finished ? context.isBuild() ? InstanceStatus.STARTED : InstanceStatus.STOPPED : InstanceStatus.IN_PROGRESS;
-            LOGGER.debug("Instance: {} status: {}", instances, status);
-            return singletonList(new CloudVmInstanceStatus(cloudInstance, status));
-        } catch (Exception ignored) {
-            LOGGER.debug("Failed to check instance state of {}", cloudInstance);
-            return singletonList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
+        List<CloudVmInstanceStatus> result = new ArrayList<>();
+        String instanceName = instances.isEmpty() ? "" : instances.get(0).getInstanceId();
+        if (!StringUtils.isEmpty(instanceName)) {
+            List<Instance> gcpInstances = gcpNetworkInterfaceProvider.getInstances(auth, instanceName.split("-")[0]);
+            for (CloudInstance instance : instances) {
+                Optional<Instance> gcpInstanceOpt = gcpInstances.stream().filter(inst -> inst.getName().equalsIgnoreCase(instance.getInstanceId())).findFirst();
+                if (gcpInstanceOpt.isPresent()) {
+                    Instance gcpInstance = gcpInstanceOpt.get();
+                    InstanceStatus status;
+                    switch (gcpInstance.getStatus()) {
+                        case "RUNNING":
+                            status = InstanceStatus.STARTED;
+                            break;
+                        case "TERMINATED":
+                            status = InstanceStatus.STOPPED;
+                            break;
+                        default:
+                            status = InstanceStatus.IN_PROGRESS;
+                    }
+                    result.add(new CloudVmInstanceStatus(instance, status));
+                } else {
+                    LOGGER.debug("Instance {} cannot be found", instance.getInstanceId());
+                    result.add(new CloudVmInstanceStatus(instance, InstanceStatus.TERMINATED));
+                }
+            }
         }
+        return result;
     }
 
     @Override
@@ -375,7 +395,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                 Operation operation = stopRequest ? compute.instances().stop(projectId, availabilityZone, instanceId).setPrettyPrint(true).execute()
                         : executeStartOperation(projectId, availabilityZone, compute, instanceId, instance.getTemplate(), instanceResponse.getDisks());
                 CloudInstance operationAwareCloudInstance = createOperationAwareCloudInstance(instance, operation);
-                return checkInstances(context, auth, singletonList(operationAwareCloudInstance)).get(0);
+                return new CloudVmInstanceStatus(operationAwareCloudInstance, InstanceStatus.IN_PROGRESS);
             } else {
                 LOGGER.debug("Instance {} is not in {} state - won't start it.", state, instanceId);
                 return null;

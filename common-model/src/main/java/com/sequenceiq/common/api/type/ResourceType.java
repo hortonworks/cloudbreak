@@ -1,5 +1,7 @@
 package com.sequenceiq.common.api.type;
 
+import java.util.List;
+
 public enum ResourceType {
     // AWS
     CLOUDFORMATION_STACK(CommonResourceType.TEMPLATE),
@@ -63,6 +65,8 @@ public enum ResourceType {
     // MOCK
     MOCK_INSTANCE;
 
+    private static final List<ResourceType> INSTANCE_TYPES = List.of(GCP_INSTANCE, OPENSTACK_INSTANCE, MOCK_INSTANCE);
+
     private final CommonResourceType commonResourceType;
 
     ResourceType() {
@@ -75,5 +79,9 @@ public enum ResourceType {
 
     public CommonResourceType getCommonResourceType() {
         return commonResourceType;
+    }
+
+    public static boolean isInstanceResource(ResourceType resourceType) {
+        return INSTANCE_TYPES.contains(resourceType);
     }
 }

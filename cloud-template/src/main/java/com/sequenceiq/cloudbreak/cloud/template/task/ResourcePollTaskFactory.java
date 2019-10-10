@@ -23,13 +23,13 @@ public class ResourcePollTaskFactory {
     private ApplicationContext applicationContext;
 
     public PollTask<List<CloudResourceStatus>> newPollResourceTask(ResourceChecker<?> checker, AuthenticatedContext authenticatedContext,
-            List<CloudResource> cloudResource, ResourceBuilderContext context, boolean cancellable) {
-        return createPollTask(PollResourceTask.NAME, authenticatedContext, checker, cloudResource, context, cancellable);
+            List<CloudResource> cloudResources, ResourceBuilderContext context, boolean cancellable) {
+        return createPollTask(PollResourceTask.NAME, authenticatedContext, checker, cloudResources, context, cancellable);
     }
 
     public PollTask<List<CloudVmInstanceStatus>> newPollComputeStatusTask(ComputeResourceBuilder<?> builder, AuthenticatedContext authenticatedContext,
-            ResourceBuilderContext context, CloudInstance instance) {
-        return createPollTask(PollComputeStatusTask.NAME, authenticatedContext, builder, context, instance);
+            ResourceBuilderContext context, List<CloudInstance> instances) {
+        return createPollTask(PollComputeStatusTask.NAME, authenticatedContext, builder, context, instances);
     }
 
     @SuppressWarnings("unchecked")
