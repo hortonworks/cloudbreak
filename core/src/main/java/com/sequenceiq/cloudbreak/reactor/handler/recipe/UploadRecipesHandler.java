@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -38,6 +39,9 @@ public class UploadRecipesHandler implements ReactorEventHandler<UploadRecipesRe
     private StackService stackService;
 
     @Inject
+    private ResourceService resourceService;
+
+    @Inject
     private HostGroupService hostGroupService;
 
     @Override
@@ -52,6 +56,7 @@ public class UploadRecipesHandler implements ReactorEventHandler<UploadRecipesRe
         Long stackId = request.getStackId();
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+            stack.setResources(resourceService.getNotInstanceRelatedByStackId(stackId));
             Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
             recipeEngine.uploadRecipes(stack, hostGroups);
             result = new UploadRecipesSuccess(stackId);
