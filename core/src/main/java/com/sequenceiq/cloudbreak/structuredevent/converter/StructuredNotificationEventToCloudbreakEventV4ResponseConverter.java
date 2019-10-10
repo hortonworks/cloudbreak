@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.RdsNotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 
 @Component
-public class StructuredNotificationEventToCloudbreakEventJsonConverter
+public class StructuredNotificationEventToCloudbreakEventV4ResponseConverter
         extends AbstractConversionServiceAwareConverter<StructuredNotificationEvent, CloudbreakEventV4Response> {
 
     @Override

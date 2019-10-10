@@ -33,7 +33,7 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
 
     private List<String> skippedFields;
 
-    private StructuredNotificationEventToCloudbreakEventJsonConverter underTest;
+    private StructuredNotificationEventToCloudbreakEventV4ResponseConverter underTest;
 
     public StructuredNotificationEventToCloudbreakEventJsonConverterTest(StructuredNotificationEvent source, List<String> additionalElementsToSkip) {
         skippedFields = Lists.newArrayList("availabilityZone");
@@ -54,7 +54,7 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
 
     @Before
     public void setUp() {
-        underTest = new StructuredNotificationEventToCloudbreakEventJsonConverter();
+        underTest = new StructuredNotificationEventToCloudbreakEventV4ResponseConverter();
     }
 
     @Test

@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
@@ -19,7 +20,8 @@ public class StackResponseEventProvider implements ResponseProvider {
 
     @Override
     public StackV4Response providerEntriesToStackResponse(Stack stack, StackV4Response stackResponse) {
-        List<CloudbreakEventV4Response> cloudbreakEvents = cloudbreakEventsFacade.retrieveEventsByStack(stack.getId());
+        List<CloudbreakEventV4Response> cloudbreakEvents = cloudbreakEventsFacade
+                .retrieveEventsByStack(stack.getId(), PageRequest.of(0, Integer.MAX_VALUE)).getContent();
         stackResponse.setCloudbreakEvents(cloudbreakEvents);
         return stackResponse;
     }
