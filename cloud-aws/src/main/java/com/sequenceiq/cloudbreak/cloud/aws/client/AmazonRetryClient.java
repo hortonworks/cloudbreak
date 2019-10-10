@@ -11,7 +11,7 @@ public abstract class AmazonRetryClient {
         try {
             return supplier.get();
         } catch (SdkClientException e) {
-            if (e.getMessage().contains("Rate exceeded")) {
+            if (e.getMessage().contains("Rate exceeded") || e.getMessage().contains("Request limit exceeded")) {
                 throw new ActionWentFailException(e.getMessage());
             }
             throw e;

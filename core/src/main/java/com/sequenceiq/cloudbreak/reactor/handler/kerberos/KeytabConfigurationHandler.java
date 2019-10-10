@@ -2,9 +2,7 @@ package com.sequenceiq.cloudbreak.reactor.handler.kerberos;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -13,13 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.KeytabModel;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationException;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationFailed;
@@ -78,14 +73,14 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             Optional<KerberosConfig> kerberosConfigOptional = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
             // TODO remove Cloudplatform check when FreeIPA registration is ready
-            if ((CloudPlatform.AWS.name().equals(stack.cloudPlatform()) || CloudPlatform.AZURE.name().equals(stack.cloudPlatform()))
-                    && kerberosConfigOptional.isPresent() && kerberosDetailService.isIpaJoinable(kerberosConfigOptional.get())) {
-                GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-                ServiceKeytabResponse serviceKeytabResponse = keytabProvider.getServiceKeytabResponse(stack, primaryGatewayConfig);
-                KeytabModel keytabModel = buildKeytabModel(serviceKeytabResponse);
-                hostOrchestrator.uploadKeytabs(List.of(primaryGatewayConfig), Set.of(keytabModel),
-                        ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, stack.getCluster().getId()));
-            }
+//            if ((CloudPlatform.AWS.name().equals(stack.cloudPlatform()) || CloudPlatform.AZURE.name().equals(stack.cloudPlatform()))
+//                    && kerberosConfigOptional.isPresent() && kerberosDetailService.isIpaJoinable(kerberosConfigOptional.get())) {
+//                GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+//                ServiceKeytabResponse serviceKeytabResponse = keytabProvider.getServiceKeytabResponse(stack, primaryGatewayConfig);
+//                KeytabModel keytabModel = buildKeytabModel(serviceKeytabResponse);
+//                hostOrchestrator.uploadKeytabs(List.of(primaryGatewayConfig), Set.of(keytabModel),
+//                        ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, stack.getCluster().getId()));
+//            }
             response = new KeytabConfigurationSuccess(stackId);
         } catch (Exception e) {
             LOGGER.info("Error during keytab configuration, stackId: " + stackId, e);

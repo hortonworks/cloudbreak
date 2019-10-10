@@ -85,7 +85,7 @@ public class ClusterServiceRunner {
             }
             clusterService.updateHostMetadata(cluster.getId(), hostsPerHostGroup, HostMetadataState.CONTAINER_RUNNING);
         } else if (orchestratorType.hostOrchestrator()) {
-            hostRunner.runClusterServices(stack, cluster);
+            hostRunner.runClusterServices(stack, cluster, List.of());
             updateAmbariClientConfig(stack, cluster);
             Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
             for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
@@ -118,7 +118,7 @@ public class ClusterServiceRunner {
         } else {
             Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId())
                     .orElseThrow(NotFoundException.notFound("cluster", stack.getId()));
-            hostRunner.runClusterServices(stack, cluster);
+            hostRunner.runClusterServices(stack, cluster, List.of());
         }
     }
 

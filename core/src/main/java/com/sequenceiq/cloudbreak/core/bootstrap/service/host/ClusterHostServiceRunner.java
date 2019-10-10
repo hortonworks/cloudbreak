@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -88,6 +89,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
+import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
@@ -178,7 +180,10 @@ public class ClusterHostServiceRunner {
     @Inject
     private TelemetryDecorator telemetryDecorator;
 
-    public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster) {
+    @Inject
+    private MountDisks mountDisks;
+
+    public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, List<String> candidateAddresses) {
         try {
             Set<Node> nodes = stackUtil.collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
@@ -188,6 +193,11 @@ public class ClusterHostServiceRunner {
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
             boolean clouderaManager = blueprintService.isClouderaManagerTemplate(cluster.getBlueprint());
             hostOrchestrator.initServiceRun(gatewayConfigs, nodes, saltConfig, exitCriteriaModel, clouderaManager);
+            if (CollectionUtils.isEmpty(candidateAddresses)) {
+                mountDisks.mountAllDisks(stack.getId());
+            } else {
+                mountDisks.mountDisksOnNewNodes(stack.getId(), new HashSet<>(candidateAddresses));
+            }
             recipeEngine.executePreClusterManagerRecipes(stack, hostGroupService.getByClusterWithRecipes(cluster.getId()));
             hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
@@ -202,7 +212,7 @@ public class ClusterHostServiceRunner {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Cluster cluster = stack.getCluster();
         candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
-        runClusterServices(stack, cluster);
+        runClusterServices(stack, cluster, new ArrayList<>(candidates.values()));
         return candidates;
     }
 

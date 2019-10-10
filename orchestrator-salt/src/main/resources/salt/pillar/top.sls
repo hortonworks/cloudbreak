@@ -19,6 +19,7 @@ base:
     - cloudera-manager.csd
     - fluent
     - metering
+    - mount.disk
 
   'G@roles:ad_member or G@roles:ad_leave':
     - match: compound

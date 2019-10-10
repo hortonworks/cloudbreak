@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
@@ -53,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -102,11 +104,19 @@ public class AwsRepairTest extends AwsComponentTest {
     @Inject
     private ResourceNotifier resourceNotifier;
 
+    @Inject
+    private Retry retry;
+
     @Test
     public void repairStack() throws Exception {
+        setupRetryService();
         downscaleStack();
         Mockito.reset(amazonEC2Client, amazonCloudFormationRetryClient, amazonAutoScalingRetryClient, persistenceNotifier);
         upscaleStack();
+    }
+
+    private void setupRetryService() {
+        when(retry.testWith2SecDelayMax15Times(any())).then(answer -> ((Supplier) answer.getArgument(0)).get());
     }
 
     private void upscaleStack() throws Exception {

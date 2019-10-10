@@ -10,7 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +49,27 @@ public class SaltStates {
 
     public static String ambariReset(SaltConnector sc, Target<String> target) {
         return applyState(sc, "ambari.reset", target).getJid();
+    }
+
+    public static String mountDisks(SaltConnector sc) {
+        return applyStateAll(sc, "disks.format-and-mount").getJid();
+    }
+
+    public static Map<String, String> getUuidList(SaltConnector sc) {
+        ApplyResponse applyResponse = applyStateAllSync(sc, "disks.get-uuid-list");
+        List<Map<String, JsonNode>> result = (List<Map<String, JsonNode>>) applyResponse.getResult();
+        if (CollectionUtils.isEmpty(result) || 1 != result.size()) {
+            return Map.of();
+        }
+
+        return result.get(0).entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> {
+            JsonNode responseJson = entry.getValue();
+            return Optional.ofNullable(responseJson.get("cmd_|-execute_get_uuid_list_|-/opt/salt/scripts/get-uuid-list.sh_|-run"))
+                    .map(cmdNode -> cmdNode.get("changes"))
+                    .map(changesNode -> changesNode.get("stdout"))
+                    .map(JsonNode::textValue)
+                    .orElse("");
+        }));
     }
 
     public static ApplyResponse addGrain(SaltConnector sc, Target<String> target, String key, String value) {
@@ -212,5 +235,13 @@ public class SaltStates {
 
     private static ApplyResponse applyState(SaltConnector sc, String service, Target<String> target) {
         return sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service);
+    }
+
+    private static ApplyResponse applyStateAll(SaltConnector sc, String service) {
+        return applyState(sc, service, Glob.ALL);
+    }
+
+    private static ApplyResponse applyStateAllSync(SaltConnector sc, String service) {
+        return sc.run(Glob.ALL, "state.apply", LOCAL, ApplyResponse.class, service);
     }
 }
