@@ -1,5 +1,5 @@
 name: "mock-sdx-tests"
 tests:
-  - name: "aws mock sdx tests"
+  - name: "mock sdx tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.mock.MockSdxTests

@@ -33,6 +33,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
+import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 @Prototype
 public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxClusterDetailResponse, SdxTestDto> implements Purgable<SdxClusterResponse, SdxClient> {
@@ -182,5 +183,13 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     @Override
     public String getName() {
         return super.getName() == null ? DEFAULT_SDX_NAME : super.getName();
+    }
+
+    public SdxRepairRequest getSdxRepairRequest() {
+        SdxRepairTestDto repair = getCloudProvider().sdxRepair(given(SdxRepairTestDto.class));
+        if (repair == null) {
+            throw new IllegalArgumentException("SDX Repair does not exist!");
+        }
+        return repair.getRequest();
     }
 }

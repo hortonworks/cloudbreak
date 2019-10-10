@@ -41,6 +41,7 @@ import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxRepairTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
@@ -604,6 +605,42 @@ public abstract class TestContext implements ApplicationContextAware {
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         SdxInternalTestDto awaitEntity = get(key);
+        LOGGER.info("await {} for {}", key, desiredStatuses);
+        try {
+            if (awaitEntity == null) {
+                throw new RuntimeException("Key provided but no result in resource map, key=" + key);
+            }
+
+            SdxClient sdxClient = getMicroserviceClient(SdxClient.class, getWho(runningParameter));
+            String sdxName = entity.getName();
+            statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(sdxClient, sdxName, desiredStatuses, pollingInterval));
+            if (!desiredStatuses.equals(SdxClusterStatusResponse.DELETED)) {
+                awaitEntity.refresh(this, (CloudbreakClient) null);
+            }
+        } catch (Exception e) {
+            if (runningParameter.isLogError()) {
+                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
+            }
+            exceptionMap.put("await " + entity + " for desired statuses " + desiredStatuses, e);
+        }
+        return entity;
+    }
+
+    public SdxRepairTestDto await(SdxRepairTestDto entity, SdxClusterStatusResponse desiredStatuses,
+            RunningParameter runningParameter) {
+        return await(entity, desiredStatuses, runningParameter, -1);
+    }
+
+    public SdxRepairTestDto await(SdxRepairTestDto entity, SdxClusterStatusResponse desiredStatuses,
+            RunningParameter runningParameter, long pollingInterval) {
+        checkShutdown();
+
+        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+            LOGGER.info("Should be skipped beacause of previous error. await [{}]", desiredStatuses);
+            return entity;
+        }
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
+        SdxRepairTestDto awaitEntity = get(key);
         LOGGER.info("await {} for {}", key, desiredStatuses);
         try {
             if (awaitEntity == null) {

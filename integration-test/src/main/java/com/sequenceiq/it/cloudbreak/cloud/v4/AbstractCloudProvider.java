@@ -1,11 +1,13 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
 import com.sequenceiq.it.TestParameter;
+import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
@@ -136,7 +138,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public final SdxRepairTestDto sdxRepair(SdxRepairTestDto sdxRepair) {
-        sdxRepair.withHostGroupName();
+        sdxRepair.withHostGroupNames(List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()));
         return sdxRepair;
     }
 
