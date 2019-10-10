@@ -165,9 +165,11 @@ main() {
     return_code=$?
     [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Not all devices were mounted"
 
-    grow_mount_partition
-    return_code=$?
-    [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error growing root partition"
+    if [[ "$CLOUD_PLATFORM" == "AZURE" ]]; then
+       grow_mount_partition
+       return_code=$?
+       [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error growing root partition"
+    fi
 
     create_directories
     return_code=$?
