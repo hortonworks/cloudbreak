@@ -137,6 +137,7 @@ public class ApiDescription {
 
     public static class MetricAlertJsonProperties {
         public static final String ALERTDEFINITION = "Definition of the alert";
+        public static final String ALERTDEFINITION_LABEL = "Definition label of the alert";
         public static final String PERIOD = "Period of the alert";
         public static final String ALERTSTATE = "State of the alert";
     }

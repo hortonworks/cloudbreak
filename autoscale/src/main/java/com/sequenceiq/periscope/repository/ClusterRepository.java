@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.repository;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,6 +25,10 @@ public interface ClusterRepository extends BaseRepository<Cluster, Long> {
     List<Cluster> findByStateAndPeriscopeNodeId(ClusterState state, String nodeId);
 
     List<Cluster> findByStateAndAutoscalingEnabledAndPeriscopeNodeId(ClusterState state, boolean autoscalingEnabled, String nodeId);
+
+    @Query("SELECT c FROM Cluster c LEFT JOIN c.metricAlerts ma WHERE ma.definitionLabel IS NULL "
+            + "OR ma.definitionLabel = '' OR ma.definitionLabel = ma.definitionName")
+    Set<Cluster> findClustersWhereMetricAlertLabelIsMissing();
 
     @DisableHasPermission
     int countByStateAndAutoscalingEnabledAndPeriscopeNodeId(ClusterState state, boolean autoscalingEnabled, String nodeId);

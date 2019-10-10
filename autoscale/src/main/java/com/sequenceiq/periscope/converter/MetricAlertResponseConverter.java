@@ -19,6 +19,7 @@ public class MetricAlertResponseConverter extends AbstractConverter<MetricAlertR
         alert.setName(source.getAlertName());
         alert.setDescription(source.getDescription());
         alert.setDefinitionName(source.getAlertDefinition());
+        alert.setDefinitionLabel(source.getAlertDefinitionLabel());
         alert.setPeriod(source.getPeriod());
         alert.setAlertState(source.getAlertState());
         if (source.getScalingPolicy() != null) {
@@ -36,6 +37,7 @@ public class MetricAlertResponseConverter extends AbstractConverter<MetricAlertR
         json.setDescription(source.getDescription());
         json.setPeriod(source.getPeriod());
         json.setAlertDefinition(source.getDefinitionName());
+        json.setAlertDefinitionLabel(source.getDefinitionLabel());
         json.setAlertState(source.getAlertState());
         if (source.getScalingPolicy() != null) {
             json.setScalingPolicy(scalingPolicyRequestConverter.convert(source.getScalingPolicy()));

@@ -128,7 +128,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         Map<String, Object> map = new HashMap<>();
         map.put("state", "CRITICAL");
         map.put("host_name", "hostname-recovery");
-        when(ambariClient.getAlert("ambari_server_agent_heartbeat")).thenReturn(Collections.singletonList(map));
+        when(ambariClient.getAlertByNameAndState("ambari_server_agent_heartbeat", "CRITICAL")).thenReturn(Collections.singletonList(map));
 
         List<Cluster> clusters = Collections.singletonList(cluster);
         when(clusterService.findAllByStateAndNode(ClusterState.RUNNING, null)).thenReturn(clusters);
@@ -154,7 +154,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         when(clusterService.findById(4L)).thenReturn(cluster4);
         when(clusterService.findById(5L)).thenReturn(cluster5);
 
-        when(ambariClient.getAlert(anyString())).thenAnswer(delayed(Collections.emptyList()));
+        when(ambariClient.getAlertByNameAndState(anyString(), anyString())).thenAnswer(delayed(Collections.emptyList()));
 
         List<Cluster> clusters = Arrays.asList(cluster1, cluster2, cluster3, cluster4, cluster5);
         when(clusterService.findAllByStateAndNode(ClusterState.RUNNING, null)).thenReturn(clusters);
@@ -166,7 +166,6 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         List<RejectedThread> allRejectedCluster = rejectedThreadService.getAllRejectedCluster();
 
         Assert.assertFalse(allRejectedCluster.isEmpty());
-
     }
 
     @Ignore

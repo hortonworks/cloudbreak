@@ -14,6 +14,9 @@ public class MetricAlertRequest extends AbstractAlertJson {
     @ApiModelProperty(MetricAlertJsonProperties.ALERTDEFINITION)
     private String alertDefinition;
 
+    @ApiModelProperty(MetricAlertJsonProperties.ALERTDEFINITION)
+    private String alertDefinitionLabel;
+
     @ApiModelProperty(MetricAlertJsonProperties.PERIOD)
     private int period;
 
@@ -30,6 +33,14 @@ public class MetricAlertRequest extends AbstractAlertJson {
 
     public void setAlertDefinition(String alertDefinition) {
         this.alertDefinition = alertDefinition;
+    }
+
+    public String getAlertDefinitionLabel() {
+        return alertDefinitionLabel;
+    }
+
+    public void setAlertDefinitionLabel(String alertDefinitionLabel) {
+        this.alertDefinitionLabel = alertDefinitionLabel;
     }
 
     public int getPeriod() {

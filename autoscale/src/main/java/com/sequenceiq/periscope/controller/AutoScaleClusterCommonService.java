@@ -14,6 +14,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
@@ -62,6 +63,9 @@ public class AutoScaleClusterCommonService {
     @Inject
     private AmbariConverter ambariConverter;
 
+    @Inject
+    private TransactionService transactionService;
+
     public AutoscaleClusterResponse addCluster(AutoscaleClusterRequest ambariServer) {
         PeriscopeUser user = authenticatedUserService.getPeriscopeUser();
         MDCBuilder.buildUserMdcContext(user);
@@ -84,7 +88,11 @@ public class AutoScaleClusterCommonService {
     public AutoscaleClusterResponse getCluster(Long clusterId) {
         PeriscopeUser user = authenticatedUserService.getPeriscopeUser();
         MDCBuilder.buildMdcContext(user, clusterId);
-        return createClusterJsonResponse(clusterService.findById(clusterId));
+        try {
+            return transactionService.required(() -> createClusterJsonResponse(clusterService.findById(clusterId)));
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw e.getCause();
+        }
     }
 
     public void deleteCluster(Long clusterId) {
