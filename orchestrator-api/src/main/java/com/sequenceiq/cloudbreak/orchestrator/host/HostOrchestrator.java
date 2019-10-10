@@ -72,12 +72,15 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     byte[] getStateConfigZip() throws IOException;
 
-    Map<String, Map<String, String>> formatAndMountDisksOnNodes(List<GatewayConfig> allGateway, Set<Node> targets, ExitCriteriaModel exitModel,
-            String platformVariant) throws CloudbreakOrchestratorFailedException;
+    Map<String, Map<String, String>> formatAndMountDisksOnNodes(List<GatewayConfig> allGateway, Set<Node> targets, Set<Node> allNodes,
+            ExitCriteriaModel exitModel, String platformVariant) throws CloudbreakOrchestratorFailedException;
 
     void stopClusterManagerAgent(GatewayConfig gatewayConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel, boolean adJoinable, boolean ipaJoinable)
             throws CloudbreakOrchestratorFailedException;
 
     void uploadKeytabs(List<GatewayConfig> allGatewayConfigs, Set<KeytabModel> keytabModels, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException;
+
+    Map<String, Map<String, String>> formatAndMountDisksOnNodesLegacy(List<GatewayConfig> gatewayConfigs, Set<Node> nodes, Set<Node> allNodes,
+            ExitCriteriaModel exitCriteriaModel, String platformVariant) throws CloudbreakOrchestratorFailedException;
 }

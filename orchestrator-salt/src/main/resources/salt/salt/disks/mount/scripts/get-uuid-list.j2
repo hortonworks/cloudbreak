@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+ATTACHED_VOLUME_NAME_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_name_list'] }}"
+ATTACHED_VOLUME_SERIAL_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_serial_list'] }}"
+CLOUD_PLATFORM={{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['cloud_platform'] }}
+
+source /opt/salt/scripts/format-and-mount-common.sh
+
+LOG_FILE=/var/log/get_uuid_list.log
+
+main() {
+    device_name_list=$(get_device_names $LOG_FILE)
+    local uuid_list=$(get_uuid_list $LOG_FILE "$device_name_list") # ephemeral devices' uuid should not be returned
+    log $LOG_FILE exit code of get_uuid_list: $?, uuids: $uuid_list
+    output $uuid_list
+    exit_with_code $LOG_FILE $EXIT_CODE_OK "script ran ok"
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && main "$@"

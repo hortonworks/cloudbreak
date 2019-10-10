@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.VersionComparator;
+import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
@@ -31,6 +34,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -38,6 +42,8 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
 public class MountDisks {
+
+    private static final String MIN_VERSION = "2.16.0";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MountDisks.class);
 
@@ -62,6 +68,9 @@ public class MountDisks {
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
+    @Inject
+    private ComponentConfigProviderService componentConfigProviderService;
+
     public void mountAllDisks(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
@@ -69,11 +78,12 @@ public class MountDisks {
             return;
         }
 
+        Set<Node> allNodes = stackUtil.collectNodes(stack);
         Set<Node> nodes = stackUtil.collectNodesWithDiskData(stack);
-        mountDisks(stackId, stack, nodes);
+        mountDisks(stackId, stack, nodes, allNodes);
     }
 
-    private void mountDisks(Long stackId, Stack stack, Set<Node> nodes) throws CloudbreakException {
+    private void mountDisks(Long stackId, Stack stack, Set<Node> nodes, Set<Node> allNodes) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         if (orchestratorType.containerOrchestrator()) {
@@ -85,8 +95,13 @@ public class MountDisks {
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(orchestrator.getType());
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-            Map<String, Map<String, String>> mountInfo =
-                    hostOrchestrator.formatAndMountDisksOnNodes(gatewayConfigs, nodes, exitCriteriaModel, stack.getPlatformVariant());
+
+            Map<String, Map<String, String>> mountInfo;
+            if (isCbVersionPostOptimisation(stack)) {
+                mountInfo = hostOrchestrator.formatAndMountDisksOnNodes(gatewayConfigs, nodes, allNodes, exitCriteriaModel, stack.getPlatformVariant());
+            } else {
+                mountInfo = hostOrchestrator.formatAndMountDisksOnNodesLegacy(gatewayConfigs, nodes, allNodes, exitCriteriaModel, stack.getPlatformVariant());
+            }
 
             mountInfo.forEach((hostname, value) -> {
                 String instanceId = stack.getInstanceMetaDataAsList().stream()
@@ -97,7 +112,7 @@ public class MountDisks {
 
                 String uuids = value.getOrDefault("uuids", "");
                 String fstab = value.getOrDefault("fstab", "");
-                if (!StringUtils.isEmpty(uuids) || !StringUtils.isEmpty(fstab)) {
+                if (!StringUtils.isEmpty(uuids) && !StringUtils.isEmpty(fstab)) {
                     persistUuidAndFstab(stack, instanceId, uuids, fstab);
                 }
             });
@@ -125,7 +140,16 @@ public class MountDisks {
             return;
         }
 
+        Set<Node> allNodes = stackUtil.collectNodes(stack);
         Set<Node> nodes = stackUtil.collectNewNodesWithDiskData(stack, upscaleCandidateAddresses);
-        mountDisks(stackId, stack, nodes);
+        mountDisks(stackId, stack, nodes, allNodes);
+    }
+
+    private boolean isCbVersionPostOptimisation(Stack stack) {
+        CloudbreakDetails cloudbreakDetails = componentConfigProviderService.getCloudbreakDetails(stack.getId());
+        VersionComparator versionComparator = new VersionComparator();
+        String version = substringBefore(cloudbreakDetails.getVersion(), "-");
+        int compare = versionComparator.compare(() -> version, () -> MIN_VERSION);
+        return compare >= 0;
     }
 }

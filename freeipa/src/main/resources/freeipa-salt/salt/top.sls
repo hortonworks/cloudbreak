@@ -1,5 +1,5 @@
 base:
-  '*':
-    - nginx
-    - freeipa
-    - dns
+           '*':
+             - nginx
+             - freeipa
+             - dns

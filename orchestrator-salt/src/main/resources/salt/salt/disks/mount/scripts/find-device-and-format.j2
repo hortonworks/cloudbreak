@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+
+ATTACHED_VOLUME_NAME_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_name_list'] }}"
+ATTACHED_VOLUME_SERIAL_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_serial_list'] }}"
+CLOUD_PLATFORM={{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['cloud_platform'] }}
+
+source /opt/salt/scripts/format-and-mount-common.sh
+
+LOG_FILE=/var/log/find_device_and_format.log
+VERSION="V1.0"
+
+# INPUT - expected lists
+#   ATTACHED_VOLUME_NAME_LIST - contains a list of volume device names attached to the instance, format: space separated list
+#   ATTACHED_VOLUME_SERIAL_LIST - contains a list of volume serial ids, format: space separated list
+#
+# OUTPUT:
+#   happy case:
+#       exit code: 0
+#       STDOUT:   list of uuids, format: space  separated list
+#
+#   error:
+#       exit code: 1
+#       STDERR: a one-line summary of the type of error, without details. Details are in the log
+
+
+unmount_device_if_mounted() {
+      local device_name_list=$1
+      local return_value=0
+      log $LOG_FILE checking if devices are mounted: $device_name_list
+      for device in $device_name_list; do
+          local mountpoint=$(grep $device /etc/fstab | tr -s ' \t' ' ' | cut -d' ' -f 2)
+          if [ -n "$mountpoint" ]; then
+            $(umount "$mountpoint" >> $LOG_FILE 2>&1)
+            log $LOG_FILE "unmounted $device, exit code of umount: $?"
+            $(sed -i "\|^$device|d" /etc/fstab > $LOG_FILE 2>&1)
+            log $LOG_FILE "deleting device $device from fstab, exit code of sed: $?"
+            device_in_mount=$(mount | grep $device)
+            if [ -n "$device_in_mount" ]; then
+                log $LOG_FILE mount: device $device is still mounted, line from mount: $device_in_mount
+                return_value=1
+             fi
+          else
+            log $LOG_FILE "device $device is not yet mounted"
+          fi
+      done
+      return $((return_value))
+}
+
+format_disks_if_unformatted() {
+  local device_name_list=$1
+  log $LOG_FILE format disk arguments: $device_name_list
+  local return_value=0
+  for devicename in $device_name_list; do
+      log $LOG_FILE device: $devicename
+      if [ -z "$(blkid $devicename)" ]; then
+          log $LOG_FILE "formatting: $devicename"
+          $(mkfs -E lazy_itable_init=1 -O uninit_bg -F -t $FS_TYPE $devicename >> $LOG_FILE 2>&1)
+          if [ ! $? -eq 0 ]; then
+            log $LOG_FILE "formatting of device $devicename failed"
+            return_value=1
+          fi
+          log $LOG_FILE $format_result
+      fi
+  done
+  return $((return_value))
+}
+
+not_in_list() {
+    local element_to_find=$1
+    local list=$2
+
+    for element in $list; do
+        [[ "$element" == "$element_to_find" ]] && return 1
+    done
+
+    return 0
+}
+
+get_ephemeral_device_names() {
+    attached_volumes=$1
+
+    lsblk_out=$(lsblk -I 8 -dn  | cut -f1 -d' ')
+
+    root_disk=$(get_root_disk)
+    used_disks="$attached_volumes $root_disk"
+    all_disk_names=$(lsblk_command  | cut -f1 -d' ')
+    log $LOG_FILE root disk: $root_disk
+    log $LOG_FILE used disks: $used_disks
+    log $LOG_FILE all disks: $all_disk_names
+
+    local ephemeral_volumes=""
+    for disk in $all_disk_names; do
+        $(not_in_list "/dev/$disk" "$used_disks") && $(not_elastic_block_store $disk $LOG_FILE) && ephemeral_volumes+=" /dev/$disk"
+    done
+
+    log $LOG_FILE found ephemeral volumes: \"$ephemeral_volumes\"
+    echo "$ephemeral_volumes"
+}
+
+save_env_vars_to_log_file() {
+    log $LOG_FILE environment variables:
+    log $LOG_FILE ATTACHED_VOLUME_NAME_LIST=$ATTACHED_VOLUME_NAME_LIST
+    log $LOG_FILE ATTACHED_VOLUME_SERIAL_LIST=$ATTACHED_VOLUME_SERIAL_LIST
+    log $LOG_FILE CLOUD_PLATFORM=$CLOUD_PLATFORM
+}
+
+main() {
+    log $LOG_FILE "started, version: $VERSION"
+    save_env_vars_to_log_file
+    local script_name="find-device-and-format"
+    can_start $script_name $LOG_FILE
+
+    device_name_list=$(get_device_names $LOG_FILE)
+    if [ ! $? -eq 0 ]; then
+        exit_with_code $LOG_FILE $EXIT_CODE_ERROR "some volumes are missing"
+    fi
+    ephemeral_device_name_list=$(get_ephemeral_device_names "$device_name_list")
+    log $LOG_FILE found devices: $device_name_list $ephemeral_device_name_list
+
+    format_disks_if_unformatted "$device_name_list $ephemeral_device_name_list"
+    if [ ! $? -eq 0 ]; then
+        exit_with_code $LOG_FILE $EXIT_CODE_ERROR "could not format all devices"
+    fi
+
+    unmount_device_if_mounted "$device_name_list $ephemeral_device_name_list"
+    if [ ! $? -eq 0 ]; then
+        exit_with_code $LOG_FILE $EXIT_CODE_ERROR "could not unmount devices that were mounted by device name"
+    fi
+
+    local uuid_list=$(get_uuid_list $LOG_FILE "$device_name_list") # ephemeral devices' uuid should not be returned
+    log $LOG_FILE exit code of get_uuid_list: $?, uuids: $uuid_list
+    output $uuid_list
+    export ATTACHED_VOLUME_UUID_LIST=$uuid_list
+    exit_with_code $LOG_FILE $EXIT_CODE_OK "script ran ok"
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && main "$@"

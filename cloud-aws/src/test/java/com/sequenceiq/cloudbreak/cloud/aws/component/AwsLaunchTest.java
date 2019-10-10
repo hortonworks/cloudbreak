@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -91,8 +93,12 @@ public class AwsLaunchTest extends AwsComponentTest {
     @Inject
     private AmazonAutoScalingRetryClient amazonAutoScalingRetryClient;
 
+    @Inject
+    private Retry retry;
+
     @Test
     public void launchStack() throws Exception {
+        setupRetryService();
         setupFreemarkerTemplateProcessing();
         setupDescribeStacksResponses();
         setupDescribeImagesResponse();
@@ -122,6 +128,10 @@ public class AwsLaunchTest extends AwsComponentTest {
         inOrder.verify(awsCreateStackStatusCheckerTask).call();
         inOrder.verify(amazonEC2Client, times(2)).createVolume(any());
         inOrder.verify(amazonEC2Client, times(2)).attachVolume(any());
+    }
+
+    private void setupRetryService() {
+        when(retry.testWith2SecDelayMax15Times(any())).then(answer -> ((Supplier) answer.getArgument(0)).get());
     }
 
     private void setupFreemarkerTemplateProcessing() throws IOException, freemarker.template.TemplateException {
