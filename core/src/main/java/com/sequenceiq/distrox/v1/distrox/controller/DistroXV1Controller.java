@@ -2,10 +2,12 @@ package com.sequenceiq.distrox.v1.distrox.controller;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.dto.StackAccessDto.StackAccessDtoBuilder.aStackAccessDtoBuilder;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
@@ -271,6 +273,24 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
                 workspaceService.getForCurrentUser().getId(),
                 forced,
                 instanceId);
+    }
+
+    @Override
+    public void deleteInstancesByName(String name, @NotEmpty List<String> instances, boolean forced) {
+        stackOperation.deleteInstances(
+                aStackAccessDtoBuilder().withName(name).build(),
+                workspaceService.getForCurrentUser().getId(),
+                instances,
+                forced);
+    }
+
+    @Override
+    public void deleteInstancesByCrn(String crn, @NotEmpty List<String> instances, boolean forced) {
+        stackOperation.deleteInstances(
+                aStackAccessDtoBuilder().withCrn(crn).build(),
+                workspaceService.getForCurrentUser().getId(),
+                instances,
+                forced);
     }
 
     @Override

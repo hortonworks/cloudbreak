@@ -585,13 +585,7 @@ public class StackService implements ResourceIdProvider {
         flowManager.triggerStackRemoveInstance(stack.getId(), metaData.getInstanceGroupName(), metaData.getPrivateId(), forced);
     }
 
-    public void removeInstances(Long stackId, Long workspaceId, Set<String> instanceIds, User user) {
-        Stack stack = getById(stackId);
-        removeInstances(stack, workspaceId, instanceIds, false, user);
-    }
-
     public void removeInstances(Stack stack, Long workspaceId, Collection<String> instanceIds, boolean forced, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
         for (String instanceId : instanceIds) {
             InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, workspaceId, user);

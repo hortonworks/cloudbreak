@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_CRN;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_NAME;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.WorkspaceOpDescription.DELETE_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.CREATE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_BY_CRN;
@@ -31,9 +32,11 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.STO
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SYNC_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SYNC_BY_NAME;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -229,6 +232,22 @@ public interface DistroXV1Endpoint {
     void deleteInstanceByCrn(@PathParam("crn") String crn,
                         @QueryParam("forced") @DefaultValue("false") Boolean forced,
                         @QueryParam("instanceId") String instanceId);
+
+    @DELETE
+    @Path("name/{name}/instances")
+    @ApiOperation(value = DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "deleteInstancesDistroXV1ByName")
+    void deleteInstancesByName(@PathParam("name") String name,
+            @QueryParam("id") @NotEmpty List<String> instances,
+            @QueryParam("forced") @DefaultValue("false") boolean forced);
+
+    @DELETE
+    @Path("crn/{crn}/instances")
+    @ApiOperation(value = DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "deleteInstancesDistroXV1ByCrn")
+    void deleteInstancesByCrn(@PathParam("crn") String crn,
+            @QueryParam("id") @NotEmpty List<String> instances,
+            @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @PUT
     @Path("name/{name}/maintenance")

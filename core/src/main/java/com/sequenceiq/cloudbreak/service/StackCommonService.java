@@ -323,6 +323,7 @@ public class StackCommonService {
 
     public void deleteMultipleInstancesByNameInWorkspace(String name, Long workspaceId, List<String> instanceIds, boolean forced) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         stackService.removeInstances(stack, workspaceId, instanceIds, forced, user);
     }
@@ -332,6 +333,13 @@ public class StackCommonService {
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
         stackService.removeInstance(stack, workspaceId, instanceId, forced, user);
+    }
+
+    public void deleteMultipleInstancesByCrnInWorkspace(String crn, Long workspaceId, List<String> instanceIds, boolean forced) {
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
+        Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
+        stackService.removeInstances(stack, workspaceId, instanceIds, forced, user);
     }
 
     public void changeImageByNameInWorkspace(String name, Long organziationId, StackImageChangeV4Request stackImageChangeRequest) {
