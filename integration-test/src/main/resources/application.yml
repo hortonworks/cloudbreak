@@ -127,7 +127,7 @@ integrationtest:
       - subnet-065019e58cbefd9b8
     publicKeyId: api-e2e-test
     credential:
-      type: key
+      type: role
       roleArn:
       accessKeyId:
       secretKey:

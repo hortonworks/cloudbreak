@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.dto.sdx;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
@@ -44,14 +46,16 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxInternalClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 @Prototype
-public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterRequest, SdxClusterResponse, SdxInternalTestDto>
+public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterRequest, SdxClusterDetailResponse, SdxInternalTestDto>
         implements Purgable<SdxClusterResponse, SdxClient> {
 
     private static final String DEFAULT_SDX_NAME = "test-sdx" + '-' + UUID.randomUUID().toString().replaceAll("-", "");
@@ -132,6 +136,14 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     private SdxInternalTestDto withStackRequest(StackTestDto stack, ClusterTestDto cluster) {
+        InstanceGroupTestDto instanceGroup = getTestContext().given(InstanceGroupTestDto.class);
+
+        if (instanceGroup.getResponse() == null) {
+            getTestContext()
+                    .given("master", InstanceGroupTestDto.class).withHostGroup(MASTER).withNodeCount(1)
+                    .given("idbroker", InstanceGroupTestDto.class).withHostGroup(IDBROKER).withNodeCount(1);
+        }
+
         cluster.withName(cluster.getName())
                 .withBlueprintName(DEFAULT_SDX_BLUEPRINT_NAME)
                 .withValidateBlueprint(Boolean.FALSE);
@@ -139,6 +151,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .withImageSettings(getCloudProvider().imageSettings(getTestContext().given(ImageSettingsTestDto.class)))
                 .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
                 .withInstanceGroupsEntity(InstanceGroupTestDto.sdxHostGroup(getTestContext()))
+                .withInstanceGroups(MASTER.getName(), IDBROKER.getName())
                 .withNetwork(getCloudProvider().network(getTestContext().given(NetworkV4TestDto.class)))
                 .withStackAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
                 .withGatewayPort(getCloudProvider().gatewayPort(stack))
@@ -159,6 +172,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .withImageSettings(getImageCatalog(getTestContext().given(ImageSettingsTestDto.class), templateJson))
                 .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
                 .withInstanceGroupsEntity(InstanceGroupTestDto.sdxHostGroup(getTestContext()))
+                .withInstanceGroups(MASTER.getName(), IDBROKER.getName())
                 .withNetwork(getNetwork(getTestContext().given(NetworkV4TestDto.class), templateJson, getCloudProvider().getCloudPlatform()))
                 .withStackAuthentication(getAuthentication(getTestContext().given(StackAuthenticationTestDto.class), templateJson))
                 .withGatewayPort(getGatewayPort(stack, templateJson))
@@ -376,5 +390,13 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
             String user = commonCloudProperties.getClouderaManager().getDefaultUser();
             return user == null ? DEFAULT_CM_USER : user;
         }
+    }
+
+    public SdxRepairRequest getSdxRepairRequest() {
+        SdxRepairTestDto repair = getCloudProvider().sdxRepair(given(SdxRepairTestDto.class));
+        if (repair == null) {
+            throw new IllegalArgumentException("SDX Repair does not exist!");
+        }
+        return repair.getRequest();
     }
 }

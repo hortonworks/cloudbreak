@@ -211,7 +211,7 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
 
     public StackTestDtoBase<T> replaceInstanceGroups(String... keys) {
         Stream.of(keys)
-                .map(this::getInstanceGroupV2Request)
+                .map(this::getInstanceGroupV4Request)
                 .forEach(ig -> {
                     for (int i = 0; i < getRequest().getInstanceGroups().size(); i++) {
                         InstanceGroupV4Request old = getRequest().getInstanceGroups().get(i);
@@ -224,7 +224,7 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
         return this;
     }
 
-    private InstanceGroupV4Request getInstanceGroupV2Request(String key) {
+    private InstanceGroupV4Request getInstanceGroupV4Request(String key) {
         InstanceGroupTestDto instanceGroupTestDto = getTestContext().get(key);
         if (instanceGroupTestDto == null) {
             throw new IllegalStateException("Given key is not exists in the test context: " + key);
@@ -234,7 +234,7 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
 
     public StackTestDtoBase<T> withInstanceGroups(String... keys) {
         getRequest().setInstanceGroups(Stream.of(keys)
-                .map(this::getInstanceGroupV2Request)
+                .map(this::getInstanceGroupV4Request)
                 .collect(Collectors.toList()));
         return this;
     }

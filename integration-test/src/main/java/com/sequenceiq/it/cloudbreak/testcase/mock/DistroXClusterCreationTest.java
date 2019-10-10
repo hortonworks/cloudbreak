@@ -141,6 +141,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         String storageEnvKey = resourcePropertyProvider().getName();
 
         String sdxInternal = resourcePropertyProvider().getName();
+        String stack = resourcePropertyProvider().getName();
         String clouderaManager = "cm";
         String cluster = "cmcluster";
         String networkKey = "someNetwork";
@@ -160,8 +161,8 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .when(getEnvironmentTestClient().describe(), key(storageEnvKey))
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class).withClouderaManager(clouderaManager)
-                .given(StackTestDto.class).withCluster(cluster).withGatewayPort(testContext.getSparkServer().getPort()).withEnvironmentKey(storageEnvKey)
-                .given(sdxInternal, SdxInternalTestDto.class).withStackRequest().withDatabase(sdxDatabaseRequestWithCreateTrue())
+                .given(stack, StackTestDto.class).withCluster(cluster).withGatewayPort(testContext.getSparkServer().getPort()).withEnvironmentKey(storageEnvKey)
+                .given(sdxInternal, SdxInternalTestDto.class).withStackRequest(stack, cluster).withDatabase(sdxDatabaseRequestWithCreateTrue())
                 .withCloudStorage(testStorage()).withEnvironmentKey(key(storageEnvKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SDX_RUNNING)
@@ -200,6 +201,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         String envKey = "dbEnvKey";
 
         String sdxInternal = resourcePropertyProvider().getName();
+        String stack = resourcePropertyProvider().getName();
         String clouderaManager = "cm";
         String cluster = "cmcluster";
         String networkKey = "someNetwork";
@@ -215,8 +217,9 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class).withClouderaManager(clouderaManager)
-                .given(StackTestDto.class).withCluster(cluster).withGatewayPort(testContext.getSparkServer().getPort())
-                .given(sdxInternal, SdxInternalTestDto.class).withStackRequest().withDatabase(sdxDatabaseRequestWithCreateTrue()).withEnvironmentKey(key(envKey))
+                .given(stack, StackTestDto.class).withCluster(cluster).withGatewayPort(testContext.getSparkServer().getPort())
+                .given(sdxInternal, SdxInternalTestDto.class).withStackRequest(stack, cluster).withDatabase(sdxDatabaseRequestWithCreateTrue())
+                .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SDX_RUNNING)
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)

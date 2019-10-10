@@ -42,6 +42,7 @@ public class MockSdxTests extends AbstractIntegrationTest {
     )
     public void testDefaultSDXCanBeCreatedThenDeletedSuccessfully(MockedTestContext testContext) throws IOException {
         String sdxInternal = resourcePropertyProvider().getName();
+        String stack = resourcePropertyProvider().getName();
         String envKey = "sdxEnvKey";
         String clouderaManager = "cm";
         String cluster = "cmcluster";
@@ -59,10 +60,10 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
                 .withClouderaManager(clouderaManager)
-                .given(StackTestDto.class).withCluster(cluster)
+                .given(stack, StackTestDto.class).withCluster(cluster)
                 .withGatewayPort(testContext.getSparkServer().getPort())
                 .given(sdxInternal, SdxInternalTestDto.class)
-                .withStackRequest()
+                .withStackRequest(stack, cluster)
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SDX_RUNNING)
@@ -79,6 +80,7 @@ public class MockSdxTests extends AbstractIntegrationTest {
     )
     public void testSDXFromTemplateCanBeCreatedThenDeletedSuccessfully(MockedTestContext testContext) throws IOException {
         String sdxInternal = resourcePropertyProvider().getName();
+        String stack = resourcePropertyProvider().getName();
         String clouderaManager = "cm";
         String cluster = "cmcluster";
         String networkKey = "someOtherNetwork";
@@ -96,7 +98,7 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
                 .withClouderaManager(clouderaManager)
-                .given(StackTestDto.class).withCluster(cluster)
+                .given(stack, StackTestDto.class).withCluster(cluster)
                 .withGatewayPort(testContext.getSparkServer().getPort())
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withTemplate(ResourceUtil.readResourceAsJson(applicationContext, TEMPLATE_JSON))
@@ -125,6 +127,7 @@ public class MockSdxTests extends AbstractIntegrationTest {
 
     private SdxInternalTestDto createSdx(MockedTestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();
+        String stack = resourcePropertyProvider().getName();
         String clouderaManager = "cm";
         String cluster = "cmcluster";
         String networkKey = "someOtherNetwork";
@@ -141,10 +144,10 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
                 .withClouderaManager(clouderaManager)
-                .given(StackTestDto.class).withCluster(cluster)
+                .given(stack, StackTestDto.class).withCluster(cluster)
                 .withGatewayPort(testContext.getSparkServer().getPort())
                 .given(sdxInternal, SdxInternalTestDto.class)
-                .withStackRequest()
+                .withStackRequest(stack, cluster)
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SDX_RUNNING);
