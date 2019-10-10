@@ -18,7 +18,14 @@ public enum DatalakeStatusEnum {
     REPAIR_FAILED,
     DELETE_REQUESTED,
     DELETED,
-    DELETE_FAILED;
+    DELETE_FAILED,
+    START_REQUESTED,
+    START_IN_PROGRESS,
+    START_FAILED,
+    STOP_REQUESTED,
+    STOP_IN_PROGRESS,
+    STOP_FAILED,
+    STOPPED;
 
     public boolean isDeleteInProgressOrCompleted() {
         return EXTERNAL_DATABASE_DELETION_IN_PROGRESS.equals(this)

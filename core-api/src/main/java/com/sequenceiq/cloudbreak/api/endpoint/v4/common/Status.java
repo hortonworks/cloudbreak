@@ -49,4 +49,24 @@ public enum Status {
     public boolean isInProgress() {
         return getStatusKind().equals(StatusKind.PROGRESS);
     }
+
+    public boolean isStopped() {
+        return STOPPED == this;
+    }
+
+    public boolean isStartState() {
+        return Status.AVAILABLE.equals(this)
+                || UPDATE_IN_PROGRESS.equals(this)
+                || Status.START_FAILED.equals(this)
+                || Status.START_REQUESTED.equals(this)
+                || Status.START_IN_PROGRESS.equals(this);
+    }
+
+    public boolean isStopState() {
+        return Status.STOPPED.equals(this)
+                || UPDATE_IN_PROGRESS.equals(this)
+                || Status.STOP_IN_PROGRESS.equals(this)
+                || Status.STOP_REQUESTED.equals(this)
+                || Status.STOP_FAILED.equals(this);
+    }
 }

@@ -47,7 +47,7 @@ public class AppConfig implements AsyncConfigurer {
     @Value("${cert.validation:true}")
     private boolean certificateValidation;
 
-    @Value("${cert.ignorePreValidation:false}")
+    @Value("${cert.ignorePreValidation:true}")
     private boolean ignorePreValidation;
 
     @Inject

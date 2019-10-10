@@ -1,0 +1,243 @@
+package com.sequenceiq.datalake.service.sdx.start;
+
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_FAILED;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.Map;
+
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.dyngr.core.AttemptResult;
+import com.dyngr.core.AttemptState;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxStatusEntity;
+import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+
+@ExtendWith(MockitoExtension.class)
+public class SdxStartServiceTest {
+
+    private static final String CLUSTER_NAME = "clusterName";
+
+    private static final Long CLUSTER_ID = 1L;
+
+    @InjectMocks
+    private SdxStartService underTest;
+
+    @Mock
+    private SdxReactorFlowManager sdxReactorFlowManager;
+
+    @Mock
+    private SdxService sdxService;
+
+    @Mock
+    private StackV4Endpoint stackV4Endpoint;
+
+    @Mock
+    private SdxStatusService sdxStatusService;
+
+    @Test
+    public void testTriggerStartWhenSdxStopped() {
+        SdxCluster sdxCluster = sdxCluster();
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.STOPPED);
+
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
+
+        underTest.triggerStartIfClusterNotRunning(sdxCluster);
+
+        verify(sdxReactorFlowManager).triggerSdxStartFlow(CLUSTER_ID);
+    }
+
+    @Test
+    public void testTriggerStartWhenSdxRunning() {
+        SdxCluster sdxCluster = sdxCluster();
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
+
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
+
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerStartIfClusterNotRunning(sdxCluster));
+        assertEquals("SDX is in running state, ignore it.", exception.getMessage());
+    }
+
+    @Test
+    public void testStartWhenNotFoundException() {
+        SdxCluster sdxCluster = sdxCluster();
+        doThrow(NotFoundException.class).when(stackV4Endpoint).putStart(0L, CLUSTER_NAME);
+        when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
+
+        underTest.start(CLUSTER_ID);
+
+        verify(sdxStatusService, times(0)).setStatusForDatalakeAndNotify(DatalakeStatusEnum.START_IN_PROGRESS, ResourceEvent.SDX_START_STARTED,
+                "Datalake start in progress", sdxCluster);
+    }
+
+    @Test
+    public void testStartWheClientErrorException() {
+        SdxCluster sdxCluster = sdxCluster();
+        ClientErrorException clientErrorException = mock(ClientErrorException.class);
+        Response response = mock(Response.class);
+        when(clientErrorException.getResponse()).thenReturn(response);
+        when(response.readEntity(String.class)).thenReturn(Json.silent(Map.of("message", "error")).getValue());
+        doThrow(clientErrorException).when(stackV4Endpoint).putStart(0L, CLUSTER_NAME);
+        when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
+
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.start(CLUSTER_ID));
+        assertEquals("Can not start stack, client error happened on Cloudbreak side: Error message: \"error\"", exception.getMessage());
+    }
+
+    @Test
+    public void testStartWhenWebApplicationException() {
+        SdxCluster sdxCluster = sdxCluster();
+        WebApplicationException clientErrorException = mock(WebApplicationException.class);
+        when(clientErrorException.getMessage()).thenReturn("error");
+        doThrow(clientErrorException).when(stackV4Endpoint).putStart(0L, CLUSTER_NAME);
+        when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
+
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.start(CLUSTER_ID));
+        assertEquals("Can not start stack, web application error happened on Cloudbreak side: error", exception.getMessage());
+    }
+
+    @Test
+    public void testCheckClusterStatusDuringStartWhenStackAndClusterAvailable() throws JsonProcessingException {
+        SdxCluster sdxCluster = sdxCluster();
+
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(AVAILABLE);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        clusterV4Response.setStatus(AVAILABLE);
+        stackV4Response.setCluster(clusterV4Response);
+
+        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+
+        AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
+
+        assertEquals(stackV4Response, actual.getResult());
+    }
+
+    @Test
+    public void testCheckClusterStatusDuringStartWhenStackAvailableOnly() throws JsonProcessingException {
+        SdxCluster sdxCluster = sdxCluster();
+
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(AVAILABLE);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        clusterV4Response.setStatus(START_REQUESTED);
+        stackV4Response.setCluster(clusterV4Response);
+
+        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+
+        AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
+
+        assertEquals(AttemptState.CONTINUE, actual.getState());
+    }
+
+    @Test
+    public void testCheckClusterStatusDuringStartWhenStackFailed() throws JsonProcessingException {
+        SdxCluster sdxCluster = sdxCluster();
+
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatusReason("reason");
+        stackV4Response.setStatus(START_FAILED);
+
+        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+
+        AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
+
+        assertEquals(AttemptState.BREAK, actual.getState());
+        assertEquals("SDX start failed 'clusterName', reason", actual.getMessage());
+    }
+
+    @Test
+    public void testCheckClusterStatusDuringStartWhenClusterFailed() throws JsonProcessingException {
+        SdxCluster sdxCluster = sdxCluster();
+
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatusReason("reason");
+        stackV4Response.setStatus(AVAILABLE);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        clusterV4Response.setStatus(START_FAILED);
+        clusterV4Response.setStatusReason("cluster reason");
+        stackV4Response.setCluster(clusterV4Response);
+
+        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+
+        AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
+
+        assertEquals(AttemptState.BREAK, actual.getState());
+        assertEquals("SDX start failed 'clusterName', cluster reason", actual.getMessage());
+    }
+
+    @Test
+    public void testCheckClusterStatusDuringStartWhenStackStopFailed() throws JsonProcessingException {
+        SdxCluster sdxCluster = sdxCluster();
+
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatusReason("reason");
+        stackV4Response.setStatus(STOP_FAILED);
+
+        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+
+        AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
+
+        assertEquals(AttemptState.BREAK, actual.getState());
+        assertEquals("SDX start failed 'clusterName', stack is in inconsistency state: STOP_FAILED", actual.getMessage());
+    }
+
+    @Test
+    public void testCheckClusterStatusDuringStartWhenClusterStopFailed() throws JsonProcessingException {
+        SdxCluster sdxCluster = sdxCluster();
+
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatusReason("reason");
+        stackV4Response.setStatus(AVAILABLE);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        clusterV4Response.setStatus(STOP_FAILED);
+        clusterV4Response.setStatusReason("cluster reason");
+        stackV4Response.setCluster(clusterV4Response);
+
+        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+
+        AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
+
+        assertEquals(AttemptState.BREAK, actual.getState());
+        assertEquals("SDX start failed 'clusterName', cluster is in inconsistency state: STOP_FAILED", actual.getMessage());
+    }
+
+    private SdxCluster sdxCluster() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setId(CLUSTER_ID);
+        sdxCluster.setClusterName(CLUSTER_NAME);
+        return sdxCluster;
+    }
+
+}

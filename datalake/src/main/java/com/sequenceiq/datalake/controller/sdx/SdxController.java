@@ -18,6 +18,8 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxRetryService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.start.SdxStartService;
+import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.RedeploySdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
@@ -42,6 +44,12 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private SdxClusterConverter sdxClusterConverter;
+
+    @Inject
+    private SdxStartService sdxStartService;
+
+    @Inject
+    private SdxStopService sdxStopService;
 
     @Override
     public SdxClusterResponse create(@ValidStackNameFormat @ValidStackNameLength String name, @Valid SdxClusterRequest createSdxClusterRequest) {
@@ -159,6 +167,34 @@ public class SdxController implements SdxEndpoint {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
         sdxRetryService.retrySdx(sdxCluster);
+    }
+
+    @Override
+    public void startByName(String name) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
+        sdxStartService.triggerStartIfClusterNotRunning(sdxCluster);
+    }
+
+    @Override
+    public void startByCrn(String crn) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
+        sdxStartService.triggerStartIfClusterNotRunning(sdxCluster);
+    }
+
+    @Override
+    public void stopByName(String name) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
+        sdxStopService.triggerStopIfClusterNotStopped(sdxCluster);
+    }
+
+    @Override
+    public void stopByCrn(String crn) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
+        sdxStopService.triggerStopIfClusterNotStopped(sdxCluster);
     }
 
 }

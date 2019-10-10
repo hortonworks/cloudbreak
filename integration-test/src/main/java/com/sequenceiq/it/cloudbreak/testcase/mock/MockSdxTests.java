@@ -57,9 +57,9 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(clouderaManager, ClouderaManagerTestDto.class)
-                .given(cluster, ClusterTestDto.class).withClouderaManager(clouderaManager)
-                .given(StackTestDto.class)
-                .withCluster(cluster)
+                .given(cluster, ClusterTestDto.class)
+                .withClouderaManager(clouderaManager)
+                .given(StackTestDto.class).withCluster(cluster)
                 .withGatewayPort(testContext.getSparkServer().getPort())
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withStackRequest()
@@ -108,4 +108,45 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .validate();
     }
 
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running Cloudbreak",
+            when = "start an sdx cluster",
+            then = "SDX should be available"
+    )
+    public void testSdxStopStart(MockedTestContext testContext) throws IOException {
+        createSdx(testContext)
+                .when(sdxTestClient.stopInternal())
+                .await(SdxClusterStatusResponse.STOPPED)
+                .when(sdxTestClient.startInternal())
+                .await(SdxClusterStatusResponse.RUNNING)
+                .validate();
+    }
+
+    private SdxInternalTestDto createSdx(MockedTestContext testContext) {
+        String sdxInternal = resourcePropertyProvider().getName();
+        String clouderaManager = "cm";
+        String cluster = "cmcluster";
+        String networkKey = "someOtherNetwork";
+        String envKey = "sdxEnvKey";
+        return testContext
+                .given(networkKey, EnvironmentNetworkTestDto.class)
+                .withMock(new EnvironmentNetworkMockParams())
+                .given(envKey, EnvironmentTestDto.class)
+                .withNetwork(networkKey)
+                .withCreateFreeIpa(Boolean.FALSE)
+                .withName(resourcePropertyProvider().getEnvironmentName())
+                .when(getEnvironmentTestClient().create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .given(clouderaManager, ClouderaManagerTestDto.class)
+                .given(cluster, ClusterTestDto.class)
+                .withClouderaManager(clouderaManager)
+                .given(StackTestDto.class).withCluster(cluster)
+                .withGatewayPort(testContext.getSparkServer().getPort())
+                .given(sdxInternal, SdxInternalTestDto.class)
+                .withStackRequest()
+                .withEnvironmentKey(key(envKey))
+                .when(sdxTestClient.createInternal(), key(sdxInternal))
+                .await(SDX_RUNNING);
+    }
 }

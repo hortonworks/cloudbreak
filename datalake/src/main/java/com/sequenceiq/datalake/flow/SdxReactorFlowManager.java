@@ -3,6 +3,8 @@ package com.sequenceiq.datalake.flow;
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.ENV_WAIT_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
 import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_EVENT;
+import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
+import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -21,6 +23,8 @@ import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
+import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
+import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.datalake.logger.ThreadBasedRequestIdProvider;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.core.Flow2Handler;
@@ -74,6 +78,20 @@ public class SdxReactorFlowManager {
         String userId = threadBasedUserCrnProvider.getUserCrn();
         String requestId = threadBasedRequestIdProvider.getRequestId();
         notify(selector, new SdxRepairStartEvent(selector, sdxId, userId, requestId, repairRequest));
+    }
+
+    public void triggerSdxStartFlow(Long sdxId) {
+        String selector = SDX_START_EVENT.event();
+        String userId = threadBasedUserCrnProvider.getUserCrn();
+        String requestId = threadBasedRequestIdProvider.getRequestId();
+        notify(selector, new SdxStartStartEvent(selector, sdxId, userId, requestId));
+    }
+
+    public void triggerSdxStopFlow(Long sdxId) {
+        String selector = SDX_STOP_EVENT.event();
+        String userId = threadBasedUserCrnProvider.getUserCrn();
+        String requestId = threadBasedRequestIdProvider.getRequestId();
+        notify(selector, new SdxStartStopEvent(selector, sdxId, userId, requestId));
     }
 
     public void cancelRunningFlows(Long sdxId) {

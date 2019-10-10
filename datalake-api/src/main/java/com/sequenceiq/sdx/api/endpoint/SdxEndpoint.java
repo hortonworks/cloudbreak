@@ -134,4 +134,28 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "retry sdx by crn", produces = ContentType.JSON, nickname = "retrySdxByCrn")
     void retryByCrn(@PathParam("crn") String crn);
+
+    @POST
+    @Path("{name}/start")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "start sdx", produces = ContentType.JSON, nickname = "startSdxByName")
+    void startByName(@PathParam("name") String name);
+
+    @POST
+    @Path("/crn/{crn}/start")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "start sdx by crn", produces = ContentType.JSON, nickname = "startSdxByCrn")
+    void startByCrn(@PathParam("crn") String crn);
+
+    @POST
+    @Path("{name}/stop")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "stop sdx", produces = ContentType.JSON, nickname = "stopSdxByName")
+    void stopByName(@PathParam("name") String name);
+
+    @POST
+    @Path("/crn/{crn}/stop")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "stop sdx by crn", produces = ContentType.JSON, nickname = "stopSdxByCrn")
+    void stopByCrn(@PathParam("crn") String crn);
 }

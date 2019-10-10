@@ -38,7 +38,6 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -102,6 +101,9 @@ class SdxServiceTest {
 
     @Mock
     private StackV4Endpoint stackV4Endpoint;
+
+    @Mock
+    private DistroxService distroxService;
 
     @InjectMocks
     private SdxService sdxService;
@@ -364,7 +366,7 @@ class SdxServiceTest {
     }
 
     private void mockCBCallForDistroXClusters(Set<StackViewV4Response> stackViews) {
-        when(distroXV1Endpoint.list(anyString(), anyString())).thenReturn(new StackViewV4Responses(stackViews));
+        when(distroxService.getAttachedDistroXClusters(anyString(), anyString())).thenReturn(stackViews);
     }
 
     private SdxCluster getSdxClusterForDeletionTest() {
