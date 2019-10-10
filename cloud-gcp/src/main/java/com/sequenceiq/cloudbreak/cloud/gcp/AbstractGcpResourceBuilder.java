@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,11 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.model.Operation;
-import com.google.api.services.compute.model.Operation.Error.Errors;
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformAware;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
@@ -25,7 +22,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -33,12 +29,15 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
 
-    protected static final String OPERATION_ID = "opid";
+    public static final String OPERATION_ID = "opid";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGcpResourceBuilder.class);
 
     @Inject
     private GcpResourceNameService resourceNameService;
+
+    @Inject
+    private GcpResourceChecker gcpResourceChecker;
 
     @Override
     public Platform platform() {
@@ -59,7 +58,8 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
         for (CloudResource resource : resources) {
             LOGGER.debug("Check {} resource: {}", type, resource);
             try {
-                Operation operation = check(context, resource.getStringParameter(OPERATION_ID));
+                String operationId = resource.getStringParameter(OPERATION_ID);
+                Operation operation = gcpResourceChecker.check(context, operationId);
                 boolean finished = operation == null || GcpStackUtil.isOperationFinished(operation);
                 ResourceStatus successStatus = context.isBuild() ? ResourceStatus.CREATED : ResourceStatus.DELETED;
                 result.add(new CloudResourceStatus(resource, finished ? successStatus : ResourceStatus.IN_PROGRESS));
@@ -77,51 +77,6 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
             }
         }
         return result;
-    }
-
-    protected Operation check(GcpContext context, String operation) throws IOException {
-        if (operation == null) {
-            return null;
-        }
-        try {
-            Operation execute = GcpStackUtil.globalOperations(context.getCompute(), context.getProjectId(), operation).execute();
-            checkError(execute);
-            return execute;
-        } catch (GoogleJsonResponseException e) {
-            if (e.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND) || e.getDetails().get("code").equals(HttpStatus.SC_FORBIDDEN)) {
-                Location location = context.getLocation();
-                try {
-                    Operation execute = GcpStackUtil.regionOperations(context.getCompute(), context.getProjectId(), operation, location.getRegion()).execute();
-                    checkError(execute);
-                    return execute;
-                } catch (GoogleJsonResponseException e1) {
-                    if (e1.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND) || e1.getDetails().get("code").equals(HttpStatus.SC_FORBIDDEN)) {
-                        Operation execute = GcpStackUtil.zoneOperations(context.getCompute(), context.getProjectId(), operation,
-                                location.getAvailabilityZone()).execute();
-                        checkError(execute);
-                        return execute;
-                    } else {
-                        throw e1;
-                    }
-                }
-            } else {
-                throw e;
-            }
-        }
-    }
-
-    protected void checkError(Operation execute) {
-        if (execute.getError() != null) {
-            String msg = null;
-            StringBuilder error = new StringBuilder();
-            if (execute.getError().getErrors() != null) {
-                for (Errors errors : execute.getError().getErrors()) {
-                    error.append(String.format("code: %s -> message: %s %s", errors.getCode(), errors.getMessage(), System.lineSeparator()));
-                }
-                msg = error.toString();
-            }
-            throw new CloudConnectorException(msg);
-        }
     }
 
     protected String checkException(GoogleJsonResponseException execute) {
@@ -153,4 +108,7 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
         }
     }
 
+    protected GcpResourceChecker getGcpResourceChecker() {
+        return gcpResourceChecker;
+    }
 }
