@@ -16,9 +16,7 @@
   limitations under the License.
 -->
 <topology>
-
     <gateway>
-
         <provider>
             <role>authentication</role>
             <name>ShiroProvider</name>
@@ -26,15 +24,16 @@
             <param>
                 <!--
                 session timeout in minutes,  this is really idle timeout,
-                defaults to 30mins, if the property value is not defined,,
-                current client authentication would expire if client idles contiuosly for more than this value
+                defaults to 30mins, if the property value is not defined,
+                current client authentication would expire if client idles
+                continuously for more than this value
                 -->
                 <name>sessionTimeout</name>
                 <value>30</value>
             </param>
             <param>
                 <name>main.pamRealm</name>
-                <value>org.apache.hadoop.gateway.shirorealm.KnoxPamRealm</value>
+                <value>org.apache.knox.gateway.shirorealm.KnoxPamRealm</value>
             </param>
             <param>
                 <name>main.pamRealm.service</name>
@@ -45,31 +44,35 @@
                 <value>authcBasic</value>
             </param>
         </provider>
-
-        <provider>
-            <role>authorization</role>
-            <name>AclsAuthz</name>
-            <enabled>true</enabled>
-            <param>
-                <name>knox.acl</name>
-{%- if ldap.adminGroup is defined and ldap.adminGroup is not none %}
-                <value>KNOX_ADMIN_USERS;{{ ldap.adminGroup }};*</value>
-{%- else %}
-                <value>KNOX_ADMIN_USERS;admin;*</value>
-{%- endif %}
-            </param>
-        </provider>
-
         <provider>
             <role>identity-assertion</role>
             <name>Default</name>
             <enabled>true</enabled>
         </provider>
-
+        <provider>
+            <role>identity-assertion</role>
+            <name>HadoopGroupProvider</name>
+            <enabled>true</enabled>
+            <param>
+                <name>CENTRAL_GROUP_CONFIG_PREFIX</name>
+                <value>gateway.group.config.</value>
+            </param>
+        </provider>
+        <provider>
+            <role>authorization</role>
+            <name>AclsAuthz</name>
+            <enabled>true</enabled>
+            <param>
+                <name>knox.acl.mode</name>
+                <value>OR</value>
+            </param>
+            <param>
+                <name>knox.acl</name>
+                <value>KNOX_ADMIN_USERS;KNOX_ADMIN_GROUPS;*</value>
+            </param>
+        </provider>
     </gateway>
-
     <service>
         <role>KNOX</role>
     </service>
-
 </topology>
