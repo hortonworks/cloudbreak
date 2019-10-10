@@ -11,6 +11,8 @@ import javax.inject.Inject;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
@@ -36,6 +38,9 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
 
     @Inject
     private StructuredEventRepository structuredEventRepository;
+
+    @Inject
+    private PagingStructuredEventRepository pagingStructuredEventRepository;
 
     @Inject
     private StackService stackService;
@@ -86,6 +91,14 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
         return events != null ? (List<T>) conversionService.convert(events,
                 TypeDescriptor.forObject(events),
                 TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(StructuredEvent.class))) : Collections.emptyList();
+    }
+
+    @Override
+    public <T extends StructuredEvent> Page<T> getEventsLimitedWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId,
+            Pageable pageable) {
+        Page<StructuredEventEntity> events = pagingStructuredEventRepository
+                .findByEventTypeAndResourceTypeAndResourceId(StructuredEventType.getByClass(eventClass), resourceType, resourceId, pageable);
+        return (Page<T>) Optional.ofNullable(events).orElse(Page.empty()).map(event -> conversionService.convert(event, StructuredEvent.class));
     }
 
     @Override
