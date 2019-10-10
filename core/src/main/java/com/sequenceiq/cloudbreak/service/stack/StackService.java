@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -585,14 +587,11 @@ public class StackService implements ResourceIdProvider {
 
     public void removeInstances(Long stackId, Long workspaceId, Set<String> instanceIds, User user) {
         Stack stack = getById(stackId);
-        if (stack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_ID_TXT, stackId));
-        }
         removeInstances(stack, workspaceId, instanceIds, false, user);
     }
 
     public void removeInstances(Stack stack, Long workspaceId, Collection<String> instanceIds, boolean forced, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
         for (String instanceId : instanceIds) {
             InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, workspaceId, user);

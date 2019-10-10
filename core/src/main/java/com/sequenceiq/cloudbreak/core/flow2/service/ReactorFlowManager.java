@@ -146,7 +146,7 @@ public class ReactorFlowManager {
 
     public void triggerStackRemoveInstances(Long stackId, Map<String, Set<Long>> instanceIdsByHostgroupMap, boolean forced) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_MULTIHOSTGROUP_TRIGGER_EVENT;
-        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced);
+        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false);
         MultiHostgroupClusterAndStackDownscaleTriggerEvent event = new MultiHostgroupClusterAndStackDownscaleTriggerEvent(selector, stackId,
                 instanceIdsByHostgroupMap, details, ScalingType.DOWNSCALE_TOGETHER, new Promise<>());
         notify(stackId, selector, event);
