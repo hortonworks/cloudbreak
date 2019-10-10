@@ -120,8 +120,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
-    private TestContext testContext;
-
     private final List<AutoCloseable> closableBeans = new CopyOnWriteArrayList<>();
 
     @BeforeSuite
@@ -147,7 +145,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     @BeforeMethod
     public final void minimalSetupForClusterCreation(Object[] data) {
         setupTest((TestContext) data[0]);
-        testContext = (TestContext) data[0];
     }
 
     protected void setupTest(TestContext testContext) {
@@ -160,10 +157,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     public EnvironmentTestClient getEnvironmentTestClient() {
         return environmentTestClient;
-    }
-
-    public TestContext getTestContext() {
-        return testContext;
     }
 
     private TestCaseDescription collectTestCaseDescription(Method method, Object[] params) {
