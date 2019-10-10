@@ -253,7 +253,11 @@ public class StackOperation {
     }
 
     public void deleteInstances(StackAccessDto stackAccessDto, Long workspaceId, List<String> instanceIds, boolean forced) {
-        stackCommonService.deleteMultipleInstancesByNameInWorkspace(stackAccessDto.getName(), workspaceId, instanceIds, forced);
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stackCommonService.deleteMultipleInstancesByNameInWorkspace(stackAccessDto.getName(), workspaceId, instanceIds, forced);
+        } else {
+            stackCommonService.deleteMultipleInstancesByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, instanceIds, forced);
+        }
     }
 
     public void putPassword(@NotNull StackAccessDto stackAccessDto, Long workspaceId, @Valid UserNamePasswordV4Request userNamePasswordJson) {
