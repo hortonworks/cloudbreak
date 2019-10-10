@@ -116,7 +116,7 @@ public class AmbariAgentHealthEvaluatorTest {
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(ambariRequestLogging).logging(any(), anyString());
         when(cloudbreakClientConfiguration.cloudbreakClient()).thenReturn(cloudbreakClient);
         when(cloudbreakClient.autoscaleEndpoint()).thenReturn(autoscaleEndpoint);
-        when(ambariClient.getAlert("ambari_server_agent_heartbeat"))
+        when(ambariClient.getAlertByNameAndState("ambari_server_agent_heartbeat", "CRITICAL"))
                 .thenReturn(List.of(Map.of("state", "CRITICAL", "host_name", "host_1")));
         when(autoscaleEndpoint.changedNodesReport(anyLong(), any())).thenReturn(response);
         when(response.getStatus()).thenReturn(Status.ACCEPTED.getStatusCode());
@@ -152,7 +152,7 @@ public class AmbariAgentHealthEvaluatorTest {
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(ambariRequestLogging).logging(any(), anyString());
         when(cloudbreakClientConfiguration.cloudbreakClient()).thenReturn(cloudbreakClient);
         when(cloudbreakClient.autoscaleEndpoint()).thenReturn(autoscaleEndpoint);
-        when(ambariClient.getAlert("ambari_server_agent_heartbeat"))
+        when(ambariClient.getAlertByNameAndState("ambari_server_agent_heartbeat", "CRITICAL"))
                 .thenReturn(List.of(Map.of("state", "CRITICAL", "host_name", "host_1")));
         when(autoscaleEndpoint.changedNodesReport(anyLong(), any())).thenReturn(response);
         when(response.getStatus()).thenReturn(Status.BAD_REQUEST.getStatusCode());

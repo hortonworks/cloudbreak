@@ -21,6 +21,9 @@ public class MetricAlert extends BaseAlert {
     @Column(name = "definition_name")
     private String definitionName;
 
+    @Column(name = "definition_label")
+    private String definitionLabel;
+
     private int period;
 
     @Enumerated(EnumType.STRING)
@@ -33,6 +36,14 @@ public class MetricAlert extends BaseAlert {
 
     public void setDefinitionName(String definitionName) {
         this.definitionName = definitionName;
+    }
+
+    public String getDefinitionLabel() {
+        return definitionLabel;
+    }
+
+    public void setDefinitionLabel(String definitionLabel) {
+        this.definitionLabel = definitionLabel;
     }
 
     public int getPeriod() {

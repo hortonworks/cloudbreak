@@ -7,7 +7,6 @@ import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 
 public abstract class EvaluatorExecutor implements Runnable {
-
     @Inject
     private ExecutorServiceWithRegistry executorServiceWithRegistry;
 
@@ -29,5 +28,4 @@ public abstract class EvaluatorExecutor implements Runnable {
     }
 
     protected abstract void execute();
-
 }

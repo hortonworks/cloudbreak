@@ -98,33 +98,29 @@ public class AmbariAgentHealthEvaluator extends EvaluatorExecutor {
             MDCBuilder.buildMdcContext(cluster);
             LOGGER.info("Checking '{}' alerts for cluster {}.", AMBARI_AGENT_HEARTBEAT, cluster.getId());
             AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
-            List<Map<String, Object>> alertHistory = ambariRequestLogging.logging(() -> ambariClient.getAlert(AMBARI_AGENT_HEARTBEAT_DEF_NAME), "alert");
-            if (!alertHistory.isEmpty()) {
-                List<String> hostNamesToRecover = new ArrayList<>();
-                for (Map<String, Object> history : alertHistory) {
-                    String currentState = (String) history.get(ALERT_STATE);
-                    if (isAlertStateMet(currentState)) {
-                        String hostName = (String) history.get(HOST_NAME);
-                        hostNamesToRecover.add(hostName);
-                        LOGGER.info("Alert: {} is in '{}' state for host '{}'.", AMBARI_AGENT_HEARTBEAT, currentState, hostName);
+            List<Map<String, Object>> alerts = ambariRequestLogging.logging(() -> ambariClient.getAlertByNameAndState(
+                    AMBARI_AGENT_HEARTBEAT_DEF_NAME, CRITICAL_ALERT_STATE), "alert[" + AMBARI_AGENT_HEARTBEAT_DEF_NAME + ", " + CRITICAL_ALERT_STATE + "]");
+            List<String> hostNamesToRecover = new ArrayList<>();
+            for (Map<String, Object> history : alerts) {
+                String hostName = (String) history.get(HOST_NAME);
+                hostNamesToRecover.add(hostName);
+                LOGGER.info("Alert: {} is in '{}' state for host '{}'.", AMBARI_AGENT_HEARTBEAT, CRITICAL_ALERT_STATE, hostName);
+            }
+            List<FailedNode> failedNodes = failedNodeRepository.findByClusterId(clusterId);
+            Optional<ChangedNodesReport> changedNodesRequest = getChangedNodes(Set.copyOf(hostNamesToRecover), failedNodes);
+            if (changedNodesRequest.isPresent()) {
+                LOGGER.info("Nodes state changed for cluster {}. New failed nodes {}, new healthy nodes {}.",
+                        clusterId,
+                        changedNodesRequest.get().getNewFailedNodes(),
+                        changedNodesRequest.get().getNewHealthyNodes());
+                try (Response response = cloudbreakClientConfiguration.cloudbreakClient()
+                        .autoscaleEndpoint().changedNodesReport(cluster.getStackId(), changedNodesRequest.get())) {
+                    if (Status.ACCEPTED.getStatusCode() == response.getStatus()) {
+                        updateFailedNodes(failedNodes, changedNodesRequest.get());
                     }
                 }
-                List<FailedNode> failedNodes = failedNodeRepository.findByClusterId(clusterId);
-                Optional<ChangedNodesReport> changedNodesRequest = getChangedNodes(Set.copyOf(hostNamesToRecover), failedNodes);
-                if (changedNodesRequest.isPresent()) {
-                    LOGGER.info("Nodes state changed for cluster {}. New failed nodes {}, new healthy nodes {}.",
-                            clusterId,
-                            changedNodesRequest.get().getNewFailedNodes(),
-                            changedNodesRequest.get().getNewHealthyNodes());
-                    try (Response response = cloudbreakClientConfiguration.cloudbreakClient()
-                            .autoscaleEndpoint().changedNodesReport(cluster.getStackId(), changedNodesRequest.get())) {
-                        if (Status.ACCEPTED.getStatusCode() == response.getStatus()) {
-                            updateFailedNodes(failedNodes, changedNodesRequest.get());
-                        }
-                    }
-                } else {
-                    LOGGER.debug("Nodes state not changed for cluster {}", clusterId);
-                }
+            } else {
+                LOGGER.debug("Nodes state not changed for cluster {}", clusterId);
             }
         } catch (Exception e) {
             LOGGER.warn(String.format("Failed to retrieve '%s' alerts. Original message: %s", AMBARI_AGENT_HEARTBEAT, e.getMessage()));
@@ -132,6 +128,7 @@ public class AmbariAgentHealthEvaluator extends EvaluatorExecutor {
         } finally {
             LOGGER.info("Finished {} for cluster {} in {} ms", AMBARI_AGENT_HEARTBEAT, clusterId, System.currentTimeMillis() - start);
         }
+
     }
 
     private Optional<ChangedNodesReport> getChangedNodes(Set<String> unhealthyNodes, List<FailedNode> registeredFailedNodes) {
@@ -171,9 +168,5 @@ public class AmbariAgentHealthEvaluator extends EvaluatorExecutor {
                     .collect(toList());
             failedNodeRepository.deleteAll(recoveredNodes);
         }
-    }
-
-    private boolean isAlertStateMet(String currentState) {
-        return currentState.equalsIgnoreCase(CRITICAL_ALERT_STATE);
     }
 }

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.aspects.AmbariRequestLogging;
-import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.MetricAlert;
 import com.sequenceiq.periscope.log.MDCBuilder;
@@ -37,7 +36,7 @@ public class MetricEvaluator extends EvaluatorExecutor {
 
     private static final String ALERT_STATE = "state";
 
-    private static final String ALERT_TS = "timestamp";
+    private static final String ALERT_TS = "original_timestamp";
 
     @Inject
     private ClusterService clusterService;
@@ -79,27 +78,24 @@ public class MetricEvaluator extends EvaluatorExecutor {
             Cluster cluster = clusterService.findById(clusterId);
             MDCBuilder.buildMdcContext(cluster);
             AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
-            for (MetricAlert alert : alertRepository.findAllByCluster(clusterId)) {
-                String alertName = alert.getName();
+            for (MetricAlert metricAlert : alertRepository.findAllWithScalingPolicyByCluster(clusterId)) {
+                String alertName = metricAlert.getName();
                 LOGGER.info("Checking metric based alert: '{}'", alertName);
-                List<Map<String, Object>> alertHistory = ambariRequestLogging.logging(() ->
-                        ambariClient.getAlertHistory(alert.getDefinitionName(), 1), "alertHistory");
-                int historySize = alertHistory.size();
-                if (historySize > 1) {
+                List<Map<String, Object>> alerts = ambariRequestLogging.logging(() ->
+                        ambariClient.getAlertByNameAndState(metricAlert.getDefinitionName(), metricAlert.getAlertState().getValue()), "alert");
+                if (alerts.size() > 1) {
                     LOGGER.debug("Multiple results found for alert: {}, probably HOST alert, ignoring now..", alertName);
                     continue;
                 }
-                if (!alertHistory.isEmpty()) {
-                    Map<String, Object> history = alertHistory.get(0);
-                    String currentState = (String) history.get(ALERT_STATE);
-                    if (isAlertStateMet(currentState, alert)) {
-                        long elapsedTime = getPeriod(history);
-                        LOGGER.info("Alert: {} is in '{}' state since {} min(s)", alertName, currentState,
-                                ClusterUtils.TIME_FORMAT.format((double) elapsedTime / TimeUtil.MIN_IN_MS));
-                        if (isPeriodReached(alert, elapsedTime) && isPolicyAttached(alert)) {
-                            eventPublisher.publishEvent(new ScalingEvent(alert));
-                            break;
-                        }
+                if (!alerts.isEmpty()) {
+                    Map<String, Object> alert = alerts.get(0);
+                    String currentState = (String) alert.get(ALERT_STATE);
+                    long elapsedTime = getPeriod(alert);
+                    LOGGER.info("Alert: {} is in '{}' state since {} min(s)", alertName, currentState,
+                            ClusterUtils.TIME_FORMAT.format((double) elapsedTime / TimeUtil.MIN_IN_MS));
+                    if (isPeriodReached(metricAlert, elapsedTime)) {
+                        eventPublisher.publishEvent(new ScalingEvent(metricAlert));
+                        break;
                     }
                 }
             }
@@ -111,10 +107,6 @@ public class MetricEvaluator extends EvaluatorExecutor {
         }
     }
 
-    private boolean isAlertStateMet(String currentState, MetricAlert alert) {
-        return currentState.equalsIgnoreCase(alert.getAlertState().getValue());
-    }
-
     private long getPeriod(Map<String, Object> history) {
         return System.currentTimeMillis() - (long) history.get(ALERT_TS);
     }
@@ -122,9 +114,4 @@ public class MetricEvaluator extends EvaluatorExecutor {
     private boolean isPeriodReached(MetricAlert alert, float period) {
         return period > alert.getPeriod() * TimeUtil.MIN_IN_MS;
     }
-
-    private boolean isPolicyAttached(BaseAlert alert) {
-        return alert.getScalingPolicy() != null;
-    }
-
 }
