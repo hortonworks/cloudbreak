@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -100,15 +101,16 @@ public class ServiceEndpointCollector {
                         List<ClusterExposedServiceV4Response> uiServices = new ArrayList<>();
                         List<ClusterExposedServiceV4Response> apiServices = new ArrayList<>();
                         boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
+                        SecurityConfig securityConfig = cluster.getStack().getSecurityConfig();
                         for (ExposedService exposedService : knownExposedServices) {
                             if (exposedService.isUISupported()) {
                                 List<ClusterExposedServiceV4Response> uiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
-                                        managerIp, privateIps, exposedServicesInTopology, false, autoTlsEnabled);
+                                        managerIp, privateIps, exposedServicesInTopology, false, autoTlsEnabled, securityConfig);
                                 uiServices.addAll(uiServiceOnPrivateIps);
                             }
                             if (exposedService.isAPISupported()) {
                                 List<ClusterExposedServiceV4Response> apiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
-                                        managerIp, privateIps, exposedServicesInTopology, true, autoTlsEnabled);
+                                        managerIp, privateIps, exposedServicesInTopology, true, autoTlsEnabled, securityConfig);
                                 apiServices.addAll(apiServiceOnPrivateIps);
                             }
                         }
@@ -123,32 +125,34 @@ public class ServiceEndpointCollector {
     }
 
     private List<ClusterExposedServiceV4Response> createServiceEntries(ExposedService exposedService, Gateway gateway, GatewayTopology gatewayTopology,
-            String managerIp, Map<String, List<String>> privateIps, Set<String> exposedServicesInTopology, boolean api, boolean autoTlsEnabled) {
+            String managerIp, Map<String, List<String>> privateIps,
+            Set<String> exposedServicesInTopology, boolean api, boolean autoTlsEnabled, SecurityConfig securityConfig) {
         List<ClusterExposedServiceV4Response> services = new ArrayList<>();
         List<String> serviceUrlsForService = getServiceUrlsForService(exposedService, managerIp,
                 gateway, gatewayTopology.getTopologyName(), privateIps, api, autoTlsEnabled);
-        serviceUrlsForService.addAll(getJdbcUrlsForService(exposedService, managerIp, gateway));
+        serviceUrlsForService.addAll(getJdbcUrlsForService(exposedService, managerIp, gateway, securityConfig));
         if (serviceUrlsForService.isEmpty()) {
-            ClusterExposedServiceV4Response service = new ClusterExposedServiceV4Response();
-            service.setMode(api ? SSOType.PAM : getSSOType(exposedService, gateway));
-            service.setDisplayName(exposedService.getDisplayName());
-            service.setKnoxService(exposedService.getKnoxService());
-            service.setServiceName(exposedService.getServiceName());
-            service.setOpen(isExposed(exposedService, exposedServicesInTopology));
-            services.add(service);
+            services.add(createExposedServiceResponse(exposedService, gateway, exposedServicesInTopology, api, null));
         } else {
             serviceUrlsForService.forEach(url -> {
-                ClusterExposedServiceV4Response service = new ClusterExposedServiceV4Response();
-                service.setMode(api ? SSOType.PAM : getSSOType(exposedService, gateway));
-                service.setDisplayName(exposedService.getDisplayName());
-                service.setKnoxService(exposedService.getKnoxService());
-                service.setServiceName(exposedService.getServiceName());
-                service.setOpen(isExposed(exposedService, exposedServicesInTopology));
-                service.setServiceUrl(url);
-                services.add(service);
+                services.add(createExposedServiceResponse(exposedService, gateway, exposedServicesInTopology, api, url));
             });
         }
         return services;
+    }
+
+    private ClusterExposedServiceV4Response createExposedServiceResponse(ExposedService exposedService,
+            Gateway gateway, Set<String> exposedServicesInTopology, boolean api, String url) {
+        ClusterExposedServiceV4Response service = new ClusterExposedServiceV4Response();
+        service.setMode(api ? SSOType.PAM : getSSOType(exposedService, gateway));
+        service.setDisplayName(exposedService.getDisplayName());
+        service.setKnoxService(exposedService.getKnoxService());
+        service.setServiceName(exposedService.getServiceName());
+        service.setOpen(isExposed(exposedService, exposedServicesInTopology));
+        if (isNotEmpty(url)) {
+            service.setServiceUrl(url);
+        }
+        return service;
     }
 
     private SSOType getSSOType(ExposedService exposedService, Gateway gateway) {
@@ -214,13 +218,13 @@ public class ServiceEndpointCollector {
         return urls;
     }
 
-    private List<String> getJdbcUrlsForService(ExposedService exposedService, String managerIp, Gateway gateway) {
+    private List<String> getJdbcUrlsForService(ExposedService exposedService, String managerIp, Gateway gateway, SecurityConfig securityConfig) {
         List<String> urls = new ArrayList<>();
         if (hasKnoxUrl(exposedService) && managerIp != null) {
             switch (exposedService) {
                 case HIVE_SERVER:
                 case HIVE_SERVER_INTERACTIVE:
-                    getHiveJdbcUrl(gateway, managerIp).ifPresent(urls::add);
+                    getHiveJdbcUrl(gateway, managerIp, securityConfig).ifPresent(urls::add);
                     break;
                 case IMPALA:
                     getImpalaJdbcUrl(gateway, managerIp).ifPresent(urls::add);
@@ -317,9 +321,9 @@ public class ServiceEndpointCollector {
                 .map(gt -> getHBaseUIUrlWithHostParameterFromGatewayTopology(managerIp, gt, hbaseMasterPrivateIp));
     }
 
-    private Optional<String> getHiveJdbcUrl(Gateway gateway, String ambariIp) {
+    private Optional<String> getHiveJdbcUrl(Gateway gateway, String ambariIp, SecurityConfig securityConfig) {
         return getGatewayTopologyWithHive(gateway)
-                .map(gt -> getHiveJdbcUrlFromGatewayTopology(ambariIp, gt));
+                .map(gt -> getHiveJdbcUrlFromGatewayTopology(ambariIp, gt, securityConfig));
     }
 
     private Optional<String> getImpalaJdbcUrl(Gateway gateway, String ambariIp) {
@@ -327,8 +331,12 @@ public class ServiceEndpointCollector {
                 .map(gt -> getImpalaJdbcUrlFromGatewayTopology(ambariIp, gt));
     }
 
-    private String getHiveJdbcUrlFromGatewayTopology(String managerIp, GatewayTopology gt) {
+    private String getHiveJdbcUrlFromGatewayTopology(String managerIp, GatewayTopology gt, SecurityConfig securityConfig) {
         Gateway gateway = gt.getGateway();
+        if (securityConfig != null && securityConfig.getUserFacingCert() != null) {
+            return String.format("jdbc:hive2://%s/;ssl=true;transportMode=http;httpPath=%s/%s%s/hive",
+                    managerIp, gateway.getPath(), gt.getTopologyName(), API_TOPOLOGY_POSTFIX);
+        }
         return String.format("jdbc:hive2://%s/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword=${GATEWAY_JKS_PASSWORD};"
                 + "transportMode=http;httpPath=%s/%s%s/hive", managerIp, gateway.getPath(), gt.getTopologyName(), API_TOPOLOGY_POSTFIX);
     }
