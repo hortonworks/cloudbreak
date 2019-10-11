@@ -116,7 +116,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withStackRepoDetailsHdpVersion(stackRepoDetailsHdpVersion)
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster, cloudbreakUser))
-                    .withSmartSenseSubscription(aDefault.isPresent() ? aDefault.get() : null)
+                    .withSmartSenseSubscription(aDefault.orElse(null))
                     .withLdapConfig(ldapConfig)
                     .withHdfConfigs(hdfConfigs)
                     .withKerberosConfig(cluster.isSecure() ? cluster.getKerberosConfig() : null)

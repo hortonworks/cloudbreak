@@ -19,9 +19,12 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.cloudbreak.core.flow2.config.RetryableFlowConfiguration;
 
 @Component
-public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterStartState, ClusterStartEvent> {
+public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterStartState, ClusterStartEvent>
+        implements RetryableFlowConfiguration<ClusterStartEvent> {
+
     private static final List<Transition<ClusterStartState, ClusterStartEvent>> TRANSITIONS =
             new Builder<ClusterStartState, ClusterStartEvent>()
                     .from(INIT_STATE).to(CLUSTER_STARTING_STATE).event(CLUSTER_START_EVENT).noFailureEvent()
@@ -71,5 +74,10 @@ public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterSta
         return new ClusterStartEvent[] {
                 CLUSTER_START_EVENT
         };
+    }
+
+    @Override
+    public ClusterStartEvent getFailHandledEvent() {
+        return FAIL_HANDLED_EVENT;
     }
 }

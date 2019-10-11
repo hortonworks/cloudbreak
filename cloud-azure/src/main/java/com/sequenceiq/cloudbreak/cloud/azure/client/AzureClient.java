@@ -75,6 +75,8 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 import okhttp3.JavaNetAuthenticator;
+import rx.Completable;
+import rx.Observable;
 
 public class AzureClient {
 
@@ -277,9 +279,9 @@ public class AzureClient {
         }
     }
 
-    public void deleteManagedDisk(String id) {
+    public Completable deleteManagedDiskAsync(String id) {
         LOGGER.debug("delete managed disk: id={}", id);
-        handleAuthException(() -> azure.disks().deleteById(id));
+        return handleAuthException(() -> azure.disks().deleteByIdAsync(id));
     }
 
     public void createContainerInStorage(String resourceGroup, String storageName, String containerName) {
@@ -369,6 +371,10 @@ public class AzureClient {
         return handleAuthException(() -> azure.virtualMachines().getByResourceGroup(resourceGroup, vmName));
     }
 
+    public Observable<VirtualMachine> getVirtualMachineAsync(String resourceGroup, String vmName) {
+        return handleAuthException(() -> azure.virtualMachines().getByResourceGroupAsync(resourceGroup, vmName));
+    }
+
     public PowerState getVirtualMachinePowerState(String resourceGroup, String vmName) {
         return getVirtualMachine(resourceGroup, vmName).powerState();
     }
@@ -393,8 +399,8 @@ public class AzureClient {
         handleAuthException(() -> azure.availabilitySets().deleteByResourceGroup(resourceGroup, asName));
     }
 
-    public void deallocateVirtualMachine(String resourceGroup, String vmName) {
-        handleAuthException(() -> azure.virtualMachines().deallocate(resourceGroup, vmName));
+    public Completable deallocateVirtualMachineAsync(String resourceGroup, String vmName) {
+        return handleAuthException(() -> azure.virtualMachines().deallocateAsync(resourceGroup, vmName));
     }
 
     public boolean isVirtualMachineExists(String resourceGroup, String vmName) {
@@ -406,22 +412,20 @@ public class AzureClient {
         });
     }
 
-    public void deleteVirtualMachine(String resourceGroup, String vmName) {
-        String id = getVirtualMachine(resourceGroup, vmName).id();
-        handleAuthException(() -> azure.virtualMachines().deleteById(id));
+    public Completable deleteVirtualMachine(String resourceGroup, String vmName) {
+        return handleAuthException(() -> azure.virtualMachines().deleteByResourceGroupAsync(resourceGroup, vmName));
     }
 
-    public void startVirtualMachine(String resourceGroup, String vmName) {
-        handleAuthException(() -> azure.virtualMachines().start(resourceGroup, vmName));
+    public Completable startVirtualMachineAsync(String resourceGroup, String vmName) {
+        return handleAuthException(() -> azure.virtualMachines().startAsync(resourceGroup, vmName));
     }
 
     public void stopVirtualMachine(String resourceGroup, String vmName) {
         handleAuthException(() -> azure.virtualMachines().powerOff(resourceGroup, vmName));
     }
 
-    public void deletePublicIpAddressByName(String resourceGroup, String ipName) {
-        String id = getPublicIpAddress(resourceGroup, ipName).id();
-        handleAuthException(() -> azure.publicIPAddresses().deleteById(id));
+    public Completable deletePublicIpAddressByNameAsync(String resourceGroup, String ipName) {
+        return handleAuthException(() -> azure.publicIPAddresses().deleteByResourceGroupAsync(resourceGroup, ipName));
     }
 
     public void deletePublicIpAddressById(String ipId) {
@@ -477,8 +481,8 @@ public class AzureClient {
         return handleAuthException(() -> azure.publicIPAddresses().getById(ipId));
     }
 
-    public void deleteNetworkInterface(String resourceGroup, String networkInterfaceName) {
-        handleAuthException(() -> azure.networkInterfaces().deleteByResourceGroup(resourceGroup, networkInterfaceName));
+    public Completable deleteNetworkInterfaceAsync(String resourceGroup, String networkInterfaceName) {
+        return handleAuthException(() -> azure.networkInterfaces().deleteByResourceGroupAsync(resourceGroup, networkInterfaceName));
     }
 
     public NetworkInterface getNetworkInterface(String resourceGroup, String networkInterfaceName) {

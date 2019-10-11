@@ -17,9 +17,11 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.cloudbreak.core.flow2.config.RetryableFlowConfiguration;
 
 @Component
-public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopState, StackStopEvent> {
+public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopState, StackStopEvent>
+        implements RetryableFlowConfiguration<StackStopEvent> {
 
     private static final List<Transition<StackStopState, StackStopEvent>> TRANSITIONS = new Builder<StackStopState, StackStopEvent>()
             .defaultFailureEvent(StackStopEvent.STOP_FAILURE_EVENT)
@@ -67,5 +69,10 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
     @Override
     public String getDisplayName() {
         return FLOW_DISPLAY_NAME;
+    }
+
+    @Override
+    public StackStopEvent getFailHandledEvent() {
+        return STOP_FAIL_HANDLED_EVENT;
     }
 }

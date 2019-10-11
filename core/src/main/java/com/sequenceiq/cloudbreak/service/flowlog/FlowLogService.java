@@ -47,8 +47,15 @@ public class FlowLogService {
 
     public FlowLog save(String flowId, String flowChanId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
             FlowState currentState) {
-        String payloadJson = JsonWriter.objectToJson(payload, writeOptions);
-        String variablesJson = JsonWriter.objectToJson(variables, writeOptions);
+        String payloadJson = null;
+        String variablesJson = null;
+        try {
+            payloadJson = JsonWriter.objectToJson(payload, writeOptions);
+            variablesJson = JsonWriter.objectToJson(variables, writeOptions);
+        } catch (RuntimeException e) {
+            //TODO: we should extract exception message from payload if we can
+            LOGGER.error("Can not convert payload to json", e);
+        }
         FlowLog flowLog = new FlowLog(payload.getStackId(), flowId, flowChanId, key, payloadJson, payload.getClass(), variablesJson, flowType,
                 currentState.toString());
         flowLog.setCloudbreakNodeId(cloudbreakNodeConfig.getId());

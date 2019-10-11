@@ -8,24 +8,24 @@ public abstract class AzureSubnetStrategy {
     public enum SubnetStratgyType {
         FILL {
             @Override
-            AzureSubnetStrategy create(List<String> subnets, Map<String, Integer> availableIPs) {
+            AzureSubnetStrategy create(List<String> subnets, Map<String, Long> availableIPs) {
                 return new FillSubnetStrategy(subnets, availableIPs);
             }
         };
 
-        abstract AzureSubnetStrategy create(List<String> subnets, Map<String, Integer> availableIPs);
+        abstract AzureSubnetStrategy create(List<String> subnets, Map<String, Long> availableIPs);
     }
 
     private final List<String> subnets;
 
-    private final Map<String, Integer> availableIPs;
+    private final Map<String, Long> availableIPs;
 
-    AzureSubnetStrategy(List<String> subnets, Map<String, Integer> availableIPs) {
+    AzureSubnetStrategy(List<String> subnets, Map<String, Long> availableIPs) {
         this.subnets = subnets;
         this.availableIPs = availableIPs;
     }
 
-    public static AzureSubnetStrategy getAzureSubnetStrategy(SubnetStratgyType type, List<String> subnets, Map<String, Integer> availableIPs) {
+    public static AzureSubnetStrategy getAzureSubnetStrategy(SubnetStratgyType type, List<String> subnets, Map<String, Long> availableIPs) {
         return type.create(subnets, availableIPs);
     }
 
@@ -35,7 +35,7 @@ public abstract class AzureSubnetStrategy {
         return subnets;
     }
 
-    Map<String, Integer> getAvailableIPs() {
+    Map<String, Long> getAvailableIPs() {
         return availableIPs;
     }
 }
