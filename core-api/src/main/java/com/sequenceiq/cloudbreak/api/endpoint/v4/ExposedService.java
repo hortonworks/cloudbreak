@@ -24,7 +24,7 @@ public enum ExposedService {
     JOB_HISTORY_SERVER("Job History Server", "JOBHISTORY", "JOBHISTORYUI", "/jobhistory/", true, 19888, 19890, false, false),
     HIVE_SERVER("Hive Server", "HIVESERVER2", "HIVE", "/hive/", false, 10001, 10001, true, true),
     HIVE_SERVER_INTERACTIVE("Hive Server Interactive", "", "HIVE_INTERACTIVE", "/hive/", false, 10501, 10502, true, true),
-    ATLAS("Atlas", "ATLAS_SERVER", "ATLAS", "/atlas/", true, 21000, 21443, false, true),
+    ATLAS("Atlas", "ATLAS_SERVER", "ATLAS", "/atlas/", true, 21000, 31443, false, true),
     SPARK_HISTORY_SERVER("Spark History Server", "SPARK_YARN_HISTORY_SERVER", "SPARKHISTORYUI", "/sparkhistory/", true, 18088, 18488, false, false),
     ZEPPELIN("Zeppelin", "ZEPPELIN_SERVER", "ZEPPELIN", "/zeppelin/", true, 8885, 8886, false, false),
     RANGER("Ranger", "RANGER_ADMIN", "RANGER", "/ranger/", true, 6080, 6182, false, true),
