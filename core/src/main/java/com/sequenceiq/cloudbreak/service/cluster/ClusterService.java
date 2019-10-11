@@ -138,6 +138,8 @@ public class ClusterService {
 
     private static final String MASTER_CATEGORY = "MASTER";
 
+    private static final String RECOVERY = "RECOVERY";
+
     private static final List<String> REATTACH_NOT_SUPPORTED_VOLUME_TYPES = List.of("ephemeral");
 
     private static final Long REQUIRED_CM_DATABASE_COUNT = 2L;
@@ -588,12 +590,12 @@ public class ClusterService {
     private void handleChangedHosts(Cluster cluster, Set<String> newHealthyNodes,
             Map<String, List<String>> autoRecoveryNodesMap, Map<String, HostMetadata> autoRecoveryHostMetadata, Map<String, HostMetadata> failedHostMetadata) {
         try {
-            if (!autoRecoveryNodesMap.isEmpty()) {
+            boolean hasAutoRecoverableNodes = !autoRecoveryNodesMap.isEmpty();
+            if (hasAutoRecoverableNodes) {
                 flowManager.triggerClusterRepairFlow(cluster.getStack().getId(), autoRecoveryNodesMap, false);
                 String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.CLUSTER_AUTORECOVERY_REQUESTED.code(),
                         Collections.singletonList(autoRecoveryNodesMap));
-                updateHosts(cluster, autoRecoveryHostMetadata.keySet(), HostMetadataState.HEALTHY, HostMetadataState.WAITING_FOR_REPAIR,
-                        recoveryMessage);
+                updateHosts(cluster, autoRecoveryHostMetadata.keySet(), HostMetadataState.HEALTHY, HostMetadataState.WAITING_FOR_REPAIR, recoveryMessage);
             }
             if (!failedHostMetadata.isEmpty()) {
                 String failedNodesMessage = cloudbreakMessagesService.getMessage(Msg.CLUSTER_FAILED_NODES_REPORTED.code(),
@@ -604,6 +606,15 @@ public class ClusterService {
                 String recoveredMessage = cloudbreakMessagesService.getMessage(Msg.CLUSTER_RECOVERED_NODES_REPORTED.code(),
                         Collections.singletonList(newHealthyNodes));
                 updateHosts(cluster, newHealthyNodes, HostMetadataState.UNHEALTHY, HostMetadataState.HEALTHY, recoveredMessage);
+            }
+
+            if (!hasAutoRecoverableNodes) {
+                Optional<InstanceMetaData> primaryGateway = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(cluster.getStack().getId());
+                if (primaryGateway.isPresent() && failedHostMetadata.containsKey(primaryGateway.get().getDiscoveryFQDN())) {
+                    String syncStartedMessage = cloudbreakMessagesService.getMessage(Msg.CLUSTER_PRIMARY_GATEWAY_UNHEALTHY_SYNC_STARTED.code());
+                    eventService.fireCloudbreakEvent(cluster.getStack().getId(), RECOVERY, syncStartedMessage);
+                    flowManager.triggerStackSync(cluster.getStack().getId());
+                }
             }
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
@@ -814,7 +825,7 @@ public class ClusterService {
             flowManager.triggerClusterRepairFlow(stackId, failedNodeMap, removeOnly);
             String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.CLUSTER_MANUALRECOVERY_REQUESTED.code(), List.of(recoveryMessageArgument));
             LOGGER.debug(recoveryMessage);
-            eventService.fireCloudbreakEvent(stackId, "RECOVERY", recoveryMessage);
+            eventService.fireCloudbreakEvent(stackId, RECOVERY, recoveryMessage);
         } else {
             throw new BadRequestException(String.format("Could not trigger cluster repair  for stack %s, because node list is incorrect", stackId));
         }
@@ -851,7 +862,7 @@ public class ClusterService {
                 if (HostMetadataState.HEALTHY.equals(newState)) {
                     eventType = AVAILABLE.name();
                 } else {
-                    eventType = "RECOVERY";
+                    eventType = RECOVERY;
                 }
                 eventService.fireCloudbreakEvent(cluster.getStack().getId(), eventType, recoveryMessage);
                 hostMetadataService.saveAll(changedHosts);
@@ -1414,7 +1425,8 @@ public class ClusterService {
         CLUSTER_AUTORECOVERY_REQUESTED("cluster.autorecovery.requested"),
         CLUSTER_MANUALRECOVERY_REQUESTED("cluster.manualrecovery.requested"),
         CLUSTER_FAILED_NODES_REPORTED("cluster.failednodes.reported"),
-        CLUSTER_RECOVERED_NODES_REPORTED("cluster.recoverednodes.reported");
+        CLUSTER_RECOVERED_NODES_REPORTED("cluster.recoverednodes.reported"),
+        CLUSTER_PRIMARY_GATEWAY_UNHEALTHY_SYNC_STARTED("cluster.pgw.unhealthy.sync.started");
 
         private final String code;
 
