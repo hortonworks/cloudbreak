@@ -167,7 +167,10 @@ public class ServiceEndpointCollector {
             if (ExposedService.HIVE_SERVER.equals(exposedService) || ExposedService.HIVE_SERVER_INTERACTIVE.equals(exposedService)) {
                 return getHiveJdbcUrl(gateway, ambariIp);
             } else if (ExposedService.NAMENODE.equals(exposedService) && versionComparator.compare(() -> stackVersion, () -> "2.6") > 0) {
-                return getHdfsUIUrl(gateway, ambariIp, privateIps.get(ExposedService.NAMENODE.getServiceName()).iterator().next());
+                List<String> nameNodePrivateIps = privateIps.get(ExposedService.NAMENODE.getServiceName());
+                if (!nameNodePrivateIps.isEmpty()) {
+                    return getHdfsUIUrl(gateway, ambariIp, nameNodePrivateIps.iterator().next());
+                }
             } else {
                 String url = GatewayType.CENTRAL == gateway.getGatewayType()
                         ? String.format("/%s/%s%s", gateway.getPath(), topologyName, exposedService.getKnoxUrl())

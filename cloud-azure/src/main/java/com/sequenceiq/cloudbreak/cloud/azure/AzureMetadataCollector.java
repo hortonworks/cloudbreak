@@ -12,6 +12,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.microsoft.azure.management.compute.VirtualMachine;
@@ -46,6 +48,7 @@ public class AzureMetadataCollector implements MetadataCollector {
     private AzureVmPublicIpProvider azureVmPublicIpProvider;
 
     @Override
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
             List<CloudInstance> knownInstances) {
         LOGGER.debug("Starting to collect vm metadata.");
@@ -54,10 +57,13 @@ public class AzureMetadataCollector implements MetadataCollector {
         AzureClient azureClient = authenticatedContext.getParameter(AzureClient.class);
 
         Map<String, InstanceTemplate> templateMap = getTemplateMap(vms, authenticatedContext);
-        Map<String, VirtualMachine> virtualMachinesByName = getVirtualMachinesByName(azureClient, resourceGroup, vms, templateMap);
+        Map<String, VirtualMachine> virtualMachinesByName = azureVirtualMachineService.getVirtualMachinesByName(azureClient, resourceGroup,
+                templateMap.keySet());
+        azureVirtualMachineService.refreshInstanceViews(virtualMachinesByName);
         try {
             for (Entry<String, InstanceTemplate> instance : templateMap.entrySet()) {
                 VirtualMachine vm = virtualMachinesByName.get(instance.getKey());
+                //TODO: network interface is lazy, so we will fetch it for every instances
                 NetworkInterface networkInterface = vm.getPrimaryNetworkInterface();
                 String subnetId = networkInterface.primaryIPConfiguration().subnetName();
 
@@ -106,11 +112,6 @@ public class AzureMetadataCollector implements MetadataCollector {
                 .append(faultDomainCount);
         AzureUtils.removeBlankSpace(localityIndicatorBuilder);
         return localityIndicatorBuilder.toString();
-    }
-
-    private Map<String, VirtualMachine> getVirtualMachinesByName(AzureClient azureClient, String resourceGroup, List<CloudInstance> vms,
-            Map<String, InstanceTemplate> templateMap) {
-        return azureVirtualMachineService.getVirtualMachinesByName(azureClient, resourceGroup, templateMap.keySet());
     }
 
     private Map<String, InstanceTemplate> getTemplateMap(List<CloudInstance> vms, AuthenticatedContext authenticatedContext) {

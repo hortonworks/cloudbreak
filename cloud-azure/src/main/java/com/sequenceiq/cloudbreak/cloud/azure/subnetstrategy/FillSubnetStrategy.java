@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 class FillSubnetStrategy extends AzureSubnetStrategy {
 
-    FillSubnetStrategy(List<String> subnets, Map<String, Integer> availableIPs) {
+    FillSubnetStrategy(List<String> subnets, Map<String, Long> availableIPs) {
         super(subnets, availableIPs);
     }
 
