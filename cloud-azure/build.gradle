@@ -20,6 +20,7 @@ dependencies {
   compile project(':cloud-template')
 
   compile (group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: okhttpVersion)
+
   compile (group: 'com.microsoft.azure',         name: 'azure-client-authentication', version: '1.6.14') {
     exclude group: 'org.slf4j'
   }

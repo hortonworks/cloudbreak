@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,7 +28,6 @@ import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.network.NicIPConfiguration;
 import com.microsoft.azure.management.resources.Deployment;
-import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
@@ -43,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -58,8 +60,6 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     public static final String RESOURCE_GROUP_NAME = "resourceGroupName";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureResourceConnector.class);
-
-    private static final Double PUBLIC_ADDRESS_BATCH_RATIO = 100.0D / 30;
 
     private static final String NETWORK_INTERFACES_NAMES = "NETWORK_INTERFACES_NAMES";
 
@@ -82,6 +82,9 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
     @Inject
     private CloudResourceHelper cloudResourceHelper;
+
+    @Inject
+    private AzureVirtualMachineService azureVirtualMachineService;
 
     @Inject
     @Qualifier("DefaultRetryService")
@@ -266,6 +269,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
         Map<String, Map<String, Object>> resp = new HashMap<>(vms.size());
         for (CloudInstance instance : vms) {
+            // TODO: it should be async!
             resp.put(instance.getInstanceId(), collectInstanceResourcesToRemove(ac, stack, client, azureCredentialView, resourceGroupName, instance));
         }
         return resp;
@@ -334,21 +338,35 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     public List<CloudResourceStatus> downscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms,
             Map<String, Map<String, Object>> resourcesToRemove) {
         AzureClient client = ac.getParameter(AzureClient.class);
-        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
         String diskContainer = azureStorage.getDiskContainerName(ac.getCloudContext());
+
         List<CloudResource> networkResources = cloudResourceHelper.getNetworkResources(resources);
+        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
+
+        Map<String, VirtualMachine> vmsFromAzure = azureVirtualMachineService.getVmsFromAzureAndFillStatuses(ac, vms, new ArrayList<>());
+        List<CloudInstance> cloudInstancesSyncedWithAzure = vms.stream()
+                .filter(cloudInstance -> vmsFromAzure.containsKey(cloudInstance.getInstanceId()))
+                .collect(Collectors.toList());
+        azureUtils.deleteInstances(ac, cloudInstancesSyncedWithAzure);
+
+        List<String> networkInterfaceNames = getResourcesByResourceType(resourcesToRemove, NETWORK_INTERFACES_NAMES);
+        azureUtils.deleteNetworkInterfaces(client, resourceGroupName, networkInterfaceNames);
+
+        List<String> publicAddressNames = getResourcesByResourceType(resourcesToRemove, PUBLIC_ADDRESS_NAME);
+        azureUtils.deletePublicIps(client, resourceGroupName, publicAddressNames);
+
+        List<String> managedDiskIds = getResourcesByResourceType(resourcesToRemove, MANAGED_DISK_IDS);
+        azureUtils.deleteManagedDisks(client, managedDiskIds);
+
         for (CloudInstance instance : vms) {
             String instanceId = instance.getInstanceId();
             Map<String, Object> instanceResources = resourcesToRemove.get(instanceId);
             try {
-                deallocateVirtualMachine(client, resourceGroupName, instanceId);
-                deleteVirtualMachine(client, resourceGroupName, instanceId);
                 if (instanceResources != null) {
-                    deleteNetworkInterfaces(client, resourceGroupName, emptyIfNull(instanceResources.get(NETWORK_INTERFACES_NAMES)));
-                    deletePublicIps(client, resourceGroupName, emptyIfNull(instanceResources.get(PUBLIC_ADDRESS_NAME)));
-                    deleteDisk(emptyIfNull(instanceResources.get(STORAGE_PROFILE_DISK_NAMES)), client, resourceGroupName,
+                    // TODO: blocking foreach!
+                    //       it can be slow only on clusters with unmanaged disks!
+                    deleteDisk(CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(STORAGE_PROFILE_DISK_NAMES)), client, resourceGroupName,
                             (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), diskContainer);
-                    deleteManagedDisks(emptyIfNull(instanceResources.get(MANAGED_DISK_IDS)), client);
                     if (azureStorage.getArmAttachedStorageOption(stack.getParameters()) == ArmAttachedStorageOption.PER_VM) {
                         azureStorage.deleteStorage(client, (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), resourceGroupName);
                     }
@@ -358,7 +376,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                                     .collect(Collectors.toList())
                                     .contains(resource.getInstanceId()))
                             .collect(Collectors.toList());
-                    azureComputeResourceService.deleteComputeResources(ac, stack, resourcesToDownscale, networkResources);
+                        azureComputeResourceService.deleteComputeResources(ac, stack, resourcesToDownscale, networkResources);
                 }
             } catch (CloudConnectorException e) {
                 throw e;
@@ -367,6 +385,12 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             }
         }
         return check(ac, resources);
+    }
+
+    private List<String> getResourcesByResourceType(Map<String, Map<String, Object>> resourcesToRemove, String resourceType) {
+        return resourcesToRemove.entrySet().stream()
+                .flatMap(instanceResources -> ((Collection<String>) instanceResources.getValue().get(resourceType)).stream())
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -384,6 +408,22 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         return azureTemplateBuilder.getDBTemplateString();
     }
 
+    private Map<String, String> getCustomImageNamePerInstance(AuthenticatedContext ac, CloudStack cloudStack) {
+        AzureClient client = ac.getParameter(AzureClient.class);
+        Map<String, String> imageNameMap = new HashMap<>();
+        Map<String, String> customImageNamePerInstance = new HashMap<>();
+        for (Group group : cloudStack.getGroups()) {
+            for (CloudInstance instance : group.getInstances()) {
+                String imageId = instance.getTemplate().getImageId();
+                if (StringUtils.isNotBlank(imageId)) {
+                    String imageCustomName = imageNameMap.computeIfAbsent(imageId, s -> azureStorage.getCustomImageId(client, ac, cloudStack, imageId));
+                    customImageNamePerInstance.put(instance.getInstanceId(), imageCustomName);
+                }
+            }
+        }
+        return customImageNamePerInstance;
+    }
+
     private void deleteContainer(AzureClient azureClient, String resourceGroup, String storageName, String container) {
         try {
             azureClient.deleteContainerInStorage(resourceGroup, storageName, container);
@@ -394,12 +434,6 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 LOGGER.debug("Container not found: resourcegroup={}, storagename={}, container={}",
                         resourceGroup, storageName, container);
             }
-        }
-    }
-
-    private void deleteManagedDisks(Collection<String> managedDiskIds, AzureClient azureClient) {
-        for (String managedDiskId : managedDiskIds) {
-            azureClient.deleteManagedDisk(managedDiskId);
         }
     }
 
@@ -414,58 +448,6 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                     LOGGER.debug("Disk not found: resourceGroup={}, storageName={}, container={}, storageProfileDiskName: {}",
                             resourceGroup, storageName, container, storageProfileDiskName);
                 }
-            }
-        }
-    }
-
-    private void deleteNetworkInterfaces(AzureClient client, String resourceGroupName, Collection<String> networkInterfacesNames)
-            throws CloudConnectorException {
-        for (String networkInterfacesName : networkInterfacesNames) {
-            try {
-                client.deleteNetworkInterface(resourceGroupName, networkInterfacesName);
-            } catch (CloudException e) {
-                if (e.response().code() != AzureConstants.NOT_FOUND) {
-                    throw new CloudConnectorException(String.format("Could not delete network interface: %s", networkInterfacesName), e);
-                } else {
-                    LOGGER.debug("Network interface not found: {}, {}", resourceGroupName, networkInterfacesName);
-                }
-            }
-        }
-    }
-
-    private void deletePublicIps(AzureClient client, String resourceGroupName, Collection<String> publicIpNames) {
-        for (String publicIpName : publicIpNames) {
-            try {
-                HasId publicIpAddress = client.getPublicIpAddress(resourceGroupName, publicIpName);
-                if (publicIpAddress != null) {
-                    client.deletePublicIpAddressById(publicIpAddress.id());
-                } else {
-                    LOGGER.debug("Public ip not found: stackName={}, publicIpName={}", resourceGroupName, publicIpName);
-                }
-            } catch (CloudException e) {
-                throw new CloudConnectorException(String.format("Could not delete public IP address: %s", publicIpName), e);
-            }
-        }
-    }
-
-    private void deleteVirtualMachine(AzureClient client, String resourceGroupName, String privateInstanceId)
-            throws CloudConnectorException {
-        if (client.isVirtualMachineExists(resourceGroupName, privateInstanceId)) {
-            client.deleteVirtualMachine(resourceGroupName, privateInstanceId);
-        } else {
-            LOGGER.debug("Virtual machine not found: resourceGroupName={}, privateInstanceId={}", resourceGroupName, privateInstanceId);
-        }
-    }
-
-    private void deallocateVirtualMachine(AzureClient client, String resourceGroupName, String privateInstanceId)
-            throws CloudConnectorException {
-        try {
-            client.deallocateVirtualMachine(resourceGroupName, privateInstanceId);
-        } catch (CloudException e) {
-            if (e.response().code() != AzureConstants.NOT_FOUND) {
-                throw new CloudConnectorException(String.format("Could not deallocate machine: %s", privateInstanceId), e);
-            } else {
-                LOGGER.debug("Virtual machine not found: resourceGroupName={}, privateInstanceId={}", resourceGroupName, privateInstanceId);
             }
         }
     }

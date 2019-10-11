@@ -17,9 +17,11 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopState, StackStopEvent> {
+public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopState, StackStopEvent>
+        implements RetryableFlowConfiguration<StackStopEvent> {
 
     private static final List<Transition<StackStopState, StackStopEvent>> TRANSITIONS = new Builder<StackStopState, StackStopEvent>()
             .defaultFailureEvent(StackStopEvent.STOP_FAILURE_EVENT)
@@ -30,6 +32,8 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
 
     private static final FlowEdgeConfig<StackStopState, StackStopEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, STOP_FAILED_STATE, STOP_FAIL_HANDLED_EVENT);
+
+    private static final String FLOW_DISPLAY_NAME = "Stop Stack";
 
     public StackStopFlowConfig() {
         super(StackStopState.class, StackStopEvent.class);
@@ -53,11 +57,6 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
     }
 
     @Override
-    public String getDisplayName() {
-        return "Stop stack";
-    }
-
-    @Override
     protected List<Transition<StackStopState, StackStopEvent>> getTransitions() {
         return TRANSITIONS;
     }
@@ -65,5 +64,15 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
     @Override
     protected FlowEdgeConfig<StackStopState, StackStopEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
+    }
+
+    @Override
+    public StackStopEvent getFailHandledEvent() {
+        return STOP_FAIL_HANDLED_EVENT;
     }
 }

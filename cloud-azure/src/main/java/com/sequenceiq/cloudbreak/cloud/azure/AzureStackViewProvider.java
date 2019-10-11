@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 @Component
 class AzureStackViewProvider {
 
-    private static final int AZURE_NUMBER_OF_RESERVED_IPS = 5;
+    private static final long AZURE_NUMBER_OF_RESERVED_IPS = 5;
 
     @Value("${cb.azure.host.name.prefix.length}")
     private int stackNamePrefixLength;
@@ -42,7 +42,7 @@ class AzureStackViewProvider {
     AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudStack cloudStack, AzureClient client, AuthenticatedContext ac) {
         Map<String, String> customImageNamePerInstance = getCustomImageNamePerInstance(ac, cloudStack);
         Network network = cloudStack.getNetwork();
-        Map<String, Integer> availableIPs = getNumberOfAvailableIPsInSubnets(client, network);
+        Map<String, Long> availableIPs = getNumberOfAvailableIPsInSubnets(client, network);
         return new AzureStackView(ac.getCloudContext().getName(), stackNamePrefixLength, cloudStack.getGroups(), new AzureStorageView(azureCredentialView,
                 ac.getCloudContext(),
                 azureStorage, azureStorage.getArmAttachedStorageOption(cloudStack.getParameters())),
@@ -66,24 +66,24 @@ class AzureStackViewProvider {
         return customImageNamePerInstance;
     }
 
-    private Map<String, Integer> getNumberOfAvailableIPsInSubnets(AzureClient client, Network network) {
-        Map<String, Integer> result = new HashMap<>();
+    private Map<String, Long> getNumberOfAvailableIPsInSubnets(AzureClient client, Network network) {
+        Map<String, Long> result = new HashMap<>();
         String resourceGroup = network.getStringParameter("resourceGroupName");
         String networkId = network.getStringParameter("networkId");
         Collection<String> subnetIds = azureUtils.getCustomSubnetIds(network);
         for (String subnetId : subnetIds) {
             Subnet subnet = client.getSubnetProperties(resourceGroup, networkId, subnetId);
-            int available = getAvailableAddresses(subnet);
+            long available = getAvailableAddresses(subnet);
             result.put(subnetId, available);
         }
         return result;
     }
 
-    private int getAvailableAddresses(Subnet subnet) {
+    private long getAvailableAddresses(Subnet subnet) {
         SubnetUtils su = new SubnetUtils(subnet.addressPrefix());
         su.setInclusiveHostCount(true);
-        int available = su.getInfo().getAddressCount();
-        int used = subnet.networkInterfaceIPConfigurationCount();
+        long available = su.getInfo().getAddressCountLong();
+        long used = subnet.networkInterfaceIPConfigurationCount();
         return available - used - AZURE_NUMBER_OF_RESERVED_IPS;
     }
 }

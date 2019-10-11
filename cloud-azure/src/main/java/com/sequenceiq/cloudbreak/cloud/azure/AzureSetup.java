@@ -126,7 +126,7 @@ public class AzureSetup implements Setup {
                 return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
             } else {
                 int percentage = (int) (((double) copyState.getBytesCopied() * ImageStatusResult.COMPLETED) / copyState.getTotalBytes());
-                LOGGER.info("CopyStatus, Total:{} / Pending:{} bytes, %.4s %% {}%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage);
+                LOGGER.info("CopyStatus, Total:{} / Pending:{} bytes, {}%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage);
                 return new ImageStatusResult(ImageStatus.IN_PROGRESS, percentage);
             }
         } catch (RuntimeException ex) {
@@ -209,12 +209,12 @@ public class AzureSetup implements Setup {
         boolean validAccountname = false;
 
         List<DataLakeStoreAccountBasic> dataLakeStoreAccountList = new ArrayList<>();
-            while (dataLakeStoreAccountPagedList.hasNextPage()) {
-                dataLakeStoreAccountList.addAll(dataLakeStoreAccountPagedList);
-                dataLakeStoreAccountPagedList.loadNextPage();
-            }
+        while (dataLakeStoreAccountPagedList.hasNextPage()) {
+            dataLakeStoreAccountList.addAll(dataLakeStoreAccountPagedList);
+            dataLakeStoreAccountPagedList.loadNextPage();
+        }
 
-            for (DataLakeStoreAccountBasic account : dataLakeStoreAccountList) {
+        for (DataLakeStoreAccountBasic account : dataLakeStoreAccountList) {
             if (account.name().equalsIgnoreCase(accountName)) {
                 validAccountname = true;
                 break;

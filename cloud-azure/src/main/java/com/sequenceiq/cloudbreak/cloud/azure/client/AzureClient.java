@@ -82,6 +82,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.ResourceType;
 
+import rx.Completable;
+import rx.Observable;
+
 public class AzureClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureClient.class);
@@ -316,9 +319,9 @@ public class AzureClient {
         return azure.disks().getByResourceGroup(resourceGroupName, diskName);
     }
 
-    public void deleteManagedDisk(String id) {
+    public Completable deleteManagedDiskAsync(String id) {
         LOGGER.debug("delete managed disk: id={}", id);
-        handleAuthException(() -> azure.disks().deleteById(id));
+        return handleAuthException(() -> azure.disks().deleteByIdAsync(id));
     }
 
     public DiskSkuTypes convertAzureDiskTypeToDiskSkuTypes(AzureDiskType diskType) {
@@ -412,6 +415,10 @@ public class AzureClient {
         return handleAuthException(() -> azure.virtualMachines().getByResourceGroup(resourceGroup, vmName));
     }
 
+    public Observable<VirtualMachine> getVirtualMachineAsync(String resourceGroup, String vmName) {
+        return handleAuthException(() -> azure.virtualMachines().getByResourceGroupAsync(resourceGroup, vmName));
+    }
+
     public PowerState getVirtualMachinePowerState(String resourceGroup, String vmName) {
         return getVirtualMachine(resourceGroup, vmName).powerState();
     }
@@ -443,8 +450,8 @@ public class AzureClient {
         handleAuthException(() -> azure.availabilitySets().deleteByResourceGroup(resourceGroup, asName));
     }
 
-    public void deallocateVirtualMachine(String resourceGroup, String vmName) {
-        handleAuthException(() -> azure.virtualMachines().deallocate(resourceGroup, vmName));
+    public Completable deallocateVirtualMachineAsync(String resourceGroup, String vmName) {
+        return handleAuthException(() -> azure.virtualMachines().deallocateAsync(resourceGroup, vmName));
     }
 
     public boolean isVirtualMachineExists(String resourceGroup, String vmName) {
@@ -456,22 +463,20 @@ public class AzureClient {
         });
     }
 
-    public void deleteVirtualMachine(String resourceGroup, String vmName) {
-        String id = getVirtualMachine(resourceGroup, vmName).id();
-        handleAuthException(() -> azure.virtualMachines().deleteById(id));
+    public Completable deleteVirtualMachine(String resourceGroup, String vmName) {
+        return handleAuthException(() -> azure.virtualMachines().deleteByResourceGroupAsync(resourceGroup, vmName));
     }
 
-    public void startVirtualMachine(String resourceGroup, String vmName) {
-        handleAuthException(() -> azure.virtualMachines().start(resourceGroup, vmName));
+    public Completable startVirtualMachineAsync(String resourceGroup, String vmName) {
+        return handleAuthException(() -> azure.virtualMachines().startAsync(resourceGroup, vmName));
     }
 
     public void stopVirtualMachine(String resourceGroup, String vmName) {
         handleAuthException(() -> azure.virtualMachines().powerOff(resourceGroup, vmName));
     }
 
-    public void deletePublicIpAddressByName(String resourceGroup, String ipName) {
-        String id = getPublicIpAddress(resourceGroup, ipName).id();
-        handleAuthException(() -> azure.publicIPAddresses().deleteById(id));
+    public Completable deletePublicIpAddressByNameAsync(String resourceGroup, String ipName) {
+        return handleAuthException(() -> azure.publicIPAddresses().deleteByResourceGroupAsync(resourceGroup, ipName));
     }
 
     public void deletePublicIpAddressById(String ipId) {
@@ -527,8 +532,8 @@ public class AzureClient {
         return handleAuthException(() -> azure.publicIPAddresses().getById(ipId));
     }
 
-    public void deleteNetworkInterface(String resourceGroup, String networkInterfaceName) {
-        handleAuthException(() -> azure.networkInterfaces().deleteByResourceGroup(resourceGroup, networkInterfaceName));
+    public Completable deleteNetworkInterfaceAsync(String resourceGroup, String networkInterfaceName) {
+        return handleAuthException(() -> azure.networkInterfaces().deleteByResourceGroupAsync(resourceGroup, networkInterfaceName));
     }
 
     public NetworkInterface getNetworkInterface(String resourceGroup, String networkInterfaceName) {
@@ -613,9 +618,9 @@ public class AzureClient {
         notifier.notifyAllocation(resourceGroupResource, cloudContext);
 
         CloudResource networkResource = CloudResource.builder().
-                        name(networkName).
-                        type(ResourceType.AZURE_NETWORK).
-                        build();
+                name(networkName).
+                type(ResourceType.AZURE_NETWORK).
+                build();
         resources.add(networkResource);
         notifier.notifyAllocation(networkResource, cloudContext);
         for (String subnetName : subnetNameList) {
@@ -661,9 +666,9 @@ public class AzureClient {
         PagedList<RoleAssignment> roleAssignments = listIdentityRoleAssignmentsByScopeId(roleAssignmentScopeId);
         return identityList.stream().filter(
                 identity -> roleAssignments.stream()
-                .anyMatch(roleAssignment -> roleAssignment.principalId() != null &&
-                        roleAssignment.principalId().equalsIgnoreCase(identity.principalId())))
-                        .collect(Collectors.toList());
+                        .anyMatch(roleAssignment -> roleAssignment.principalId() != null &&
+                                roleAssignment.principalId().equalsIgnoreCase(identity.principalId())))
+                .collect(Collectors.toList());
     }
 
     public Identity getIdentityById(String id) {

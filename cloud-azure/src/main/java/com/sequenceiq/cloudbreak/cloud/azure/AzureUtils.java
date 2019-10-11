@@ -19,6 +19,8 @@ import org.apache.commons.lang3.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Splitter;
@@ -30,12 +32,14 @@ import com.microsoft.azure.management.resources.DeploymentOperations;
 import com.microsoft.azure.management.resources.TargetResource;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStackStatus;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -43,8 +47,12 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import rx.Completable;
+import rx.schedulers.Schedulers;
 
 @Component
 public class AzureUtils {
@@ -67,6 +75,9 @@ public class AzureUtils {
 
     @Inject
     private AzurePremiumValidatorService azurePremiumValidatorService;
+
+    @Inject
+    private AzureUtils armTemplateUtils;
 
     public CloudResource getTemplateResource(Iterable<CloudResource> resourceList) {
         for (CloudResource resource : resourceList) {
@@ -271,5 +282,105 @@ public class AzureUtils {
             }
         }
         return cloudResourceList;
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public List<CloudVmInstanceStatus> deallocateInstances(AuthenticatedContext ac, List<CloudInstance> vms) {
+        LOGGER.info("Deallocate VMs: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
+        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
+        List<Completable> deallocateCompletables = new ArrayList<>();
+        for (CloudInstance vm : vms) {
+            String resourceGroupName = armTemplateUtils.getResourceGroupName(ac.getCloudContext(), vm);
+            AzureClient azureClient = ac.getParameter(AzureClient.class);
+            deallocateCompletables.add(azureClient.deallocateVirtualMachineAsync(resourceGroupName, vm.getInstanceId())
+                    .doOnError(throwable -> {
+                        LOGGER.error("Error happend on azure instance stop: {}", vm, throwable);
+                        statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
+                    })
+                    .doOnCompleted(() -> statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.STOPPED)))
+                    .subscribeOn(Schedulers.io()));
+        }
+        Completable.merge(deallocateCompletables).await();
+        return statuses;
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public List<CloudVmInstanceStatus> deleteInstances(AuthenticatedContext ac, List<CloudInstance> vms) {
+        LOGGER.info("Delete VMs: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
+        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
+        List<Completable> deleteCompletables = new ArrayList<>();
+        for (CloudInstance vm : vms) {
+            String resourceGroupName = armTemplateUtils.getResourceGroupName(ac.getCloudContext(), vm);
+            AzureClient azureClient = ac.getParameter(AzureClient.class);
+            deleteCompletables.add(azureClient.deleteVirtualMachine(resourceGroupName, vm.getInstanceId())
+                    .doOnError(throwable -> {
+                        LOGGER.error("Error happend on azure instance delete: {}", vm, throwable);
+                        statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
+                    })
+                    .doOnCompleted(() -> statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED)))
+                    .subscribeOn(Schedulers.io()));
+        }
+        Completable.merge(deleteCompletables).await();
+        return statuses;
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteNetworkInterfaces(AzureClient azureClient, String resourceGroupName, Collection<String> networkInterfacesNames) {
+        LOGGER.info("Delete network interfaces: {}", networkInterfacesNames);
+        List<Completable> deleteCompletables = new ArrayList<>();
+        List<String> failedToDeleteNetworkInterfaces = new ArrayList<>();
+        for (String networkInterfaceName : networkInterfacesNames) {
+            deleteCompletables.add(azureClient.deleteNetworkInterfaceAsync(resourceGroupName, networkInterfaceName)
+                    .doOnError(throwable -> {
+                        LOGGER.error("Error happend on azure network interface delete: {}", networkInterfaceName, throwable);
+                        failedToDeleteNetworkInterfaces.add(networkInterfaceName);
+                    })
+                    .subscribeOn(Schedulers.io()));
+        }
+        Completable.merge(deleteCompletables).await();
+        if (!failedToDeleteNetworkInterfaces.isEmpty()) {
+            LOGGER.error("Can't delete every network interfaces: {}", failedToDeleteNetworkInterfaces);
+            throw new CloudbreakServiceException("Can't delete every network interfaces: " + failedToDeleteNetworkInterfaces);
+        }
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deletePublicIps(AzureClient azureClient, String resourceGroupName, Collection<String> publicIpNames) {
+        LOGGER.info("Delete public ips: {}", publicIpNames);
+        List<Completable> deleteCompletables = new ArrayList<>();
+        List<String> failedToDeletePublicIps = new ArrayList<>();
+        for (String publicIpName : publicIpNames) {
+            deleteCompletables.add(azureClient.deletePublicIpAddressByNameAsync(resourceGroupName, publicIpName)
+                    .doOnError(throwable -> {
+                        LOGGER.error("Error happend on azure public ip delete: {}", publicIpName, throwable);
+                        failedToDeletePublicIps.add(publicIpName);
+                    })
+                    .subscribeOn(Schedulers.io()));
+        }
+        Completable.merge(deleteCompletables).await();
+        if (!failedToDeletePublicIps.isEmpty()) {
+            LOGGER.error("Can't delete every public ips: {}", failedToDeletePublicIps);
+            throw new CloudbreakServiceException("Can't delete public ips: " + failedToDeletePublicIps);
+        }
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteManagedDisks(AzureClient azureClient, Collection<String> managedDiskIds) {
+        LOGGER.info("Delete managed disks: {}", managedDiskIds);
+        List<Completable> deleteCompletables = new ArrayList<>();
+        List<String> failedToDeleteManagedDisks = new ArrayList<>();
+        for (String managedDiskId : managedDiskIds) {
+            deleteCompletables.add(azureClient.deleteManagedDiskAsync(managedDiskId)
+                    .doOnError(throwable -> {
+                        LOGGER.error("Error happend on azure managed disk delete: {}", managedDiskId, throwable);
+                        failedToDeleteManagedDisks.add(managedDiskId);
+                    })
+                    .subscribeOn(Schedulers.io()));
+        }
+        Completable.merge(deleteCompletables).await();
+        if (!failedToDeleteManagedDisks.isEmpty()) {
+            LOGGER.error("Can't delete every managed disks: {}", failedToDeleteManagedDisks);
+            throw new CloudbreakServiceException("Can't delete managed disks: " + failedToDeleteManagedDisks);
+        }
     }
 }

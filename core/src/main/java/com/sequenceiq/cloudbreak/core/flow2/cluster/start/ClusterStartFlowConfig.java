@@ -19,9 +19,12 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterStartState, ClusterStartEvent> {
+public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterStartState, ClusterStartEvent>
+        implements RetryableFlowConfiguration<ClusterStartEvent> {
+
     private static final List<Transition<ClusterStartState, ClusterStartEvent>> TRANSITIONS =
             new Builder<ClusterStartState, ClusterStartEvent>()
                     .from(INIT_STATE).to(CLUSTER_STARTING_STATE).event(CLUSTER_START_EVENT).noFailureEvent()
@@ -69,5 +72,10 @@ public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterSta
     @Override
     public String getDisplayName() {
         return "Start cluster";
+    }
+
+    @Override
+    public ClusterStartEvent getFailHandledEvent() {
+        return FAIL_HANDLED_EVENT;
     }
 }
