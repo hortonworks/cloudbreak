@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterTemplateModelDescription;
@@ -31,6 +32,16 @@ public class ClusterTemplateV4Response extends ClusterTemplateV4Base {
     private String environmentName;
 
     private Long created;
+
+    private FeatureState featurseState;
+
+    public FeatureState getFeatureState() {
+        return featurseState;
+    }
+
+    public void setFeatureState(FeatureState featurseState) {
+        this.featurseState = featurseState;
+    }
 
     public ResourceStatus getStatus() {
         return status;

@@ -2,6 +2,7 @@
   "name": "CDP 1.2 - Operations Data Mart template",
   "description": "",
   "type": "DATAMART",
+  "featureState": "RELEASED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {

@@ -2,6 +2,7 @@
   "name": "CDP 1.1 - Operational Database template",
   "description": "",
   "type": "OTHER",
+  "featureState": "RELEASED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {

@@ -8,6 +8,7 @@ import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
 import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
@@ -29,6 +30,9 @@ public class ClusterTemplateView extends CompactView {
 
     @Enumerated(EnumType.STRING)
     private ClusterTemplateV4Type type;
+
+    @Enumerated(EnumType.STRING)
+    private FeatureState featureState;
 
     @OneToOne
     private StackApiView stackTemplate;
@@ -89,6 +93,14 @@ public class ClusterTemplateView extends CompactView {
                 .mapToInt(InstanceGroupView::getNodeCount)
                 .sum();
 
+    }
+
+    public FeatureState getFeatureState() {
+        return featureState;
+    }
+
+    public void setFeatureState(FeatureState featureState) {
+        this.featureState = featureState;
     }
 
     public Long getCreated() {

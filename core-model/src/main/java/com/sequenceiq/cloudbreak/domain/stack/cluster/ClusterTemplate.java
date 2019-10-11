@@ -17,6 +17,7 @@ import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -50,6 +51,9 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
 
     @Enumerated(EnumType.STRING)
     private DatalakeRequired datalakeRequired;
+
+    @Enumerated(EnumType.STRING)
+    private FeatureState featureState;
 
     @Enumerated(EnumType.STRING)
     private ClusterTemplateV4Type type = ClusterTemplateV4Type.OTHER;
@@ -172,5 +176,13 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public FeatureState getFeatureState() {
+        return featureState;
+    }
+
+    public void setFeatureState(FeatureState featureState) {
+        this.featureState = featureState;
     }
 }
