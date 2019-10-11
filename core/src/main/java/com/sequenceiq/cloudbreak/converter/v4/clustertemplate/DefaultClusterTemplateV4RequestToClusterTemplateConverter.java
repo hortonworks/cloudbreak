@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -68,6 +69,7 @@ public class DefaultClusterTemplateV4RequestToClusterTemplateConverter
         clusterTemplate.setStackTemplate(stack);
         clusterTemplate.setCloudPlatform(getCloudPlatform(source, stack));
         clusterTemplate.setName(source.getName());
+        clusterTemplate.setFeatureState(source.getFeatureState() == null ? FeatureState.RELEASED : source.getFeatureState());
         clusterTemplate.setDescription(source.getDescription());
         clusterTemplate.setStatus(ResourceStatus.DEFAULT);
         if (source.getType() == null) {

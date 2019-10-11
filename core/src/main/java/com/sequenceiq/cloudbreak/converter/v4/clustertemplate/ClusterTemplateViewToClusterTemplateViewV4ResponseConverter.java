@@ -25,6 +25,7 @@ public class ClusterTemplateViewToClusterTemplateViewV4ResponseConverter
         clusterTemplateViewV4Response.setStatus(source.getStatus());
         clusterTemplateViewV4Response.setType(source.getType());
         clusterTemplateViewV4Response.setNodeCount(source.getFullNodeCount());
+        clusterTemplateViewV4Response.setFeatureState(source.getFeatureState());
         if (source.getStackTemplate() != null) {
             StackApiView stackTemplate = source.getStackTemplate();
             if (stackTemplate.getCluster() != null) {

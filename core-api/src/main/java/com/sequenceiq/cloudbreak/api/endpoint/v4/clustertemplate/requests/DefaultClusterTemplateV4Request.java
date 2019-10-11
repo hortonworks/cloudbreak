@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterTemplateModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -17,6 +18,16 @@ public class DefaultClusterTemplateV4Request extends ClusterTemplateV4Request {
     @ApiModelProperty(value = ClusterTemplateModelDescription.DATALAKE_REQUIRED,
             allowableValues = "NONE,OPTIONAL,REQUIRED")
     private DatalakeRequired datalakeRequired = DatalakeRequired.OPTIONAL;
+
+    private FeatureState featureState;
+
+    public FeatureState getFeatureState() {
+        return featureState;
+    }
+
+    public void setFeatureState(FeatureState featureState) {
+        this.featureState = featureState;
+    }
 
     public DatalakeRequired getDatalakeRequired() {
         return datalakeRequired;
