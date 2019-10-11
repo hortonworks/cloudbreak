@@ -193,13 +193,14 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         }
 
         AzureClient client = getAzureClient(auth);
-                cloudResourceStatuses.stream()
+        List<String> managedDiskIds = cloudResourceStatuses.stream()
                 .filter(cloudResourceStatus -> ResourceStatus.CREATED.equals(cloudResourceStatus.getStatus()))
                 .map(CloudResourceStatus::getCloudResource)
                 .map(this::getVolumeSetAttributes)
                 .map(VolumeSetAttributes::getVolumes)
                 .flatMap(List::stream)
-                .forEach(volume -> client.deleteManagedDisk(volume.getId()));
+                .map(VolumeSetAttributes.Volume::getId).collect(Collectors.toList());
+        azureUtils.deleteManagedDisks(client, managedDiskIds);
         return null;
     }
 

@@ -193,7 +193,7 @@ public class AzureTemplateBuilderTest {
         azureStorageView = new AzureStorageView(azureCredentialView, cloudContext, azureStorage, null);
 
         azureSubnetStrategy = AzureSubnetStrategy.getAzureSubnetStrategy(FILL, Collections.singletonList("existingSubnet"),
-                ImmutableMap.of("existingSubnet", 100));
+                ImmutableMap.of("existingSubnet", 100L));
         defaultTags.put(CloudbreakResourceType.DISK.templateVariable(), CloudbreakResourceType.DISK.key());
         defaultTags.put(CloudbreakResourceType.INSTANCE.templateVariable(), CloudbreakResourceType.INSTANCE.key());
         defaultTags.put(CloudbreakResourceType.IP.templateVariable(), CloudbreakResourceType.IP.key());

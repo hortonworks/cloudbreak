@@ -15,14 +15,17 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class ClusterStopFlowConfig extends AbstractFlowConfiguration<ClusterStopState, ClusterStopEvent> {
+public class ClusterStopFlowConfig extends AbstractFlowConfiguration<ClusterStopState, ClusterStopEvent>
+        implements RetryableFlowConfiguration<ClusterStopEvent> {
+
     private static final List<Transition<ClusterStopState, ClusterStopEvent>> TRANSITIONS =
             new Builder<ClusterStopState, ClusterStopEvent>()
                     .from(INIT_STATE).to(CLUSTER_STOPPING_STATE).event(CLUSTER_STOP_EVENT).noFailureEvent()
                     .from(CLUSTER_STOPPING_STATE).to(ClusterStopState.CLUSTER_STOP_FINISHED_STATE).event(ClusterStopEvent.CLUSTER_STOP_FINISHED_EVENT)
-                            .failureEvent(ClusterStopEvent.CLUSTER_STOP_FINISHED_FAILURE_EVENT)
+                    .failureEvent(ClusterStopEvent.CLUSTER_STOP_FINISHED_FAILURE_EVENT)
                     .from(ClusterStopState.CLUSTER_STOP_FINISHED_STATE).to(FINAL_STATE).event(FINALIZED_EVENT).failureEvent(FAILURE_EVENT)
                     .build();
 
@@ -58,6 +61,11 @@ public class ClusterStopFlowConfig extends AbstractFlowConfiguration<ClusterStop
     @Override
     public String getDisplayName() {
         return "Stop cluster";
+    }
+
+    @Override
+    public ClusterStopEvent getFailHandledEvent() {
+        return FAIL_HANDLED_EVENT;
     }
 }
 

@@ -20,9 +20,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartState, StackStartEvent> {
+public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartState, StackStartEvent>
+        implements RetryableFlowConfiguration<StackStartEvent> {
 
     private static final List<Transition<StackStartState, StackStartEvent>> TRANSITIONS = new Builder<StackStartState, StackStartEvent>()
             .defaultFailureEvent(START_FAILURE_EVENT)
@@ -35,6 +37,8 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
     private static final FlowEdgeConfig<StackStartState, StackStartEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, START_FAILED_STATE, START_FAIL_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Start Stack";
+
     public StackStartFlowConfig() {
         super(StackStartState.class, StackStartEvent.class);
     }
@@ -46,14 +50,9 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
 
     @Override
     public StackStartEvent[] getInitEvents() {
-        return new StackStartEvent[] {
+        return new StackStartEvent[]{
                 STACK_START_EVENT
         };
-    }
-
-    @Override
-    public String getDisplayName() {
-        return "Start stack";
     }
 
     @Override
@@ -62,7 +61,17 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
     }
 
     @Override
-    protected FlowEdgeConfig<StackStartState, StackStartEvent> getEdgeConfig() {
+    protected AbstractFlowConfiguration.FlowEdgeConfig<StackStartState, StackStartEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
+    }
+
+    @Override
+    public StackStartEvent getFailHandledEvent() {
+        return START_FAIL_HANDLED_EVENT;
     }
 }
