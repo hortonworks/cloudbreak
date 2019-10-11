@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -70,6 +71,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -125,6 +127,9 @@ public class ClusterServiceTest {
 
     @Mock
     private ClusterApiConnectors clusterApiConnectors;
+
+    @Mock
+    private InstanceMetaDataService instanceMetaDataService;
 
     @InjectMocks
     private ClusterService underTest;
@@ -317,6 +322,24 @@ public class ClusterServiceTest {
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(STACK_ID, "RECOVERY", "failed node");
         verify(hostMetadataService, times(1)).saveAll(Set.of(hostMetadata2));
         assertEquals(HostMetadataState.UNHEALTHY, hostMetadata2.getHostMetadataState());
+    }
+
+    @Test
+    public void shouldTriggerSync() {
+        String hostFQDN = "host2Name.stopped";
+        HostMetadata hostMetadata = givenHost(hostFQDN, "hg2", RecoveryMode.MANUAL, HostMetadataState.HEALTHY);
+        InstanceMetaData instanceMd = new InstanceMetaData();
+        instanceMd.setDiscoveryFQDN(hostFQDN);
+
+        when(stackService.findByCrn(STACK_CRN)).thenReturn(stack);
+        when(hostMetadataService.findHostsInCluster(CLUSTER_ID)).thenReturn(Set.of(hostMetadata));
+        when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn("failed node");
+        when(instanceMetaDataService.getPrimaryGatewayInstanceMetadata(anyLong())).thenReturn(Optional.of(instanceMd));
+        doNothing().when(flowManager).triggerStackSync(anyLong());
+
+        underTest.reportHealthChange(STACK_CRN, Set.of(hostFQDN), Set.of());
+
+        verify(flowManager, times(1)).triggerStackSync(eq(stack.getId()));
     }
 
     @Test
