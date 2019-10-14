@@ -567,6 +567,8 @@ public class ClusterHostServiceRunner {
         List<String> serviceNames = ExposedService.getAllServiceName();
         Map<String, List<String>> componentLocation = componentLocator.getComponentLocation(cluster, serviceNames);
         if (componentLocation.containsKey(ExposedService.IMPALA.getServiceName())) {
+            // IMPALA_DEBUG_UI role is not a valid role, but we need to distinguish the 2 roles in order to generate the Knox topology file
+            componentLocation.put(ExposedService.IMPALA_DEBUG_UI.getServiceName(), List.copyOf(componentLocation.get(ExposedService.IMPALA.getServiceName())));
             Map<String, List<String>> impalaLocations = componentLocator.getImpalaComponentServiceLocation(cluster);
             List<String> locations = impalaLocations.values().stream().flatMap(List::stream).collect(Collectors.toList());
             componentLocation.replace(ExposedService.IMPALA.getServiceName(), locations);
