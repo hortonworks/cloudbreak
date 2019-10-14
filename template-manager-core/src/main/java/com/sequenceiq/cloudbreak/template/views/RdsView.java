@@ -21,6 +21,8 @@ public class RdsView {
 
     private final String connectionDriver;
 
+    private final String fullConnectionUserName;
+
     private final String connectionUserName;
 
     private final String connectionPassword;
@@ -45,7 +47,9 @@ public class RdsView {
 
     public RdsView(RDSConfig rdsConfig) {
         connectionURL = rdsConfig.getConnectionURL();
-        connectionUserName = rdsConfig.getConnectionUserName();
+        fullConnectionUserName = rdsConfig.getConnectionUserName();
+        int atidx = fullConnectionUserName.indexOf('@');
+        connectionUserName = atidx != -1 ? fullConnectionUserName.substring(0, atidx) : fullConnectionUserName;
         connectionPassword = rdsConfig.getConnectionPassword();
         rdsViewDialect = createDialect(rdsConfig);
         String[] split = connectionURL.split(rdsViewDialect.jdbcPrefixSplitter());
@@ -91,6 +95,10 @@ public class RdsView {
 
     public String getConnectionURL() {
         return connectionURL;
+    }
+
+    public String getFullConnectionUserName() {
+        return fullConnectionUserName;
     }
 
     public String getConnectionUserName() {

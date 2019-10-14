@@ -181,7 +181,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
                 .when(distroXClient.create(), key(DISTRO_X_STACK))
-                .await(STACK_AVAILABLE, key(DISTRO_X_STACK))
+                .await(STACK_AVAILABLE)
                 .then(DistroXClusterCreationTest::distroxInheritedCloudStorage)
                 .then(DistroXClusterCreationTest::distroxCloudStorageLocationNotEmpty)
                 .validate();
@@ -235,7 +235,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
                 .when(distroXClient.create(), key(DISTRO_X_STACK))
-                .await(STACK_AVAILABLE, key(DISTRO_X_STACK))
+                .await(STACK_AVAILABLE)
                 .then(DistroXClusterCreationTest::distroxClusterTemplateContainsMockHostname)
                 .validate();
     }
