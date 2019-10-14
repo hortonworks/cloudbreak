@@ -83,7 +83,7 @@ public class RestUrlParserTest {
     @Autowired
     private List<RestUrlParser> restUrlParsers;
 
-    private String[] excludes = {"/v1/distrox", "/autoscale"};
+    private String[] excludes = {"/v1/distrox", "/v1/internal/distrox", "/autoscale"};
 
     @Test
     public void testEventUrlParser() {

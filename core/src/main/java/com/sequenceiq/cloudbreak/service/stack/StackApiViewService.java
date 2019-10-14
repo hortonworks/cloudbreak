@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -9,6 +11,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -88,6 +91,11 @@ public class StackApiViewService {
             stackViewResponses = filterByStackType(stackType, stackViewResponses);
         }
         return stackViewResponses;
+    }
+
+    @PreAuthorize("hasRole('INTERNAL')")
+    public StackApiView retrieveStackByCrnAndType(String crn, StackType stackType) {
+        return stackApiViewRepository.findByResourceCrnAndStackType(crn, stackType).orElseThrow(notFound("Stack", crn));
     }
 
     private Set<StackApiView> filterByStackType(StackType stackType, Set<StackApiView> stackViewResponses) {
