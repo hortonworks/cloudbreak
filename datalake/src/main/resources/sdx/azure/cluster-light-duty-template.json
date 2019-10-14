@@ -1,17 +1,7 @@
 {
   "cluster": {
     "blueprintName": "CDP 1.2 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas",
-    "validateBlueprint": false,
-    "gateway": {
-      "topologies": [
-        {
-          "topologyName": "dp-proxy",
-          "exposedServices": [
-            "ALL"
-          ]
-        }
-      ],
-      "ssoType": "SSO_PROVIDER"
+    "validateBlueprint": false
     }
   },
   "customDomain": {
