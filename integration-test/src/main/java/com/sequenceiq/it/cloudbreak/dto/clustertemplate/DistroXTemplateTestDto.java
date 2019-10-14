@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.dto.clustertemplate;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,6 +59,11 @@ public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, C
         return this;
     }
 
+    public DistroXTemplateTestDto withCluster(String key) {
+        withCluster(((ClusterTestDto) getTestContext().get(key)).getRequest());
+        return this;
+    }
+
     private DistroXTemplateTestDto withCluster(ClusterV4Request clusterV4Request) {
         DistroXClusterV1Request cluster = new DistroXClusterV1Request();
         cluster.setBlueprintName(clusterV4Request.getBlueprintName());
@@ -65,7 +71,18 @@ public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, C
         ClouderaManagerRepositoryV1Request repository = new ClouderaManagerRepositoryV1Request();
         cm.setRepository(repository);
         cluster.setCm(cm);
+        cluster.setUserName(clusterV4Request.getUserName());
+        cluster.setPassword(clusterV4Request.getPassword());
         getRequest().setCluster(cluster);
+        return this;
+    }
+
+    public DistroXTemplateTestDto withBlueprintName(String value) {
+        Optional.ofNullable(getRequest().getCluster())
+                .ifPresentOrElse(r -> getRequest().getCluster().setBlueprintName(value), () -> {
+                    throw new IllegalStateException("You can't set the blueprint name empty if there is no existing DistroXClusterV1Request on the " +
+                            "DistroXTemplateTestDto!");
+                });
         return this;
     }
 

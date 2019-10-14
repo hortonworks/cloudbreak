@@ -7,6 +7,7 @@ import static java.util.stream.Collectors.toSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -43,12 +44,12 @@ import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackTemplateService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -95,9 +96,6 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
-    private StackService stackService;
-
-    @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Inject
@@ -111,6 +109,9 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @Inject
     private EnvironmentServiceDecorator environmentServiceDecorator;
+
+    @Inject
+    private BlueprintService blueprintService;
 
     @Override
     protected WorkspaceResourceRepository<ClusterTemplate, Long> repository() {
@@ -183,6 +184,11 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
             throw new BadRequestException(
                     format("clustertemplate already exists with name '%s' in workspace %s", resource.getName(), resource.getWorkspace().getName()));
         }
+
+        Optional<String> messageIfBlueprintIsInvalidInCluster = getMessageIfBlueprintIsInvalidInCluster(resource);
+        if (messageIfBlueprintIsInvalidInCluster.isPresent()) {
+            throw new BadRequestException(messageIfBlueprintIsInvalidInCluster.get());
+        }
     }
 
     @Override
@@ -229,6 +235,26 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         updateDefaultClusterTemplates(workspace);
     }
 
+    private Optional<String> getMessageIfBlueprintIsInvalidInCluster(ClusterTemplate clusterTemplate) {
+        if (Objects.isNull(clusterTemplate.getStackTemplate().getCluster())) {
+            String msg = "Stack template in cluster definition should contain a – valid – cluster request!";
+            return Optional.of(msg);
+        }
+        String msg = null;
+        boolean hasBlueprint = nonNull(clusterTemplate.getStackTemplate().getCluster().getBlueprint());
+        if (!hasBlueprint) {
+            msg = "Cluster definition should contain a cluster template!";
+        } else {
+            boolean hasExistingBlueprint = blueprintService.getAllAvailableInWorkspace(clusterTemplate.getWorkspace())
+                    .stream()
+                    .anyMatch(blueprint -> blueprint.getName().equals(clusterTemplate.getStackTemplate().getCluster().getBlueprint().getName()));
+            if (!hasExistingBlueprint) {
+                msg = "The cluster template (aka blueprint) in the cluster definition should be an existing one!";
+            }
+        }
+        return Optional.ofNullable(msg);
+    }
+
     public Set<ClusterTemplateViewV4Response> listInWorkspaceAndCleanUpInvalids(Long workspaceId) {
         try {
             Set<ClusterTemplateView> views = transactionService.required(() -> clusterTemplateViewService.findAllActive(workspaceId));
@@ -241,7 +267,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
             return responses.stream()
                     .filter(this::isUsableClusterTemplate)
                     .collect(toSet());
-        } catch (TransactionService.TransactionExecutionException e) {
+        } catch (TransactionExecutionException e) {
             LOGGER.warn("Unable to find cluster definitions due to {}", e.getMessage());
             throw new CloudbreakServiceException("Unable to obtain cluster definitions!");
         }
