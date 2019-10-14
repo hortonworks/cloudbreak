@@ -29,7 +29,10 @@ public class AzureCredentialConnector implements CredentialConnector {
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
         try {
             AzureClient client = authenticatedContext.getParameter(AzureClient.class);
-            client.getStorageAccounts().list();
+            if (client.getCurrentSubscription() == null) {
+                return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.FAILED, null,
+                        "Your subscription ID is not valid");
+            }
         } catch (RuntimeException e) {
             LOGGER.info(e.getMessage(), e);
             return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.FAILED, e, e.getMessage());
