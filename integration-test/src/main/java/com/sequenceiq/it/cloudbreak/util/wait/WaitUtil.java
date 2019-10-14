@@ -34,6 +34,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.FreeIPAClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -476,6 +477,35 @@ public class WaitUtil {
         return sdxTestDto;
     }
 
+    public DistroXTestDto waitForDistroxInstancesStatus(DistroXTestDto distroXTestDto, CloudbreakClient cloudbreakClient, Map<String,
+            InstanceStatus> hostGroupsAndStates) {
+        String distroxName = distroXTestDto.getRequest().getName();
+
+        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
+        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
+
+        hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
+            int retryCount = 0;
+
+            while (retryCount < maxRetry && !checkDistroxInstanceStateIsAvailable(cloudbreakClient, distroxName, hostGroup, desiredState)) {
+                LOGGER.info("Waiting for instance status {} in Host Group {} at {} DistroX", desiredState, hostGroup, distroxName);
+                sleep(pollingInterval);
+                retryCount++;
+            }
+
+            if (checkDistroxInstanceStateIsAvailable(cloudbreakClient, distroxName, hostGroup, desiredState)) {
+                Log.log(LOGGER, format(" [%s] host group instance state is [%s] at [%s] DostroX.", hostGroup, desiredState, distroxName));
+            } else {
+                LOGGER.error("Timeout: Host Group: {} desired instance state: {} is NOT available at {} DostroX during {} retries", hostGroup, desiredState,
+                        distroxName, maxRetry);
+                throw new TestFailException(" Timeout: Host Group: " + hostGroup + " desired instance state: " + desiredState
+                        + " is NOT available at " + distroxName + " DostroX during " + maxRetry + " retries");
+            }
+        });
+
+        return distroXTestDto;
+    }
+
     private boolean checkSdxInstanceGroupStateIsAvailable(SdxClient sdxClient, String sdxName, String hostGroup, String desiredState) {
         InstanceMetaDataV4Response instanceMetaDataV4Response = sdxClient.getSdxClient().sdxEndpoint().getDetail(sdxName, new HashSet<>())
                 .getStackV4Response().getInstanceGroups().stream().filter(instanceGroup -> instanceGroup.getName().equals(hostGroup))
@@ -497,6 +527,25 @@ public class WaitUtil {
     private boolean checkSdxInstanceStateIsAvailable(SdxClient sdxClient, String sdxName, String hostGroup, InstanceStatus desiredState) {
         InstanceMetaDataV4Response instanceMetaDataV4Response = sdxClient.getSdxClient().sdxEndpoint().getDetail(sdxName, new HashSet<>())
                 .getStackV4Response().getInstanceGroups().stream().filter(instanceGroup -> instanceGroup.getName().equals(hostGroup))
+                .findFirst()
+                .orElse(null).getMetadata().stream().findFirst().orElse(null);
+        if (instanceMetaDataV4Response != null) {
+            LOGGER.info(" Instance group {} with {} group state and with {} instance state is present. ",
+                    instanceMetaDataV4Response.getInstanceGroup(),
+                    instanceMetaDataV4Response.getState(),
+                    instanceMetaDataV4Response.getInstanceStatus()
+            );
+            return instanceMetaDataV4Response.getInstanceStatus().equals(desiredState);
+        } else {
+            LOGGER.info(" Instance Metadata is NOT available for {} instance group! ", hostGroup);
+            return true;
+        }
+    }
+
+    private boolean checkDistroxInstanceStateIsAvailable(CloudbreakClient cloudbreakClient, String distroxName, String hostGroup, InstanceStatus desiredState) {
+        InstanceMetaDataV4Response instanceMetaDataV4Response = cloudbreakClient.getCloudbreakClient().distroXV1Endpoint()
+                .getByName(distroxName, new HashSet<>())
+                .getInstanceGroups().stream().filter(instanceGroup -> instanceGroup.getName().equals(hostGroup))
                 .findFirst()
                 .orElse(null).getMetadata().stream().findFirst().orElse(null);
         if (instanceMetaDataV4Response != null) {

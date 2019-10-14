@@ -1,0 +1,5 @@
+name: "aws-sdx-upgrade-tests"
+tests:
+  - name: "aws sdx e2e upgrade tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.aws.AwsSdxUpgradeTests

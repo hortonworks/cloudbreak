@@ -81,17 +81,17 @@ public class BasicStackTests extends AbstractE2ETest {
                         .withDesiredCount(upscaleCount), key(stack))
                 .await(STACK_AVAILABLE, key(stack))
                 .then((ctx, stackDto, cloudbreakClient) -> stackTestClient.getV4().action(ctx, stackDto, cloudbreakClient))
-                .then(checkWorgerGroupNodeCount(groupToScale, upscaleCount))
+                .then(checkWorkerGroupNodeCount(groupToScale, upscaleCount))
                 .when(stackTestClient.scalePostV4()
                         .withGroup(groupToScale)
                         .withDesiredCount(downscaleCount), key(stack))
                 .await(STACK_AVAILABLE, key(stack))
                 .then((ctx, stackDto, cloudbreakClient) -> stackTestClient.getV4().action(ctx, stackDto, cloudbreakClient))
-                .then(checkWorgerGroupNodeCount(groupToScale, downscaleCount))
+                .then(checkWorkerGroupNodeCount(groupToScale, downscaleCount))
                 .validate();
     }
 
-    private Assertion<StackTestDto, CloudbreakClient> checkWorgerGroupNodeCount(String scaledGroup, int expectedCount) {
+    private Assertion<StackTestDto, CloudbreakClient> checkWorkerGroupNodeCount(String scaledGroup, int expectedCount) {
         return (ctx, testDto, cloudbreakClient) -> {
             Integer nodeCount = testDto.getResponse().getInstanceGroups().stream()
                     .filter(group -> scaledGroup.equals(group.getName()))

@@ -23,6 +23,7 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.Azure
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
@@ -280,5 +281,10 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     public String getAccountKey() {
         return azureProperties.getCloudstorage().getAccountKey();
+    }
+
+    @Override
+    public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
+        return imageSettings.withImageCatalog(commonCloudProperties().getImageCatalogName());
     }
 }

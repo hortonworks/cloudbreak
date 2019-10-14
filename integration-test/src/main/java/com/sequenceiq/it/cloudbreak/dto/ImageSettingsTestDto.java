@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.dto;
 
+import java.util.UUID;
 import java.util.function.Function;
 
 import javax.ws.rs.core.Response;
@@ -13,6 +14,8 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 public class ImageSettingsTestDto extends AbstractCloudbreakTestDto<ImageSettingsV4Request, Response, ImageSettingsTestDto> {
 
     public static final String IMAGESETTINGS_REQUEST = "IMAGESETTINGS_REQUEST";
+
+    private static final String DEFAULT_SETTING_NAME = "test-image-setting" + '-' + UUID.randomUUID().toString().replaceAll("-", "");
 
     ImageSettingsTestDto(String newId) {
         super(newId);
@@ -29,7 +32,7 @@ public class ImageSettingsTestDto extends AbstractCloudbreakTestDto<ImageSetting
 
     @Override
     public ImageSettingsTestDto valid() {
-        return this;
+        return getCloudProvider().imageSettings(withName(getResourcePropertyProvider().getName()));
     }
 
     public ImageSettingsTestDto withImageCatalog(String imageCatalog) {
@@ -45,6 +48,16 @@ public class ImageSettingsTestDto extends AbstractCloudbreakTestDto<ImageSetting
     public ImageSettingsTestDto withOs(String os) {
         getRequest().setOs(os);
         return this;
+    }
+
+    public ImageSettingsTestDto withName(String name) {
+        setName(name);
+        return this;
+    }
+
+    @Override
+    public String getName() {
+        return super.getName() == null ? DEFAULT_SETTING_NAME : super.getName();
     }
 
     public static Function<IntegrationTestContext, ImageSettingsTestDto> getTestContextImageSettings(String key) {
