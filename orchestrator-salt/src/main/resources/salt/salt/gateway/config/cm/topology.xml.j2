@@ -437,6 +437,7 @@
     {% if 'NIFI' in exposed -%}
     <service>
         <role>NIFI</role>
+        <param name="useTwoWaySsl" value="true" />
         {% for hostloc in salt['pillar.get']('gateway:location')['NIFI_NODE'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['NIFI'] }}</url>
         {%- endfor %}
@@ -448,6 +449,7 @@
     {% if 'NIFI-REGISTRY' in exposed -%}
         <service>
             <role>NIFI-REGISTRY</role>
+            <param name="useTwoWaySsl" value="true" />
             {% for hostloc in salt['pillar.get']('gateway:location')['NIFI_REGISTRY_SERVER'] -%}
             <url>{{ protocol }}://{{ hostloc }}:{{ ports['NIFI-REGISTRY'] }}</url>
             {%- endfor %}
