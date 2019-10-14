@@ -90,6 +90,7 @@ integrationtest:
   subnetCidr: 10.0.0.0/16
   accessCidr: 0.0.0.0/0
   imageCatalogName: cloudbreak-default
+  imageCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-dev-cb-image-catalog.json
   gatewayPort: null
   defaultCredentialDescription: "autotesting credential default description."
   tags:
@@ -137,10 +138,7 @@ integrationtest:
       volumeCount: 1
       volumeType: gp2
     baseimage:
-      redhat7:
-        imageId: ee68297d-59b3-4cb0-419a-f9e00763bdb4
-        blueprints:
-          - "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+      imageId:
     cloudstorage:
       s3:
         instanceProfile:
@@ -238,8 +236,8 @@ integrationtest:
       volumeSize: 0
       volumeCount: 0
     queue: cloudbreak-tests
-    imageCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json
-    imageId: 16ad7759-83b1-42aa-aadf-0e3a6e7b5444
+    baseimage:
+      imageId:
 
   # mock parameters
   mock:

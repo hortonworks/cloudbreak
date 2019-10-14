@@ -17,15 +17,13 @@ public class YarnProperties {
 
     private String queue;
 
-    private String imageCatalogUrl;
-
-    private String imageId;
-
     private String blueprintCdhVersion;
 
     private final Credential credential = new Credential();
 
     private final Instance instance = new Instance();
+
+    private final Baseimage baseimage = new Baseimage();
 
     public String getDefaultBlueprintName() {
         return defaultBlueprintName;
@@ -67,22 +65,6 @@ public class YarnProperties {
         this.queue = queue;
     }
 
-    public String getImageCatalogUrl() {
-        return imageCatalogUrl;
-    }
-
-    public void setImageCatalogUrl(String imageCatalogUrl) {
-        this.imageCatalogUrl = imageCatalogUrl;
-    }
-
-    public String getImageId() {
-        return imageId;
-    }
-
-    public void setImageId(String imageId) {
-        this.imageId = imageId;
-    }
-
     public Credential getCredential() {
         return credential;
     }
@@ -97,6 +79,10 @@ public class YarnProperties {
 
     public void setBlueprintCdhVersion(String blueprintCdhVersion) {
         this.blueprintCdhVersion = blueprintCdhVersion;
+    }
+
+    public Baseimage getBaseimage() {
+        return baseimage;
     }
 
     public static class Credential {
@@ -150,6 +136,18 @@ public class YarnProperties {
 
         public void setVolumeCount(Integer volumeCount) {
             this.volumeCount = volumeCount;
+        }
+    }
+
+    public static class Baseimage {
+        private String imageId;
+
+        public String getImageId() {
+            return imageId;
+        }
+
+        public void setImageId(String imageId) {
+            this.imageId = imageId;
         }
     }
 }

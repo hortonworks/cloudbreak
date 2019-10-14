@@ -27,6 +27,8 @@ public class CommonCloudProperties {
 
     private String imageCatalogName;
 
+    private String imageCatalogUrl;
+
     private Integer gatewayPort;
 
     private String defaultCredentialDescription;
@@ -97,6 +99,14 @@ public class CommonCloudProperties {
 
     public void setImageCatalogName(String imageCatalogName) {
         this.imageCatalogName = imageCatalogName;
+    }
+
+    public String getImageCatalogUrl() {
+        return imageCatalogUrl;
+    }
+
+    public void setImageCatalogUrl(String imageCatalogUrl) {
+        this.imageCatalogUrl = imageCatalogUrl;
     }
 
     public Integer getGatewayPort() {

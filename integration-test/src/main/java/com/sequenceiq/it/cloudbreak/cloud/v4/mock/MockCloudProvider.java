@@ -155,8 +155,9 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return imageSettings.withImageId("f6e778fc-7f17-4535-9021-515351df3691")
-                .withImageCatalog(imageSettings.getTestContext().given(ImageSettingsTestDto.class).getName());
+        return imageSettings
+                .withImageId("f6e778fc-7f17-4535-9021-515351df3691")
+                .withImageCatalog(commonCloudProperties().getImageCatalogName());
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.dto.distrox.image;
 
+import java.util.UUID;
+
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.distrox.api.v1.distrox.model.image.DistroXImageV1Request;
@@ -10,6 +12,7 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 
 @Prototype
 public class DistroXImageTestDto extends AbstractCloudbreakTestDto<DistroXImageV1Request, Response, DistroXImageTestDto> {
+    private static final String DEFAULT_SETTING_NAME = "test-image-setting" + '-' + UUID.randomUUID().toString().replaceAll("-", "");
 
     public DistroXImageTestDto(TestContext testContext) {
         super(new DistroXImageV1Request(), testContext);
@@ -17,7 +20,7 @@ public class DistroXImageTestDto extends AbstractCloudbreakTestDto<DistroXImageV
 
     @Override
     public DistroXImageTestDto valid() {
-        return getCloudProvider().imageSettings(this);
+        return getCloudProvider().imageSettings(withName(getResourcePropertyProvider().getName()));
     }
 
     public DistroXImageTestDto withImageCatalog(String imageCatalog) {
@@ -33,6 +36,16 @@ public class DistroXImageTestDto extends AbstractCloudbreakTestDto<DistroXImageV
     public DistroXImageTestDto withImageId(String imageId) {
         getRequest().setId(imageId);
         return this;
+    }
+
+    public DistroXImageTestDto withName(String name) {
+        setName(name);
+        return this;
+    }
+
+    @Override
+    public String getName() {
+        return super.getName() == null ? DEFAULT_SETTING_NAME : super.getName();
     }
 }
 

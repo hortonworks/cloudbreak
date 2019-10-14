@@ -14,6 +14,7 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.JsonPar
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.P12Parameters;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
@@ -192,5 +193,10 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     public String getInstanceProfile() {
         return null;
+    }
+
+    @Override
+    public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
+        return imageSettings.withImageCatalog(commonCloudProperties().getImageCatalogName());
     }
 }
