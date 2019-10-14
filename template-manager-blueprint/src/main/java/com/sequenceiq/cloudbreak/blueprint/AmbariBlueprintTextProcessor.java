@@ -267,7 +267,7 @@ public class AmbariBlueprintTextProcessor implements BlueprintTextProcessor {
     }
 
     @Override
-    public Set<String> getImpalaComponentsInHostGroup(String name) {
+    public Set<String> getImpalaCoordinatorsInHostGroup(String name) {
         return Collections.emptySet();
     }
 
