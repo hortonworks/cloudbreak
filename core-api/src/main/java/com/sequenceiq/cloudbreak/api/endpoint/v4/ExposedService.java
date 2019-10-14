@@ -41,6 +41,7 @@ public enum ExposedService {
     SMM_API("Streams Messaging Manager Rest", "STREAMS_MESSAGING_MANAGER_SERVER", "SMM-API", "/smm-api/", true, 8585, 8587, true, true),
     SCHEMA_REGISTRY("Schema Registry", "SCHEMA_REGISTRY_SERVER", "SCHEMA-REGISTRY", "/schema-registry/", true, 7788, 7790, false, false),
     IMPALA("Impala", "IMPALAD", "IMPALA", "/impala/", true, 28000, 28000, true, true),
+    IMPALA_DEBUG_UI("Impala Debug UI", "IMPALA_DEBUG_UI", "IMPALA_DEBUG_UI", "/impala/", true, 25000, 25000, false, false),
     NAMENODE_HDFS("NameNode HDFS", "NAMENODE", "NAMENODE", "/", true, 8020, 8020, true, true),
     JOBTRACKER("Job Tracker", "RESOURCEMANAGER", "JOBTRACKER", "/", true, 8032, 8032, true, true),
     PROFILER_ADMIN("Profiler Admin", "PROFILER_ADMIN_AGENT", "PROFILER-ADMIN-API", "/profiler-admin/", false, 21700, 21700, true, true),
@@ -91,7 +92,9 @@ public enum ExposedService {
                 .filter(exposedService ->
                         components.contains(exposedService.serviceName)
                                 || CLOUDERA_MANAGER_UI.serviceName.equals(exposedService.serviceName)
-                                || CLOUDERA_MANAGER.serviceName.equals(exposedService.serviceName))
+                                || CLOUDERA_MANAGER.serviceName.equals(exposedService.serviceName)
+                                // IMPALA_DEBUG_UI needs to be exposed under the same service name, but with different purpose
+                                || (IMPALA_DEBUG_UI.serviceName.equals(exposedService.serviceName) && components.contains(IMPALA.serviceName)))
                 .collect(Collectors.toList());
     }
 

@@ -197,6 +197,12 @@
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
              </param>
              {%- endif %}
+             {% if 'IMPALA_DEBUG_UI' in exposed and 'IMPALA_DEBUG_UI' in salt['pillar.get']('gateway:location') -%}
+             <param>
+                 <name>IMPALA</name>
+                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+             </param>
+             {%- endif %}
          </provider>
 
     </gateway>
@@ -505,6 +511,17 @@
         <role>PROFILER-SCHEDULER-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['PROFILER_SCHEDULER_AGENT'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['PROFILER-SCHEDULER-API'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'IMPALA_DEBUG_UI' in salt['pillar.get']('gateway:location') -%}
+    {% if 'IMPALA_DEBUG_UI' in exposed -%}
+    <service>
+        <role>IMPALA</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['IMPALA_DEBUG_UI'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['IMPALA_DEBUG_UI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
