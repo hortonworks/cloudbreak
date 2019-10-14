@@ -20,6 +20,7 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.RoleBas
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
@@ -31,6 +32,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTem
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -260,5 +262,17 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public String getInstanceProfile() {
         return awsProperties.getCloudstorage().getS3().getInstanceProfile();
+    }
+
+    @Override
+    public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
+        imageCatalog.withUrl(awsProperties.getBaseimage().getImageCatalogUrl());
+        return imageCatalog;
+    }
+
+    @Override
+    public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
+        return imageSettings.withImageId(awsProperties.getBaseimage().getImageId())
+                .withImageCatalog(imageSettings.getTestContext().given(ImageSettingsTestDto.class).getName());
     }
 }

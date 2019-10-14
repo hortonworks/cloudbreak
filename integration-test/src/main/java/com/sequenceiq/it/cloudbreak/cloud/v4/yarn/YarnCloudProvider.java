@@ -152,13 +152,13 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
-        imageCatalog.withUrl(yarnProperties.getImageCatalogUrl());
+        imageCatalog.withUrl(yarnProperties.getBaseimage().getImageCatalogUrl());
         return imageCatalog;
     }
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return imageSettings.withImageId(yarnProperties.getImageId())
+        return imageSettings.withImageId(yarnProperties.getBaseimage().getImageId())
                 .withImageCatalog(imageSettings.getTestContext().given(ImageSettingsTestDto.class).getName());
     }
 
