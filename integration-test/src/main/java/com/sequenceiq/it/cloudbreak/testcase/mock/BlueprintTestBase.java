@@ -1,15 +1,8 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import java.util.Collection;
-
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class BlueprintTestBase extends AbstractIntegrationTest {
-
-    private static final String VALID_CD = "{\"Blueprints\":{\"blueprint_name\":\"ownbp\",\"stack_name\":\"HDP\",\"stack_version\":\"2.6\"},\"settings\""
-            + ":[{\"recovery_settings\":[]},{\"service_settings\":[]},{\"component_settings\":[]}],\"configurations\":[],\"host_groups\":[{\"name\":\"master\""
-            + ",\"configurations\":[],\"components\":[{\"name\":\"HIVE_METASTORE\"}],\"cardinality\":\"1"
-            + "\"}]}";
 
     private static final String VALID_CM_BP = "{\"cdhVersion\":\"7.0.1\",\"displayName\":\"datamart\",\"services\":[{\"refName\":\"hdfs\",\"serviceType\":" +
             "\"HDFS\",\"roleConfigGroups\":[{\"refName\":\"hdfs-NAMENODE-BASE\",\"roleType\":\"NAMENODE\",\"base\":true},{\"refName\":\"" +
@@ -32,16 +25,8 @@ public class BlueprintTestBase extends AbstractIntegrationTest {
             "]},{\"refName\":\"coordinator\",\"cardinality\":\"1\",\"roleConfigGroupsRefNames\":[\"hdfs-DATANODE-BASE\",\"impala-IMPALAD-COORDINATOR\"]}," +
             "{\"refName\":\"executor\",\"cardinality\":\"2\",\"roleConfigGroupsRefNames\":[\"hdfs-DATANODE-BASE\",\"impala-IMPALAD-EXECUTOR\"]}]}";
 
-    String getValidAmbariBlueprintText() {
-        return VALID_CD;
-    }
-
     String getValidCMTemplateText() {
         return VALID_CM_BP;
-    }
-
-    <O extends Object> boolean assertList(Collection<O> result, Collection<O> expected) {
-        return result.containsAll(expected) && result.size() == expected.size();
     }
 
 }

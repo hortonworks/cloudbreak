@@ -132,7 +132,6 @@ public class BlueprintServiceTest {
         when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
         when(workspaceService.get(1L, user)).thenReturn(getWorkspace());
         when(cmTemplateProcessor.getHostGroupPropertyIdentifier()).thenReturn("template");
-        when(ambariBlueprintTextProcessor.getHostGroupPropertyIdentifier()).thenReturn("group");
     }
 
     @Test
@@ -477,20 +476,17 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testIfHostGroupNamesAreNotUniqueThenBadRequestExceptionShouldCome() {
+    public void testIfUnableToDefineCMTemplateVersionThenBadRequestExceptionShouldCome() {
         String someBlueprintText = "someText";
 
         when(cmTemplateProcessorFactory.get(someBlueprintText)).thenReturn(cmTemplateProcessor);
         when(cmTemplateProcessor.getVersion()).thenReturn(Optional.empty());
-        when(ambariBlueprintProcessorFactory.get(someBlueprintText)).thenReturn(ambariBlueprintTextProcessor);
-        when(ambariBlueprintTextProcessor.getHostTemplateNames()).thenReturn(INVALID_HOST_GROUP_NAME_LIST);
 
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(someBlueprintText);
 
         exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage("Host group names must be unique! The following host group names are invalid due to their multiple " +
-                "occurrence: master");
+        exceptionRule.expectMessage("Invalid CM template!");
 
         underTest.createForLoggedInUser(blueprint, 1L, "someAccountId", "someone");
 
@@ -498,10 +494,6 @@ public class BlueprintServiceTest {
         verify(cmTemplateProcessorFactory, times(1)).get(someBlueprintText);
         verify(cmTemplateProcessor, times(1)).getVersion();
         verify(cmTemplateProcessor, times(0)).getHostTemplateNames();
-        verify(ambariBlueprintProcessorFactory, times(1)).get(anyString());
-        verify(ambariBlueprintProcessorFactory, times(1)).get(someBlueprintText);
-        verify(ambariBlueprintTextProcessor, times(1)).getVersion();
-        verify(ambariBlueprintTextProcessor, times(1)).getHostTemplateNames();
     }
 
     private Cluster getCluster(String name, Long id, Blueprint blueprint, Status clusterStatus, Status stackStatus) {
