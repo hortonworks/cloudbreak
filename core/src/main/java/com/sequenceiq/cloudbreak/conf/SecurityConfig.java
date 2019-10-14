@@ -55,6 +55,8 @@ public class SecurityConfig {
 
         private static final String DISTROX_API = API_ROOT_CONTEXT + "/v1/distrox/**";
 
+        private static final String INTERNAL_DISTROX_API = API_ROOT_CONTEXT + "/v1/internal/distrox/**";
+
         private static final String AUTOSCALE_API = API_ROOT_CONTEXT + "/autoscale/**";
 
         private static final String FLOW_API = API_ROOT_CONTEXT + "/flow_logs/**";
@@ -106,6 +108,8 @@ public class SecurityConfig {
                     .antMatchers(V4_API)
                     .authenticated()
                     .antMatchers(DISTROX_API)
+                    .authenticated()
+                    .antMatchers(INTERNAL_DISTROX_API)
                     .authenticated()
                     .antMatchers(AUTOSCALE_API)
                     .authenticated()

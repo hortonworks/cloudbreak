@@ -54,13 +54,15 @@ public class InternalCrnBuilder {
         return getInternalCrnForService().toString();
     }
 
-    public static CrnUser createInternalCrnUser(Crn crn) {
+    public static CrnUser createInternalCrnUser(Crn crn)  {
+        String service = crn.getService().toString().toUpperCase();
+        String role = "AUTOSCALE".equals(service) ? "ROLE_AUTOSCALE" : "ROLE_INTERNAL";
         return new CrnUser(crn.getResource(),
                 crn.toString(),
                 crn.getResourceType().toString(),
                 crn.getResourceType().toString(),
                 crn.getAccountId(),
-                "ROLE_" + crn.getService().toString().toUpperCase());
+                role);
     }
 
 }
