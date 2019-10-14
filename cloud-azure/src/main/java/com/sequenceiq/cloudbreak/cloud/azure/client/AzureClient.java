@@ -49,6 +49,7 @@ import com.microsoft.azure.management.resources.DeploymentOperations;
 import com.microsoft.azure.management.resources.Deployments;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.ResourceGroups;
+import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
 import com.microsoft.azure.management.storage.ProvisioningState;
@@ -579,5 +580,9 @@ public class AzureClient {
             ipList.add(publicIpAddress.ipAddress());
         }
         return ipList;
+    }
+
+    public Subscription getCurrentSubscription() {
+        return azure.getCurrentSubscription();
     }
 }
