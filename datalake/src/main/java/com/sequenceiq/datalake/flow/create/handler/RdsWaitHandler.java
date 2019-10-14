@@ -17,6 +17,7 @@ import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
@@ -101,7 +102,7 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
 
     private void validForDatabaseCreation(Long sdxId, DetailedEnvironmentResponse env) {
         String message;
-        if ("aws".equalsIgnoreCase(env.getCloudPlatform())) {
+        if (CloudPlatform.AWS.name().equalsIgnoreCase(env.getCloudPlatform())) {
             if (env.getNetwork().getSubnetMetas().size() < 2) {
                 message = String.format("Cannot create external database for sdx: %s, not enough subnets in the vpc", sdxId);
                 LOGGER.debug(message);

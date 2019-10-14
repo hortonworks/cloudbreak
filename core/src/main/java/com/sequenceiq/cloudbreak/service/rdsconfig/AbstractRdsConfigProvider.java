@@ -72,9 +72,9 @@ public abstract class AbstractRdsConfigProvider {
                 }
                 String dbName = getDb();
                 postgres.put("database", dbName);
-                postgres.put("user", getDbUser());
+                postgres.put("user", rdsConfig.getConnectionUserName());
                 postgres.put("password", rdsConfig.getConnectionPassword());
-                LOGGER.debug("Rds config added: {}, databaseEngine: {}", dbName, rdsConfig.getDatabaseEngine());
+                LOGGER.debug("RDS config added to pillar for name: {} databaseEngine: {}", dbName, rdsConfig.getDatabaseEngine());
                 return Collections.singletonMap(getPillarKey(), postgres);
             }
         }
