@@ -124,8 +124,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     @Override
-    public Set<String> getImpalaComponentsInHostGroup(String name) {
-        return getImpalaServiceComponentsByHostGroup().getOrDefault(name, Set.of());
+    public Set<String> getImpalaCoordinatorsInHostGroup(String name) {
+        return getImpalaCoordinatorsByHostGroup().getOrDefault(name, Set.of());
     }
 
     @Override
@@ -158,11 +158,11 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         return collectServiceComponentsByHostGroup(rolesByRoleRef);
     }
 
-    private Map<String, Set<String>> getImpalaServiceComponentsByHostGroup() {
-        Map<String, ServiceComponent> rolesByRoleRef = getImpalaServiceComponents();
+    private Map<String, Set<String>> getImpalaCoordinatorsByHostGroup() {
+        Map<String, ServiceComponent> rolesByRoleRef = getImpalaCoordinators();
         return collectServiceComponentsByHostGroup(rolesByRoleRef).entrySet().stream()
                 .collect(toMap(
-                        Map.Entry::getKey,
+                        Entry::getKey,
                         e -> e.getValue().stream()
                                 .map(ServiceComponent::getComponent)
                                 .collect(toSet())));
@@ -421,17 +421,17 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     @VisibleForTesting
     Map<String, ServiceComponent> mapRoleRefsToServiceComponents() {
-        return Optional.ofNullable(cmTemplate.getServices()).orElse(List.of()).stream()
+        return ofNullable(cmTemplate.getServices()).orElse(List.of()).stream()
                 .filter(service -> service.getRoleConfigGroups() != null)
                 .flatMap(service -> service.getRoleConfigGroups().stream()
-                .map(rcg -> Pair.of(service.getServiceType(), rcg)))
+                        .map(rcg -> Pair.of(service.getServiceType(), rcg)))
                 .collect(toMap(
                         pair -> pair.getRight().getRefName(),
                         pair -> ServiceComponent.of(pair.getLeft(), pair.getRight().getRoleType())));
     }
 
-    Map<String, ServiceComponent> getImpalaServiceComponents() {
-        return Optional.ofNullable(cmTemplate.getServices()).orElse(List.of()).stream()
+    Map<String, ServiceComponent> getImpalaCoordinators() {
+        return ofNullable(cmTemplate.getServices()).orElse(List.of()).stream()
                 .filter(service -> service.getRoleConfigGroups() != null)
                 .flatMap(service -> service.getRoleConfigGroups().stream()
                         .filter(filterNonCoordinatorImpalaRole())
@@ -450,8 +450,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         if (cmTemplate.getServices() != null) {
             Set<String> existingVariables = cmTemplate.getInstantiator() != null && cmTemplate.getInstantiator().getVariables() != null
                     ? cmTemplate.getInstantiator().getVariables().stream()
-                            .map(ApiClusterTemplateVariable::getName)
-                            .collect(toSet())
+                    .map(ApiClusterTemplateVariable::getName)
+                    .collect(toSet())
                     : Set.of();
 
             for (ApiClusterTemplateService s : cmTemplate.getServices()) {

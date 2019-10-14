@@ -47,7 +47,7 @@ public interface BlueprintTextProcessor {
 
     Set<String> getComponentsInHostGroup(String name);
 
-    Set<String> getImpalaComponentsInHostGroup(String name);
+    Set<String> getImpalaCoordinatorsInHostGroup(String name);
 
     Map<String, InstanceCount> getCardinalityByHostGroup();
 

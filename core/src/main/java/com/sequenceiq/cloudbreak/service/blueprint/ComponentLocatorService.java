@@ -41,13 +41,13 @@ public class ComponentLocatorService {
         return getComponentAttribute(cluster, componentNames, InstanceMetaData::getDiscoveryFQDN);
     }
 
-    public Map<String, List<String>> getImpalaComponentServiceLocation(Cluster cluster) {
+    public Map<String, List<String>> getImpalaCoordinatorLocations(Cluster cluster) {
         Map<String, List<String>> result = new HashMap<>();
         String blueprintText = cluster.getBlueprint().getBlueprintText();
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
 
         for (HostGroup hg : hostGroupService.getByCluster(cluster.getId())) {
-            Set<String> hgComponents = new HashSet<>(processor.getImpalaComponentsInHostGroup(hg.getName()));
+            Set<String> hgComponents = new HashSet<>(processor.getImpalaCoordinatorsInHostGroup(hg.getName()));
             fillList(InstanceMetaData::getDiscoveryFQDN, result, hg, hgComponents);
         }
         return result;
