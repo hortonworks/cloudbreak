@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.aws;
 
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -200,89 +199,25 @@ public class AwsProperties {
     }
 
     public static class Baseimage {
-        private final Redhat7 redhat7 = new Redhat7();
+        private String imageCatalogUrl;
 
-        private final Amazonlinux2 amazonlinux2 = new Amazonlinux2();
+        private String imageId;
 
-        private final Sles12 sles12 = new Sles12();
-
-        public Redhat7 getRedhat7() {
-            return redhat7;
-        }
-
-        public Amazonlinux2 getAmazonlinux2() {
-            return amazonlinux2;
-        }
-
-        public Sles12 getSles12() {
-            return sles12;
-        }
-
-        public static class Redhat7 {
-            private String imageId;
-
-            private List<String> blueprints;
-
-            public String getImageId() {
+        public String getImageId() {
                 return imageId;
             }
 
-            public void setImageId(String imageId) {
+        public void setImageId(String imageId) {
                 this.imageId = imageId;
             }
 
-            public List<String> getBlueprints() {
-                return blueprints;
+        public String getImageCatalogUrl() {
+                return imageCatalogUrl;
             }
 
-            public void setBlueprints(List<String> blueprints) {
-                this.blueprints = blueprints;
+        public void setImageCatalogUrl(String imageCatalogUrl) {
+                this.imageCatalogUrl = imageCatalogUrl;
             }
-        }
-
-        public static class Amazonlinux2 {
-            private String imageId;
-
-            private List<String> blueprints;
-
-            public String getImageId() {
-                return imageId;
-            }
-
-            public void setImageId(String imageId) {
-                this.imageId = imageId;
-            }
-
-            public List<String> getBlueprints() {
-                return blueprints;
-            }
-
-            public void setBlueprints(List<String> blueprints) {
-                this.blueprints = blueprints;
-            }
-        }
-
-        public static class Sles12 {
-            private String imageId;
-
-            private List<String> blueprints;
-
-            public String getImageId() {
-                return imageId;
-            }
-
-            public void setImageId(String imageId) {
-                this.imageId = imageId;
-            }
-
-            public List<String> getBlueprints() {
-                return blueprints;
-            }
-
-            public void setBlueprints(List<String> blueprints) {
-                this.blueprints = blueprints;
-            }
-        }
     }
 
     public static class Cloudstorage {
