@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
-import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.evaluateIfTrueDoOtherwise;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -113,8 +112,11 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public Blueprint createForLoggedInUser(Blueprint blueprint, Long workspaceId, String accountId, String creator) {
-        evaluateIfTrueDoOtherwise(blueprint.getBlueprintText(), bpText -> getVersionForCmWithBlueprintProcessingExceptionHandling(bpText).isPresent(),
-                bpText -> validateHostNames(cmTemplateProcessorFactory.get(bpText)), bpText -> validateHostNames(ambariBlueprintProcessorFactory.get(bpText)));
+        if (getVersionForCmWithBlueprintProcessingExceptionHandling(blueprint.getBlueprintText()).isPresent()) {
+            validateHostNames(cmTemplateProcessorFactory.get(blueprint.getBlueprintText()));
+        } else {
+            throw new BadRequestException("Invalid CM template!");
+        }
         decorateWithCrn(blueprint, accountId, creator);
         return super.createForLoggedInUser(blueprint, workspaceId);
     }
@@ -383,6 +385,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     private void validateHostNames(BlueprintTextProcessor blueprintTextProcessor) {
+        LOGGER.debug("Validating CM template host names...");
         List<String> hostTemplateNames = blueprintTextProcessor.getHostTemplateNames();
         if (hostNamesAreNotUnique(hostTemplateNames)) {
             String nonUniqueHostTemplateNames = String.join(", ", findHostTemplateNameDuplicates(hostTemplateNames));
@@ -396,6 +399,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         try {
             return cmTemplateProcessorFactory.get(bpText).getVersion();
         } catch (BlueprintProcessingException ignore) {
+            LOGGER.info("Unable to serialize blueprint text as a CM template!");
             return Optional.empty();
         }
     }
