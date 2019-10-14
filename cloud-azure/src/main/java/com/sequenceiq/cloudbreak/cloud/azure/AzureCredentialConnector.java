@@ -51,15 +51,18 @@ public class AzureCredentialConnector implements CredentialConnector {
         CloudCredential cloudCredential = authenticatedContext.getCloudCredential();
         try {
             AzureClient client = authenticatedContext.getParameter(AzureClient.class);
-            client.getStorageAccounts().list();
-
-            client.getRefreshToken()
-                    .ifPresent(refreshToken -> {
-                        Map<String, String> codeGrantFlowBased = (Map<String, String>) cloudCredential
-                                .getParameter("azure", Map.class)
-                                .get(AzureCredentialView.CODE_GRANT_FLOW_BASED);
-                        codeGrantFlowBased.put("refreshToken", refreshToken);
-                    });
+            if (client.getCurrentSubscription() == null) {
+                return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.FAILED, null,
+                        "Your subscription ID is not valid");
+            } else {
+                client.getRefreshToken()
+                        .ifPresent(refreshToken -> {
+                            Map<String, String> codeGrantFlowBased = (Map<String, String>) cloudCredential
+                                    .getParameter("azure", Map.class)
+                                    .get(AzureCredentialView.CODE_GRANT_FLOW_BASED);
+                            codeGrantFlowBased.put("refreshToken", refreshToken);
+                        });
+            }
         } catch (RuntimeException e) {
             LOGGER.warn(e.getMessage(), e);
             return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, e.getMessage());

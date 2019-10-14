@@ -55,6 +55,7 @@ import com.microsoft.azure.management.resources.DeploymentOperations;
 import com.microsoft.azure.management.resources.Deployments;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.ResourceGroups;
+import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.fluentcore.arm.AvailabilityZoneId;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
@@ -684,5 +685,9 @@ public class AzureClient {
         PagedList<RoleAssignment> roleAssignments = listIdentityRoleAssignmentsByScopeId(scopeId);
         return roleAssignments.stream().anyMatch(roleAssignment -> roleAssignment.principalId() != null &&
                 roleAssignment.principalId().equalsIgnoreCase(identity.principalId()));
+    }
+
+    public Subscription getCurrentSubscription() {
+        return azure.getCurrentSubscription();
     }
 }
