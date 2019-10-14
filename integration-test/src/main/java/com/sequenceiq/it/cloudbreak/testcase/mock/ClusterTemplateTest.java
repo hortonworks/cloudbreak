@@ -25,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.clustertemplate.DistroXTemplateTestDto;
@@ -101,6 +102,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         String distroxTemplate = resourcePropertyProvider().getName();
 
         testContext
+                .given("clusterWithUnPw", ClusterTestDto.class)
+                .withUserName("someusername")
+                .withPassword("Passw0rd")
                 .given(cm, DistroXClouderaManagerTestDto.class)
                 .withoutRepository()
                 .given(DistroXNetworkTestDto.class)
@@ -112,6 +116,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .withImage()
                 .withMockedGatewayPort()
                 .withDefaultThreeInstanceGroups()
+                .withCluster("clusterWithUnPw")
                 .given(template, ClusterTemplateTestDto.class)
                 .withNetwork()
                 .withImageSettings()
@@ -285,6 +290,63 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .expect(BadRequestException.class, RunningParameter.key(generatedKey)
                         .withExpectedMessage("The length of the cluster's name has to be in range of 5 to 40")
                 )
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "a cluster definition create request is sent without blueprint name",
+            then = "the cluster definition cannot be created"
+    )
+    public void testCreateWithoutBlueprintInCluster(TestContext testContext) {
+        String generatedKey = resourcePropertyProvider().getName();
+
+        testContext
+                .given("dixTemplate", DistroXTemplateTestDto.class)
+                .withBlueprintName(null)
+                .given(ClusterTemplateTestDto.class)
+                .withDistroXTemplateKey("dixTemplate")
+                .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
+                .expect(BadRequestException.class, RunningParameter.key(generatedKey))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "a cluster definition create request is sent with an empty blueprint name",
+            then = "the cluster definition cannot be created"
+    )
+    public void testCreateWithEmptyBlueprintInCluster(TestContext testContext) {
+        String generatedKey = resourcePropertyProvider().getName();
+
+        testContext
+                .given("dixTemplate", DistroXTemplateTestDto.class)
+                .withBlueprintName("")
+                .given(ClusterTemplateTestDto.class)
+                .withDistroXTemplateKey("dixTemplate")
+                .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
+                .expect(BadRequestException.class, RunningParameter.key(generatedKey))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "a cluster definition create request is sent with a not existing blueprint name",
+            then = "the cluster definition cannot be created"
+    )
+    public void testCreateWithNotExistingBlueprintInCluster(TestContext testContext) {
+        String generatedKey = resourcePropertyProvider().getName();
+
+        testContext
+                .given("dixTemplate", DistroXTemplateTestDto.class)
+                .withBlueprintName("thisBlueprintDoesNotExistsForSure")
+                .given(ClusterTemplateTestDto.class)
+                .withDistroXTemplateKey("dixTemplate")
+                .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
+                .expect(BadRequestException.class, RunningParameter.key(generatedKey))
                 .validate();
     }
 

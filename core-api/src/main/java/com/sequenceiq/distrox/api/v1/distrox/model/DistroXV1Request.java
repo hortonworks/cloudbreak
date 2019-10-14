@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.validation.Valid;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -30,6 +32,7 @@ public class DistroXV1Request extends DistroXV1Base {
 
     private NetworkV1Request network;
 
+    @Valid
     private DistroXClusterV1Request cluster;
 
     private SdxV1Request sdx;
