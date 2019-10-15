@@ -89,6 +89,9 @@ public class StackUpscaleActions {
     @Inject
     private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
 
+    @Inject
+    private StackScalabilityCondition stackScalabilityCondition;
+
     @Bean(name = "UPSCALE_PREVALIDATION_STATE")
     public Action<?, ?> prevalidate() {
         return new AbstractStackUpscaleAction<>(StackScaleTriggerEvent.class) {
@@ -149,9 +152,9 @@ public class StackUpscaleActions {
         };
     }
 
-    private int getInstanceCountToCreate(Stack stack, String instanceGroupName, int adjusment) {
+    private int getInstanceCountToCreate(Stack stack, String instanceGroupName, int adjustment) {
         Set<InstanceMetaData> instanceMetadata = instanceMetaDataService.unusedInstancesInInstanceGroupByName(stack.getId(), instanceGroupName);
-        return adjusment - instanceMetadata.size();
+        return stackScalabilityCondition.isScalable(stack, instanceGroupName) ? adjustment - instanceMetadata.size() : 0;
     }
 
     @Bean(name = "ADD_INSTANCES_FINISHED_STATE")

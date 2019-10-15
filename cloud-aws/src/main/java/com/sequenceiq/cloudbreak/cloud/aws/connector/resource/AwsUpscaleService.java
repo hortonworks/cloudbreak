@@ -2,10 +2,12 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static java.util.Collections.singletonList;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
@@ -60,24 +64,23 @@ public class AwsUpscaleService {
     private AwsElasticIpService awsElasticIpService;
 
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
-        AmazonCloudFormationRetryClient cloudFormationClient = awsClient.createCloudFormationRetryClient(new AwsCredentialView(ac.getCloudCredential()),
-                ac.getCloudContext().getLocation().getRegion().value());
-        AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(new AwsCredentialView(ac.getCloudCredential()),
-                ac.getCloudContext().getLocation().getRegion().value());
-        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
-                ac.getCloudContext().getLocation().getRegion().value());
+        AmazonCloudFormationRetryClient cloudFormationClient = getCloudFormationRetryClient(ac);
+        AmazonAutoScalingRetryClient amazonASClient = getAutoScalingRetryClient(ac);
+        AmazonEC2Client amazonEC2Client = getEC2Client(ac);
 
         List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
-
-        Map<String, Group> groupMap = scaledGroups.stream().collect(
-                Collectors.toMap(g -> cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, g.getName()), g -> g));
+        Map<String, Group> groupMap = getAutoScaleGroupsByName(ac, cloudFormationClient, scaledGroups);
         awsAutoScalingService.resumeAutoScaling(amazonASClient, groupMap.keySet(), UPSCALE_PROCESSES);
+
+        Map<String, Integer> autoScalingGroupsBySize = getAutoScalingGroupsBySize(groupMap.keySet(), amazonASClient);
+
         for (Entry<String, Group> groupEntry : groupMap.entrySet()) {
-            awsAutoScalingService.updateAutoscalingGroup(amazonASClient, groupEntry.getKey(), groupEntry.getValue(), ac.getCloudContext().getId());
+            if (autoScalingGroupsBySize.get(groupEntry.getKey()) < groupEntry.getValue().getInstancesSize()) {
+                awsAutoScalingService.updateAutoscalingGroup(amazonASClient, groupEntry.getKey(), groupEntry.getValue(), ac.getCloudContext().getId());
+            }
         }
         awsAutoScalingService.scheduleStatusChecks(stack, ac, cloudFormationClient);
         awsAutoScalingService.suspendAutoScaling(ac, stack);
-
         List<CloudResource> instances = cfStackUtil.getInstanceCloudResources(ac, cloudFormationClient, amazonASClient, scaledGroups);
         associateElasticIpWithNewInstances(stack, resources, cloudFormationClient, amazonEC2Client, scaledGroups, instances);
 
@@ -85,10 +88,40 @@ public class AwsUpscaleService {
         List<CloudResource> newInstances = getNewInstances(scaledGroups, instances);
         List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(scaledGroups, resources);
         List<CloudResource> networkResources = resources.stream()
-                .filter(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType())).collect(Collectors.toList());
+                .filter(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType()))
+                .collect(Collectors.toList());
         awsComputeResourceService.buildComputeResourcesForUpscale(ac, stack, groupsWithNewInstances, newInstances, reattachableVolumeSets, networkResources);
 
         return singletonList(new CloudResourceStatus(cfStackUtil.getCloudFormationStackResource(resources), ResourceStatus.UPDATED));
+    }
+
+    private Map<String, Integer> getAutoScalingGroupsBySize(Set<String> autoScalingGroupNames, AmazonAutoScalingRetryClient amazonASClient) {
+        DescribeAutoScalingGroupsRequest request = new DescribeAutoScalingGroupsRequest();
+        request.setAutoScalingGroupNames(new ArrayList<>(autoScalingGroupNames));
+        return amazonASClient.describeAutoScalingGroups(request).getAutoScalingGroups().stream()
+                .collect(Collectors.toMap(AutoScalingGroup::getAutoScalingGroupName,
+                                autoScalingGroup -> autoScalingGroup.getInstances().size()));
+    }
+
+    private Map<String, Group> getAutoScaleGroupsByName(AuthenticatedContext ac, AmazonCloudFormationRetryClient cloudFormationClient,
+            List<Group> scaledGroups) {
+        return scaledGroups.stream()
+                .collect(Collectors.toMap(g -> cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, g.getName()), g -> g));
+    }
+
+    private AmazonEC2Client getEC2Client(AuthenticatedContext ac) {
+        return awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
+    }
+
+    private AmazonAutoScalingRetryClient getAutoScalingRetryClient(AuthenticatedContext ac) {
+        return awsClient.createAutoScalingRetryClient(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
+    }
+
+    private AmazonCloudFormationRetryClient getCloudFormationRetryClient(AuthenticatedContext ac) {
+        return awsClient.createCloudFormationRetryClient(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
     }
 
     private void associateElasticIpWithNewInstances(CloudStack stack, List<CloudResource> resources, AmazonCloudFormationRetryClient cloudFormationClient,
@@ -98,8 +131,8 @@ public class AwsUpscaleService {
         Map<String, List<String>> gatewayGroupInstanceMapping = createGatewayToNewInstancesMap(instances, gateways);
         if (mapPublicIpOnLaunch && !gateways.isEmpty()) {
             String cFStackName = cfStackUtil.getCloudFormationStackResource(resources).getName();
-            Map<String, String> eipAllocationIds =
-                    awsElasticIpService.getElasticIpAllocationIds(cfStackUtil.getOutputs(cFStackName, cloudFormationClient), cFStackName);
+            Map<String, String> eipAllocationIds = awsElasticIpService.getElasticIpAllocationIds(cfStackUtil.getOutputs(cFStackName, cloudFormationClient),
+                    cFStackName);
             for (Group gateway : gateways) {
                 List<String> eips = awsElasticIpService.getEipsForGatewayGroup(eipAllocationIds, gateway);
                 List<String> freeEips = awsElasticIpService.getFreeIps(eips, amazonEC2Client);
