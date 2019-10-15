@@ -58,6 +58,8 @@ public class KerberosMgmtV1Service {
 
     private static final String ROLE_NOT_ALLOWED = "The role request is not allowed when retrieving a keytab";
 
+    private static final String PRIVILEGE_DOES_NOT_EXIST = "At least one privilege in the role request does not exist.";
+
     private static final String IPA_STACK_NOT_FOUND = "Stack for IPA server not found.";
 
     private static final int NOT_FOUND_ERROR_CODE = 4001;
@@ -85,6 +87,9 @@ public class KerberosMgmtV1Service {
         Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
         String realm = getRealm(freeIpaStack);
         FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
+        if (!roleComponent.privilegesExist(request.getRoleRequest(), ipaClient)) {
+            throw new KeytabCreationException(PRIVILEGE_DOES_NOT_EXIST);
+        }
         addHost(request.getServerHostName(), null, ipaClient);
         com.sequenceiq.freeipa.client.model.Service service = serviceAdd(request, realm, ipaClient);
         String serviceKeytab;
@@ -120,6 +125,9 @@ public class KerberosMgmtV1Service {
         HostKeytabResponse response = new HostKeytabResponse();
         Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
         FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
+        if (!roleComponent.privilegesExist(request.getRoleRequest(), ipaClient)) {
+            throw new KeytabCreationException(PRIVILEGE_DOES_NOT_EXIST);
+        }
         Host host = addHost(request.getServerHostName(), request.getRoleRequest(), ipaClient);
         String hostKeytab;
         if (host.getHasKeytab() && request.getDoNotRecreateKeytab()) {

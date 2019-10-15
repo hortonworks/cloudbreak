@@ -160,12 +160,14 @@ public class KerberosMgmtV1ServiceTest {
         request.setEnvironmentCrn(ENVIRONMENT_ID);
         request.setServerHostName(HOST);
         Mockito.when(stackService.getByEnvironmentCrnAndAccountId(anyString(), anyString())).thenThrow(new NotFoundException("Stack not found"));
+        Mockito.when(roleComponent.privilegesExist(any(), any())).thenReturn(true);
         Exception e = Assertions.assertThrows(NotFoundException.class,
                 () -> underTest.generateServiceKeytab(request, ACCOUNT_ID));
         Assertions.assertEquals("Stack not found", e.getMessage());
         Mockito.reset(stackService);
         Mockito.when(stackService.getByEnvironmentCrnAndAccountId(anyString(), anyString())).thenReturn(stack);
         Mockito.when(freeIpaService.findByStack(any())).thenThrow(new NotFoundException("Stack not found"));
+        Mockito.when(roleComponent.privilegesExist(any(), any())).thenReturn(true);
         e = Assertions.assertThrows(KeytabCreationException.class,
                 () -> underTest.generateServiceKeytab(request, ACCOUNT_ID));
         Assertions.assertEquals("Failed to create service as realm was empty.", e.getMessage());
@@ -173,12 +175,14 @@ public class KerberosMgmtV1ServiceTest {
         Mockito.when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
         Mockito.when(freeIpaClientFactory.getFreeIpaClientForStack(any())).thenReturn(mockIpaClient);
         Mockito.when(mockIpaClient.addHost(anyString())).thenThrow(ipaClientException);
+        Mockito.when(roleComponent.privilegesExist(any(), any())).thenReturn(true);
         e = Assertions.assertThrows(KeytabCreationException.class,
                 () -> underTest.generateServiceKeytab(request, ACCOUNT_ID));
         Assertions.assertEquals("Failed to create host.", e.getMessage());
         Mockito.reset(mockIpaClient);
         Mockito.when(mockIpaClient.addHost(anyString())).thenReturn(host);
         Mockito.when(mockIpaClient.addService(anyString())).thenThrow(ipaClientException);
+        Mockito.when(roleComponent.privilegesExist(any(), any())).thenReturn(true);
         e = Assertions.assertThrows(RuntimeException.class,
                 () -> underTest.generateServiceKeytab(request, ACCOUNT_ID));
         Assertions.assertEquals("Failed to create service principal.", e.getMessage());
@@ -186,9 +190,15 @@ public class KerberosMgmtV1ServiceTest {
         Mockito.when(mockIpaClient.addHost(anyString())).thenReturn(host);
         Mockito.when(mockIpaClient.addService(anyString())).thenReturn(service);
         Mockito.when(mockIpaClient.getKeytab(anyString())).thenThrow(ipaClientException);
+        Mockito.when(roleComponent.privilegesExist(any(), any())).thenReturn(true);
         e = Assertions.assertThrows(KeytabCreationException.class,
                 () -> underTest.generateServiceKeytab(request, ACCOUNT_ID));
         Assertions.assertEquals("Failed to create keytab.", e.getMessage());
+        Mockito.reset(mockIpaClient);
+        Mockito.when(roleComponent.privilegesExist(any(), any())).thenReturn(false);
+        e = Assertions.assertThrows(KeytabCreationException.class,
+                () -> underTest.generateServiceKeytab(request, ACCOUNT_ID));
+        Assertions.assertEquals("At least one privilege in the role request does not exist.", e.getMessage());
     }
 
     @Test
@@ -214,6 +224,7 @@ public class KerberosMgmtV1ServiceTest {
         Mockito.when(mockIpaClient.getKeytab(anyString())).thenReturn(keytab);
         Mockito.when(vaultComponent.getSecretResponseForKeytab(any(ServiceKeytabRequest.class), anyString(), anyString())).thenReturn(expectedSecret);
         Mockito.when(vaultComponent.getSecretResponseForPrincipal(any(ServiceKeytabRequest.class), anyString(), anyString())).thenReturn(expectedSecret);
+        Mockito.when(roleComponent.privilegesExist(any(), any())).thenReturn(true);
         ServiceKeytabResponse resp = underTest.generateServiceKeytab(request, ACCOUNT_ID);
         Assertions.assertEquals(expectedSecret, resp.getKeytab());
         Assertions.assertEquals(expectedSecret, resp.getServicePrincipal());
@@ -221,6 +232,7 @@ public class KerberosMgmtV1ServiceTest {
         Mockito.verify(mockIpaClient).addService(SERVICE_PRINCIPAL);
         Mockito.verify(mockIpaClient).allowServiceKeytabRetrieval(SERVICE_PRINCIPAL, ADMIN);
         Mockito.verify(mockIpaClient).getKeytab(SERVICE_PRINCIPAL);
+        Mockito.verify(roleComponent).privilegesExist(roleRequest, mockIpaClient);
         Mockito.verify(roleComponent).addRoleAndPrivileges(Optional.of(service), Optional.empty(), roleRequest, mockIpaClient);
     }
 
@@ -266,9 +278,15 @@ public class KerberosMgmtV1ServiceTest {
         request.setServerHostName(HOST);
         Mockito.when(freeIpaClientFactory.getFreeIpaClientForStack(any())).thenReturn(mockIpaClient);
         Mockito.when(mockIpaClient.addHost(anyString())).thenThrow(ipaClientException);
+        Mockito.when(roleComponent.privilegesExist(any(), any())).thenReturn(true);
         Exception e = Assertions.assertThrows(KeytabCreationException.class,
                 () -> underTest.generateHostKeytab(request, ACCOUNT_ID));
         Assertions.assertEquals("Failed to create host.", e.getMessage());
+        Mockito.reset(mockIpaClient);
+        Mockito.when(roleComponent.privilegesExist(any(), any())).thenReturn(false);
+        e = Assertions.assertThrows(KeytabCreationException.class,
+                () -> underTest.generateHostKeytab(request, ACCOUNT_ID));
+        Assertions.assertEquals("At least one privilege in the role request does not exist.", e.getMessage());
     }
 
     @Test
@@ -291,12 +309,14 @@ public class KerberosMgmtV1ServiceTest {
         Mockito.when(mockIpaClient.getKeytab(anyString())).thenReturn(keytab);
         Mockito.when(vaultComponent.getSecretResponseForKeytab(any(HostKeytabRequest.class), anyString(), anyString())).thenReturn(expectedSecret);
         Mockito.when(vaultComponent.getSecretResponseForPrincipal(any(HostKeytabRequest.class), anyString(), anyString())).thenReturn(expectedSecret);
+        Mockito.when(roleComponent.privilegesExist(any(), any())).thenReturn(true);
         HostKeytabResponse resp = underTest.generateHostKeytab(request, ACCOUNT_ID);
         Assertions.assertEquals(expectedSecret, resp.getKeytab());
         Assertions.assertEquals(expectedSecret, resp.getHostPrincipal());
         Mockito.verify(mockIpaClient).addHost(HOST);
         Mockito.verify(mockIpaClient).allowHostKeytabRetrieval(HOST, ADMIN);
         Mockito.verify(mockIpaClient).getKeytab(HOST_PRINCIPAL);
+        Mockito.verify(roleComponent).privilegesExist(roleRequest, mockIpaClient);
         Mockito.verify(roleComponent).addRoleAndPrivileges(Optional.empty(), Optional.of(host), roleRequest, mockIpaClient);
     }
 

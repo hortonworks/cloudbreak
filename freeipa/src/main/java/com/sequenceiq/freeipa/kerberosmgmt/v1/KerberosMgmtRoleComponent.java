@@ -24,6 +24,23 @@ public class KerberosMgmtRoleComponent {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosMgmtV1Service.class);
 
+    public boolean privilegesExist(RoleRequest roleRequest, FreeIpaClient ipaClient) {
+        return roleRequest == null ||
+            roleRequest.getPrivileges().stream().allMatch(privilegeName -> {
+                try {
+                    ipaClient.showPrivilege(privilegeName);
+                    return true;
+                } catch (FreeIpaClientException e) {
+                    if (!KerberosMgmtUtil.isNotFoundException(e)) {
+                        LOGGER.debug("Privilege [{}] does not exist", privilegeName);
+                    } else {
+                        LOGGER.error("Privilege [{}] show error", privilegeName, e);
+                    }
+                    return false;
+                }
+            });
+    }
+
     public void addRoleAndPrivileges(Optional<Service> service, Optional<Host> host, RoleRequest roleRequest,
             FreeIpaClient ipaClient)
             throws FreeIpaClientException {
