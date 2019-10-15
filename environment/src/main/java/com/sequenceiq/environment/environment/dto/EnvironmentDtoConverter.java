@@ -48,14 +48,12 @@ public class EnvironmentDtoConverter {
                 .withTelemetry(environment.getTelemetry())
                 .withEnvironmentStatus(environment.getStatus())
                 .withCreator(environment.getCreator())
-                .withCreateFreeIpa(environment.isCreateFreeIpa())
                 .withAuthentication(authenticationDtoConverter.authenticationToDto(environment.getAuthentication()))
                 .withCreateFreeIpa(environment.isCreateFreeIpa())
                 .withCreated(environment.getCreated())
                 .withStatusReason(environment.getStatusReason())
-                .withTunnel(environment.getTunnel())
+                .withExperimentalFeatures(environment.getExperimentalFeatures())
                 .withSecurityAccess(environmentToSecurityAccessDto(environment))
-                .withIdBrokerMappingSource(environment.getIdBrokerMappingSource())
                 .withAdminGroupName(environment.getAdminGroupName());
 
         doIfNotNull(environment.getParameters(), parameters -> builder.withParameters(
@@ -80,10 +78,9 @@ public class EnvironmentDtoConverter {
         environment.setLocationDisplayName(creationDto.getLocation().getDisplayName());
         environment.setStatus(EnvironmentStatus.CREATION_INITIATED);
         environment.setCreateFreeIpa(creationDto.isCreateFreeIpa());
-        environment.setTunnel(creationDto.getTunnel());
         environment.setAdminGroupName(creationDto.getAdminGroupName());
-        environment.setIdBrokerMappingSource(creationDto.getIdBrokerMappingSource());
         environment.setCreated(System.currentTimeMillis());
+        environment.setExperimentalFeatures(creationDto.getExperimentalFeatures());
         return environment;
     }
 

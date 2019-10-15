@@ -7,10 +7,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
-import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
+import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -63,13 +62,11 @@ public class EnvironmentDto implements Payload {
 
     private SecurityAccessDto securityAccess;
 
-    private Tunnel tunnel;
-
-    private IdBrokerMappingSource idBrokerMappingSource;
-
     private String adminGroupName;
 
     private ParametersDto parameters;
+
+    private ExperimentalFeatures experimentalFeatures = new ExperimentalFeatures();
 
     @Override
     public Long getResourceId() {
@@ -249,22 +246,6 @@ public class EnvironmentDto implements Payload {
         this.securityAccess = securityAccess;
     }
 
-    public Tunnel getTunnel() {
-        return tunnel;
-    }
-
-    public void setTunnel(Tunnel tunnel) {
-        this.tunnel = tunnel;
-    }
-
-    public IdBrokerMappingSource getIdBrokerMappingSource() {
-        return idBrokerMappingSource;
-    }
-
-    public void setIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
-        this.idBrokerMappingSource = idBrokerMappingSource;
-    }
-
     public String getAdminGroupName() {
         return adminGroupName;
     }
@@ -279,6 +260,14 @@ public class EnvironmentDto implements Payload {
 
     public void setParameters(ParametersDto parameters) {
         this.parameters = parameters;
+    }
+
+    public ExperimentalFeatures getExperimentalFeatures() {
+        return experimentalFeatures;
+    }
+
+    public void setExperimentalFeatures(ExperimentalFeatures experimentalFeatures) {
+        this.experimentalFeatures = experimentalFeatures;
     }
 
     public static Builder builder() {
@@ -328,13 +317,11 @@ public class EnvironmentDto implements Payload {
 
         private SecurityAccessDto securityAccess;
 
-        private Tunnel tunnel;
-
-        private IdBrokerMappingSource idBrokerMappingSource;
-
         private String adminGroupName;
 
         private ParametersDto parameters;
+
+        private ExperimentalFeatures experimentalFeatures;
 
         private Builder() {
         }
@@ -444,16 +431,6 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
-        public Builder withTunnel(Tunnel tunnel) {
-            this.tunnel = tunnel;
-            return this;
-        }
-
-        public Builder withIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
-            this.idBrokerMappingSource = idBrokerMappingSource;
-            return this;
-        }
-
         public Builder withAdminGroupName(String adminGroupName) {
             this.adminGroupName = adminGroupName;
             return this;
@@ -461,6 +438,11 @@ public class EnvironmentDto implements Payload {
 
         public Builder withParameters(ParametersDto parameters) {
             this.parameters = parameters;
+            return this;
+        }
+
+        public Builder withExperimentalFeatures(ExperimentalFeatures experimentalFeatures) {
+            this.experimentalFeatures = experimentalFeatures;
             return this;
         }
 
@@ -487,10 +469,9 @@ public class EnvironmentDto implements Payload {
             environmentDto.setStatusReason(statusReason);
             environmentDto.setCreated(created);
             environmentDto.setSecurityAccess(securityAccess);
-            environmentDto.setTunnel(tunnel);
-            environmentDto.setIdBrokerMappingSource(idBrokerMappingSource);
             environmentDto.setAdminGroupName(adminGroupName);
             environmentDto.setParameters(parameters);
+            environmentDto.setExperimentalFeatures(experimentalFeatures);
             return environmentDto;
         }
     }
