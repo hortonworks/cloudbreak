@@ -65,6 +65,10 @@ freeipa:
       timeout-millis: 1800000
       initial-delay-millis: 60000
       fixed-delay-millis: 60000
+    poller:
+      enabled: true
+      initial-delay-millis: 60000
+      fixed-delay-millis: 300000
 
 info:
   app:

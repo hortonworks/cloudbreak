@@ -20,6 +20,10 @@ public class StackService {
     @Inject
     private StackRepository stackRepository;
 
+    public List<Stack> findAllRunning() {
+        return stackRepository.findAllRunning();
+    }
+
     public Stack getByIdWithListsInTransaction(Long id) {
         return stackRepository.findOneWithLists(id).orElseThrow(() -> new NotFoundException(String.format("Stack [%s] not found", id)));
     }
