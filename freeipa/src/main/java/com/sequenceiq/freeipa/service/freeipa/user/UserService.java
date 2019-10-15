@@ -3,11 +3,13 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -28,6 +30,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
@@ -43,6 +47,7 @@ import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.converter.freeipa.user.SyncOperationToSyncOperationStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.SyncOperation;
+import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
@@ -79,6 +84,12 @@ public class UserService {
     @Inject
     private SyncOperationToSyncOperationStatus syncOperationToSyncOperationStatus;
 
+    @Inject
+    private UmsEventGenerationIdsProvider umsEventGenerationIdsProvider;
+
+    @Inject
+    private UserSyncStatusService userSyncStatusService;
+
     public SyncOperationStatus synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
                                                 Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
 
@@ -112,39 +123,61 @@ public class UserService {
         Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
         try {
             Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
+
+            Optional<String> requestIdOptional = Optional.of(
+                    Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()))
+                            .orElseGet(() -> {
+                                String requestId = UUID.randomUUID().toString();
+                                LOGGER.debug("No requestId found. Setting request id to new UUID [{}]", requestId);
+                                MDCBuilder.addRequestId(requestId);
+                                return requestId;
+                            }));
+
+            boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
+            Json umsEventGenerationIdsJson =  fullSync ?
+                    new Json(umsEventGenerationIdsProvider.getEventGenerationIds(actorCrn, accountId, requestIdOptional)) :
+                    null;
+
             Map<String, UsersState> envToUmsStateMap = umsUsersStateProvider
-                .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userCrnFilter, machineUserCrnFilter);
+                .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userCrnFilter, machineUserCrnFilter, requestIdOptional);
+
+            Collection<SuccessDetails> success = new ConcurrentLinkedQueue<>();
+            Collection<FailureDetails> failure = new ConcurrentLinkedQueue<>();
 
             Map<String, Future<SyncStatusDetail>> statusFutures = stacks.stream()
                     .collect(Collectors.toMap(Stack::getEnvironmentCrn,
                             stack -> asyncTaskExecutor.submit(() -> {
-                                        MDCBuilder.buildMdcContext(stack);
-                                        return synchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), userCrnFilter, machineUserCrnFilter);
-                                    })));
-
-            List<SuccessDetails> success = new ArrayList<>();
-            List<FailureDetails> failure = new ArrayList<>();
+                                MDCBuilder.buildMdcContext(stack);
+                                String envCrn = stack.getEnvironmentCrn();
+                                SyncStatusDetail statusDetail =
+                                        synchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), userCrnFilter, machineUserCrnFilter);
+                                switch (statusDetail.getStatus()) {
+                                    case COMPLETED:
+                                        success.add(new SuccessDetails(envCrn));
+                                        if (umsEventGenerationIdsJson != null) {
+                                            UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
+                                            userSyncStatus.setUmsEventGenerationIds(umsEventGenerationIdsJson);
+                                            userSyncStatusService.save(userSyncStatus);
+                                        }
+                                        break;
+                                    case FAILED:
+                                        failure.add(new FailureDetails(envCrn, statusDetail.getDetails()));
+                                        break;
+                                    default:
+                                        failure.add(new FailureDetails(envCrn, "Unknown status"));
+                                        break;
+                                }
+                                return statusDetail;
+                            })));
 
             statusFutures.forEach((envCrn, statusFuture) -> {
-                SyncStatusDetail status;
                 try {
-                    status = statusFuture.get();
-                    switch (status.getStatus()) {
-                        case COMPLETED:
-                            success.add(new SuccessDetails(envCrn));
-                            break;
-                        case FAILED:
-                            failure.add(new FailureDetails(envCrn, status.getDetails()));
-                            break;
-                        default:
-                            failure.add(new FailureDetails(envCrn, "Unknown status"));
-                            break;
-                    }
+                    statusFuture.get();
                 } catch (InterruptedException | ExecutionException e) {
                     failure.add(new FailureDetails(envCrn, e.getLocalizedMessage()));
                 }
             });
-            syncOperationStatusService.completeOperation(operationId, success, failure);
+            syncOperationStatusService.completeOperation(operationId, List.copyOf(success), List.copyOf(failure));
         } catch (RuntimeException e) {
             LOGGER.error("User sync operation {} failed with error:", operationId, e);
             syncOperationStatusService.failOperation(operationId, e.getLocalizedMessage());
@@ -174,7 +207,8 @@ public class UserService {
     @VisibleForTesting
     UsersState getIpaUserState(FreeIpaClient freeIpaClient, UsersState umsUsersState, Set<String> userCrnFilter, Set<String> machineUserCrnFilter)
             throws FreeIpaClientException {
-        return userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty() ? freeIpaUsersStateProvider.getUsersState(freeIpaClient) :
+        boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
+        return fullSync ? freeIpaUsersStateProvider.getUsersState(freeIpaClient) :
                 freeIpaUsersStateProvider.getFilteredFreeIPAState(freeIpaClient, umsUsersState.getRequestedWorkloadUsers());
     }
 
@@ -329,11 +363,11 @@ public class UserService {
     @VisibleForTesting
     void validateParameters(String accountId, String actorCrn, Set<String> environmentCrnFilter,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
-        requireNonNull(accountId);
-        requireNonNull(actorCrn);
-        requireNonNull(environmentCrnFilter);
-        requireNonNull(userCrnFilter);
-        requireNonNull(machineUserCrnFilter);
+        requireNonNull(accountId, "accountId must not be null");
+        requireNonNull(actorCrn, "actorCrn must not be null");
+        requireNonNull(environmentCrnFilter, "environmentCrnFilter must not be null");
+        requireNonNull(userCrnFilter, "userCrnFilter must not be null");
+        requireNonNull(machineUserCrnFilter, "machineUserCrnFilter must not be null");
         validateCrnFilter(environmentCrnFilter, Crn.ResourceType.ENVIRONMENT);
         validateCrnFilter(userCrnFilter, Crn.ResourceType.USER);
         validateCrnFilter(machineUserCrnFilter, Crn.ResourceType.MACHINE_USER);

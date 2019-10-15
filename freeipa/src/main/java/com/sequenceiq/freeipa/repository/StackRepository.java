@@ -23,6 +23,10 @@ import com.sequenceiq.freeipa.entity.Stack;
 public interface StackRepository extends BaseJpaRepository<Stack, Long> {
 
     @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT s FROM Stack s WHERE s.terminated = -1")
+    List<Stack> findAllRunning();
+
+    @CheckPermission(action = ResourceAction.READ)
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.id= :id ")
     Optional<Stack> findOneWithLists(@Param("id") Long id);
 

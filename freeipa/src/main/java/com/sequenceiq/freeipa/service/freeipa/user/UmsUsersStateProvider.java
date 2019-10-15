@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -26,8 +25,6 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
@@ -44,16 +41,8 @@ public class UmsUsersStateProvider {
     private GrpcUmsClient grpcUmsClient;
 
     public Map<String, UsersState> getEnvToUmsUsersStateMap(String accountId, String actorCrn, Set<String> environmentCrns,
-                                                            Set<String> userCrns, Set<String> machineUserCrns) {
+                                                            Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional) {
         try {
-            final Optional<String> requestIdOptional = Optional.of(
-                Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()))
-                    .orElseGet(() -> {
-                String requestId = UUID.randomUUID().toString();
-                LOGGER.debug("No requestId found. Setting request id to new UUID [{}]", requestId);
-                return requestId;
-            }));
-
             LOGGER.debug("Getting UMS state for environments {} with requestId {}", environmentCrns, requestIdOptional);
 
             Map<String, UsersState> envUsersStateMap = new HashMap<>();
@@ -63,7 +52,6 @@ public class UmsUsersStateProvider {
 
             List<MachineUser> machineUsers = machineUserCrns.isEmpty() ? grpcUmsClient.listAllMachineUsers(actorCrn, accountId, requestIdOptional)
                 : grpcUmsClient.listMachineUsers(actorCrn, accountId, List.copyOf(machineUserCrns), requestIdOptional);
-
 
             Map<String, FmsGroup> crnToFmsGroup = grpcUmsClient.listGroups(actorCrn, accountId, List.of(), requestIdOptional).stream()
                     .collect(Collectors.toMap(Group::getCrn, this::umsGroupToGroup));
