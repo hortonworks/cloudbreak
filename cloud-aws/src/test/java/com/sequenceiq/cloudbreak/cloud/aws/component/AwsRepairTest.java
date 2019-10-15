@@ -133,8 +133,7 @@ public class AwsRepairTest extends AwsComponentTest {
                                 .withAutoScalingGroupName(AUTOSCALING_GROUP_NAME)
                                 .withInstances(List.of(
                                         new Instance().withInstanceId(INSTANCE_ID_1).withLifecycleState(LifecycleState.InService),
-                                        new Instance().withInstanceId(INSTANCE_ID_2).withLifecycleState(LifecycleState.InService),
-                                        new Instance().withInstanceId(INSTANCE_ID_3).withLifecycleState(LifecycleState.InService)))
+                                        new Instance().withInstanceId(INSTANCE_ID_2).withLifecycleState(LifecycleState.InService)))
                         ));
 
         when(amazonEC2Client.describeVolumes(any()))

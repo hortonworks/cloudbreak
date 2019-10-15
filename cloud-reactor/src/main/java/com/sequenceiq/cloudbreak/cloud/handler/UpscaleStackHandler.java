@@ -56,7 +56,7 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
         CloudContext cloudContext = request.getCloudContext();
         try {
             CloudConnector<?> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
-            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
+            AuthenticatedContext ac = getAuthenticatedContext(request, cloudContext, connector);
             List<CloudResourceStatus> resourceStatus = connector.resources().upscale(ac, request.getCloudStack(), request.getResourceList());
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);
@@ -73,6 +73,11 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
             request.getResult().onNext(result);
             eventBus.notify(CloudPlatformResult.failureSelector(UpscaleStackResult.class), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
         }
+    }
+
+    private AuthenticatedContext getAuthenticatedContext(UpscaleStackRequest<UpscaleStackResult> request, CloudContext cloudContext,
+            CloudConnector<?> connector) {
+        return connector.authentication().authenticate(cloudContext, request.getCloudCredential());
     }
 
 }
