@@ -46,7 +46,8 @@ public enum ExposedService {
     JOBTRACKER("Job Tracker", "RESOURCEMANAGER", "JOBTRACKER", "/", true, 8032, 8032, true, true),
     PROFILER_ADMIN("Profiler Admin", "PROFILER_ADMIN_AGENT", "PROFILER-ADMIN-API", "/profiler-admin/", false, 21700, 21700, true, true),
     PROFILER_METRICS("Profiler Metrics", "PROFILER_METRICS_AGENT", "PROFILER-METRICS-API", "/profiler-metrics/", false, 21800, 21800, true, true),
-    PROFILER_SCHEDULER("Profiler Scheduler", "PROFILER_SCHEDULER_AGENT", "PROFILER-SCHEDULER-API", "/profiler-scheduler/", false, 21900, 21900, true, true);
+    PROFILER_SCHEDULER("Profiler Scheduler", "PROFILER_SCHEDULER_AGENT", "PROFILER-SCHEDULER-API", "/profiler-scheduler/", false, 21900, 21900, true, true),
+    DAS("Data Analytics Studio", "DAS", "DAS", "/das/", true, 30800, 30800, false, true);
 
     private final String displayName;
     private final String serviceName;
