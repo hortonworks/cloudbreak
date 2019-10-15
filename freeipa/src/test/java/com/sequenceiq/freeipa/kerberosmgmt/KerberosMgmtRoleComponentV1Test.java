@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -166,5 +167,31 @@ public class KerberosMgmtRoleComponentV1Test {
         Mockito.when(mockIpaClient.showRole(anyString())).thenReturn(role);
         new KerberosMgmtRoleComponent().deleteRoleIfItIsNoLongerUsed(ROLE, mockIpaClient);
         Mockito.verify(mockIpaClient).deleteRole(ROLE);
+    }
+
+    @Test
+    public void testPrivilegeExistReturnTrue() throws Exception {
+        RoleRequest roleRequest = new RoleRequest();
+        roleRequest.setRoleName(ROLE);
+        Set<String> privileges = new HashSet<>();
+        privileges.add(PRIVILEGE1);
+        privileges.add(PRIVILEGE2);
+        roleRequest.setPrivileges(privileges);
+        Privilege privilege = new Privilege();
+        Mockito.when(mockIpaClient.showPrivilege(any())).thenReturn(privilege);
+        Assertions.assertTrue(new KerberosMgmtRoleComponent().privilegesExist(roleRequest, mockIpaClient));
+    }
+
+    @Test
+    public void testPrivilegeExistReturnFalse() throws Exception {
+        RoleRequest roleRequest = new RoleRequest();
+        roleRequest.setRoleName(ROLE);
+        Set<String> privileges = new HashSet<>();
+        privileges.add(PRIVILEGE1);
+        privileges.add(PRIVILEGE2);
+        roleRequest.setPrivileges(privileges);
+        Mockito.when(mockIpaClient.showPrivilege(any())).thenThrow(new FreeIpaClientException(ERROR_MESSAGE,
+                new JsonRpcClientException(NOT_FOUND, ERROR_MESSAGE, null)));
+        Assertions.assertFalse(new KerberosMgmtRoleComponent().privilegesExist(roleRequest, mockIpaClient));
     }
 }
