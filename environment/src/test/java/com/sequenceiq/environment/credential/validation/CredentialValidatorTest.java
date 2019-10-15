@@ -8,17 +8,17 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.hamcrest.CoreMatchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.validation.definition.CredentialDefinitionService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CredentialValidatorTest {
 
     private final CredentialDefinitionService credentialDefinitionService = Mockito.mock(CredentialDefinitionService.class);

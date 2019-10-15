@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,7 +32,7 @@ class FreeIpaCreationRetrievalTaskTest {
     @InjectMocks
     private FreeIpaCreationRetrievalTask underTest;
 
-    @Before
+    @BeforeEach
     void setup() {
         when(freeIpaPollerObject.getEnvironmentId()).thenReturn(ENV_ID);
     }

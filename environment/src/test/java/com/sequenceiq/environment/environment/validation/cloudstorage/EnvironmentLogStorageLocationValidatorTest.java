@@ -1,20 +1,20 @@
 package com.sequenceiq.environment.environment.validation.cloudstorage;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentLogging;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EnvironmentLogStorageLocationValidatorTest {
 
     private static final String REGION_1 = "region-1";
