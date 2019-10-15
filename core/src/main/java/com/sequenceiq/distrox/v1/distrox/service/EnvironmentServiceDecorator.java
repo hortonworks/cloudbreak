@@ -71,4 +71,13 @@ public class EnvironmentServiceDecorator {
         }
     }
 
+    public void prepareEnvironment(StackViewV4Response stackViewResponse) {
+        try {
+            DetailedEnvironmentResponse byCrn = environmentClientService.getByCrn(stackViewResponse.getEnvironmentCrn());
+            stackViewResponse.setEnvironmentName(byCrn.getName());
+        } catch (Exception e) {
+            LOGGER.warn("Environment deleted which had crn: {}.", stackViewResponse.getEnvironmentCrn());
+        }
+    }
+
 }

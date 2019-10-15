@@ -35,7 +35,14 @@ public class CrnUserDetailsServiceTest {
     public void loadUserByInternalCrn() {
         InternalCrnBuilder crnBuilder = new InternalCrnBuilder(Crn.Service.ENVIRONMENTS);
         UserDetails userDetails = underTest.loadUserByUsername(crnBuilder.getInternalCrnForServiceAsString());
-        assertTrue(userDetails.getAuthorities().iterator().next().getAuthority().equals("ROLE_ENVIRONMENTS"));
+        assertTrue(userDetails.getAuthorities().iterator().next().getAuthority().equals("ROLE_INTERNAL"));
+    }
+
+    @Test
+    public void loadUserByInternalCrnWithAutoscale() {
+        InternalCrnBuilder crnBuilder = new InternalCrnBuilder(Crn.Service.AUTOSCALE);
+        UserDetails userDetails = underTest.loadUserByUsername(crnBuilder.getInternalCrnForServiceAsString());
+        assertTrue(userDetails.getAuthorities().iterator().next().getAuthority().equals("ROLE_AUTOSCALE"));
     }
 
     @Test

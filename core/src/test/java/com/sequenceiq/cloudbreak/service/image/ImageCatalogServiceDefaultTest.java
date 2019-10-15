@@ -103,6 +103,8 @@ public class ImageCatalogServiceDefaultTest {
                 { "com/sequenceiq/cloudbreak/service/image/default-hdf-imagecatalog.json", "aws", "HDF", "2.4", "latest-hdf", "5.0.0", "" },
                 { "com/sequenceiq/cloudbreak/service/image/default-hdf-imagecatalog.json", "aws", "HDF", "missing", "latest-base", "5.0.0", "" },
                 { "com/sequenceiq/cloudbreak/service/image/default-base-imagecatalog.json", "aws", ImageCatalogService.UNDEFINED,
+                        ImageCatalogService.UNDEFINED, "latest-base", "5.0.0", "" },
+                { "com/sequenceiq/cloudbreak/service/image/default-base-imagecatalog-with-timestamp.json", "aws", ImageCatalogService.UNDEFINED,
                         ImageCatalogService.UNDEFINED, "latest-base", "5.0.0", "" }
         });
     }

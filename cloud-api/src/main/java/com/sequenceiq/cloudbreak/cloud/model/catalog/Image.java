@@ -16,6 +16,8 @@ public class Image {
 
     private final String date;
 
+    private final Long created;
+
     private final String description;
 
     private final String os;
@@ -43,6 +45,7 @@ public class Image {
     @JsonCreator
     public Image(
             @JsonProperty(value = "date", required = true) String date,
+            @JsonProperty(value = "created") Long created,
             @JsonProperty(value = "description", required = true) String description,
             @JsonProperty(value = "os", required = true) String os,
             @JsonProperty(value = "uuid", required = true) String uuid,
@@ -55,6 +58,7 @@ public class Image {
             @JsonProperty("pre_warm_parcels") List<List<String>> preWarmParcels,
             @JsonProperty("pre_warm_csd") List<String> preWarmCsd) {
         this.date = date;
+        this.created = created;
         this.description = description;
         this.os = os;
         this.uuid = uuid;
@@ -128,11 +132,16 @@ public class Image {
         return preWarmCsd;
     }
 
+    public Long getCreated() {
+        return created;
+    }
+
     @Override
     public String toString() {
         return "Image{"
                 + "uuid='" + uuid + '\''
                 + ", date='" + date + '\''
+                + ", created='" + created + '\''
                 + ", description='" + description + '\''
                 + ", os='" + os + '\''
                 + ", osType='" + osType + '\''

@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
@@ -142,6 +143,17 @@ public class StackOperation {
         sdxServiceDecorator.prepareSdxAttributes(stackResponse);
         LOGGER.info("Query Stack successfully decorated.");
         return stackResponse;
+    }
+
+    public StackViewV4Response getForInternalCrn(@NotNull StackAccessDto stackAccessDto, StackType stackType) {
+        LOGGER.info("Validate stack against internal user.");
+        validateAccessDto(stackAccessDto);
+        StackApiView stackApiView = stackApiViewService.retrieveStackByCrnAndType(stackAccessDto.getCrn(), stackType);
+        LOGGER.info("Query Stack (view) successfully finished with crn {}", stackAccessDto.getCrn());
+        StackViewV4Response stackViewV4Response = converterUtil.convert(stackApiView, StackViewV4Response.class);
+        LOGGER.info("Adding environment name to the response.");
+        environmentServiceDecorator.prepareEnvironment(stackViewV4Response);
+        return stackViewV4Response;
     }
 
     public void delete(StackAccessDto stackAccessDto, Long workspaceId, Boolean forced) {

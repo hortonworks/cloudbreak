@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.controller.v4.WorkspaceAwareUtilV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.WorkspaceV4Controller;
 import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredEventFilter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.distrox.v1.distrox.controller.DistroXInternalV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1Controller;
 import com.sequenceiq.flow.controller.FlowController;
 
@@ -75,6 +76,7 @@ public class EndpointConfig extends ResourceConfig {
             StackV4Controller.class,
             CloudbreakInfoV4Controller.class,
             DistroXV1Controller.class,
+            DistroXInternalV1Controller.class,
             DatalakeV4Controller.class,
             CloudProviderServicesV4Controller.class,
             FlowController.class
