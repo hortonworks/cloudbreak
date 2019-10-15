@@ -149,7 +149,6 @@ public class EnvironmentCreationService {
                 .getCredentialFromRequest(creationDto.getCredential(), creationDto.getAccountId(), creationDto.getCreator());
         environment.setCredential(credential);
         environment.setCloudPlatform(credential.getCloudPlatform());
-        environment.setTunnel(creationDto.getTunnel());
         environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(creationDto.getAuthentication()));
         return environment;
     }

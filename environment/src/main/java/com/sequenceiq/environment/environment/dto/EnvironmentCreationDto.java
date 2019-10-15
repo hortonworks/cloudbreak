@@ -5,12 +5,11 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
-import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.CredentialAwareEnvRequest;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameters.dto.ParametersDto;
 
 public class EnvironmentCreationDto {
 
@@ -44,20 +43,18 @@ public class EnvironmentCreationDto {
 
     private final SecurityAccessDto securityAccess;
 
-    private final Tunnel tunnel;
-
-    private final IdBrokerMappingSource idBrokerMappingSource;
-
     private final String adminGroupName;
 
     private final ParametersDto parameters;
+
+    private final ExperimentalFeatures experimentalFeatures;
 
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             String creator, LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
             Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, AuthenticationDto authentication,
-            Long created, EnvironmentTelemetry telemetry, SecurityAccessDto securityAccess, Tunnel tunnel, IdBrokerMappingSource idBrokerMappingSource,
-            String adminGroupName, ParametersDto parameters) {
+            Long created, EnvironmentTelemetry telemetry, SecurityAccessDto securityAccess, String adminGroupName,
+            ParametersDto parameters, ExperimentalFeatures experimentalFeatures) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -69,7 +66,6 @@ public class EnvironmentCreationDto {
         this.credential = credential;
         this.createFreeIpa = createFreeIpa;
         this.created = created;
-        this.tunnel = tunnel;
         if (CollectionUtils.isEmpty(regions)) {
             this.regions = new HashSet<>();
         } else {
@@ -83,9 +79,9 @@ public class EnvironmentCreationDto {
         this.authentication = authentication;
         this.telemetry = telemetry;
         this.securityAccess = securityAccess;
-        this.idBrokerMappingSource = idBrokerMappingSource;
         this.adminGroupName = adminGroupName;
         this.parameters = parameters;
+        this.experimentalFeatures = experimentalFeatures != null ? experimentalFeatures : new ExperimentalFeatures();
     }
 
     public String getName() {
@@ -148,20 +144,16 @@ public class EnvironmentCreationDto {
         return securityAccess;
     }
 
-    public Tunnel getTunnel() {
-        return tunnel;
-    }
-
-    public IdBrokerMappingSource getIdBrokerMappingSource() {
-        return idBrokerMappingSource;
-    }
-
     public String getAdminGroupName() {
         return adminGroupName;
     }
 
     public ParametersDto getParameters() {
         return parameters;
+    }
+
+    public ExperimentalFeatures getExperimentalFeatures() {
+        return experimentalFeatures;
     }
 
     public static final class Builder {
@@ -195,13 +187,11 @@ public class EnvironmentCreationDto {
 
         private SecurityAccessDto securityAccess;
 
-        private Tunnel tunnel;
-
-        private IdBrokerMappingSource idBrokerMappingSource;
-
         private String adminGroupName;
 
         private ParametersDto parameters;
+
+        private ExperimentalFeatures experimentalFeatures;
 
         public Builder() {
         }
@@ -275,11 +265,6 @@ public class EnvironmentCreationDto {
             return this;
         }
 
-        public Builder withTunnel(Tunnel tunnel) {
-            this.tunnel = tunnel;
-            return this;
-        }
-
         public Builder withTelemetry(EnvironmentTelemetry telemetry) {
             this.telemetry = telemetry;
             return this;
@@ -287,11 +272,6 @@ public class EnvironmentCreationDto {
 
         public Builder withSecurityAccess(SecurityAccessDto securityAccess) {
             this.securityAccess = securityAccess;
-            return this;
-        }
-
-        public Builder withIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
-            this.idBrokerMappingSource = idBrokerMappingSource;
             return this;
         }
 
@@ -305,10 +285,15 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        public Builder withExperimentalFeatures(ExperimentalFeatures experimentalFeatures) {
+            this.experimentalFeatures = experimentalFeatures;
+            return this;
+        }
+
         public EnvironmentCreationDto build() {
-            return new EnvironmentCreationDto(name, description, cloudPlatform, accountId,
-                    creator, location, network, credential, regions, proxyNames, createFreeIpa,
-                    authentication, created, telemetry, securityAccess, tunnel, idBrokerMappingSource, adminGroupName, parameters);
+            return new EnvironmentCreationDto(name, description, cloudPlatform, accountId, creator,
+                    location, network, credential, regions, proxyNames, createFreeIpa, authentication,
+                    created, telemetry, securityAccess, adminGroupName, parameters, experimentalFeatures);
         }
     }
 }

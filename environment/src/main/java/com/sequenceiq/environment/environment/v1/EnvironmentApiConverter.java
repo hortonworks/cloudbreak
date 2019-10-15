@@ -36,6 +36,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAcce
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
+import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
@@ -100,14 +101,16 @@ public class EnvironmentApiConverter {
                 .withCloudPlatform(request.getCloudPlatform())
                 .withCredential(request)
                 .withCreated(System.currentTimeMillis())
-                .withTunnel(tunnelConverter.convert(request.getTunnel()))
                 .withCreateFreeIpa(request.getFreeIpa() == null ? true : request.getFreeIpa().getCreate())
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry()))
                 .withRegions(request.getRegions())
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()))
-                .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
                 .withAdminGroupName(request.getAdminGroupName())
+                .withExperimentalFeatures(ExperimentalFeatures.builder()
+                        .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
+                        .withTunnel(tunnelConverter.convert(request.getTunnel()))
+                        .build())
                 .withParameters(getIfNotNull(request.getAws(), this::awsParamsToParametersDto));
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
@@ -170,7 +173,7 @@ public class EnvironmentApiConverter {
         }
         if (network.getSubnetIds() != null) {
             builder.withSubnetMetas(network.getSubnetIds().stream()
-                .collect(Collectors.toMap(id -> id, id -> new CloudSubnet(id, id))));
+                    .collect(Collectors.toMap(id -> id, id -> new CloudSubnet(id, id))));
         }
         if (network.getMock() != null) {
             LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Mock");
@@ -226,9 +229,9 @@ public class EnvironmentApiConverter {
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
-                .withTunnel(environmentDto.getTunnel())
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()))
-                .withIdBrokerMappingSource(environmentDto.getIdBrokerMappingSource())
+                .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())
+                .withIdBrokerMappingSource(environmentDto.getExperimentalFeatures().getIdBrokerMappingSource())
                 .withAdminGroupName(environmentDto.getAdminGroupName())
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams));
 
@@ -249,7 +252,7 @@ public class EnvironmentApiConverter {
                 .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
-                .withTunnel(environmentDto.getTunnel())
+                .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())
                 .withAdminGroupName(environmentDto.getAdminGroupName())
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()))

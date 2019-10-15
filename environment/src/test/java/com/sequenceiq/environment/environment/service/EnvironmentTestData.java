@@ -92,7 +92,7 @@ public class EnvironmentTestData {
         environment.setLocationDisplayName(LOCATION_DISPLAY_NAME);
         environment.setStatus(EnvironmentStatus.AVAILABLE);
         environment.setStatusReason(OK);
-        environment.setTunnel(Tunnel.DIRECT);
+        environment.getExperimentalFeatures().setTunnel(Tunnel.DIRECT);
         environment.setSecurityGroupIdForKnox(KNOX_SG);
         environment.setParameters(PARAMETERS);
         environment.setRegions(REGIONS);

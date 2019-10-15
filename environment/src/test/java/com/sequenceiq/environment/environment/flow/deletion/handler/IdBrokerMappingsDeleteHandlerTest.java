@@ -186,7 +186,7 @@ class IdBrokerMappingsDeleteHandlerTest {
         Environment env = new Environment();
         env.setId(ENVIRONMENT_ID);
         env.setResourceCrn(ENVIRONMENT_CRN);
-        env.setIdBrokerMappingSource(mappingSource);
+        env.getExperimentalFeatures().setIdBrokerMappingSource(mappingSource);
         return env;
     }
 

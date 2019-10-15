@@ -212,7 +212,7 @@ public class EnvironmentModificationService {
 
     private void editTunnelIfChanged(EnvironmentEditDto editDto, Environment environment) {
         if (editDto.getTunnel() != null) {
-            environment.setTunnel(editDto.getTunnel());
+            environment.getExperimentalFeatures().setTunnel(editDto.getTunnel());
         }
     }
 
@@ -236,7 +236,7 @@ public class EnvironmentModificationService {
     private void editIdBrokerMappingSource(EnvironmentEditDto editDto, Environment environment) {
         IdBrokerMappingSource idBrokerMappingSource = editDto.getIdBrokerMappingSource();
         if (idBrokerMappingSource != null) {
-            environment.setIdBrokerMappingSource(idBrokerMappingSource);
+            environment.getExperimentalFeatures().setIdBrokerMappingSource(idBrokerMappingSource);
         }
     }
 
