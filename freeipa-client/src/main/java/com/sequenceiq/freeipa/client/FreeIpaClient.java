@@ -479,7 +479,7 @@ public class FreeIpaClient {
         }
         parameterMap.put("version", apiVersion);
 
-        LOGGER.debug("Issuing JSON-RPC request:\n\n method: {}\n flags: {}\n params: {}\n", method, flags, parameterMap);
+        LOGGER.debug("Issuing JSON-RPC request:\n\n method: {}\n flags: {}\n", method, flags);
         ParameterizedType type = TypeUtils
                 .parameterize(RPCResponse.class, resultType);
         try {
