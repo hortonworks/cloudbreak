@@ -38,7 +38,7 @@ public class InstanceMetaDataToInstanceMetaDataJsonConverterTest extends Abstrac
         assertNotNull(result);
         assertEquals("test-" + source.getInstanceGroupName() + "-1-1", result.getDiscoveryFQDN());
         assertTrue(result.getAmbariServer());
-        assertAllFieldsNotNull(result, List.of("state"));
+        assertAllFieldsNotNull(result, List.of("state", "statusReason"));
     }
 
     @Override

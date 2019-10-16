@@ -28,6 +28,9 @@ public class HostMetadataView implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private HostMetadataState hostMetadataState = HostMetadataState.HEALTHY;
 
+    @Column(columnDefinition = "TEXT")
+    private String statusReason;
+
     public String getHostName() {
         return hostName;
     }
@@ -50,5 +53,13 @@ public class HostMetadataView implements ProvisionEntity {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 }

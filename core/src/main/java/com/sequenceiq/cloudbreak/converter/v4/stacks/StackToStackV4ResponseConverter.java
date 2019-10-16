@@ -41,6 +41,8 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataExtendedState;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
@@ -212,18 +214,34 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
                         instanceGroupResponse.setRecipes(converterUtil.convertAll(hostGroup.getRecipes(), RecipeV4Response.class));
                         instanceGroupResponse.setRecoveryMode(hostGroup.getRecoveryMode());
 
-                        Map<String, String> metaDataStates = new HashMap<>();
+                        Map<String, HostMetadataExtendedState> metaDataStates = new HashMap<>();
 
                         instanceGroup.getInstanceMetaDataSet()
                                 .forEach(imd -> hostGroup.getHostMetadata().stream()
                                         .filter(s -> s.getHostName().equals(imd.getDiscoveryFQDN()))
                                         .findFirst()
-                                        .ifPresent(hmd -> metaDataStates.put(hmd.getHostName(), hmd.getHostMetadataState().name()))
+                                        .ifPresent(hmd -> metaDataStates.put(hmd.getHostName(),
+                                                new HostMetadataExtendedState(hmd.getHostMetadataState(), hmd.getStatusReason())))
                                 );
 
-                        instanceGroupResponse.getMetadata().forEach(md -> md.setState(metaDataStates.get(md.getDiscoveryFQDN())));
+                        instanceGroupResponse.getMetadata().forEach(md -> {
+                            md.setState(getMetadataStateName(metaDataStates, md.getDiscoveryFQDN()));
+                            md.setStatusReason(getMetadataStatusReason(metaDataStates, md.getDiscoveryFQDN()));
+                        });
                     });
         }
+    }
+
+    private String getMetadataStateName(Map<String, HostMetadataExtendedState> metaDataStates, String fqdn) {
+        return Optional.ofNullable(metaDataStates.get(fqdn))
+                .map(HostMetadataExtendedState::getHostMetadataState)
+                .map(HostMetadataState::name).orElse(null);
+    }
+
+    private String getMetadataStatusReason(Map<String, HostMetadataExtendedState> metaDataStates, String fqdn) {
+        return Optional.ofNullable(metaDataStates.get(fqdn))
+                .map(HostMetadataExtendedState::getExplanation)
+                .orElse(null);
     }
 
     private Long getStackTimeToLive(Stack stack) {

@@ -50,6 +50,9 @@ public class InstanceMetaDataV4Response implements JsonEntity {
     @ApiModelProperty(HostMetadataModelDescription.STATE)
     private String state;
 
+    @ApiModelProperty(HostMetadataModelDescription.STATUS_REASON)
+    private String statusReason;
+
     @ApiModelProperty
     private List<MountedVolumeV4Response> mountedVolumes = Lists.newArrayList();
 
@@ -131,6 +134,14 @@ public class InstanceMetaDataV4Response implements JsonEntity {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 
     public List<MountedVolumeV4Response> getMountedVolumes() {
