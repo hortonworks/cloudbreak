@@ -60,6 +60,14 @@ public class EnvironmentBasedDomainNameProvider {
         return endpointName + DOMAIN_PART_DELIMITER + domain;
     }
 
+    //It is responsible for creating a CN for the generated CSR, so the result could not exceed 64 chars.
+    //But it should provide as unique as possible.
+    public String getCommonName(String endpointName, String environmentName, String accountName) {
+        String domain = getDomainName(environmentName, accountName);
+        //TODO endpointName + env name -> hash it to be 17chars
+        return endpointName + DOMAIN_PART_DELIMITER + domain;
+    }
+
     private void validateDomainPattern(String result) {
         boolean matches = Pattern.matches(DOMAIN_PATTERN, result);
         if (!matches) {

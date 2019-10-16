@@ -101,11 +101,12 @@ public class GatewayPublicEndpointManagementService {
                 gatewayIp = gateway.get().getPublicIpWrapper();
             }
         }
-        boolean success = dnsManagementService.createDnsEntryWithIp(userCrn, accountId, stack.getName(), environment.getName(), false, List.of(gatewayIp));
+        String endpointName = stack.getPrimaryGatewayInstance().getShortHostname();
+        boolean success = dnsManagementService.createDnsEntryWithIp(userCrn, accountId, endpointName, environment.getName(), false, List.of(gatewayIp));
         if (success) {
             try {
                 String fullQualifiedDomainName = environmentBasedDomainNameProvider
-                        .getFullyQualifiedEndpointName(stack.getName(), environment.getName(), getWorkloadSubdomain(userCrn));
+                        .getFullyQualifiedEndpointName(endpointName, environment.getName(), getWorkloadSubdomain(userCrn));
                 if (fullQualifiedDomainName != null) {
                     LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", gatewayIp, fullQualifiedDomainName);
                     return fullQualifiedDomainName;
@@ -155,8 +156,9 @@ public class GatewayPublicEndpointManagementService {
             }
         }
         try {
+            String endpointName = stack.getPrimaryGatewayInstance().getShortHostname();
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
-            List<String> certs = certificateCreationService.create(userCrn, accountId, stack.getName(), environment.getName(), false, keyPair);
+            List<String> certs = certificateCreationService.create(userCrn, accountId, endpointName, environment.getName(), false, keyPair);
             securityConfig.setUserFacingCert(String.join("", certs));
             securityConfigService.save(securityConfig);
             success = true;

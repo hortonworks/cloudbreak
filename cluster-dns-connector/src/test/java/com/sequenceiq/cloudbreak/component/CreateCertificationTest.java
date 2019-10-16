@@ -26,12 +26,12 @@ import com.sequenceiq.cloudbreak.certificate.service.CertificateCreationService;
 @SpringBootTest(classes = CreateCertificationTest.CreateCertificationTestConfig.class)
 @TestPropertySource(properties = {
         "clusterdns.host=localhost",
-        "clusterdns.port=8982",
+        "clusterdns.port=9983",
         "gateway.cert.polling.attempt=50",
         "gateway.cert.base.domain.name=workload-dev.cloudera.com",
         "altus.ums.host=ums.thunderhead-dev.cloudera.com",
-        "actor.crn=<your-user-crn>",
-        "account.id=<your-account-id>"
+        "actor.crn=<>",
+        "account.id=<>"
 })
 public class CreateCertificationTest {
 
@@ -54,7 +54,7 @@ public class CreateCertificationTest {
         String internalFQDN = "ip-10-97-110-78.cloudera.site";
         List<String> strings = certificateCreationService.create(actorCrn,
                 accountId,
-                "cluster-tb",
+                "really-really-long-named-cluster-tbihari2",
                 "env-tb",
                 false,
                 keyPair);
@@ -71,6 +71,7 @@ public class CreateCertificationTest {
     @Configuration
     @ComponentScan(
             basePackages = {"com.sequenceiq.cloudbreak.certificate",
+                    "com.sequenceiq.cloudbreak.dns",
                     "com.sequenceiq.cloudbreak.client",
                     "com.sequenceiq.cloudbreak.auth.altus",
                     "com.sequenceiq.cloudbreak.auth"}

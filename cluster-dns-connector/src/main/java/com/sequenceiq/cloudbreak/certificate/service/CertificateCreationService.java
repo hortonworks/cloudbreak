@@ -32,7 +32,7 @@ public class CertificateCreationService {
     @Value("${gateway.cert.polling.intervall:10}")
     private Long pollingIntervall;
 
-    @Value("${gateway.cert.polling.attempt:20}")
+    @Value("${gateway.cert.polling.attempt:80}")
     private Integer pollingAttempt;
 
     @Inject
@@ -42,16 +42,14 @@ public class CertificateCreationService {
     private GrpcUmsClient grpcUmsClient;
 
     @Inject
-    private EnvironmentBasedDomainNameProvider environmentBasedDomainNameProvider;
+    private EnvironmentBasedDomainNameProvider domainNameProvider;
 
     public List<String> create(String actorCrn, String accountId, String endpoint, String environment, boolean wildcard, KeyPair identity)
             throws IOException {
-        LOGGER.info("Start cert creation");
+        LOGGER.info("Starting certificate creation for endpoint: {} in environment: {}", endpoint, environment);
         Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
         UserManagementProto.Account account = grpcUmsClient.getAccountDetails(actorCrn, actorCrn, requestIdOptional);
-        String externalFQDN = environmentBasedDomainNameProvider.getFullyQualifiedEndpointName(endpoint, environment, account.getWorkloadSubdomain());
-        LOGGER.info("Create cert for {}", externalFQDN);
-        PKCS10CertificationRequest csr = PkiUtil.csr(identity, externalFQDN);
+        PKCS10CertificationRequest csr = generateCSR(endpoint, environment, identity, account);
         String pollingRequestId = grpcClusterDnsClient
                 .createCertificate(actorCrn, accountId, endpoint, environment, wildcard, csr.getEncoded(), requestIdOptional);
         return polling(actorCrn, pollingRequestId);
@@ -63,5 +61,20 @@ public class CertificateCreationService {
                 .stopAfterAttempt(pollingAttempt)
                 .stopIfException(true)
                 .run(new CreateCertificationPoller(grpcClusterDnsClient, actorCrn, pollingRequestId, requestIdOptional));
+    }
+
+    private PKCS10CertificationRequest generateCSR(String endpoint, String environment, KeyPair identity, UserManagementProto.Account account) {
+        String fullyQualifiedEndpointName = domainNameProvider.getFullyQualifiedEndpointName(endpoint, environment, account.getWorkloadSubdomain());
+        List<String> subjectAlternativeNames = List.of();
+        LOGGER.info("Creating certificate with fully qualified endpoint name: {}", fullyQualifiedEndpointName);
+        return PkiUtil.csr(identity, fullyQualifiedEndpointName, subjectAlternativeNames);
+    }
+
+    private PKCS10CertificationRequest generateCSRWithSANs(String endpoint, String environment, KeyPair identity, UserManagementProto.Account account) {
+        String commonName = domainNameProvider.getCommonName(endpoint, environment, account.getWorkloadSubdomain());
+        String fullyQualifiedEndpointName = domainNameProvider.getFullyQualifiedEndpointName(endpoint, environment, account.getWorkloadSubdomain());
+        List<String> subjectAlternativeNames = List.of(commonName, fullyQualifiedEndpointName);
+        LOGGER.info("Creating certificate with common name:{} and fully qualified endpoint name: {}", commonName, fullyQualifiedEndpointName);
+        return PkiUtil.csr(identity, fullyQualifiedEndpointName, subjectAlternativeNames);
     }
 }
