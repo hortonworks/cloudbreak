@@ -1,170 +1,136 @@
 import org.ajoberstar.grgit.Grgit
 
 plugins {
-  id "java"
-  id "checkstyle"
-  id "jacoco"
-  id 'maven'
-  id "org.springframework.boot" version "2.1.2.RELEASE"
-  id 'com.adarshr.test-logger' version '1.7.0'
+    id "java"
+    id "checkstyle"
+    id "jacoco"
+    id "maven"
+    id "org.springframework.boot" version "2.1.2.RELEASE"
+    id "com.adarshr.test-logger" version "1.7.0"
 }
 
 repositories {
-  maven { url 'http://repo.spring.io/libs-release' }
-  mavenLocal()
-  maven { url = "$repoUrl" }
-  mavenCentral()
-  maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
-  maven { url "https://repo.spring.io/release" }
-  maven { url "https://plugins.gradle.org/m2/" }
+    maven { url "http://repo.spring.io/libs-release" }
+    mavenLocal()
+    maven { url = "$repoUrl" }
+    mavenCentral()
+    maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
+    maven { url "https://repo.spring.io/release" }
+    maven { url "https://plugins.gradle.org/m2/" }
 }
 
 configurations.all {
     resolutionStrategy {
-        force 'org.ow2.asm:asm:7.1'
-        force 'net.bytebuddy:byte-buddy:1.9.13'
+        force "org.ow2.asm:asm:7.1"
+        force "net.bytebuddy:byte-buddy:1.9.13"
     }
 }
 
 dependencies {
-  compile project(':authorization')
-  compile project(':common')
-  compile project(':secret-engine')
-  compile project(':flow')
-  compile project(':auth-connector')
-  compile project(':environment-api')
-  compile project(':notification-sender')
-  compile (project(':cloud-reactor')) {
-  }
-  compile (project(':cloud-reactor-api')) {
-  }
-  compile (project(':datalake-api')) {
-  }
-  compile (project(':core-api'))
+    implementation     project(":authorization")
+    implementation     project(":common")
+    implementation     project(":secret-engine")
+    implementation     project(":flow")
+    implementation     project(":auth-connector")
+    implementation     project(":environment-api")
+    implementation     project(":notification-sender")
+    implementation     project(":cloud-reactor")
+    implementation     project(":cloud-reactor-api")
+    implementation     project(":datalake-api")
+    implementation     project(":core-api")
+    implementation     project(":cloud-aws")
+    implementation     project(":cloud-azure")
+    implementation     project(":cloud-mock")
+    implementation     project(":cloud-yarn")
+    implementation     project(":cloud-gcp")
+    implementation     project(":cloud-openstack")
+    implementation     project(":cloud-cumulus-yarn")
+    implementation     project(":core-api")
+    implementation     project(":idbmms-connector")
+    implementation     project(":redbeams-api")
+    implementation     project(":freeipa-api")
 
-  compile project (":cloud-aws")
-  compile project (":cloud-azure")
-  compile project (":cloud-mock")
-  compile project (":cloud-yarn")
-  compile project (":cloud-gcp")
-  compile project (":cloud-openstack")
-  compile project (":cloud-cumulus-yarn")
-  compile project(":core-api")
-  compile project(':idbmms-connector')
-  implementation (project (":redbeams-api"))
-  implementation (project (":freeipa-api"))
+    implementation     group: "org.yaml",                  name: "snakeyaml",                                version: snakeYamlVersion
+    implementation     group: "io.springfox",              name: "springfox-swagger2",                       version: swagger2Version
+    implementation     group: "io.springfox",              name: "springfox-core",                           version: swagger2Version
+    implementation     group: "io.springfox",              name: "springfox-swagger-ui",                     version: swagger2Version
+    implementation     group: "com.google.code.gson",      name: "gson",                                     version: gsonVersion
+    implementation     group: "dnsjava",                   name: "dnsjava",                                  version: dnsjavaVersion
+    implementation     group: "io.micrometer",             name: "micrometer-core",                          version: micrometerVersion
+    implementation     group: "io.micrometer",             name: "micrometer-jersey2",                       version: micrometerVersion
+    implementation     group: "io.micrometer",             name: "micrometer-registry-prometheus",           version: micrometerVersion
+    implementation     group: "io.springfox",              name: "springfox-swagger2",                       version: swagger2Version
+    implementation     group: "io.springfox",              name: "springfox-swagger-ui",                     version: swagger2Version
+    implementation    (group: "io.swagger",                name: "swagger-jersey2-jaxrs",                    version: swaggerVersion) {
+        exclude group: "org.yaml", module: "snakeyaml"
+    }
+    implementation     group: "javax.xml.bind",            name: "jaxb-api",                                 version: "2.3.1"
+    implementation     group: "org.glassfish.jersey.core", name: "jersey-server",                            version: jerseyCoreVersion
+    implementation     group: "org.mybatis",               name: "mybatis-migrations",                       version: mybatisMigrationVersion
+    implementation     group: "org.postgresql",            name: "postgresql",                               version: postgreSQLVersion
+    implementation     group: "org.springframework.boot",  name: "spring-boot-starter",                      version: springBootVersion
+    implementation     group: "org.springframework.boot",  name: "spring-boot-starter-web",                  version: springBootVersion
+    implementation     group: "org.springframework.boot",  name: "spring-boot-starter-actuator",             version: springBootVersion
+    implementation     group: "org.springframework.boot",  name: "spring-boot-starter-jersey",               version: springBootVersion
+    implementation     group: "org.springframework.boot",  name: "spring-boot-starter-data-jpa",             version: springBootVersion
+    implementation     group: "io.projectreactor",         name: "reactor-core",                             version: eventBusVersion
+    implementation     group: "io.projectreactor",         name: "reactor-bus",                              version: eventBusVersion
+    implementation     group: "io.opentracing.contrib",    name: "opentracing-spring-jaeger-starter",        version: opentracingSpringJaegerStarterVersion
+    implementation     group: "io.opentracing.contrib",    name: "opentracing-jaxrs2",                       version: opentracingJaxrs2Version
+    implementation     group: "io.opentracing.contrib",    name: "opentracing-jdbc",                         version: opentracingJdbcVersion
 
-  compile     group: 'org.yaml',                  name: 'snakeyaml'
-  compile     group: 'io.springfox',              name: 'springfox-swagger2'
-  compile     group: 'io.springfox',              name: 'springfox-core'
-  compile     group: 'io.springfox',              name: 'springfox-swagger-ui'
-  compile     group: 'com.google.code.gson',      name: 'gson'
-  compile     group: 'dnsjava',                   name: 'dnsjava'
-  compile     group: 'io.micrometer',             name: 'micrometer-core'
-  compile     group: 'io.micrometer',             name: 'micrometer-jersey2'
-  compile     group: 'io.micrometer',             name: 'micrometer-registry-prometheus'
-  compile     group: 'io.springfox',              name: 'springfox-swagger2'
-  compile     group: 'io.springfox',              name: 'springfox-swagger-ui'
-  compile     (group: 'io.swagger',               name: 'swagger-jersey2-jaxrs') {
-    exclude group: 'org.yaml', module: 'snakeyaml'
-  }
-  compile     group: 'javax.xml.bind',            name: 'jaxb-api'
-  compile     group: 'org.glassfish.jersey.core', name: 'jersey-server'
-  compile     group: 'org.mybatis',               name: 'mybatis-migrations'
-  compile     group: 'org.postgresql',            name: 'postgresql'
-  compile     group: 'org.springframework.boot',  name: 'spring-boot-starter'
-  compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-web'
-  compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator'
-  compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey'
-  compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
-  compile     group: 'io.projectreactor',         name: 'reactor-core',                             version: eventBusVersion
-  compile     group: 'io.projectreactor',         name: 'reactor-bus',                              version: eventBusVersion
+    testImplementation group: "org.junit.jupiter",         name: "junit-jupiter-api",                        version: junitJupiterVersion
+    testImplementation group: "org.junit.jupiter",         name: "junit-jupiter-params",                     version: junitJupiterVersion
+    testImplementation group: "org.mockito",               name: "mockito-core",                             version: mockitoVersion
+    testImplementation(group: "org.springframework.boot",  name: "spring-boot-starter-test",                 version: springBootVersion) {
+        exclude group: "junit"
+    }
+    testImplementation group: "com.openpojo",              name: "openpojo",                                 version: openPojoVersion
+    testImplementation group: "org.ow2.asm",               name: "asm",                                      version: asmVersion
+    testImplementation group: "com.h2database",            name: "h2",                                       version: h2databaseVersion
+    testImplementation group: "org.mockito",               name: "mockito-core",                             version: mockitoVersion
+    testImplementation group: "org.mockito",               name: "mockito-junit-jupiter",                    version: mockitoVersion
+    testImplementation group: "com.google.guava",          name: "guava",                                    version: guavaVersion
 
-  compile     group: 'io.opentracing.contrib',    name: 'opentracing-spring-jaeger-starter',        version: opentracingSpringJaegerStarterVersion
-  compile     group: 'io.opentracing.contrib',    name: 'opentracing-jaxrs2',                       version: opentracingJaxrs2Version
-  compile     group: 'io.opentracing.contrib',    name: 'opentracing-jdbc',                         version: opentracingJdbcVersion
-
-
-  testCompile group: 'org.junit.jupiter',         name: 'junit-jupiter-api'
-  testCompile group: 'org.junit.jupiter',         name: 'junit-jupiter-params',                     version: junitJupiterVersion
-  testCompile group: 'org.mockito',               name: 'mockito-core',                             version: mockitoVersion
-  testCompile ('org.springframework.boot:spring-boot-starter-test') {
-    exclude group: 'junit'
-  }
-  testImplementation group: 'com.openpojo',              name: 'openpojo'
-  testImplementation group: 'org.ow2.asm',               name: 'asm',                               version: asmVersion
-  testCompile group: 'com.h2database',                   name: 'h2',                                version: '1.3.148'
-  testImplementation group: 'org.mockito',               name: 'mockito-core'
-  testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter'
-
-  testRuntime group: 'org.junit.jupiter',         name: 'junit-jupiter-engine'
-  testRuntime group: 'org.junit.vintage',         name: 'junit-vintage-engine'
-
-  constraints {
-    compile     group: 'org.yaml',                  name: 'snakeyaml',                      version: '1.23'
-    compile     group: 'com.google.code.gson',      name: 'gson',                           version: '2.6.2'
-    compile     group: 'dnsjava',                   name: 'dnsjava',                        version: '2.1.7'
-    compile     group: 'io.micrometer',             name: 'micrometer-core',                version: micrometerVersion
-    compile     group: 'io.micrometer',             name: 'micrometer-jersey2',             version: micrometerVersion
-    compile     group: 'io.micrometer',             name: 'micrometer-registry-prometheus', version: micrometerVersion
-    compile     group: 'io.springfox',              name: 'springfox-swagger2',             version: swagger2Version
-    compile     group: 'io.springfox',              name: 'springfox-swagger-ui',           version: swagger2Version
-    compile     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
-    compile     group: 'javax.xml.bind',            name: 'jaxb-api',                       version: '2.3.1'
-    compile     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: '2.28'
-    compile     group: 'org.mybatis',               name: 'mybatis-migrations',             version: '3.2.0'
-    compile     group: 'org.postgresql',            name: 'postgresql',                     version: postgreSQLVersion
-    compile     group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
-    compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',        version: springBootVersion
-    compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator',   version: springBootVersion
-    compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',     version: springBootVersion
-    compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',   version: springBootVersion
-    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-    testCompile group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
-    testImplementation group: 'com.openpojo',              name: 'openpojo',                       version: openPojoVersion
-    testRuntime group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
-    testRuntime group: 'org.junit.vintage',         name: 'junit-vintage-engine',           version: junitJupiterVersion
-    testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
-    testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter',          version: mockitoVersion
-  }
-
+    testRuntimeOnly    group: "org.junit.jupiter",         name: "junit-jupiter-engine",                     version: junitJupiterVersion
+    testRuntimeOnly    group: "org.junit.vintage",         name: "junit-vintage-engine",                     version: junitJupiterVersion
 }
 
 bootRun {
-  systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
-  systemProperty 'spring.config.location', System.properties['spring.config.location']
-  if (project.hasProperty('jvmArgs')) {
+  systemProperty "spring.profiles.active", System.properties["spring.profiles.active"]
+  systemProperty "spring.config.location", System.properties["spring.config.location"]
+  if (project.hasProperty("jvmArgs")) {
     jvmArgs += project.jvmArgs.split("\\s+").toList()
   }
 }
 
 springBoot {
-  mainClassName = 'com.sequenceiq.environment.EnvironmentApplication'
+  mainClassName = "com.sequenceiq.environment.EnvironmentApplication"
 }
 
 jar {
-  baseName = 'environment'
-  archiveName = 'environment.jar'
+  baseName = "environment"
+  archiveName = "environment.jar"
 }
 
 bootJar {
-  baseName = 'environment'
-  archiveName = 'environment.jar'
+  baseName = "environment"
+  archiveName = "environment.jar"
   manifest {
     def grgit = Grgit.open(currentDir: project.projectDir)
-    attributes "compile-Version": grgit.describe()
+    attributes "Implementation-Version": grgit.describe()
   }
 }
 
 test{
   useJUnitPlatform {
-    excludeTags 'outofscope'
-    includeEngines 'junit-jupiter', 'junit-vintage'
+    excludeTags "outofscope"
+    includeEngines "junit-jupiter", "junit-vintage"
   }
 }
 
 task execute(type: JavaExec) {
-  if (project.hasProperty('mainClass')) {
+  if (project.hasProperty("mainClass")) {
     main = mainClass
     classpath = sourceSets.main.runtimeClasspath
   }
