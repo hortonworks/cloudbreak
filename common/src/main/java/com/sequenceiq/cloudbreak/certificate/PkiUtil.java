@@ -156,15 +156,14 @@ public class PkiUtil {
         }
     }
 
-    public static PKCS10CertificationRequest csr(KeyPair identity, String externalAddress) {
+    public static PKCS10CertificationRequest csr(KeyPair identity, String commonName, List<String> subjectAlternativeNames) {
         if (identity == null) {
             throw new PkiException("Failed to generate CSR because KeyPair hasn't been specified for the method!");
         }
         try {
-            String name = String.format("C=US, CN=%s, O=Cloudera", externalAddress);
-            List<String> sanList = List.of();
-            LOGGER.info("Generate CSR with X.500 distinguished name: '{}' and list of SAN: '{}'", name, String.join(",", sanList));
-            return generateCsrWithName(identity, name, sanList);
+            String name = String.format("C=US, CN=%s, O=Cloudera", commonName);
+            LOGGER.info("Generate CSR with X.500 distinguished name: '{}' and list of SAN: '{}'", name, String.join(",", subjectAlternativeNames));
+            return generateCsrWithName(identity, name, subjectAlternativeNames);
         } catch (Exception e) {
             throw new PkiException("Failed to generate csr for the cluster!", e);
         }
