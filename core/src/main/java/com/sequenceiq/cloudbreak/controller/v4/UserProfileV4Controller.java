@@ -13,8 +13,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.ShowTermi
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.UserProfileV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClustersConfig;
 import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigService;
+import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClustersConfig;
+import com.sequenceiq.cloudbreak.service.user.UserProfileDecorator;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 
 @Controller
@@ -30,10 +31,15 @@ public class UserProfileV4Controller implements UserProfileV4Endpoint {
     @Inject
     private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
 
+    @Inject
+    private UserProfileDecorator userProfileDecorator;
+
     @Override
     public UserProfileV4Response get() {
         UserProfile userProfile = userProfileService.getOrCreateForLoggedInUser();
-        return converterUtil.convert(userProfile, UserProfileV4Response.class);
+        UserProfileV4Response userProfileV4Response = converterUtil.convert(userProfile, UserProfileV4Response.class);
+        userProfileDecorator.decorate(userProfileV4Response, userProfile.getUser().getUserCrn());
+        return userProfileV4Response;
     }
 
     @Override

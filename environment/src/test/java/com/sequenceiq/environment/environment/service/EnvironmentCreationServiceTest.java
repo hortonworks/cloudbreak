@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -63,6 +64,9 @@ class EnvironmentCreationServiceTest {
 
     @MockBean
     private ParametersService parametersService;
+
+    @MockBean
+    private EntitlementService entitlementService;
 
     @MockBean
     private NetworkService networkService;

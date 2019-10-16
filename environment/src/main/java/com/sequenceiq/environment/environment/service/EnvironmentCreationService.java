@@ -16,9 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
+import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
@@ -53,6 +55,8 @@ public class EnvironmentCreationService {
 
     private final NetworkService networkService;
 
+    private final EntitlementService entitlementService;
+
     public EnvironmentCreationService(
             EnvironmentService environmentService,
             EnvironmentValidatorService validatorService,
@@ -61,7 +65,8 @@ public class EnvironmentCreationService {
             EnvironmentReactorFlowManager reactorFlowManager,
             AuthenticationDtoConverter authenticationDtoConverter,
             ParametersService parametersService,
-            NetworkService networkService) {
+            NetworkService networkService,
+            EntitlementService entitlementService) {
         this.environmentService = environmentService;
         this.validatorService = validatorService;
         this.environmentResourceService = environmentResourceService;
@@ -70,6 +75,7 @@ public class EnvironmentCreationService {
         this.authenticationDtoConverter = authenticationDtoConverter;
         this.parametersService = parametersService;
         this.networkService = networkService;
+        this.entitlementService = entitlementService;
     }
 
     public EnvironmentDto create(EnvironmentCreationDto creationDto) {
@@ -77,6 +83,7 @@ public class EnvironmentCreationService {
             throw new BadRequestException(String.format("Environment with name '%s' already exists in account '%s'.",
                     creationDto.getName(), creationDto.getAccountId()));
         }
+        validateTunnel(creationDto.getCreator(), creationDto.getExperimentalFeatures().getTunnel());
         Environment environment = initializeEnvironment(creationDto);
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
         environmentService.setAdminGroupName(environment, creationDto.getAdminGroupName());
@@ -91,6 +98,12 @@ public class EnvironmentCreationService {
         environmentService.save(environment);
         reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creationDto.getCreator(), environment.getResourceCrn());
         return environmentDtoConverter.environmentToDto(environment);
+    }
+
+    private void validateTunnel(String userCrn, Tunnel tunnel) {
+        if (!entitlementService.ccmEnabled(userCrn) && Tunnel.CCM.equals(tunnel)) {
+            throw new BadRequestException("Reverse SSH tunnel is not enabled for this account.");
+        }
     }
 
     private void validateNetworkRequest(Environment environment, NetworkDto network, Map<String, CloudSubnet> subnetMetas) {
