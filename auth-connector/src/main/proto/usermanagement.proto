@@ -2236,7 +2236,7 @@ message GetActorWorkloadCredentialsResponse {
 
 message GetEventGenerationIdsRequest {
   // The account ID to retrieve the last event generation IDs for.
-  string accountId = 1;
+  string accountId = 1;https://github.com/hortonworks/cloudbreak/tree/vgroup-protorefresh
 }
 
 message GetEventGenerationIdsResponse {

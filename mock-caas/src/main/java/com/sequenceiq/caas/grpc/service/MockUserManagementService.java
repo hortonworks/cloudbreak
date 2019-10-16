@@ -540,26 +540,26 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
      */
     @Override
     public void getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request,
-                                            io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement
-                                                .UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
+            io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement
+                    .UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
 
         final int keyType17 = 17;
         final int keyType18 = 18;
         final int saltType = 4;
         GetActorWorkloadCredentialsResponse.Builder respBuilder = GetActorWorkloadCredentialsResponse.getDefaultInstance().toBuilder();
         respBuilder.addKerberosKeysBuilder(0)
-            .setSaltType(saltType)
-            .setKeyType(keyType17)
-            .setKeyValue("testKeyValue17")
-            .setSaltValue("NonIodizedGrainOfSalt")
-            .build();
+                .setSaltType(saltType)
+                .setKeyType(keyType17)
+                .setKeyValue("testKeyValue17")
+                .setSaltValue("NonIodizedGrainOfSalt")
+                .build();
 
         respBuilder.addKerberosKeysBuilder(1)
-            .setSaltType(saltType)
-            .setKeyType(keyType18)
-            .setKeyValue("testKeyValue18")
-            .setSaltValue("IodizedGrainOfSalt")
-            .build();
+                .setSaltType(saltType)
+                .setKeyType(keyType18)
+                .setKeyValue("testKeyValue18")
+                .setSaltValue("IodizedGrainOfSalt")
+                .build();
 
         // sha256 hashed value of "Password123!"
         respBuilder.setPasswordHash("008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601");
@@ -612,6 +612,29 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
             }
         }
         return null;
+    }
+
+    @Override
+    public void getWorkloadAdministrationGroupName(UserManagementProto.GetWorkloadAdministrationGroupNameRequest request,
+            StreamObserver<UserManagementProto.GetWorkloadAdministrationGroupNameResponse> responseObserver) {
+        UserManagementProto.GetWorkloadAdministrationGroupNameResponse.Builder respBuilder =
+                UserManagementProto.GetWorkloadAdministrationGroupNameResponse.getDefaultInstance().toBuilder();
+        String groupNamePostfix = request.getRightName().replaceAll("/", "_").toLowerCase();
+        respBuilder.setWorkloadAdministrationGroupName("group_" + groupNamePostfix);
+        responseObserver.onNext(respBuilder.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void setWorkloadAdministrationGroupName(UserManagementProto.SetWorkloadAdministrationGroupNameRequest request,
+            StreamObserver<UserManagementProto.SetWorkloadAdministrationGroupNameResponse> responseObserver) {
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void deleteWorkloadAdministrationGroupName(UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request,
+            StreamObserver<UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> responseObserver) {
+        responseObserver.onCompleted();
     }
 
     private UserManagementProto.ResourceAssignee createResourceAssignee(String resourceCrn) {

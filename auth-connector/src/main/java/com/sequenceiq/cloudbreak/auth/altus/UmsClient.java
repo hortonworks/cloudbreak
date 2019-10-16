@@ -654,4 +654,31 @@ public class UmsClient {
                 .build());
     }
 
+    public UserManagementProto.SetWorkloadAdministrationGroupNameResponse setWorkloadAdministrationGroupName(String requestId, String accountId, String right, String resource) {
+        checkNotNull(accountId);
+        return newStub(requestId).setWorkloadAdministrationGroupName(UserManagementProto.SetWorkloadAdministrationGroupNameRequest.newBuilder()
+                .setAccountId(accountId)
+                .setRightName(right)
+                .setResource(resource)
+                .build());
+    }
+
+    public UserManagementProto.GetWorkloadAdministrationGroupNameResponse getWorkloadAdministrationGroupName(String requestId, String accountId, String right, String resource) {
+        checkNotNull(accountId);
+        return newStub(requestId).getWorkloadAdministrationGroupName(UserManagementProto.GetWorkloadAdministrationGroupNameRequest.newBuilder()
+                .setAccountId(accountId)
+                .setRightName(right)
+                .setResource(resource)
+                .build());
+    }
+
+    public UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse deleteWorkloadAdministrationGroupName(String requestId, String accountId, String right, String resource) {
+        checkNotNull(accountId);
+        return newStub(requestId).deleteWorkloadAdministrationGroupName(UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest.newBuilder()
+                .setAccountId(accountId)
+                .setRightName(right)
+                .setResource(resource)
+                .build());
+    }
+
 }
