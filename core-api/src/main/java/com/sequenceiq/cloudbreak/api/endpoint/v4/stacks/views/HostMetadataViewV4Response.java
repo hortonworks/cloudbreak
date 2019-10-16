@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views;
 
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostMetadataModelDescription.STATE;
+import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostMetadataModelDescription.STATUS_REASON;
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.ID;
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.NAME;
 
@@ -18,6 +19,9 @@ public class HostMetadataViewV4Response implements JsonEntity {
 
     @ApiModelProperty(STATE)
     private String state;
+
+    @ApiModelProperty(STATUS_REASON)
+    private String statusReason;
 
     public String getName() {
         return name;
@@ -41,5 +45,13 @@ public class HostMetadataViewV4Response implements JsonEntity {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 }

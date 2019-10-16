@@ -505,6 +505,7 @@ public class ModelDescriptions {
 
     public static class HostMetadataModelDescription {
         public static final String STATE = "state of the host";
+        public static final String STATUS_REASON = "reason of the state";
     }
 
     public static class HostGroupAdjustmentModelDescription {

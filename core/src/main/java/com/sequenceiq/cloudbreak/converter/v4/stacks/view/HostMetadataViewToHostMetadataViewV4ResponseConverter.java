@@ -16,6 +16,7 @@ public class HostMetadataViewToHostMetadataViewV4ResponseConverter extends Abstr
         hostMetadataViewResponse.setId(source.getId());
         hostMetadataViewResponse.setName(source.getHostName());
         hostMetadataViewResponse.setState(source.getHostMetadataState().name());
+        hostMetadataViewResponse.setStatusReason(source.getStatusReason());
         return hostMetadataViewResponse;
     }
 
