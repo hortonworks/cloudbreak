@@ -18,7 +18,7 @@ buildscript {
 
 plugins {
   id 'org.ajoberstar.grgit' version '2.1.0'
-  id "com.github.spotbugs" version "1.6.10"
+  id "com.github.spotbugs" version "2.0.0"
 }
 
 if (project.hasProperty("reckon.scope")) {
@@ -92,7 +92,7 @@ subprojects {
   }
 
   jacoco {
-    toolVersion = "0.8.3"
+    toolVersion = "0.8.4"
     reportsDir = file("$buildDir/reports/jacoco")
   }
 
@@ -103,7 +103,7 @@ subprojects {
       html.enabled true
     }
       afterEvaluate {
-          classDirectories = files(classDirectories.files.collect {
+          classDirectories.from = files(classDirectories.files.collect {
               fileTree(
                       dir: it,
                       exclude: [
@@ -119,7 +119,6 @@ subprojects {
 
   test {
     jacoco {
-      append = false
       destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
       classDumpDir = file("$buildDir/jacoco/classpathdumps")
     }

@@ -11,13 +11,11 @@ buildscript {
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
         classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
-        classpath "gradle.plugin.com.palantir:jacoco-coverage:0.4.0"
         classpath "gradle.plugin.com.github.jk1:gradle-license-report:0.3.4"
     }
 }
 
 plugins {
-    id "com.palantir.jacoco-full-report" version "0.4.0"
     id "com.github.jk1.dependency-license-report" version "0.3.4"
     id 'net.ltgt.apt' version '0.14'
 }

@@ -1,3 +1,5 @@
+rootProject.name = 'cloudbreak'
+
 include 'core-model'
 include 'core'
 include 'integration-test'
@@ -51,12 +53,9 @@ include 'client-cm'
 include 'freeipa-client'
 include 'usage-collection'
 include 'cluster-proxy'
-
-rootProject.name = 'cloudbreak'
 include 'authorization'
 include 'workspace-authorization-api'
 include 'authorization-common'
 include 'idbmms-connector'
 include 'authorization-common-api'
 include 'cluster-dns-connector'
-

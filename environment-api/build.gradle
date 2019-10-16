@@ -1,45 +1,46 @@
 plugins {
-  id 'java'
-  id 'com.adarshr.test-logger' version '1.7.0'
+    id "java"
+    id "com.adarshr.test-logger" version "1.7.0"
 }
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 configurations.all {
     resolutionStrategy {
-        force group: 'org.ow2.asm', name: 'asm', version: asmVersion
+        force group: "org.ow2.asm", name: "asm", version: asmVersion
     }
 }
 
 dependencies {
-  implementation project(':structuredevent-model')
-  implementation project(':common')
-  implementation project(':cloud-api')
-  implementation project(':auth-connector')
-  implementation project(':common-model')
+    implementation     project(":structuredevent-model")
+    implementation     project(":common")
+    implementation     project(":cloud-api")
+    implementation     project(":auth-connector")
+    implementation     project(":common-model")
 
-  implementation     group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
-  implementation     group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: "1.5.21"
-  implementation     group: 'javax.validation',              name: 'validation-api',                 version: '2.0.1.Final'
-  implementation     group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
-  implementation     group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
-  implementation     group: 'javax.activation',              name: 'activation',                     version: "1.1.1"
-  implementation     group: 'javax.xml.bind',                name: 'jaxb-api',                       version: "2.3.0"
-  implementation     group: 'com.sun.xml.bind',              name: 'jaxb-impl',                      version: "2.3.0"
-  implementation     group: 'com.sun.xml.bind',              name: 'jaxb-core',                      version: "2.3.0"
-  implementation     group: 'com.sun.xml.ws',                name: 'rt',                             version: "2.3.0"
-  implementation     group: 'com.sun.xml.ws',                name: 'jaxws-rt',                       version: "2.3.0"
-  implementation     group: 'io.opentracing.contrib',        name: 'opentracing-jaxrs2',             version: opentracingJaxrs2Version
+    implementation     group: "org.apache.commons",            name: "commons-lang3",                  version: apacheCommonsLangVersion
+    implementation     group: "io.swagger",                    name: "swagger-jersey2-jaxrs",          version: swaggerVersion
+    implementation     group: "javax.validation",              name: "validation-api",                 version: javaxValidationVersion
+    implementation     group: "org.glassfish.jersey.ext",      name: "jersey-proxy-client",            version: jerseyCoreVersion
+    implementation     group: "org.glassfish.jersey.media",    name: "jersey-media-json-jackson",      version: jerseyCoreVersion
+    implementation     group: "javax.activation",              name: "activation",                     version: javaxActivationVersion
+    implementation     group: "javax.xml.bind",                name: "jaxb-api",                       version: "2.3.0"
+    implementation     group: "com.sun.xml.bind",              name: "jaxb-impl",                      version: "2.3.0"
+    implementation     group: "com.sun.xml.bind",              name: "jaxb-core",                      version: "2.3.0"
+    implementation     group: "com.sun.xml.ws",                name: "rt",                             version: "2.3.0"
+    implementation     group: "com.sun.xml.ws",                name: "jaxws-rt",                       version: "2.3.0"
+    implementation     group: "io.opentracing.contrib",        name: "opentracing-jaxrs2",             version: opentracingJaxrs2Version
 
-  testImplementation group: 'org.junit.jupiter',             name: 'junit-jupiter-api',              version: junitJupiterVersion
-  testImplementation group: 'org.junit.jupiter',             name: 'junit-jupiter-params',           version: junitJupiterVersion
-  testImplementation group: 'org.assertj',                   name: 'assertj-core',                   version: assertjVersion
-  testImplementation group: 'com.openpojo',                  name: 'openpojo',                       version: openPojoVersion
-  testImplementation group: 'org.ow2.asm',                   name: 'asm',                            version: asmVersion
-  testImplementation group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
-  testRuntimeOnly    group: 'org.junit.jupiter',             name: 'junit-jupiter-engine',           version: junitJupiterVersion
+    testImplementation group: "org.junit.jupiter",             name: "junit-jupiter-api",              version: junitJupiterVersion
+    testImplementation group: "org.junit.jupiter",             name: "junit-jupiter-params",           version: junitJupiterVersion
+    testImplementation group: "org.assertj",                   name: "assertj-core",                   version: assertjVersion
+    testImplementation group: "com.openpojo",                  name: "openpojo",                       version: openPojoVersion
+    testImplementation group: "org.ow2.asm",                   name: "asm",                            version: asmVersion
+    testImplementation group: "org.hibernate",                 name: "hibernate-validator",            version: hibernateValidatorVersion
+
+    testRuntimeOnly    group: "org.junit.jupiter",             name: "junit-jupiter-engine",           version: junitJupiterVersion
 }
 
 test {
