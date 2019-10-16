@@ -106,6 +106,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final String ALL_RIGHTS_AND_RESOURCES = "*";
 
+    private static final String NO_TUNNEL_PROVISIONING = "NO_TUNNEL_PROVISIONING";
+
     @Inject
     private JsonUtil jsonUtil;
 
@@ -348,11 +350,16 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Override
     public void getAccount(GetAccountRequest request, StreamObserver<GetAccountResponse> responseObserver) {
+        UserManagementProto.Entitlement entitlement = UserManagementProto.Entitlement.newBuilder()
+                .setEntitlementName(NO_TUNNEL_PROVISIONING)
+                .build();
+
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
                         .setAccount(UserManagementProto.Account.newBuilder()
                                 .setClouderaManagerLicenseKey(cbLicense)
                                 .setWorkloadSubdomain(ACCOUNT_SUBDOMAIN)
+                                .addEntitlements(entitlement)
                                 .build())
                         .build());
         responseObserver.onCompleted();

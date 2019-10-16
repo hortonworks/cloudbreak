@@ -41,8 +41,11 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentModificationService environmentModificationService;
 
-    public EnvironmentController(EnvironmentApiConverter environmentApiConverter, EnvironmentService environmentService,
-            EnvironmentCreationService environmentCreationService, ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
+    public EnvironmentController(
+            EnvironmentApiConverter environmentApiConverter,
+            EnvironmentService environmentService,
+            EnvironmentCreationService environmentCreationService,
+            ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
             EnvironmentModificationService environmentModificationService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentService = environmentService;

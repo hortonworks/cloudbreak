@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
@@ -78,18 +79,22 @@ public class EnvironmentApiConverter {
 
     private final SdxEndpoint sdxEndpoint;
 
+    private final EntitlementService entitlementService;
+
     public EnvironmentApiConverter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
             RegionConverter regionConverter,
             CredentialToCredentialV1ResponseConverter credentialConverter,
             TelemetryApiConverter telemetryApiConverter,
             TunnelConverter tunnelConverter,
-            SdxEndpoint sdxEndpoint) {
+            SdxEndpoint sdxEndpoint,
+            EntitlementService entitlementService) {
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.regionConverter = regionConverter;
         this.credentialConverter = credentialConverter;
         this.telemetryApiConverter = telemetryApiConverter;
         this.tunnelConverter = tunnelConverter;
         this.sdxEndpoint = sdxEndpoint;
+        this.entitlementService = entitlementService;
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
