@@ -1,4 +1,4 @@
-apply plugin: 'java'
+apply plugin: "java"
 
 repositories {
   mavenLocal()
@@ -7,45 +7,52 @@ repositories {
 }
 
 jar {
-  baseName = 'template-manager-cmtemplate'
+  baseName = "template-manager-cmtemplate"
 }
 
 dependencies {
-  compile project(':orchestrator-api')
-  compile project(':core-model')
-  compile project(':cloud-api')
-  compile project(':cluster-api')
-  compile project(':template-manager-core')
+  implementation project(":orchestrator-api")
+  implementation project(":core-model")
+  implementation project(":cloud-api")
+  implementation project(":cluster-api")
+  implementation project(":template-manager-core")
 
-  compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
-    exclude group: 'org.slf4j'
-    exclude group: 'xerces.xercesImpl'
+  implementation ("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
+    exclude group: "org.slf4j"
+    exclude group: "xerces.xercesImpl"
   }
-  compile group: 'xerces',              name: 'xercesImpl',            version: xerces
+  implementation group: "xerces",                        name: "xercesImpl",                     version: xerces
 
-  compile (group: 'com.cloudera.api.swagger',           name: 'cloudera-manager-api-swagger',version: cmClientVersion) {
+  implementation(group: "com.cloudera.api.swagger",      name: "cloudera-manager-api-swagger",   version: cmClientVersion) {
     transitive = false
   }
-  compile group: 'com.github.jknack',             name: 'handlebars',                     version: '4.0.6'
+  implementation group: "com.github.jknack",             name: "handlebars",                     version: "4.0.6"
 
-  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
-  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-  testCompile (group: 'junit', name: 'junit', version: junitVersion) {
-    exclude group: 'org.hamcrest'
+  testImplementation group: "org.springframework.boot",  name: "spring-boot-starter",            version: springBootVersion
+  testImplementation group: "org.springframework.boot",  name: "spring-boot-starter-test",       version: springBootVersion
+  testImplementation(group: "org.mockito",               name: "mockito-core",                   version: mockitoVersion) {
+    exclude group: "org.hamcrest"
   }
-  testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
-    exclude group: 'org.hamcrest'
-  }
-  testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
-  testCompile 'net.javacrumbs.json-unit:json-unit:1.28.2'
-  testCompile project(path: ':template-manager-core', configuration: 'tests')
-  testCompile project(path: ':core-model', configuration: 'tests')
-  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
-  testRuntime        group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
-  testCompile        group: 'org.mockito',               name: 'mockito-junit-jupiter',          version: mockitoVersion
+  testImplementation "org.hamcrest:java-hamcrest:2.0.0.0"
+  testImplementation "net.javacrumbs.json-unit:json-unit:1.28.2"
+  testImplementation project(path: ":template-manager-core", configuration: "tests")
+  testImplementation project(path: ":core-model", configuration: "tests")
+  testImplementation group: "org.junit.jupiter",         name: "junit-jupiter-api",              version: junitJupiterVersion
+  testImplementation group: "org.mockito",               name: "mockito-junit-jupiter",          version: mockitoVersion
+  testImplementation group: 'org.assertj',               name: 'assertj-core',                   version: assertjVersion
+
+
+  testRuntimeOnly    group: "org.junit.jupiter",         name: "junit-jupiter-engine",           version: junitJupiterVersion
+  testRuntimeOnly    group: 'org.junit.vintage',         name: 'junit-vintage-engine',           version: junitJupiterVersion
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-  implementation group: 'net.bytebuddy',          name: 'byte-buddy',                   version: '1.9.12'
+  implementation     group: "net.bytebuddy",             name: "byte-buddy",                     version: "1.9.12"
+}
+
+test{
+    useJUnitPlatform {
+        includeEngines "junit-jupiter", "junit-vintage"
+    }
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {
