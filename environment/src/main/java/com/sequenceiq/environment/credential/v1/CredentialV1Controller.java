@@ -11,6 +11,8 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
@@ -25,6 +27,7 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialToCredential
 import com.sequenceiq.notification.NotificationController;
 
 @Component
+@InternalReady
 public class CredentialV1Controller extends NotificationController implements CredentialEndpoint {
 
     private final CredentialService credentialService;
@@ -64,7 +67,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    public CredentialResponse getByEnvironmentCrn(String environmentCrn) {
+    public CredentialResponse getByEnvironmentCrn(@ResourceCrn String environmentCrn) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         return credentialConverter.convert(credential);
