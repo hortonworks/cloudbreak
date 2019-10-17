@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -56,6 +57,26 @@ public class CloudNetwork {
 
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !getClass().equals(o.getClass())) {
+            return false;
+        }
+        CloudNetwork that = (CloudNetwork) o;
+        return Objects.equals(name, that.name) &&
+                Objects.equals(id, that.id) &&
+                Objects.equals(subnets, that.subnets) &&
+                Objects.equals(properties, that.properties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, id, subnets, properties);
     }
 
     @Override
