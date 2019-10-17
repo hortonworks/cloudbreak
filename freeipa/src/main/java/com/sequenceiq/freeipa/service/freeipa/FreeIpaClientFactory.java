@@ -44,7 +44,7 @@ public class FreeIpaClientFactory {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
-    public FreeIpaClient getFreeIpaClientForStackId(Long stackId) throws Exception {
+    public FreeIpaClient getFreeIpaClientForStackId(Long stackId) throws FreeIpaClientException {
         LOGGER.debug("Retrieving stack for stack id {}", stackId);
 
         Stack stack = stackService.getStackById(stackId);

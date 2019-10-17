@@ -20,15 +20,16 @@ import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
-import com.sequenceiq.freeipa.converter.freeipa.user.SyncOperationToSyncOperationStatus;
+import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationStatus;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.entity.SyncOperation;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordRequest;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordResult;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.operation.OperationStatusService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -53,10 +54,10 @@ public class PasswordService {
     private AsyncTaskExecutor asyncTaskExecutor;
 
     @Inject
-    private SyncOperationStatusService syncOperationStatusService;
+    private OperationStatusService operationStatusService;
 
     @Inject
-    private SyncOperationToSyncOperationStatus syncOperationToSyncOperationStatus;
+    private OperationToSyncOperationStatus operationToSyncOperationStatus;
 
     @Inject
     private FreeIpaPasswordValidator freeIpaPasswordValidator;
@@ -72,14 +73,14 @@ public class PasswordService {
         }
         LOGGER.debug("Found {} matching stacks for accountId {}", stacks.size(), accountId);
 
-        SyncOperation syncOperation = syncOperationStatusService.startOperation(accountId, SyncOperationType.SET_PASSWORD,
+        Operation operation = operationStatusService.startOperation(accountId, OperationType.SET_PASSWORD,
                 environmentCrnFilter, List.of(userCrn));
-        if (syncOperation.getStatus() == SynchronizationStatus.RUNNING) {
-            MDCBuilder.addFlowId(syncOperation.getOperationId());
-            asyncTaskExecutor.submit(() -> asyncSetPasswords(syncOperation.getOperationId(), accountId, actorCrn, userCrn, password, stacks));
+        if (operation.getStatus() == OperationState.RUNNING) {
+            MDCBuilder.addFlowId(operation.getOperationId());
+            asyncTaskExecutor.submit(() -> asyncSetPasswords(operation.getOperationId(), accountId, actorCrn, userCrn, password, stacks));
         }
 
-        return syncOperationToSyncOperationStatus.convert(syncOperation);
+        return operationToSyncOperationStatus.convert(operation);
     }
 
     private void asyncSetPasswords(String operationId, String accountId, String actorCrn, String userCrn, String password, List<Stack> stacks) {
@@ -105,12 +106,12 @@ public class PasswordService {
                     failure.add(new FailureDetails(request.getEnvironment(), e.getLocalizedMessage()));
                 }
             }
-            syncOperationStatusService.completeOperation(operationId, success, failure);
+            operationStatusService.completeOperation(operationId, success, failure);
         } catch (InterruptedException e) {
-            syncOperationStatusService.failOperation(operationId, e.getLocalizedMessage());
+            operationStatusService.failOperation(operationId, e.getLocalizedMessage());
             Thread.currentThread().interrupt();
         } catch (RuntimeException e) {
-            syncOperationStatusService.failOperation(operationId, e.getLocalizedMessage());
+            operationStatusService.failOperation(operationId, e.getLocalizedMessage());
             throw e;
         }
     }

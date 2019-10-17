@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
+import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent;
+import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.start.StackStartFlowConfig;
@@ -20,7 +22,10 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
             StackTerminationFlowConfig.class,
             FreeIpaProvisionFlowConfig.class,
             StackStartFlowConfig.class,
-            StackStopFlowConfig.class);
+            StackStopFlowConfig.class,
+            FreeIpaCleanupFlowConfig.class);
+
+    private static final List<String> PARALLEL_FLOWS = List.of(FreeIpaCleanupEvent.CLEANUP_EVENT.event());
 
     @Override
     public List<Class<? extends FlowConfiguration<?>>> getRestartableFlows() {
@@ -29,6 +34,6 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
 
     @Override
     public List<String> getAllowedParallelFlows() {
-        return List.of();
+        return PARALLEL_FLOWS;
     }
 }

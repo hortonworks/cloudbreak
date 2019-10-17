@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.user.model;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -10,6 +13,8 @@ import io.swagger.annotations.ApiModel;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SuccessDetails {
     private String environment;
+
+    private Map<String, List<String>> additionalDetails = new HashMap<>();
 
     public SuccessDetails() {
     }
@@ -24,6 +29,10 @@ public class SuccessDetails {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
+    }
+
+    public Map<String, List<String>> getAdditionalDetails() {
+        return additionalDetails;
     }
 
     @Override
@@ -50,6 +59,7 @@ public class SuccessDetails {
     public String toString() {
         return "SuccessDetails{"
                 + "environment='" + environment + '\''
+                + "additionalDetails='" + additionalDetails + '\''
                 + '}';
     }
 }

@@ -12,9 +12,11 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
-import com.sequenceiq.freeipa.entity.SyncOperation;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
+import com.sequenceiq.freeipa.entity.Operation;
 
-class SyncOperationToSyncOperationStatusTest {
+class SyncOperationToOperationStatusConverterTest {
 
     private static final String OPERATION_ID = "operationId";
 
@@ -22,19 +24,22 @@ class SyncOperationToSyncOperationStatusTest {
 
     private static final SyncOperationType SYNC_OPERATION_TYPE = SyncOperationType.SET_PASSWORD;
 
+    private static final OperationType OPERATION_TYPE = OperationType.SET_PASSWORD;
+
     private static final Long START_TIME = System.currentTimeMillis();
 
     private static final Long END_TIME = START_TIME + 1000L;
 
-    private SyncOperationToSyncOperationStatus underTest = new SyncOperationToSyncOperationStatus();
+    private OperationToSyncOperationStatus underTest = new OperationToSyncOperationStatus();
 
     @Test
     void convertRunning() {
-        SynchronizationStatus synchronizationStatus = SynchronizationStatus.RUNNING;
+        OperationState operationState = OperationState.RUNNING;
+        SynchronizationStatus synchronizationStatus = SynchronizationStatus.fromOperationState(operationState);
 
-        SyncOperation syncOperation = createSyncOperation(synchronizationStatus);
+        Operation operation = createSyncOperation(operationState);
 
-        SyncOperationStatus actual = underTest.convert(syncOperation);
+        SyncOperationStatus actual = underTest.convert(operation);
 
         assertEqualsDefaults(actual);
         assertEquals(synchronizationStatus, actual.getStatus());
@@ -45,7 +50,8 @@ class SyncOperationToSyncOperationStatusTest {
 
     @Test
     void convertCompleted() {
-        SynchronizationStatus synchronizationStatus = SynchronizationStatus.COMPLETED;
+        OperationState operationState = OperationState.COMPLETED;
+        SynchronizationStatus synchronizationStatus = SynchronizationStatus.fromOperationState(operationState);
         List<SuccessDetails> successDetails = List.of(
                 new SuccessDetails("environment1"),
                 new SuccessDetails("environment2")
@@ -55,11 +61,11 @@ class SyncOperationToSyncOperationStatusTest {
                 new FailureDetails("environment4", "failure message2")
         );
 
-        SyncOperation syncOperation = createSyncOperation(synchronizationStatus);
-        syncOperation.setSuccessList(successDetails);
-        syncOperation.setFailureList(failureDetails);
+        Operation operation = createSyncOperation(operationState);
+        operation.setSuccessList(successDetails);
+        operation.setFailureList(failureDetails);
 
-        SyncOperationStatus actual = underTest.convert(syncOperation);
+        SyncOperationStatus actual = underTest.convert(operation);
 
         assertEqualsDefaults(actual);
         assertEquals(synchronizationStatus, actual.getStatus());
@@ -70,13 +76,14 @@ class SyncOperationToSyncOperationStatusTest {
 
     @Test
     void convertFailed() {
-        SynchronizationStatus synchronizationStatus = SynchronizationStatus.FAILED;
+        OperationState operationState = OperationState.FAILED;
+        SynchronizationStatus synchronizationStatus = SynchronizationStatus.fromOperationState(operationState);
 
-        SyncOperation syncOperation = createSyncOperation(synchronizationStatus);
+        Operation operation = createSyncOperation(operationState);
         String errorMessage = "error message";
-        syncOperation.setError(errorMessage);
+        operation.setError(errorMessage);
 
-        SyncOperationStatus actual = underTest.convert(syncOperation);
+        SyncOperationStatus actual = underTest.convert(operation);
 
         assertEqualsDefaults(actual);
         assertEquals(synchronizationStatus, actual.getStatus());
@@ -92,14 +99,14 @@ class SyncOperationToSyncOperationStatusTest {
         assertEquals(END_TIME, actual.getEndTime());
     }
 
-    private SyncOperation createSyncOperation(SynchronizationStatus status) {
-        SyncOperation syncOperation = new SyncOperation();
-        syncOperation.setOperationId(OPERATION_ID);
-        syncOperation.setAccountId(ACCOUNT_ID);
-        syncOperation.setSyncOperationType(SYNC_OPERATION_TYPE);
-        syncOperation.setStatus(status);
-        syncOperation.setStartTime(START_TIME);
-        syncOperation.setEndTime(END_TIME);
-        return syncOperation;
+    private Operation createSyncOperation(OperationState status) {
+        Operation operation = new Operation();
+        operation.setOperationId(OPERATION_ID);
+        operation.setAccountId(ACCOUNT_ID);
+        operation.setOperationType(OPERATION_TYPE);
+        operation.setStatus(status);
+        operation.setStartTime(START_TIME);
+        operation.setEndTime(END_TIME);
+        return operation;
     }
 }

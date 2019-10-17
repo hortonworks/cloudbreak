@@ -20,7 +20,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.exception.SyncOperationAlreadyRunningException;
 import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
-import com.sequenceiq.freeipa.service.freeipa.user.SyncOperationStatusService;
+import com.sequenceiq.freeipa.service.operation.OperationStatusService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserService;
 
 @Controller
@@ -35,7 +35,7 @@ public class UserV1Controller implements UserV1Endpoint {
     private PasswordService passwordService;
 
     @Inject
-    private SyncOperationStatusService syncOperationStatusService;
+    private OperationStatusService operationStatusService;
 
     @Inject
     private ThreadBasedUserCrnProvider threadBaseUserCrnProvider;
@@ -86,7 +86,7 @@ public class UserV1Controller implements UserV1Endpoint {
     @Override
     public SyncOperationStatus getSyncOperationStatus(@NotNull String operationId) {
         LOGGER.debug("getSyncOperationStatus() requested for operation {}", operationId);
-        return syncOperationStatusService.getStatus(operationId);
+        return operationStatusService.getSyncOperationStatus(operationId);
     }
 
     private SyncOperationStatus checkOperationRejected(SyncOperationStatus syncOperationStatus) {

@@ -6,6 +6,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberos.KerberosConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.KerberosMgmtV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 
 public interface FreeIpaApiEndpoint {
     FreeIpaV1Endpoint getFreeIpaV1Endpoint();
@@ -19,4 +20,6 @@ public interface FreeIpaApiEndpoint {
     ClientTestV1Endpoint getClientTestV1Endpoint();
 
     KerberosMgmtV1Endpoint getKerberosMgmtV1Endpoint();
+
+    OperationV1Endpoint getOperationV1Endpoint();
 }
