@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOption;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -61,31 +61,31 @@ public class SdxUpgradeService {
     @Inject
     private FlowEndpoint flowEndpoint;
 
-    public UpgradeOption checkForUpgradeByName(String userCrn, String clusterName) {
+    public UpgradeOptionV4Response checkForUpgradeByName(String userCrn, String clusterName) {
         SdxCluster cluster = sdxService.getSdxByNameInAccount(userCrn, clusterName);
         return stackV4Endpoint.checkForUpgrade(0L, cluster.getClusterName());
     }
 
-    public UpgradeOption checkForUpgradeByCrn(String userCrn, String clusterCrn) {
+    public UpgradeOptionV4Response checkForUpgradeByCrn(String userCrn, String clusterCrn) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
         return stackV4Endpoint.checkForUpgrade(0L, cluster.getClusterName());
     }
 
     public void triggerUpgradeByName(String userCrn, String clusterName) {
-        UpgradeOption upgradeOption = checkForUpgradeByName(userCrn, clusterName);
+        UpgradeOptionV4Response upgradeOption = checkForUpgradeByName(userCrn, clusterName);
         SdxCluster cluster = sdxService.getSdxByNameInAccount(userCrn, clusterName);
         MDCBuilder.buildMdcContext(cluster);
         sdxReactorFlowManager.triggerDatalakeUpgradeFlow(cluster.getId(), upgradeOption);
     }
 
     public void triggerUpgradeByCrn(String userCrn, String clusterCrn) {
-        UpgradeOption upgradeOption = checkForUpgradeByCrn(userCrn, clusterCrn);
+        UpgradeOptionV4Response upgradeOption = checkForUpgradeByCrn(userCrn, clusterCrn);
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
         MDCBuilder.buildMdcContext(cluster);
         sdxReactorFlowManager.triggerDatalakeUpgradeFlow(cluster.getId(), upgradeOption);
     }
 
-    public void changeImage(Long id, UpgradeOption upgradeOption) {
+    public void changeImage(Long id, UpgradeOptionV4Response upgradeOption) {
         Optional<SdxCluster> cluster = sdxClusterRepository.findById(id);
         if (cluster.isPresent()) {
             StackImageChangeV4Request stackImageChangeRequest = new StackImageChangeV4Request();

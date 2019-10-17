@@ -27,7 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOption;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -93,7 +93,7 @@ public class UpgradeServiceTest {
         Image image = getImage("id-1");
         setUpMocks(stack, image, true, "id-1", "id-2");
 
-        UpgradeOption result = underTest.getUpgradeOptionByName(WORKSPACE_ID, CLUSTER_NAME, user);
+        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackName(WORKSPACE_ID, CLUSTER_NAME, user);
 
         verify(stackService).findStackByNameAndWorkspaceId(eq(CLUSTER_NAME), eq(WORKSPACE_ID));
         verify(clusterService).repairSupported(eq(stack));
@@ -110,7 +110,7 @@ public class UpgradeServiceTest {
         Image image = getImage("id-1");
         setUpMocks(stack, image, false, "id-1", "id-1");
 
-        UpgradeOption result = underTest.getUpgradeOptionByName(WORKSPACE_ID, CLUSTER_NAME, user);
+        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackName(WORKSPACE_ID, CLUSTER_NAME, user);
 
         verify(stackService).findStackByNameAndWorkspaceId(eq(CLUSTER_NAME), eq(WORKSPACE_ID));
         verify(clusterService).repairSupported(eq(stack));

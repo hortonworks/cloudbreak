@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOption;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -71,14 +71,14 @@ public class UpgradeService {
     @Inject
     private HostGroupService hostGroupService;
 
-    public UpgradeOption getUpgradeOptionByName(Long workspaceId, String name, User user) {
+    public UpgradeOptionV4Response getUpgradeOptionByStackName(Long workspaceId, String stackName, User user) {
         try {
             return transactionService.required(() -> {
-                Optional<Stack> stack = stackService.findStackByNameAndWorkspaceId(name, workspaceId);
+                Optional<Stack> stack = stackService.findStackByNameAndWorkspaceId(stackName, workspaceId);
                 if (stack.isPresent()) {
                     return getUpgradeOption(stack.get(), workspaceId, user);
                 } else {
-                    throw notFoundException("Stack", name);
+                    throw notFoundException("Stack", stackName);
                 }
             });
         } catch (TransactionExecutionException e) {
@@ -86,10 +86,10 @@ public class UpgradeService {
         }
     }
 
-    public void upgradeByName(Long workspaceId, String name) {
+    public void upgradeByStackName(Long workspaceId, String stackName) {
         try {
             transactionService.required(() -> {
-                Optional<Stack> stack = stackService.findStackByNameAndWorkspaceId(name, workspaceId);
+                Optional<Stack> stack = stackService.findStackByNameAndWorkspaceId(stackName, workspaceId);
                 if (stack.isPresent()) {
                     List<String> hostGroupNames = hostGroupService.getByCluster(stack.get().getCluster().getId())
                             .stream()
@@ -98,7 +98,7 @@ public class UpgradeService {
                     clusterService.repairCluster(stack.get().getId(), hostGroupNames, REMOVE_ONLY, FORCE_REPAIR);
                     return null;
                 } else {
-                    throw notFoundException("Stack", name);
+                    throw notFoundException("Stack", stackName);
                 }
             });
         } catch (TransactionExecutionException e) {
@@ -106,7 +106,7 @@ public class UpgradeService {
         }
     }
 
-    private UpgradeOption getUpgradeOption(Stack stack, Long workspaceId, User user) {
+    private UpgradeOptionV4Response getUpgradeOption(Stack stack, Long workspaceId, User user) {
         if (clusterService.repairSupported(stack) && attachedClustersStoppedOrDeleted(stack)) {
             try {
                 Blueprint blueprint = stack.getCluster().getBlueprint();
@@ -116,15 +116,15 @@ public class UpgradeService {
                 StatedImage latestImage = imageService
                         .determineImageFromCatalog(workspaceId, imageSettingsV4Request, stack.getCloudPlatform().toLowerCase(), blueprint, baseImage, user);
                 if (!Objects.equals(image.getImageId(), latestImage.getImage().getUuid())) {
-                    return new UpgradeOption(latestImage.getImage().getUuid(), latestImage.getImageCatalogName());
+                    return new UpgradeOptionV4Response(latestImage.getImage().getUuid(), latestImage.getImageCatalogName());
                 } else {
-                    return new UpgradeOption();
+                    return new UpgradeOptionV4Response();
                 }
             } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                 throw new BadRequestException(e.getMessage());
             }
         } else {
-            return new UpgradeOption();
+            return new UpgradeOptionV4Response();
         }
     }
 
