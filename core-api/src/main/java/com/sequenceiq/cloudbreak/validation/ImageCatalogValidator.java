@@ -42,6 +42,7 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
+        LOGGER.info("Image Catalog validation was called: {}", value);
         try {
             if (value == null || !HTTP_CONTENT_SIZE_VALIDATOR.isValid(value, context)) {
                 return false;

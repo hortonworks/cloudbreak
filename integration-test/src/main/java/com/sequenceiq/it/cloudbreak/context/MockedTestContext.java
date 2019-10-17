@@ -38,9 +38,11 @@ public class MockedTestContext extends TestContext implements AutoCloseable {
     private DefaultModel model;
 
     @PostConstruct
-    private void init() {
+    private void init() throws InterruptedException {
+        LOGGER.info("Creating mocked TestContext");
         sparkServer = sparkServerFactory.construct();
-        imageCatalogMockServerSetup.configureImgCatalogMock();
+        LOGGER.info("MockedTestContext got spark server: {}", sparkServer);
+        imageCatalogMockServerSetup.configureImgCatalogWithExistingSparkServer(sparkServer);
         model = new DefaultModel();
         model.startModel(sparkServer.getSparkService(), mockServerAddress, ThreadLocalProfiles.getActiveProfiles());
     }
@@ -62,9 +64,17 @@ public class MockedTestContext extends TestContext implements AutoCloseable {
     }
 
     @Override
-    public void close() {
+    public void cleanupTestContext() {
+        LOGGER.info("MockedTestContext cleaned up. {}", sparkServer);
+        super.cleanupTestContext();
         sparkServerFactory.release(sparkServer);
-        imageCatalogMockServerSetup.close();
+        setShutdown(true);
+    }
+
+    @Override
+    public void close() {
+        LOGGER.info("MockedTestContext closed. {}", sparkServer);
+        sparkServerFactory.release(sparkServer);
         setShutdown(true);
     }
 }

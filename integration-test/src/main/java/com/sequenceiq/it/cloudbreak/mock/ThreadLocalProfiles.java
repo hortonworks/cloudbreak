@@ -7,10 +7,6 @@ public class ThreadLocalProfiles {
 
     private static ThreadLocal<Set<String>> profiles = new ThreadLocal<>();
 
-    static {
-        profiles.set(new HashSet<>());
-    }
-
     private ThreadLocalProfiles() {
     }
 
@@ -20,14 +16,24 @@ public class ThreadLocalProfiles {
 
     public static void setProfile(String profile) {
         Set<String> profileSet = profiles.get();
-        profileSet.add(profile);
+        if (profileSet != null) {
+            profileSet.add(profile);
+        } else {
+            profileSet = new HashSet<>();
+            profileSet.add(profile);
+            profiles.set(profileSet);
+        }
     }
 
     public static void clearProfiles() {
-        profiles.get().clear();
+        Set<String> profile = profiles.get();
+        if (profile != null) {
+            profiles.get().clear();
+        }
     }
 
     public static Set<String> getActiveProfiles() {
-        return new HashSet<>(profiles.get());
+        Set<String> result = profiles.get();
+        return result == null ? new HashSet<>() : result;
     }
 }
