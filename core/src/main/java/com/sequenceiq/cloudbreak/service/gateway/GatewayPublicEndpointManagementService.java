@@ -73,15 +73,10 @@ public class GatewayPublicEndpointManagementService {
                 && stack.getCluster() != null) {
             if (StringUtils.isEmpty(stack.getSecurityConfig().getUserFacingCert())) {
                 certGeneratedAndSaved = generateCertAndSaveForStack(stack);
-                if (certGeneratedAndSaved) {
-                    updateDnsEntryForCluster(stack);
-                }
-            } else {
-                LOGGER.info("CERT is already generated for stack, we don't generate a new one");
-                updateDnsEntryForCluster(stack);
             }
+            updateDnsEntryForCluster(stack);
         } else {
-            LOGGER.info("Cert generation is disabled.");
+            LOGGER.info("External FQDN and valid certificate creation is disabled.");
         }
         return certGeneratedAndSaved;
     }
