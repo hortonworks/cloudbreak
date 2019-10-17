@@ -11,14 +11,15 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -40,6 +41,9 @@ public class UploadRecipesHandler implements EventHandler<UploadRecipesRequest> 
     @Inject
     private HostGroupService hostGroupService;
 
+    @Inject
+    private ResourceService resourceService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(UploadRecipesRequest.class);
@@ -52,6 +56,7 @@ public class UploadRecipesHandler implements EventHandler<UploadRecipesRequest> 
         Long stackId = request.getResourceId();
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+            stack.setResources(resourceService.getNotInstanceRelatedByStackId(stackId));
             Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
             recipeEngine.uploadRecipes(stack, hostGroups);
             result = new UploadRecipesSuccess(stackId);
