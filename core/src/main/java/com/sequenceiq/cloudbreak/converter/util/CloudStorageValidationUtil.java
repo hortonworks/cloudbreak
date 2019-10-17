@@ -22,8 +22,9 @@ public class CloudStorageValidationUtil {
                 return false;
             }
             if (!containsOnlyLogIdentity(cloudStorageRequest.getIdentities())) {
-                validationBuilder.ifError(() -> CollectionUtils.isEmpty(cloudStorageRequest.getLocations()),
-                        "'locations' in 'cloudStorage' must not be empty!");
+                validationBuilder.ifError(() -> CollectionUtils.isEmpty(cloudStorageRequest.getLocations())
+                                && CollectionUtils.isEmpty(cloudStorageRequest.getIdentities()),
+                        "Either 'locations' or 'identities' in 'cloudStorage' must not be empty!");
             }
             ValidationResult validationResult = validationBuilder.build();
             if (validationResult.hasError()) {

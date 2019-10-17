@@ -44,7 +44,7 @@
     format single_value
   </store>
 </match>
-{% elif fluent.providerPrefix == "wasb" %}
+{% elif fluent.providerPrefix == "abfs" %}
 <match {{fluent.providerPrefix}}.*>
   @type copy
   <store ignore_error>
@@ -61,7 +61,7 @@
     store_as                 gzip
     path                     "{{fluent.logFolderName}}/{{fluent.serviceLogPathSuffix}}"
     azure_object_key_format  %{path}-%{index}.%{file_extension}
-    auto_create_container    false
+    auto_create_container    true
 
     <buffer tag,time>
       @type file
@@ -91,7 +91,7 @@
     store_as                 gzip
     path                     "{{fluent.logFolderName}}/{{fluent.cmCommandLogPathSuffix}}"
     azure_object_key_format  %{path}-%{index}.%{file_extension}
-    auto_create_container    false
+    auto_create_container    true
 
     <buffer tag,time>
       @type file

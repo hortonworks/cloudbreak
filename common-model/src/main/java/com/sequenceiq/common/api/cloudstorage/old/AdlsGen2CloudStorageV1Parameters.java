@@ -2,8 +2,6 @@ package com.sequenceiq.common.api.cloudstorage.old;
 
 import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
-
 import com.sequenceiq.common.api.cloudstorage.old.validation.ValidAdlsGen2CloudStorageParameters;
 import com.sequenceiq.common.model.FileSystemAwareCloudStorage;
 import com.sequenceiq.common.model.FileSystemType;
@@ -16,12 +14,13 @@ import io.swagger.annotations.ApiModelProperty;
 public class AdlsGen2CloudStorageV1Parameters implements FileSystemAwareCloudStorage {
 
     @ApiModelProperty
-    @NotNull
     private String accountKey;
 
     @ApiModelProperty
-    @NotNull
     private String accountName;
+
+    @ApiModelProperty
+    private String managedIdentity;
 
     @ApiModelProperty
     private boolean secure;
@@ -50,6 +49,14 @@ public class AdlsGen2CloudStorageV1Parameters implements FileSystemAwareCloudSto
         this.secure = secure;
     }
 
+    public String getManagedIdentity() {
+        return managedIdentity;
+    }
+
+    public void setManagedIdentity(String managedIdentity) {
+        this.managedIdentity = managedIdentity;
+    }
+
     @ApiModelProperty(hidden = true)
     @Override
     public FileSystemType getType() {
@@ -67,11 +74,12 @@ public class AdlsGen2CloudStorageV1Parameters implements FileSystemAwareCloudSto
         AdlsGen2CloudStorageV1Parameters that = (AdlsGen2CloudStorageV1Parameters) o;
         return secure == that.secure
                 && Objects.equals(accountKey, that.accountKey)
-                && Objects.equals(accountName, that.accountName);
+                && Objects.equals(accountName, that.accountName)
+                && Objects.equals(managedIdentity, that.managedIdentity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountKey, accountName, secure);
+        return Objects.hash(accountKey, accountName, secure, managedIdentity);
     }
 }

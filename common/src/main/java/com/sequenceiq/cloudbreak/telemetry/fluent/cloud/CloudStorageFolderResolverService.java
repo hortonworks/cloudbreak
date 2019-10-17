@@ -16,12 +16,12 @@ public class CloudStorageFolderResolverService {
 
     private final S3ConfigGenerator s3ConfigGenerator;
 
-    private final WasbConfigGenerator wasbConfigGenerator;
+    private final AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
 
     public CloudStorageFolderResolverService(S3ConfigGenerator s3ConfigGenerator,
-            WasbConfigGenerator wasbConfigGenerator) {
+            AdlsGen2ConfigGenerator adlsGen2ConfigGenerator) {
         this.s3ConfigGenerator = s3ConfigGenerator;
-        this.wasbConfigGenerator = wasbConfigGenerator;
+        this.adlsGen2ConfigGenerator = adlsGen2ConfigGenerator;
     }
 
     public void updateStorageLocation(Telemetry telemetry, String clusterType,
@@ -34,8 +34,8 @@ public class CloudStorageFolderResolverService {
             if (logging.getS3() != null) {
                 storageLocation = resolveS3Location(storageLocation,
                         clusterType, clusterName, clusterCrn);
-            } else if (logging.getWasb() != null) {
-                storageLocation = resolveWasbLocation(storageLocation,
+            } else if (logging.getAdlsGen2() != null) {
+                storageLocation = resolveAdlsGen2Location(storageLocation,
                         clusterType, clusterName, clusterCrn);
             } else {
                 LOGGER.warn("None of the telemetry logging storage location was resolved, "
@@ -54,10 +54,10 @@ public class CloudStorageFolderResolverService {
                 clusterType, clusterName, Crn.fromString(clusterCrn).getResource());
     }
 
-    public String resolveWasbLocation(String location, String clusterType,
+    public String resolveAdlsGen2Location(String location, String clusterType,
             String clusterName, String clusterCrn) {
         LOGGER.debug("Start to resolve WASB storage location for telemetry (logging).");
-        return wasbConfigGenerator.generateStoredLocation(location,
+        return adlsGen2ConfigGenerator.generateStoredLocation(location,
                 clusterType, clusterName, Crn.fromString(clusterCrn).getResource());
     }
 

@@ -22,7 +22,7 @@ public enum FileSystemType {
 
     ADLS(AdlsFileSystem.class, "adl", "{{{ accountName }}}.azuredatalakestore.net/{{{ storageName }}}"),
 
-    ADLS_GEN_2(AdlsGen2FileSystem.class, "abfs", "{{{ storageName }}}@{{{ accountName }}}.dfs.core.windows.net"),
+    ADLS_GEN_2(AdlsGen2FileSystem.class, "abfs", "{{{ storageName }}}.dfs.core.windows.net"),
 
     S3(S3FileSystem.class, "s3a", "{{{ storageName }}}");
 

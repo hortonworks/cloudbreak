@@ -12,9 +12,12 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
+import com.sequenceiq.cloudbreak.cloud.IdentityService;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
+import com.sequenceiq.cloudbreak.cloud.NoSqlConnector;
+import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -67,6 +70,15 @@ public class AzureConnector implements CloudConnector<Map<String, Map<String, Ob
 
     @Inject
     private AzureNetworkConnector azureNetworkConnector;
+
+    @Inject
+    private AzureIdentityService azureIdentityService;
+
+    @Inject
+    private AzureObjectStorageConnector azureObjectStorageConnector;
+
+    @Inject
+    private AzureNoSqlConnector azureNoSqlConnector;
 
     @Override
     public Authenticator authentication() {
@@ -131,5 +143,20 @@ public class AzureConnector implements CloudConnector<Map<String, Map<String, Ob
     @Override
     public NetworkConnector networkConnector() {
         return azureNetworkConnector;
+    }
+
+    @Override
+    public IdentityService identityService() {
+        return azureIdentityService;
+    }
+
+    @Override
+    public ObjectStorageConnector objectStorage() {
+        return azureObjectStorageConnector;
+    }
+
+    @Override
+    public NoSqlConnector noSql() {
+        return azureNoSqlConnector;
     }
 }

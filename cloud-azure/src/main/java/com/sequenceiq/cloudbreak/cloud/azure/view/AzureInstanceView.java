@@ -43,9 +43,11 @@ public class AzureInstanceView {
 
     private final String customImageId;
 
+    private final String managedIdentity;
+
     public AzureInstanceView(String stackName, int stackNamePrefixLength, CloudInstance instance, InstanceGroupType type, String attachedDiskStorage,
             String attachedDiskStorageType, String groupName, String availabilitySetName, boolean managedDisk, String subnetId, int rootVolumeSize,
-            String customImageId) {
+            String customImageId, String managedIdentity) {
         this.instance = instance;
         instanceTemplate = instance.getTemplate();
         this.stackNamePrefixLength = stackNamePrefixLength;
@@ -59,6 +61,7 @@ public class AzureInstanceView {
         this.subnetId = subnetId;
         this.rootVolumeSize = rootVolumeSize;
         this.customImageId = customImageId;
+        this.managedIdentity = managedIdentity;
     }
 
     /**
@@ -168,5 +171,9 @@ public class AzureInstanceView {
 
     public String getCustomImageId() {
         return customImageId;
+    }
+
+    public String getManagedIdentity() {
+        return managedIdentity;
     }
 }

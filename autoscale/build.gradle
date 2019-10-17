@@ -114,6 +114,7 @@ dependencies {
         exclude group: 'xerces.xercesImpl'
     }
 
+    compile group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: okhttpVersion
     compile group: 'com.fasterxml.jackson.core',         name: 'jackson-databind'
     compile group: 'org.springframework.boot',           name: 'spring-boot-starter'
     compile group: 'org.springframework.boot',           name: 'spring-boot-starter-web'

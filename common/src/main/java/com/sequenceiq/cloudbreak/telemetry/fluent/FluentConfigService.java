@@ -7,11 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
-import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.WasbConfig;
-import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.WasbConfigGenerator;
-import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -22,17 +22,17 @@ public class FluentConfigService {
 
     private static final String S3_PROVIDER_PREFIX = "s3";
 
-    private static final String WASB_PROVIDER_PREFIX = "wasb";
+    private static final String ADLS_GEN2_PROVIDER_PREFIX = "abfs";
 
     private static final String DEFAULT_PROVIDER_PREFIX = "stdout";
 
     private final S3ConfigGenerator s3ConfigGenerator;
 
-    private final WasbConfigGenerator wasbConfigGenerator;
+    private final AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
 
-    public FluentConfigService(S3ConfigGenerator s3ConfigGenerator, WasbConfigGenerator wasbConfigGenerator) {
+    public FluentConfigService(S3ConfigGenerator s3ConfigGenerator, AdlsGen2ConfigGenerator adlsGen2ConfigGenerator) {
         this.s3ConfigGenerator = s3ConfigGenerator;
-        this.wasbConfigGenerator = wasbConfigGenerator;
+        this.adlsGen2ConfigGenerator = adlsGen2ConfigGenerator;
     }
 
     public FluentConfigView createFluentConfigs(String clusterType, String platform,
@@ -53,9 +53,9 @@ public class FluentConfigService {
                     fillS3Configs(builder, logging.getStorageLocation());
                     LOGGER.debug("Fluent will be configured to use S3 output.");
                     cloudStorageLoggingEnabled = true;
-                } else if (logging.getWasb() != null) {
-                    fillWasbConfigs(builder, logging.getStorageLocation(), logging.getWasb());
-                    LOGGER.debug("Fluent will be configured to use WASB output.");
+                } else if (logging.getAdlsGen2() != null) {
+                    fillAdlsGen2Configs(builder, logging.getStorageLocation(), logging.getAdlsGen2());
+                    LOGGER.debug("Fluent will be configured to use ADLS Gen2 output.");
                     cloudStorageLoggingEnabled = true;
                 }
                 builder.withCloudStorageLoggingEnabled(cloudStorageLoggingEnabled);
@@ -100,16 +100,16 @@ public class FluentConfigService {
     }
 
     // TODO: add support for Azure MSI
-    private void fillWasbConfigs(FluentConfigView.Builder builder, String storageLocation,
-            WasbCloudStorageV1Parameters wasbParams) {
-        WasbConfig wasbConfig = wasbConfigGenerator.generateStorageConfig(storageLocation);
-        String storageAccount = StringUtils.isNotEmpty(wasbConfig.getAccount())
-                ? wasbConfig.getAccount() : wasbParams.getAccountName();
+    private void fillAdlsGen2Configs(FluentConfigView.Builder builder, String storageLocation,
+            AdlsGen2CloudStorageV1Parameters parameters) {
+        AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(storageLocation);
+        String storageAccount = StringUtils.isNotEmpty(adlsGen2Config.getAccount())
+                ? adlsGen2Config.getAccount() : parameters.getAccountName();
 
-        builder.withProviderPrefix(WASB_PROVIDER_PREFIX)
-                .withAzureStorageAccessKey(wasbParams.getAccountKey())
-                .withAzureContainer(wasbConfig.getStorageContainer())
+        builder.withProviderPrefix(ADLS_GEN2_PROVIDER_PREFIX)
+                .withAzureStorageAccessKey(parameters.getAccountKey())
+                .withAzureContainer(adlsGen2Config.getFileSystem())
                 .withAzureStorageAccount(storageAccount)
-                .withLogFolderName(wasbConfig.getFolderPrefix());
+                .withLogFolderName(adlsGen2Config.getFolderPrefix());
     }
 }

@@ -41,7 +41,7 @@ public class TelemetryApiConverter {
                 logging = new EnvironmentLogging();
                 logging.setStorageLocation(loggingRequest.getStorageLocation());
                 logging.setS3(convertS3(loggingRequest.getS3()));
-                logging.setWasb(convertWasb(loggingRequest.getWasb()));
+//                logging.set(convertWasb(loggingRequest.getAdlsGen2()));
             }
             if (request.getWorkloadAnalytics() != null) {
                 WorkloadAnalyticsRequest waRequest = request.getWorkloadAnalytics();
@@ -92,7 +92,7 @@ public class TelemetryApiConverter {
                 loggingResponse = new LoggingResponse();
                 loggingResponse.setStorageLocation(logging.getStorageLocation());
                 loggingResponse.setS3(convertS3(logging.getS3()));
-                loggingResponse.setWasb(convertWasb(logging.getWasb()));
+                loggingResponse.setAdlsGen2(convertAdlsV2(logging.getAdlsGen2()));
             }
             if (telemetry.getWorkloadAnalytics() != null) {
                 EnvironmentWorkloadAnalytics workloadAnalytics = telemetry.getWorkloadAnalytics();

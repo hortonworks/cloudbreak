@@ -94,8 +94,8 @@ public class CloudStorageManifester {
             LoggingResponse logging = environment.getTelemetry().getLogging();
             if (logging.getS3() != null) {
                 log.setS3(logging.getS3());
-            } else if (logging.getWasb() != null) {
-                log.setWasb(logging.getWasb());
+            } else if (logging.getAdlsGen2() != null) {
+                log.setAdlsGen2(logging.getAdlsGen2());
             }
             cloudStorageRequest.getIdentities().add(log);
         }
@@ -146,7 +146,8 @@ public class CloudStorageManifester {
 
     private boolean isInternalCloudStorageConfigured(ClusterV4Request clusterV4Request) {
         return clusterV4Request.getCloudStorage() != null
-                && !CollectionUtils.isEmpty(clusterV4Request.getCloudStorage().getLocations());
+                && (!CollectionUtils.isEmpty(clusterV4Request.getCloudStorage().getLocations())
+                || !CollectionUtils.isEmpty(clusterV4Request.getCloudStorage().getIdentities()));
     }
 
     private boolean isCloudStorageConfigured(SdxClusterRequest clusterRequest) {
@@ -168,6 +169,8 @@ public class CloudStorageManifester {
                 idBroker.setS3(cloudStorage.getS3());
             } else if (fileSystemType.isWasb()) {
                 idBroker.setWasb(cloudStorage.getWasb());
+            } else if (fileSystemType.isAdlsGen2()) {
+                idBroker.setAdlsGen2(cloudStorage.getAdlsGen2());
             }
             cloudStorageRequest.getIdentities().add(idBroker);
         }
