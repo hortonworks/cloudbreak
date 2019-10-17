@@ -3,7 +3,6 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -34,9 +33,6 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.flow.api.FlowEndpoint;
-import com.sequenceiq.flow.api.model.FlowLogResponse;
-import com.sequenceiq.flow.api.model.StateStatus;
 
 @Service
 public class SdxUpgradeService {
@@ -59,7 +55,7 @@ public class SdxUpgradeService {
     private StackV4Endpoint stackV4Endpoint;
 
     @Inject
-    private FlowEndpoint flowEndpoint;
+    private CloudbreakFlowService cloudbreakFlowService;
 
     public UpgradeOptionV4Response checkForUpgradeByName(String userCrn, String clusterName) {
         SdxCluster cluster = sdxService.getSdxByNameInAccount(userCrn, clusterName);
@@ -97,6 +93,7 @@ public class SdxUpgradeService {
                     "Changing image",
                     cluster.get());
             stackV4Endpoint.changeImage(0L, cluster.get().getClusterName(), stackImageChangeRequest);
+            cloudbreakFlowService.setCloudbreakFlowChainId(cluster.get());
         } else {
             throw new NotFoundException("Not found cluster with id" + id);
         }
@@ -121,6 +118,7 @@ public class SdxUpgradeService {
                     "Upgrade started",
                     cluster.get());
             stackV4Endpoint.upgradeCluster(0L, cluster.get().getClusterName());
+            cloudbreakFlowService.setCloudbreakFlowChainId(cluster.get());
         } else {
             throw new NotFoundException("Not found cluster with id" + id);
         }
@@ -143,7 +141,7 @@ public class SdxUpgradeService {
             if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
                 LOGGER.info("{} polling cancelled in inmemory store, id: {}", pollingMessage, sdxCluster.getId());
                 return AttemptResults.breakFor(pollingMessage + " polling cancelled in inmemory store, id: " + sdxCluster.getId());
-            } else if (hasActiveFlow(sdxCluster)) {
+            } else if (cloudbreakFlowService.hasActiveFlow(sdxCluster)) {
                 LOGGER.info("{} polling will continue, cluster has an active flow in Cloudbreak, id: {}", pollingMessage, sdxCluster.getId());
                 return AttemptResults.justContinue();
             } else {
@@ -152,18 +150,6 @@ public class SdxUpgradeService {
         } catch (javax.ws.rs.NotFoundException e) {
             LOGGER.debug("Stack not found on CB side " + sdxCluster.getClusterName(), e);
             return AttemptResults.breakFor("Stack not found on CB side " + sdxCluster.getClusterName());
-        }
-    }
-
-    private boolean hasActiveFlow(SdxCluster sdxCluster) {
-        try {
-            List<FlowLogResponse> flowLogsByResourceNameAndChainId =
-                    flowEndpoint.getFlowLogsByResourceNameAndChainId(sdxCluster.getClusterName(), sdxCluster.getRepairFlowChainId());
-            return flowLogsByResourceNameAndChainId.stream()
-                    .anyMatch(flowLog -> flowLog.getStateStatus().equals(StateStatus.PENDING) || !flowLog.getFinalized());
-        } catch (Exception e) {
-            LOGGER.error("Exception occured during getting flow logs from CB: {}", e.getMessage());
-            return false;
         }
     }
 

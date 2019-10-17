@@ -86,7 +86,7 @@ public class SdxCluster implements AccountIdAwareResource {
     @Enumerated(EnumType.STRING)
     private FileSystemType cloudStorageFileSystemType;
 
-    private String repairFlowChainId;
+    private String lastCbFlowChainId;
 
     public Long getId() {
         return id;
@@ -240,12 +240,12 @@ public class SdxCluster implements AccountIdAwareResource {
         this.cloudStorageFileSystemType = cloudStorageFileSystemType;
     }
 
-    public String getRepairFlowChainId() {
-        return repairFlowChainId;
+    public String getLastCbFlowChainId() {
+        return lastCbFlowChainId;
     }
 
-    public void setRepairFlowChainId(String repairFlowChainId) {
-        this.repairFlowChainId = repairFlowChainId;
+    public void setLastCbFlowChainId(String lastCbFlowChainId) {
+        this.lastCbFlowChainId = lastCbFlowChainId;
     }
 
     //CHECKSTYLE:OFF
