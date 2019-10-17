@@ -26,6 +26,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.Certificate
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
@@ -41,6 +43,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 @Transactional(TxType.NEVER)
+@InternalReady
 public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Inject
@@ -68,13 +71,13 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     private ClusterCommonService clusterCommonService;
 
     @Override
-    public void putStack(String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
+    public void putStack(@ResourceCrn String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
         setupIdentityForAutoscale(crn, userId);
         stackCommonService.putInDefaultWorkspace(crn, updateRequest);
     }
 
     @Override
-    public void putCluster(String crn, String userId, @Valid UpdateClusterV4Request updateRequest) {
+    public void putCluster(@ResourceCrn String crn, String userId, @Valid UpdateClusterV4Request updateRequest) {
         setupIdentityForAutoscale(crn, userId);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
@@ -93,12 +96,12 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
-    public void failureReport(String crn, FailureReportV4Request failureReport) {
+    public void failureReport(@ResourceCrn String crn, FailureReportV4Request failureReport) {
         clusterService.reportHealthChange(crn, Set.copyOf(failureReport.getFailedNodes()), Set.of());
     }
 
     @Override
-    public void changedNodesReport(String crn, ChangedNodesReportV4Request changedNodesReport) {
+    public void changedNodesReport(@ResourceCrn String crn, ChangedNodesReportV4Request changedNodesReport) {
         clusterService.reportHealthChange(crn, Set.copyOf(changedNodesReport.getNewFailedNodes()), Set.copyOf(changedNodesReport.getNewHealthyNodes()));
     }
 
@@ -125,7 +128,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
-    public CertificateV4Response getCertificate(String crn) {
+    public CertificateV4Response getCertificate(@ResourceCrn String crn) {
         return stackCommonService.getCertificate(crn);
     }
 
