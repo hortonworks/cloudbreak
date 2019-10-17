@@ -2,7 +2,6 @@
   "cluster": {
     "blueprintName": "CDP 1.2 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas",
     "validateBlueprint": false
-    }
   },
   "customDomain": {
     "domainName": "cloudera.site",
