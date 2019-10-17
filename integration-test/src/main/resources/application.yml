@@ -56,6 +56,25 @@ integrationtest:
             - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel/NIFI-1.10.0.2.0.0.0-22.jar
             - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel/NIFICA-1.10.0.2.0.0.0-22.jar
             - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-22.jar
+    "[7.0.2]":
+      parcels:
+        - name: SCHEMAREGISTRY
+          parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel
+          version: 0.8.0.3.0.0.0-21
+          csd:
+            - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel/SCHEMAREGISTRY-0.8.0.jar
+        - name: STREAMS_MESSAGING_MANAGER
+          parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel
+          version: 2.1.0.3.0.0.0-21
+          csd:
+            - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar
+        - name: CFM
+          parcel: http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel
+          version: 2.0.0.0
+          csd:
+            - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel/NIFI-1.10.0.2.0.0.0-22.jar
+            - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel/NIFICA-1.10.0.2.0.0.0-22.jar
+            - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-22.jar
 
   user:
     accessKey: Y3JuOmFsdHVzOmlhbTp1cy13ZXN0LTE6Y2xvdWRlcmE6dXNlcjptb2NrdXNlcg==
@@ -95,8 +114,8 @@ integrationtest:
 
   # aws parameters
   aws:
-    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.0.1
+    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.0.2
     region: eu-west-1
     location: eu-west-1
     availabilityZone: eu-west-1a
@@ -120,7 +139,7 @@ integrationtest:
       redhat7:
         imageId: ee68297d-59b3-4cb0-419a-f9e00763bdb4
         blueprints:
-          - "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+          - "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     cloudstorage:
       s3:
         instanceProfile:
@@ -129,8 +148,8 @@ integrationtest:
 
   # azure parameters
   azure:
-    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.0.1
+    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.0.2
     availabilityZone:
     region: West Europe
     location: West Europe
@@ -159,8 +178,8 @@ integrationtest:
 
   # gcp parameters
   gcp:
-    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.0.1
+    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.0.2
     availabilityZone: europe-west2-a
     region: europe-west2
     location: europe-west2
@@ -180,8 +199,8 @@ integrationtest:
 
   # openstack parameters
   openstack:
-    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.0.1
+    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.0.2
     availabilityZone: nova
     region: RegionOne
     location: Texas
@@ -200,8 +219,8 @@ integrationtest:
 
   # yarn parameters
   yarn:
-    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.0.1
+    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.0.2
     availabilityZone:
     region: default
     location: Frankfurt
@@ -218,7 +237,7 @@ integrationtest:
 
   # mock parameters
   mock:
-    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     region: Europe
     location: London
     availabilityZone: London
@@ -242,7 +261,7 @@ integrationtest:
       redhat7:
         imageId: ee68297d-59b3-4cb0-419a-f9e00763bdb4
         blueprints:
-          - "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+          - "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     cloudstorage:
       s3:
         instanceProfile:

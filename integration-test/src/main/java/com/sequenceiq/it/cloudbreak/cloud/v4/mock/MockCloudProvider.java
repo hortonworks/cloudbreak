@@ -46,7 +46,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     public static final String EUROPE = "Europe";
 
-    private static final String DEFAULT_BLUEPRINT_CDH_VERSION = "7.0.1";
+    private static final String DEFAULT_BLUEPRINT_CDH_VERSION = "7.0.2";
 
     @Inject
     private ResourcePropertyProvider resourcePropertyProvider;
