@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.dto.StackAccessDt
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RetryableFlowResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
@@ -67,6 +69,13 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     public void retry(Long workspaceId, String name) {
         stackOperation.retry(aStackAccessDtoBuilder().withName(name).build(), workspaceId);
+    }
+
+    @Override
+    public List<RetryableFlowResponse> listRetryableFlows(Long workspaceId, String name) {
+        return stackOperation.getRetryableFlows(name, workspaceId)
+                .stream().map(retryable -> RetryableFlowResponse.Builder.builder().setName(retryable.getName()).setFailDate(retryable.getFailDate()).build())
+                .collect(Collectors.toList());
     }
 
     @Override
