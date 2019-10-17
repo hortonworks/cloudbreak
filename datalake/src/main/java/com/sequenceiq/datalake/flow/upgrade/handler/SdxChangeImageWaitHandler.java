@@ -41,7 +41,7 @@ public class SdxChangeImageWaitHandler implements EventHandler<SdxChangeImageWai
 
     @Override
     public String selector() {
-        return "SdxUpgradeWaitRequest";
+        return "SdxChangeImageWaitRequest";
     }
 
     @Override

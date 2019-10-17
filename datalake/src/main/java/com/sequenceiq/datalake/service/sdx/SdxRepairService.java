@@ -35,9 +35,6 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.flow.api.FlowEndpoint;
-import com.sequenceiq.flow.api.model.FlowLogResponse;
-import com.sequenceiq.flow.api.model.StateStatus;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 @Service
@@ -61,7 +58,7 @@ public class SdxRepairService {
     private StackV4Endpoint stackV4Endpoint;
 
     @Inject
-    private FlowEndpoint flowEndpoint;
+    private CloudbreakFlowService cloudbreakFlowService;
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
@@ -90,8 +87,7 @@ public class SdxRepairService {
         try {
             LOGGER.info("Triggering repair flow for cluster {} with hostgroups {}", sdxCluster.getClusterName(), repairRequest.getHostGroupName());
             stackV4Endpoint.repairCluster(0L, sdxCluster.getClusterName(), createRepairRequest(repairRequest));
-            sdxCluster.setRepairFlowChainId(flowEndpoint.getLastFlowByResourceName(sdxCluster.getClusterName()).getFlowChainId());
-            sdxClusterRepository.save(sdxCluster);
+            cloudbreakFlowService.setCloudbreakFlowChainId(sdxCluster);
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, ResourceEvent.SDX_REPAIR_STARTED,
                     "Datalake repair in progress", sdxCluster);
         } catch (NotFoundException e) {
@@ -137,7 +133,7 @@ public class SdxRepairService {
                 LOGGER.info("Repair polling cancelled in inmemory store, id: " + sdxCluster.getId());
                 return AttemptResults.breakFor("Repair polling cancelled in inmemory store, id: " + sdxCluster.getId());
             }
-            if (hasActiveFlow(sdxCluster)) {
+            if (cloudbreakFlowService.hasActiveFlow(sdxCluster)) {
                 LOGGER.info("Repair polling will continue, cluster has an active flow in Cloudbreak, id: " + sdxCluster.getId());
                 return AttemptResults.justContinue();
             } else {
@@ -146,18 +142,6 @@ public class SdxRepairService {
         } catch (NotFoundException e) {
             LOGGER.debug("Stack not found on CB side " + sdxCluster.getClusterName(), e);
             return AttemptResults.breakFor("Stack not found on CB side " + sdxCluster.getClusterName());
-        }
-    }
-
-    private boolean hasActiveFlow(SdxCluster sdxCluster) {
-        try {
-            List<FlowLogResponse> flowLogsByResourceNameAndChainId =
-                    flowEndpoint.getFlowLogsByResourceNameAndChainId(sdxCluster.getClusterName(), sdxCluster.getRepairFlowChainId());
-            return flowLogsByResourceNameAndChainId.stream()
-                    .anyMatch(flowLog -> flowLog.getStateStatus().equals(StateStatus.PENDING) || !flowLog.getFinalized());
-        } catch (Exception e) {
-            LOGGER.error("Exception occured during getting flow logs from CB: {}", e.getMessage());
-            return false;
         }
     }
 
