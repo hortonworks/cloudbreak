@@ -104,7 +104,7 @@
               "value" : "COORDINATOR_ONLY"
             }, {
               "name" : "impala_hdfs_site_conf_safety_valve",
-              "value" : "<property><name>fs.s3a.block.size</name><value>268435456</value></property><property><name>fs.s3a.experimental.input.fadvise</name><value>RANDOM</value></property><property><name>fs.s3a.fast.upload</name><value>true</value></property>"
+              "value" : "<property><name>fs.s3a.experimental.input.fadvise</name><value>RANDOM</value></property><property><name>fs.s3a.fast.upload</name><value>true</value></property>"
             } ],
             "base": false
           },
@@ -116,7 +116,7 @@
               "value" : "EXECUTOR_ONLY"
             }, {
               "name" : "impala_hdfs_site_conf_safety_valve",
-              "value" : "<property><name>fs.s3a.block.size</name><value>268435456</value></property><property><name>fs.s3a.experimental.input.fadvise</name><value>RANDOM</value></property><property><name>fs.s3a.fast.upload</name><value>true</value></property>"
+              "value" : "<property><name>fs.s3a.experimental.input.fadvise</name><value>RANDOM</value></property><property><name>fs.s3a.fast.upload</name><value>true</value></property>"
             } ],
             "base": false
           },
