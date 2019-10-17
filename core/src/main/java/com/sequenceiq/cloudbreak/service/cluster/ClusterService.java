@@ -659,16 +659,16 @@ public class ClusterService {
         }
     }
 
-    public void repairCluster(Long stackId, List<String> repairedHostGroups, boolean removeOnly) {
-        repairClusterInternal(ManualClusterRepairMode.HOST_GROUP, stackId, repairedHostGroups, null, false, removeOnly);
+    public void repairCluster(Long stackId, List<String> repairedHostGroups, boolean removeOnly, boolean forceRepair) {
+        repairClusterInternal(ManualClusterRepairMode.HOST_GROUP, stackId, repairedHostGroups, null, false, removeOnly, forceRepair);
     }
 
-    public void repairCluster(Long stackId, List<String> nodeIds, boolean deleteVolumes, boolean removeOnly) {
-        repairClusterInternal(ManualClusterRepairMode.NODE_ID, stackId, null, nodeIds, deleteVolumes, removeOnly);
+    public void repairCluster(Long stackId, List<String> nodeIds, boolean deleteVolumes, boolean removeOnly, boolean forceRepair) {
+        repairClusterInternal(ManualClusterRepairMode.NODE_ID, stackId, null, nodeIds, deleteVolumes, removeOnly, forceRepair);
     }
 
     private void repairClusterInternal(ManualClusterRepairMode repairMode, Long stackId, List<String> repairedHostGroups,
-            List<String> nodeIds, boolean deleteVolumes, boolean removeOnly) {
+            List<String> nodeIds, boolean deleteVolumes, boolean removeOnly, boolean forceRepair) {
         Map<String, List<String>> failedNodeMap = new HashMap<>();
         try {
             transactionService.required(() -> {
@@ -679,7 +679,7 @@ public class ClusterService {
                 Stack stack = stackUpdater.updateStackStatus(stackId, DetailedStackStatus.REPAIR_IN_PROGRESS);
                 boolean repairWithReattach = !deleteVolumes;
                 checkReattachSupportedOnProvider(stack, repairWithReattach);
-                failedNodeMap.putAll(collectFailedNodeMap(stack, repairMode, repairWithReattach, repairedHostGroups, nodeIds));
+                failedNodeMap.putAll(collectFailedNodeMap(stack, repairMode, repairWithReattach, repairedHostGroups, nodeIds, forceRepair));
                 if (repairMode == ManualClusterRepairMode.NODE_ID) {
                     updateNodeVolumeSetsDeleteVolumesFlag(stack, nodeIds, deleteVolumes);
                 } else {
@@ -721,7 +721,7 @@ public class ClusterService {
     }
 
     public Map<String, List<String>> collectFailedNodeMap(Stack stack, ManualClusterRepairMode repairMode, boolean repairWithReattach,
-            List<String> repairedHostGroups, List<String> nodeIds) {
+            List<String> repairedHostGroups, List<String> nodeIds, boolean forceRepair) {
         Map<String, List<String>> failedNodeMap = new HashMap<>();
         Cluster cluster = stack.getCluster();
         Set<String> instanceHostNames = getInstanceHostNames(repairMode, stack, nodeIds);
@@ -731,7 +731,7 @@ public class ClusterService {
             if (hg.getRecoveryMode() == RecoveryMode.MANUAL
                     && (repairMode == ManualClusterRepairMode.NODE_ID || repairedHostGroups.contains(hg.getName()))) {
                 for (HostMetadata hmd : hg.getHostMetadata()) {
-                    if (isRepairNeededForHost(repairMode, instanceHostNames, hmd)) {
+                    if (isRepairNeededForHost(repairMode, instanceHostNames, hmd) || forceRepair) {
                         checkReattachSupportForGateways(stack, repairWithReattach, cluster, hmd);
                         checkDiskTypeSupported(stack, repairWithReattach, hg);
                         validateRepair(stack, hmd, repairWithReattach);
