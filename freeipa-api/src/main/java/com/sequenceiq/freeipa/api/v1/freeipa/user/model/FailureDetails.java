@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.user.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -12,6 +14,8 @@ public class FailureDetails {
     private String environment;
 
     private String message;
+
+    private Map<String, String> additionalDetails = new HashMap<>();
 
     public FailureDetails() {
     }
@@ -35,6 +39,10 @@ public class FailureDetails {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Map<String, String> getAdditionalDetails() {
+        return additionalDetails;
     }
 
     @Override
@@ -62,6 +70,7 @@ public class FailureDetails {
         return "FailureDetails{"
                 + "environment='" + environment + '\''
                 + ", message='" + message + '\''
+                + "additionalDetails='" + additionalDetails + '\''
                 + '}';
     }
 }

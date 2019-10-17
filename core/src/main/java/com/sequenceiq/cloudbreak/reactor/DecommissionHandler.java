@@ -38,6 +38,8 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterKerberosService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaCleanupService;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaOperationFailedException;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -45,9 +47,6 @@ import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -94,7 +93,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
     private ClusterKerberosService clusterKerberosService;
 
     @Inject
-    private FreeIpaV1Endpoint freeIpaV1Endpoint;
+    private FreeIpaCleanupService freeIpaCleanupService;
 
     @Override
     public String selector() {
@@ -131,7 +130,8 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             hostOrchestrator.stopClusterManagerAgent(gatewayConfig, decommissionedNodes, clusterDeletionBasedModel(stack.getId(), cluster.getId()),
                     kerberosDetailService.isAdJoinable(kerberosConfig), kerberosDetailService.isIpaJoinable(kerberosConfig));
-            cleanUpFreeIpa(stack.getEnvironmentCrn(), hostsToRemove.keySet());
+            boolean forced = request.getDetails() == null ? false : request.getDetails().isForced();
+            cleanUpFreeIpa(stack, hostsToRemove.keySet(), forced);
             decomissionedHostNames.stream().map(hostsToRemove::get).filter(Objects::nonNull).forEach(clusterDecomissionService::deleteHostFromCluster);
             clusterDecomissionService.restartStaleServices();
 
@@ -145,16 +145,14 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 
-    private void cleanUpFreeIpa(String environmentCrn, Set<String> hostNames) {
-        CleanupRequest cleanupRequest = new CleanupRequest();
-        cleanupRequest.setHosts(hostNames);
-        cleanupRequest.setEnvironmentCrn(environmentCrn);
-        LOGGER.info("Sending cleanup request to FreeIPA: [{}]", cleanupRequest);
+    private void cleanUpFreeIpa(Stack stack, Set<String> hostNames, boolean forced) {
         try {
-            CleanupResponse cleanupResponse = freeIpaV1Endpoint.cleanup(cleanupRequest);
-            LOGGER.info("FreeIPA cleanup finished: [{}]", cleanupResponse);
-        } catch (Exception e) {
-            LOGGER.error("FreeIPA cleanup failed", e);
+            freeIpaCleanupService.cleanup(stack, true, hostNames);
+        } catch (FreeIpaOperationFailedException e) {
+            LOGGER.error("Failed to cleanup FreeIPA", e);
+            if (!forced) {
+                throw e;
+            }
         }
     }
 

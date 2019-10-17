@@ -36,17 +36,17 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Config;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
-import com.sequenceiq.freeipa.converter.freeipa.user.SyncOperationToSyncOperationStatus;
+import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationStatus;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.entity.SyncOperation;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
@@ -55,6 +55,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
+import com.sequenceiq.freeipa.service.operation.OperationStatusService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.KrbKeySetEncoder;
 
@@ -79,10 +80,10 @@ public class UserService {
     private AsyncTaskExecutor asyncTaskExecutor;
 
     @Inject
-    private SyncOperationStatusService syncOperationStatusService;
+    private OperationStatusService operationStatusService;
 
     @Inject
-    private SyncOperationToSyncOperationStatus syncOperationToSyncOperationStatus;
+    private OperationToSyncOperationStatus operationToSyncOperationStatus;
 
     @Inject
     private UmsEventGenerationIdsProvider umsEventGenerationIdsProvider;
@@ -104,18 +105,18 @@ public class UserService {
                     accountId, environmentCrnFilter));
         }
 
-        SyncOperation syncOperation = syncOperationStatusService
-                .startOperation(accountId, SyncOperationType.USER_SYNC, environmentCrnFilter, union(userCrnFilter, machineUserCrnFilter));
+        Operation operation = operationStatusService
+                .startOperation(accountId, OperationType.USER_SYNC, environmentCrnFilter, union(userCrnFilter, machineUserCrnFilter));
 
-        LOGGER.info("Starting operation [{}] with status [{}]", syncOperation.getOperationId(), syncOperation.getStatus());
+        LOGGER.info("Starting operation [{}] with status [{}]", operation.getOperationId(), operation.getStatus());
 
-        if (syncOperation.getStatus() == SynchronizationStatus.RUNNING) {
-            MDCBuilder.addFlowId(syncOperation.getOperationId());
+        if (operation.getStatus() == OperationState.RUNNING) {
+            MDCBuilder.addFlowId(operation.getOperationId());
             asyncTaskExecutor.submit(() -> asyncSynchronizeUsers(
-                syncOperation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter));
+                operation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter));
         }
 
-        return syncOperationToSyncOperationStatus.convert(syncOperation);
+        return operationToSyncOperationStatus.convert(operation);
     }
 
     private void asyncSynchronizeUsers(
@@ -177,10 +178,10 @@ public class UserService {
                     failure.add(new FailureDetails(envCrn, e.getLocalizedMessage()));
                 }
             });
-            syncOperationStatusService.completeOperation(operationId, List.copyOf(success), List.copyOf(failure));
+            operationStatusService.completeOperation(operationId, List.copyOf(success), List.copyOf(failure));
         } catch (RuntimeException e) {
             LOGGER.error("User sync operation {} failed with error:", operationId, e);
-            syncOperationStatusService.failOperation(operationId, e.getLocalizedMessage());
+            operationStatusService.failOperation(operationId, e.getLocalizedMessage());
             throw e;
         }
     }

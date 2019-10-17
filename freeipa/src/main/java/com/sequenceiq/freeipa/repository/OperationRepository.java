@@ -13,33 +13,36 @@ import com.sequenceiq.authorization.repository.CheckPermission;
 import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.ResourceAction;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
-import com.sequenceiq.freeipa.entity.SyncOperation;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
+import com.sequenceiq.freeipa.entity.Operation;
 
 @Transactional(Transactional.TxType.REQUIRED)
 @AuthorizationResourceType(resource = AuthorizationResource.ENVIRONMENT)
-public interface SyncOperationRepository extends BaseJpaRepository<SyncOperation, Long> {
+public interface OperationRepository extends BaseJpaRepository<Operation, Long> {
 
     // TODO restrict this permission. Set Password and User sync should have more
     // restrictive permissions than READ but more permissive than WRITE
     // TODO override other BaseJpaRepository methods for consistent behavior
     @CheckPermission(action = ResourceAction.READ)
     @Override
-    SyncOperation save(SyncOperation entity);
+    Operation save(Operation entity);
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT s FROM SyncOperation s WHERE s.operationId = :operationId")
-    Optional<SyncOperation> findByOperationId(@Param("operationId") String operationId);
+    @Query("SELECT s FROM Operation s WHERE s.operationId = :operationId")
+    Optional<Operation> findByOperationId(@Param("operationId") String operationId);
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT s FROM SyncOperation s WHERE s.accountId = :accountId AND s.endTime IS NULL")
-    List<SyncOperation> findRunningByAccountId(@Param("accountId") String accountId);
+    Optional<Operation> findByOperationIdAndAccountId(String operationId, String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT s FROM SyncOperation s WHERE s.accountId = :accountId AND s.syncOperationType = :syncOperationType AND s.endTime IS NULL")
-    List<SyncOperation> findRunningByAccountIdAndType(@Param("accountId") String accountId, @Param("syncOperationType")SyncOperationType syncOperationType);
+    @Query("SELECT s FROM Operation s WHERE s.accountId = :accountId AND s.endTime IS NULL")
+    List<Operation> findRunningByAccountId(@Param("accountId") String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT s FROM SyncOperation s WHERE s.startTime < :startBeforeTime AND s.endTime IS NULL")
-    List<SyncOperation> findStaleRunning(@Param("startBeforeTime") Long startBeforeTime);
+    @Query("SELECT s FROM Operation s WHERE s.accountId = :accountId AND s.operationType = :operationType AND s.endTime IS NULL")
+    List<Operation> findRunningByAccountIdAndType(@Param("accountId") String accountId, @Param("operationType") OperationType operationType);
+
+    @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT s FROM Operation s WHERE s.startTime < :startBeforeTime AND s.endTime IS NULL")
+    List<Operation> findStaleRunning(@Param("startBeforeTime") Long startBeforeTime);
 }

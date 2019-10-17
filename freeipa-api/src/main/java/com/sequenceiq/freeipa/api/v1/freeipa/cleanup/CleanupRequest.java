@@ -19,6 +19,8 @@ public class CleanupRequest {
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
+    private String clusterName;
+
     private Set<String> users;
 
     private Set<String> hosts;
@@ -31,6 +33,14 @@ public class CleanupRequest {
 
     public void setEnvironmentCrn(String environmentCrn) {
         this.environmentCrn = environmentCrn;
+    }
+
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
     }
 
     public Set<String> getUsers() {
@@ -61,6 +71,7 @@ public class CleanupRequest {
     public String toString() {
         return "CleanupRequest{"
                 + "environmentCrn='" + environmentCrn + '\''
+                + "clusterName='" + clusterName + '\''
                 + ", users=" + users
                 + ", hosts=" + hosts
                 + ", roles=" + roles

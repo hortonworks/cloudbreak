@@ -26,7 +26,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersReque
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserRequest;
 import com.sequenceiq.freeipa.controller.exception.SyncOperationAlreadyRunningException;
 import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
-import com.sequenceiq.freeipa.service.freeipa.user.SyncOperationStatusService;
+import com.sequenceiq.freeipa.service.operation.OperationStatusService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserService;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,7 +50,7 @@ public class UserV1ControllerTest {
     private PasswordService passwordService;
 
     @Mock
-    private SyncOperationStatusService syncOperationStatusService;
+    private OperationStatusService operationStatusService;
 
     @Mock
     private ThreadBasedUserCrnProvider threadBaseUserCrnProvider;
@@ -144,7 +144,7 @@ public class UserV1ControllerTest {
 
         underTest.getSyncOperationStatus(operationId);
 
-        verify(syncOperationStatusService, times(1)).getStatus(operationId);
+        verify(operationStatusService, times(1)).getSyncOperationStatus(operationId);
     }
 
     @Test
@@ -152,11 +152,11 @@ public class UserV1ControllerTest {
         String operationId = "testId";
 
         SyncOperationStatus status = mock(SyncOperationStatus.class);
-        when(syncOperationStatusService.getStatus(operationId)).thenReturn(status);
+        when(operationStatusService.getSyncOperationStatus(operationId)).thenReturn(status);
 
         underTest.getSyncOperationStatus(operationId);
 
-        verify(syncOperationStatusService, times(1)).getStatus(operationId);
+        verify(operationStatusService, times(1)).getSyncOperationStatus(operationId);
         verify(status, never()).getStatus();
     }
 

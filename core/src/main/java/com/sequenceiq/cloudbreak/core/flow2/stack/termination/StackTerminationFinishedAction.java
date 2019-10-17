@@ -22,7 +22,8 @@ public class StackTerminationFinishedAction extends AbstractStackTerminationActi
 
     @Override
     protected void doExecute(StackTerminationContext context, TerminateStackResult payload, Map<Object, Object> variables) {
-        stackTerminationService.finishStackTermination(context, payload);
+        Boolean forcedTermination = (Boolean) variables.getOrDefault("FORCEDTERMINATION", Boolean.FALSE);
+        stackTerminationService.finishStackTermination(context, payload, forcedTermination);
         sendEvent(context);
     }
 

@@ -17,15 +17,15 @@ import javax.persistence.Version;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.entity.util.ListFailureDetailsToString;
 import com.sequenceiq.freeipa.entity.util.ListStringToString;
 import com.sequenceiq.freeipa.entity.util.ListSuccessDetailsToString;
 
 @Entity
-@Table(name = "syncoperation")
-public class SyncOperation {
+@Table(name = "operation")
+public class Operation {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "syncoperation_generator")
     @SequenceGenerator(name = "syncoperation_generator", sequenceName = "syncoperation_id_seq", allocationSize = 1)
@@ -39,11 +39,11 @@ public class SyncOperation {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private SyncOperationType syncOperationType;
+    private OperationType operationType;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private SynchronizationStatus status;
+    private OperationState status;
 
     @Convert(converter = ListStringToString.class)
     @Column(columnDefinition = "TEXT")
@@ -101,19 +101,19 @@ public class SyncOperation {
         this.accountId = accountId;
     }
 
-    public SyncOperationType getSyncOperationType() {
-        return syncOperationType;
+    public OperationType getOperationType() {
+        return operationType;
     }
 
-    public void setSyncOperationType(SyncOperationType syncOperationType) {
-        this.syncOperationType = syncOperationType;
+    public void setOperationType(OperationType operationType) {
+        this.operationType = operationType;
     }
 
-    public SynchronizationStatus getStatus() {
+    public OperationState getStatus() {
         return status;
     }
 
-    public void setStatus(SynchronizationStatus status) {
+    public void setStatus(OperationState status) {
         this.status = status;
     }
 

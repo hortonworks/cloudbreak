@@ -62,6 +62,14 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
         });
     }
 
+    public void delete(String environmentCrn, String accountId, String clusterName) {
+        Optional<KerberosConfig> kerberosConfig =
+                kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterName(accountId, environmentCrn, clusterName);
+        kerberosConfig.ifPresentOrElse(this::delete, () -> {
+            throw notFound("KerberosConfig for environment", environmentCrn).get();
+        });
+    }
+
     public void deleteAllInEnvironment(String environmentCrn, String accountId) {
         kerberosConfigRepository.findByAccountIdAndEnvironmentCrn(accountId, environmentCrn).forEach(this::delete);
     }

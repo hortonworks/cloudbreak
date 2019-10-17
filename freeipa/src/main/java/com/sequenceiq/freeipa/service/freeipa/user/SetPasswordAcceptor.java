@@ -4,18 +4,19 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
-import com.sequenceiq.freeipa.repository.SyncOperationRepository;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
+import com.sequenceiq.freeipa.repository.OperationRepository;
+import com.sequenceiq.freeipa.service.operation.OperationAcceptor;
 
 @Component
-public class SetPasswordAcceptor extends SyncOperationAcceptor {
+public class SetPasswordAcceptor extends OperationAcceptor {
     @Inject
-    public SetPasswordAcceptor(SyncOperationRepository syncOperationRepository) {
-        super(syncOperationRepository);
+    public SetPasswordAcceptor(OperationRepository operationRepository) {
+        super(operationRepository);
     }
 
     @Override
-    SyncOperationType selector() {
-        return SyncOperationType.SET_PASSWORD;
+    protected OperationType selector() {
+        return OperationType.SET_PASSWORD;
     }
 }
