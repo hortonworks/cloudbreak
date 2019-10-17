@@ -51,7 +51,7 @@ public class CmServiceKeytabRequestFactoryTest {
                 "172.16.252.43", fqdn,
                 9443, "instanceid", "servercert", "clientcert", "clientkey",
                 "saltpasswd", "saltbootpassword", "signkey", false,
-                true, "privatekey", "publickey", null, null);
+                true, "privatekey", "publickey", null, null, null);
 
     }
 }

@@ -1,22 +1,27 @@
 package com.sequenceiq.cloudbreak.ccmimpl.endpoint;
 
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.ccm.endpoint.DirectServiceEndpointFinder;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpoint;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpointFinder;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpointLookupException;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpointRequest;
+import com.sequenceiq.cloudbreak.ccm.exception.CcmException;
+import com.sequenceiq.cloudbreak.ccmimpl.util.RetryUtil;
 
 /**
  * Default service endpoint finder, that decides whether to return a direct service endpoint
@@ -25,6 +30,7 @@ import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpointRequest;
  * of minasshd by the minasshd management service. Implements retrying, as well as caching
  * the minasshd gRPC service endpoint finder to avoid unnecessary calls to the supplier.
  */
+@Component
 public class DefaultServiceEndpointFinder implements ServiceEndpointFinder {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultServiceEndpointFinder.class);
@@ -32,12 +38,12 @@ public class DefaultServiceEndpointFinder implements ServiceEndpointFinder {
     /**
      * A cache key for the minasshd endpoint finder.
      */
-    private static final String MINASSHD_ENDPOINT_FINDER_CACHE_KEY = "minasshd.endpoint.finder.cache.key";
+    private static final String MINASSHD_ENDPOINT_FINDER_CACHE_KEY_FORMAT = "minasshd.endpoint.finder.cache.key.%s/%s";
 
     /**
      * The default GRPC port.
      */
-    private static final int DEFAULT_GRPC_PORT = 8984;
+    private static final int DEFAULT_GRPC_PORT = 8982;
 
     /**
      * The cache expiration in seconds.
@@ -45,9 +51,11 @@ public class DefaultServiceEndpointFinder implements ServiceEndpointFinder {
     // JSA TODO make this configurable
     private static final int CACHE_EXPIRATION_IN_SECONDS = 600;
 
-    private final Supplier<ServiceEndpoint> minasshdGrpcEndpointSupplier;
+    private final MinaSshdGrpcEndpointSupplier minasshdGrpcEndpointSupplier;
 
     private final ServiceEndpointFinder directServiceEndpointFinder = new DirectServiceEndpointFinder();
+
+    private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider = new ThreadBasedUserCrnProvider();
 
     /**
      * A cache to avoid expensive gRPC calls.
@@ -60,7 +68,8 @@ public class DefaultServiceEndpointFinder implements ServiceEndpointFinder {
      * @param minasshdGrpcEndpointSupplier a supplier for the minasshd gRPC endpoint
      * @param cache                        a cache to avoid expensive gRPC calls
      */
-    public DefaultServiceEndpointFinder(@Nonnull Supplier<ServiceEndpoint> minasshdGrpcEndpointSupplier, @Nullable Cache<String, Object> cache) {
+    @Inject
+    public DefaultServiceEndpointFinder(@Nonnull MinaSshdGrpcEndpointSupplier minasshdGrpcEndpointSupplier, @Nullable Cache<String, Object> cache) {
         this.minasshdGrpcEndpointSupplier = Objects.requireNonNull(minasshdGrpcEndpointSupplier, "minasshdGrpcEndpointSupplier is null");
         if (cache == null) {
             cache = CacheBuilder.newBuilder()
@@ -79,35 +88,82 @@ public class DefaultServiceEndpointFinder implements ServiceEndpointFinder {
             return directServiceEndpointFinder.getServiceEndpoint(serviceEndpointRequest);
         }
 
-        ServiceEndpointFinder retryingMinaSshdEndpointFinder;
-        synchronized (cache) {
-            retryingMinaSshdEndpointFinder =
-                    (ServiceEndpointFinder) cache.getIfPresent(MINASSHD_ENDPOINT_FINDER_CACHE_KEY);
-            if (retryingMinaSshdEndpointFinder == null) {
-                LOG.debug("Requesting endpoint for minasshd gRPC lookup");
-                ServiceEndpoint minasshdGrpcEndpoint = minasshdGrpcEndpointSupplier.get();
-                String lookupHost = minasshdGrpcEndpoint.getHostEndpoint().getHostAddressString();
-                int lookupPort = minasshdGrpcEndpoint.getPort().orElse(DEFAULT_GRPC_PORT);
-                LOG.debug("Creating minasshd gRPC service endpoint finder with lookup host: {}, port: {}", lookupHost, lookupPort);
-                MinaSshdServiceEndpointFinder minaSshdServiceEndpointFinder =
-                        new MinaSshdServiceEndpointFinder(lookupHost, lookupPort);
-                retryingMinaSshdEndpointFinder = new RetryingServiceEndpointFinder(minaSshdServiceEndpointFinder);
-                LOG.debug("Caching retrying minasshd gRPC service endpoint finder");
-                cache.put(MINASSHD_ENDPOINT_FINDER_CACHE_KEY, retryingMinaSshdEndpointFinder);
-            } else {
-                LOG.debug("Using cached retrying minasshd gRPC service endpoint finder");
-            }
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String actorCrn = threadBasedUserCrnProvider.getUserCrn();
+        if (actorCrn == null) {
+            throw new IllegalStateException("actor CRN unspecified");
         }
 
+        String targetInstanceId = serviceEndpointRequest.getTargetInstance().getTargetInstanceId();
+        String actionDescription = "discover service endpoint for instance " + targetInstanceId;
+
+        return RetryUtil.performWithRetries(
+                () -> getServiceEndpoint(accountId, actorCrn, cache, serviceEndpointRequest), actionDescription,
+                serviceEndpointRequest.getWaitUntilTime().orElse(null), serviceEndpointRequest.getPollingIntervalInMs(),
+                ServiceEndpointLookupException.class,
+                () -> new ServiceEndpointLookupException(String.format("Timed out while trying to %s", actionDescription), true),
+                LOG);
+    }
+
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    private <T extends ServiceEndpoint> T getServiceEndpoint(String accountId, String actorCrn,
+            Cache<String, Object> cache, @Nonnull ServiceEndpointRequest<T> serviceEndpointRequest)
+            throws ServiceEndpointLookupException {
+        String cacheKey = String.format(MINASSHD_ENDPOINT_FINDER_CACHE_KEY_FORMAT, actorCrn, accountId);
+        MinaSshdServiceEndpointFinder minaSshdServiceEndpointFinder = getMinaSshdServiceEndpointFinder(cache, cacheKey, accountId, actorCrn);
         try {
-            return retryingMinaSshdEndpointFinder.getServiceEndpoint(serviceEndpointRequest);
+            return minaSshdServiceEndpointFinder.getServiceEndpoint(serviceEndpointRequest);
         } catch (ServiceEndpointLookupException e) {
-            // JSA TODO make this more granular, to only throw away the finder if the service is bad,
-            // not if the lookup just fails
+            // JSA Note: a transient exception trying to talk to a good minasshd instance will invalidate the cache here,
+            // which is inefficient, but functionally correct since on retry, the call to the minasshd management service should
+            // give us back the same minasshd instance. If we did not invalidate the cache on transient exceptions, we would wait
+            // until timeout on a bad minasshd instance even if the minasshd management service already knew the instance was bad,
+            // which is functionally incorrect.
             synchronized (cache) {
-                cache.invalidate(MINASSHD_ENDPOINT_FINDER_CACHE_KEY);
+                cache.invalidate(cacheKey);
             }
             throw e;
         }
+    }
+
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    private MinaSshdServiceEndpointFinder getMinaSshdServiceEndpointFinder(Cache<String, Object> cache, String cacheKey, String accountId, String actorCrn)
+            throws ServiceEndpointLookupException {
+        synchronized (cache) {
+            try {
+                return (MinaSshdServiceEndpointFinder) cache.get(cacheKey, () -> createMinaSshdServiceEndpointFinder(accountId, actorCrn));
+            } catch (ExecutionException e) {
+                throw (ServiceEndpointLookupException) e.getCause();
+            }
+        }
+    }
+
+    private MinaSshdServiceEndpointFinder createMinaSshdServiceEndpointFinder(String accountId, String actorCrn) throws ServiceEndpointLookupException {
+        ServiceEndpoint minasshdGrpcEndpoint = getMinaSshdGrpcServiceEndpoint(accountId, actorCrn);
+        return createMinaSshdServiceEndpointFinder(minasshdGrpcEndpoint);
+    }
+
+    private ServiceEndpoint getMinaSshdGrpcServiceEndpoint(String accountId, String actorCrn) throws ServiceEndpointLookupException {
+        LOG.debug("Requesting endpoint for minasshd gRPC lookup");
+        ServiceEndpoint minasshdGrpcEndpoint;
+        try {
+            minasshdGrpcEndpoint = minasshdGrpcEndpointSupplier.getMinaSshdGrpcServiceEndpoint(actorCrn, accountId);
+        } catch (CcmException e) {
+            throw wrapCcmExceptionIfNecessary(e);
+        }
+        return minasshdGrpcEndpoint;
+    }
+
+    private MinaSshdServiceEndpointFinder createMinaSshdServiceEndpointFinder(ServiceEndpoint minasshdGrpcEndpoint) {
+        String lookupHost = minasshdGrpcEndpoint.getHostEndpoint().getHostAddressString();
+        int lookupPort = minasshdGrpcEndpoint.getPort().orElse(DEFAULT_GRPC_PORT);
+        LOG.debug("Creating minasshd gRPC service endpoint finder with lookup host: {}, port: {}", lookupHost, lookupPort);
+        return new MinaSshdServiceEndpointFinder(lookupHost, lookupPort);
+    }
+
+    private ServiceEndpointLookupException wrapCcmExceptionIfNecessary(CcmException e) {
+        return (e instanceof ServiceEndpointLookupException)
+                ? (ServiceEndpointLookupException) e
+                : new ServiceEndpointLookupException(e, e.isRetryable());
     }
 }

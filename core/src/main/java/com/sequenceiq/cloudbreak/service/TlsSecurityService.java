@@ -96,7 +96,7 @@ public class TlsSecurityService {
     }
 
     public GatewayConfig buildGatewayConfig(Long stackId, InstanceMetaData gatewayInstance, Integer gatewayPort,
-            SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) {
+            SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled, Boolean useCcm) {
         SecurityConfig securityConfig = getSecurityConfigByStackIdOrThrowNotFound(stackId);
         String connectionIp = getGatewayIp(securityConfig, gatewayInstance);
         HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp, gatewayInstance);
@@ -107,7 +107,7 @@ public class TlsSecurityService {
                 saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem(),
                 knoxGatewayEnabled, InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()),
                 new String(decodeBase64(saltSignPrivateKeyB64)), new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())),
-                securityConfig.getUserFacingCert(), securityConfig.getUserFacingKey());
+                securityConfig.getUserFacingCert(), securityConfig.getUserFacingKey(), useCcm);
     }
 
     public String getGatewayIp(SecurityConfig securityConfig, InstanceMetaData gatewayInstance) {
