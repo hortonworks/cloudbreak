@@ -296,10 +296,18 @@
                    }
                  },
                  {
-                   "apiVersion": "2018-04-01",
+                   "apiVersion": "2017-12-01",
                    "type": "Microsoft.Compute/virtualMachines",
                    "name": "[concat(parameters('vmNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
+                    <#if instance.managedIdentity?? && instance.managedIdentity?has_content>
+                    "identity": {
+                        "type": "userAssigned",
+                        "identityIds": [
+                            "${instance.managedIdentity}"
+                        ]
+                     },
+                    </#if>
                    "dependsOn": [
                     <#if instance.availabilitySetName?? && instance.availabilitySetName?has_content>
                        "[concat('Microsoft.Compute/availabilitySets/', '${instance.availabilitySetName}')]",

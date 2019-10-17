@@ -103,7 +103,7 @@ public class AzureTemplateBuilder {
             model.put("userDefinedTags", cloudStack.getTags());
             model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(cloudStack), model);
-            LOGGER.debug("Generated Arm template: {}", generatedTemplate);
+            LOGGER.info("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process the ARM TemplateBuilder", e);

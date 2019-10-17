@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,6 +49,7 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
+import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
@@ -109,6 +113,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     @Inject
     private AwsMockAccountMappingService awsMockAccountMappingService;
+
+    @Inject
+    private AzureMockAccountMappingService azureMockAccountMappingService;
 
     @Inject
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
@@ -220,11 +227,25 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             AccountMapping accountMapping = isCloudStorageConfigured(source) ? source.getCluster().getFileSystem().getCloudStorage().getAccountMapping() : null;
             if (accountMapping != null) {
                 builder.withAccountMappingView(new AccountMappingView(accountMapping.getGroupMappings(), accountMapping.getUserMappings()));
-            } else if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK
-                    && source.getCloudPlatform().equals(CloudPlatform.AWS.name())) {
-                Map<String, String> groupMappings = awsMockAccountMappingService.getGroupMappings(source.getRegion(), credential,
-                        environment.getAdminGroupName());
-                Map<String, String> userMappings = awsMockAccountMappingService.getUserMappings(source.getRegion(), credential);
+            } else if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK) {
+                Map<String, String> groupMappings;
+                Map<String, String> userMappings;
+                switch (source.getCloudPlatform()) {
+                    case AWS:
+                        groupMappings = awsMockAccountMappingService.getGroupMappings(source.getRegion(), credential,
+                                environment.getAdminGroupName());
+                        userMappings = awsMockAccountMappingService.getUserMappings(source.getRegion(), credential);
+                        break;
+                    case AZURE:
+                        groupMappings = azureMockAccountMappingService.getGroupMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
+                                credential,
+                                environment.getAdminGroupName());
+                        userMappings = azureMockAccountMappingService.getUserMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
+                                credential);
+                        break;
+                    default:
+                        return;
+                }
                 builder.withAccountMappingView(new AccountMappingView(groupMappings, userMappings));
             }
         }

@@ -10,7 +10,7 @@ public class TelemetryModelDescription {
     public static final String TELEMETRY_FEATURES = "Telemetry features settings";
     public static final String TELEMETRY_METERING = "Telemetry metering feature setting";
     public static final String TELEMETRY_LOGGING_S3_ATTRIBUTES = "telemetry - logging s3 attributes";
-    public static final String TELEMETRY_LOGGING_WASB_ATTRIBUTES = "telemetry - logging wasb attributes";
+    public static final String TELEMETRY_LOGGING_ADLS_GEN_2_ATTRIBUTES = "telemetry - logging adls gen2 attributes";
     public static final String TELEMETRY_LOGGING_STORAGE_LOCATION = "telemetry - logging storage location / container";
     public static final String TELEMETRY_DATABUS_ENDPOINT = "telemetry - altus service (databus) endpoint url";
     public static final String TELEMETRY_WA_DATABUS_ENDPOINT = "telemetry - workload altus service (databus) endpoint url";

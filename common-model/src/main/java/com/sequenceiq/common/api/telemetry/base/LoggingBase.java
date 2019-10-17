@@ -5,7 +5,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.common.CommonTelemetryParams;
 import com.sequenceiq.common.api.telemetry.doc.TelemetryModelDescription;
 
@@ -24,8 +24,8 @@ public abstract class LoggingBase extends CommonTelemetryParams {
     @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING_S3_ATTRIBUTES)
     private S3CloudStorageV1Parameters s3;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING_WASB_ATTRIBUTES)
-    private WasbCloudStorageV1Parameters wasb;
+    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING_ADLS_GEN_2_ATTRIBUTES)
+    private AdlsGen2CloudStorageV1Parameters adlsGen2;
 
     public String getStorageLocation() {
         return storageLocation;
@@ -43,11 +43,11 @@ public abstract class LoggingBase extends CommonTelemetryParams {
         this.s3 = s3;
     }
 
-    public WasbCloudStorageV1Parameters getWasb() {
-        return wasb;
+    public AdlsGen2CloudStorageV1Parameters getAdlsGen2() {
+        return adlsGen2;
     }
 
-    public void setWasb(WasbCloudStorageV1Parameters wasb) {
-        this.wasb = wasb;
+    public void setAdlsGen2(AdlsGen2CloudStorageV1Parameters adlsGen2) {
+        this.adlsGen2 = adlsGen2;
     }
 }

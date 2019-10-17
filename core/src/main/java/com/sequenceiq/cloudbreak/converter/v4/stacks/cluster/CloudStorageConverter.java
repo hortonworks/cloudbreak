@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.AdlsGen2Identity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.S3Identity;
@@ -36,6 +37,7 @@ import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
 import com.sequenceiq.common.api.cloudstorage.S3Guard;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.model.CloudStorageCdpService;
@@ -102,11 +104,9 @@ public class CloudStorageConverter {
             List<CloudIdentity> cloudIdentities = cloudStorageRequest.getIdentities().stream()
                     .map(this::identityRequestToCloudIdentity).collect(Collectors.toList());
             cloudStorage.setCloudIdentities(cloudIdentities);
-
         }
 
         cloudStorage.setAccountMapping(accountMappingRequestToAccountMapping(cloudStorageRequest.getAccountMapping()));
-
         fileSystem.setCloudStorage(cloudStorage);
 
         return fileSystem;
@@ -153,7 +153,7 @@ public class CloudStorageConverter {
             throw new BadRequestException(type + " FileSystemType is not supported.");
         }
         if (cloudFileSystemViews.size() > 1) {
-            if (type != FileSystemType.S3) {
+            if (type != FileSystemType.S3 && type != FileSystemType.ADLS_GEN_2) {
                 throw new BadRequestException("Multiple identities for " + type + " is not supported yet.");
             }
         }
@@ -197,6 +197,9 @@ public class CloudStorageConverter {
         } else if (cloudIdentity.getS3Identity() != null) {
             S3CloudStorageV1Parameters parameters = s3IdentityToParameters(cloudIdentity.getS3Identity());
             storageIdentityBase.setS3(parameters);
+        } else if (cloudIdentity.getAdlsGen2Identity() != null) {
+            AdlsGen2CloudStorageV1Parameters adlsGen2CloudStorageV1Parameters = adlsGen2IdentityToParameters(cloudIdentity.getAdlsGen2Identity());
+            storageIdentityBase.setAdlsGen2(adlsGen2CloudStorageV1Parameters);
         }
         return storageIdentityBase;
     }
@@ -210,6 +213,9 @@ public class CloudStorageConverter {
         } else if (cloudIdentity.getWasbIdentity() != null) {
             WasbCloudStorageV1Parameters wasbParameters = wasbIdentityToParameters(cloudIdentity.getWasbIdentity());
             storageIdentityRequest.setWasb(wasbParameters);
+        } else if (cloudIdentity.getAdlsGen2Identity() != null) {
+            AdlsGen2CloudStorageV1Parameters adlsGen2CloudStorageV1Parameters = adlsGen2IdentityToParameters(cloudIdentity.getAdlsGen2Identity());
+            storageIdentityRequest.setAdlsGen2(adlsGen2CloudStorageV1Parameters);
         }
         return storageIdentityRequest;
     }
@@ -233,6 +239,12 @@ public class CloudStorageConverter {
         wasbParameters.setAccountName(wasbIdentity.getAccountName());
         wasbParameters.setSecure(wasbIdentity.isSecure());
         return wasbParameters;
+    }
+
+    private AdlsGen2CloudStorageV1Parameters adlsGen2IdentityToParameters(AdlsGen2Identity adlsGen2Identity) {
+        AdlsGen2CloudStorageV1Parameters adlsGen2CloudStorageV1Parameters = new AdlsGen2CloudStorageV1Parameters();
+        adlsGen2CloudStorageV1Parameters.setManagedIdentity(adlsGen2Identity.getManagedIdentity());
+        return adlsGen2CloudStorageV1Parameters;
     }
 
     private S3Identity s3ParametersToIdentity(S3CloudStorageV1Parameters s3CloudStorageV1Parameters) {
@@ -273,7 +285,8 @@ public class CloudStorageConverter {
             cloudIdentity.setWasbIdentity(wasbIdentity);
         }
         if (storageIdentityRequest.getAdlsGen2() != null) {
-            throw new BadRequestException("ADLS Gen2 cloud storage is not (yet) supported.");
+            AdlsGen2Identity identity = identityRequestToAdlsGen2(storageIdentityRequest);
+            cloudIdentity.setAdlsGen2Identity(identity);
         }
         if (storageIdentityRequest.getAdls() != null) {
             throw new BadRequestException("ADLS cloud storage is not (yet) supported.");
@@ -296,6 +309,12 @@ public class CloudStorageConverter {
         wasbIdentity.setAccountName(storageIdentityRequest.getWasb().getAccountName());
         wasbIdentity.setSecure(storageIdentityRequest.getWasb().isSecure());
         return wasbIdentity;
+    }
+
+    private AdlsGen2Identity identityRequestToAdlsGen2(StorageIdentityBase storageIdentityRequest) {
+        AdlsGen2Identity adlsGen2Identity = new AdlsGen2Identity();
+        adlsGen2Identity.setManagedIdentity(storageIdentityRequest.getAdlsGen2().getManagedIdentity());
+        return adlsGen2Identity;
     }
 
     private AccountMapping accountMappingRequestToAccountMapping(AccountMappingBase accountMappingRequest) {

@@ -125,14 +125,17 @@ public class CloudStorageParametersConverter {
         AdlsGen2FileSystem adlsGen2FileSystem = new AdlsGen2FileSystem();
         adlsGen2FileSystem.setAccountName(source.getAccountName());
         adlsGen2FileSystem.setAccountKey(source.getAccountKey());
+        adlsGen2FileSystem.setManagedIdentity(source.getManagedIdentity());
         return adlsGen2FileSystem;
     }
 
     public CloudAdlsGen2View adlsGen2ToCloudView(StorageIdentityBase source) {
         CloudAdlsGen2View cloudAdlsGen2View = new CloudAdlsGen2View(source.getType());
-        cloudAdlsGen2View.setAccountKey(source.getWasb().getAccountKey());
-        cloudAdlsGen2View.setAccountName(source.getWasb().getAccountName());
-        cloudAdlsGen2View.setSecure(source.getWasb().isSecure());
+        AdlsGen2CloudStorageV1Parameters adlsGen2 = source.getAdlsGen2();
+        cloudAdlsGen2View.setAccountKey(adlsGen2.getAccountKey());
+        cloudAdlsGen2View.setAccountName(adlsGen2.getAccountName());
+        cloudAdlsGen2View.setSecure(adlsGen2.isSecure());
+        cloudAdlsGen2View.setManagedIdentity(adlsGen2.getManagedIdentity());
         return cloudAdlsGen2View;
     }
 
@@ -141,6 +144,7 @@ public class CloudStorageParametersConverter {
         cloudAdlsGen2View.setAccountKey(source.getAccountKey());
         cloudAdlsGen2View.setAccountName(source.getAccountName());
         cloudAdlsGen2View.setSecure(source.isSecure());
+        cloudAdlsGen2View.setManagedIdentity(source.getManagedIdentity());
         return cloudAdlsGen2View;
     }
 }

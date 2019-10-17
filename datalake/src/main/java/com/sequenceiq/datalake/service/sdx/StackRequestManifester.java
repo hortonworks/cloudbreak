@@ -263,7 +263,9 @@ public class StackRequestManifester {
                 cloudStorage.setAccountMapping(accountMapping);
             } else {
                 LOGGER.info("IDBMMS usage is disabled for environment {}. Proceeding with {} mappings for stack {}.", environmentCrn,
-                        mappingSource == IdBrokerMappingSource.MOCK && CloudPlatform.AWS.name().equals(cloudPlatform) ? "mock" : "missing", stackName);
+                        mappingSource == IdBrokerMappingSource.MOCK
+                                && (CloudPlatform.AWS.name().equals(cloudPlatform)
+                                || CloudPlatform.AZURE.name().equals(cloudPlatform)) ? "mock" : "missing", stackName);
             }
         } else {
             // getAccountMapping() != null is possible only in case of SdxInternalClusterRequest, in which case the user-given values will be honored.

@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 
 public class AzureStackView {
 
@@ -55,7 +56,7 @@ public class AzureStackView {
                     AzureInstanceView azureInstance = new AzureInstanceView(stackName, stackNamePrefixLength, instance, group.getType(),
                             attachedDiskStorageName, attachedDiskStorageType, group.getName(), instanceGroupView.getAvailabilitySetName(),
                             managedDisk, getInstanceSubnetId(instance, subnetStrategy), group.getRootVolumeSize(),
-                            customImageNamePerInstance.get(instance.getInstanceId()));
+                            customImageNamePerInstance.get(instance.getInstanceId()), getManagedIdentity(group));
                     existingInstances.add(azureInstance);
                 }
             }
@@ -65,14 +66,6 @@ public class AzureStackView {
             instanceGroupNames.add(group.getName());
             instanceGroups.add(instanceGroupView);
         }
-    }
-
-    private String getInstanceSubnetId(CloudInstance instance, AzureSubnetStrategy subnetStrategy) {
-        String stored = instance.getStringParameter(CloudInstance.SUBNET_ID);
-        if (StringUtils.isNoneBlank(stored)) {
-            return stored;
-        }
-        return subnetStrategy.getNextSubnetId();
     }
 
     public Map<String, List<AzureInstanceView>> getGroups() {
@@ -97,5 +90,20 @@ public class AzureStackView {
             }
         }
         return storageAccounts;
+    }
+
+    private String getInstanceSubnetId(CloudInstance instance, AzureSubnetStrategy subnetStrategy) {
+        String stored = instance.getStringParameter(CloudInstance.SUBNET_ID);
+        if (StringUtils.isNoneBlank(stored)) {
+            return stored;
+        }
+        return subnetStrategy.getNextSubnetId();
+    }
+
+    private String getManagedIdentity(Group group) {
+        return group.getIdentity().map(cloudFileSystemView -> {
+            CloudAdlsGen2View cloudAdlsGen2View = (CloudAdlsGen2View) cloudFileSystemView;
+            return cloudAdlsGen2View.getManagedIdentity();
+        }).orElse(null);
     }
 }
