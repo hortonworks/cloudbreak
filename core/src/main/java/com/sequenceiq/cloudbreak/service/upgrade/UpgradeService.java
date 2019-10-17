@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFoundException;
+import static java.util.stream.Collectors.toList;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -24,9 +26,11 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
@@ -38,6 +42,10 @@ import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 public class UpgradeService {
 
     private static final Set<Status> UPGRADEABLE_ATTACHED_DISTRO_X_STATES = Sets.immutableEnumSet(Status.STOPPED, Status.DELETE_COMPLETED);
+
+    private static final boolean FORCE_REPAIR = true;
+
+    private static final boolean REMOVE_ONLY = false;
 
     @Inject
     private StackService stackService;
@@ -60,12 +68,35 @@ public class UpgradeService {
     @Inject
     private TransactionService transactionService;
 
+    @Inject
+    private HostGroupService hostGroupService;
+
     public UpgradeOption getUpgradeOptionByName(Long workspaceId, String name, User user) {
         try {
             return transactionService.required(() -> {
                 Optional<Stack> stack = stackService.findStackByNameAndWorkspaceId(name, workspaceId);
                 if (stack.isPresent()) {
                     return getUpgradeOption(stack.get(), workspaceId, user);
+                } else {
+                    throw notFoundException("Stack", name);
+                }
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    public void upgradeByName(Long workspaceId, String name) {
+        try {
+            transactionService.required(() -> {
+                Optional<Stack> stack = stackService.findStackByNameAndWorkspaceId(name, workspaceId);
+                if (stack.isPresent()) {
+                    List<String> hostGroupNames = hostGroupService.getByCluster(stack.get().getCluster().getId())
+                            .stream()
+                            .map(HostGroup::getName)
+                            .collect(toList());
+                    clusterService.repairCluster(stack.get().getId(), hostGroupNames, REMOVE_ONLY, FORCE_REPAIR);
+                    return null;
                 } else {
                     throw notFoundException("Stack", name);
                 }

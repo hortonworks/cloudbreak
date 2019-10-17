@@ -244,12 +244,20 @@ public class StackOperations {
         }
     }
 
+    public void upgradeCluster(StackAccessDto stackAccessDto, Long workspaceId) {
+        if (isNotEmpty(stackAccessDto.getName())) {
+            upgradeService.upgradeByName(workspaceId, stackAccessDto.getName());
+        } else {
+            throw new BadRequestException("Please provide a stack name for upgrade");
+        }
+    }
+
     public UpgradeOption checkForUpgrade(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         if (isNotEmpty(stackAccessDto.getName())) {
             return upgradeService.getUpgradeOptionByName(workspaceId, stackAccessDto.getName(), user);
         } else {
-            return null;
+            throw new BadRequestException("Please provide a stack name for upgrade");
         }
     }
 

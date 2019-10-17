@@ -100,7 +100,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     public void upgradeCluster(Long workspaceId, String name) {
-        throw new UnsupportedOperationException("Not implemented");
+        stackOperation.upgradeCluster(aStackAccessDtoBuilder().withName(name).build(), workspaceId);
     }
 
     @Override
