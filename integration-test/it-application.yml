@@ -6,10 +6,12 @@ mock:
       url: https://test:9443/imagecatalog
 
 integrationtest:
-    testsuite:
-      threadPoolSize: 5
-    defaultBlueprintName: hdp-small-default
-    outputdir: /it
-    command: suites
-    cleanup:
-      cleanupBeforeStart: false
+  spark:
+    sparkPoolSize: 8
+  threadCount: 2
+  parallel: classes
+  defaultBlueprintName: hdp-small-default
+  outputdir: /it
+  command: suites
+  cleanup:
+    cleanupBeforeStart: false

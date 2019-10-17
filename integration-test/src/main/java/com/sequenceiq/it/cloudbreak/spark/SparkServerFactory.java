@@ -36,14 +36,20 @@ public class SparkServerFactory {
     @Inject
     private SparkServerPool sparkServerPool;
 
-    public SparkServer construct() {
+    private File keystoreTempFile;
+
+    public SparkServerFactory() {
+        keystoreTempFile = createKeystoreTempFile();
+    }
+
+    public SparkServer construct() throws InterruptedException {
         long start = System.currentTimeMillis();
         int port = NEXT_PORT.incrementAndGet();
         String endpoint = "https://" + mockServerAddress + ':' + port;
 
         LOGGER.info("Try to setup with endpoint: {}", endpoint);
         SparkServer sparkServer = sparkServerPool.pop();
-        sparkServer.reset(endpoint, createKeystoreTempFile(), port, printRequestBody);
+        sparkServer.reset(endpoint, keystoreTempFile, port, printRequestBody);
         sparkServer.init();
         sparkServer.awaitInitialization();
         LOGGER.info("Spark has been initalized in {}ms", System.currentTimeMillis() - start);
@@ -53,15 +59,16 @@ public class SparkServerFactory {
     }
 
     public void release(@Nonnull SparkServer sparkServer) {
-        new Thread(() -> {
-            sparkServer.stop();
-            sparkServer.awaitStop();
-            LOGGER.info("spark server has cleared.");
-            sparkServerPool.put(sparkServer);
-        }).start();
+        long start = System.currentTimeMillis();
+        sparkServer.stop();
+        sparkServer.awaitStop();
+        LOGGER.info("spark server has been cleared in {}ms.", System.currentTimeMillis() - start);
+        LOGGER.info("spark server has been cleared on: https://{}", mockServerAddress + ':' + sparkServer.getPort());
+        sparkServerPool.put(sparkServer);
     }
 
     private static File createKeystoreTempFile() {
+        LOGGER.info("Preparing SparkServer keystore file");
         try {
             InputStream sshPemInputStream = new ClassPathResource("/keystore_server").getInputStream();
             File tempKeystoreFile = File.createTempFile("/keystore_server", ".tmp");
@@ -69,6 +76,7 @@ public class SparkServerFactory {
                 IOUtils.copy(sshPemInputStream, outputStream);
             } catch (IOException e) {
                 LOGGER.error("can't write " + "/keystore_server", e);
+                throw e;
             }
             return tempKeystoreFile;
         } catch (IOException e) {

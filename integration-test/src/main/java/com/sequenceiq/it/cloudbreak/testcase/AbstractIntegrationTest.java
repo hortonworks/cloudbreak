@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.inject.Inject;
 
@@ -25,7 +24,6 @@ import org.testng.ITestContext;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
@@ -37,6 +35,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMoc
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
+import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
 import com.sequenceiq.it.cloudbreak.actor.Actor;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -120,8 +119,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
-    private final List<AutoCloseable> closableBeans = new CopyOnWriteArrayList<>();
-
     @BeforeSuite
     public void beforeSuite(ITestContext testngContext) {
         MDC.put("testlabel", "init of " + getClass().getSimpleName());
@@ -201,18 +198,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     @AfterClass(alwaysRun = true)
     public void cleanSharedObjects() {
         ThreadLocalProfiles.clearProfiles();
-        closableBeans.forEach(b -> {
-            try {
-                b.close();
-            } catch (Exception e) {
-                LOGGER.error("Unable to close bean: " + b.getClass().getCanonicalName(), e);
-            }
-        });
-    }
-
-    @AfterSuite
-    public void afterSuite() {
-
     }
 
     @DataProvider(name = TEST_CONTEXT_WITH_MOCK)
@@ -261,7 +246,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     protected void createDefaultImageCatalog(TestContext testContext) {
         testContext
                 .given(ImageCatalogTestDto.class)
-                .when(imageCatalogTestClient.createV4());
+                .when(new ImageCatalogCreateRetryAction());
     }
 
     protected Set<String> createDefaultProxyConfig(TestContext testContext) {
@@ -370,12 +355,11 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
      * @throws IllegalStateException if no application context exists or bean could not be created
      */
     protected <T> T getBean(Class<T> requiredType) {
+        LOGGER.info("Getting for test bean: {}", requiredType.getName());
         if (applicationContext != null) {
             try {
                 T bean = applicationContext.getBean(requiredType);
-                if (bean instanceof AutoCloseable) {
-                    closableBeans.add((AutoCloseable) bean);
-                }
+                LOGGER.info("bean created. ref: {}", bean);
                 return bean;
             } catch (BeansException be) {
                 throw new IllegalStateException("No bean found!", be);
