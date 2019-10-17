@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadata
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
@@ -28,7 +29,6 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentLogging;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParameters;
-import com.sequenceiq.environment.environment.dto.telemetry.WasbCloudStorageParameters;
 
 @ExtendWith(MockitoExtension.class)
 public class CloudStorageLocationValidatorTest {
@@ -39,7 +39,7 @@ public class CloudStorageLocationValidatorTest {
 
     private static final String S3_OBJECT_PATH = "s3a://bucket-name/folder/file";
 
-    private static final String WASB_OBJECT_PATH = "wasb://bucket-name/folder/file";
+    private static final String ABFS_OBJECT_PATH = "abfs://bucket-name/folder/file";
 
     private static final String ENV_REGION = "env-region";
 
@@ -68,7 +68,7 @@ public class CloudStorageLocationValidatorTest {
     private S3CloudStorageParameters s3;
 
     @Mock
-    private WasbCloudStorageParameters wasb;
+    private AdlsGen2CloudStorageV1Parameters adlsGen2;
 
     @InjectMocks
     private CloudStorageLocationValidator underTest;
@@ -103,9 +103,9 @@ public class CloudStorageLocationValidatorTest {
     }
 
     @Test
-    public void validateWasb() {
-        when(environmentLogging.getWasb()).thenReturn(wasb);
-        when(wasb.getType()).thenReturn(FileSystemType.WASB);
+    public void validateAbfs() {
+        when(environmentLogging.getAdlsGen2()).thenReturn(adlsGen2);
+        when(adlsGen2.getType()).thenReturn(FileSystemType.ADLS_GEN_2);
 
         ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder()
                 .withCloudPlatform(CLOUD_PLATFORM)
@@ -116,7 +116,7 @@ public class CloudStorageLocationValidatorTest {
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        underTest.validate(WASB_OBJECT_PATH, environment, validationResultBuilder);
+        underTest.validate(ABFS_OBJECT_PATH, environment, validationResultBuilder);
 
         assertFalse(validationResultBuilder.build().hasError());
     }

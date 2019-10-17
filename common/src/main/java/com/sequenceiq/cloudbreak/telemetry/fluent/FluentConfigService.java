@@ -99,15 +99,19 @@ public class FluentConfigService {
                 .withLogFolderName(s3Config.getFolderPrefix());
     }
 
-    // TODO: add support for Azure MSI
     private void fillAdlsGen2Configs(FluentConfigView.Builder builder, String storageLocation,
             AdlsGen2CloudStorageV1Parameters parameters) {
         AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(storageLocation);
         String storageAccount = StringUtils.isNotEmpty(adlsGen2Config.getAccount())
                 ? adlsGen2Config.getAccount() : parameters.getAccountName();
 
+        if (StringUtils.isNotBlank(parameters.getManagedIdentity())) {
+            builder.withAzureInstanceMsi(parameters.getManagedIdentity());
+        } else {
+            builder.withAzureStorageAccessKey(parameters.getAccountKey());
+        }
+
         builder.withProviderPrefix(ADLS_GEN2_PROVIDER_PREFIX)
-                .withAzureStorageAccessKey(parameters.getAccountKey())
                 .withAzureContainer(adlsGen2Config.getFileSystem())
                 .withAzureStorageAccount(storageAccount)
                 .withLogFolderName(adlsGen2Config.getFolderPrefix());
