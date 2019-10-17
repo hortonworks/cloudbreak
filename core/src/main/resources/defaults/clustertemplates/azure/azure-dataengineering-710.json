@@ -1,0 +1,126 @@
+{
+  "name": "CDP 1.1 - Data Engineering template for Azure",
+  "description": "",
+  "type": "DATAENGINEERING",
+  "cloudPlatform": "AZURE",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    },
+    "instanceGroups": [
+      {
+        "name": "master",
+        "template": {
+          "attachedVolumes": [
+            {
+              "size": 100,
+              "count": 1,
+              "type": "Standard_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D12_v2",
+          "rootVolume": {
+            "size": 50
+          }
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL",
+        "securityGroup": {
+          "securityRules": [
+            {
+              "subnet": "0.0.0.0/0",
+              "ports": [
+                "9443",
+                "443",
+                "22"
+              ],
+              "protocol": "tcp"
+            }
+          ]
+        }
+      },
+      {
+        "name": "compute",
+        "template": {
+          "attachedVolumes": [
+            {
+              "size": 100,
+              "count": 1,
+              "type": "Standard_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D3_v2",
+          "rootVolume": {
+            "size": 50
+          }
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "securityGroup": {
+          "securityRules": [
+            {
+              "subnet": "0.0.0.0/0",
+              "ports": [
+                "22"
+              ],
+              "protocol": "tcp"
+            }
+          ]
+        }
+      },
+      {
+        "name": "worker",
+        "template": {
+          "attachedVolumes": [
+            {
+              "size": 100,
+              "count": 1,
+              "type": "Standard_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D3_v2",
+          "rootVolume": {
+            "size": 50
+          }
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "securityGroup": {
+          "securityRules": [
+            {
+              "subnet": "0.0.0.0/0",
+              "ports": [
+                "22"
+              ],
+              "protocol": "tcp"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
