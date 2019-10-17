@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RetryableFlowRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOption;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -104,7 +104,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
-    public UpgradeOption checkForUpgrade(Long workspaceId, String name) {
+    public UpgradeOptionV4Response checkForUpgrade(Long workspaceId, String name) {
         return stackOperation.checkForUpgrade(aStackAccessDtoBuilder().withName(name).build(), workspaceId);
     }
 

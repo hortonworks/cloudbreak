@@ -17,7 +17,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOption;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -83,7 +83,7 @@ public class SdxReactorFlowManager {
         notify(selector, new SdxRepairStartEvent(selector, sdxId, userId, requestId, repairRequest));
     }
 
-    public void triggerDatalakeUpgradeFlow(Long sdxId, UpgradeOption upgradeOption) {
+    public void triggerDatalakeUpgradeFlow(Long sdxId, UpgradeOptionV4Response upgradeOption) {
         String selector = SDX_UPGRADE_EVENT.event();
         String userId = threadBasedUserCrnProvider.getUserCrn();
         String requestId = threadBasedRequestIdProvider.getRequestId();

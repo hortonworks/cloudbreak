@@ -10,7 +10,7 @@ import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOption;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
@@ -132,19 +132,19 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    public UpgradeOption checkForUpgrade(String clusterName) {
+    public UpgradeOptionV4Response checkForUpgradeByName(String clusterName) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         return sdxUpgradeService.checkForUpgradeByName(userCrn, clusterName);
     }
 
     @Override
-    public UpgradeOption checkForUpgradeByCrn(String clusterCrn) {
+    public UpgradeOptionV4Response checkForUpgradeByCrn(String clusterCrn) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         return sdxUpgradeService.checkForUpgradeByCrn(userCrn, clusterCrn);
     }
 
     @Override
-    public void upgradeCluster(String clusterName) {
+    public void upgradeClusterByName(String clusterName) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         sdxUpgradeService.triggerUpgradeByName(userCrn, clusterName);
     }

@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOption;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -246,16 +246,16 @@ public class StackOperations {
 
     public void upgradeCluster(StackAccessDto stackAccessDto, Long workspaceId) {
         if (isNotEmpty(stackAccessDto.getName())) {
-            upgradeService.upgradeByName(workspaceId, stackAccessDto.getName());
+            upgradeService.upgradeByStackName(workspaceId, stackAccessDto.getName());
         } else {
             throw new BadRequestException("Please provide a stack name for upgrade");
         }
     }
 
-    public UpgradeOption checkForUpgrade(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
+    public UpgradeOptionV4Response checkForUpgrade(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         if (isNotEmpty(stackAccessDto.getName())) {
-            return upgradeService.getUpgradeOptionByName(workspaceId, stackAccessDto.getName(), user);
+            return upgradeService.getUpgradeOptionByStackName(workspaceId, stackAccessDto.getName(), user);
         } else {
             throw new BadRequestException("Please provide a stack name for upgrade");
         }
