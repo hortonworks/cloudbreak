@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
+import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
@@ -326,5 +327,9 @@ public class StackOperation {
         if (dto.isNotValid()) {
             throw new BadRequestException("A stack name or crn must be provided. One and only one of them.");
         }
+    }
+
+    public List<RetryableFlow> getRetryableFlows(String name, Long workspaceId) {
+        return stackCommonService.getRetryableFlows(name, workspaceId);
     }
 }
