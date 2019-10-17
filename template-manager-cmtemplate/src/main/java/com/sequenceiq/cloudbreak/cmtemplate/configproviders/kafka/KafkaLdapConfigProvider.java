@@ -4,12 +4,15 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
+@Component
 public class KafkaLdapConfigProvider implements CmTemplateComponentConfigProvider {
 
     private static final String LDAP_AUTH_URL = "ldap.auth.url";
