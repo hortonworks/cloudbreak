@@ -34,6 +34,9 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState.Builder;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+
 @Service
 public class UmsUsersStateProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(UmsUsersStateProvider.class);
@@ -159,30 +162,42 @@ public class UmsUsersStateProvider {
     private void handleUser(Builder userStateBuilder, Map<String, FmsGroup> crnToFmsGroup,
                             String actorCrn, String memberCrn, FmsUser fmsUser, String environmentCrn, Optional<String> requestId) {
 
-        GetRightsResponse rightsResponse = grpcUmsClient.getRightsForUser(actorCrn, memberCrn, environmentCrn, requestId);
-        if (isEnvironmentUser(environmentCrn, rightsResponse)) {
-            userStateBuilder.addUser(fmsUser);
-            rightsResponse.getGroupCrnList().stream().forEach(gcrn -> {
-                userStateBuilder.addMemberToGroup(crnToFmsGroup.get(gcrn).getName(), fmsUser.getName());
-            });
+        try {
+            GetRightsResponse rightsResponse = grpcUmsClient.getRightsForUser(actorCrn, memberCrn, environmentCrn, requestId);
+            if (isEnvironmentUser(environmentCrn, rightsResponse)) {
+                userStateBuilder.addUser(fmsUser);
+                rightsResponse.getGroupCrnList().stream().forEach(gcrn -> {
+                    userStateBuilder.addMemberToGroup(crnToFmsGroup.get(gcrn).getName(), fmsUser.getName());
+                });
 
-            // Since this user is eligible, add this user to internal group
-            userStateBuilder.addMemberToGroup(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP, fmsUser.getName());
+                // Since this user is eligible, add this user to internal group
+                userStateBuilder.addMemberToGroup(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP, fmsUser.getName());
 
-            List<String> workloadAdministrationGroupNames = rightsResponse.getWorkloadAdministrationGroupNameList();
-            LOGGER.debug("workloadAdministrationGroupNameList = {}", workloadAdministrationGroupNames);
-            workloadAdministrationGroupNames.forEach(groupName -> {
-                userStateBuilder.addGroup(nameToGroup(groupName));
-                userStateBuilder.addMemberToGroup(groupName, fmsUser.getName());
-            });
+                List<String> workloadAdministrationGroupNames = rightsResponse.getWorkloadAdministrationGroupNameList();
+                LOGGER.debug("workloadAdministrationGroupNameList = {}", workloadAdministrationGroupNames);
+                workloadAdministrationGroupNames.forEach(groupName -> {
+                    userStateBuilder.addGroup(nameToGroup(groupName));
+                    userStateBuilder.addMemberToGroup(groupName, fmsUser.getName());
+                });
 
-            if (isEnvironmentAdmin(environmentCrn, rightsResponse)) {
-                // TODO: introduce a flag for adding admin
-                userStateBuilder.addMemberToGroup("admins", fmsUser.getName());
+                if (isEnvironmentAdmin(environmentCrn, rightsResponse)) {
+                    // TODO: introduce a flag for adding admin
+                    userStateBuilder.addMemberToGroup("admins", fmsUser.getName());
+                }
+
+                // get credentials
+                userStateBuilder.addWorkloadCredentials(fmsUser.getName(), getCredentials(memberCrn, requestId));
             }
-
-            // get credentials
-            userStateBuilder.addWorkloadCredentials(fmsUser.getName(), getCredentials(memberCrn, requestId));
+        } catch (StatusRuntimeException e) {
+            // NOT_FOUND errors indicate that a user/machineUser has been deleted after we have
+            // retrieved the list of users/machineUsers from the UMS. Treat these users as if
+            // they do not have the right to access this environment and belong to no groups.
+            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+                LOGGER.warn("CRN {} not found in UMS. Treating as if CRN has no rights to environment {}: {}",
+                        memberCrn, environmentCrn, e.getLocalizedMessage());
+            } else {
+                throw e;
+            }
         }
     }
 
