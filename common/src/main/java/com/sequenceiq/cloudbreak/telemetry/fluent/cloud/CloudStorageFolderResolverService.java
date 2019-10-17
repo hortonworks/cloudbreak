@@ -56,7 +56,7 @@ public class CloudStorageFolderResolverService {
 
     public String resolveAdlsGen2Location(String location, String clusterType,
             String clusterName, String clusterCrn) {
-        LOGGER.debug("Start to resolve WASB storage location for telemetry (logging).");
+        LOGGER.debug("Start to resolve ADLS V2 storage location for telemetry (logging).");
         return adlsGen2ConfigGenerator.generateStoredLocation(location,
                 clusterType, clusterName, Crn.fromString(clusterCrn).getResource());
     }

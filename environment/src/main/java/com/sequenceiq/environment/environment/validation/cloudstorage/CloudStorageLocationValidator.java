@@ -48,8 +48,8 @@ public class CloudStorageLocationValidator {
             if (logging.getS3() != null) {
                 return Optional.of(logging.getS3().getType());
             }
-            if (logging.getWasb() != null) {
-                return Optional.of(logging.getWasb().getType());
+            if (logging.getAdlsGen2() != null) {
+                return Optional.of(logging.getAdlsGen2().getType());
             }
         }
         return response;
