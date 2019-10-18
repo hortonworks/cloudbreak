@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
@@ -42,29 +43,33 @@ public class EventV4Controller implements EventV4Endpoint {
     @Inject
     private StackService stackService;
 
+    @Inject
+    private WorkspaceService workspaceService;
+
     @Override
-    public CloudbreakEventV4Responses list(Long workspaceId, Long since) {
-        return new CloudbreakEventV4Responses(cloudbreakEventsFacade.retrieveEventsForWorkspace(workspaceId, since));
+    public CloudbreakEventV4Responses list(Long since) {
+        return new CloudbreakEventV4Responses(cloudbreakEventsFacade.retrieveEventsForWorkspace(workspaceService.getForCurrentUser().getId(), since));
     }
 
     @Override
-    public Page<CloudbreakEventV4Response> getCloudbreakEventsByStack(Long workspaceId, String name, Integer page, Integer size) {
+    public Page<CloudbreakEventV4Response> getCloudbreakEventsByStack(String name, Integer page, Integer size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
-        return cloudbreakEventsFacade.retrieveEventsByStack(getStackIdIfAvailable(workspaceId, name), pageable);
+        return cloudbreakEventsFacade.retrieveEventsByStack(getStackIdIfAvailable(name), pageable);
     }
 
-    private Long getStackIdIfAvailable(Long workspaceId, String name) {
+    private Long getStackIdIfAvailable(String name) {
+        Long workspaceId = workspaceService.getForCurrentUser().getId();
         return Optional.ofNullable(stackService.getIdByNameInWorkspace(name, workspaceId)).orElseThrow(notFound("stack", name));
     }
 
     @Override
-    public StructuredEventContainer structured(Long workspaceId, String name) {
-        return structuredEventService.getStructuredEventsForStack(name, workspaceId);
+    public StructuredEventContainer structured(String name) {
+        return structuredEventService.getStructuredEventsForStack(name, workspaceService.getForCurrentUser().getId());
     }
 
     @Override
-    public Response download(Long workspaceId, String name) {
-        StructuredEventContainer events = structuredEventService.getStructuredEventsForStack(name, workspaceId);
+    public Response download(String name) {
+        StructuredEventContainer events = structuredEventService.getStructuredEventsForStack(name, workspaceService.getForCurrentUser().getId());
         StreamingOutput streamingOutput = output -> {
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(output)) {
                 zipOutputStream.putNextEntry(new ZipEntry("struct-events.json"));
