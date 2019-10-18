@@ -57,7 +57,6 @@ public class KerberosMgmtVaultComponent {
     public SecretResponse getSecretResponseForPrincipal(ServiceKeytabRequest request, String accountId, String principal) {
         try {
             String path = new VaultPathBuilder()
-                    .enableGeneratingClusterIdIfNotPresent()
                     .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                     .withAccountId(accountId)
                     .withSubType(VaultPathBuilder.SecretSubType.SERVICE_PRINCIPAL)
@@ -77,7 +76,6 @@ public class KerberosMgmtVaultComponent {
     public SecretResponse getSecretResponseForKeytab(ServiceKeytabRequest request, String accountId, String keytab) {
         try {
             String path = new VaultPathBuilder()
-                    .enableGeneratingClusterIdIfNotPresent()
                     .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                     .withAccountId(accountId)
                     .withSubType(VaultPathBuilder.SecretSubType.KEYTAB)
@@ -97,7 +95,6 @@ public class KerberosMgmtVaultComponent {
     public SecretResponse getSecretResponseForPrincipal(HostKeytabRequest request, String accountId, String principal) {
         try {
             String path = new VaultPathBuilder()
-                    .enableGeneratingClusterIdIfNotPresent()
                     .withSecretType(VaultPathBuilder.SecretType.HOST_KEYTAB)
                     .withAccountId(accountId)
                     .withSubType(VaultPathBuilder.SecretSubType.SERVICE_PRINCIPAL)
@@ -116,7 +113,6 @@ public class KerberosMgmtVaultComponent {
     public SecretResponse getSecretResponseForKeytab(HostKeytabRequest request, String accountId, String keytab) {
         try {
             String path = new VaultPathBuilder()
-                    .enableGeneratingClusterIdIfNotPresent()
                     .withSecretType(VaultPathBuilder.SecretType.HOST_KEYTAB)
                     .withAccountId(accountId)
                     .withSubType(VaultPathBuilder.SecretSubType.KEYTAB)
