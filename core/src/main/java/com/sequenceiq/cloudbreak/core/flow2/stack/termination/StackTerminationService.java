@@ -72,8 +72,7 @@ public class StackTerminationService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DELETE_COMPLETED, DELETE_COMPLETED.name());
         clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
         if (stack.getType() == StackType.DATALAKE) {
-            datalakeResourcesService.findByDatalakeStackId(stack.getId()).ifPresent(datalakeResources ->
-                    datalakeResourcesService.deleteWithMdcContextRestore(datalakeResources));
+            datalakeResourcesService.deleteWithDependenciesByStackId(stack.getId());
         }
         executorService.execute(new CleanupFreeIpaTask(stack, freeIpaV1Endpoint, threadBasedUserCrnProvider, threadBasedUserCrnProvider.getUserCrn(),
                 MDCBuilder.getMdcContextMap()));

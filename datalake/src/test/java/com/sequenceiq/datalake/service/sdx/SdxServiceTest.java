@@ -299,7 +299,7 @@ class SdxServiceTest {
 
     @Test
     void validateAllAzureStackRequests() {
-        CloudPlatform cp = CloudPlatform.YARN;
+        CloudPlatform cp = CloudPlatform.AZURE;
         Stream.of(SdxClusterShape.values())
                 .filter(a -> !a.equals(SdxClusterShape.CUSTOM))
                 .forEach(a -> assertStackV4Request(cp, a));

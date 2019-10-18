@@ -4,9 +4,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
@@ -42,6 +44,15 @@ public class DatalakeResourcesService extends AbstractWorkspaceAwareResourceServ
     @Override
     protected void prepareDeletion(DatalakeResources resource) {
 
+    }
+
+    @Transactional
+    public void deleteWithDependenciesByStackId(Long stackId) {
+        datalakeResourcesRepository.findByDatalakeStackId(stackId).ifPresent(datalakeResources -> {
+            datalakeResources.setRdsConfigs(Sets.newHashSet());
+            datalakeResourcesRepository.save(datalakeResources);
+            datalakeResourcesRepository.delete(datalakeResources);
+        });
     }
 
     @Override

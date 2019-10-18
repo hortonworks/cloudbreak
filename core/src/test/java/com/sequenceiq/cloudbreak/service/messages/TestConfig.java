@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.service.messages;
 
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 
-@Configuration
+@TestConfiguration
 public class TestConfig {
 
     @Bean
