@@ -6,15 +6,20 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.Datalake
 import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 
 public class ClusterTemplateTestAssertion {
 
@@ -86,32 +91,36 @@ public class ClusterTemplateTestAssertion {
 
     public static Assertion<ClusterTemplateTestDto, CloudbreakClient> checkStackTemplateAfterClusterTemplateCreation() {
         return (testContext, entity, cloudbreakClient) -> {
-            Optional<ClusterTemplateV4Response> first = entity.getResponses().stream().filter(f -> f.getName().equals(entity.getName())).findFirst();
-            if (!first.isPresent()) {
-                throw new IllegalArgumentException("No element in the result");
-            }
-
-            ClusterTemplateV4Response clusterTemplateV4Response = first.get();
-
-            /*StackV4Request stackTemplate = clusterTemplateV4Response.getStackTemplate();
-            if (stackTemplate == null) {
-                throw new IllegalArgumentException("Stack template is empty");
-            }
-
-            if (!StringUtils.isEmpty(stackTemplate.getName())) {
-                throw new IllegalArgumentException("Stack template name should be empty!");
-            }
-
-            if (!StringUtils.isEmpty(stackTemplate.getCluster().getPassword())) {
-                throw new IllegalArgumentException("Ambari password should be empty!");
-            }
-
-            if (!StringUtils.isEmpty(stackTemplate.getCluster().getUserName())) {
-                throw new IllegalArgumentException("Ambari username should be empty!");
-            }*/
-
+            entity.getResponses()
+                    .stream()
+                    .filter(f -> f.getName().equals(entity.getName()))
+                    .findFirst()
+                    .ifPresentOrElse(ClusterTemplateTestAssertion::validateDistroxTemplate, ClusterTemplateTestAssertion::throwExceptionUponMissingTemplate);
             return entity;
         };
+    }
+
+    private static void throwExceptionUponMissingTemplate() {
+        throw new IllegalArgumentException("No element in the result");
+    }
+
+    private static void validateDistroxTemplate(ClusterTemplateV4Response clusterTemplateV4Response) {
+        DistroXV1Request distroXTemplate = clusterTemplateV4Response.getDistroXTemplate();
+        if (distroXTemplate == null) {
+            throw new IllegalArgumentException("Template is empty");
+        }
+
+        if (!StringUtils.isEmpty(distroXTemplate.getName())) {
+            throw new IllegalArgumentException("Template name should be empty!");
+        }
+
+        if (!StringUtils.isEmpty(distroXTemplate.getCluster().getPassword())) {
+            throw new IllegalArgumentException("CM password should be empty!");
+        }
+
+        if (!StringUtils.isEmpty(distroXTemplate.getCluster().getUserName())) {
+            throw new IllegalArgumentException("CM username should be empty!");
+        }
     }
 
     public static Assertion<ClusterTemplateTestDto, CloudbreakClient> checkStackTemplateAfterClusterTemplateCreationWithProperties() {
@@ -124,38 +133,12 @@ public class ClusterTemplateTestAssertion {
 
             ClusterTemplateV4Response clusterTemplateV4Response = first.get();
 
-            /*StackV4Request stackTemplate = clusterTemplateV4Response.getStackTemplate();
+            DistroXV1Request stackTemplate = clusterTemplateV4Response.getDistroXTemplate();
             if (stackTemplate == null) {
                 throw new IllegalArgumentException("Stack template is empty");
             }
 
-            if (!"10.10.0.0/16".equals(stackTemplate.getNetwork().getSubnetCIDR())) {
-                throw new IllegalArgumentException("SubnetCIDR is mismatch!");
-            }
-
-            InstanceGroupV4Request master = getInstanceGroup(stackTemplate.getInstanceGroups(), HostGroupType.MASTER);
-            if (!master.getRecipeNames().equals(newHashSet("mock-test-recipe"))) {
-                throw new IllegalArgumentException("Master recipes are mismatches!");
-            }
-            if (!master.getSecurityGroup().getSecurityGroupIds().equals(newHashSet("scgId1", "scgId2"))) {
-                throw new IllegalArgumentException("Security groups are mismatches!");
-            }
-
-            InstanceGroupV4Request worker = getInstanceGroup(stackTemplate.getInstanceGroups(), HostGroupType.WORKER);
-            SecurityRuleV4Request securityRuleRequest = worker.getSecurityGroup().getSecurityRules().get(0);
-            if (!Arrays.asList("55", "66", "77").equals(securityRuleRequest.getPorts())) {
-                throw new IllegalArgumentException("Ports are mismatches!");
-            }
-
-            if (!"ftp".equals(securityRuleRequest.getProtocol())) {
-                throw new IllegalArgumentException("Protocol is mismatches!");
-            }
-
-            if (!"10.0.0.0/32".equals(securityRuleRequest.getSubnet())) {
-                throw new IllegalArgumentException("Subnet is mismatches!");
-            }
-
-            if (!stackTemplate.getCluster().getDatabases().equals(newHashSet("mock-test-rds"))) {
+            if (!stackTemplate.getCluster().getDatabases().equals(Set.of("mock-test-rds"))) {
                 throw new IllegalArgumentException("RDS is mismatch!");
             }
 
@@ -182,16 +165,16 @@ public class ClusterTemplateTestAssertion {
 
             if (!org.springframework.util.StringUtils.isEmpty(stackTemplate.getCluster().getUserName())) {
                 throw new IllegalArgumentException("Username should be empty!");
-            }*/
+            }
 
             return entity;
         };
     }
 
-    private static InstanceGroupV4Request getInstanceGroup(List<InstanceGroupV4Request> instanceGroups, HostGroupType hostGroupType) {
+    private static InstanceGroupV1Request getInstanceGroup(List<InstanceGroupV1Request> instanceGroups) {
         return instanceGroups
                 .stream()
-                .filter(ig -> hostGroupType.getName().equals(ig.getName()))
+                .filter(ig -> HostGroupType.MASTER.getName().equals(ig.getName()))
                 .findFirst()
                 .orElseThrow(() -> new InvalidParameterException("Unable to find valid instancegroup by type"));
     }

@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.flow.deletion;
 
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_CLUSTER_DEFINITION_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_IDBROKER_MAPPINGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_NETWORK_EVENT;
@@ -98,6 +99,32 @@ public class EnvDeleteActions {
 
                 EnvironmentDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent, envDeleteState, logDeleteState);
                 sendEvent(context, DELETE_NETWORK_EVENT.selector(), envDto);
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTER_DEFINITION_DELETE_STARTED_STATE")
+    public Action<?, ?> clusterDefinitionDeleteAction() {
+        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
+                environmentService
+                        .findEnvironmentById(payload.getResourceId())
+                        .ifPresentOrElse(environment -> {
+                            environment.setStatus(EnvironmentStatus.CLUSTER_DEFINITION_DELETE_PROGRESS);
+                            Environment env = environmentService.save(environment);
+                            EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
+                            SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                            notificationService.send(ResourceEvent.ENVIRONMENT_CLUSTER_DEFINITION_DELETE_STARTED, simpleResponse,
+                                    context.getFlowTriggerUserCrn());
+                        }, () -> LOGGER.error("Cannot delete cluster definition, because the environment does not exist: {}. "
+                                + "The flow will continue.", payload.getResourceId()));
+                EnvironmentDto envDto = new EnvironmentDto();
+                envDto.setId(payload.getResourceId());
+                envDto.setResourceCrn(payload.getResourceCrn());
+                envDto.setName(payload.getResourceName());
+                LOGGER.info("Flow entered into CLUSTER_DEFINITION_DELETE_STARTED_STATE");
+                sendEvent(context, DELETE_CLUSTER_DEFINITION_EVENT.selector(), envDto);
             }
         };
     }

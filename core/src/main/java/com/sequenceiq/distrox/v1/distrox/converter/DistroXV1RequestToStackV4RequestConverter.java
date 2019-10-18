@@ -100,7 +100,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setPlacement(preparePlacement(environment));
-        request.setSharedService(sdxConverter.getSharedService(source.getSdx(), environment.getCrn()));
+        request.setSharedService(sdxConverter.getSharedService(sdxClusterResponse));
         request.setCustomDomain(null);
         request.setTimeToLive(source.getTimeToLive());
         request.setTelemetry(getTelemetryRequest(source, environment, sdxClusterResponse));
@@ -136,7 +136,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setYarn(getYarnProperties(source, environment));
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
-        request.setSharedService(getIfNotNull(source.getSdx(), sdxConverter::getSharedService));
+        request.setSharedService(getIfNotNull(sdxClusterResponse, sdx -> sdxConverter.getSharedServiceV4Request(sdx.getName())));
         request.setTimeToLive(source.getTimeToLive());
         request.setTelemetry(getTelemetryRequest(source, environment, sdxClusterResponse));
         return request;

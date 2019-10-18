@@ -4,16 +4,21 @@ import static com.sequenceiq.environment.environment.service.EnvironmentTestData
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.USER;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import javax.inject.Inject;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,16 +27,23 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.exception.UnableToDeleteClusterDefinitionException;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 
 @ExtendWith(SpringExtension.class)
 class EnvironmentResourceDeletionServiceTest {
+
+    private static final Long WORKSPACE_ID = 0L;
+
+    private static final String ENVIRONMENT_CRN = "someEnvCrn";
 
     @MockBean
     private SdxEndpoint sdxEndpoint;
@@ -47,6 +59,9 @@ class EnvironmentResourceDeletionServiceTest {
 
     @MockBean
     private DatalakeV4Endpoint datalakeEndpoint;
+
+    @MockBean
+    private ClusterTemplateV4Endpoint clusterTemplateV4Endpoint;
 
     @Inject
     private EnvironmentResourceDeletionService environmentResourceDeletionServiceUnderTest;
@@ -88,8 +103,43 @@ class EnvironmentResourceDeletionServiceTest {
         verify(eventSender).sendEvent(any(), any());
     }
 
+    @Test
+    void testWhenDeleteClusterDefinitionsOnCloudbreakThrowsWebApplicationExceptionThenItShouldBeCatchedAndEnvironmentServiceExceptionShouldBeThrown() {
+        doThrow(WebApplicationException.class).when(clusterTemplateV4Endpoint).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
+
+        Assertions.assertThrows(EnvironmentServiceException.class,
+                () -> environmentResourceDeletionServiceUnderTest.deleteClusterDefinitionsOnCloudbreak(ENVIRONMENT_CRN));
+
+        verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(anyLong(), any(), any(), anyString());
+        verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
+    }
+
+    @Test
+    void testWhenDeleteClusterDefinitionsOnCloudbreakThrowsProcessingExceptionThenItShouldBeCatchedAndEnvironmentServiceExceptionShouldBeThrown() {
+        doThrow(ProcessingException.class).when(clusterTemplateV4Endpoint).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
+
+        Assertions.assertThrows(EnvironmentServiceException.class,
+                () -> environmentResourceDeletionServiceUnderTest.deleteClusterDefinitionsOnCloudbreak(ENVIRONMENT_CRN));
+
+        verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(anyLong(), any(), any(), anyString());
+        verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
+    }
+
+    @Test
+    void testWhenDeleteClusterDefinitionsThrowsUnableToDeleteClusterDefinitionExceptionThenItShouldBeCatchedAndEnvironmentServiceExceptionShouldBeThrown() {
+        doThrow(UnableToDeleteClusterDefinitionException.class).when(clusterTemplateV4Endpoint).deleteMultiple(eq(WORKSPACE_ID), any(), any(),
+                eq(ENVIRONMENT_CRN));
+
+        Assertions.assertThrows(EnvironmentServiceException.class,
+                () -> environmentResourceDeletionServiceUnderTest.deleteClusterDefinitionsOnCloudbreak(ENVIRONMENT_CRN));
+
+        verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(anyLong(), any(), any(), anyString());
+        verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
+    }
+
     @Configuration
     @Import(EnvironmentResourceDeletionService.class)
     static class Config {
     }
+
 }

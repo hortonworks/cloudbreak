@@ -80,6 +80,7 @@ public class OperationDescriptions {
         public static final String CREATE_IN_WORKSPACE = "create cluster template in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete cluster template by name in workspace";
         public static final String DELETE_BY_CRN_IN_WORKSPACE = "delete cluster template by crn in workspace";
+        public static final String DELETE_BY_ENVIRONMENT_CRN = "get cluster templates by environment crn";
         public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple cluster templates by name in workspace";
     }
 

@@ -46,7 +46,9 @@ import com.amazonaws.services.ec2.model.DescribeRegionsResult;
 import com.amazonaws.services.ec2.model.DescribeRouteTablesResult;
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
+import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
+import com.amazonaws.services.ec2.model.DescribeVpcsResult;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.InternetGateway;
 import com.amazonaws.services.ec2.model.InternetGatewayAttachment;
@@ -266,12 +268,26 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Override
     public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        Map<String, Set<CloudNetwork>> result = new HashMap<>();
-        Set<CloudNetwork> cloudNetworks = new HashSet<>();
         AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(cloudCredential), region.value());
-
         DescribeRouteTablesResult describeRouteTablesResult = ec2Client.describeRouteTables();
+        DescribeVpcsRequest describeVpcsRequest = getDescribeVpcsRequestWIthFilters(filters);
+        Set<CloudNetwork> cloudNetworks = new HashSet<>();
 
+        DescribeVpcsResult describeVpcsResult = null;
+        boolean first = true;
+        while (first || !StringUtils.isNullOrEmpty(describeVpcsResult.getNextToken())) {
+            first = false;
+            describeVpcsRequest.setNextToken(describeVpcsResult == null ? null : describeVpcsResult.getNextToken());
+            describeVpcsResult = ec2Client.describeVpcs(describeVpcsRequest);
+            Set<CloudNetwork> partialNetworks = getCloudNetworks(ec2Client, describeRouteTablesResult, describeVpcsResult);
+            cloudNetworks.addAll(partialNetworks);
+        }
+        Map<String, Set<CloudNetwork>> result = new HashMap<>();
+        result.put(region.value(), cloudNetworks);
+        return new CloudNetworks(result);
+    }
+
+    private DescribeVpcsRequest getDescribeVpcsRequestWIthFilters(Map<String, String> filters) {
         //create vpc filter view
         PlatformResourceVpcFilterView filter = new PlatformResourceVpcFilterView(filters);
         DescribeVpcsRequest describeVpcsRequest = new DescribeVpcsRequest();
@@ -279,31 +295,18 @@ public class AwsPlatformResources implements PlatformResources {
         if (!Strings.isNullOrEmpty(filter.getVpcId())) {
             describeVpcsRequest.withVpcIds(filter.getVpcId());
         }
-        for (Vpc vpc : ec2Client.describeVpcs(describeVpcsRequest).getVpcs()) {
-            Set<CloudSubnet> subnets = new HashSet<>();
-            List<Subnet> awsSubnets = ec2Client.describeSubnets(createVpcDescribeRequest(vpc)).getSubnets();
-            Map<String, Object> properties = new HashMap<>();
-            properties.put("cidrBlock", vpc.getCidrBlock());
-            properties.put("default", vpc.getIsDefault());
-            properties.put("dhcpOptionsId", vpc.getDhcpOptionsId());
-            properties.put("instanceTenancy", vpc.getInstanceTenancy());
-            properties.put("state", vpc.getState());
+        return describeVpcsRequest;
+    }
 
-            for (Subnet subnet : awsSubnets) {
-                boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(describeRouteTablesResult, subnet.getSubnetId());
-                Optional<String> subnetName = getName(subnet.getTags());
-                subnets.add(
-                        new CloudSubnet(
-                                subnet.getSubnetId(),
-                                subnetName.orElse(subnet.getSubnetId()),
-                                subnet.getAvailabilityZone(),
-                                subnet.getCidrBlock(),
-                                !subnet.isMapPublicIpOnLaunch(),
-                                subnet.getMapPublicIpOnLaunch(),
-                                hasInternetGateway)
-                );
-            }
+    private Set<CloudNetwork> getCloudNetworks(AmazonEC2Client ec2Client,
+            DescribeRouteTablesResult describeRouteTablesResult, DescribeVpcsResult describeVpcsResult) {
 
+        Set<CloudNetwork> cloudNetworks = new HashSet<>();
+        for (Vpc vpc : describeVpcsResult.getVpcs()) {
+            List<Subnet> awsSubnets = getSubnets(ec2Client, vpc);
+            Set<CloudSubnet> subnets = convertAwsSubnetsToCloudSubnets(describeRouteTablesResult, awsSubnets);
+
+            Map<String, Object> properties = prepareNetworkProperties(vpc);
             Optional<String> name = getName(vpc.getTags());
             if (name.isPresent()) {
                 cloudNetworks.add(new CloudNetwork(name.get(), vpc.getVpcId(), subnets, properties));
@@ -311,8 +314,51 @@ public class AwsPlatformResources implements PlatformResources {
                 cloudNetworks.add(new CloudNetwork(vpc.getVpcId(), vpc.getVpcId(), subnets, properties));
             }
         }
-        result.put(region.value(), cloudNetworks);
-        return new CloudNetworks(result);
+        return cloudNetworks;
+    }
+
+    private List<Subnet> getSubnets(AmazonEC2Client ec2Client, Vpc vpc) {
+        List<Subnet> awsSubnets = new ArrayList<>();
+        DescribeSubnetsResult describeSubnetsResult = null;
+        boolean first = true;
+        while (first || !StringUtils.isNullOrEmpty(describeSubnetsResult.getNextToken())) {
+            first = false;
+            DescribeSubnetsRequest describeSubnetsRequest = createSubnetsDescribeRequest(vpc, describeSubnetsResult == null
+                    ? null
+                    : describeSubnetsResult.getNextToken());
+            describeSubnetsResult = ec2Client.describeSubnets(describeSubnetsRequest);
+            awsSubnets.addAll(describeSubnetsResult.getSubnets());
+        }
+        return awsSubnets;
+    }
+
+    private Set<CloudSubnet> convertAwsSubnetsToCloudSubnets(DescribeRouteTablesResult describeRouteTablesResult, List<Subnet> awsSubnets) {
+        Set<CloudSubnet> subnets = new HashSet<>();
+        for (Subnet subnet : awsSubnets) {
+            boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(describeRouteTablesResult, subnet.getSubnetId());
+            Optional<String> subnetName = getName(subnet.getTags());
+            subnets.add(
+                    new CloudSubnet(
+                            subnet.getSubnetId(),
+                            subnetName.orElse(subnet.getSubnetId()),
+                            subnet.getAvailabilityZone(),
+                            subnet.getCidrBlock(),
+                            !subnet.isMapPublicIpOnLaunch(),
+                            subnet.getMapPublicIpOnLaunch(),
+                            hasInternetGateway)
+            );
+        }
+        return subnets;
+    }
+
+    private Map<String, Object> prepareNetworkProperties(Vpc vpc) {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("cidrBlock", vpc.getCidrBlock());
+        properties.put("default", vpc.getIsDefault());
+        properties.put("dhcpOptionsId", vpc.getDhcpOptionsId());
+        properties.put("instanceTenancy", vpc.getInstanceTenancy());
+        properties.put("state", vpc.getState());
+        return properties;
     }
 
     private Optional<RouteTable> getRouteTableForSubnet(DescribeRouteTablesResult describeRouteTablesResult, Subnet subnet) {
@@ -328,15 +374,17 @@ public class AwsPlatformResources implements PlatformResources {
 
     private Optional<String> getName(List<Tag> tags) {
         for (Tag tag : tags) {
-            if (tag.getKey().equals("Name")) {
+            if ("Name".equals(tag.getKey())) {
                 return Optional.ofNullable(tag.getValue());
             }
         }
         return Optional.empty();
     }
 
-    private DescribeSubnetsRequest createVpcDescribeRequest(Vpc vpc) {
-        return new DescribeSubnetsRequest().withFilters(new Filter("vpc-id", singletonList(vpc.getVpcId())));
+    private DescribeSubnetsRequest createSubnetsDescribeRequest(Vpc vpc, String nextToken) {
+        return new DescribeSubnetsRequest()
+                .withFilters(new Filter("vpc-id", singletonList(vpc.getVpcId())))
+                .withNextToken(nextToken);
     }
 
     @Override

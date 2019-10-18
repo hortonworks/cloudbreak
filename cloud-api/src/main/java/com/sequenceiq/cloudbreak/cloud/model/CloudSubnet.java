@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -106,6 +107,29 @@ public class CloudSubnet implements Serializable {
 
     public CloudSubnet withId(String newId) {
         return new CloudSubnet(newId, name, availabilityZone, cidr, privateSubnet, mapPublicIpOnLaunch, igwAvailable);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !getClass().equals(o.getClass())) {
+            return false;
+        }
+        CloudSubnet that = (CloudSubnet) o;
+        return privateSubnet == that.privateSubnet &&
+                mapPublicIpOnLaunch == that.mapPublicIpOnLaunch &&
+                igwAvailable == that.igwAvailable &&
+                Objects.equals(id, that.id) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(availabilityZone, that.availabilityZone) &&
+                Objects.equals(cidr, that.cidr);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, availabilityZone, cidr, privateSubnet, mapPublicIpOnLaunch, igwAvailable);
     }
 
     @Override

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -58,6 +59,8 @@ public class DistroXClusterV1Request implements Serializable {
 
     private List<String> exposedServices;
 
+    @NotNull
+    @NotEmpty
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
 
