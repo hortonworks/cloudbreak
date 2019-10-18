@@ -41,7 +41,7 @@ public class StructuredEventToStructuredEventEntityConverter extends AbstractCon
                 structuredEventEntity.setWorkspace(workspaceService.getByIdWithoutAuth(operationDetails.getWorkspaceId()));
             }
             if (StringUtils.hasLength(operationDetails.getUserId())) {
-                structuredEventEntity.setUser(userService.getByUserId(operationDetails.getUserId()).orElse(null));
+                structuredEventEntity.setUser(userService.getByUserIdAndTenant(operationDetails.getTenant(), operationDetails.getUserId()).orElse(null));
             }
 
             return structuredEventEntity;
