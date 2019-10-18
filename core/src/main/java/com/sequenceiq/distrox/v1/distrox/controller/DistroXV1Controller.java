@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBluepr
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
@@ -32,6 +34,7 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXScaleV1RequestToStackS
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 
 @Controller
+@InternalReady
 public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Inject
@@ -85,7 +88,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public StackV4Response getByCrn(String crn, Set<String> entries) {
+    public StackV4Response getByCrn(@ResourceCrn String crn, Set<String> entries) {
         return stackOperation.get(
                 aStackAccessDtoBuilder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId(),
