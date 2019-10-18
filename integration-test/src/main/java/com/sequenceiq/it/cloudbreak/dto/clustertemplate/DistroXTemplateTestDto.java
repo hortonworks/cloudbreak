@@ -2,7 +2,9 @@ package com.sequenceiq.it.cloudbreak.dto.clustertemplate;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -16,10 +18,14 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.Instan
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.volume.RootVolumeV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 
 @Prototype
@@ -53,6 +59,11 @@ public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, C
         return this;
     }
 
+    public DistroXTemplateTestDto withCluster(String key) {
+        withCluster(((ClusterTestDto) getTestContext().get(key)).getRequest());
+        return this;
+    }
+
     private DistroXTemplateTestDto withCluster(ClusterV4Request clusterV4Request) {
         DistroXClusterV1Request cluster = new DistroXClusterV1Request();
         cluster.setBlueprintName(clusterV4Request.getBlueprintName());
@@ -60,11 +71,30 @@ public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, C
         ClouderaManagerRepositoryV1Request repository = new ClouderaManagerRepositoryV1Request();
         cm.setRepository(repository);
         cluster.setCm(cm);
+        cluster.setUserName(clusterV4Request.getUserName());
+        cluster.setPassword(clusterV4Request.getPassword());
         getRequest().setCluster(cluster);
         return this;
     }
 
-    private DistroXTemplateTestDto withEnvironmentName(String name) {
+    public DistroXTemplateTestDto withBlueprintName(String value) {
+        Optional.ofNullable(getRequest().getCluster())
+                .ifPresentOrElse(r -> getRequest().getCluster().setBlueprintName(value), () -> {
+                    throw new IllegalStateException("You can't set the blueprint name empty if there is no existing DistroXClusterV1Request on the " +
+                            "DistroXTemplateTestDto!");
+                });
+        return this;
+    }
+
+    public DistroXTemplateTestDto withDefaultThreeInstanceGroups() {
+        Collection<DistroXInstanceGroupTestDto> instanceGroups = DistroXInstanceGroupTestDto.defaultHostGroup(getTestContext());
+        getRequest().setInstanceGroups(instanceGroups.stream()
+                .map(DistroXInstanceGroupTestDto::getRequest)
+                .collect(Collectors.toSet()));
+        return this;
+    }
+
+    public DistroXTemplateTestDto withEnvironmentName(String name) {
         getRequest().setEnvironmentName(name);
         return this;
     }
@@ -72,6 +102,24 @@ public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, C
     public DistroXTemplateTestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
+        return this;
+    }
+
+    public DistroXTemplateTestDto withImage() {
+        DistroXImageTestDto imageTestDto = getTestContext().get(DistroXImageTestDto.class);
+        getRequest().setImage(imageTestDto.getRequest());
+        return this;
+    }
+
+    public DistroXTemplateTestDto withNetwork(String key) {
+        DistroXNetworkTestDto networkTestDto = getTestContext().get(key);
+        getRequest().setNetwork(networkTestDto.getRequest());
+        return this;
+    }
+
+    public DistroXTemplateTestDto withMockedGatewayPort() {
+        Integer gatewayPort = ((MockedTestContext) getTestContext()).getSparkServer().getPort();
+        getRequest().setGatewayPort(gatewayPort);
         return this;
     }
 

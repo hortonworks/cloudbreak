@@ -1,8 +1,13 @@
 package com.sequenceiq.cloudbreak.service.template;
 
+import static java.lang.String.format;
+import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toSet;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -11,14 +16,23 @@ import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.dto.ClusterDefinitionAccessDto;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.GeneralAccessDto;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -27,19 +41,21 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.init.clustertemplate.ClusterTemplateLoaderService;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateRepository;
-import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackTemplateService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
 public class ClusterTemplateService extends AbstractWorkspaceAwareResourceService<ClusterTemplate> {
@@ -50,7 +66,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     private ClusterTemplateRepository clusterTemplateRepository;
 
     @Inject
-    private ClusterTemplateViewRepository clusterTemplateViewRepository;
+    private ClusterTemplateViewService clusterTemplateViewService;
 
     @Inject
     private UserService userService;
@@ -80,10 +96,22 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
-    private StackService stackService;
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+    private EnvironmentClientService environmentClientService;
+
+    @Inject
+    private TransactionService transactionService;
+
+    @Inject
+    private ConverterUtil converterUtil;
+
+    @Inject
+    private EnvironmentServiceDecorator environmentServiceDecorator;
+
+    @Inject
+    private BlueprintService blueprintService;
 
     @Override
     protected WorkspaceResourceRepository<ClusterTemplate, Long> repository() {
@@ -154,7 +182,12 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
         if (clusterTemplateRepository.findByNameAndWorkspace(resource.getName(), resource.getWorkspace()).isPresent()) {
             throw new BadRequestException(
-                    String.format("clustertemplate already exists with name '%s' in workspace %s", resource.getName(), resource.getWorkspace().getName()));
+                    format("clustertemplate already exists with name '%s' in workspace %s", resource.getName(), resource.getWorkspace().getName()));
+        }
+
+        Optional<String> messageIfBlueprintIsInvalidInCluster = getMessageIfBlueprintIsInvalidInCluster(resource);
+        if (messageIfBlueprintIsInvalidInCluster.isPresent()) {
+            throw new BadRequestException(messageIfBlueprintIsInvalidInCluster.get());
         }
     }
 
@@ -164,19 +197,80 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
     }
 
+    public Set<ClusterTemplate> findAllByEnvironment(ClusterDefinitionAccessDto dto) {
+        GeneralAccessDto.validate(dto);
+        DetailedEnvironmentResponse env = getEnvironmentByDto(dto);
+        LOGGER.debug("About to collect cluster definitions by environment: {} - [crn: {}]", env.getName(), env.getCrn());
+        return clusterTemplateRepository.getAllByEnvironmentCrn(env.getCrn());
+    }
+
     @Override
     public Set<ClusterTemplate> findAllByWorkspaceId(Long workspaceId) {
         updateDefaultClusterTemplates(workspaceId);
         return clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspaceId);
     }
 
-    public Set<ClusterTemplateView> getAllAvailableViewInWorkspace(Long workspaceId) {
-        return clusterTemplateViewRepository.findAllByNotDeletedInWorkspace(workspaceId);
+    private boolean isNotUsableClusterTemplate(ClusterTemplateViewV4Response response) {
+        return !isUsableClusterTemplate(response);
+    }
+
+    public boolean isUsableClusterTemplate(ClusterTemplateViewV4Response response) {
+        return (isUserManaged(response) && hasEnvironment(response)) || isDefaultTemplate(response);
+    }
+
+    private boolean isUserManaged(ClusterTemplateViewV4Response response) {
+        return ResourceStatus.USER_MANAGED == response.getStatus();
+    }
+
+    private boolean hasEnvironment(ClusterTemplateViewV4Response response) {
+        return nonNull(response.getEnvironmentName());
+    }
+
+    private boolean isDefaultTemplate(ClusterTemplateViewV4Response response) {
+        return ResourceStatus.DEFAULT == response.getStatus();
     }
 
     public void updateDefaultClusterTemplates(long workspaceId) {
         Workspace workspace = getWorkspaceService().getByIdForCurrentUser(workspaceId);
         updateDefaultClusterTemplates(workspace);
+    }
+
+    private Optional<String> getMessageIfBlueprintIsInvalidInCluster(ClusterTemplate clusterTemplate) {
+        if (Objects.isNull(clusterTemplate.getStackTemplate().getCluster())) {
+            String msg = "Stack template in cluster definition should contain a – valid – cluster request!";
+            return Optional.of(msg);
+        }
+        String msg = null;
+        boolean hasBlueprint = nonNull(clusterTemplate.getStackTemplate().getCluster().getBlueprint());
+        if (!hasBlueprint) {
+            msg = "Cluster definition should contain a cluster template!";
+        } else {
+            boolean hasExistingBlueprint = blueprintService.getAllAvailableInWorkspace(clusterTemplate.getWorkspace())
+                    .stream()
+                    .anyMatch(blueprint -> blueprint.getName().equals(clusterTemplate.getStackTemplate().getCluster().getBlueprint().getName()));
+            if (!hasExistingBlueprint) {
+                msg = "The cluster template (aka blueprint) in the cluster definition should be an existing one!";
+            }
+        }
+        return Optional.ofNullable(msg);
+    }
+
+    public Set<ClusterTemplateViewV4Response> listInWorkspaceAndCleanUpInvalids(Long workspaceId) {
+        try {
+            Set<ClusterTemplateView> views = transactionService.required(() -> clusterTemplateViewService.findAllActive(workspaceId));
+            Set<ClusterTemplateViewV4Response> responses = transactionService.required(() ->
+                    converterUtil.convertAllAsSet(views, ClusterTemplateViewV4Response.class));
+            environmentServiceDecorator.prepareEnvironments(responses);
+
+            cleanUpInvalidClusterDefinitions(workspaceId, responses);
+
+            return responses.stream()
+                    .filter(this::isUsableClusterTemplate)
+                    .collect(toSet());
+        } catch (TransactionExecutionException e) {
+            LOGGER.warn("Unable to find cluster definitions due to {}", e.getMessage());
+            throw new CloudbreakServiceException("Unable to obtain cluster definitions!");
+        }
     }
 
     private void updateDefaultClusterTemplates(Workspace workspace) {
@@ -208,7 +302,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         Optional<ClusterTemplate> clusterTemplateOptional = clusterTemplateRepository.getByCrnForWorkspaceId(crn, workspaceId);
         if (clusterTemplateOptional.isEmpty()) {
             throw new BadRequestException(
-                    String.format("clustertemplate does not exist with crn '%s' in workspace %s", crn, workspaceId));
+                    format("cluster template does not exist with crn '%s' in workspace %s", crn, workspaceId));
         }
         return clusterTemplateOptional.get();
     }
@@ -220,8 +314,36 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return clusterTemplate;
     }
 
+    private DetailedEnvironmentResponse getEnvironmentByDto(ClusterDefinitionAccessDto dto) {
+        GeneralAccessDto.validate(dto);
+        DetailedEnvironmentResponse env;
+        if (StringUtils.isNotEmpty(dto.getCrn())) {
+            env = environmentClientService.getByCrn(dto.getCrn());
+        } else {
+            env = environmentClientService.getByName(dto.getName());
+        }
+        return env;
+    }
+
+    private void cleanUpInvalidClusterDefinitions(final long workspaceId, Set<ClusterTemplateViewV4Response> envPreparedTemplates) {
+        try {
+            LOGGER.debug("Collecting cluster definition(s) which has no associated existing environment...");
+            Set<String> invalidTemplateNames = envPreparedTemplates.stream()
+                    .filter(this::isNotUsableClusterTemplate)
+                    .map(CompactViewV4Response::getName)
+                    .collect(toSet());
+
+            if (!invalidTemplateNames.isEmpty()) {
+                LOGGER.debug("About to delete invalid cluster definition(s): [{}]", String.join(", ", invalidTemplateNames));
+                transactionService.required(() -> deleteMultiple(invalidTemplateNames, workspaceId));
+            }
+        } catch (TransactionExecutionException e) {
+            LOGGER.warn("Unable to delete invalid cluster definition(s) due to: {}", e.getMessage());
+        }
+    }
+
     public Set<ClusterTemplate> deleteMultiple(Set<String> names, Long workspaceId) {
-        return names.stream().map(name -> deleteByName(name, workspaceId)).collect(Collectors.toSet());
+        return names.stream().map(name -> deleteByName(name, workspaceId)).collect(toSet());
     }
 
     private String createCRN(String accountId) {

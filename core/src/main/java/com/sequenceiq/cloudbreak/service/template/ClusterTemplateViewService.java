@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.template;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -14,11 +16,11 @@ import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourc
 public class ClusterTemplateViewService extends AbstractWorkspaceAwareResourceService<ClusterTemplateView> {
 
     @Inject
-    private ClusterTemplateViewRepository clusterTemplateViewRepository;
+    private ClusterTemplateViewRepository repository;
 
     @Override
     protected WorkspaceResourceRepository<ClusterTemplateView, Long> repository() {
-        return clusterTemplateViewRepository;
+        return repository;
     }
 
     @Override
@@ -30,4 +32,9 @@ public class ClusterTemplateViewService extends AbstractWorkspaceAwareResourceSe
     protected void prepareCreation(ClusterTemplateView resource) {
         throw new BadRequestException("Cluster template creation is not supported from ClusterTemplateViewService");
     }
+
+    public Set<ClusterTemplateView> findAllActive(Long workspaceId) {
+        return repository.findAllActive(workspaceId);
+    }
+
 }

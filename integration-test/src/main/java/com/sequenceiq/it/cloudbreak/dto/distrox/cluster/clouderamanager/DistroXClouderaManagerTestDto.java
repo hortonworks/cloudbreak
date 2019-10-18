@@ -40,6 +40,11 @@ public class DistroXClouderaManagerTestDto extends AbstractCloudbreakTestDto<Clo
         return this;
     }
 
+    public DistroXClouderaManagerTestDto withoutRepository() {
+        getRequest().setRepository(null);
+        return this;
+    }
+
     public DistroXClouderaManagerTestDto withClouderaManagerProduct(String key) {
         DistroXClouderaManagerProductTestDto repositoryEntity = getTestContext().get(key);
         return withClouderaManagerProduct(repositoryEntity);

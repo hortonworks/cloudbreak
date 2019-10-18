@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.service;
 
+import static com.sequenceiq.environment.TempConstants.TEMP_WORKSPACE_ID;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
 
 import java.util.HashSet;
@@ -15,9 +16,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.exception.UnableToDeleteClusterDefinitionException;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
@@ -31,6 +34,7 @@ import reactor.bus.Event;
 
 @Service
 public class EnvironmentResourceDeletionService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentResourceDeletionService.class);
 
     private final SdxEndpoint sdxEndpoint;
@@ -43,13 +47,26 @@ public class EnvironmentResourceDeletionService {
 
     private final EventSender eventSender;
 
+    private final ClusterTemplateV4Endpoint clusterTemplateV4Endpoint;
+
     public EnvironmentResourceDeletionService(SdxEndpoint sdxEndpoint, DatalakeV4Endpoint datalakeV4Endpoint, DistroXV1Endpoint distroXV1Endpoint,
-            ThreadBasedUserCrnProvider userCrnProvider, EventSender eventSender) {
+            ThreadBasedUserCrnProvider userCrnProvider, EventSender eventSender, ClusterTemplateV4Endpoint clusterTemplateV4Endpoint) {
         this.sdxEndpoint = sdxEndpoint;
         this.datalakeV4Endpoint = datalakeV4Endpoint;
         this.distroXV1Endpoint = distroXV1Endpoint;
         this.userCrnProvider = userCrnProvider;
         this.eventSender = eventSender;
+        this.clusterTemplateV4Endpoint = clusterTemplateV4Endpoint;
+    }
+
+    public void deleteClusterDefinitionsOnCloudbreak(String environmentCrn) {
+        try {
+            clusterTemplateV4Endpoint.deleteMultiple(TEMP_WORKSPACE_ID, null, null, environmentCrn);
+        } catch (WebApplicationException | ProcessingException | UnableToDeleteClusterDefinitionException e) {
+            String message = String.format("Failed to delete cluster definition(s) from Cloudbreak due to: '%s' ", e.getMessage());
+            LOGGER.error(message, e);
+            throw new EnvironmentServiceException(message, e);
+        }
     }
 
     Set<String> getAttachedSdxClusterNames(Environment environment) {
