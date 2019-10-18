@@ -1,20 +1,33 @@
 {
-  "name": "CDP 1.1 - Data Engineering template for Azure",
+  "name": "CDP 1.2 - Operational Database template for Azure",
   "description": "",
-  "type": "DATAENGINEERING",
+  "type": "OTHER",
   "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+      "blueprintName": "CDP 1.2 - Operational Database: Apache HBase"
     },
     "instanceGroups": [
       {
         "name": "master",
+        "nodeCount": 2,
+        "recoveryMode": "MANUAL",
+        "securityGroup": {
+          "securityRules": [
+            {
+              "subnet": "0.0.0.0/0",
+              "ports": [
+                "22"
+              ],
+              "protocol": "tcp"
+            }
+          ]
+        },
         "template": {
           "attachedVolumes": [
             {
-              "size": 100,
               "count": 1,
+              "size": 100,
               "type": "Standard_LRS"
             }
           ],
@@ -28,32 +41,33 @@
           "instanceType": "Standard_D12_v2",
           "rootVolume": {
             "size": 50
-          }
+          },
+          "cloudPlatform": "AZURE"
         },
+        "type": "CORE"
+      },
+      {
+        "name": "gateway",
         "nodeCount": 1,
-        "type": "GATEWAY",
         "recoveryMode": "MANUAL",
         "securityGroup": {
           "securityRules": [
             {
               "subnet": "0.0.0.0/0",
               "ports": [
-                "9443",
+                "22",
                 "443",
-                "22"
+                "9443"
               ],
               "protocol": "tcp"
             }
           ]
-        }
-      },
-      {
-        "name": "compute",
+        },
         "template": {
           "attachedVolumes": [
             {
-              "size": 100,
               "count": 1,
+              "size": 100,
               "type": "Standard_LRS"
             }
           ],
@@ -67,10 +81,14 @@
           "instanceType": "Standard_D3_v2",
           "rootVolume": {
             "size": 50
-          }
+          },
+          "cloudPlatform": "AZURE"
         },
-        "nodeCount": 0,
-        "type": "CORE",
+        "type": "GATEWAY"
+      },
+      {
+        "name": "leader",
+        "nodeCount": 1,
         "recoveryMode": "MANUAL",
         "securityGroup": {
           "securityRules": [
@@ -82,15 +100,50 @@
               "protocol": "tcp"
             }
           ]
-        }
+        },
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "Standard_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D3_v2",
+          "rootVolume": {
+            "size": 50
+          },
+          "cloudPlatform": "AZURE"
+        },
+        "type": "CORE"
       },
       {
         "name": "worker",
+        "nodeCount": 3,
+        "recoveryMode": "MANUAL",
+        "securityGroup": {
+          "securityRules": [
+            {
+              "subnet": "0.0.0.0/0",
+              "ports": [
+                "22"
+              ],
+              "protocol": "tcp"
+            }
+          ]
+        },
         "template": {
           "attachedVolumes": [
             {
-              "size": 100,
               "count": 1,
+              "size": 100,
               "type": "Standard_LRS"
             }
           ],
@@ -104,22 +157,10 @@
           "instanceType": "Standard_D3_v2",
           "rootVolume": {
             "size": 50
-          }
+          },
+          "cloudPlatform": "AZURE"
         },
-        "nodeCount": 3,
-        "type": "CORE",
-        "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        }
+        "type": "CORE"
       }
     ]
   }

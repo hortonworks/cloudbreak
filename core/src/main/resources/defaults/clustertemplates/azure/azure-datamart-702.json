@@ -1,11 +1,11 @@
 {
-  "name": "CDP 1.1 - Data Mart template for Azure",
+  "name": "CDP 1.2 - Data Mart template for Azure",
   "description": "",
   "type": "DATAMART",
   "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "CDP 1.1 - Data Mart: Apache Impala, Hue"
+      "blueprintName": "CDP 1.2 - Data Mart: Apache Impala, Hue"
     },
     "instanceGroups": [
       {
