@@ -46,8 +46,7 @@ public class InternalCrnBuilder {
 
     public static boolean isInternalCrn(String crn) {
         Crn c = Crn.fromString(crn);
-        return INTERNAL_ACCOUNT.equals(c.getAccountId()) && INTERNAL_USER_CRN.equals(c.getResource());
-
+        return INTERNAL_USER_CRN.equals(c.getResource());
     }
 
     public String getInternalCrnForServiceAsString() {
