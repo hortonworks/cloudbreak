@@ -8,6 +8,7 @@ public enum HandleBarModelKey {
     COMPONENTS("components"),
     LDAP("ldap"),
     KERBEROS("kerberos"),
+    PRODUCTS("products"),
     GATEWAY("gateway"),
     RDS("rds"),
     FILESYSTEMCONFIGS("fileSystemConfigs"),
@@ -16,6 +17,7 @@ public enum HandleBarModelKey {
     BLUEPRINT("blueprint"),
     HDF("hdf"),
     GENERAL("general"),
+    EXPOSED_SERVICES("exposedServices"),
     HOST_GROUPS("host_groups"),
     DEFAULT_TAGS("default_tags"),
     STACK_VERSION("stack_version");

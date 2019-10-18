@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
 
 @Service
 public class ServiceEndpointCollector {
@@ -125,6 +127,23 @@ public class ServiceEndpointCollector {
             }
         }
         return Collections.emptyMap();
+    }
+
+    public Map<String, Collection<ClusterExposedServiceView>> prepareClusterExposedServicesViews(Cluster cluster, String managerIp) {
+        Map<String, Collection<ClusterExposedServiceView>> result = new HashMap<>();
+
+        for (Map.Entry<String, Collection<ClusterExposedServiceV4Response>> entry : prepareClusterExposedServices(cluster, managerIp).entrySet()) {
+            Set<ClusterExposedServiceView> views = new HashSet<>();
+            for (ClusterExposedServiceV4Response response : entry.getValue()) {
+                views.add(new ClusterExposedServiceView(
+                        response.getServiceName(),
+                        response.getDisplayName(),
+                        response.getKnoxService(),
+                        response.getServiceUrl()));
+            }
+            result.put(entry.getKey(), views);
+        }
+        return result;
     }
 
     private void setImpalaDebugUIToCoordinator(Cluster cluster, Map<String, List<String>> privateIps) {
