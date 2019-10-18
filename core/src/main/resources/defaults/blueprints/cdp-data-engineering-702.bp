@@ -57,6 +57,10 @@
             "base": true,
             "configs": [
               {
+		            "name": "resourcemanager_config_safety_valve",
+		            "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>file</value></property>"
+		          },
+              {
                 "name": "yarn_resourcemanager_scheduler_class",
                 "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
               },
