@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler;
 
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_S3GUARD_TABLE_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINISH_ENV_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_CLUSTER_DEFINITION_CLEANUP_EVENT;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,7 +119,7 @@ public class S3GuardTableDeleteHandler extends EventSenderAwareHandler<Environme
                 .withResourceId(environmentDto.getResourceId())
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentDto.getResourceCrn())
-                .withSelector(FINISH_ENV_DELETE_EVENT.selector())
+                .withSelector(START_CLUSTER_DEFINITION_CLEANUP_EVENT.selector())
                 .build();
     }
 

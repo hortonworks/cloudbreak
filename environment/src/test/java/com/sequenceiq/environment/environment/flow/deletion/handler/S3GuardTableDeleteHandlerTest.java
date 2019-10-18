@@ -2,7 +2,7 @@ package com.sequenceiq.environment.environment.flow.deletion.handler;
 
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_S3GUARD_TABLE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FAILED_ENV_DELETE_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINISH_ENV_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_CLUSTER_DEFINITION_CLEANUP_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -216,7 +216,7 @@ class S3GuardTableDeleteHandlerTest {
         assertThat(envDeleteEvent.getResourceName()).isEqualTo(ENVIRONMENT_NAME);
         assertThat(envDeleteEvent.getResourceCrn()).isEqualTo(ENVIRONMENT_CRN);
         assertThat(envDeleteEvent.getResourceId()).isEqualTo(ENVIRONMENT_ID);
-        assertThat(envDeleteEvent.selector()).isEqualTo(FINISH_ENV_DELETE_EVENT.selector());
+        assertThat(envDeleteEvent.selector()).isEqualTo(START_CLUSTER_DEFINITION_CLEANUP_EVENT.selector());
 
         assertThat(headersArgumentCaptor.getValue()).isSameAs(headers);
     }
