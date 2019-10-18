@@ -42,6 +42,12 @@ public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
 
     private String creator;
 
+    private Long created = System.currentTimeMillis();
+
+    public Long getCreated() {
+        return created;
+    }
+
     public String getResourceCrn() {
         return resourceCrn;
     }

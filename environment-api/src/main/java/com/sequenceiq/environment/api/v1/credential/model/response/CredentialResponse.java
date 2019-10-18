@@ -29,6 +29,17 @@ public class CredentialResponse extends CredentialBase {
     @ApiModelProperty(CredentialModelDescription.CREATOR)
     private String creator;
 
+    @ApiModelProperty(CredentialModelDescription.CREATED)
+    private Long created;
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
+    }
+
     public AzureCredentialResponseParameters getAzure() {
         return azure;
     }

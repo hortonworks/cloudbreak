@@ -26,6 +26,7 @@ public class CredentialModelDescription {
     public static final String VERIFICATION_STATUS_TEXT = "verification status text for credential, if empty then there is no verification issue";
     public static final String CREATOR = "crn of the creator";
     public static final String AWS_ROLE_ARN = "the role ARN of the credential";
+    public static final String CREATED = "creation time of the credential in long";
 
     private CredentialModelDescription() {
     }

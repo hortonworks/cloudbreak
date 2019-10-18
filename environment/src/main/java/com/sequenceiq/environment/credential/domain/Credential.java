@@ -57,6 +57,12 @@ public class Credential implements Serializable, AuthResource, AccountIdAwareRes
     @Column
     private String verificationStatusText;
 
+    private Long created = System.currentTimeMillis();
+
+    public Long getCreated() {
+        return created;
+    }
+
     public Long getId() {
         return id;
     }
