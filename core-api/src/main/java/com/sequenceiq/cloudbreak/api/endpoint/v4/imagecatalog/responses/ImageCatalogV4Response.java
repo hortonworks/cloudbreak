@@ -29,6 +29,17 @@ public class ImageCatalogV4Response extends ImageCatalogV4Base {
     @ApiModelProperty(ModelDescriptions.CRN)
     private String crn;
 
+    @ApiModelProperty(ModelDescriptions.CREATED)
+    private Long created;
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
+    }
+
     public String getCrn() {
         return crn;
     }

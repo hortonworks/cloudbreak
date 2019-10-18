@@ -75,6 +75,7 @@ public class CredentialToCredentialV1ResponseConverter {
             response.setCrn(source.getResourceCrn());
         }
         response.setCreator(source.getCreator());
+        response.setCreated(source.getCreated());
         response.setDescription(source.getDescription() == null ? "" : source.getDescription());
         return response;
     }
