@@ -16,11 +16,11 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.tenant.TenantService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -92,8 +92,8 @@ public class UserService {
         return userRepository.findById(id);
     }
 
-    public Optional<User> getByUserId(String userId) {
-        return userRepository.findByUserId(userId);
+    public Optional<User> getByUserIdAndTenant(String userId, String tenant) {
+        return userRepository.findByTenantNameAndUserId(tenant, userId);
     }
 
     public Set<User> getByUsersIds(Set<String> userIds) {
@@ -101,9 +101,11 @@ public class UserService {
     }
 
     public Set<User> getAll(CloudbreakUser cloudbreakUser) {
-        User user = userRepository.findByUserId(cloudbreakUser.getUserId())
-                .orElseThrow(NotFoundException.notFound("User", cloudbreakUser.getUserId()));
-        return userRepository.findAllByTenant(user.getTenant());
+        Optional<Tenant> tenant = tenantService.findByName(cloudbreakUser.getTenant());
+        if (tenant.isPresent()) {
+            return userRepository.findAllByTenant(tenant.get());
+        }
+        return Sets.newHashSet();
     }
 
     public String evictCurrentUserDetailsForLoggedInUser() {

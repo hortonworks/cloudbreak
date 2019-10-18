@@ -20,8 +20,6 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 @DisableHasPermission
 public interface UserRepository extends DisabledBaseRepository<User, Long> {
 
-    Optional<User> findByUserId(String userId);
-
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.tenant t LEFT JOIN FETCH u.userPreferences WHERE u.userId = :userId AND t.name = :tenantName")
     Optional<User> findByTenantNameAndUserId(@Param("tenantName") String tenantName, @Param("userId") String userId);
 

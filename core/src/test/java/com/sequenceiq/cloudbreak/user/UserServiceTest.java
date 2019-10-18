@@ -84,7 +84,6 @@ public class UserServiceTest {
         when(tenantService.findByName(anyString())).thenReturn(Optional.empty());
         when(tenantService.save(any())).thenReturn(createTenant());
         when(workspaceService.create(any())).thenReturn(createWorkspace());
-        when(userPreferencesService.save(any())).thenReturn(createUserPref());
 
         when(userRepository.findByTenantNameAndUserId(anyString(), anyString())).thenAnswer(new Answer() {
             private int count;
