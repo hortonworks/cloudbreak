@@ -123,13 +123,17 @@
             <value>true</value>
         </param>
         <param>
-	    <!-- 24 hours in milliseconds = 86400000 -->
+            <!-- 24 hours in milliseconds = 86400000 -->
             <name>knoxsso.token.ttl</name>
             <value>86400000</value>
         </param>
         <param>
            <name>knoxsso.redirect.whitelist.regex</name>
-           <value>.*</value>
+           {% if salt['pillar.get']('gateway:userfacingdomain') is defined and salt['pillar.get']('gateway:userfacingdomain')|length > 1 %}
+           <value>^\/.*$;^https?:\/\/(.+\.{{ salt['pillar.get']('gateway:userfacingdomain') }}):[0-9]+\/?.*$</value>
+           {% else %}
+           <value>^.*$</value>
+           {% endif %}
         </param>
     </service>
 

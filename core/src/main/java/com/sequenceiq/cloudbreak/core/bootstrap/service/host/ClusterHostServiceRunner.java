@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -570,8 +571,13 @@ public class ClusterHostServiceRunner {
             gateway.put("userfacingkey", cluster.getStack().getSecurityConfig().getUserFacingKey());
             gateway.put("userfacingcert", cluster.getStack().getSecurityConfig().getUserFacingCert());
         }
-        if (StringUtils.isNotEmpty(cluster.getFqdn())) {
-            gateway.put("userfacingfqdn", cluster.getFqdn());
+        String fqdn = cluster.getFqdn();
+        if (StringUtils.isNotEmpty(fqdn)) {
+            gateway.put("userfacingfqdn", fqdn);
+            String[] fqdnParts = fqdn.split("\\.", 2);
+            if (fqdnParts.length == 2) {
+                gateway.put("userfacingdomain", Pattern.quote(fqdnParts[1]));
+            }
         }
     }
 
