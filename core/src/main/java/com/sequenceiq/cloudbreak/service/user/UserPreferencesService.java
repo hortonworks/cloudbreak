@@ -32,12 +32,6 @@ public class UserPreferencesService {
     @Inject
     private TransactionService transactionService;
 
-    public Optional<UserPreferences> getByUserId(String userId) {
-        User user = userService.getByUserId(userId)
-                .orElseThrow(NotFoundException.notFound("User", userId));
-        return getByUser(user);
-    }
-
     public UserPreferences getWithExternalId(User user) {
         LOGGER.debug("Get or create user preferences with external id for user '{}'", user.getUserId());
         UserPreferences result;
