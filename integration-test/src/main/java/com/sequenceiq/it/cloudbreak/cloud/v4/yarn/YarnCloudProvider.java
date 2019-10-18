@@ -28,7 +28,6 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTest
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -151,15 +150,9 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
-        imageCatalog.withUrl(yarnProperties.getBaseimage().getImageCatalogUrl());
-        return imageCatalog;
-    }
-
-    @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
         return imageSettings.withImageId(yarnProperties.getBaseimage().getImageId())
-                .withImageCatalog(imageSettings.getTestContext().given(ImageSettingsTestDto.class).getName());
+                .withImageCatalog(commonCloudProperties().getImageCatalogName());
     }
 
     @Override

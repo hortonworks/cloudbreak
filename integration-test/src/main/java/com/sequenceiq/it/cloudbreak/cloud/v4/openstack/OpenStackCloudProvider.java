@@ -12,6 +12,7 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.K
 import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.OpenstackParameters;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
@@ -181,5 +182,10 @@ public class OpenStackCloudProvider extends AbstractCloudProvider {
     @Override
     public String getInstanceProfile() {
         return null;
+    }
+
+    @Override
+    public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
+        return imageSettings.withImageCatalog(commonCloudProperties().getImageCatalogName());
     }
 }

@@ -32,7 +32,6 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTem
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
-import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -265,14 +264,9 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
-        imageCatalog.withUrl(awsProperties.getBaseimage().getImageCatalogUrl());
-        return imageCatalog;
-    }
-
-    @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return imageSettings.withImageId(awsProperties.getBaseimage().getImageId())
-                .withImageCatalog(imageSettings.getTestContext().given(ImageSettingsTestDto.class).getName());
+        return imageSettings
+                .withImageId(awsProperties.getBaseimage().getImageId())
+                .withImageCatalog(commonCloudProperties().getImageCatalogName());
     }
 }

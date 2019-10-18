@@ -199,8 +199,6 @@ public class AwsProperties {
     }
 
     public static class Baseimage {
-        private String imageCatalogUrl;
-
         private String imageId;
 
         public String getImageId() {
@@ -209,14 +207,6 @@ public class AwsProperties {
 
         public void setImageId(String imageId) {
                 this.imageId = imageId;
-            }
-
-        public String getImageCatalogUrl() {
-                return imageCatalogUrl;
-            }
-
-        public void setImageCatalogUrl(String imageCatalogUrl) {
-                this.imageCatalogUrl = imageCatalogUrl;
             }
     }
 

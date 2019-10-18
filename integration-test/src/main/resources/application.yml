@@ -89,6 +89,7 @@ integrationtest:
   subnetCidr: 10.0.0.0/16
   accessCidr: 0.0.0.0/0
   imageCatalogName: cloudbreak-default
+  imageCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-dev-cb-image-catalog.json
   gatewayPort: null
   defaultCredentialDescription: "autotesting credential default description."
   tags:
@@ -137,7 +138,6 @@ integrationtest:
       volumeType: gp2
     baseimage:
       imageId:
-      imageCatalogUrl:
     cloudstorage:
       s3:
         instanceProfile:
@@ -231,8 +231,7 @@ integrationtest:
       volumeCount: 0
     queue: HDP_2_6_0_0-integration-tests
     baseimage:
-      imageCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json
-      imageId: 16ad7759-83b1-42aa-aadf-0e3a6e7b5444
+      imageId:
 
   # mock parameters
   mock:
