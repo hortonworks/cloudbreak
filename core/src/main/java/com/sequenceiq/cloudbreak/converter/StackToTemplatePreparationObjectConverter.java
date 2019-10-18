@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -34,6 +37,7 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
@@ -49,7 +53,9 @@ import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfiguration
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
+import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -113,15 +119,26 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Inject
+    private ServiceEndpointCollector serviceEndpointCollector;
+
+    @Inject
+    private StackUtil stackUtil;
+
     @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
+            Map<String, Collection<ClusterExposedServiceView>> views = serviceEndpointCollector
+                    .prepareClusterExposedServicesViews(source.getCluster(),
+                            stackUtil.extractClusterManagerAddress(source));
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
             Credential credential = credentialConverter.convert(environment.getCredential());
             Cluster cluster = clusterService.getById(source.getCluster().getId());
             FileSystem fileSystem = cluster.getFileSystem();
             Optional<LdapView> ldapView = ldapConfigService.get(source.getEnvironmentCrn(), source.getName());
             StackRepoDetails hdpRepo = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
+            ClouderaManagerRepo cm = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
+            List<ClouderaManagerProduct> products = clusterComponentConfigProvider.getClouderaManagerProductDetails(cluster.getId());
             String stackRepoDetailsHdpVersion = hdpRepo != null ? hdpRepo.getHdpVersion() : null;
             Map<String, List<InstanceMetaData>> groupInstances = instanceGroupMetadataCollector.collectMetadata(source);
             String blueprintText = cluster.getBlueprint().getBlueprintText();
@@ -150,6 +167,8 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withLdapConfig(ldapView.orElse(null))
                     .withHdfConfigs(hdfConfigs)
                     .withKerberosConfig(kerberosConfigService.get(source.getEnvironmentCrn(), source.getName()).orElse(null))
+                    .withProductDetails(cm, products)
+                    .withExposedServices(views)
                     .withDefaultTags(defaultCostTaggingService.prepareDefaultTags(
                             source.getCreator().getUserName(),
                             new HashMap<>(),

@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.template;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -11,6 +14,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -26,9 +31,11 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
+import com.sequenceiq.cloudbreak.template.views.ProductDetailsView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
 public class TemplatePreparationObject {
@@ -67,6 +74,10 @@ public class TemplatePreparationObject {
 
     private final Optional<PlacementView> placementView;
 
+    private final ProductDetailsView productDetailsView;
+
+    private final Map<String, Collection<ClusterExposedServiceView>> exposedServices;
+
     private TemplatePreparationObject(Builder builder) {
         cloudPlatform = builder.cloudPlatform;
         rdsConfigs = builder.rdsConfigs.stream().collect(Collectors.toMap(
@@ -88,6 +99,8 @@ public class TemplatePreparationObject {
         accountMappingView = builder.accountMappingView;
         placementView = builder.placementView;
         defaultTags = builder.defaultTags;
+        productDetailsView = builder.productDetailsView;
+        exposedServices = builder.exposedServices;
     }
 
     public Stream<HostgroupView> getHostGroupsWithComponent(String component) {
@@ -169,6 +182,14 @@ public class TemplatePreparationObject {
         return defaultTags;
     }
 
+    public ProductDetailsView getProductDetailsView() {
+        return productDetailsView;
+    }
+
+    public Map<String, Collection<ClusterExposedServiceView>> getExposedServices() {
+        return exposedServices;
+    }
+
     public static class Builder {
 
         private CloudPlatform cloudPlatform;
@@ -204,6 +225,10 @@ public class TemplatePreparationObject {
         private AccountMappingView accountMappingView;
 
         private Optional<PlacementView> placementView = Optional.empty();
+
+        private ProductDetailsView productDetailsView;
+
+        private Map<String, Collection<ClusterExposedServiceView>> exposedServices = new HashMap<>();
 
         public static Builder builder() {
             return new Builder();
@@ -269,6 +294,16 @@ public class TemplatePreparationObject {
 
         public Builder withKerberosConfig(KerberosConfig kerberosConfig) {
             this.kerberosConfig = Optional.ofNullable(kerberosConfig);
+            return this;
+        }
+
+        public Builder withProductDetails(ClouderaManagerRepo cm, List<ClouderaManagerProduct> products) {
+            this.productDetailsView = new ProductDetailsView(cm, products == null ? new ArrayList<>() : products);
+            return this;
+        }
+
+        public Builder withExposedServices(Map<String, Collection<ClusterExposedServiceView>> exposedServices) {
+            this.exposedServices = exposedServices == null ? new HashMap<>() : exposedServices;
             return this;
         }
 
