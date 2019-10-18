@@ -34,10 +34,9 @@ public class VaultPathBuilderV1Test {
     }
 
     @Test
-    public void testVaultServicePrincipalKeytabPathGenerateClusterId() throws Exception {
-        Assertions.assertEquals("accountId/ServiceKeytab/keytab/12345-6789/accountId-12345-6789/host1/service1",
+    public void testVaultServicePrincipalKeytabPathWithoutClusterId() throws Exception {
+        Assertions.assertEquals("accountId/ServiceKeytab/keytab/12345-6789/host1/service1",
                 new VaultPathBuilder()
-                        .enableGeneratingClusterIdIfNotPresent()
                         .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                         .withAccountId(ACCOUNT_ID)
                         .withSubType(VaultPathBuilder.SecretSubType.KEYTAB)
@@ -48,10 +47,9 @@ public class VaultPathBuilderV1Test {
     }
 
     @Test
-    public void testVaultServicePrincipalPathGenerateClusterId() throws Exception {
-        Assertions.assertEquals("accountId/ServiceKeytab/serviceprincipal/12345-6789/accountId-12345-6789/host1/service1",
+    public void testVaultServicePrincipalPathWithoutClusterId() throws Exception {
+        Assertions.assertEquals("accountId/ServiceKeytab/serviceprincipal/12345-6789/host1/service1",
                 new VaultPathBuilder()
-                        .enableGeneratingClusterIdIfNotPresent()
                         .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                         .withAccountId(ACCOUNT_ID)
                         .withSubType(VaultPathBuilder.SecretSubType.SERVICE_PRINCIPAL)
@@ -75,10 +73,9 @@ public class VaultPathBuilderV1Test {
     }
 
     @Test
-    public void testVaultHostPrincipalPathGenerateClusterId() throws Exception {
-        Assertions.assertEquals("accountId/HostKeytab/keytab/12345-6789/accountId-12345-6789/host1",
+    public void testVaultHostPrincipalPathWithoutClusterId() throws Exception {
+        Assertions.assertEquals("accountId/HostKeytab/keytab/12345-6789/host1",
                 new VaultPathBuilder()
-                        .enableGeneratingClusterIdIfNotPresent()
                         .withSecretType(VaultPathBuilder.SecretType.HOST_KEYTAB)
                         .withAccountId(ACCOUNT_ID)
                         .withSubType(VaultPathBuilder.SecretSubType.KEYTAB)
@@ -101,10 +98,9 @@ public class VaultPathBuilderV1Test {
     }
 
     @Test
-    public void testVaultHostPathGenerateClusterId() throws Exception {
-        Assertions.assertEquals("accountId/ServiceKeytab/keytab/12345-6789/accountId-12345-6789/host1/",
+    public void testVaultHostPathWithoutClusterId() throws Exception {
+        Assertions.assertEquals("accountId/ServiceKeytab/keytab/12345-6789/host1/",
                 new VaultPathBuilder()
-                        .enableGeneratingClusterIdIfNotPresent()
                         .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                         .withAccountId(ACCOUNT_ID)
                         .withSubType(VaultPathBuilder.SecretSubType.KEYTAB)
@@ -126,18 +122,6 @@ public class VaultPathBuilderV1Test {
     }
 
     @Test
-    public void testVaultClusterCrnPathGenerateClusterId() throws Exception {
-        Assertions.assertEquals("accountId/ServiceKeytab/keytab/12345-6789/accountId-12345-6789/",
-                new VaultPathBuilder()
-                        .enableGeneratingClusterIdIfNotPresent()
-                        .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
-                        .withAccountId(ACCOUNT_ID)
-                        .withSubType(VaultPathBuilder.SecretSubType.KEYTAB)
-                        .withEnvironmentCrn(ENVIRONMENT_ID)
-                        .build());
-    }
-
-    @Test
     public void testVaultEnvironmentCrnPath() throws Exception {
         Assertions.assertEquals("accountId/ServiceKeytab/keytab/12345-6789/",
                 new VaultPathBuilder()
@@ -150,9 +134,8 @@ public class VaultPathBuilderV1Test {
 
     @Test
     public void testVaultClusterCrnPathNullClusterId() throws Exception {
-        Assertions.assertEquals("accountId/ServiceKeytab/keytab/12345-6789/accountId-12345-6789/",
+        Assertions.assertEquals("accountId/ServiceKeytab/keytab/12345-6789/",
                 new VaultPathBuilder()
-                        .enableGeneratingClusterIdIfNotPresent()
                         .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                         .withAccountId(ACCOUNT_ID)
                         .withSubType(VaultPathBuilder.SecretSubType.KEYTAB)

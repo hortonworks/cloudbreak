@@ -16,6 +16,7 @@ public class CmServiceKeytabRequestFactory {
     public ServiceKeytabRequest create(Stack stack, GatewayConfig primaryGatewayConfig) {
         ServiceKeytabRequest request = new ServiceKeytabRequest();
         request.setEnvironmentCrn(stack.getEnvironmentCrn());
+        request.setClusterCrn(stack.getResourceCrn());
         String fqdn = primaryGatewayConfig.getHostname();
         request.setServerHostName(fqdn);
         String hostname = StringUtils.substringBefore(fqdn, ".");
