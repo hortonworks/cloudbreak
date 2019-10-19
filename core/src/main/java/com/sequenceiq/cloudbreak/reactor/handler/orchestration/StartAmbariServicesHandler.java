@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartClusterManagerServicesSuccess;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 import reactor.bus.Event;
@@ -38,7 +38,7 @@ public class StartAmbariServicesHandler implements EventHandler<StartAmbariServi
         Selectable response;
         try {
             clusterServiceRunner.runAmbariServices(stackId);
-            response = new StartAmbariServicesSuccess(stackId);
+            response = new StartClusterManagerServicesSuccess(stackId);
         } catch (Exception e) {
             LOGGER.info("Start ambari services failed!", e);
             response = new StartAmbariServicesFailed(stackId, e);

@@ -76,7 +76,6 @@ distrox:
     ssotype: SSO_PROVIDER
 
 cb:
-  uaa.startup.timeout.sec: 300
   enabledplatforms: AZURE,AWS,GCP,OPENSTACK
   platform.default.rootVolumeSize:
     AWS: 50
@@ -151,7 +150,6 @@ cb:
                               p3.8xlarge,
                               r5d.4xlarge
     hostkey.verify: false
-    external.id: provision-ambari
     role.session.name: hadoop-provisioning
     cf.template.new.path: templates/aws-cf-stack.ftl
     cf.network.template.path: templates/aws-cf-network.ftl
@@ -207,10 +205,6 @@ cb:
                 CDP 1.2 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-702;
                 CDP 1.2 - Data Engineering Hue HA: Apache Spark, Apache Hive, Hue, Apache Oozie=cdp-data-engineering-hueha-702;
 
-    ambari:
-      defaults:
-      internal:
-
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
   custom.user.data: |
@@ -224,12 +218,6 @@ cb:
       starttls.enable: true
   success.cluster.installer.mail.template.path: templates/cluster-installer-mail-success.ftl
   failed.cluster.installer.mail.template.path: templates/cluster-installer-mail-fail.ftl
-
-  docker:
-    container:
-      yarn.ambari.server: hortonworks/yarn-cloudbreak-ambari-server:2.5.0-v1
-      yarn.ambari.agent: hortonworks/yarn-cloudbreak-ambari-agent:2.5.0-v1
-      yarn.ambari.db: hortonworks/yarn-cloudbreak-postgres:9.4.1
 
   arm:
     template.path: templates/arm-v2.ftl
@@ -432,248 +420,6 @@ cb:
             redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1570147/cdh/7.x/parcels/
             centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1570147/cdh/7.x/parcels/
 
-
-  ambari:
-    entries:
-      2.6:
-        version: 2.6.2.2
-        repo:
-          redhat6:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.2.2
-            gpgkey: http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
-          redhat7:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.2
-            gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
-          debian9:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/debian9/2.x/updates/2.6.2.2
-          ubuntu16:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.6.2.2
-          sles12:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.6.2.2
-            gpgkey: http://public-repo-1.hortonworks.com/ambari/sles12/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
-      2.7:
-        version: 2.7.3.0
-        repo:
-          redhat7:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.3.0
-            gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.3.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
-          debian9:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/debian9/2.x/updates/2.7.3.0
-          ubuntu16:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.7.3.0
-          ubuntu18:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/ubuntu18/2.x/updates/2.7.3.0
-          sles12:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.7.3.0
-            gpgkey: http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.7.3.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
-          amazonlinux2:
-            baseurl: http://public-repo-1.hortonworks.com/ambari/amazonlinux2/2.x/updates/2.7.3.0
-            gpgkey: http://public-repo-1.hortonworks.com/ambari/amazonlinux2/2.x/updates/2.7.3.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
-    database:
-      port: 5432
-      user: ambari
-      db: ambari
-    ldaps:
-      certPath: /etc/ambari-server/cert
-      keystorePath: /var/lib/ambari-server/keys
-      keystorePassword: mypass
-
-  hdp:
-    entries:
-      2.5:
-        version: 2.5.5.0
-        minAmbari: 2.6
-        repo:
-          stack:
-            repoid: HDP-2.5
-            redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.5.0
-            redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.5.0
-            debian9: http://public-repo-1.hortonworks.com/HDP/debian9/2.x/updates/2.5.5.0
-            ubuntu16: http://public-repo-1.hortonworks.com/HDP/ubuntu16/2.x/updates/2.5.5.0
-            repository-version: 2.5.3.0-37
-            vdf-redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml
-            vdf-redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml
-            vdf-debian9: http://public-repo-1.hortonworks.com/HDP/debian9/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml
-            vdf-ubuntu16: http://public-repo-1.hortonworks.com/HDP/ubuntu16/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml
-          util:
-            repoid: HDP-UTILS-1.1.0.21
-            redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
-            redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7
-            debian9: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/debian9
-            ubuntu16: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu16
-      2.6:
-        version: 2.6.5.0
-        minAmbari: 2.6
-        repo:
-          stack:
-            repoid: HDP-2.6
-            redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.5.0
-            redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0
-            debian9: http://public-repo-1.hortonworks.com/HDP/debian9/2.x/updates/2.6.5.0
-            ubuntu16: http://public-repo-1.hortonworks.com/HDP/ubuntu16/2.x/updates/2.6.5.0
-            sles12: http://public-repo-1.hortonworks.com/HDP/sles12/2.x/updates/2.6.5.0
-            repository-version: 2.6.5.0-292
-            vdf-redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml
-            vdf-redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml
-            vdf-debian9: http://public-repo-1.hortonworks.com/HDP/debian9/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml
-            vdf-ubuntu16: http://public-repo-1.hortonworks.com/HDP/ubuntu16/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml
-            vdf-sles12: http://public-repo-1.hortonworks.com/HDP/sles12/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml
-          util:
-            repoid: HDP-UTILS-1.1.0.22
-            redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos6
-            redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7
-            debian9: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/debian9
-            ubuntu16: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu16
-            sles12: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/sles12
-      3.1:
-        version: 3.1.0.0
-        minAmbari: 2.7
-        repo:
-          stack:
-            repoid: HDP-3.1
-            redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/3.x/updates/3.1.0.0
-            debian9: http://public-repo-1.hortonworks.com/HDP/debian9/3.x/updates/3.1.0.0
-            ubuntu16: http://public-repo-1.hortonworks.com/HDP/ubuntu16/3.x/updates/3.1.0.0
-            ubuntu18: http://public-repo-1.hortonworks.com/HDP/ubuntu18/3.x/updates/3.1.0.0
-            sles12: http://public-repo-1.hortonworks.com/HDP/sles12/3.x/updates/3.1.0.0
-            amazonlinux2: http://public-repo-1.hortonworks.com/HDP/amazonlinux2/3.x/updates/3.1.0.0
-            repository-version: 3.1.0.0-78
-            vdf-redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml
-            vdf-debian9: http://public-repo-1.hortonworks.com/HDP/debian9/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml
-            vdf-ubuntu16: http://public-repo-1.hortonworks.com/HDP/ubuntu16/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml
-            vdf-ubuntu18: http://public-repo-1.hortonworks.com/HDP/ubuntu18/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml
-            vdf-sles12: http://public-repo-1.hortonworks.com/HDP/sles12/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml
-            vdf-amazonlinux2: http://public-repo-1.hortonworks.com/HDP/amazonlinux2/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml
-          util:
-            repoid: HDP-UTILS-1.1.0.22
-            redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7
-            debian9: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/debian9
-            ubuntu16: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu16
-            ubuntu18: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu18
-            sles12: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/sles12
-            amazonlinux2: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/amazonlinux2
-  hdf:
-    entries:
-      3.1:
-        version: 3.1.2.0-7
-        min-ambari: 2.6
-        repo:
-          stack:
-            repoid: HDF-3.1
-            redhat6: http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.1.2.0
-            redhat7: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.2.0
-            debian9: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.1.2.0
-            ubuntu16: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.1.2.0
-            sles12: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.1.2.0
-            repository-version: 3.1.2.0-7
-            vdf-redhat6: http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.1.2.0/HDF-3.1.2.0-7.xml
-            vdf-redhat7: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.2.0/HDF-3.1.2.0-7.xml
-            vdf-debian9: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.1.2.0/HDF-3.1.2.0-7.xml
-            vdf-ubuntu16: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.1.2.0/HDF-3.1.2.0-7.xml
-            vdf-sles12: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.1.2.0/HDF-3.1.2.0-7.xml
-          util:
-            repoid: HDP-UTILS-1.1.0.22
-            redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos6
-            redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7
-            debian9: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/debian9
-            ubuntu16: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu16
-            sles12: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/sles12
-          mpacks:
-            redhat6:
-              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.1.2.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.2.0-7.tar.gz
-                stackDefault: true
-            redhat7:
-              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.2.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.2.0-7.tar.gz
-                stackDefault: true
-            debian9:
-              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.1.2.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.2.0-7.tar.gz
-                stackDefault: true
-            ubuntu16:
-              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.1.2.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.2.0-7.tar.gz
-                stackDefault: true
-            sles12:
-              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.1.2.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.2.0-7.tar.gz
-                stackDefault: true
-      3.2:
-        version: 3.2.0.0-520
-        min-ambari: 2.7
-        repo:
-          stack:
-            repoid: HDF-3.2
-            redhat7: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.0
-            debian9: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.2.0.0
-            ubuntu16: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.2.0.0
-            sles12: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.2.0.0
-            amazonlinux2: http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.2.0.0
-            repository-version: 3.2.0.0-520
-            vdf-redhat7: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.0/HDF-3.2.0.0-520.xml
-            vdf-debian9: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.2.0.0/HDF-3.2.0.0-520.xml
-            vdf-ubuntu16: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.2.0.0/HDF-3.2.0.0-520.xml
-            vdf-sles12: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.2.0.0/HDF-3.2.0.0-520.xml
-            vdf-amazonlinux2: http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.2.0.0/HDF-3.2.0.0-520.xml
-          util:
-            repoid: HDP-UTILS-1.1.0.22
-            redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7
-            debian9: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/debian9
-            ubuntu16: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu16
-            sles12: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/sles12
-            amazonlinux2: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/amazonlinux2
-          mpacks:
-            redhat7:
-              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz
-                stackDefault: true
-            debian9:
-              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz
-                stackDefault: true
-            ubuntu16:
-              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz
-                stackDefault: true
-            sles12:
-              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz
-                stackDefault: true
-            amazonlinux2:
-              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz
-                stackDefault: true
-      3.3:
-        version: 3.3.1.0-10
-        min-ambari: 2.7
-        repo:
-          stack:
-            repoid: HDF-3.3
-            redhat7: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.3.1.0
-            debian9: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.3.1.0
-            ubuntu16: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.3.1.0
-            sles12: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.3.1.0
-            amazonlinux2: http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.3.1.0
-            repository-version: 3.3.1.0-10
-            vdf-redhat7: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.3.1.0/HDF-3.3.1.0-10.xml
-            vdf-debian9: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.3.1.0/HDF-3.3.1.0-10.xml
-            vdf-ubuntu16: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.3.1.0/HDF-3.3.1.0-10.xml
-            vdf-sles12: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.3.1.0/HDF-3.3.1.0-10.xml
-            vdf-amazonlinux2: http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.3.1.0/HDF-3.3.1.0-10.xml
-          util:
-            repoid: HDP-UTILS-1.1.0.22
-            redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7
-            debian9: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/debian9
-            ubuntu16: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu16
-            sles12: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/sles12
-            amazonlinux2: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/amazonlinux2
-          mpacks:
-            redhat7:
-              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz
-                stackDefault: true
-            debian9:
-              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz
-                stackDefault: true
-            ubuntu16:
-              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz
-                stackDefault: true
-            sles12:
-              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz
-                stackDefault: true
-            amazonlinux2:
-              - mpackUrl: http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz
-                stackDefault: true
   workspace.service.cache.ttl: 15
 
   structuredevent:
@@ -703,57 +449,6 @@ cb:
           - name: cloudera-manager-agent
             pattern: "(.*)-.*"
         prewarmed: true
-
-# configuration for BlueprintPortConfigCollector.java
-blueprintServicePorts:
-  - service: HIVE_SERVER
-    configName: hive-site
-    portKey: hive.server2.thrift.http.port
-  - service: HIVE_SERVER_INTERACTIVE
-    configName: hive-interactive-site
-    portKey: hive.server2.thrift.http.port
-  - service: SPARK_HISTORY_SERVER
-    configName: spark-defaults
-    portKey: spark.history.ui.port
-  - service: ZEPPELIN
-    configName: zeppelin-config
-    portKey: zeppelin.server.port
-  - service: WEBHDFS
-    configName: hdfs-site
-    host-key: dfs.namenode.http-address
-  - service: RESOURCEMANAGER_WEB
-    configName: yarn-site
-    hostKey: yarn.resourcemanager.webapp.address
-  - service: RANGER
-    configName: ranger-admin-site
-    portKey: ranger.service.http.port
-
-# service discovery configuration for ServiceDescriptorDefinitionProvider.java
-serviceDescriptorDefinitionMap:
-  RANGER:
-    serviceName: RANGER
-    blueprintParamKeys:
-      - ranger-admin-site/ranger.service.http.port
-      - ranger.audit.solr.zookeepers
-      - ranger_admin_username
-      - policymgr_external_url
-    blueprintSecretParamKeys:
-      - ranger.admin.password
-    componentHosts:
-      - RANGER_ADMIN
-  ATLAS:
-    serviceName: ATLAS
-    blueprintParamKeys:
-      - atlas.rest.address
-      - atlas.kafka.bootstrap.servers
-      - atlas.kafka.security.protocol
-      - atlas.jaas.KafkaClient.option.serviceName
-      - atlas.kafka.sasl.kerberos.service.name
-      - atlas.kafka.zookeeper.connect
-  YARN:
-    serviceName: YARN
-    blueprintParamKeys:
-      - yarn.resourcemanager.webapp.address
 
 clusterProxy:
   url: http://localhost:10080/cluster-proxy

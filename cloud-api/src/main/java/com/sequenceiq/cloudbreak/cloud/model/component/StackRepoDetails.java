@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model.component;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,8 +32,6 @@ public class StackRepoDetails implements Serializable {
     private boolean verify = true;
 
     private String hdpVersion;
-
-    private List<ManagementPackComponent> mpacks = new ArrayList<>();
 
     public Map<String, String> getStack() {
         return stack;
@@ -88,14 +84,6 @@ public class StackRepoDetails implements Serializable {
 
     public void setEnableGplRepo(boolean enableGplRepo) {
         this.enableGplRepo = enableGplRepo;
-    }
-
-    public List<ManagementPackComponent> getMpacks() {
-        return mpacks;
-    }
-
-    public void setMpacks(List<ManagementPackComponent> mpacks) {
-        this.mpacks = mpacks;
     }
 
     @Override

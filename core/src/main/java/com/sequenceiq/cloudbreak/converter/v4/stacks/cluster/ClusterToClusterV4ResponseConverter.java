@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.AmbariV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.customcontainer.CustomContainerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.GatewayV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
@@ -90,7 +89,6 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         clusterResponse.setCreationFinished(source.getCreationFinished());
         decorateResponseWithProxyConfig(source, clusterResponse);
         clusterResponse.setCloudStorage(getCloudStorage(source));
-        clusterResponse.setAmbari(getConversionService().convert(source, AmbariV4Response.class));
         clusterResponse.setCm(ClusterToClouderaManagerV4ResponseConverter.convert(source));
         clusterResponse.setDatabases(converterUtil.convertAll(source.getRdsConfigs().stream().filter(
                 rds -> ResourceStatus.USER_MANAGED.equals(rds.getStatus())).collect(Collectors.toList()), DatabaseV4Response.class));

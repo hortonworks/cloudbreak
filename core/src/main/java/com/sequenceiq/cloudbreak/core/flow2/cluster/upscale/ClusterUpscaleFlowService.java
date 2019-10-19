@@ -61,12 +61,12 @@ class ClusterUpscaleFlowService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    void ambariRepairSingleMasterStarted(long stackId) {
+    void clusterManagerRepairSingleMasterStarted(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Repairing single master of cluster finished.");
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SINGLE_MASTER_REPAIR_STARTED);
     }
 
-    void ambariRepairSingleMasterFinished(long stackId) {
+    void clusterManagerRepairSingleMasterFinished(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Repairing single master of cluster finished.");
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SINGLE_MASTER_REPAIR_FINISHED);
     }

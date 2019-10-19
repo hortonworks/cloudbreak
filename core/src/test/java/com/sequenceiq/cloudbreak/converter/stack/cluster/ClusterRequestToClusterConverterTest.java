@@ -74,7 +74,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = underTest.convert(request);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "clusterManagerIp",
-                "fileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn",
+                "fileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn", "configStrategy",
                 "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn"));
     }
 
@@ -94,7 +94,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "clusterManagerIp",
                 "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn", "extendedBlueprintText",
-                "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn"));
+                "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn", "configStrategy"));
     }
 
     @Test
@@ -108,7 +108,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = underTest.convert(clusterRequest);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "clusterManagerIp",
-                "fileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn",
+                "fileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn", "configStrategy",
                 "extendedBlueprintText", "gateway", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn"));
         assertNull(result.getGateway());
     }

@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANC
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,10 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.MaintenanceModeStat
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -63,9 +59,6 @@ public class ClusterCommonService {
     private HostGroupService hostGroupService;
 
     @Inject
-    private AmbariBlueprintValidator ambariBlueprintValidator;
-
-    @Inject
     private CmTemplateValidator cmTemplateValidator;
 
     @Inject
@@ -96,29 +89,9 @@ public class ClusterCommonService {
             }
         } else if (updateJson.getHostGroupAdjustment() != null) {
             clusterHostgroupAdjustmentChange(stackId, updateJson, stack);
-        } else if (Objects.nonNull(updateJson.getStackRepository())) {
-            updateStackDetails(updateJson, stack);
         } else {
             LOGGER.info("Invalid cluster update request received. Stack id: {}", stackId);
             throw new BadRequestException("Invalid update cluster request!");
-        }
-    }
-
-    private void updateStackDetails(UpdateClusterV4Request updateJson, Stack stack) {
-        Cluster cluster = stack.getCluster();
-        if (!cluster.isMaintenanceModeEnabled()) {
-            throw new BadRequestException(String.format("Repo update is only permitted in maintenance mode, current status is: '%s'",
-                    stack.getCluster().getStatus()));
-        }
-
-        StackRepositoryV4Request stackRepository = updateJson.getStackRepository();
-        Long clusterId = cluster.getId();
-        if ("AMBARI".equals(stackRepository.getStack())) {
-            clusterService.updateAmbariRepoDetails(clusterId, stackRepository);
-        } else if ("HDP".equals(stackRepository.getStack())) {
-            clusterService.updateHdpRepoDetails(clusterId, stackRepository);
-        } else if ("HDF".equals(stackRepository.getStack())) {
-            clusterService.updateHdfRepoDetails(clusterId, stackRepository);
         }
     }
 
@@ -136,10 +109,7 @@ public class ClusterCommonService {
             throw new BadRequestException(String.format("Host group '%s' not found or not member of the cluster '%s'",
                     updateJson.getHostGroupAdjustment().getHostGroup(), stack.getName()));
         }
-        if (blueprintService.isAmbariBlueprint(blueprint)) {
-            ambariBlueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(),
-                    updateJson.getHostGroupAdjustment().getScalingAdjustment());
-        } else {
+        if (blueprintService.isClouderaManagerTemplate(blueprint)) {
             cmTemplateValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(),
                     updateJson.getHostGroupAdjustment().getScalingAdjustment());
         }
@@ -153,12 +123,7 @@ public class ClusterCommonService {
             hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack, false);
             hostGroups.add(hostGroup);
         }
-        StackRepositoryV4Request stackDetails = updateCluster.getStackRepository();
-        StackRepoDetails stackRepoDetails = null;
-        if (stackDetails != null) {
-            stackRepoDetails = converterUtil.convert(stackDetails, StackRepoDetails.class);
-        }
-        clusterService.recreate(stack, updateCluster.getBlueprintName(), hostGroups, updateCluster.getValidateBlueprint(), stackRepoDetails);
+        clusterService.recreate(stack, updateCluster.getBlueprintName(), hostGroups, updateCluster.getValidateBlueprint(), null);
     }
 
     private void ambariUserNamePasswordChange(Long stackId, Stack stack, UserNamePasswordV4Request userNamePasswordJson) {

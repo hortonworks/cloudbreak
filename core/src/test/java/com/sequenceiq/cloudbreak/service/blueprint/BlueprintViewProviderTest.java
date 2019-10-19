@@ -10,9 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.template.model.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
@@ -52,7 +51,7 @@ public class BlueprintViewProviderTest {
 
     @Test
     public void usesAmbariBlueprintTextProcessor() {
-        testUsesProcessorFromFactory(new AmbariBlueprintTextProcessor(TEST_BLUEPRINT_TEXT));
+        testUsesProcessorFromFactory(new CmTemplateProcessor(TEST_BLUEPRINT_TEXT));
     }
 
     @Test

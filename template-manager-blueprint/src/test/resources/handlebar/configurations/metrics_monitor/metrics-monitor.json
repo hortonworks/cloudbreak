@@ -1,9 +1,0 @@
-{
-
-  "cluster-env": {
-    "properties": {
-      "metrics_collector_external_hosts": "clustermanagerfqdn"
-    }
-  }
-
-}

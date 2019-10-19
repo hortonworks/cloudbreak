@@ -19,7 +19,6 @@ import com.cloudera.api.swagger.model.ApiAuthRoleRef;
 import com.cloudera.api.swagger.model.ApiUser2;
 import com.cloudera.api.swagger.model.ApiUser2List;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
@@ -192,11 +191,6 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         } catch (ApiException | ClouderaManagerClientInitException e) {
             throw new CloudbreakException(e);
         }
-    }
-
-    @Override
-    public boolean isLdapAndSSOReady(AmbariRepo ambariRepo) {
-        return false;
     }
 
     @Override

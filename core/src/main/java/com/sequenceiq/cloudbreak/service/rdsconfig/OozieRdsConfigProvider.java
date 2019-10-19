@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
@@ -15,11 +15,6 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 public class OozieRdsConfigProvider extends AbstractRdsConfigProvider {
 
     private static final String PILLAR_KEY = "oozie";
-
-    private static final String[] PATH = {AmbariBlueprintTextProcessor.CONFIGURATIONS_NODE, "oozie-site"};
-
-    private static final String[] CONFIGURATIONS = {"oozie.service.JPAService.jdbc.driver", "oozie.service.JPAService.jdbc.url",
-            "oozie.service.JPAService.jdbc.username", "oozie.service.JPAService.jdbc.password"};
 
     @Value("${cb.oozie.database.user:oozie}")
     private String oozieDbUser;
@@ -31,19 +26,14 @@ public class OozieRdsConfigProvider extends AbstractRdsConfigProvider {
     private String oozieDbPort;
 
     @Inject
-    private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Inject
     private BlueprintService blueprintService;
 
     private boolean isRdsConfigNeedForOozieServer(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintText();
-        AmbariBlueprintTextProcessor blueprintProcessor = ambariBlueprintProcessorFactory.get(blueprintText);
-        if (blueprintService.isAmbariBlueprint(blueprint)) {
-            return blueprintProcessor.isComponentExistsInBlueprint("OOZIE_SERVER")
-                    && !blueprintProcessor.isComponentExistsInBlueprint("MYSQL_SERVER")
-                    && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfigurations(PATH, CONFIGURATIONS));
-        }
+        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
         return blueprintProcessor.isCMComponentExistsInBlueprint("OOZIE_SERVER");
     }
 

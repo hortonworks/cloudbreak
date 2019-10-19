@@ -12,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.customcontainer.CustomContainerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
@@ -61,10 +60,6 @@ public class ClusterV4Request implements JsonEntity {
     @Valid
     @ApiModelProperty(ClusterModelDescription.CM_REQUEST)
     private ClouderaManagerV4Request cm;
-
-    @Valid
-    @ApiModelProperty(ClusterModelDescription.AMBARI_REQUEST)
-    private AmbariV4Request ambari;
 
     private GatewayV4Request gateway;
 
@@ -153,14 +148,6 @@ public class ClusterV4Request implements JsonEntity {
 
     public void setCm(ClouderaManagerV4Request cm) {
         this.cm = cm;
-    }
-
-    public AmbariV4Request getAmbari() {
-        return ambari;
-    }
-
-    public void setAmbari(AmbariV4Request ambari) {
-        this.ambari = ambari;
     }
 
     public GatewayV4Request getGateway() {

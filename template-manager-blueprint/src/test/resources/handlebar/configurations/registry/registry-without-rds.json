@@ -1,9 +1,0 @@
-{
-
-  "registry-common": {
-    "properties": {
-      "jar.storage.type": "local"
-    }
-  }
-
-}

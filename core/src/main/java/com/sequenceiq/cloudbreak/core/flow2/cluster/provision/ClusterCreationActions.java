@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReg
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartClusterManagerServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
@@ -139,7 +139,7 @@ public class ClusterCreationActions {
         };
     }
 
-    @Bean(name = "STARTING_AMBARI_SERVICES_STATE")
+    @Bean(name = "STARTING_CLUSTER_MANAGER_SERVICES_STATE")
     public Action<?, ?> startingAmbariServicesAction() {
         return new AbstractClusterAction<>(KeytabConfigurationSuccess.class) {
             @Override
@@ -155,12 +155,12 @@ public class ClusterCreationActions {
         };
     }
 
-    @Bean(name = "STARTING_AMBARI_STATE")
+    @Bean(name = "STARTING_CLUSTER_MANAGER_STATE")
     public Action<?, ?> startingAmbariAction() {
-        return new AbstractClusterAction<>(StartAmbariServicesSuccess.class) {
+        return new AbstractClusterAction<>(StartClusterManagerServicesSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, StartAmbariServicesSuccess payload, Map<Object, Object> variables) {
-                clusterCreationService.startingAmbari(context.getStackId());
+            protected void doExecute(ClusterViewContext context, StartClusterManagerServicesSuccess payload, Map<Object, Object> variables) {
+                clusterCreationService.startingClusterManager(context.getStackId());
                 sendEvent(context);
             }
 

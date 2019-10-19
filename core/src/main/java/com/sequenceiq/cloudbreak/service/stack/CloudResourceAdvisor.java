@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
@@ -56,9 +55,6 @@ public class CloudResourceAdvisor {
 
     @Inject
     private BlueprintTextProcessorFactory blueprintTextProcessorFactory;
-
-    @Inject
-    private StackServiceComponentDescriptors stackServiceComponentDescs;
 
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
@@ -182,10 +178,7 @@ public class CloudResourceAdvisor {
     }
 
     private boolean isThereMasterComponents(ClusterManagerType clusterManagerType, String hostGroupName, Collection<String> components) {
-        return clusterManagerType == ClusterManagerType.AMBARI
-                ? components.stream()
-                    .anyMatch(component -> stackServiceComponentDescs.get(component) != null && stackServiceComponentDescs.get(component).isMaster())
-                : hostGroupName.toLowerCase().contains("master");
+        return hostGroupName.toLowerCase().contains("master");
     }
 
     private VmType getDefaultVmType(String availabilityZone, CloudVmTypes vmtypes) {

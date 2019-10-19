@@ -5,11 +5,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_REQUESTED;
-import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.CUSTOM_VDF_REPO_KEY;
-import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.MPACK_TAG;
-import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPOSITORY_VERSION;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPO_ID_TAG;
-import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.VDF_REPO_KEY_PREFIX;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AUTORECOVERY_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_HOST_STATUS_UPDATED;
@@ -32,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -57,25 +52,20 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.mpack.ManagementPackDetailsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
-import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -213,9 +203,6 @@ public class ClusterService {
     private TransactionService transactionService;
 
     @Inject
-    private BlueprintUtils blueprintUtils;
-
-    @Inject
     private ResourceService resourceService;
 
     @Inject
@@ -235,6 +222,9 @@ public class ClusterService {
 
     @Inject
     private StackUpdater stackUpdater;
+
+    @Inject
+    private BlueprintUtils blueprintUtils;
 
     @Measure(ClusterService.class)
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
@@ -543,16 +533,17 @@ public class ClusterService {
     }
 
     private void handleChangedHosts(Cluster cluster, Set<String> newHealthyNodes,
-            Map<String, List<String>> autoRecoveryNodesMap, Map<String, InstanceMetaData> autoRecoveryMetadata, Map<String, InstanceMetaData> failedMetadata) {
+            Map<String, List<String>> autoRecoveryNodesMap, Map<String, InstanceMetaData> autoRecoveryHostMetadata,
+            Map<String, InstanceMetaData> failedHostMetadata) {
         try {
             boolean hasAutoRecoverableNodes = !autoRecoveryNodesMap.isEmpty();
             if (hasAutoRecoverableNodes) {
                 flowManager.triggerClusterRepairFlow(cluster.getStack().getId(), autoRecoveryNodesMap, false);
-                updateChangedHosts(cluster, autoRecoveryMetadata.keySet(), InstanceStatus.SERVICES_HEALTHY, InstanceStatus.WAITING_FOR_REPAIR,
+                updateChangedHosts(cluster, autoRecoveryHostMetadata.keySet(), InstanceStatus.SERVICES_HEALTHY, InstanceStatus.WAITING_FOR_REPAIR,
                         CLUSTER_AUTORECOVERY_REQUESTED);
             }
-            if (!failedMetadata.isEmpty()) {
-                updateChangedHosts(cluster, failedMetadata.keySet(), InstanceStatus.SERVICES_HEALTHY, InstanceStatus.SERVICES_UNHEALTHY,
+            if (!failedHostMetadata.isEmpty()) {
+                updateChangedHosts(cluster, failedHostMetadata.keySet(), InstanceStatus.SERVICES_HEALTHY, InstanceStatus.SERVICES_UNHEALTHY,
                         CLUSTER_FAILED_NODES_REPORTED);
             }
             if (!newHealthyNodes.isEmpty()) {
@@ -562,7 +553,7 @@ public class ClusterService {
 
             if (!hasAutoRecoverableNodes) {
                 Optional<InstanceMetaData> primaryGateway = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(cluster.getStack().getId());
-                if (primaryGateway.isPresent() && failedMetadata.containsKey(primaryGateway.get().getDiscoveryFQDN())) {
+                if (primaryGateway.isPresent() && failedHostMetadata.containsKey(primaryGateway.get().getDiscoveryFQDN())) {
                     eventService.fireCloudbreakEvent(cluster.getStack().getId(), RECOVERY, CLUSTER_PRIMARY_GATEWAY_UNHEALTHY_SYNC_STARTED);
                     flowManager.triggerStackSync(cluster.getStack().getId());
                 }
@@ -619,7 +610,7 @@ public class ClusterService {
     }
 
     private void repairClusterInternal(ManualClusterRepairMode repairMode, Long stackId, List<String> repairedHostGroups,
-            List<String> nodeIds, boolean deleteVolumes, boolean removeOnly, boolean forceRepair) {
+        List<String> nodeIds, boolean deleteVolumes, boolean removeOnly, boolean forceRepair) {
         Map<String, List<String>> failedNodeMap = new HashMap<>();
         try {
             transactionService.required(() -> {
@@ -672,7 +663,7 @@ public class ClusterService {
     }
 
     public Map<String, List<String>> collectFailedNodeMap(Stack stack, ManualClusterRepairMode repairMode, boolean repairWithReattach,
-            List<String> repairedHostGroups, List<String> nodeIds, boolean forceRepair) {
+        List<String> repairedHostGroups, List<String> nodeIds, boolean forceRepair) {
         Map<String, List<String>> failedNodeMap = new HashMap<>();
         Cluster cluster = stack.getCluster();
         Set<String> instanceHostNames = getInstanceHostNames(repairMode, stack, nodeIds);
@@ -709,19 +700,14 @@ public class ClusterService {
     }
 
     private boolean gatewayDatabaseAvailable(Cluster cluster) {
-        if (blueprintService.isAmbariBlueprint(cluster.getBlueprint())) {
-            return cluster.getRdsConfigs().stream()
-                    .anyMatch(rdsConfig -> DatabaseType.AMBARI.name().equals(rdsConfig.getType()) && ResourceStatus.USER_MANAGED.equals(rdsConfig.getStatus()));
-        } else {
-            long cmRdsCount = cluster.getRdsConfigs().stream()
-                    .filter(rds -> rds.getStatus() == ResourceStatus.USER_MANAGED)
-                    .map(RDSConfig::getType)
-                    .filter(type -> DatabaseType.CLOUDERA_MANAGER.name().equals(type)
-                            || DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER.name().equals(type))
-                    .distinct()
-                    .count();
-            return cmRdsCount == REQUIRED_CM_DATABASE_COUNT || cluster.getDatabaseServerCrn() != null;
-        }
+        long cmRdsCount = cluster.getRdsConfigs().stream()
+                .filter(rds -> rds.getStatus() == ResourceStatus.USER_MANAGED)
+                .map(RDSConfig::getType)
+                .filter(type -> DatabaseType.CLOUDERA_MANAGER.name().equals(type)
+                        || DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER.name().equals(type))
+                .distinct()
+                .count();
+        return cmRdsCount == REQUIRED_CM_DATABASE_COUNT || cluster.getDatabaseServerCrn() != null;
     }
 
     private void checkReattachSupportedOnProvider(Stack inTransactionStack, boolean repairWithReattach) {
@@ -817,9 +803,6 @@ public class ClusterService {
 
     private boolean withEmbeddedClusterManagerDB(Cluster cluster) {
         DatabaseType databaseType = DatabaseType.CLOUDERA_MANAGER;
-        if (blueprintService.isAmbariBlueprint(cluster.getBlueprint())) {
-            databaseType = DatabaseType.AMBARI;
-        }
         RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getId(), databaseType);
         return (rdsConfig == null || ResourceStatus.DEFAULT == rdsConfig.getStatus()) && cluster.getDatabaseServerCrn() == null;
     }
@@ -975,7 +958,7 @@ public class ClusterService {
     }
 
     public Cluster recreate(Stack stack, String blueprintName, Set<HostGroup> hostGroups, boolean validateBlueprint,
-            StackRepoDetails stackRepoDetails) throws TransactionExecutionException {
+                            StackRepoDetails stackRepoDetails) throws TransactionExecutionException {
         return transactionService.required(() -> {
             checkBlueprintIdAndHostGroups(blueprintName, hostGroups);
             Stack stackWithLists = stackService.getByIdWithListsInTransaction(stack.getId());
@@ -1019,7 +1002,6 @@ public class ClusterService {
         cluster.setBlueprint(blueprint);
         cluster.getHostGroups().clear();
         cluster.getHostGroups().addAll(hostGroups);
-        createHDPRepoComponent(stackRepoDetails, stack);
         LOGGER.debug("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         cluster.setStatus(REQUESTED);
         cluster.setStack(stack);
@@ -1034,83 +1016,6 @@ public class ClusterService {
     private Cluster getCluster(Long clusterId) {
         return repository.findById(clusterId)
                 .orElseThrow(notFound("Cluster", clusterId));
-    }
-
-    public void upgrade(Long stackId, AmbariRepo ambariRepoUpgrade) throws TransactionExecutionException {
-        if (ambariRepoUpgrade != null) {
-            Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-            Cluster cluster = getCluster(stack);
-            if (cluster == null) {
-                throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stackId));
-            }
-            if (!stack.isAvailable()) {
-                throw new BadRequestException(String.format(
-                        "Stack '%s' is currently in '%s' state. Upgrade requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.",
-                        stackId, stack.getStatus()));
-            }
-            if (!cluster.isAvailable()) {
-                throw new BadRequestException(String.format(
-                        "Cluster '%s' is currently in '%s' state. Upgrade requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.",
-                        stackId, stack.getStatus()));
-            }
-            AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
-            transactionService.required(() -> {
-                if (ambariRepo == null) {
-                    try {
-                        clusterComponentConfigProvider.store(new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS,
-                                new Json(ambariRepoUpgrade), stack.getCluster()));
-                    } catch (IllegalArgumentException ignored) {
-                        throw new BadRequestException(String.format("Ambari repo details cannot be saved. %s", ambariRepoUpgrade));
-                    }
-                } else {
-                    ClusterComponent component = clusterComponentConfigProvider.getComponent(cluster.getId(), ComponentType.AMBARI_REPO_DETAILS);
-                    ambariRepo.setBaseUrl(ambariRepoUpgrade.getBaseUrl());
-                    ambariRepo.setGpgKeyUrl(ambariRepoUpgrade.getGpgKeyUrl());
-                    ambariRepo.setPredefined(false);
-                    ambariRepo.setVersion(ambariRepoUpgrade.getVersion());
-                    try {
-                        component.setAttributes(new Json(ambariRepo));
-                        clusterComponentConfigProvider.store(component);
-                    } catch (IllegalArgumentException ignored) {
-                        throw new BadRequestException(String.format("Ambari repo details cannot be saved. %s", ambariRepoUpgrade));
-                    }
-                }
-                try {
-                    flowManager.triggerClusterUpgrade(stack.getId());
-                } catch (RuntimeException e) {
-                    throw new CloudbreakServiceException(e);
-                }
-                return null;
-            });
-        }
-    }
-
-    private void createHDPRepoComponent(StackRepoDetails stackRepoDetailsUpdate, Stack stack) {
-        if (stackRepoDetailsUpdate != null) {
-            StackRepoDetails stackRepoDetails = clusterComponentConfigProvider.getHDPRepo(stack.getCluster().getId());
-            if (stackRepoDetails == null) {
-                try {
-                    ClusterComponent clusterComp = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, new Json(stackRepoDetailsUpdate), stack.getCluster());
-                    clusterComponentConfigProvider.store(clusterComp);
-                } catch (IllegalArgumentException ignored) {
-                    throw new BadRequestException(String.format("HDP Repo parameters cannot be converted. %s", stackRepoDetailsUpdate));
-                }
-            } else {
-                ClusterComponent component = clusterComponentConfigProvider.getComponent(stack.getCluster().getId(), ComponentType.HDP_REPO_DETAILS);
-                stackRepoDetails.setHdpVersion(stackRepoDetailsUpdate.getHdpVersion());
-                stackRepoDetails.setVerify(stackRepoDetailsUpdate.isVerify());
-                stackRepoDetails.setStack(stackRepoDetailsUpdate.getStack());
-                stackRepoDetails.setUtil(stackRepoDetailsUpdate.getUtil());
-                stackRepoDetails.setEnableGplRepo(stackRepoDetailsUpdate.isEnableGplRepo());
-                stackRepoDetails.setMpacks(stackRepoDetailsUpdate.getMpacks());
-                try {
-                    component.setAttributes(new Json(stackRepoDetails));
-                    clusterComponentConfigProvider.store(component);
-                } catch (IllegalArgumentException ignored) {
-                    throw new BadRequestException(String.format("HDP Repo parameters cannot be converted. %s", stackRepoDetailsUpdate));
-                }
-            }
-        }
     }
 
     private void triggerClusterInstall(Stack stack, Cluster cluster) throws CloudbreakException {
@@ -1128,11 +1033,6 @@ public class ClusterService {
         boolean downScale = scalingAdjustment < 0;
         if (scalingAdjustment == 0) {
             throw new BadRequestException("No scaling adjustments specified. Nothing to do.");
-        }
-        Blueprint clusterDefinition = stack.getCluster().getBlueprint();
-        if (blueprintService.isAmbariBlueprint(clusterDefinition)) {
-            BlueprintValidator blueprintValidator = blueprintValidatorFactory.createBlueprintValidator(clusterDefinition);
-            blueprintValidator.validateHostGroupScalingRequest(stack.getCluster().getBlueprint(), hostGroup, scalingAdjustment);
         }
         if (!downScale && hostGroup.getInstanceGroup() != null) {
             validateUnusedHosts(hostGroup.getInstanceGroup(), scalingAdjustment);
@@ -1244,133 +1144,6 @@ public class ClusterService {
 
     public Set<String> findNamesByRdsConfig(Long rdsConfigId) {
         return repository.findNamesByRdsConfig(rdsConfigId);
-    }
-
-    public void updateAmbariRepoDetails(Long clusterId, StackRepositoryV4Request stackRepository) {
-        if (Objects.isNull(stackRepository.getVersion()) || Objects.isNull(stackRepository.getRepository().getBaseUrl())) {
-            throw new BadRequestException("Ambari repo details not complete.");
-        }
-
-        AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(clusterId);
-        ambariRepo.setVersion(stackRepository.getVersion());
-        ambariRepo.setBaseUrl(stackRepository.getRepository().getBaseUrl());
-        ambariRepo.setPredefined(Boolean.FALSE);
-        Optional.ofNullable(stackRepository.getRepository().getGpgKeyUrl()).ifPresent(ambariRepo::setGpgKeyUrl);
-
-        ClusterComponent component = clusterComponentConfigProvider.getComponent(clusterId, ComponentType.AMBARI_REPO_DETAILS);
-
-        try {
-            component.setAttributes(new Json(ambariRepo));
-            clusterComponentConfigProvider.store(component);
-        } catch (IllegalArgumentException ignored) {
-            throw new BadRequestException("Ambari repo details cannot be saved.");
-        }
-    }
-
-    public void updateHdpRepoDetails(Long clusterId, StackRepositoryV4Request stackRepository) {
-        checkMandatoryHdpFields(stackRepository);
-
-        StackRepoDetails hdpRepo = clusterComponentConfigProvider.getStackRepoDetails(clusterId);
-
-        Map<String, String> stack = Optional.ofNullable(hdpRepo.getStack()).orElseGet(HashMap::new);
-        stack.put(REPO_ID_TAG, stackRepository.getRepoId());
-        stack.put(stackRepository.getOsType(), stackRepository.getRepository().getBaseUrl());
-        stack.put(REPOSITORY_VERSION, stackRepository.getRepository().getVersion());
-        stack.put(VDF_REPO_KEY_PREFIX + stackRepository.getOsType(), stackRepository.getVersionDefinitionFileUrl());
-        stack.put(CUSTOM_VDF_REPO_KEY, stackRepository.getVersionDefinitionFileUrl());
-        hdpRepo.setStack(stack);
-
-        Map<String, String> util = Optional.ofNullable(hdpRepo.getUtil()).orElseGet(HashMap::new);
-        util.put(REPO_ID_TAG, stackRepository.getUtilsRepoId());
-        util.put(stackRepository.getOsType(), stackRepository.getUtilsBaseURL());
-        hdpRepo.setUtil(util);
-
-        hdpRepo.setEnableGplRepo(stackRepository.isEnableGplRepo());
-        Optional.ofNullable(stackRepository.getVerify()).or(() -> Optional.of(Boolean.TRUE)).ifPresent(hdpRepo::setVerify);
-        hdpRepo.setHdpVersion(stackRepository.getVersion());
-
-        hdpRepo.setMpacks(List.of());
-
-        ClusterComponent component = clusterComponentConfigProvider.getComponent(clusterId, ComponentType.HDP_REPO_DETAILS);
-        try {
-            component.setAttributes(new Json(hdpRepo));
-            clusterComponentConfigProvider.store(component);
-        } catch (IllegalArgumentException ignored) {
-            throw new BadRequestException("HDP repo details cannot be saved.");
-        }
-    }
-
-    private void checkMandatoryHdpFields(StackRepositoryV4Request stackRepository) {
-        if (isAnyHdpHdfCommonFieldNull(stackRepository)) {
-            throw new BadRequestException("HDP repo details not complete.");
-        }
-    }
-
-    private boolean isAnyHdpHdfCommonFieldNull(StackRepositoryV4Request stackRepository) {
-        return Objects.isNull(stackRepository.getRepoId())
-                || Objects.isNull(stackRepository.getOsType())
-                || Objects.isNull(stackRepository.getRepository().getBaseUrl())
-                || Objects.isNull(stackRepository.getRepository().getVersion())
-                || Objects.isNull(stackRepository.getVersionDefinitionFileUrl())
-                || Objects.isNull(stackRepository.getUtilsRepoId())
-                || Objects.isNull(stackRepository.getUtilsBaseURL())
-                || Objects.isNull(stackRepository.isEnableGplRepo())
-                || Objects.isNull(stackRepository.getVersion());
-    }
-
-    public void updateHdfRepoDetails(Long clusterId, StackRepositoryV4Request stackRepository) {
-        if (isAnyHdpHdfCommonFieldNull(stackRepository)
-                || Objects.isNull(stackRepository.getVersionDefinitionFileUrl())
-                || Objects.isNull(stackRepository.getMpackUrl())) {
-            throw new BadRequestException("HDF repo details not complete.");
-        }
-
-        StackRepoDetails hdfRepo = clusterComponentConfigProvider.getStackRepoDetails(clusterId);
-
-        Map<String, String> stack = Optional.ofNullable(hdfRepo.getStack()).orElseGet(HashMap::new);
-        stack.put(REPO_ID_TAG, stackRepository.getRepoId());
-        stack.put(stackRepository.getOsType(), stackRepository.getRepository().getBaseUrl());
-        stack.put(REPOSITORY_VERSION, stackRepository.getRepository().getVersion());
-        stack.put(VDF_REPO_KEY_PREFIX + stackRepository.getOsType(), stackRepository.getVersionDefinitionFileUrl());
-        stack.put(CUSTOM_VDF_REPO_KEY, stackRepository.getVersionDefinitionFileUrl());
-        stack.put(MPACK_TAG, stackRepository.getMpackUrl());
-        hdfRepo.setStack(stack);
-
-        Map<String, String> util = Optional.ofNullable(hdfRepo.getUtil()).orElseGet(HashMap::new);
-        util.put(REPO_ID_TAG, stackRepository.getUtilsRepoId());
-        util.put(stackRepository.getOsType(), stackRepository.getUtilsBaseURL());
-        hdfRepo.setUtil(util);
-
-        hdfRepo.setEnableGplRepo(stackRepository.isEnableGplRepo());
-        Optional.ofNullable(stackRepository.getVerify()).or(() -> Optional.of(Boolean.TRUE)).ifPresent(hdfRepo::setVerify);
-        hdfRepo.setHdpVersion(stackRepository.getVersion());
-
-        ManagementPackComponent managementPackComponent = new ManagementPackComponent();
-        ManagementPackDetailsV4Request managementPackDetails = stackRepository.getMpacks().get(0);
-        managementPackComponent.setName(managementPackDetails.getName());
-        managementPackComponent.setMpackUrl(stackRepository.getMpackUrl());
-        managementPackComponent.setPurge(false);
-        managementPackComponent.setPurgeList(List.of());
-        managementPackComponent.setForce(false);
-        managementPackComponent.setStackDefault(true);
-        managementPackComponent.setPreInstalled(managementPackDetails.isPreInstalled());
-        hdfRepo.setMpacks(List.of(managementPackComponent));
-
-        ClusterComponent component = clusterComponentConfigProvider.getComponent(clusterId, ComponentType.HDP_REPO_DETAILS);
-        try {
-            component.setAttributes(new Json(hdfRepo));
-            clusterComponentConfigProvider.store(component);
-        } catch (IllegalArgumentException ignored) {
-            throw new BadRequestException("HDF repo details cannot be saved.");
-        }
-    }
-
-    private void checkMandatoryHdfFields(StackRepositoryV4Request stackRepository) {
-        if (isAnyHdpHdfCommonFieldNull(stackRepository)
-                || Objects.isNull(stackRepository.getMpackUrl())
-                || (Objects.isNull(stackRepository.getMpacks()) && StringUtils.isEmpty(stackRepository.getMpacks().iterator().next().getName()))) {
-            throw new BadRequestException("HDF repo details not complete.");
-        }
     }
 
     public void triggerMaintenanceModeValidation(Stack stack) {

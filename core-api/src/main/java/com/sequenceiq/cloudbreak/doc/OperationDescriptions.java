@@ -185,24 +185,6 @@ public class OperationDescriptions {
         public static final String GET_REQUEST_BY_NAME = "get request by name";
     }
 
-    public static class ManagementPackOpDescription {
-        public static final String POST_PRIVATE = "create management pack as private resource";
-        public static final String POST_PUBLIC = "create management pack as public resource";
-        public static final String GET_PRIVATE = "retrieve private management packs";
-        public static final String GET_PUBLIC = "retrieve public and private (owned) management packs";
-        public static final String GET_PRIVATE_BY_NAME = "retrieve a private management pack by name";
-        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) management pack by name";
-        public static final String GET_BY_ID = "retrieve management pack by id";
-        public static final String DELETE_PRIVATE_BY_NAME = "delete private management pack by name";
-        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private management pack by name";
-        public static final String DELETE_BY_ID = "delete management pack by id";
-        public static final String LIST_BY_WORKSPACE = "list management packs for the given workspace";
-        public static final String GET_BY_NAME_IN_WORKSPACE = "get management pack by name in workspace";
-        public static final String CREATE_IN_WORKSPACE = "create management pack in workspace";
-        public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete management pack by name in workspace";
-        public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple management packs by name in workspace";
-    }
-
     public static class KubernetesConfigOpDescription {
         public static final String LIST_BY_WORKSPACE = "list Kubernetes configs for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get Kubernetes config by name in workspace";

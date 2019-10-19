@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.cluster.ClusterUpscaleService;
-import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariRestartAllRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariRestartAllResult;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 import reactor.bus.Event;
@@ -46,4 +46,5 @@ public class AmbariRestartAllHandler implements EventHandler<AmbariRestartAllReq
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
+
 }

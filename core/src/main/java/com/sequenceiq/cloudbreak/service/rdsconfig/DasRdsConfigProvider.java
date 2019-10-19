@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
@@ -15,11 +15,6 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 public class DasRdsConfigProvider extends AbstractRdsConfigProvider {
 
     private static final String PILLAR_KEY = "das";
-
-    private static final String[] PATH = {AmbariBlueprintTextProcessor.CONFIGURATIONS_NODE, "data_analytics_studio-database"};
-
-    private static final String[] CONFIGURATIONS = {"data_analytics_studio_database_host", "data_analytics_studio_database_port",
-            "data_analytics_studio_database_name", "data_analytics_studio_database_username", "data_analytics_studio_database_password"};
 
     @Value("${cb.das.database.user:das}")
     private String dasDbUser;
@@ -31,7 +26,7 @@ public class DasRdsConfigProvider extends AbstractRdsConfigProvider {
     private String dasDbPort;
 
     @Inject
-    private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Inject
     private BlueprintService blueprintService;
@@ -64,14 +59,9 @@ public class DasRdsConfigProvider extends AbstractRdsConfigProvider {
     @Override
     protected boolean isRdsConfigNeeded(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintText();
-        AmbariBlueprintTextProcessor blueprintProcessor = ambariBlueprintProcessorFactory.get(blueprintText);
-        if (blueprintService.isAmbariBlueprint(blueprint)) {
-            return blueprintProcessor.isComponentExistsInBlueprint("DATA_ANALYTICS_STUDIO_EVENT_PROCESSOR")
-                && blueprintProcessor.isComponentExistsInBlueprint("DATA_ANALYTICS_STUDIO_WEBAPP")
-                && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfigurations(PATH, CONFIGURATIONS));
-        } else {
-            return blueprintProcessor.isCMComponentExistsInBlueprint("DAS_EVENT_PROCESSOR")
+        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
+        return blueprintProcessor.isCMComponentExistsInBlueprint("DAS_EVENT_PROCESSOR")
                 || blueprintProcessor.isCMComponentExistsInBlueprint("DAS_WEBAPP");
-        }
+
     }
 }

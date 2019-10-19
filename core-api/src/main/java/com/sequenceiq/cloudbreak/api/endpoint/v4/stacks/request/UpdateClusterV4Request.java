@@ -2,12 +2,9 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
 
 import java.util.Set;
 
-import javax.validation.Valid;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.model.annotations.TransformGetterType;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 
@@ -36,10 +33,6 @@ public class UpdateClusterV4Request implements JsonEntity {
 
     @ApiModelProperty(ClusterModelDescription.HOSTGROUPS)
     private Set<HostGroupV4Request> hostgroups;
-
-    @Valid
-    @ApiModelProperty(ClusterModelDescription.AMBARI_STACK_DETAILS)
-    private StackRepositoryV4Request stackRepository;
 
     public HostGroupAdjustmentV4Request getHostGroupAdjustment() {
         return hostGroupAdjustment;
@@ -87,13 +80,5 @@ public class UpdateClusterV4Request implements JsonEntity {
 
     public void setHostgroups(Set<HostGroupV4Request> hostgroups) {
         this.hostgroups = hostgroups;
-    }
-
-    public StackRepositoryV4Request getStackRepository() {
-        return stackRepository;
-    }
-
-    public void setStackRepository(StackRepositoryV4Request stackRepository) {
-        this.stackRepository = stackRepository;
     }
 }

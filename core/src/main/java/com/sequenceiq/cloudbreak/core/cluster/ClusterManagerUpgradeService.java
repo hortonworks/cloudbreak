@@ -12,7 +12,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
@@ -69,16 +68,12 @@ public class ClusterManagerUpgradeService {
                 GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.getGateway() != null);
                 Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
                 ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-                AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(cluster.getId());
                 Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
                 Map<String, Object> credentials = new HashMap<>();
                 ClusterSecurityService clusterSecurityService = clusterApiConnectors.getConnector(stack).clusterSecurityService();
                 credentials.put("username", clusterSecurityService.getCloudbreakClusterUserName());
                 credentials.put("password", clusterSecurityService.getCloudbreakClusterPassword());
                 servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
-                if (ambariRepo != null) {
-                    servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));
-                }
                 SaltConfig pillar = new SaltConfig(servicePillar);
                 hostOrchestrator.upgradeAmbari(gatewayConfig, gatewayFQDN, stackUtil.collectNodes(stack), pillar, exitCriteriaModel);
             } else {

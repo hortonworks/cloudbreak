@@ -9,7 +9,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -22,16 +21,6 @@ public class ClouderaManagerPreCreationService implements ClusterPreCreationApi 
 
     @Inject
     private ClouderaManagerBlueprintPortConfigCollector clouderaManagerBlueprintPortConfigCollector;
-
-    @Override
-    public boolean isVdfReady(AmbariRepo ambariRepo) {
-        return false;
-    }
-
-    @Override
-    public boolean isLdapAndSSOReady(AmbariRepo ambariRepo) {
-        return false;
-    }
 
     @Override
     public String getCloudbreakClusterUserName(Cluster cluster) {

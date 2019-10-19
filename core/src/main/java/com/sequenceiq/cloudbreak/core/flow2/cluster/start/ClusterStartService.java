@@ -48,12 +48,12 @@ public class ClusterStartService {
     public void clusterStartFinished(StackView stack) {
         Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId())
                 .orElseThrow(NotFoundException.notFound("cluster", stack.getId()));
-        String ambariIp = stackUtil.extractClusterManagerIp(stack);
+        String clusterManagerIp = stackUtil.extractClusterManagerIp(stack);
         cluster.setUpSince(new Date().getTime());
         clusterService.updateCluster(cluster);
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Cluster started.");
-        flowMessageService.fireEventAndLog(stack.getId(), Status.AVAILABLE.name(), CLUSTER_STARTED, ambariIp);
+        flowMessageService.fireEventAndLog(stack.getId(), Status.AVAILABLE.name(), CLUSTER_STARTED, clusterManagerIp);
     }
 
     public void handleClusterStartFailure(StackView stackView, String errorReason) {

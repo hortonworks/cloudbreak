@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.sharedservice;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -34,9 +33,6 @@ public class SharedServiceConfigProvider {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private AmbariDatalakeConfigProvider ambariDatalakeConfigProvider;
 
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
@@ -82,10 +78,9 @@ public class SharedServiceConfigProvider {
         if (datalakeResource.isPresent()) {
             DatalakeResources datalakeResources = datalakeResource.get();
             publicStack.setDatalakeResourceId(datalakeResources.getId());
-            Map<String, String> additionalParams = ambariDatalakeConfigProvider.getAdditionalParameters(publicStack, datalakeResources);
             StackInputs stackInputs = publicStack.getInputs().get(StackInputs.class);
             stackInputs.setDatalakeInputs(new HashMap<>());
-            stackInputs.setFixInputs((Map) additionalParams);
+            stackInputs.setFixInputs(new HashMap<>());
             try {
                 publicStack.setInputs(new Json(stackInputs));
             } catch (IllegalArgumentException e) {
@@ -101,32 +96,6 @@ public class SharedServiceConfigProvider {
                 ? publicStack.getDatalakeResourceId() : datalakeResources.stream().findFirst().get().getId();
     }
 
-    private Long getDatalakeStackId(Stack publicStack, Optional<DatalakeResources> datalakeResource) {
-        return datalakeResource.isPresent() ? datalakeResource.get().getDatalakeStackId() : null;
-    }
-
-    private void addDatalakeRequiredProperties(Set<String> datalakeProperties) {
-        datalakeProperties.add("ranger.audit.solr.zookeepers");
-        datalakeProperties.add("atlas.rest.address");
-        datalakeProperties.add("atlas.kafka.bootstrap.servers");
-        datalakeProperties.add("atlas.kafka.security.protocol");
-        datalakeProperties.add("atlas.jaas.KafkaClient.option.serviceName");
-        datalakeProperties.add("atlas.kafka.sasl.kerberos.service.name");
-        datalakeProperties.add("atlas.kafka.zookeeper.connect");
-        datalakeProperties.add("ranger_admin_username");
-        datalakeProperties.add("policymgr_external_url");
-    }
-
-    public Map<String, Object> prepareAdditionalInputParameters(String sourceClustername, String clusterName) {
-        Map<String, Object> result = new HashMap<>();
-        result.put("REMOTE_CLUSTER_NAME", sourceClustername);
-        result.put("remoteClusterName", sourceClustername);
-        result.put("remote.cluster.name", sourceClustername);
-        result.put("cluster_name", clusterName);
-        result.put("cluster.name", clusterName);
-        return result;
-    }
-
     private void setupRds(Cluster requestedCluster, DatalakeResources datalakeResources) {
         if (requestedCluster.getRdsConfigs().isEmpty() && datalakeResources.getRdsConfigs() != null) {
             requestedCluster.setRdsConfigs(remoteDataContextWorkaroundService.prepareRdsConfigs(requestedCluster, datalakeResources));
@@ -136,11 +105,5 @@ public class SharedServiceConfigProvider {
     private void setupStoragePath(Cluster requestedCluster, DatalakeResources datalakeResources) {
         FileSystem fileSystem = remoteDataContextWorkaroundService.prepareFilesytem(requestedCluster, datalakeResources);
         requestedCluster.setFileSystem(fileSystem);
-    }
-
-    private Stack queryStack(Long sourceClusterId, Optional<String> sourceClusterName, User user, Workspace workspace) {
-        return sourceClusterName.isPresent()
-                ? stackService.getByNameInWorkspace(sourceClusterName.get(), workspace.getId())
-                : stackService.getById(sourceClusterId);
     }
 }

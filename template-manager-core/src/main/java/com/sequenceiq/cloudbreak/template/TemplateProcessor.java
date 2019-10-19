@@ -67,7 +67,6 @@ public class TemplateProcessor {
                 .withFixInputs(source.getFixInputs())
                 .withProductDetails(source.getProductDetailsView())
                 .withGeneralClusterConfigs(source.getGeneralClusterConfigs())
-                .withHdfConfigs(source.getHdfConfigs().orElse(null))
                 .withExposedServices(source.getExposedServices())
                 .build();
     }

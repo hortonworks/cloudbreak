@@ -17,9 +17,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.template.domain.GeneratedCmTemplate;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -79,14 +79,7 @@ public class BlueprintV4RequestToBlueprintConverter
                 blueprint.setBlueprintText(JsonUtil.writeValueAsString(blueprintJson));
             }
 
-            if (blueprintUtils.isAmbariBlueprint(blueprintJson)) {
-                validateAmbariBlueprint(blueprintJson);
-                validateAmbariBlueprintStackVersion(blueprintJson);
-                blueprint.setStackName(blueprintUtils.getBlueprintName(blueprintJson));
-                blueprint.setHostGroupCount(blueprintUtils.countHostGroups(blueprintJson));
-                blueprint.setStackType(blueprintUtils.getBlueprintStackName(blueprintJson));
-                blueprint.setStackVersion(blueprintUtils.getBlueprintStackVersion(blueprintJson));
-            } else if (blueprintUtils.isClouderaManagerClusterTemplate(blueprintJson)) {
+            if (blueprintUtils.isClouderaManagerClusterTemplate(blueprintJson)) {
                 blueprint.setStackName(blueprintUtils.getCDHDisplayName(blueprintJson));
                 blueprint.setHostGroupCount(blueprintUtils.countHostTemplates(blueprintJson));
                 blueprint.setStackVersion(blueprintUtils.getCDHStackVersion(blueprintJson));
@@ -104,14 +97,6 @@ public class BlueprintV4RequestToBlueprintConverter
         return blueprint;
     }
 
-    private void validateAmbariBlueprintStackVersion(JsonNode blueprintJson) {
-        String stackVersion = blueprintUtils.getBlueprintStackVersion(blueprintJson);
-        if (StringUtils.isBlank(stackVersion) || !stackVersion.matches("[0-9]+\\.[0-9]+")) {
-            throw new BadRequestException(String.format("Stack version [%s] is not valid. Valid stack version is in MAJOR.MINOR format eg.: 2.6",
-                    stackVersion));
-        }
-    }
-
     private String getNameByItsAvailability(@Nullable String name) {
         return Strings.isNullOrEmpty(name) ? missingResourceNameGenerator.generateName(APIResourceType.BLUEPRINT) : name;
     }
@@ -122,12 +107,6 @@ public class BlueprintV4RequestToBlueprintConverter
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Invalid tag(s) in the cluster template: Unable to parse JSON.", e);
         }
-    }
-
-    private void validateAmbariBlueprint(JsonNode root) {
-        hasBlueprintInBlueprint(root);
-        hasBlueprintNameInBlueprint(root);
-        validateHostGroups(root);
     }
 
     private void validateHostGroups(JsonNode root) {

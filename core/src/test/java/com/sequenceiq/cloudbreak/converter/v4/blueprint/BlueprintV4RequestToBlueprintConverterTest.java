@@ -4,19 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,11 +17,9 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
-import com.sequenceiq.cloudbreak.cmtemplate.generator.template.domain.GeneratedCmTemplate;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
@@ -66,15 +54,6 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         doReturn("bpname").when(blueprintUtils).getBlueprintName(any());
     }
 
-    @Test
-    public void testConvertWhereEveryDataFilledButThereIsNoTagsElementInBlueprintJsonThenItShouldBeEmpty() {
-        Blueprint result = underTest.convert(getRequest("blueprint.json"));
-        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn", "created"));
-        assertEquals("{}", result.getTags().getValue());
-        assertEquals("HDP", result.getStackType());
-        assertEquals("2.3", result.getStackVersion());
-    }
-
     @Test(expected = BadRequestException.class)
     public void testConvertShouldThrowExceptionWhenTheBlueprintJsonIsInvalid() {
         BlueprintV4Request request = new BlueprintV4Request();
@@ -82,24 +61,6 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         request.setBlueprint(blueprint);
         when(jsonHelper.createJsonFromString(blueprint)).thenThrow(new CloudbreakApiException("Invalid Json"));
         underTest.convert(request);
-    }
-
-    @Test
-    public void testConvertWhenInputJsonHasTagsFieldButItsEmpty() {
-        Blueprint result = underTest.convert(getRequest("blueprint-empty-tags.json"));
-        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn", "created"));
-        assertEquals("{}", result.getTags().getValue());
-        assertEquals("HDP", result.getStackType());
-        assertEquals("2.3", result.getStackVersion());
-    }
-
-    @Test
-    public void testConvertWhenInputJsonHasTagsFieldAndItHasMoreThanOneFieldInIt() {
-        Blueprint result = underTest.convert(getRequest("blueprint-filled-tags.json"));
-        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn", "created"));
-        Assert.assertTrue(result.getTags().getMap().size() > 1);
-        assertEquals("HDP", result.getStackType());
-        assertEquals("2.3", result.getStackVersion());
     }
 
     @Test
@@ -114,151 +75,9 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         underTest.convert(request);
     }
 
-    @Test
-    public void testConvertWhenUrlIsNotNullButEmptyThenBlueprintTextShouldBeTheProvidedAmbariBlueprint() {
-        BlueprintV4Request request = getRequest("blueprint.json");
-        request.setUrl("");
-
-        Blueprint result = underTest.convert(request);
-
-        assertEquals(request.getBlueprint(), result.getBlueprintText());
-        assertEquals("HDP", result.getStackType());
-        assertEquals("2.3", result.getStackVersion());
-    }
-
-    @Test
-    public void testConvertWhenNameIsFilledThenTheSameShoulBeInTheBlueprintObject() {
-        String name = "name";
-        BlueprintV4Request request = getRequest("blueprint.json");
-        request.setName(name);
-
-        Blueprint result = underTest.convert(request);
-
-        assertEquals(name, result.getName());
-        assertEquals("HDP", result.getStackType());
-        assertEquals("2.3", result.getStackVersion());
-    }
-
-    @Test
-    public void testConvertWhenNameIsNullThenGeneratedNameShouldBeRepresentedInTheBlueprintObject() {
-        String generatedName = "something generated here";
-        BlueprintV4Request request = getRequest("blueprint.json");
-        request.setName(null);
-        when(missingResourceNameGenerator.generateName(APIResourceType.BLUEPRINT)).thenReturn(generatedName);
-
-        Blueprint result = underTest.convert(request);
-
-        assertEquals(generatedName, result.getName());
-        assertEquals("HDP", result.getStackType());
-        assertEquals("2.3", result.getStackVersion());
-    }
-
-    @Test
-    public void testConvertWhenUnableToObtainTheBlueprintNameFromTheProvidedBlueprintTextThenExceptionWouldCome() {
-        doAnswer(invocation -> {
-            throw new IOException("some message");
-        }).when(blueprintUtils).getBlueprintName(any());
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid cluster template: Failed to parse JSON.");
-
-        underTest.convert(getRequest("blueprint.json"));
-    }
-
-    @Test
-    public void testConvertWhenUnableToObtainHostGroupCountThenExceptionWouldCome() {
-        doAnswer(invocation -> {
-            throw new IOException("some message");
-        }).when(blueprintUtils).countHostGroups(any());
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid cluster template: Failed to parse JSON.");
-
-        underTest.convert(getRequest("blueprint.json"));
-    }
-
-    @Test
-    public void testConvertWhenUnableToObtainTheStackTypeFromTheProvidedBlueprintTextThenExceptionWouldCome() {
-        doAnswer(invocation -> {
-            throw new IOException("some message");
-        }).when(blueprintUtils).getBlueprintStackName(any());
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid cluster template: Failed to parse JSON.");
-
-        underTest.convert(getRequest("blueprint.json"));
-    }
-
-    @Test
-    public void testConvertWhenUnableToObtainTheStackVersionFromTheProvidedBlueprintTextThenExceptionWouldCome() {
-        doAnswer(invocation -> {
-            throw new IOException("some message");
-        }).when(blueprintUtils).getBlueprintStackVersion(any());
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid cluster template: Failed to parse JSON.");
-
-        underTest.convert(getRequest("blueprint.json"));
-    }
-
-    @Test
-    public void testConvertWhenUnableToCreateJsonFromIncomingTagsThenExceptionWouldCome() {
-        BlueprintV4Request request = getRequest("blueprint.json");
-        Map<String, Object> invalidTags = new HashMap<>(1);
-        invalidTags.put(null, null);
-        request.setTags(invalidTags);
-
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid tag(s) in the cluster template: Unable to parse JSON.");
-
-        underTest.convert(request);
-    }
-
-    @Test
-    public void testConvertWhenServiceListIsNull() {
-        BlueprintV4Request request = getRequest("blueprint.json");
-        request.setServices(null);
-        Blueprint result = underTest.convert(request);
-        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn", "created"));
-        assertEquals("{}", result.getTags().getValue());
-        assertEquals("HDP", result.getStackType());
-        assertEquals("2.3", result.getStackVersion());
-    }
-
-    @Test
-    public void testConvertWhenServiceListIsEmpty() {
-        BlueprintV4Request request = getRequest("blueprint.json");
-        request.setServices(new HashSet<>());
-        Blueprint result = underTest.convert(request);
-        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn", "created"));
-        assertEquals("{}", result.getTags().getValue());
-        assertEquals("HDP", result.getStackType());
-        assertEquals("2.3", result.getStackVersion());
-    }
-
-    @Test
-    public void testConvertWithOneService() {
-        BlueprintV4Request request = getRequest("blueprint.json");
-        String blueprint = request.getBlueprint();
-        Set<String> services = Set.of("DATANODE");
-        String platform = "platform";
-        GeneratedCmTemplate generatedCmTemplate = mock(GeneratedCmTemplate.class);
-        when(generatedCmTemplate.getTemplate()).thenReturn(blueprint);
-        when(clusterTemplateGeneratorService.generateTemplateByServices(services, platform)).thenReturn(generatedCmTemplate);
-        request.setServices(services);
-        request.setPlatform(platform);
-
-        Blueprint result = underTest.convert(request);
-
-        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn", "created"));
-        assertEquals(blueprint, result.getBlueprintText());
-    }
-
     @Test(expected = BadRequestException.class)
     public void testWithInvalidDashInHostgroupName() {
         underTest.convert(getRequest("blueprint-hostgroup-name-with-dash.json"));
-    }
-
-    @Test
-    public void testWithInvalidUnderscoreInHostgroupName() {
-        Blueprint result = underTest.convert(getRequest("blueprint-hostgroup-name-with-underscore.json"));
-        assertNotNull(result);
     }
 
     @Test

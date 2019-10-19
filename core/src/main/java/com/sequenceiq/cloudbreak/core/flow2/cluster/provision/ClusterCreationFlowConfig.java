@@ -38,8 +38,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.INSTALLING_CLUSTER_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.STARTING_AMBARI_SERVICES_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.STARTING_AMBARI_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.STARTING_CLUSTER_MANAGER_SERVICES_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.STARTING_CLUSTER_MANAGER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.UPLOAD_RECIPES_STATE;
 
 import java.util.List;
@@ -67,11 +67,11 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
                     .defaultFailureEvent()
             .from(UPLOAD_RECIPES_STATE).to(CONFIGURE_KEYTABS_STATE).event(UPLOAD_RECIPES_FINISHED_EVENT)
                     .failureEvent(UPLOAD_RECIPES_FAILED_EVENT)
-            .from(CONFIGURE_KEYTABS_STATE).to(STARTING_AMBARI_SERVICES_STATE).event(CONFIGURE_KEYTABS_FINISHED_EVENT)
+            .from(CONFIGURE_KEYTABS_STATE).to(STARTING_CLUSTER_MANAGER_SERVICES_STATE).event(CONFIGURE_KEYTABS_FINISHED_EVENT)
                     .failureEvent(CONFIGURE_KEYTABS_FAILED_EVENT)
-            .from(STARTING_AMBARI_SERVICES_STATE).to(STARTING_AMBARI_STATE).event(START_AMBARI_SERVICES_FINISHED_EVENT)
+            .from(STARTING_CLUSTER_MANAGER_SERVICES_STATE).to(STARTING_CLUSTER_MANAGER_STATE).event(START_AMBARI_SERVICES_FINISHED_EVENT)
                     .failureEvent(START_AMBARI_SERVICES_FAILED_EVENT)
-            .from(STARTING_AMBARI_STATE).to(CONFIGURE_LDAP_SSO_STATE).event(START_AMBARI_FINISHED_EVENT)
+            .from(STARTING_CLUSTER_MANAGER_STATE).to(CONFIGURE_LDAP_SSO_STATE).event(START_AMBARI_FINISHED_EVENT)
                     .failureEvent(START_AMBARI_FAILED_EVENT)
             .from(CONFIGURE_LDAP_SSO_STATE).to(INSTALLING_CLUSTER_STATE).event(LDAP_SSO_CONFIGURATION_FINISHED_EVENT)
                     .failureEvent(LDAP_SSO_CONFIGURATION_FAILED_EVENT)

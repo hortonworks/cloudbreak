@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
@@ -25,7 +25,7 @@ public class StreamsMessagingManagerRdsConfigProvider extends AbstractRdsConfigP
     private String db;
 
     @Inject
-    private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Override
     protected String getDbUser() {
@@ -54,7 +54,7 @@ public class StreamsMessagingManagerRdsConfigProvider extends AbstractRdsConfigP
 
     @Override
     protected boolean isRdsConfigNeeded(Blueprint blueprint) {
-        AmbariBlueprintTextProcessor blueprintProcessor = ambariBlueprintProcessorFactory.get(blueprint.getBlueprintText());
+        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprint.getBlueprintText());
         return blueprintProcessor.isCMComponentExistsInBlueprint("STREAMS_MESSAGING_MANAGER_SERVER");
     }
 }

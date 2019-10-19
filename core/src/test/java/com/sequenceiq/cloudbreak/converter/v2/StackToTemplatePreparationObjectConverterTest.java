@@ -18,11 +18,9 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -36,13 +34,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
-import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
-import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
-import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.general.GeneralClusterConfigsProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -58,7 +55,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -78,7 +74,6 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
-import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
@@ -127,9 +122,6 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private InstanceGroupMetadataCollector instanceGroupMetadataCollector;
-
-    @Mock
-    private HdfConfigProvider hdfConfigProvider;
 
     @Mock
     private PostgresConfigService postgresConfigService;
@@ -212,8 +204,6 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
-        when(clusterService.getById(any(Long.class))).thenReturn(cluster);
-        when(stackMock.getCluster()).thenReturn(sourceCluster);
         User user = new User();
         user.setUserName("applebob@apple.com");
         when(stackMock.getCreator()).thenReturn(user);
@@ -226,13 +216,13 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.getName()).thenReturn("stackname");
         when(sourceCluster.getId()).thenReturn(TEST_CLUSTER_ID);
         when(cluster.getId()).thenReturn(TEST_CLUSTER_ID);
-        when(clusterComponentConfigProvider.getHDPRepo(TEST_CLUSTER_ID)).thenReturn(stackRepoDetails);
         when(instanceGroupMetadataCollector.collectMetadata(stackMock)).thenReturn(groupInstances);
         when(cluster.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(stackMock.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
         when(stackMock.getEnvironmentCrn()).thenReturn(TestConstants.CRN);
+        when(stackMock.getCluster()).thenReturn(sourceCluster);
         Credential credential = Credential.builder()
                 .crn("aCredentialCRN")
                 .attributes(new Json(""))
@@ -247,6 +237,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(awsMockAccountMappingService.getGroupMappings(REGION, credential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
         when(awsMockAccountMappingService.getUserMappings(REGION, credential)).thenReturn(MOCK_USER_MAPPINGS);
         when(ldapConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
+        when(clusterService.getById(anyLong())).thenReturn(cluster);
     }
 
     @Test
@@ -339,49 +330,6 @@ public class StackToTemplatePreparationObjectConverterTest {
     public void testConvertWhenClusterFromClusterServiceHasNoLdapConfigThenTheOptionalShouldBeEmpty() {
         TemplatePreparationObject result = underTest.convert(stackMock);
         assertFalse(result.getLdapConfig().isPresent());
-    }
-
-    @Test
-    public void testConvertWhenHdpRepoNotNullThenItsVersionShouldBeSet() {
-        String hdpVersion = "2.6";
-        when(clusterComponentConfigProvider.getHDPRepo(TEST_CLUSTER_ID)).thenReturn(stackRepoDetails);
-        when(stackRepoDetails.getHdpVersion()).thenReturn(hdpVersion);
-
-        TemplatePreparationObject result = underTest.convert(stackMock);
-
-        assertTrue(result.getStackRepoDetailsHdpVersion().isPresent());
-        assertEquals(hdpVersion, result.getStackRepoDetailsHdpVersion().get());
-    }
-
-    @Test
-    public void testConvertWhenHdpRepoNullThenEmptyVersionShouldBeSet() {
-        when(clusterComponentConfigProvider.getHDPRepo(TEST_CLUSTER_ID)).thenReturn(null);
-
-        TemplatePreparationObject result = underTest.convert(stackMock);
-
-        assertFalse(result.getStackRepoDetailsHdpVersion().isPresent());
-    }
-
-    @Test
-    public void testConvertWhenHdfConfigProviderProvidedThenItShouldBeStored() {
-        HdfConfigs expected = mock(HdfConfigs.class);
-        Set<HostGroup> hostGroups = new LinkedHashSet<>();
-        when(hdfConfigProvider.createHdfConfig(hostGroups, groupInstances, TEST_BLUEPRINT_TEXT)).thenReturn(expected);
-
-        TemplatePreparationObject result = underTest.convert(stackMock);
-
-        assertTrue(result.getHdfConfigs().isPresent());
-        assertEquals(expected, result.getHdfConfigs().get());
-    }
-
-    @Test
-    public void testConvertWhenHdfConfigIsNullThenOptionalShouldBeEmpty() {
-        Set<HostGroup> hostGroups = new LinkedHashSet<>();
-        when(hdfConfigProvider.createHdfConfig(hostGroups, groupInstances, TEST_BLUEPRINT_TEXT)).thenReturn(null);
-
-        TemplatePreparationObject result = underTest.convert(stackMock);
-
-        assertFalse(result.getHdfConfigs().isPresent());
     }
 
     @Test

@@ -35,14 +35,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
-import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
-import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.general.GeneralClusterConfigsProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
@@ -174,9 +173,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private ClusterV4Request cluster;
 
     @Mock
-    private AmbariV4Request ambari;
-
-    @Mock
     private Blueprint blueprint;
 
     @Mock
@@ -222,7 +218,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(source.getType()).thenReturn(StackType.DATALAKE);
         when(source.getPlacement()).thenReturn(placementSettings);
         when(source.getName()).thenReturn(TEST_CLUSTER_NAME);
-        when(cluster.getAmbari()).thenReturn(ambari);
         when(cluster.getBlueprintName()).thenReturn(TEST_BLUEPRINT_NAME);
         when(cluster.getName()).thenReturn(TEST_CLUSTER_NAME);
         when(blueprintService.getByNameForWorkspace(TEST_BLUEPRINT_NAME, workspace)).thenReturn(blueprint);
@@ -332,18 +327,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         TemplatePreparationObject result = underTest.convert(source);
 
         assertSame(expected, result.getBlueprintView());
-    }
-
-    @Test
-    public void testConvertWhenObtainingBlueprintStackInfoThenItsVersionShouldBeStoredAsStackRepoDetailsHdpVersion() {
-        String expected = TEST_VERSION;
-        when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
-        when(blueprintStackInfo.getVersion()).thenReturn(expected);
-
-        TemplatePreparationObject result = underTest.convert(source);
-
-        assertTrue(result.getStackRepoDetailsHdpVersion().isPresent());
-        assertEquals(expected, result.getStackRepoDetailsHdpVersion().get());
     }
 
     @Test

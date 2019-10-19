@@ -74,7 +74,6 @@ public class MaintenanceModeValidationActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 List<Warning> warnings = getWarnings(variables);
-                warnings.addAll(maintenanceModeValidationService.validateAmbariRepository(context.getStack().getCluster().getId()));
                 sendEvent(context, new StackEvent(VALIDATE_AMBARI_REPO_INFO_FINISHED_EVENT.event(),
                         context.getStack().getId()));
                 putWarnings(variables, warnings);

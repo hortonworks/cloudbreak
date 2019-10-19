@@ -54,7 +54,6 @@ public class DistroXClusterToClusterConverter {
             source.setExposedServices(List.of("ALL"));
         }
         response.setGateway(gatewayConverter.convert(source.getExposedServices()));
-        response.setAmbari(null);
         response.setName(null);
         response.setDatabases(source.getDatabases());
         response.setBlueprintName(source.getBlueprintName());

@@ -8,16 +8,14 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
@@ -40,12 +38,6 @@ public class SharedServiceValidator {
         if (request.getSharedService() != null) {
             Long workspaceId = workspace.getId();
             checkCloudPlatform(request, workspaceId, resultBuilder);
-            ClusterV4Request clusterReq = request.getCluster();
-            Blueprint blueprint = blueprintService.getByNameForWorkspaceId(
-                    clusterReq.getBlueprintName(), workspaceId);
-            if (blueprintService.isAmbariBlueprint(blueprint)) {
-                checkSharedServiceRequirements(request, workspace, resultBuilder);
-            }
         }
         return resultBuilder.build();
     }

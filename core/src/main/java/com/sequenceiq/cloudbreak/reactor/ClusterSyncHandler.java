@@ -13,7 +13,6 @@ import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceMetadataUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.status.ClusterStatusUpdater;
-import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -36,9 +35,6 @@ public class ClusterSyncHandler implements EventHandler<ClusterSyncRequest> {
     @Inject
     private InstanceMetadataUpdater instanceMetadataUpdater;
 
-    @Inject
-    private AmbariDatalakeConfigProvider ambariDatalakeConfigProvider;
-
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterSyncRequest.class);
@@ -54,9 +50,6 @@ public class ClusterSyncHandler implements EventHandler<ClusterSyncRequest> {
             clusterStatusUpdater.updateClusterStatus(stack, cluster);
             if (cluster != null && (cluster.isAvailable() || cluster.isMaintenanceModeEnabled())) {
                 instanceMetadataUpdater.updatePackageVersionsOnAllInstances(stack.getId());
-                if (stack.isDatalake()) {
-                    ambariDatalakeConfigProvider.collectAndStoreDatalakeResources(stack, cluster);
-                }
             }
             result = new ClusterSyncResult(request);
         } catch (Exception e) {

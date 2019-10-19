@@ -36,11 +36,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToExposedServicesConverter;
@@ -66,9 +64,6 @@ public class ServiceEndpointCollectorTest {
 
     @Mock
     private BlueprintService blueprintService;
-
-    @Mock
-    private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
 
     @Mock
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
@@ -236,10 +231,7 @@ public class ServiceEndpointCollectorTest {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText("{\"Blueprints\":{}}");
         when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(blueprint);
-        when(blueprintService.isAmbariBlueprint(any())).thenReturn(true);
-        AmbariBlueprintTextProcessor blueprintTextProcessor = mock(AmbariBlueprintTextProcessor.class);
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
-        when(ambariBlueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
     }
 

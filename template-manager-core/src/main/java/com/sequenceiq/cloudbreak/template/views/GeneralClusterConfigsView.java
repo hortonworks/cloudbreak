@@ -34,8 +34,6 @@ public class GeneralClusterConfigsView {
 
     private String primaryGatewayInstanceDiscoveryFQDN;
 
-    private int kafkaReplicationFactor;
-
     public GeneralClusterConfigsView(GeneralClusterConfigs generalClusterConfigs) {
         email = generalClusterConfigs.getIdentityUserEmail();
         gatewayInstanceMetadataPresented = generalClusterConfigs.isGatewayInstanceMetadataPresented();
@@ -51,7 +49,6 @@ public class GeneralClusterConfigsView {
         nodeCount = generalClusterConfigs.getNodeCount();
         containerExecutor = ExecutorType.CONTAINER.equals(generalClusterConfigs.getExecutorType());
         primaryGatewayInstanceDiscoveryFQDN = generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().orElse(null);
-        kafkaReplicationFactor = generalClusterConfigs.getKafkaReplicationFactor();
     }
 
     public OrchestratorType getOrchestratorType() {
@@ -168,13 +165,5 @@ public class GeneralClusterConfigsView {
 
     public void setContainerExecutor(boolean containerExecutor) {
         this.containerExecutor = containerExecutor;
-    }
-
-    public int getKafkaReplicationFactor() {
-        return kafkaReplicationFactor;
-    }
-
-    public void setKafkaReplicationFactor(int kafkaReplicationFactor) {
-        this.kafkaReplicationFactor = kafkaReplicationFactor;
     }
 }

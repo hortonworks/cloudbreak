@@ -29,19 +29,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
-import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -248,11 +246,7 @@ public class ImageService {
                 }
                 return new Component(ComponentType.CM_REPO_DETAILS, ComponentType.CM_REPO_DETAILS.name(), new Json(clouderaManagerRepo), stack);
             } else {
-                AmbariRepo ambariRepo = conversionService.convert(imgFromCatalog, AmbariRepo.class);
-                if (ambariRepo.getBaseUrl() == null) {
-                    throw new CloudbreakImageCatalogException(String.format("Ambari repo was not found in image for os: '%s'.", imgFromCatalog.getOsType()));
-                }
-                return new Component(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(), new Json(ambariRepo), stack);
+                throw new CloudbreakImageCatalogException(String.format("Invalid Ambari repo present in image catalog: '%s'.", imgFromCatalog.getRepo()));
             }
         } else {
             throw new CloudbreakImageCatalogException(String.format("Invalid Ambari repo present in image catalog: '%s'.", imgFromCatalog.getRepo()));
@@ -275,17 +269,6 @@ public class ImageService {
         repo.setHdpVersion(stack.getVersion());
         repo.setStack(stack.getRepo().getStack());
         repo.setUtil(stack.getRepo().getUtil());
-        repo.setMpacks(stack.getMpackList().stream().map(icmpack -> {
-            ManagementPackComponent mpack = new ManagementPackComponent();
-            mpack.setMpackUrl(icmpack.getMpackUrl());
-            mpack.setStackDefault(true);
-            mpack.setPreInstalled(true);
-            return mpack;
-        }).collect(Collectors.toList()));
-        if (!stack.getMpackList().isEmpty()) {
-            // Backward compatibility for the previous UI versions
-            repo.getStack().put(StackRepoDetails.MPACK_TAG, stack.getMpackList().get(0).getMpackUrl());
-        }
         return repo;
     }
 

@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
+import com.sequenceiq.cloudbreak.cmtemplate.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterToClusterV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -98,7 +98,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         assertEquals(1L, (long) result.getId());
         assertEquals(getSource().getExtendedBlueprintText(), result.getExtendedBlueprintText());
 
-        List<String> skippedFields = Lists.newArrayList("customContainers", "ambari", "cm", "creationFinished", "cloudStorage", "gateway");
+        List<String> skippedFields = Lists.newArrayList("customContainers", "cm", "creationFinished", "cloudStorage", "gateway");
         assertAllFieldsNotNull(result, skippedFields);
     }
 

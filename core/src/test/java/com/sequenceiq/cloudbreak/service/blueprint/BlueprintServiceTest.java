@@ -42,8 +42,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -113,12 +111,6 @@ public class BlueprintServiceTest {
 
     @Mock
     private CmTemplateProcessor cmTemplateProcessor;
-
-    @Mock
-    private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
-
-    @Mock
-    private AmbariBlueprintTextProcessor ambariBlueprintTextProcessor;
 
     @InjectMocks
     private BlueprintService underTest;
@@ -471,8 +463,6 @@ public class BlueprintServiceTest {
         verify(cmTemplateProcessorFactory, times(1)).get(someBlueprintText);
         verify(cmTemplateProcessor, times(1)).getVersion();
         verify(cmTemplateProcessor, times(1)).getHostTemplateNames();
-        verify(ambariBlueprintTextProcessor, times(0)).getVersion();
-        verify(ambariBlueprintTextProcessor, times(0)).getHostTemplateNames();
     }
 
     @Test

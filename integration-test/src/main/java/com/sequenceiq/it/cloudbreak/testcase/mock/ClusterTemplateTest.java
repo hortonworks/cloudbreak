@@ -18,7 +18,6 @@ import com.sequenceiq.it.cloudbreak.client.ClusterTemplateTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
-import com.sequenceiq.it.cloudbreak.client.MpackTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.mock.MockCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -55,9 +54,6 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 
     @Inject
     private RecipeTestClient recipeTestClient;
-
-    @Inject
-    private MpackTestClient mpackTestClient;
 
     @Inject
     private EnvironmentTestClient environmentTestClient;

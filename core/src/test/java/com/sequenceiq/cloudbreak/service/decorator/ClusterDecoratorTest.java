@@ -17,11 +17,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.FileReaderUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
-import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -47,7 +46,7 @@ class ClusterDecoratorTest {
     private BlueprintValidatorFactory blueprintValidatorFactory;
 
     @Mock
-    private AmbariBlueprintValidator ambariBlueprintValidator;
+    private CmTemplateValidator cmTemplateValidator;
 
     @Mock
     private StackService stackService;
@@ -78,7 +77,7 @@ class ClusterDecoratorTest {
 
     @BeforeEach
     void setUp() {
-        when(blueprintValidatorFactory.createBlueprintValidator(any())).thenReturn(ambariBlueprintValidator);
+        when(blueprintValidatorFactory.createBlueprintValidator(any())).thenReturn(cmTemplateValidator);
         when(cloudPlatformConnectors.get(any(), any())).thenReturn(connector);
         when(connector.parameters()).thenReturn(platformParameters);
     }
@@ -118,9 +117,6 @@ class ClusterDecoratorTest {
     }
 
     private ClusterV4Request createClusterV4Request() {
-        ClusterV4Request clusterV4Request = new ClusterV4Request();
-        AmbariV4Request ambariV4Request = new AmbariV4Request();
-        clusterV4Request.setAmbari(ambariV4Request);
-        return clusterV4Request;
+        return new ClusterV4Request();
     }
 }

@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.controller.v4.EventV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.FileSystemV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ImageCatalogV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.KubernetesV4Controller;
-import com.sequenceiq.cloudbreak.controller.v4.ManagementPackV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.RecipesV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.StackV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.UserProfileV4Controller;
@@ -72,7 +71,6 @@ public class EndpointConfig extends ResourceConfig {
             FileSystemV4Controller.class,
             WorkspaceAwareUtilV4Controller.class,
             AutoscaleV4Controller.class,
-            ManagementPackV4Controller.class,
             StackV4Controller.class,
             CloudbreakInfoV4Controller.class,
             DistroXV1Controller.class,

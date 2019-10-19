@@ -59,8 +59,8 @@ public class ClusterResetActions {
         };
     }
 
-    @Bean(name = "CLUSTER_RESET_START_AMBARI_FINISHED_STATE")
-    public Action<?, ?> finishStartAmbari() {
+    @Bean(name = "CLUSTER_RESET_START_CLUSTER_MANAGER_FINISHED_STATE")
+    public Action<?, ?> finishStartClusterManager() {
         return new AbstractClusterResetAction<>(StartClusterSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StartClusterSuccess payload, Map<Object, Object> variables) {

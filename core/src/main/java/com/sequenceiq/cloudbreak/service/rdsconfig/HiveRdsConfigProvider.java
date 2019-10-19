@@ -9,22 +9,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 
 @Component
 public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
 
     private static final String PILLAR_KEY = "hive";
-
-    private static final String[] PATH = {AmbariBlueprintTextProcessor.CONFIGURATIONS_NODE, "hive-site"};
-
-    private static final String[] CONFIGURATIONS = {"javax.jdo.option.ConnectionURL", "javax.jdo.option.ConnectionDriverName",
-            "javax.jdo.option.ConnectionUserName", "javax.jdo.option.ConnectionPassword"};
 
     @Value("${cb.hive.database.user:hive}")
     private String hiveDbUser;
@@ -36,7 +31,7 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
     private String hiveDbPort;
 
     @Inject
-    private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Inject
     private BlueprintService blueprintService;
@@ -65,12 +60,7 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
 
     private boolean isRdsConfigNeedForHiveMetastore(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintText();
-        AmbariBlueprintTextProcessor blueprintProcessor = ambariBlueprintProcessorFactory.get(blueprintText);
-        if (blueprintService.isAmbariBlueprint(blueprint)) {
-            return blueprintProcessor.isComponentExistsInBlueprint("HIVE_METASTORE")
-                    && !blueprintProcessor.isComponentExistsInBlueprint("MYSQL_SERVER")
-                    && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfigurations(PATH, CONFIGURATIONS));
-        }
+        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
         return blueprintProcessor.isCMComponentExistsInBlueprint("HIVEMETASTORE");
     }
 

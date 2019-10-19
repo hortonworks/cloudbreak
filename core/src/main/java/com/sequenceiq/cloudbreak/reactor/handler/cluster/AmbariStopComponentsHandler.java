@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.cluster.ClusterUpscaleService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStopComponentsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerStopComponentsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopClusterComponentsResult;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -16,7 +16,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class AmbariStopComponentsHandler implements EventHandler<AmbariStopComponentsRequest> {
+public class AmbariStopComponentsHandler implements EventHandler<ClusterManagerStopComponentsRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariStopComponentsHandler.class);
 
@@ -28,12 +28,12 @@ public class AmbariStopComponentsHandler implements EventHandler<AmbariStopCompo
 
     @Override
     public String selector() {
-        return EventSelectorUtil.selector(AmbariStopComponentsRequest.class);
+        return EventSelectorUtil.selector(ClusterManagerStopComponentsRequest.class);
     }
 
     @Override
-    public void accept(Event<AmbariStopComponentsRequest> event) {
-        AmbariStopComponentsRequest request = event.getData();
+    public void accept(Event<ClusterManagerStopComponentsRequest> event) {
+        ClusterManagerStopComponentsRequest request = event.getData();
         Long stackId = request.getResourceId();
         StopClusterComponentsResult result;
         try {

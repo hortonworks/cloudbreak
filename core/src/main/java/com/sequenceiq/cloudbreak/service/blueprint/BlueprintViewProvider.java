@@ -5,7 +5,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.template.model.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;

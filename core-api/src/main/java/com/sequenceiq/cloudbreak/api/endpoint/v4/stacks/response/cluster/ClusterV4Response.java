@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.AmbariV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.customcontainer.CustomContainerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.GatewayV4Response;
@@ -64,8 +63,6 @@ public class ClusterV4Response implements JsonEntity {
 
     @ApiModelProperty(ClusterModelDescription.FILESYSTEM)
     private CloudStorageResponse cloudStorage;
-
-    private AmbariV4Response ambari;
 
     private ClouderaManagerV4Response cm;
 
@@ -177,14 +174,6 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setCloudStorage(CloudStorageResponse cloudStorage) {
         this.cloudStorage = cloudStorage;
-    }
-
-    public AmbariV4Response getAmbari() {
-        return ambari;
-    }
-
-    public void setAmbari(AmbariV4Response ambari) {
-        this.ambari = ambari;
     }
 
     public ClouderaManagerV4Response getCm() {

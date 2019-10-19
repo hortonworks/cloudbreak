@@ -40,7 +40,6 @@ import com.sequenceiq.it.cloudbreak.dto.GatewayTestDto;
 import com.sequenceiq.it.cloudbreak.dto.GatewayTopologyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ManagementPackDetailsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.SecurityGroupTestDto;
@@ -83,7 +82,6 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
                 .given("master", InstanceGroupTestDto.class).withHostGroup(MASTER).withRecipes("mock-test-recipe").withSecurityGroup("securityGroupMaster")
                 .given("worker", InstanceGroupTestDto.class).withHostGroup(WORKER).withSecurityGroup("securityGroupWorker")
                 .given("compute", InstanceGroupTestDto.class).withHostGroup(COMPUTE)
-                .given("mpackDetails", ManagementPackDetailsTestDto.class).withName("mock-test-mpack")
                 .given("gatewayTopology", GatewayTopologyTestDto.class).withExposedServices("AMBARI").withTopologyName("proxy-name")
                 .given("gateway", GatewayTestDto.class).withTopologies("gatewayTopology")
                 .given("cluster", ClusterTestDto.class).withRdsConfigNames("mock-test-rds").withGateway("gateway")

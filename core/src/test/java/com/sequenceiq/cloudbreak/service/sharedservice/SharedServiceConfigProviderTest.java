@@ -12,7 +12,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -29,7 +28,6 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -68,9 +66,6 @@ public class SharedServiceConfigProviderTest {
 
     @Mock
     private DatalakeResourcesService datalakeResourcesService;
-
-    @Mock
-    private AmbariDatalakeConfigProvider ambariDatalakeConfigProvider;
 
     @Mock
     private StackInputs stackInputs;
@@ -150,35 +145,6 @@ public class SharedServiceConfigProviderTest {
         assertNull(stack.getDatalakeResourceId());
         assertEquals(publicStack.getInputs(), stack.getInputs());
         verify(datalakeResourcesService, times(0)).findById(anyLong());
-    }
-
-    @Test
-    public void testPrepareDLConfWithCloudDL() throws IOException {
-        Stack stackIn = new Stack();
-        stackIn.setDatalakeResourceId(1L);
-        DatalakeResources datalakeResources = new DatalakeResources();
-        long datalakeStackId = 11L;
-        datalakeResources.setDatalakeStackId(datalakeStackId);
-
-        Workspace workspace = new Workspace();
-        workspace.setId(1L);
-        stackIn.setWorkspace(workspace);
-        when(datalakeResourcesService.findDatalakeResourcesByWorkspaceAndEnvironment(anyLong(), anyString()))
-                .thenReturn(Collections.emptySet());
-
-        when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
-        when(ambariDatalakeConfigProvider.getAdditionalParameters(stackIn, datalakeResources)).thenReturn(Collections.singletonMap("test", "data"));
-        when(stackService.save(stackIn)).thenReturn(stackIn);
-        Stack dlStack = new Stack();
-        dlStack.setId(datalakeStackId);
-        dlStack.setCluster(createBarelyConfiguredRequestedCluster());
-        when(stackService.getById(dlStack.getId())).thenReturn(dlStack);
-        stackIn.setInputs(new Json(stackInputs));
-
-        Stack stack = underTest.prepareDatalakeConfigs(stackIn);
-
-        StackInputs stackInputs = stack.getInputs().get(StackInputs.class);
-        assertEquals(1L, stackInputs.getFixInputs().size());
     }
 
     private Cluster createBarelyConfiguredRequestedCluster() {

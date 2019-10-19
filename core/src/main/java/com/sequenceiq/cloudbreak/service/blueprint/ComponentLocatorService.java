@@ -13,7 +13,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -24,9 +23,6 @@ import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
 @Service
 public class ComponentLocatorService {
-
-    @Inject
-    private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
@@ -65,18 +61,13 @@ public class ComponentLocatorService {
     private Map<String, List<String>> getComponentAttribute(Cluster cluster, Collection<String> componentNames, Function<InstanceMetaData, String> fqdn) {
         Map<String, List<String>> result = new HashMap<>();
         String blueprintText = cluster.getBlueprint().getBlueprintText();
-        BlueprintTextProcessor processor = isAmbariBlueprint(cluster) ? ambariBlueprintProcessorFactory.get(blueprintText)
-                : cmTemplateProcessorFactory.get(blueprintText);
+        BlueprintTextProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
         for (HostGroup hg : hostGroupService.getByCluster(cluster.getId())) {
             Set<String> hgComponents = new HashSet<>(processor.getComponentsInHostGroup(hg.getName()));
             hgComponents.retainAll(componentNames);
             fillList(fqdn, result, hg, hgComponents);
         }
         return result;
-    }
-
-    private boolean isAmbariBlueprint(Cluster cluster) {
-        return blueprintService.isAmbariBlueprint(cluster.getBlueprint());
     }
 
     private Map<String, List<String>> getComponentAttribute(Long clusterId, BlueprintTextProcessor blueprintTextProcessor,

@@ -16,8 +16,6 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public interface ClusterApi {
 
-    String AMBARI = "AMBARI";
-
     String CLOUDERA_MANAGER = "CLOUDERA_MANAGER";
 
     default void waitForServer(Stack stack) throws CloudbreakException, ClusterClientInitException {

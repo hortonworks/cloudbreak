@@ -18,13 +18,11 @@ import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
-import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
 import com.sequenceiq.cloudbreak.template.utils.ModelConverterUtils;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.GeneralClusterConfigsView;
-import com.sequenceiq.cloudbreak.template.views.HdfConfigView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.ProductDetailsView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
@@ -43,8 +41,6 @@ public class TemplateModelContextBuilder {
     private Optional<KerberosConfig> kerberos = Optional.empty();
 
     private Optional<GatewayView> gateway = Optional.empty();
-
-    private Optional<HdfConfigView> hdfConfigs = Optional.empty();
 
     private Optional<SharedServiceConfigsView> sharedServiceConfigs = Optional.empty();
 
@@ -132,11 +128,6 @@ public class TemplateModelContextBuilder {
         return this;
     }
 
-    public TemplateModelContextBuilder withHdfConfigs(HdfConfigs hdfConfigs) {
-        this.hdfConfigs = hdfConfigs == null ? Optional.empty() : Optional.of(new HdfConfigView(hdfConfigs));
-        return this;
-    }
-
     public TemplateModelContextBuilder withSharedServiceConfigs(SharedServiceConfigsView sharedServiceConfigsView) {
         sharedServiceConfigs = Optional.ofNullable(sharedServiceConfigsView);
         return this;
@@ -197,7 +188,6 @@ public class TemplateModelContextBuilder {
         templateModelContext.put(HandleBarModelKey.FILESYSTEMCONFIGS.modelKey(), ModelConverterUtils.convert(createAdjustedFileSystemConfig()));
         templateModelContext.put(HandleBarModelKey.SHAREDSERVICE.modelKey(), sharedServiceConfigs.orElse(null));
         templateModelContext.put(HandleBarModelKey.BLUEPRINT.modelKey(), blueprintView);
-        templateModelContext.put(HandleBarModelKey.HDF.modelKey(), hdfConfigs.orElse(null));
         templateModelContext.put(HandleBarModelKey.GENERAL.modelKey(), generalClusterConfigsView);
         templateModelContext.put(HandleBarModelKey.HOST_GROUPS.modelKey(), hostGroups);
         templateModelContext.put(HandleBarModelKey.DEFAULT_TAGS.modelKey(), defaultTags);

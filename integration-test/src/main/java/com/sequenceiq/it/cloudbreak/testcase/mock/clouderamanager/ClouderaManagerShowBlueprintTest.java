@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.AmbariTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
@@ -47,9 +46,9 @@ public class ClouderaManagerShowBlueprintTest extends AbstractClouderaManagerTes
         String cm = resourcePropertyProvider().getName();
 
         testContext
-                .given(cm, AmbariTestDto.class)
+                .given(cm, ClouderaManagerTestDto.class)
                 .given(cmcluster, ClusterTestDto.class)
-                .withAmbari(cm)
+                .withClouderaManager(cm)
                 .withBlueprintName(blueprintName)
                 .withValidateBlueprint(Boolean.FALSE)
                 .given(StackTestDto.class)

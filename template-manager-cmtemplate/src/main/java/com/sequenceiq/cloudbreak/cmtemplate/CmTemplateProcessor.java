@@ -60,6 +60,12 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CmTemplateProcessor.class);
 
+    private static final String SERVICES_NODE = "services";
+
+    private static final String ROLE_CONFIG_GROUPS = "roleConfigGroups";
+
+    private static final String ROLE_TYPE = "roleType";
+
     private final ApiClusterTemplate cmTemplate;
 
     public CmTemplateProcessor(@Nonnull String cmTemplateText) {
@@ -481,6 +487,17 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
             }
         }
         return configs;
+    }
+
+    public boolean isCMComponentExistsInBlueprint(String component) {
+        for (Entry<String, Set<String>> entry : getComponentsByHostGroup().entrySet()) {
+            for (String entryCompoenent : entry.getValue()) {
+                if (component.equalsIgnoreCase(entryCompoenent)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public Optional<ApiClusterTemplateConfig> getRoleConfig(String serviceType, String roleType, String configName) {

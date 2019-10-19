@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import javax.inject.Inject;
@@ -36,30 +35,12 @@ public class StackMatrixTest extends AbstractIntegrationTest {
                 .given(StackMatrixTestDto.class)
                 .when(utilTestClient.stackMatrixV4())
                 .then(this::responseExists)
-                .then(this::hdpExists)
-                .then(this::hdfExists)
                 .validate();
     }
 
     private StackMatrixTestDto responseExists(TestContext tc, StackMatrixTestDto entity, CloudbreakClient cc) {
         assertNotNull(entity);
         assertNotNull(entity.getResponse());
-        return entity;
-    }
-
-    private StackMatrixTestDto hdpExists(TestContext tc, StackMatrixTestDto entity, CloudbreakClient cc) {
-        assertNotNull(entity);
-        assertNotNull(entity.getResponse());
-        assertNotNull(entity.getResponse().getHdp());
-        assertFalse(entity.getResponse().getHdp().isEmpty());
-        return entity;
-    }
-
-    private StackMatrixTestDto hdfExists(TestContext tc, StackMatrixTestDto entity, CloudbreakClient cc) {
-        assertNotNull(entity);
-        assertNotNull(entity.getResponse());
-        assertNotNull(entity.getResponse().getHdf());
-        assertFalse(entity.getResponse().getHdf().isEmpty());
         return entity;
     }
 

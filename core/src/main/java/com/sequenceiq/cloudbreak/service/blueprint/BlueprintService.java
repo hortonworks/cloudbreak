@@ -30,13 +30,11 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.dto.BlueprintAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.AmbariCloudStorageConfigDetails;
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
+import com.sequenceiq.cloudbreak.cmtemplate.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -56,7 +54,6 @@ import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -88,16 +85,10 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     private ClusterService clusterService;
 
     @Inject
-    private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
-
-    @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Inject
     private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
-
-    @Inject
-    private AmbariCloudStorageConfigDetails ambariCloudStorageConfigDetails;
 
     @Inject
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
@@ -160,10 +151,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 }
             }
             String blueprintText = blueprint.getBlueprintText();
-            String extendedAmbariBlueprint = ambariBlueprintProcessorFactory.get(blueprintText)
-                    .extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(configs), false).asText();
-            LOGGER.debug("Extended blueprint result: {}", AnonymizerUtil.anonymize(extendedAmbariBlueprint));
-            blueprint.setBlueprintText(extendedAmbariBlueprint);
+            LOGGER.debug("Extended blueprint result: {}", AnonymizerUtil.anonymize(blueprintText));
+            blueprint.setBlueprintText(blueprintText);
         }
         try {
             savedBlueprint = create(blueprint, workspace.getId(), user);
@@ -269,10 +258,6 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return blueprintUtils.isClouderaManagerClusterTemplate(blueprint.getBlueprintText());
     }
 
-    public boolean isAmbariBlueprint(Blueprint blueprint) {
-        return blueprintUtils.isAmbariBlueprint(blueprint.getBlueprintText());
-    }
-
     public String getBlueprintVariant(Blueprint blueprint) {
         return blueprintUtils.getBlueprintVariant(blueprint.getBlueprintText());
     }
@@ -374,14 +359,11 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 .withSecure(secure)
                 .build();
 
-        Set<ConfigQueryEntry> result;
+        Set<ConfigQueryEntry> result = new HashSet<>();
 
         if (blueprintUtils.isClouderaManagerClusterTemplate(blueprintText)) {
             result = cmCloudStorageConfigProvider.queryParameters(fileSystemConfigQueryObject);
-        } else {
-            result = ambariCloudStorageConfigDetails.queryParameters(fileSystemConfigQueryObject);
         }
-
         return result;
     }
 

@@ -1,6 +1,0 @@
-{
-  "webhcat-site": {
-    "webhcat.proxyuser.root.groups": "*",
-    "webhcat.proxyuser.root.hosts": "*"
-  }
-}

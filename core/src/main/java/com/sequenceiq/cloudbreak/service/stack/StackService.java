@@ -52,7 +52,6 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
@@ -62,7 +61,6 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -76,7 +74,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -100,6 +97,7 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
@@ -170,7 +168,7 @@ public class StackService implements ResourceIdProvider {
     private SaltSecurityConfigService saltSecurityConfigService;
 
     @Inject
-    private AmbariBlueprintValidator ambariBlueprintValidator;
+    private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
@@ -974,15 +972,11 @@ public class StackService implements ResourceIdProvider {
     }
 
     private void validateHostGroupAdjustment(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
-        Blueprint blueprint = stack.getCluster().getBlueprint();
         Optional<HostGroup> hostGroup = stack.getCluster().getHostGroups().stream()
                 .filter(input -> input.getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())).findFirst();
         if (!hostGroup.isPresent()) {
             throw new BadRequestException(String.format("Instancegroup '%s' not found or not part of stack '%s'",
                     instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));
-        }
-        if (ClusterApi.AMBARI.equalsIgnoreCase(stack.getCluster().getVariant())) {
-            ambariBlueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(), adjustment);
         }
     }
 
