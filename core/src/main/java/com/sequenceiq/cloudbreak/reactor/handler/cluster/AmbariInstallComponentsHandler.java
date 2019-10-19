@@ -8,15 +8,15 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.cluster.ClusterUpscaleService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariInstallComponentsRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariInstallComponentsResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerInstallComponentsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerInstallComponentsResult;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class AmbariInstallComponentsHandler implements EventHandler<AmbariInstallComponentsRequest> {
+public class AmbariInstallComponentsHandler implements EventHandler<ClusterManagerInstallComponentsRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariInstallComponentsHandler.class);
 
@@ -28,21 +28,21 @@ public class AmbariInstallComponentsHandler implements EventHandler<AmbariInstal
 
     @Override
     public String selector() {
-        return EventSelectorUtil.selector(AmbariInstallComponentsRequest.class);
+        return EventSelectorUtil.selector(ClusterManagerInstallComponentsRequest.class);
     }
 
     @Override
-    public void accept(Event<AmbariInstallComponentsRequest> event) {
-        AmbariInstallComponentsRequest request = event.getData();
+    public void accept(Event<ClusterManagerInstallComponentsRequest> event) {
+        ClusterManagerInstallComponentsRequest request = event.getData();
         Long stackId = request.getResourceId();
-        AmbariInstallComponentsResult result;
+        ClusterManagerInstallComponentsResult result;
         try {
             clusterUpscaleService.installComponents(stackId, request.getComponents(), request.getHostName());
-            result = new AmbariInstallComponentsResult(request);
+            result = new ClusterManagerInstallComponentsResult(request);
         } catch (Exception e) {
             String message = "Failed to install components on new host";
             LOGGER.error(message, e);
-            result = new AmbariInstallComponentsResult(message, e, request);
+            result = new ClusterManagerInstallComponentsResult(message, e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
 

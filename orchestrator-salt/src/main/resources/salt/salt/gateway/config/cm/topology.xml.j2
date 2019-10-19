@@ -524,7 +524,7 @@
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['IMPALA_DEBUG_UI'] }}</url>
         {%- endfor %}
     </service>
-    {%- endif %}
+    {%- endif %}SharedServiceConfigProviderTest.java
     {%- endif %}
 
     {% if 'KUDU_MASTER' in salt['pillar.get']('gateway:location') -%}

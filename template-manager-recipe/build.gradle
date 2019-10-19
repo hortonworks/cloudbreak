@@ -11,10 +11,6 @@ jar {
 }
 
 dependencies {
-    compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
-        exclude group: 'org.slf4j'
-        exclude group: 'xerces.xercesImpl'
-    }
     compile group: 'xerces',              name: 'xercesImpl',            version: xerces
 
     compile group: 'com.github.jknack',             name: 'handlebars',                     version: '4.0.6'

@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
-import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
@@ -57,10 +56,6 @@ public class TemplatePreparationObject {
     private final Optional<LdapView> ldapConfig;
 
     private final Optional<SharedServiceConfigsView> sharedServiceConfigs;
-
-    private final Optional<String> stackRepoDetailsHdpVersion;
-
-    private final Optional<HdfConfigs> hdfConfigs;
 
     private final Optional<BaseFileSystemConfigurationsView> fileSystemView;
 
@@ -91,9 +86,7 @@ public class TemplatePreparationObject {
                 Function.identity()
         ));
         hostgroupViews = builder.hostgroupViews;
-        stackRepoDetailsHdpVersion = builder.stackRepoDetailsHdpVersion;
         ldapConfig = builder.ldapConfig;
-        hdfConfigs = builder.hdfConfigs;
         gatewayView = builder.gatewayView;
         fileSystemView = builder.fileSystemView;
         kerberosConfig = builder.kerberosConfig;
@@ -134,16 +127,8 @@ public class TemplatePreparationObject {
         return hostgroupViews;
     }
 
-    public Optional<String> getStackRepoDetailsHdpVersion() {
-        return stackRepoDetailsHdpVersion;
-    }
-
     public Optional<LdapView> getLdapConfig() {
         return ldapConfig;
-    }
-
-    public Optional<HdfConfigs> getHdfConfigs() {
-        return hdfConfigs;
     }
 
     public GatewayView getGatewayView() {
@@ -214,11 +199,7 @@ public class TemplatePreparationObject {
 
         private Set<HostgroupView> hostgroupViews = new HashSet<>();
 
-        private Optional<String> stackRepoDetailsHdpVersion = Optional.empty();
-
         private Optional<LdapView> ldapConfig = Optional.empty();
-
-        private Optional<HdfConfigs> hdfConfigs = Optional.empty();
 
         private Optional<BaseFileSystemConfigurationsView> fileSystemView = Optional.empty();
 
@@ -292,11 +273,6 @@ public class TemplatePreparationObject {
             return this;
         }
 
-        public Builder withStackRepoDetailsHdpVersion(String stackRepoDetailsHdpVersion) {
-            this.stackRepoDetailsHdpVersion = Optional.ofNullable(stackRepoDetailsHdpVersion);
-            return this;
-        }
-
         public Builder withFileSystemConfigurationView(BaseFileSystemConfigurationsView fileSystemView) {
             this.fileSystemView = Optional.ofNullable(fileSystemView);
             return this;
@@ -304,11 +280,6 @@ public class TemplatePreparationObject {
 
         public Builder withLdapConfig(LdapView ldapConfig) {
             this.ldapConfig = Optional.ofNullable(ldapConfig);
-            return this;
-        }
-
-        public Builder withHdfConfigs(HdfConfigs hdfConfigs) {
-            this.hdfConfigs = Optional.ofNullable(hdfConfigs);
             return this;
         }
 

@@ -20,9 +20,9 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -44,7 +44,6 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.ClouderaManagerDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -68,9 +67,6 @@ public class ClusterBuilderService {
 
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
-
-    @Inject
-    private AmbariDatalakeConfigProvider ambariDatalakeConfigProvider;
 
     @Inject
     private ClouderaManagerDatalakeConfigProvider clouderaManagerDatalakeConfigProvider;
@@ -182,7 +178,7 @@ public class ClusterBuilderService {
             try {
                 transactionService.required(() -> {
                     Stack stackInTransaction = stackService.getByIdWithListsInTransaction(stackId);
-                    if (!blueprintUtils.isAmbariBlueprint(blueprintText)) {
+                    if (blueprintUtils.isClouderaManagerClusterTemplate(blueprintText)) {
                         clouderaManagerDatalakeConfigProvider.collectAndStoreDatalakeResources(stackInTransaction);
                     }
                     return null;

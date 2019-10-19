@@ -11,8 +11,8 @@ public enum ClusterResetEvent implements FlowEvent {
     CLUSTER_RESET_FINISHED_EVENT(EventSelectorUtil.selector(ClusterResetResult.class)),
     CLUSTER_RESET_FINISHED_FAILURE_EVENT(EventSelectorUtil.failureSelector(ClusterResetResult.class)),
 
-    CLUSTER_RESET_START_AMBARI_FINISHED_EVENT(EventSelectorUtil.selector(StartClusterSuccess.class)),
-    CLUSTER_RESET_START_AMBARI_FINISHED_FAILURE_EVENT(EventSelectorUtil.failureSelector(StartClusterFailed.class)),
+    CLUSTER_RESET_START_CLUSTER_MANAGER_FINISHED_EVENT(EventSelectorUtil.selector(StartClusterSuccess.class)),
+    CLUSTER_RESET_START_CLUSTER_MANAGER_FINISHED_FAILURE_EVENT(EventSelectorUtil.failureSelector(StartClusterFailed.class)),
 
     FINALIZED_EVENT("CLUSTERRESETFINALIZEDEVENT"),
     FAILURE_EVENT("CLUSTERRESETFAILUREEVENT"),

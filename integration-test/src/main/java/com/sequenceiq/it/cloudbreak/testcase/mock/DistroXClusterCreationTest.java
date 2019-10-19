@@ -366,7 +366,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         )
                 .then(MockVerification.verify(HttpMethod.POST,
                         ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE)
-                                .bodyContains("https://archive.cloudera.com/cdh")
+                                .bodyContains("http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/")
                                 .exactTimes(1),
                         key(DISTRO_X_STACK));
     }

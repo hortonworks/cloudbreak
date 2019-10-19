@@ -1,15 +1,11 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import java.util.Optional;
-
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -40,7 +36,6 @@ public class ClusterToClusterDetailsConverter {
         clusterDetails.setStatusReason(source.getStatusReason());
         convertGatewayProperties(clusterDetails, source.getGateway());
         convertFileSystemProperties(clusterDetails, source.getFileSystem());
-        convertComponents(clusterDetails, source);
         addDatabaseInfo(clusterDetails, source);
         return clusterDetails;
     }
@@ -69,19 +64,6 @@ public class ClusterToClusterDetailsConverter {
     private void convertFileSystemProperties(ClusterDetails clusterDetails, FileSystem fileSystem) {
         if (fileSystem != null && fileSystem.getType() != null) {
             clusterDetails.setFileSystemType(fileSystem.getType().name());
-        }
-    }
-
-    private void convertComponents(ClusterDetails clusterDetails, Cluster cluster) {
-        AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
-        if (ambariRepo != null) {
-            clusterDetails.setAmbariVersion(ambariRepo.getVersion());
-        }
-        StackRepoDetails stackRepoDetails = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
-        if (stackRepoDetails != null) {
-            clusterDetails.setClusterType(stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG));
-            Optional<String> version = Optional.ofNullable(stackRepoDetails.getStack().get(StackRepoDetails.REPOSITORY_VERSION));
-            clusterDetails.setClusterVersion(version.orElse(stackRepoDetails.getHdpVersion()));
         }
     }
 }

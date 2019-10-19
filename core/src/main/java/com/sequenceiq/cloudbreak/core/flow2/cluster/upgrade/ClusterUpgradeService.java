@@ -38,7 +38,7 @@ public class ClusterUpgradeService {
     public void clusterUpgradeFinished(StackView stack) {
         Long stackId = stack.getId();
         clusterService.updateClusterStatusByStackId(stackId, Status.START_REQUESTED);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Ambari is successfully upgraded.");
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Cluster Manage is successfully upgraded.");
         flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED, stackUtil.extractClusterManagerIp(stack));
     }
 

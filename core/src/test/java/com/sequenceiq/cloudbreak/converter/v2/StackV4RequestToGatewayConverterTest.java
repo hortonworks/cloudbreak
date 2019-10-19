@@ -13,7 +13,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
@@ -60,10 +59,8 @@ public class StackV4RequestToGatewayConverterTest {
     }
 
     private StackV4Request generateStackV4Request(GatewayV4Request gateWayJson) {
-        AmbariV4Request ambariV2Request = new AmbariV4Request();
         ClusterV4Request clusterRequest = new ClusterV4Request();
         clusterRequest.setGateway(gateWayJson);
-        clusterRequest.setAmbari(ambariV2Request);
         StackV4Request source = new StackV4Request();
         source.setName("funnyCluster");
         source.setCluster(clusterRequest);

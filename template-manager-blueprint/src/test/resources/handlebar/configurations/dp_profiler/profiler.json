@@ -1,8 +1,0 @@
-{
-  "dpprofiler-config": {
-    "properties": {
-      "dpprofiler.db.password": "admin-password",
-      "dpprofiler.db.host": "localhost"
-    }
-  }
-}

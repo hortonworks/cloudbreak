@@ -16,8 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
@@ -26,7 +24,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentViewRepository;
 
@@ -49,37 +46,13 @@ public class ClusterComponentConfigProvider {
         return componentRepository.findComponentByClusterIdComponentTypeName(clusterId, componentType, name);
     }
 
-    public Set<ClusterComponent> getComponentListByTypeAndName(Long clusterId, ComponentType componentType) {
-        return componentRepository.findComponentsByClusterIdComponentTypeName(clusterId, componentType, componentType.name());
-    }
-
     public Set<ClusterComponent> getComponentListByType(Long clusterId, ComponentType componentType) {
         return componentRepository.findComponentsByClusterIdAndComponentType(clusterId, componentType);
-    }
-
-    public ClusterComponentView getComponentView(Long clusterId, ComponentType componentType) {
-        return getComponentView(clusterId, componentType, componentType.name());
-    }
-
-    public ClusterComponentView getComponentView(Long clusterId, ComponentType componentType, String name) {
-        return componentViewRepository.findOneByClusterIdAndComponentTypeAndName(clusterId, componentType, name);
     }
 
     public ClouderaManagerRepo getClouderaManagerRepoDetails(Long clusterId) {
         ClusterComponent component = getComponent(clusterId, ComponentType.CM_REPO_DETAILS);
         return retrieveFromAttribute(component, ClouderaManagerRepo.class);
-    }
-
-    public List<ClouderaManagerProduct> getClouderaManagerProductDetails(Long clusterId) {
-        Set<ClusterComponent> components = getComponentListByType(clusterId, ComponentType.CDH_PRODUCT_DETAILS);
-        return components.stream().map(component ->
-                retrieveFromAttribute(component, ClouderaManagerProduct.class))
-                .collect(Collectors.toList());
-    }
-
-    public StackRepoDetails getHDPRepo(Long clusterId) {
-        ClusterComponentView component = getComponentView(clusterId, ComponentType.HDP_REPO_DETAILS);
-        return retrieveFromAttribute(component, StackRepoDetails.class);
     }
 
     public StackRepoDetails getStackRepoDetails(Long clusterId) {
@@ -88,17 +61,11 @@ public class ClusterComponentConfigProvider {
         return retrieveFromAttribute(component, StackRepoDetails.class);
     }
 
-    public AmbariRepo getAmbariRepo(Long clusterId) {
-        ClusterComponent component = getComponent(clusterId, ComponentType.AMBARI_REPO_DETAILS);
-        return retrieveFromAttribute(component, AmbariRepo.class);
-    }
-
-    public AmbariRepo getAmbariRepo(Iterable<ClusterComponent> clusterComponents) {
-        try {
-            return getComponent(Lists.newArrayList(clusterComponents), AmbariRepo.class, ComponentType.AMBARI_REPO_DETAILS);
-        } catch (Exception e) {
-            throw new CloudbreakServiceException("Failed to read Ambari repo", e);
-        }
+    public List<ClouderaManagerProduct> getClouderaManagerProductDetails(Long clusterId) {
+        Set<ClusterComponent> components = getComponentListByType(clusterId, ComponentType.CDH_PRODUCT_DETAILS);
+        return components.stream().map(component ->
+                retrieveFromAttribute(component, ClouderaManagerProduct.class))
+                .collect(Collectors.toList());
     }
 
     public <T> T getComponent(Collection<ClusterComponent> components, Class<T> clazz, ComponentType componentType) {
@@ -125,17 +92,6 @@ public class ClusterComponentConfigProvider {
             ret.add(store(component));
         }
         return ret;
-    }
-
-    public Set<ClusterComponent> findByComponentType(ComponentType componentType) {
-        return componentRepository.findByComponentType(componentType);
-    }
-
-    private <T> T retrieveFromAttribute(ClusterComponentView componentView, Class<T> clazz) {
-        if (componentView == null) {
-            return null;
-        }
-        return retrieveFromAttributeJson(componentView.getAttributes(), clazz);
     }
 
     private <T> T retrieveFromAttribute(ClusterComponent component, Class<T> clazz) {

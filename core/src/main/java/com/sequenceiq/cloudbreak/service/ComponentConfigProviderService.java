@@ -11,18 +11,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
-import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.repository.ComponentRepository;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Service
 public class ComponentConfigProviderService {
@@ -88,30 +86,6 @@ public class ComponentConfigProviderService {
             return component.getAttributes().get(StackTemplate.class);
         } catch (IOException e) {
             throw new CloudbreakServiceException("Failed to read template for stack.", e);
-        }
-    }
-
-    public AmbariRepo getAmbariRepo(Long stackId) {
-        try {
-            Component component = getComponent(stackId, ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name());
-            if (component == null) {
-                return null;
-            }
-            return component.getAttributes().get(AmbariRepo.class);
-        } catch (IOException e) {
-            throw new CloudbreakServiceException("Failed to read ambari repo details for stack.", e);
-        }
-    }
-
-    public StackRepoDetails getHDPRepo(Long stackId) {
-        try {
-            Component component = getComponent(stackId, ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name());
-            if (component == null) {
-                return null;
-            }
-            return component.getAttributes().get(StackRepoDetails.class);
-        } catch (IOException e) {
-            throw new CloudbreakServiceException("Failed to read hdp repo details for stack.", e);
         }
     }
 

@@ -11,12 +11,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.cm.ClusterToClouderaManagerV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -66,11 +64,6 @@ public class ClusterToClusterV4RequestConverter extends AbstractConversionServic
     }
 
     private void convertClusterManager(Cluster cluster, ClusterV4Request clusterRequest) {
-        Blueprint blueprint = cluster.getBlueprint();
-        if (blueprintService.isAmbariBlueprint(blueprint)) {
-            clusterRequest.setAmbari(getConversionService().convert(cluster, AmbariV4Request.class));
-        } else {
-            clusterRequest.setCm(clouderaManagerV4RequestConverter.convert(cluster));
-        }
+        clusterRequest.setCm(clouderaManagerV4RequestConverter.convert(cluster));
     }
 }

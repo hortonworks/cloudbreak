@@ -21,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -149,29 +148,7 @@ public class MaintenanceModeValidationServiceTest {
         when(clusterComponentConfigProvider.getStackRepoDetails(eq(cluster.getId()))).thenReturn(repoDetails);
         when(jsonHelper.createJsonFromString(eq(stackRepo))).thenReturn(JsonUtil.readTree(stackRepo));
         warnings.addAll(underTest.validateStackRepository(cluster.getId(), stackRepo));
-        assertEquals(5, warnings.size());
-    }
-
-    @Test
-    public void testValidateAmbariRepositoryOk() {
-
-        AmbariRepo repoDetails = new AmbariRepo();
-        repoDetails.setBaseUrl("http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.2");
-        repoDetails.setVersion("2.6.2.2");
-        when(clusterComponentConfigProvider.getAmbariRepo(eq(cluster.getId()))).thenReturn(repoDetails);
-        warnings.addAll(underTest.validateAmbariRepository(cluster.getId()));
-        assertEquals(0, warnings.size());
-    }
-
-    @Test
-    public void testValidateAmbariRepositoryNok() {
-
-        AmbariRepo repoDetails = new AmbariRepo();
-        repoDetails.setBaseUrl("http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.3");
-        repoDetails.setVersion("2.6.2.2");
-        when(clusterComponentConfigProvider.getAmbariRepo(eq(cluster.getId()))).thenReturn(repoDetails);
-        warnings.addAll(underTest.validateAmbariRepository(cluster.getId()));
-        assertEquals(1, warnings.size());
+        assertEquals(2, warnings.size());
     }
 
     @Test

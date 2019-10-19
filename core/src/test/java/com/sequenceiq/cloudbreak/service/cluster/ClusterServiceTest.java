@@ -175,7 +175,6 @@ public class ClusterServiceTest {
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
         when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(Collections.emptyList());
         when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
-        when(blueprintService.isAmbariBlueprint(any())).thenReturn(Boolean.TRUE);
 
         underTest.repairCluster(1L, List.of("hostGroup1"), false, false);
 
@@ -216,7 +215,6 @@ public class ClusterServiceTest {
         flowLog.setStateStatus(StateStatus.SUCCESSFUL);
         when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(List.of(flowLog));
         when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
-        when(blueprintService.isAmbariBlueprint(any())).thenReturn(Boolean.TRUE);
 
         underTest.repairCluster(1L, List.of("instanceId1"), false, false, false);
         verify(stack).getInstanceMetaDataAsList();

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -78,7 +77,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        when(blueprintService.isAmbariBlueprint(any())).thenReturn(Boolean.TRUE);
     }
 
     @Test

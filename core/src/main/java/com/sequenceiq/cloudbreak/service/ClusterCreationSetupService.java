@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
-import com.sequenceiq.cloudbreak.controller.validation.mpack.ManagementPackValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConfigValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -57,9 +56,6 @@ public class ClusterCreationSetupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCreationSetupService.class);
 
     @Inject
-    private AmbariClusterCreationSetupService ambariClusterCreationSetupService;
-
-    @Inject
     private ClouderaManagerClusterCreationSetupService clouderaManagerClusterCreationSetupService;
 
     @Inject
@@ -82,9 +78,6 @@ public class ClusterCreationSetupService {
 
     @Inject
     private BlueprintService blueprintService;
-
-    @Inject
-    private ManagementPackValidator mpackValidator;
 
     @Inject
     private RdsConfigValidator rdsConfigValidator;
@@ -115,7 +108,6 @@ public class ClusterCreationSetupService {
         }
         fileSystemValidator.validateCloudStorage(stack.cloudPlatform(), credential, request.getCloudStorage(),
                 stack.getCreator().getUserId(), stack.getWorkspace().getId());
-        mpackValidator.validateMpacks(request.getAmbari(), workspace);
         rdsConfigValidator.validateRdsConfigs(request, user, workspace);
         ValidationResult environmentValidationResult = environmentValidator.validate(request, stack, environment);
         if (environmentValidationResult.hasError()) {
@@ -145,25 +137,16 @@ public class ClusterCreationSetupService {
         List<ClusterComponent> components = checkedMeasure((MultiCheckedSupplier<List<ClusterComponent>, IOException, CloudbreakImageNotFoundException>) () -> {
             if (blueprint != null) {
                 Set<Component> allComponent = componentConfigProviderService.getAllComponentsByStackIdAndType(stack.getId(),
-                        Sets.newHashSet(ComponentType.AMBARI_REPO_DETAILS,
-                                ComponentType.HDP_REPO_DETAILS,
+                        Sets.newHashSet(
                                 ComponentType.CM_REPO_DETAILS,
                                 ComponentType.CDH_PRODUCT_DETAILS,
                                 ComponentType.IMAGE));
-                Optional<Component> stackAmbariRepoConfig = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.AMBARI_REPO_DETAILS)
-                        && c.getName().equalsIgnoreCase(ComponentType.AMBARI_REPO_DETAILS.name())).findAny();
-                Optional<Component> stackHdpRepoConfig = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.HDP_REPO_DETAILS)
-                        && c.getName().equalsIgnoreCase(ComponentType.HDP_REPO_DETAILS.name())).findAny();
                 Optional<Component> stackCmRepoConfig = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.CM_REPO_DETAILS)).findAny();
                 List<Component> stackCdhRepoConfig =
                         allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.CDH_PRODUCT_DETAILS)).collect(Collectors.toList());
                 Optional<Component> stackImageComponent = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.IMAGE)
                         && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name())).findAny();
-
-                if (blueprintService.isAmbariBlueprint(blueprint)) {
-                    return ambariClusterCreationSetupService.prepareAmbariCluster(
-                            request, stack, blueprint, cluster, stackAmbariRepoConfig, stackHdpRepoConfig, stackImageComponent);
-                } else if (blueprintService.isClouderaManagerTemplate(blueprint)) {
+                if (blueprintService.isClouderaManagerTemplate(blueprint)) {
                     return clouderaManagerClusterCreationSetupService.prepareClouderaManagerCluster(
                             request, cluster, stackCmRepoConfig, stackCdhRepoConfig, stackImageComponent);
                 }

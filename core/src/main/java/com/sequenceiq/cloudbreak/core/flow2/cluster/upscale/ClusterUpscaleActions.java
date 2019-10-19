@@ -26,20 +26,20 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariEnsureComponentsAreStoppedResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerEnsureComponentsAreStoppedResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariGatherInstalledComponentsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariGatherInstalledComponentsResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariInitComponentsRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariInitComponentsResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariInstallComponentsRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariInstallComponentsResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerInitComponentsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerInitComponentsResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerInstallComponentsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerInstallComponentsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariRepairSingleMasterStartResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariRestartAllRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariRestartAllResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStartComponentsRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStartComponentsResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerRestartAllResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerStartComponentsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerStartComponentsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStartServerAndAgentRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStopComponentsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerStopComponentsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStopServerAndAgentRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStopServerAndAgentResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.EnsureClusterComponentsAreStoppedRequest;
@@ -175,14 +175,15 @@ public class ClusterUpscaleActions {
         };
     }
 
-    @Bean(name = "UPSCALING_AMBARI_FINISHED_STATE")
-    public Action<?, ?> upscalingAmbariFinishedAction() {
+    @Bean(name = "UPSCALING_CLUSTER_MANAGER_FINISHED_STATE")
+    public Action<?, ?> upscalingClusterManagerFinishedAction() {
         return new AbstractClusterUpscaleAction<>(UpscaleClusterManagerResult.class) {
             @Override
             protected void doExecute(ClusterUpscaleContext context, UpscaleClusterManagerResult payload, Map<Object, Object> variables) {
                 if (context.isSinglePrimaryGateway() && ClusterManagerType.AMBARI.equals(context.getClusterManagerType())) {
-                    clusterUpscaleFlowService.ambariRepairSingleMasterStarted(context.getStackId());
-                    AmbariRepairSingleMasterStartResult result = new AmbariRepairSingleMasterStartResult(context.getStackId(), context.getHostGroupName());
+                    clusterUpscaleFlowService.clusterManagerRepairSingleMasterStarted(context.getStackId());
+                    AmbariRepairSingleMasterStartResult result =
+                            new AmbariRepairSingleMasterStartResult(context.getStackId(), context.getHostGroupName());
                     sendEvent(context, result.selector(), result);
                 } else {
                     UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroupName());
@@ -192,8 +193,8 @@ public class ClusterUpscaleActions {
         };
     }
 
-    @Bean(name = "AMBARI_GATHER_INSTALLED_COMPONENTS_STATE")
-    public Action<?, ?> ambariGatherInstalledComponentsAction() {
+    @Bean(name = "CLUSTER_MANAGER_GATHER_INSTALLED_COMPONENTS_STATE")
+    public Action<?, ?> clusterManagerGatherInstalledComponentsAction() {
         return new AbstractClusterUpscaleAction<>(AmbariRepairSingleMasterStartResult.class) {
 
             @Override
@@ -208,24 +209,25 @@ public class ClusterUpscaleActions {
         };
     }
 
-    @Bean(name = "AMBARI_STOP_COMPONENTS_STATE")
+    @Bean(name = "CLUSTER_MANAGER_STOP_COMPONENTS_STATE")
 
-    public Action<?, ?> ambariStopComponentsAction() {
+    public Action<?, ?> clusterManagerStopComponentsAction() {
         return new AbstractClusterUpscaleAction<>(AmbariGatherInstalledComponentsResult.class) {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, AmbariGatherInstalledComponentsResult payload, Map<Object, Object> variables) {
                 Map<String, String> components = payload.getFoundInstalledComponents();
                 variables.put(INSTALLED_COMPONENTS, components);
-                AmbariStopComponentsRequest request =
-                        new AmbariStopComponentsRequest(context.getStackId(), context.getHostGroupName(), context.getPrimaryGatewayHostName(), components);
+                ClusterManagerStopComponentsRequest request =
+                        new ClusterManagerStopComponentsRequest(context.getStackId(), context.getHostGroupName(),
+                                context.getPrimaryGatewayHostName(), components);
                 sendEvent(context, request.selector(), request);
             }
         };
     }
 
-    @Bean(name = "AMBARI_STOP_SERVER_AGENT_STATE")
-    public Action<?, ?> ambariStopServerAndAgentAction() {
+    @Bean(name = "CLUSTER_MANAGER_STOP_SERVER_AGENT_STATE")
+    public Action<?, ?> clusterManagerStopServerAndAgentAction() {
         return new AbstractClusterUpscaleAction<>(StopClusterComponentsResult.class) {
 
             @Override
@@ -242,8 +244,8 @@ public class ClusterUpscaleActions {
 
     }
 
-    @Bean(name = "AMBARI_START_SERVER_AGENT_STATE")
-    public Action<?, ?> ambariStartServerAndAgentAction() {
+    @Bean(name = "CLUSTER_MANAGER_START_SERVER_AGENT_STATE")
+    public Action<?, ?> clusterManagerStartServerAndAgentAction() {
         return new AbstractClusterUpscaleAction<>(AmbariStopServerAndAgentResult.class) {
 
             @Override
@@ -259,8 +261,8 @@ public class ClusterUpscaleActions {
         };
     }
 
-    @Bean(name = "AMBARI_REGENERATE_KERBEROS_KEYTABS_STATE")
-    public Action<?, ?> ambariRegenerateKerberosKeytabsAction() {
+    @Bean(name = "CLUSTER_MANAGER_REGENERATE_KERBEROS_KEYTABS_STATE")
+    public Action<?, ?> clusterManagerRegenerateKerberosKeytabsAction() {
         return new AbstractClusterUpscaleAction<>(StartServerAndAgentResult.class) {
 
             @Override
@@ -278,7 +280,7 @@ public class ClusterUpscaleActions {
         };
     }
 
-    @Bean(name = "AMBARI_ENSURE_COMPONENTS_ARE_STOPPED_STATE")
+    @Bean(name = "CLUSTER_MANAGER_ENSURE_COMPONENTS_ARE_STOPPED_STATE")
     public Action<?, ?> ensureClusterComponentsAreStoppedAction() {
         return new AbstractClusterUpscaleAction<>(RegenerateKerberosKeytabsResult.class) {
 
@@ -294,44 +296,46 @@ public class ClusterUpscaleActions {
         };
     }
 
-    @Bean(name = "AMBARI_INIT_COMPONENTS_STATE")
-    public Action<?, ?> ambariInitComponentsAction() {
-        return new AbstractClusterUpscaleAction<>(AmbariEnsureComponentsAreStoppedResult.class) {
+    @Bean(name = "CLUSTER_MANAGER_INIT_COMPONENTS_STATE")
+    public Action<?, ?> clusterManagerInitComponentsAction() {
+        return new AbstractClusterUpscaleAction<>(ClusterManagerEnsureComponentsAreStoppedResult.class) {
 
             @Override
-            protected void doExecute(ClusterUpscaleContext context, AmbariEnsureComponentsAreStoppedResult payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterUpscaleContext context, ClusterManagerEnsureComponentsAreStoppedResult payload, Map<Object, Object> variables) {
                 Map<String, String> components = getInstalledComponents(variables);
-                AmbariInitComponentsRequest request =
-                        new AmbariInitComponentsRequest(context.getStackId(), context.getHostGroupName(), context.getPrimaryGatewayHostName(), components);
+                ClusterManagerInitComponentsRequest request =
+                        new ClusterManagerInitComponentsRequest(context.getStackId(), context.getHostGroupName(),
+                                context.getPrimaryGatewayHostName(), components);
                 sendEvent(context, request.selector(), request);
             }
         };
     }
 
-    @Bean(name = "AMBARI_INSTALL_COMPONENTS_STATE")
-    public Action<?, ?> ambariInstallComponentsAction() {
-        return new AbstractClusterUpscaleAction<>(AmbariInitComponentsResult.class) {
+    @Bean(name = "CLUSTER_MANAGER_INSTALL_COMPONENTS_STATE")
+    public Action<?, ?> clusterManagerInstallComponentsAction() {
+        return new AbstractClusterUpscaleAction<>(ClusterManagerInitComponentsResult.class) {
 
             @Override
-            protected void doExecute(ClusterUpscaleContext context, AmbariInitComponentsResult payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterUpscaleContext context, ClusterManagerInitComponentsResult payload, Map<Object, Object> variables) {
                 clusterUpscaleFlowService.reinstallClusterComponents(context.getStackId());
                 Map<String, String> components = getInstalledComponents(variables);
-                AmbariInstallComponentsRequest request =
-                        new AmbariInstallComponentsRequest(context.getStackId(), context.getHostGroupName(), context.getPrimaryGatewayHostName(), components);
+                ClusterManagerInstallComponentsRequest request =
+                        new ClusterManagerInstallComponentsRequest(context.getStackId(), context.getHostGroupName(),
+                                context.getPrimaryGatewayHostName(), components);
                 sendEvent(context, request.selector(), request);
             }
         };
     }
 
-    @Bean(name = "AMBARI_START_COMPONENTS_STATE")
-    public Action<?, ?> ambariStartComponentsAction() {
-        return new AbstractClusterUpscaleAction<>(AmbariInstallComponentsResult.class) {
+    @Bean(name = "CLUSTER_MANAGER_START_COMPONENTS_STATE")
+    public Action<?, ?> clusterManagerStartComponentsAction() {
+        return new AbstractClusterUpscaleAction<>(ClusterManagerInstallComponentsResult.class) {
 
             @Override
-            protected void doExecute(ClusterUpscaleContext context, AmbariInstallComponentsResult payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterUpscaleContext context, ClusterManagerInstallComponentsResult payload, Map<Object, Object> variables) {
                 clusterUpscaleFlowService.startComponentsOnNewHosts(context.getStackId());
                 Map<String, String> components = getInstalledComponents(variables);
-                AmbariStartComponentsRequest request = new AmbariStartComponentsRequest(
+                ClusterManagerStartComponentsRequest request = new ClusterManagerStartComponentsRequest(
                         context.getStackId(),
                         context.getHostGroupName(),
                         context.getPrimaryGatewayHostName(),
@@ -342,31 +346,31 @@ public class ClusterUpscaleActions {
         };
     }
 
-    @Bean(name = "AMBARI_RESTART_ALL_STATE")
-    public Action<?, ?> ambariRestartAllAction() {
-        return new AbstractClusterUpscaleAction<>(AmbariStartComponentsResult.class) {
+    @Bean(name = "CLUSTER_MANAGER_RESTART_ALL_STATE")
+    public Action<?, ?> clusterManagerRestartAllAction() {
+        return new AbstractClusterUpscaleAction<>(ClusterManagerStartComponentsResult.class) {
 
             @Override
-            protected void doExecute(ClusterUpscaleContext context, AmbariStartComponentsResult payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterUpscaleContext context, ClusterManagerStartComponentsResult payload, Map<Object, Object> variables) {
                 AmbariRestartAllRequest request = new AmbariRestartAllRequest(context.getStackId(), context.getHostGroupName());
                 if (isKerberosSecured(variables) && !isSingleNodeCluster(variables)) {
                     clusterUpscaleFlowService.restartAllClusterComponents(context.getStackId());
                     sendEvent(context, request.selector(), request);
                 } else {
-                    AmbariRestartAllResult result = new AmbariRestartAllResult(request);
+                    ClusterManagerRestartAllResult result = new ClusterManagerRestartAllResult(request);
                     sendEvent(context, result.selector(), result);
                 }
             }
         };
     }
 
-    @Bean(name = "AMBARI_REPAIR_SINGLE_MASTER_FINISHED_STATE")
-    public Action<?, ?> ambariRepairSingleMasterFinishedAction() {
-        return new AbstractClusterUpscaleAction<>(AmbariRestartAllResult.class) {
+    @Bean(name = "CLUSTER_MANAGER_REPAIR_SINGLE_MASTER_FINISHED_STATE")
+    public Action<?, ?> clusterManagerRepairSingleMasterFinishedAction() {
+        return new AbstractClusterUpscaleAction<>(ClusterManagerRestartAllResult.class) {
 
             @Override
-            protected void doExecute(ClusterUpscaleContext context, AmbariRestartAllResult payload, Map<Object, Object> variables) {
-                clusterUpscaleFlowService.ambariRepairSingleMasterFinished(context.getStackId());
+            protected void doExecute(ClusterUpscaleContext context, ClusterManagerRestartAllResult payload, Map<Object, Object> variables) {
+                clusterUpscaleFlowService.clusterManagerRepairSingleMasterFinished(context.getStackId());
                 sendEvent(context);
             }
 

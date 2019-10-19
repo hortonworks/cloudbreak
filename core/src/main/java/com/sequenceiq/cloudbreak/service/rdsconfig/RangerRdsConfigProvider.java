@@ -6,19 +6,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 
 @Component
 public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
 
     private static final String PILLAR_KEY = "ranger";
-
-    private static final String[] PATH = {AmbariBlueprintTextProcessor.CONFIGURATIONS_NODE, "admin-properties", "properties"};
-
-    private static final String[] CONFIGURATIONS = {"db_user", "db_password", "db_name", "db_host"};
 
     @Value("${cb.ranger.database.user:ranger}")
     private String rangerDbUser;
@@ -30,19 +26,14 @@ public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
     private String rangerDbPort;
 
     @Inject
-    private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Inject
     private BlueprintService blueprintService;
 
     private boolean isRdsConfigNeedForRangerAdmin(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintText();
-        AmbariBlueprintTextProcessor blueprintProcessor = ambariBlueprintProcessorFactory.get(blueprintText);
-        if (blueprintService.isAmbariBlueprint(blueprint)) {
-            return blueprintProcessor.isComponentExistsInBlueprint("RANGER_ADMIN")
-                    && !blueprintProcessor.isComponentExistsInBlueprint("MYSQL_SERVER")
-                    && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfigurations(PATH, CONFIGURATIONS));
-        }
+        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
         return blueprintProcessor.isCMComponentExistsInBlueprint("RANGER_ADMIN");
     }
 

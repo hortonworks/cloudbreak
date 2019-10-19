@@ -22,14 +22,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.customcontainer.CustomContainerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -106,17 +103,9 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
             cluster.setCustomContainerDefinition(null);
         }
         updateDatabases(source, cluster, workspace);
-        convertVendorSpecificPart(source, cluster);
         extractClusterManagerAndHdpRepoConfig(cluster, source);
         cluster.setProxyConfigCrn(source.getProxyConfigCrn());
         return cluster;
-    }
-
-    private void convertVendorSpecificPart(ClusterV4Request source, Cluster cluster) {
-        if (Objects.nonNull(source.getAmbari())) {
-            cluster.setConfigStrategy(source.getAmbari().getConfigStrategy());
-            cluster.setSecurityMasterKey(source.getAmbari().getSecurityMasterKey());
-        }
     }
 
     private void convertGateway(ClusterV4Request source, Cluster cluster) {
@@ -156,31 +145,10 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     private void extractClusterManagerAndHdpRepoConfig(Cluster cluster, ClusterV4Request clusterRequest) {
         Set<ClusterComponent> components = new HashSet<>();
 
-        AmbariV4Request ambariRequest = clusterRequest.getAmbari();
         ClouderaManagerV4Request clouderaManagerRequest = clusterRequest.getCm();
-        if (Objects.nonNull(ambariRequest) && Objects.nonNull(clouderaManagerRequest)) {
-            throw new BadRequestException("Cannot determine cluster manager. More than one provided");
-        }
-        if (Objects.nonNull(ambariRequest) && StackType.CDH.name().equals(cluster.getBlueprint().getStackType())) {
-            throw new BadRequestException("Cannot process the provided blueprint template with Ambari");
-        }
         if (Objects.nonNull(clouderaManagerRequest) && !StackType.CDH.name().equals(cluster.getBlueprint().getStackType())) {
             throw new BadRequestException("Cannot process the provided Ambari blueprint with Cloudera Manager");
         }
-
-        Optional.ofNullable(ambariRequest)
-                .map(AmbariV4Request::getRepository)
-                .map(ambariRepoRequest -> getConversionService().convert(ambariRepoRequest, AmbariRepo.class))
-                .map(toJsonWrapException())
-                .map(ambariRepoJson -> new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, ambariRepoJson, cluster))
-                .ifPresent(components::add);
-
-        Optional.ofNullable(ambariRequest)
-                .map(AmbariV4Request::getStackRepository)
-                .map(stackRepoRequest -> getConversionService().convert(stackRepoRequest, StackRepoDetails.class))
-                .map(toJsonWrapException())
-                .map(ambariRepoJson -> new ClusterComponent(ComponentType.HDP_REPO_DETAILS, ambariRepoJson, cluster))
-                .ifPresent(components::add);
 
         Optional.ofNullable(clouderaManagerRequest)
                 .map(ClouderaManagerV4Request::getRepository)

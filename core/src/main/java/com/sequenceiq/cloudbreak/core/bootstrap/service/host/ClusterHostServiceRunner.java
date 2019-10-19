@@ -37,10 +37,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -246,17 +244,13 @@ public class ClusterHostServiceRunner {
 
         if (blueprintService.isClouderaManagerTemplate(cluster.getBlueprint())) {
             addClouderaManagerConfig(stack, cluster, servicePillar);
-        } else {
-            addAmbariConfig(cluster, servicePillar, connector);
         }
-
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
 
-        saveSssdAdPillar(servicePillar, kerberosConfig);
+        saveSssdAdPillar(cluster, servicePillar, kerberosConfig);
         saveSssdIpaPillar(servicePillar, kerberosConfig, serviceLocations);
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
-        saveHDPPillar(cluster.getId(), servicePillar);
         ldapView.ifPresent(ldap -> saveLdapsAdPillar(ldap, servicePillar, connector));
         Map<String, Object> credentials = new HashMap<>();
         credentials.put("username", connector.getCloudbreakClusterUserName(cluster));
@@ -309,26 +303,7 @@ public class ClusterHostServiceRunner {
         decoratePillarWithClouderaManagerSettings(servicePillar);
     }
 
-    private void addAmbariConfig(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, ClusterPreCreationApi connector)
-            throws CloudbreakOrchestratorFailedException {
-        AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
-        if (ambariRepo != null) {
-            Map<String, Object> ambariRepoMap = ambariRepo.asMap();
-            String blueprintText = cluster.getBlueprint().getBlueprintText();
-            Json blueprint = new Json(blueprintText);
-            ambariRepoMap.put("stack_version", blueprint.getValue("Blueprints.stack_version"));
-            ambariRepoMap.put("stack_type", blueprint.getValue("Blueprints.stack_name").toString().toLowerCase());
-            servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepoMap))));
-            boolean setupLdapAndSsoOnApi = connector.isLdapAndSSOReady(ambariRepo);
-            servicePillar.put("setup-ldap-and-sso-on-api", new SaltPillarProperties("/ambari/config.sls",
-                    singletonMap("ambari", singletonMap("setup_ldap_and_sso_on_api", setupLdapAndSsoOnApi))));
-        }
-        servicePillar.put("ambari-gpl-repo", new SaltPillarProperties("/ambari/gpl.sls", singletonMap("ambari", singletonMap("gpl", singletonMap("enabled",
-                clusterComponentConfigProvider.getHDPRepo(cluster.getId()).isEnableGplRepo())))));
-        decoratePillarWithAmbariDatabase(cluster, servicePillar);
-    }
-
-    private void saveSssdAdPillar(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) {
+    private void saveSssdAdPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) {
         if (kerberosDetailService.isAdJoinable(kerberosConfig)) {
             Map<String, Object> sssdConnfig = new HashMap<>();
             sssdConnfig.put("username", kerberosConfig.getPrincipal());
@@ -636,11 +611,6 @@ public class ClusterHostServiceRunner {
         dockerMap.put("enableContainerExecutor", ExecutorType.CONTAINER.equals(executorType));
 
         servicePillar.put("docker", new SaltPillarProperties("/docker/init.sls", singletonMap("docker", dockerMap)));
-    }
-
-    private void saveHDPPillar(Long clusterId, Map<String, SaltPillarProperties> servicePillar) {
-        StackRepoDetails hdprepo = clusterComponentConfigProvider.getHDPRepo(clusterId);
-        servicePillar.put("hdp", new SaltPillarProperties("/hdp/repo.sls", singletonMap("hdp", hdprepo)));
     }
 
     private Map<String, String> collectUpscaleCandidates(Long clusterId, String hostGroupName, Integer adjustment) {

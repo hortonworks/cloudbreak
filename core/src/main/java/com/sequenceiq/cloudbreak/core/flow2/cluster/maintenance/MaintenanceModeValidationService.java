@@ -13,21 +13,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -96,10 +93,6 @@ public class MaintenanceModeValidationService {
     public List<Warning> validateStackRepository(Long clusterId, String stackRepo) {
         List<Warning> warnings = new ArrayList<>();
         StackRepoDetails repoDetails = clusterComponentConfigProvider.getStackRepoDetails(clusterId);
-        String hdpVersion = repoDetails.getHdpVersion();
-        if (StringUtils.isEmpty(hdpVersion)) {
-            throw new CloudbreakServiceException("HDP version is null in database, validation aborted!");
-        }
         Map<String, String> stack = repoDetails.getStack();
         if (Objects.nonNull(stackRepo)) {
             JsonNode stackRepoJson = jsonHelper.createJsonFromString(stackRepo).path("Repositories");
@@ -128,28 +121,6 @@ public class MaintenanceModeValidationService {
         }
 
         stack.remove(StackRepoDetails.REPO_ID_TAG);
-        List<Warning> notFound = stack.entrySet().stream().filter(element -> !element.getValue().contains(hdpVersion))
-                .peek(element -> LOGGER.warn("Stack repo naming validation warning! {} cannot be found in {}", hdpVersion, element.getValue()))
-                .map(element -> new Warning(WarningType.STACK_NAMING_WARNING,
-                        String.format("Stack version: '%s' cannot be found in parameter: '%s'.", hdpVersion, element.getValue())))
-                .collect(Collectors.toList());
-        warnings.addAll(notFound);
-
-        return warnings;
-    }
-
-    public List<Warning> validateAmbariRepository(Long clusterId) {
-        List<Warning> warnings = new ArrayList<>();
-        AmbariRepo repoDetails = clusterComponentConfigProvider.getAmbariRepo(clusterId);
-        String baseUrl = repoDetails.getBaseUrl();
-        String version = repoDetails.getVersion();
-        if (!baseUrl.contains(version)) {
-            LOGGER.warn("Ambari repo naming validation warning! {} cannot be found in {}", version, baseUrl);
-            warnings.add(new Warning(WarningType.AMBARI_NAMING_WARNING,
-                    String.format("Ambari version: '%s' cannot be found in url '%s'.",
-                            version,
-                            baseUrl)));
-        }
         return warnings;
     }
 

@@ -8,15 +8,15 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.cluster.ClusterUpscaleService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariInitComponentsRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariInitComponentsResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerInitComponentsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerInitComponentsResult;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class AmbariInitComponentsHandler implements EventHandler<AmbariInitComponentsRequest> {
+public class AmbariInitComponentsHandler implements EventHandler<ClusterManagerInitComponentsRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariInitComponentsHandler.class);
 
@@ -28,21 +28,21 @@ public class AmbariInitComponentsHandler implements EventHandler<AmbariInitCompo
 
     @Override
     public String selector() {
-        return EventSelectorUtil.selector(AmbariInitComponentsRequest.class);
+        return EventSelectorUtil.selector(ClusterManagerInitComponentsRequest.class);
     }
 
     @Override
-    public void accept(Event<AmbariInitComponentsRequest> event) {
-        AmbariInitComponentsRequest request = event.getData();
+    public void accept(Event<ClusterManagerInitComponentsRequest> event) {
+        ClusterManagerInitComponentsRequest request = event.getData();
         Long stackId = request.getResourceId();
-        AmbariInitComponentsResult result;
+        ClusterManagerInitComponentsResult result;
         try {
             clusterUpscaleService.initComponents(stackId, request.getComponents(), request.getHostName());
-            result = new AmbariInitComponentsResult(request);
+            result = new ClusterManagerInitComponentsResult(request);
         } catch (Exception e) {
             String message = "Failed to init components on host";
             LOGGER.error(message, e);
-            result = new AmbariInitComponentsResult(message, e, request);
+            result = new ClusterManagerInitComponentsResult(message, e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }

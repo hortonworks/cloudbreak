@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariEnsureComponentsAreStoppedResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerEnsureComponentsAreStoppedResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariGatherInstalledComponentsResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariInitComponentsResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariInstallComponentsResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerInitComponentsResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerInstallComponentsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariRepairSingleMasterStartResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariRestartAllResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStartComponentsResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerRestartAllResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerStartComponentsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStopServerAndAgentResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RegenerateKerberosKeytabsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartServerAndAgentResult;
@@ -24,8 +24,8 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public enum ClusterUpscaleEvent implements FlowEvent {
     CLUSTER_UPSCALE_TRIGGER_EVENT("CLUSTER_UPSCALE_TRIGGER_EVENT"),
-    UPSCALE_AMBARI_FINISHED_EVENT(EventSelectorUtil.selector(UpscaleClusterManagerResult.class)),
-    UPSCALE_AMBARI_FAILED_EVENT(EventSelectorUtil.failureSelector(UpscaleClusterManagerResult.class)),
+    UPSCALE_CLUSTER_MANAGER_FINISHED_EVENT(EventSelectorUtil.selector(UpscaleClusterManagerResult.class)),
+    UPSCALE_CLUSTER_MANAGER_FAILED_EVENT(EventSelectorUtil.failureSelector(UpscaleClusterManagerResult.class)),
     CLUSTER_REPAIR_SINGLE_MASTER_START_EVENT(EventSelectorUtil.selector(AmbariRepairSingleMasterStartResult.class)),
     CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT(EventSelectorUtil.selector(ClusterProxyReRegistrationResult.class)),
     UPLOAD_UPSCALE_RECIPES_FINISHED_EVENT(EventSelectorUtil.selector(UploadUpscaleRecipesResult.class)),
@@ -35,27 +35,27 @@ public enum ClusterUpscaleEvent implements FlowEvent {
     CHECK_HOST_METADATA_FINISHED_EVENT(EventSelectorUtil.selector(UpscaleCheckHostMetadataResult.class)),
     CHECK_HOST_METADATA_FAILED_EVENT(EventSelectorUtil.failureSelector(UpscaleCheckHostMetadataResult.class)),
 
-    AMBARI_REGENERATE_KERBEROS_KEYTABS_FINISHED_EVENT(EventSelectorUtil.selector(RegenerateKerberosKeytabsResult.class)),
-    AMBARI_GATHER_INSTALLED_COMPONENTS_FINISHED_EVENT(EventSelectorUtil.selector(AmbariGatherInstalledComponentsResult.class)),
-    AMBARI_STOP_COMPONENTS_FINISHED_EVENT(EventSelectorUtil.selector(StopClusterComponentsResult.class)),
-    AMBARI_STOP_SERVER_AGENT_FINISHED_EVENT(EventSelectorUtil.selector(AmbariStopServerAndAgentResult.class)),
-    AMBARI_START_SERVER_AGENT_FINISHED_EVENT(EventSelectorUtil.selector(StartServerAndAgentResult.class)),
-    AMBARI_ENSURE_COMPONENTS_STOPPED_FINISHED_EVENT(EventSelectorUtil.selector(AmbariEnsureComponentsAreStoppedResult.class)),
-    AMBARI_INIT_COMPONENTS_FINISHED_EVENT(EventSelectorUtil.selector(AmbariInitComponentsResult.class)),
-    AMBARI_INSTALL_COMPONENTS_FINISHED_EVENT(EventSelectorUtil.selector(AmbariInstallComponentsResult.class)),
-    AMBARI_START_COMPONENTS_FINISHED_EVENT(EventSelectorUtil.selector(AmbariStartComponentsResult.class)),
-    AMBARI_RESTART_ALL_FINISHED_EVENT(EventSelectorUtil.selector(AmbariRestartAllResult.class)),
+    CLUSTER_MANAGER_REGENERATE_KERBEROS_KEYTABS_FINISHED_EVENT(EventSelectorUtil.selector(RegenerateKerberosKeytabsResult.class)),
+    CLUSTER_MANAGER_GATHER_INSTALLED_COMPONENTS_FINISHED_EVENT(EventSelectorUtil.selector(AmbariGatherInstalledComponentsResult.class)),
+    CLUSTER_MANAGER_STOP_COMPONENTS_FINISHED_EVENT(EventSelectorUtil.selector(StopClusterComponentsResult.class)),
+    CLUSTER_MANAGER_STOP_SERVER_AGENT_FINISHED_EVENT(EventSelectorUtil.selector(AmbariStopServerAndAgentResult.class)),
+    CLUSTER_MANAGER_START_SERVER_AGENT_FINISHED_EVENT(EventSelectorUtil.selector(StartServerAndAgentResult.class)),
+    CLUSTER_MANAGER_ENSURE_COMPONENTS_STOPPED_FINISHED_EVENT(EventSelectorUtil.selector(ClusterManagerEnsureComponentsAreStoppedResult.class)),
+    CLUSTER_MANAGER_INIT_COMPONENTS_FINISHED_EVENT(EventSelectorUtil.selector(ClusterManagerInitComponentsResult.class)),
+    CLUSTER_MANAGER_INSTALL_COMPONENTS_FINISHED_EVENT(EventSelectorUtil.selector(ClusterManagerInstallComponentsResult.class)),
+    CLUSTER_MANAGER_START_COMPONENTS_FINISHED_EVENT(EventSelectorUtil.selector(ClusterManagerStartComponentsResult.class)),
+    CLUSTER_MANAGER_RESTART_ALL_FINISHED_EVENT(EventSelectorUtil.selector(ClusterManagerRestartAllResult.class)),
 
-    AMBARI_REGENERATE_KERBEROS_KEYTABS_FAILED_EVENT(EventSelectorUtil.failureSelector(RegenerateKerberosKeytabsResult.class)),
-    AMBARI_GATHER_INSTALLED_COMPONENTS_FAILED_EVENT(EventSelectorUtil.failureSelector(AmbariGatherInstalledComponentsResult.class)),
-    AMBARI_STOP_COMPONENTS_FAILED_EVENT(EventSelectorUtil.failureSelector(StopClusterComponentsResult.class)),
-    AMBARI_STOP_SERVER_AGENT_FAILED_EVENT(EventSelectorUtil.failureSelector(AmbariStopServerAndAgentResult.class)),
-    AMBARI_START_SERVER_AGENT_FAILED_EVENT(EventSelectorUtil.failureSelector(StartServerAndAgentResult.class)),
-    AMBARI_ENSURE_COMPONENTS_STOPPED_FAILED_EVENT(EventSelectorUtil.failureSelector(AmbariEnsureComponentsAreStoppedResult.class)),
-    AMBARI_INIT_COMPONENTS_FAILED_EVENT(EventSelectorUtil.failureSelector(AmbariInitComponentsResult.class)),
-    AMBARI_INSTALL_COMPONENTS_FAILED_EVENT(EventSelectorUtil.failureSelector(AmbariInstallComponentsResult.class)),
-    AMBARI_START_COMPONENTS_FAILED_EVENT(EventSelectorUtil.failureSelector(AmbariStartComponentsResult.class)),
-    AMBARI_RESTART_ALL_FAILED_EVENT(EventSelectorUtil.failureSelector(AmbariRestartAllResult.class)),
+    CLUSTER_MANAGER_REGENERATE_KERBEROS_KEYTABS_FAILED_EVENT(EventSelectorUtil.failureSelector(RegenerateKerberosKeytabsResult.class)),
+    CLUSTER_MANAGER_GATHER_INSTALLED_COMPONENTS_FAILED_EVENT(EventSelectorUtil.failureSelector(AmbariGatherInstalledComponentsResult.class)),
+    CLUSTER_MANAGER_STOP_COMPONENTS_FAILED_EVENT(EventSelectorUtil.failureSelector(StopClusterComponentsResult.class)),
+    CLUSTER_MANAGER_STOP_SERVER_AGENT_FAILED_EVENT(EventSelectorUtil.failureSelector(AmbariStopServerAndAgentResult.class)),
+    CLUSTER_MANAGER_START_SERVER_AGENT_FAILED_EVENT(EventSelectorUtil.failureSelector(StartServerAndAgentResult.class)),
+    CLUSTER_MANAGER_ENSURE_COMPONENTS_STOPPED_FAILED_EVENT(EventSelectorUtil.failureSelector(ClusterManagerEnsureComponentsAreStoppedResult.class)),
+    CLUSTER_MANAGER_INIT_COMPONENTS_FAILED_EVENT(EventSelectorUtil.failureSelector(ClusterManagerInitComponentsResult.class)),
+    CLUSTER_MANAGER_INSTALL_COMPONENTS_FAILED_EVENT(EventSelectorUtil.failureSelector(ClusterManagerInstallComponentsResult.class)),
+    CLUSTER_MANAGER_START_COMPONENTS_FAILED_EVENT(EventSelectorUtil.failureSelector(ClusterManagerStartComponentsResult.class)),
+    CLUSTER_MANAGER_RESTART_ALL_FAILED_EVENT(EventSelectorUtil.failureSelector(ClusterManagerRestartAllResult.class)),
 
     CLUSTER_UPSCALE_FINISHED_EVENT(EventSelectorUtil.selector(UpscaleClusterResult.class)),
     CLUSTER_UPSCALE_FAILED_EVENT(EventSelectorUtil.failureSelector(UpscaleClusterResult.class)),

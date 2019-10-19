@@ -342,13 +342,6 @@ public class StackCreatorService {
         }
     }
 
-    private boolean shouldUseBaseAmbariImage(ClusterV4Request clusterRequest) {
-        return (clusterRequest.getAmbari() != null && clusterRequest.getAmbari().getRepository() != null)
-                || (clusterRequest.getAmbari() != null
-                && clusterRequest.getAmbari().getStackRepository() != null
-                && clusterRequest.getAmbari().getStackRepository().customRepoSpecified());
-    }
-
     boolean shouldUseBaseCMImage(ClusterV4Request clusterRequest) {
         ClouderaManagerV4Request cmRequest = clusterRequest.getCm();
         return (cmRequest != null && !CollectionUtils.isEmpty(cmRequest.getProducts())) || (cmRequest != null && cmRequest.getRepository() != null);
@@ -398,7 +391,7 @@ public class StackCreatorService {
         }
         return executorService.submit(() -> {
             try {
-                boolean base = blueprintService.isAmbariBlueprint(blueprint) ? shouldUseBaseAmbariImage(clusterRequest) : shouldUseBaseCMImage(clusterRequest);
+                boolean base = shouldUseBaseCMImage(clusterRequest);
                 LOGGER.info("The stack with name {} will use base image: {}", stackName, base);
                 return imageService.determineImageFromCatalog(workspace.getId(), stackRequest.getImage(), platformString, blueprint, base, user, image -> true);
             } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {

@@ -153,8 +153,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             boolean singlePrimaryGateway, boolean kerberosSecured) {
         Stack stack = event.getStack();
         boolean singleNodeCluster = clusterService.isSingleNode(stack);
-        boolean ambariBlueprint = blueprintService.isAmbariBlueprint(stack.getCluster().getBlueprint());
-        ClusterManagerType cmType = ambariBlueprint ? ClusterManagerType.AMBARI : ClusterManagerType.CLOUDERA_MANAGER;
+        ClusterManagerType cmType = ClusterManagerType.CLOUDERA_MANAGER;
         return new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getResourceId(), hostGroupName,
                 hostNames.size(), ScalingType.UPSCALE_TOGETHER, Sets.newHashSet(hostNames), singlePrimaryGateway,
                 kerberosSecured, event.accepted(), singleNodeCluster, cmType);

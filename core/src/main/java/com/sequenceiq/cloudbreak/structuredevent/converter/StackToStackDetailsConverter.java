@@ -11,15 +11,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.structuredevent.event.InstanceGroupDetails;
@@ -67,18 +65,6 @@ public class StackToStackDetailsConverter extends AbstractConversionServiceAware
             stackDetails.setImageIdentifier(image.getImageName());
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.warn("Image not found! {}", e.getMessage());
-        }
-        AmbariRepo ambariRepo = componentConfigProviderService.getAmbariRepo(stackId);
-        if (ambariRepo != null) {
-            stackDetails.setPrewarmedImage(ambariRepo.getPredefined());
-            stackDetails.setAmbariVersion(ambariRepo.getVersion());
-        } else {
-            stackDetails.setPrewarmedImage(Boolean.FALSE);
-        }
-        StackRepoDetails stackRepoDetails = componentConfigProviderService.getHDPRepo(stackId);
-        if (stackRepoDetails != null) {
-            stackDetails.setClusterType(stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG));
-            stackDetails.setClusterVersion(stackRepoDetails.getHdpVersion());
         }
     }
 

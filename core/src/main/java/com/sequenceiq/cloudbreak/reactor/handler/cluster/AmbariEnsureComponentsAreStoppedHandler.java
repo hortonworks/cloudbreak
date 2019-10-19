@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterUpscaleService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.EnsureClusterComponentsAreStoppedRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariEnsureComponentsAreStoppedResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterManagerEnsureComponentsAreStoppedResult;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 import reactor.bus.Event;
@@ -35,14 +35,14 @@ public class AmbariEnsureComponentsAreStoppedHandler implements EventHandler<Ens
     public void accept(Event<EnsureClusterComponentsAreStoppedRequest> event) {
         EnsureClusterComponentsAreStoppedRequest request = event.getData();
         Long stackId = request.getResourceId();
-        AmbariEnsureComponentsAreStoppedResult result;
+        ClusterManagerEnsureComponentsAreStoppedResult result;
         try {
             clusterUpscaleService.ensureComponentsAreStopped(stackId, request.getComponents(), request.getHostName());
-            result = new AmbariEnsureComponentsAreStoppedResult(request);
+            result = new ClusterManagerEnsureComponentsAreStoppedResult(request);
         } catch (Exception e) {
             String message = "Failed to gather installed components on host";
             LOGGER.error(message, e);
-            result = new AmbariEnsureComponentsAreStoppedResult(message, e, request);
+            result = new ClusterManagerEnsureComponentsAreStoppedResult(message, e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
 

@@ -47,21 +47,6 @@ public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, 
         return this;
     }
 
-    public ClusterTestDto withAmbari() {
-        AmbariTestDto ambari = getTestContext().get(AmbariTestDto.class);
-        return withAmbari(ambari);
-    }
-
-    public ClusterTestDto withAmbari(String key) {
-        AmbariTestDto ambari = getTestContext().get(key);
-        return withAmbari(ambari);
-    }
-
-    public ClusterTestDto withAmbari(AmbariTestDto ambariRequest) {
-        getRequest().setAmbari(ambariRequest.getRequest());
-        return this;
-    }
-
     public ClusterTestDto withClouderaManager() {
         ClouderaManagerTestDto clouderaManager = getTestContext().get(ClouderaManagerTestDto.class);
         return withClouderaManager(clouderaManager);
@@ -74,7 +59,6 @@ public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, 
 
     public ClusterTestDto withClouderaManager(ClouderaManagerTestDto clouderaManagerTestDto) {
         getRequest().setCm(clouderaManagerTestDto.getRequest());
-        getRequest().setAmbari(null);
         return this;
     }
 

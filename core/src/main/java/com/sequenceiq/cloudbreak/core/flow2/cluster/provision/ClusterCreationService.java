@@ -92,7 +92,7 @@ public class ClusterCreationService {
     public void startingClusterServices(StackView stack) throws CloudbreakException {
         OrchestratorView orchestrator = stack.getOrchestrator();
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTING_AMBARI_SERVICES, "Running cluster services.");
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTING_CLUSTER_MANAGER_SERVICES, "Running cluster services.");
         if (orchestratorType.containerOrchestrator()) {
             flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_RUN_CONTAINERS);
         } else if (orchestratorType.hostOrchestrator()) {
@@ -104,8 +104,8 @@ public class ClusterCreationService {
         }
     }
 
-    public void startingAmbari(long stackId) {
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, "Ambari cluster is now starting.");
+    public void startingClusterManager(long stackId) {
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, "cluster manager cluster is now starting.");
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
     }
 

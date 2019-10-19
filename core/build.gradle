@@ -247,7 +247,6 @@ dependencies {
   runtime project(':cloud-mock')
   runtime project(':cloud-azure')
   runtime project(':cloud-yarn')
-  runtime project(':cluster-ambari')
   runtime project(':cluster-cm')
   runtime project(':auth-connector')
   runtime group: 'activation',                    name: 'activation'

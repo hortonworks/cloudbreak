@@ -11,8 +11,8 @@ public enum ClusterUpgradeEvent implements FlowEvent {
     CLUSTER_UPGRADE_FINISHED_EVENT(EventSelectorUtil.selector(ClusterUpgradeResult.class)),
     CLUSTER_UPGRADE_FINISHED_FAILURE_EVENT(EventSelectorUtil.failureSelector(ClusterUpgradeResult.class)),
 
-    CLUSTER_UPGRADE_START_AMBARI_FINISHED_EVENT(EventSelectorUtil.selector(StartClusterSuccess.class)),
-    CLUSTER_UPGRADE_START_AMBARI_FINISHED_FAILURE_EVENT(EventSelectorUtil.failureSelector(StartClusterFailed.class)),
+    CLUSTER_UPGRADE_START_CLUSTER_MANAGER_FINISHED_EVENT(EventSelectorUtil.selector(StartClusterSuccess.class)),
+    CLUSTER_UPGRADE_START_CLUSTER_MANAGER_FINISHED_FAILURE_EVENT(EventSelectorUtil.failureSelector(StartClusterFailed.class)),
 
     FINALIZED_EVENT("CLUSTERUPGRADEFINALIZEDEVENT"),
     FAILURE_EVENT("CLUSTERUPGRADEFAILUREEVENT"),

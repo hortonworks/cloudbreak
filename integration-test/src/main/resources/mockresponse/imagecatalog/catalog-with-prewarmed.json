@@ -1,9 +1,10 @@
 {
   "images": {
-    "hdp-images": [
+    "cdh-images": [
       {
-        "date": "2017-10-13",
-        "description": "Cloudbreak official base image",
+        "created": 1569369600,
+        "date": "2019-09-25",
+        "description": "Official Cloudbreak image",
         "images": {
           "mock": {
             "default": "mockimage/hdc-hdp--1710161226.tar.gz"
@@ -13,39 +14,52 @@
         "os_type": "redhat7",
         "uuid": "f6e778fc-7f17-4535-9021-515351df3691",
         "package-versions": {
-          "ambari": "2.7.100.0-266",
+          "cm": "7.x.0",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "2.6.1.0"
+          "stack": "7.0.1"
         },
         "stack-details": {
           "repo": {
             "stack": {
-              "redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/2.6.1.0",
-              "repoid": "HDP-2.6",
-              "repository-version": "2.6.1.0-7",
-              "vdf-url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/2.6.1.0/HDF-2.6.1.0-7.xml"
+              "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1454941/cdh/7.x/parcels/",
+              "repoid": "CDH-7.0.1",
+              "repository-version": "7.0.1-1.cdh7.0.1.p0.1454941"
             },
-            "util": {
-              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
-              "repoid": "HDP-UTILS-1.1.0.22"
-            }
+            "util": null
           },
-          "version": "2.6.1.0",
-          "mpacks": [
-            {
-              "mpack_url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/2.6.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-2.6.1.0-7.tar.gz"
-            }
-          ]
+          "version": "7.0.1"
         },
         "repo": {
-          "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.100.0-266"
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1455819/cm7/7.0.1/redhat7/yum/"
         },
-        "version": "2.7.100.0-266"
+        "version": "7.x.0",
+        "pre_warm_parcels": [
+          [
+            "SCHEMAREGISTRY-0.8.0.3.0.0.0-21-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel"
+          ],
+          [
+            "STREAMS_MESSAGING_MANAGER-2.1.0.3.0.0.0-21-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel"
+          ],
+          [
+            "CFM-2.0.0.0-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel/SCHEMAREGISTRY-0.8.0.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel/NIFI-1.10.0.2.0.0.0-23.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel/NIFICA-1.10.0.2.0.0.0-23.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-23.jar"
+        ]
       },
       {
-        "date": "2017-10-17",
-        "description": "Cloudbreak official base image 2",
+        "created": 1569369600,
+        "date": "2019-09-25",
+        "description": "Official Cloudbreak image 2",
         "images": {
           "mock": {
             "default": "mockimage/hdc-hdp--1710171220.tar.gz"
@@ -55,35 +69,47 @@
         "os_type": "redhat7",
         "uuid": "1a6eadd2-5B95-4EC9-B300-13dc43208b64",
         "package-versions": {
-          "ambari": "2.7.100.0-266",
+          "cm": "7.x.0",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "2.6.1.0"
+          "stack": "7.0.1"
         },
         "stack-details": {
           "repo": {
             "stack": {
-              "redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/2.6.1.0",
-              "repoid": "HDP-2.6",
-              "repository-version": "2.6.1.0-7",
-              "vdf-url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/2.6.1.0/HDF-2.6.1.0-7.xml"
+              "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1454941/cdh/7.x/parcels/",
+              "repoid": "CDH-7.0.1",
+              "repository-version": "7.0.1-1.cdh7.0.1.p0.1454941"
             },
-            "util": {
-              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
-              "repoid": "HDP-UTILS-1.1.0.22"
-            }
+            "util": null
           },
-          "version": "2.6.1.0",
-          "mpacks": [
-            {
-              "mpack_url": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/2.6.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-2.6.1.0-7.tar.gz"
-            }
-          ]
+          "version": "7.0.1"
         },
         "repo": {
-          "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.100.0-266"
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1455819/cm7/7.0.1/redhat7/yum/"
         },
-        "version": "2.7.100.0-266"
+        "version": "7.x.0",
+        "pre_warm_parcels": [
+          [
+            "SCHEMAREGISTRY-0.8.0.3.0.0.0-21-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel"
+          ],
+          [
+            "STREAMS_MESSAGING_MANAGER-2.1.0.3.0.0.0-21-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel"
+          ],
+          [
+            "CFM-2.0.0.0-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel/SCHEMAREGISTRY-0.8.0.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel/NIFI-1.10.0.2.0.0.0-23.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel/NIFICA-1.10.0.2.0.0.0-23.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-23.jar"
+        ]
       }
     ],
     "hdf-images": [],

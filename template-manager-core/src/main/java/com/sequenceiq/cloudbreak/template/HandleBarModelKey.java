@@ -15,7 +15,6 @@ public enum HandleBarModelKey {
     SHAREDSERVICE("sharedService"),
     DATALAKE("datalake"),
     BLUEPRINT("blueprint"),
-    HDF("hdf"),
     GENERAL("general"),
     EXPOSED_SERVICES("exposedServices"),
     HOST_GROUPS("host_groups"),
