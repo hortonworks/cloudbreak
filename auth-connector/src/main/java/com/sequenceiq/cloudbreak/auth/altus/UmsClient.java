@@ -75,9 +75,9 @@ public class UmsClient {
     /**
      * Wraps calls to ListGroups with an Account ID.
      *
-     * @param requestId             the request ID for the request
-     * @param accountId             the account ID
-     * @param groupNameOrCrnList    the groups to list. if null or empty then all groups will be listed
+     * @param requestId          the request ID for the request
+     * @param accountId          the account ID
+     * @param groupNameOrCrnList the groups to list. if null or empty then all groups will be listed
      * @return the list of groups
      */
     public List<Group> listGroups(String requestId, String accountId, List<String> groupNameOrCrnList) {
@@ -106,9 +106,9 @@ public class UmsClient {
     /**
      * Wraps calls to ListGroupsForMember with an Account ID and member CRN.
      *
-     * @param requestId             the request ID for the request
-     * @param accountId             the account ID
-     * @param memberCrn             member (e.g., user) CRN for which groups are fetched.
+     * @param requestId the request ID for the request
+     * @param accountId the account ID
+     * @param memberCrn member (e.g., user) CRN for which groups are fetched.
      * @return the list of group CRNs
      */
     public List<String> listGroupsForMembers(String requestId, String accountId, String memberCrn) {
@@ -117,7 +117,7 @@ public class UmsClient {
 
         Actor.Builder actor = Actor.newBuilder().setAccountId(accountId).setUserIdOrCrn(memberCrn);
         ListGroupsForMemberRequest.Builder request = ListGroupsForMemberRequest.newBuilder()
-            .setMember(actor.build());
+                .setMember(actor.build());
 
         ListGroupsForMemberResponse response;
         List<String> groups = new ArrayList<>();
@@ -174,9 +174,9 @@ public class UmsClient {
     /**
      * Wraps calls to ListUsers with an Account ID.
      *
-     * @param requestId         the request ID for the request
-     * @param accountId         the account ID
-     * @param userIdOrCrnList   a list of users to list. If null or empty then all users will be listed
+     * @param requestId       the request ID for the request
+     * @param accountId       the account ID
+     * @param userIdOrCrnList a list of users to list. If null or empty then all users will be listed
      * @return the list of users
      */
     public List<User> listUsers(String requestId, String accountId, List<String> userIdOrCrnList) {
@@ -223,9 +223,9 @@ public class UmsClient {
     /**
      * Wraps calls to ListMachineUsers with an Account ID.
      *
-     * @param requestId                 the request ID for the request
-     * @param accountId                 the account ID
-     * @param machineUserNameOrCrnList  a list of users to list. If null or empty then all users will be listed
+     * @param requestId                the request ID for the request
+     * @param accountId                the account ID
+     * @param machineUserNameOrCrnList a list of users to list. If null or empty then all users will be listed
      * @return the list of machine users
      */
     public List<MachineUser> listMachineUsers(String requestId, String accountId, List<String> machineUserNameOrCrnList) {
@@ -464,18 +464,18 @@ public class UmsClient {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         return newStub(requestId).getActorWorkloadCredentials(
-            GetActorWorkloadCredentialsRequest.newBuilder()
-                .setActorCrn(userCrn)
-                .build()
+                GetActorWorkloadCredentialsRequest.newBuilder()
+                        .setActorCrn(userCrn)
+                        .build()
         );
     }
 
     /**
      * Wraps a call to getRights
      *
-     * @param requestId     the request ID for the request
-     * @param actorCrn      the actor CRN
-     * @param resourceCrn   the user or machine user CRN
+     * @param requestId   the request ID for the request
+     * @param actorCrn    the actor CRN
+     * @param resourceCrn the user or machine user CRN
      * @return rights object for the user or machine user
      */
     public GetRightsResponse getRightsForUser(String requestId, String actorCrn, String resourceCrn) {
@@ -606,8 +606,8 @@ public class UmsClient {
     /**
      * Retrieves event generation ids for an account
      *
-     * @param requestId     id of the request
-     * @param accountId     id of the account
+     * @param requestId id of the request
+     * @param accountId id of the account
      */
     UserManagementProto.GetEventGenerationIdsResponse getEventGenerationIds(String requestId, String accountId) {
         checkNotNull(requestId);
@@ -632,6 +632,7 @@ public class UmsClient {
 
     /**
      * Queries the metadata file used to configure SSO authentication on clusters.
+     *
      * @param requestId the Request ID
      * @param accountId the account ID
      * @return metadata as string
@@ -651,6 +652,42 @@ public class UmsClient {
         checkNotNull(accountId);
         return newStub(requestId).listRoles(UserManagementProto.ListRolesRequest.newBuilder()
                 .setAccountId(accountId)
+                .build());
+    }
+
+    public UserManagementProto.SetWorkloadAdministrationGroupNameResponse setWorkloadAdministrationGroupName(String requestId, String accountId,
+            String right, String resource) {
+        checkNotNull(accountId);
+        checkNotNull(right);
+        checkNotNull(resource);
+        return newStub(requestId).setWorkloadAdministrationGroupName(UserManagementProto.SetWorkloadAdministrationGroupNameRequest.newBuilder()
+                .setAccountId(accountId)
+                .setRightName(right)
+                .setResource(resource)
+                .build());
+    }
+
+    public UserManagementProto.GetWorkloadAdministrationGroupNameResponse getWorkloadAdministrationGroupName(String requestId, String accountId,
+            String right, String resource) {
+        checkNotNull(accountId);
+        checkNotNull(right);
+        checkNotNull(resource);
+        return newStub(requestId).getWorkloadAdministrationGroupName(UserManagementProto.GetWorkloadAdministrationGroupNameRequest.newBuilder()
+                .setAccountId(accountId)
+                .setRightName(right)
+                .setResource(resource)
+                .build());
+    }
+
+    public UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse deleteWorkloadAdministrationGroupName(String requestId, String accountId,
+            String right, String resource) {
+        checkNotNull(accountId);
+        checkNotNull(right);
+        checkNotNull(resource);
+        return newStub(requestId).deleteWorkloadAdministrationGroupName(UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest.newBuilder()
+                .setAccountId(accountId)
+                .setRightName(right)
+                .setResource(resource)
                 .build());
     }
 

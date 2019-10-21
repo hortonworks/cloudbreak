@@ -12,9 +12,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -84,8 +81,6 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final Logger LOG = LoggerFactory.getLogger(MockUserManagementService.class);
 
-    private static final int GROUPS_PER_ACCOUNT = 5;
-
     private static final int FIRST_GROUP = 0;
 
     private static final String ALTUS_ACCESS_KEY_ID = "altus_access_key_id";
@@ -114,6 +109,12 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     @Inject
     private IniUtil iniUtil;
 
+    @Inject
+    private MockCrnService mockCrnService;
+
+    @Inject
+    private MockGroupManagementService mockGroupManagementService;
+
     @Value("#{'${auth.config.dir:}/${auth.license.file:}'}")
     private String cmLicenseFilePath;
 
@@ -136,8 +137,6 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     private AltusCredential fluentCredential;
 
     private final Map<String, Set<String>> accountUsers = new ConcurrentHashMap<>();
-
-    private final Map<String, Map<String, Group>> accountGroups = new ConcurrentHashMap<>();
 
     @Value("${auth.mock.event-generation.expiration-minutes:10}")
     private long eventGenerationExirationMinutes;
@@ -210,7 +209,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     public void getRights(GetRightsRequest request, StreamObserver<GetRightsResponse> responseObserver) {
         String actorCrn = request.getActorCrn();
         String accountId = Crn.fromString(actorCrn).getAccountId();
-        List<Group> groups = List.copyOf(getOrCreateGroups(accountId));
+        List<Group> groups = List.copyOf(mockGroupManagementService.getOrCreateGroups(accountId));
         Group group = groups.get(FIRST_GROUP);
         PolicyStatement policyStatement = PolicyStatement.newBuilder()
                 .addRight(ALL_RIGHTS_AND_RESOURCES)
@@ -218,12 +217,12 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                 .build();
         PolicyDefinition policyDefinition = PolicyDefinition.newBuilder().addStatement(policyStatement).build();
         Policy powerUserPolicy = Policy.newBuilder()
-                .setCrn(createCrn(ACCOUNT_ID_ALTUS, Crn.Service.IAM, Crn.ResourceType.POLICY, "PowerUserPolicy").toString())
+                .setCrn(mockCrnService.createCrn(ACCOUNT_ID_ALTUS, Crn.Service.IAM, Crn.ResourceType.POLICY, "PowerUserPolicy").toString())
                 .setCreationDateMs(CREATION_DATE_MS)
                 .setPolicyDefinition(policyDefinition)
                 .build();
         Role powerUserRole = Role.newBuilder()
-                .setCrn(createCrn(ACCOUNT_ID_ALTUS, Crn.Service.IAM, Crn.ResourceType.ROLE, "PowerUser").toString())
+                .setCrn(mockCrnService.createCrn(ACCOUNT_ID_ALTUS, Crn.Service.IAM, Crn.ResourceType.ROLE, "PowerUser").toString())
                 .setCreationDateMs(CREATION_DATE_MS)
                 .addPolicy(powerUserPolicy)
                 .build();
@@ -231,7 +230,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         GetRightsResponse.Builder responseBuilder = GetRightsResponse.newBuilder()
                 .addGroupCrn(group.getCrn())
                 .addRoleAssignment(roleAssignment)
-                .addWorkloadAdministrationGroupName("mockworkloadadministrationgroup0");
+                .addWorkloadAdministrationGroupName(mockGroupManagementService.generateVirtualGroupName("environment/read"));
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
     }
@@ -254,68 +253,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Override
     public void listGroups(ListGroupsRequest request, StreamObserver<ListGroupsResponse> responseObserver) {
-
-        ListGroupsResponse.Builder groupsBuilder = ListGroupsResponse.newBuilder();
-        if (request.getGroupNameOrCrnCount() == 0) {
-            if (isNotEmpty(request.getAccountId())) {
-                getOrCreateGroups(request.getAccountId()).stream()
-                        .forEach(groupsBuilder::addGroup);
-            }
-            responseObserver.onNext(groupsBuilder.build());
-        } else {
-            request.getGroupNameOrCrnList().stream()
-                    .map(this::getOrCreateGroup)
-                    .forEach(groupsBuilder::addGroup);
-            responseObserver.onNext(groupsBuilder.build());
-        }
-        responseObserver.onCompleted();
-    }
-
-    private List<Group> getOrCreateGroups(String accountId) {
-        accountGroups.computeIfAbsent(accountId, this::createGroups);
-        List<Group> groups = new ArrayList<>(accountGroups.get(accountId).values());
-        groups.sort(Comparator.comparing(Group::getGroupName));
-        return groups;
-    }
-
-    private Group getOrCreateGroup(String groupCrn) {
-        String[] splittedCrn = groupCrn.split(":");
-        String accountId = splittedCrn[4];
-
-        accountGroups.computeIfAbsent(accountId, this::createGroups);
-        Map<String, Group> groups = accountGroups.get(accountId);
-
-        groups.computeIfAbsent(groupCrn, this::createGroupFromCrn);
-        return groups.get(groupCrn);
-    }
-
-    private Map<String, Group> createGroups(String accountId) {
-        Map<String, Group> groups = new HashMap(GROUPS_PER_ACCOUNT);
-        for (int i = 0; i < GROUPS_PER_ACCOUNT; ++i) {
-            Group group = createGroup(accountId, "mockgroup" + i);
-            groups.put(group.getCrn(), group);
-        }
-        return groups;
-    }
-
-    private Group createGroup(String accountId, String groupName) {
-        String groupId = UUID.randomUUID().toString();
-        String groupCrn = createCrn(accountId, Crn.Service.IAM, Crn.ResourceType.GROUP, groupId).toString();
-        return Group.newBuilder()
-                .setGroupId(groupId)
-                .setCrn(groupCrn)
-                .setGroupName(groupName)
-                .build();
-    }
-
-    private Group createGroupFromCrn(String groupCrn) {
-        String[] splittedCrn = groupCrn.split(":");
-        String groupId = splittedCrn[6];
-        return Group.newBuilder()
-                .setGroupId(groupId)
-                .setCrn(groupCrn)
-                .setGroupName(groupId)
-                .build();
+        mockGroupManagementService.listGroups(request, responseObserver);
     }
 
     @Override
@@ -333,7 +271,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                 crnString = machineUserIdOrCrn;
             } else {
                 userName = machineUserIdOrCrn;
-                Crn crn = createCrn(accountId, Crn.Service.IAM, Crn.ResourceType.MACHINE_USER, userName);
+                Crn crn = mockCrnService.createCrn(accountId, Crn.Service.IAM, Crn.ResourceType.MACHINE_USER, userName);
                 crnString = crn.toString();
             }
             responseObserver.onNext(
@@ -547,26 +485,26 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
      */
     @Override
     public void getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request,
-                                            io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement
-                                                .UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
+            io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement
+                    .UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
 
         final int keyType17 = 17;
         final int keyType18 = 18;
         final int saltType = 4;
         GetActorWorkloadCredentialsResponse.Builder respBuilder = GetActorWorkloadCredentialsResponse.getDefaultInstance().toBuilder();
         respBuilder.addKerberosKeysBuilder(0)
-            .setSaltType(saltType)
-            .setKeyType(keyType17)
-            .setKeyValue("testKeyValue17")
-            .setSaltValue("NonIodizedGrainOfSalt")
-            .build();
+                .setSaltType(saltType)
+                .setKeyType(keyType17)
+                .setKeyValue("testKeyValue17")
+                .setSaltValue("NonIodizedGrainOfSalt")
+                .build();
 
         respBuilder.addKerberosKeysBuilder(1)
-            .setSaltType(saltType)
-            .setKeyType(keyType18)
-            .setKeyValue("testKeyValue18")
-            .setSaltValue("IodizedGrainOfSalt")
-            .build();
+                .setSaltType(saltType)
+                .setKeyType(keyType18)
+                .setKeyValue("testKeyValue18")
+                .setSaltValue("IodizedGrainOfSalt")
+                .build();
 
         // sha256 hashed value of "Password123!"
         respBuilder.setPasswordHash("008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601");
@@ -621,32 +559,36 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         return null;
     }
 
+    @Override
+    public void getWorkloadAdministrationGroupName(UserManagementProto.GetWorkloadAdministrationGroupNameRequest request,
+            StreamObserver<UserManagementProto.GetWorkloadAdministrationGroupNameResponse> responseObserver) {
+        mockGroupManagementService.getWorkloadAdministrationGroupName(request, responseObserver);
+    }
+
+    @Override
+    public void setWorkloadAdministrationGroupName(UserManagementProto.SetWorkloadAdministrationGroupNameRequest request,
+            StreamObserver<UserManagementProto.SetWorkloadAdministrationGroupNameResponse> responseObserver) {
+        mockGroupManagementService.setWorkloadAdministrationGroupName(request, responseObserver);
+    }
+
+    @Override
+    public void deleteWorkloadAdministrationGroupName(UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request,
+            StreamObserver<UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> responseObserver) {
+        mockGroupManagementService.deleteWorkloadAdministrationGroupName(request, responseObserver);
+    }
+
     private UserManagementProto.ResourceAssignee createResourceAssignee(String resourceCrn) {
         return UserManagementProto.ResourceAssignee.newBuilder()
                 .setAssigneeCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
-                .setResourceRoleCrn(createCrn(resourceCrn, Crn.ResourceType.RESOURCE_ROLE, "WorkspaceManager").toString())
+                .setResourceRoleCrn(mockCrnService.createCrn(resourceCrn, Crn.ResourceType.RESOURCE_ROLE, "WorkspaceManager").toString())
                 .build();
     }
 
     private UserManagementProto.ResourceAssignment createResourceAssigment(String assigneeCrn) {
-        String resourceCrn = createCrn(assigneeCrn, Crn.ResourceType.WORKSPACE, Crn.fromString(assigneeCrn).getAccountId()).toString();
+        String resourceCrn = mockCrnService.createCrn(assigneeCrn, Crn.ResourceType.WORKSPACE, Crn.fromString(assigneeCrn).getAccountId()).toString();
         return UserManagementProto.ResourceAssignment.newBuilder()
                 .setResourceCrn(resourceCrn)
-                .setResourceRoleCrn(createCrn(assigneeCrn, Crn.ResourceType.RESOURCE_ROLE, "WorkspaceManager").toString())
-                .build();
-    }
-
-    private Crn createCrn(String baseCrn, Crn.ResourceType resourceType, String resource) {
-        Crn crn = Crn.fromString(baseCrn);
-        return createCrn(crn.getAccountId(), crn.getService(), resourceType, resource);
-    }
-
-    private Crn createCrn(String accountId, Crn.Service service, Crn.ResourceType resourceType, String resource) {
-        return Crn.builder()
-                .setAccountId(accountId)
-                .setService(service)
-                .setResourceType(resourceType)
-                .setResource(resource)
+                .setResourceRoleCrn(mockCrnService.createCrn(assigneeCrn, Crn.ResourceType.RESOURCE_ROLE, "WorkspaceManager").toString())
                 .build();
     }
 

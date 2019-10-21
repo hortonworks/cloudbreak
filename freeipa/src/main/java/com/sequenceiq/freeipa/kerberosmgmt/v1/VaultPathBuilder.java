@@ -47,8 +47,6 @@ public class VaultPathBuilder {
 
     private Optional<SecretType> secretType = Optional.empty();
 
-    private boolean generateClusterIdIfNotPresent;
-
     private Optional<String> accountId = Optional.empty();
 
     private Optional<SecretSubType> subType = Optional.empty();
@@ -60,11 +58,6 @@ public class VaultPathBuilder {
     private Optional<String> serverHostName = Optional.empty();
 
     private Optional<String> serviceName = Optional.empty();
-
-    public VaultPathBuilder enableGeneratingClusterIdIfNotPresent() {
-        generateClusterIdIfNotPresent = true;
-        return this;
-    }
 
     public VaultPathBuilder withSecretType(SecretType secretType) {
         this.secretType = Optional.ofNullable(secretType);
@@ -106,7 +99,7 @@ public class VaultPathBuilder {
     }
 
     public String build() {
-        // Sample Vault Path "/enginePath/appPath/account-id/Type/SubType/envId/clusterId/hostname/serviceName"
+        // Sample Vault Path "/enginePath/appPath/account-id/Type/SubType/envId (/clusterId|IF_PRESENT) /hostname/serviceName"
         StringBuilder ret = new StringBuilder();
         List<Optional<String>> requiredEntries = Arrays.asList(
                 accountId,
@@ -120,28 +113,21 @@ public class VaultPathBuilder {
             ret.append("/");
         });
 
-        if (clusterId.isPresent() || generateClusterIdIfNotPresent) {
-            ret.append(clusterId.orElseGet(() -> {
-                LOGGER.debug("Cluster CRN not provided. Auto-generating one");
-                return generateClusterId(accountId.get(), environmentId.get());
-            }));
+        if (clusterId.isPresent()) {
+            ret.append(clusterId.get());
             ret.append("/");
 
-            if (serverHostName.isPresent()) {
-                ret.append(serverHostName.get());
-                if (secretType.get() == SecretType.SERVICE_KEYTAB) {
-                    ret.append("/");
-                    ret.append(serviceName.orElse(""));
-                }
+        }
+
+        if (serverHostName.isPresent()) {
+            ret.append(serverHostName.get());
+            if (secretType.get() == SecretType.SERVICE_KEYTAB) {
+                ret.append("/");
+                ret.append(serviceName.orElse(""));
             }
         }
 
         LOGGER.debug("Generated vault path: [{}]", ret);
         return ret.toString();
     }
-
-    private String generateClusterId(String accountId, String envCrn) {
-        return accountId + "-" + envCrn;
-    }
-
 }

@@ -164,7 +164,6 @@ public class KerberosMgmtV1Service {
         FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
         delService(canonicalPrincipal, ipaClient);
         VaultPathBuilder vaultPathBuilder = new VaultPathBuilder()
-                .enableGeneratingClusterIdIfNotPresent()
                 .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                 .withAccountId(accountId)
                 .withEnvironmentCrn(request.getEnvironmentCrn())
@@ -190,7 +189,6 @@ public class KerberosMgmtV1Service {
         }
         delHost(request.getServerHostName(), ipaClient);
         VaultPathBuilder vaultPathBuilder = new VaultPathBuilder()
-                .enableGeneratingClusterIdIfNotPresent()
                 .withAccountId(accountId)
                 .withEnvironmentCrn(request.getEnvironmentCrn())
                 .withClusterCrn(request.getClusterCrn())
