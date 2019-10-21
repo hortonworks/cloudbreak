@@ -50,11 +50,11 @@ public class UmsUsersStateProvider {
 
             Map<String, UsersState> envUsersStateMap = new HashMap<>();
 
-            List<User> users = userCrns.isEmpty() ? grpcUmsClient.listAllUsers(actorCrn, accountId, requestIdOptional)
-                : grpcUmsClient.listUsers(actorCrn, accountId, List.copyOf(userCrns), requestIdOptional);
+            boolean fullSync = userCrns.isEmpty() && machineUserCrns.isEmpty();
 
-            List<MachineUser> machineUsers = machineUserCrns.isEmpty() ? grpcUmsClient.listAllMachineUsers(actorCrn, accountId, requestIdOptional)
-                : grpcUmsClient.listMachineUsers(actorCrn, accountId, List.copyOf(machineUserCrns), requestIdOptional);
+            List<User> users = getUsers(actorCrn, accountId, requestIdOptional, fullSync, userCrns);
+
+            List<MachineUser> machineUsers = getMachineUsers(actorCrn, accountId, requestIdOptional, fullSync, machineUserCrns);
 
             Map<String, FmsGroup> crnToFmsGroup = grpcUmsClient.listGroups(actorCrn, accountId, List.of(), requestIdOptional).stream()
                     .collect(Collectors.toMap(Group::getCrn, this::umsGroupToGroup));
@@ -92,6 +92,27 @@ public class UmsUsersStateProvider {
             return envUsersStateMap;
         } catch (RuntimeException e) {
             throw new UmsOperationException(String.format("Error during UMS operation: '%s'", e.getLocalizedMessage()), e);
+        }
+    }
+
+    private List<User> getUsers(String actorCrn, String accountId, Optional<String> requestIdOptional, boolean fullSync, Set<String> userCrns) {
+        if (fullSync) {
+            return grpcUmsClient.listAllUsers(actorCrn, accountId, requestIdOptional);
+        } else if (!userCrns.isEmpty()) {
+            return grpcUmsClient.listUsers(actorCrn, accountId, List.copyOf(userCrns), requestIdOptional);
+        } else {
+            return List.of();
+        }
+    }
+
+    private List<MachineUser> getMachineUsers(String actorCrn, String accountId, Optional<String> requestIdOptional,
+            boolean fullSync, Set<String> machineUserCrns) {
+        if (fullSync) {
+            return grpcUmsClient.listAllMachineUsers(actorCrn, accountId, requestIdOptional);
+        } else if (!machineUserCrns.isEmpty()) {
+            return grpcUmsClient.listMachineUsers(actorCrn, accountId, List.copyOf(machineUserCrns), requestIdOptional);
+        } else {
+            return List.of();
         }
     }
 
