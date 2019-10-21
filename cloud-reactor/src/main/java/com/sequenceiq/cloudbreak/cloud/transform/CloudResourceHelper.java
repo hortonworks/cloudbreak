@@ -25,4 +25,15 @@ public class CloudResourceHelper {
                 .filter(resource -> resource.getType() == type)
                 .findFirst();
     }
+
+    public List<CloudResource> getNetworkResources(List<CloudResource> resources) {
+        return resources.stream()
+                .filter(cloudResource -> List.of(
+                        ResourceType.AZURE_SUBNET,
+                        ResourceType.AZURE_NETWORK,
+                        ResourceType.AZURE_RESOURCE_GROUP)
+                        .contains(cloudResource.getType()))
+                .collect(Collectors.toList());
+    }
+
 }
