@@ -80,8 +80,8 @@ public class DistroXClusterToClusterConverter {
         request.setExposedServices(getIfNotNull(source.getGateway(), gatewayConverter::exposedService));
         request.setDatabases(source.getDatabases());
         request.setBlueprintName(source.getBlueprintName());
-        request.setUserName(source.getUserName());
-        request.setPassword(source.getPassword());
+        request.setUserName(null);
+        request.setPassword(null);
         request.setCm(getIfNotNull(source.getCm(), cmConverter::convert));
         request.setCloudStorage(source.getCloudStorage());
         request.setProxy(source.getProxyConfigCrn());
