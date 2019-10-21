@@ -510,6 +510,29 @@ public class GrpcUmsClient {
         }
     }
 
+    public String setWorkloadAdministrationGroupName(String actorCrn, String accountId, Optional<String> requestId, String right, String resource) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            return client.setWorkloadAdministrationGroupName(requestId.orElse(UUID.randomUUID().toString()),
+                    accountId, right, resource).getWorkloadAdministrationGroupName();
+        }
+    }
+
+    public String getWorkloadAdministrationGroupName(String actorCrn, String accountId, Optional<String> requestId, String right, String resource) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            return client.getWorkloadAdministrationGroupName(requestId.orElse(UUID.randomUUID().toString()),
+                    accountId, right, resource).getWorkloadAdministrationGroupName();
+        }
+    }
+
+    public void deleteWorkloadAdministrationGroupName(String actorCrn, String accountId, Optional<String> requestId, String right, String resource) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            client.deleteWorkloadAdministrationGroupName(requestId.orElse(UUID.randomUUID().toString()), accountId, right, resource);
+        }
+    }
+
     /**
      * Retrieves event generation ids for an account from UMS.
      *
