@@ -15,21 +15,22 @@ import static com.sequenceiq.environment.environment.service.EnvironmentTestData
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.newTestEnvironment;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverter;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
+import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 
+@ExtendWith(MockitoExtension.class)
 class EnvironmentViewConverterTest {
 
-    EnvironmentViewConverter underTest;
+    private final CredentialViewConverter credentialViewConverter = new CredentialViewConverter();
 
-    @BeforeEach
-    void setUp() {
-        underTest = new EnvironmentViewConverter();
-    }
+    private final EnvironmentViewConverter underTest = new EnvironmentViewConverter(credentialViewConverter);
 
     @Test
     void convertTest() {

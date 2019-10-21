@@ -36,6 +36,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.LocationResp
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
+import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverter;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
@@ -73,6 +74,8 @@ public class EnvironmentApiConverter {
 
     private final CredentialToCredentialV1ResponseConverter credentialConverter;
 
+    private final CredentialViewConverter credentialViewConverter;
+
     private final TelemetryApiConverter telemetryApiConverter;
 
     private final TunnelConverter tunnelConverter;
@@ -84,13 +87,14 @@ public class EnvironmentApiConverter {
     public EnvironmentApiConverter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
             RegionConverter regionConverter,
             CredentialToCredentialV1ResponseConverter credentialConverter,
-            TelemetryApiConverter telemetryApiConverter,
+            CredentialViewConverter credentialViewConverter, TelemetryApiConverter telemetryApiConverter,
             TunnelConverter tunnelConverter,
             SdxEndpoint sdxEndpoint,
             EntitlementService entitlementService) {
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.regionConverter = regionConverter;
         this.credentialConverter = credentialConverter;
+        this.credentialViewConverter = credentialViewConverter;
         this.telemetryApiConverter = telemetryApiConverter;
         this.tunnelConverter = tunnelConverter;
         this.sdxEndpoint = sdxEndpoint;
@@ -251,7 +255,7 @@ public class EnvironmentApiConverter {
                 .withName(environmentDto.getName())
                 .withDescription(environmentDto.getDescription())
                 .withCloudPlatform(environmentDto.getCloudPlatform())
-                .withCredential(credentialConverter.convert(environmentDto.getCredential()))
+                .withCredentialView(credentialViewConverter.convert(environmentDto.getCredentialView()))
                 .withEnvironmentStatus(environmentDto.getStatus().getResponseStatus())
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
                 .withCreateFreeIpa(environmentDto.isCreateFreeIpa())

@@ -1,19 +1,24 @@
-package com.sequenceiq.environment.environment.v1;
+package com.sequenceiq.environment.environment.domain;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.domain.EnvironmentView;
+import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverter;
 
 @Component
 public class EnvironmentViewConverter {
+
+    private final CredentialViewConverter credentialViewConverter;
+
+    public EnvironmentViewConverter(CredentialViewConverter credentialViewConverter) {
+        this.credentialViewConverter = credentialViewConverter;
+    }
 
     public EnvironmentView convert(Environment environment) {
         EnvironmentView environmentView = new EnvironmentView();
         environmentView.setAccountId(environment.getAccountId());
         environmentView.setArchived(environment.isArchived());
         environmentView.setCloudPlatform(environment.getCloudPlatform());
-        environmentView.setCredential(environment.getCredential());
+        environmentView.setCredentialView(credentialViewConverter.convert(environment.getCredential()));
         environmentView.setDescription(environment.getDescription());
         environmentView.setId(environment.getId());
         environmentView.setLatitude(environment.getLatitude());

@@ -4,17 +4,30 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiModel(value = "DetailedEnvironmentV1Response")
 public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
+
+    @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_RESPONSE)
+    private CredentialResponse credential;
+
+    public CredentialResponse getCredential() {
+        return credential;
+    }
+
+    public void setCredential(CredentialResponse credential) {
+        this.credential = credential;
+    }
 
     public static final class Builder {
         private String crn;
