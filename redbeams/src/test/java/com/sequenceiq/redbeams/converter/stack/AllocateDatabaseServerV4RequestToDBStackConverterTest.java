@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_USE
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_VERSION;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.OWNER;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -89,6 +89,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     private static final String UNKNOWN_CLOUD_PLATFORM = "UnknownCloudPlatform";
 
     private static final String USER_EMAIL = "userEmail";
+
+    private static final String VPC_CIDR = "1.2.3.4/22";
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -239,6 +241,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                                         "subnet-2", cloudSubnets.get(1)
                                 )
                         )
+                        .withNetworkCidr(VPC_CIDR)
                         .build())
                 .build();
         when(crnUserDetailsService.loadUserByUsername(OWNER_CRN)).thenReturn(getCrnUser());
@@ -257,8 +260,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals("n-uuid", dbStack.getNetwork().getName());
         assertEquals(1, dbStack.getNetwork().getAttributes().getMap().size());
         assertEquals("netvalue", dbStack.getNetwork().getAttributes().getMap().get("netkey"));
-        assertThat(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds(), hasSize(1));
-        assertEquals(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds().iterator().next(), DEFAULT_SECURITY_GROUP_ID);
+        assertThat(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds(), empty());
         verify(providerParameterCalculator).get(allocateRequest);
         verify(providerParameterCalculator, never()).get(networkRequest);
         verify(subnetListerService).listSubnets(any(), any());

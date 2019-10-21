@@ -230,7 +230,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         server.setRootPassword(source.getRootUserPassword() != null ?
                 source.getRootUserPassword() : passwordGeneratorService.generatePassword(Optional.of(cloudPlatform)));
         server.setPort(source.getPort());
-        server.setSecurityGroup(buildExistingSecurityGroup(source.getSecurityGroup(), securityAccessResponse));
+        server.setSecurityGroup(buildExistingSecurityGroup(source.getSecurityGroup()));
 
         Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
         if (parameters != null) {
@@ -245,25 +245,21 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     }
 
     /**
-     * Redbeams saves security group id if it is provided in the request or if the environment provides a default security group.
-     * If none of them are filled in, then a custom security group is created later in spi.
+     * Redbeams saves security group id if it is provided in the request.
+     * If not filled in, then a custom security group is created later in spi.
      *
      * @param source                 - the request
-     * @param securityAccessResponse - environment data
      * @return returns the saved security groups. If none is specified, then an empty security gorup is returned.
      */
-    private SecurityGroup buildExistingSecurityGroup(SecurityGroupV4StackRequest source, SecurityAccessResponse securityAccessResponse) {
+    private SecurityGroup buildExistingSecurityGroup(SecurityGroupV4StackRequest source) {
         SecurityGroup securityGroup = new SecurityGroup();
         if (source != null) {
             securityGroup.setSecurityGroupIds(source.getSecurityGroupIds());
-        } else if (securityAccessResponse.getDefaultSecurityGroupId() != null) {
-            securityGroup.setSecurityGroupIds(Set.of(securityAccessResponse.getDefaultSecurityGroupId()));
         }
 
         return securityGroup;
     }
-
-    // compare to freeipa CostTaggingService
+        // compare to freeipa CostTaggingService
 
     private Json getTags(String userEmail, CloudPlatform cloudPlatform, long now) {
         // freeipa currently uses account ID for username / owner

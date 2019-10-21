@@ -47,7 +47,7 @@ public class NetworkParameterAdder {
     public Map<String, Object> addParameters(Map<String, Object> parameters, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform) {
         switch (cloudPlatform) {
             case AWS:
-                parameters.put(VPC_CIDR, environmentResponse.getSecurityAccess().getCidr());
+                parameters.put(VPC_CIDR, environmentResponse.getNetwork().getNetworkCidr());
                 parameters.put(VPC_ID, environmentResponse.getNetwork().getAws().getVpcId());
                 break;
             case AZURE:
