@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy.SubnetStratgyType.FILL;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,17 +8,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.net.util.SubnetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.microsoft.azure.CloudError;
@@ -31,17 +25,15 @@ import com.microsoft.azure.management.compute.VirtualHardDisk;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.network.NicIPConfiguration;
-import com.microsoft.azure.management.network.Subnet;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDatabaseResourceService;
-import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
+import com.sequenceiq.cloudbreak.cloud.azure.upscale.AzureUpscaleService;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
-import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStorageView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -51,8 +43,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -81,11 +71,6 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
     private static final String PUBLIC_ADDRESS_NAME = "PUBLIC_ADDRESS_NAME";
 
-    private static final int AZURE_NUMBER_OF_RESERVED_IPS = 5;
-
-    @Value("${cb.azure.host.name.prefix.length}")
-    private int stackNamePrefixLength;
-
     @Inject
     private AzureTemplateBuilder azureTemplateBuilder;
 
@@ -108,6 +93,12 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     @Inject
     private AzureDatabaseResourceService azureDatabaseResourceService;
 
+    @Inject
+    private AzureUpscaleService azureUpscaleService;
+
+    @Inject
+    private AzureStackViewProvider azureStackViewProvider;
+
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentType adjustmentType, Long threshold) {
@@ -116,7 +107,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
         AzureClient client = ac.getParameter(AzureClient.class);
 
-        AzureStackView azureStackView = getAzureStack(azureCredentialView, stack, getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()), ac);
+        AzureStackView azureStackView = azureStackViewProvider.getAzureStack(azureCredentialView, stack, client, ac);
 
         String customImageId = azureStorage.getCustomImageId(client, ac, stack);
         String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView, ac.getCloudContext(), stack);
@@ -164,7 +155,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
     @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-        PersistenceNotifier persistenceNotifier) {
+            PersistenceNotifier persistenceNotifier) {
         return azureDatabaseResourceService.buildDatabaseResourcesForLaunch(authenticatedContext, stack);
     }
 
@@ -176,17 +167,17 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
         for (CloudResource resource : resources) {
             switch (resource.getType()) {
-                case ARM_TEMPLATE:
-                    LOGGER.debug("Checking Azure group stack status of: {}", stackName);
-                    handleArmTemplate(result, client, stackName, resource);
-                    break;
-                case AZURE_NETWORK:
-                case AZURE_SUBNET:
-                case AZURE_VOLUMESET:
-                case AZURE_RESOURCE_GROUP:
-                    break;
-                default:
-                    throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
+            case ARM_TEMPLATE:
+                LOGGER.debug("Checking Azure group stack status of: {}", stackName);
+                handleArmTemplate(result, client, stackName, resource);
+                break;
+            case AZURE_NETWORK:
+            case AZURE_SUBNET:
+            case AZURE_VOLUMESET:
+            case AZURE_RESOURCE_GROUP:
+                break;
+            default:
+                throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
             }
         }
         return result;
@@ -263,76 +254,8 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
         AzureClient client = ac.getParameter(AzureClient.class);
-        AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
-
-        CloudContext cloudContext = ac.getCloudContext();
-        String stackName = azureUtils.getStackName(cloudContext);
-
-
-        AzureStackView azureStackView = getAzureStack(azureCredentialView, stack,
-                getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()), ac);
-
-        String customImageId = azureStorage.getCustomImageId(client, ac, stack);
-        String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
-                cloudContext, stack);
-
-        String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
-        String resourceGroupName = azureUtils.getResourceGroupName(cloudContext, stack);
-
-        try {
-            String region = cloudContext.getLocation().getRegion().value();
-            Map<String, AzureDiskType> storageAccounts = azureStackView.getStorageAccounts();
-            for (Entry<String, AzureDiskType> entry : storageAccounts.entrySet()) {
-                azureStorage.createStorage(client, entry.getKey(), entry.getValue(), resourceGroupName, region,
-                        azureStorage.isEncrytionNeeded(stack.getParameters()), stack.getTags());
-            }
-            Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
-            LOGGER.info("Created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
-            CloudResource armTemplate = resources.stream().filter(r -> r.getType() == ResourceType.ARM_TEMPLATE).findFirst()
-                    .orElseThrow(() -> new CloudConnectorException(String.format("Arm Template not found for: %s  ", stackName)));
-
-
-            List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
-            List<CloudResource> newInstances = azureUtils.getInstanceCloudResources(cloudContext, templateDeployment, scaledGroups);
-            List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(resources);
-            List<CloudResource> networkResources = getNetworkResources(resources);
-
-            azureComputeResourceService.buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, reattachableVolumeSets, networkResources);
-
-            return Collections.singletonList(new CloudResourceStatus(armTemplate, ResourceStatus.IN_PROGRESS));
-        } catch (CloudException e) {
-            LOGGER.info("Upscale error, cloud exception happened: ", e);
-            if (e.body() != null && e.body().details() != null) {
-                String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
-                throw new CloudConnectorException(String.format("Stack upscale failed, status code %s, error message: %s, details: %s",
-                        e.body().code(), e.body().message(), details));
-            } else {
-                throw new CloudConnectorException(String.format("Stack upscale failed: '%s', please go to Azure Portal for detailed message", e));
-            }
-        } catch (Exception e) {
-            throw new CloudConnectorException(String.format("Could not upscale: %s  ", stackName), e);
-        }
-    }
-
-    private Map<String, Integer> getNumberOfAvailableIPsInSubnets(AzureClient client, Network network) {
-        Map<String, Integer> result = new HashMap<>();
-        String resourceGroup = network.getStringParameter("resourceGroupName");
-        String networkId = network.getStringParameter("networkId");
-        Collection<String> subnetIds = azureUtils.getCustomSubnetIds(network);
-        for (String subnetId : subnetIds) {
-            Subnet subnet = client.getSubnetProperties(resourceGroup, networkId, subnetId);
-            int available = getAvailableAddresses(subnet);
-            result.put(subnetId, available);
-        }
-        return result;
-    }
-
-    private int getAvailableAddresses(Subnet subnet) {
-        SubnetUtils su = new SubnetUtils(subnet.addressPrefix());
-        su.setInclusiveHostCount(true);
-        int available = su.getInfo().getAddressCount();
-        int used = subnet.networkInterfaceIPConfigurationCount();
-        return available - used - AZURE_NUMBER_OF_RESERVED_IPS;
+        AzureStackView azureStackView = azureStackViewProvider.getAzureStack(new AzureCredentialView(ac.getCloudCredential()), stack, client, ac);
+        return azureUpscaleService.upscale(ac, stack, resources, azureStackView, client);
     }
 
     @Override
@@ -413,7 +336,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         AzureClient client = ac.getParameter(AzureClient.class);
         String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
         String diskContainer = azureStorage.getDiskContainerName(ac.getCloudContext());
-        List<CloudResource> networkResources = getNetworkResources(resources);
+        List<CloudResource> networkResources = cloudResourceHelper.getNetworkResources(resources);
         for (CloudInstance instance : vms) {
             String instanceId = instance.getInstanceId();
             Map<String, Object> instanceResources = resourcesToRemove.get(instanceId);
@@ -459,48 +382,6 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     @Override
     public String getDBStackTemplate() {
         return azureTemplateBuilder.getDBTemplateString();
-    }
-
-    private AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudStack cloudStack,
-            Map<String, Integer> availableIPs, AuthenticatedContext ac) {
-        Map<String, String> customImageNamePerInstance = getCustomImageNamePerInstance(ac, cloudStack);
-        return new AzureStackView(ac.getCloudContext().getName(), stackNamePrefixLength, cloudStack.getGroups(), new AzureStorageView(azureCredentialView,
-                ac.getCloudContext(),
-                azureStorage, azureStorage.getArmAttachedStorageOption(cloudStack.getParameters())),
-                AzureSubnetStrategy.getAzureSubnetStrategy(FILL, azureUtils.getCustomSubnetIds(cloudStack.getNetwork()), availableIPs),
-                customImageNamePerInstance);
-    }
-
-    private Map<String, String> getCustomImageNamePerInstance(AuthenticatedContext ac, CloudStack cloudStack) {
-        AzureClient client = ac.getParameter(AzureClient.class);
-        Map<String, String> imageNameMap = new HashMap<>();
-        Map<String, String> customImageNamePerInstance = new HashMap<>();
-        for (Group group : cloudStack.getGroups()) {
-            for (CloudInstance instance : group.getInstances()) {
-                String imageId = instance.getTemplate().getImageId();
-                if (StringUtils.isNotBlank(imageId)) {
-                    String imageCustomName = imageNameMap.computeIfAbsent(imageId, s -> azureStorage.getCustomImageId(client, ac, cloudStack, imageId));
-                    customImageNamePerInstance.put(instance.getInstanceId(), imageCustomName);
-                }
-            }
-        }
-        return customImageNamePerInstance;
-    }
-
-    private List<CloudResource> getReattachableVolumeSets(List<CloudResource> resources) {
-        return resources.stream()
-                .filter(cloudResource -> ResourceType.AZURE_VOLUMESET.equals(cloudResource.getType()))
-                .filter(cloudResource -> Objects.isNull(cloudResource.getInstanceId()))
-                .collect(Collectors.toList());
-    }
-
-    private List<CloudResource> getNetworkResources(List<CloudResource> resources) {
-        return resources.stream()
-                .filter(cloudResource -> List.of(
-                        ResourceType.AZURE_SUBNET,
-                        ResourceType.AZURE_NETWORK,
-                        ResourceType.AZURE_RESOURCE_GROUP)
-                        .contains(cloudResource.getType())).collect(Collectors.toList());
     }
 
     private void deleteContainer(AzureClient azureClient, String resourceGroup, String storageName, String container) {
