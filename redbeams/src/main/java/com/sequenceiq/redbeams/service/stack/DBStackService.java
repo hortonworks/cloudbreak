@@ -4,11 +4,12 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.NotFoundException;
@@ -16,7 +17,7 @@ import com.sequenceiq.redbeams.repository.DBStackRepository;
 import com.sequenceiq.redbeams.service.crn.CrnService;
 
 @Service
-public class DBStackService {
+public class DBStackService extends AbstractArchivistService<DBStack> {
 
     @Inject
     private DBStackRepository dbStackRepository;
@@ -63,8 +64,8 @@ public class DBStackService {
         return dbStackRepository.save(dbStack);
     }
 
-    @Transactional
-    public void delete(DBStack dbStack) {
-        dbStackRepository.delete(dbStack);
+    @Override
+    public JpaRepository repository() {
+        return dbStackRepository;
     }
 }

@@ -18,6 +18,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.archive.ArchivableResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
@@ -26,7 +27,7 @@ import com.sequenceiq.redbeams.converter.CrnConverter;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "environment_id"}))
-public class DBStack {
+public class DBStack implements ArchivableResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "dbstack_generator")
@@ -80,6 +81,10 @@ public class DBStack {
     private Crn ownerCrn;
 
     private String userName;
+
+    private Long deletionTimestamp;
+
+    private boolean archived;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "dbStack")
     private DBStackStatus dbStackStatus;
@@ -240,6 +245,14 @@ public class DBStack {
         return dbStackStatus != null ? dbStackStatus.getStatusReason() : null;
     }
 
+    public Long getDeletionTimestamp() {
+        return deletionTimestamp;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
     // careful with toString - it may cause database accesses for nested entities
 
     @Override
@@ -260,5 +273,20 @@ public class DBStack {
             + "',ownerCrn='" + (ownerCrn != null ? ownerCrn.toString() : "null")
             + "',resourceCrn='" + (resourceCrn != null ? resourceCrn.toString() : "null")
             + '}';
+    }
+
+    @Override
+    public void setDeletionTimestamp(Long timestampMillisecs) {
+        deletionTimestamp = timestampMillisecs;
+    }
+
+    @Override
+    public void setArchived(boolean archived) {
+        this.archived = archived;
+    }
+
+    @Override
+    public void unsetRelationsToEntitiesToBeDeleted() {
+
     }
 }
