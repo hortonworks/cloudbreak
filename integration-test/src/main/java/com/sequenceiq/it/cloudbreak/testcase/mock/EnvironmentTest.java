@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
@@ -18,6 +19,7 @@ import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
@@ -137,6 +139,22 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is an environment resource created",
+            when = "obtaining environment with internal actor ",
+            then = "the environment response by crn should exist.")
+    public void testWlClusterWithInternalGetRequest(MockedTestContext testContext) {
+        testContext
+                .given(CredentialTestDto.class)
+                .when(credentialTestClient.create())
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.create())
+                .when(environmentTestClient.getInternal())
+                .then(EnvironmentTest::checkEnvironmentCrnIsNotEmpty)
+                .validate();
+    }
+
     private EnvironmentTestDto checkEnvIsListed(TestContext testContext, EnvironmentTestDto environment, EnvironmentClient environmentClient) {
         Collection<SimpleEnvironmentResponse> simpleEnvironmentV4Respons = environment.getResponseSimpleEnvSet();
         List<SimpleEnvironmentResponse> result = simpleEnvironmentV4Respons.stream()
@@ -146,5 +164,17 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             throw new TestFailException("Environment is not listed");
         }
         return environment;
+    }
+
+    private static EnvironmentTestDto checkEnvironmentCrnIsNotEmpty(TestContext testContext,
+            EnvironmentTestDto testDto, EnvironmentClient client) {
+        if (testDto.getResponse() == null) {
+            throw new TestFailException("Environment response by internal actor cannot be empty.");
+        }
+        if (StringUtils.isBlank(testDto.getResponse().getCrn())) {
+            throw new TestFailException("Environment resource crn in environment response " +
+                    "by internal actor cannot be empty.");
+        }
+        return testDto;
     }
 }

@@ -22,8 +22,13 @@ public class EnvironmentServer {
 
     private static final String WARNING_TEXT_FORMAT = "Following variable must be set whether as environment variables or (test) application.yaml: %s";
 
+    private static final int DEFAULT_ENVIRONMENT_PORT = 8088;
+
     @Value("${integrationtest.environment.server}")
     private String server;
+
+    @Value("${environment.url:localhost:" + DEFAULT_ENVIRONMENT_PORT + "}")
+    private String environmentUrl;
 
     @Value("${environment.server.contextPath:/environmentservice}")
     private String environmentRootContextPath;
@@ -49,10 +54,12 @@ public class EnvironmentServer {
 
         checkNonEmpty("integrationtest.environment.server", server);
         checkNonEmpty("environment.server.contextPath", environmentRootContextPath);
+        checkNonEmpty("environment.url", environmentUrl);
         checkNonEmpty("integrationtest.user.accesskey", accessKey);
         checkNonEmpty("integrationtest.user.privatekey", secretKey);
 
         testParameter.put(EnvironmentTest.ENVIRONMENT_SERVER_ROOT, server + environmentRootContextPath);
+        testParameter.put(EnvironmentTest.ENVIRONMENT_INTERNAL_SERVER_ROOT, "http://" + environmentUrl + environmentRootContextPath);
         testParameter.put(EnvironmentTest.ACCESS_KEY, accessKey);
         testParameter.put(EnvironmentTest.SECRET_KEY, secretKey);
     }

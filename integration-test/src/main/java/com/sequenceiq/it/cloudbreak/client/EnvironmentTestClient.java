@@ -9,6 +9,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCreateActio
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteByNameAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentGetAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentInternalGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentListAction;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 
@@ -37,5 +38,9 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> changeCredential() {
         return new EnvironmentChangeCredentialAction();
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> getInternal() {
+        return new EnvironmentInternalGetAction();
     }
 }

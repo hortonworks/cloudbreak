@@ -2,7 +2,12 @@ package com.sequenceiq.it.cloudbreak;
 
 import java.util.function.Function;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.client.CloudbreakApiKeyClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.TestParameter;
@@ -13,9 +18,13 @@ public class CloudbreakClient extends MicroserviceClient {
 
     private static com.sequenceiq.cloudbreak.client.CloudbreakClient singletonCloudbreakClient;
 
+    private static CloudbreakInternalCrnClient singletonCloudbreakInternalCrnClient;
+
     private static String crn;
 
     private com.sequenceiq.cloudbreak.client.CloudbreakClient cloudbreakClient;
+
+    private CloudbreakInternalCrnClient cloudbreakInternalCrnClient;
 
     private Long workspaceId;
 
@@ -54,7 +63,12 @@ public class CloudbreakClient extends MicroserviceClient {
                     .withKeys(integrationTestContext.getContextParam(CloudbreakTest.ACCESS_KEY),
                             integrationTestContext.getContextParam(CloudbreakTest.SECRET_KEY));
         }
+        if (singletonCloudbreakClient == null) {
+            singletonCloudbreakInternalCrnClient =
+                    createCloudbreakInternalCrnClient(integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_INTERNAL_ROOT));
+        }
         clientEntity.cloudbreakClient = singletonCloudbreakClient;
+        clientEntity.cloudbreakInternalCrnClient = singletonCloudbreakInternalCrnClient;
     }
 
     public static synchronized CloudbreakClient createProxyCloudbreakClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
@@ -63,11 +77,25 @@ public class CloudbreakClient extends MicroserviceClient {
                 testParameter.get(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
                 new ConfigKey(false, true, true))
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
+        clientEntity.cloudbreakInternalCrnClient = createCloudbreakInternalCrnClient(testParameter.get(CloudbreakTest.CLOUDBREAK_SERVER_INTERNAL_ROOT));
         return clientEntity;
+    }
+
+    public static synchronized CloudbreakInternalCrnClient createCloudbreakInternalCrnClient(String serverRoot) {
+        CloudbreakServiceUserCrnClient cbUserCrnClient = new CloudbreakUserCrnClientBuilder(serverRoot)
+                .withCertificateValidation(false)
+                .withIgnorePreValidation(true)
+                .withDebug(true)
+                .build();
+        return new CloudbreakInternalCrnClient(cbUserCrnClient, new InternalCrnBuilder(Crn.Service.IAM));
     }
 
     public com.sequenceiq.cloudbreak.client.CloudbreakClient getCloudbreakClient() {
         return cloudbreakClient;
+    }
+
+    public CloudbreakInternalCrnClient getCloudbreakInternalCrnClient() {
+        return cloudbreakInternalCrnClient;
     }
 
     public void setCloudbreakClient(com.sequenceiq.cloudbreak.client.CloudbreakClient cloudbreakClient) {

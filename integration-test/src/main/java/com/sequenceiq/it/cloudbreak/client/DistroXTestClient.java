@@ -8,6 +8,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXBlueprintRequestAct
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXGetAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXInternalGetAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStartAction;
@@ -35,6 +36,10 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> refresh() {
         return new DistroXRefreshAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> getInternal() {
+        return new DistroXInternalGetAction();
     }
 
     public Action<DistroXTestDto, CloudbreakClient> stop() {
