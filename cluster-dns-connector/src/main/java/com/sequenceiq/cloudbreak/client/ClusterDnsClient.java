@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementGrpc;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementGrpc.PublicEndpointManagementBlockingStub;
+import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateRequest;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryRequest;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryRequest;
@@ -42,6 +43,17 @@ public class ClusterDnsClient {
                 .setCsr(ByteString.copyFrom(csr));
 
         return newStub(requestId).createCertificate(requestBuilder.build()).getRequestId();
+    }
+
+    public String signCertificate(String requestId, String accountId, String environment, byte[] csr) {
+        checkNotNull(requestId);
+        checkNotNull(accountId);
+        CertificateSigningRequest.Builder requestBuilder = CertificateSigningRequest.newBuilder()
+                .setAccountId(accountId)
+                .setEnvironmentName(environment)
+                .setCsr(ByteString.copyFrom(csr));
+
+        return newStub(requestId).signCertificate(requestBuilder.build()).getWorkflowId();
     }
 
     public PollCertificateCreationResponse pollCertificateCreation(String requestId, String pollRequestId) {

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.dns;
 
+import static com.google.common.hash.Hashing.sipHash24;
+
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,7 +12,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EnvironmentBasedDomainNameProvider {
-    static final String NAMES_SHOULD_BE_SPECIFIED_MSG = "Environment and account names should be specified!";
+    static final String ENV_NAME_SHOULD_BE_SPECIFIED_MSG = "Domain name cannot be generated, since environment name must be specified!";
+
+    static final String ACCOUNT_NAME_IS_EMTPY_FORMAT = "Domain name cannot be generated for environment: %s, " +
+            " WorkloadSubdomain in your UMS Account details is null, or empty!";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentBasedDomainNameProvider.class);
 
@@ -28,13 +33,12 @@ public class EnvironmentBasedDomainNameProvider {
     public String getDomainName(String environmentName, String accountName) {
         if (StringUtils.isEmpty(environmentName)) {
             LOGGER.error("The required parameters hasn't been specified, environment name: {}, account name: {}", environmentName, accountName);
-            throw new IllegalStateException("Domain name cannot be generated, since environment name must be specified!");
+            throw new IllegalStateException(ENV_NAME_SHOULD_BE_SPECIFIED_MSG);
         }
 
         if (StringUtils.isEmpty(accountName)) {
             LOGGER.error("The required parameters hasn't been specified, environment name: {}, account name: {}", environmentName, accountName);
-            throw new IllegalStateException(String.format("Domain name cannot be generated for environment: %s, " +
-                    " WorkloadSubdomain in your UMS Account details is null, or empty!", environmentName));
+            throw new IllegalStateException(String.format(ACCOUNT_NAME_IS_EMTPY_FORMAT, environmentName));
         }
 
         LOGGER.info("Generating domain with environment name: '{}', account name: '{}' and root domain: '{}'", environmentName, accountName, rootDomain);
@@ -61,11 +65,12 @@ public class EnvironmentBasedDomainNameProvider {
     }
 
     //It is responsible for creating a CN for the generated CSR, so the result could not exceed 64 chars.
-    //But it should provide as unique as possible.
     public String getCommonName(String endpointName, String environmentName, String accountName) {
         String domain = getDomainName(environmentName, accountName);
-        //TODO endpointName + env name -> hash it to be 17chars
-        return endpointName + DOMAIN_PART_DELIMITER + domain;
+        //Hashing the concatenation of endpoint and environment names with SipHash24 as they are unique within a base-domain and account
+        String uniqueNameToBeHashed = endpointName + environmentName;
+        String clusterHash = sipHash24().hashUnencodedChars(uniqueNameToBeHashed).toString();
+        return clusterHash + DOMAIN_PART_DELIMITER + domain;
     }
 
     private void validateDomainPattern(String result) {

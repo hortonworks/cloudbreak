@@ -20,25 +20,31 @@ class EnvironmentBasedDomainNameProviderTest {
     @Test
     void testGetDomainWhenEnvironmentNameIsNull() {
         IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> underTest.getDomainName(null, "anAccountName"));
-        assertEquals(EnvironmentBasedDomainNameProvider.NAMES_SHOULD_BE_SPECIFIED_MSG, iSE.getMessage());
+        assertEquals(EnvironmentBasedDomainNameProvider.ENV_NAME_SHOULD_BE_SPECIFIED_MSG, iSE.getMessage());
     }
 
     @Test
     void testGetDomainWhenAccountNameIsNull() {
-        IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> underTest.getDomainName("anEnvName", null));
-        assertEquals(EnvironmentBasedDomainNameProvider.NAMES_SHOULD_BE_SPECIFIED_MSG, iSE.getMessage());
+        String anEnvName = "anEnvName";
+        IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> {
+            underTest.getDomainName(anEnvName, null);
+        });
+        assertEquals(String.format(EnvironmentBasedDomainNameProvider.ACCOUNT_NAME_IS_EMTPY_FORMAT, anEnvName), iSE.getMessage());
     }
 
     @Test
     void testGetDomainWhenEnvironmentNameIsEmpty() {
         IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> underTest.getDomainName("", "anAccountName"));
-        assertEquals(EnvironmentBasedDomainNameProvider.NAMES_SHOULD_BE_SPECIFIED_MSG, iSE.getMessage());
+        assertEquals(EnvironmentBasedDomainNameProvider.ENV_NAME_SHOULD_BE_SPECIFIED_MSG, iSE.getMessage());
     }
 
     @Test
     void testGetDomainWhenAccountNameIsEmpty() {
-        IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> underTest.getDomainName("anEnvName", ""));
-        assertEquals(EnvironmentBasedDomainNameProvider.NAMES_SHOULD_BE_SPECIFIED_MSG, iSE.getMessage());
+        String anEnvName = "anEnvName";
+        IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> {
+            underTest.getDomainName(anEnvName, "");
+        });
+        assertEquals(String.format(EnvironmentBasedDomainNameProvider.ACCOUNT_NAME_IS_EMTPY_FORMAT, anEnvName), iSE.getMessage());
     }
 
     @Test
@@ -114,5 +120,33 @@ class EnvironmentBasedDomainNameProviderTest {
         String actualMessage = illegalStateException.getMessage();
         assertTrue(actualMessage.startsWith("The length of the generated domain(")
                 && actualMessage.contains("is longer than the allowed 62 characters"));
+    }
+
+    @Test
+    void testGetCommonNameWhenTheEndpointNameIsLessThan17AndEnvNameLessThan8Chars() {
+        String endpointName = "test-cl-master0";
+        String envName = "shrt-nv";
+        String accountName = "xcu2-8y8x";
+        String rootDomain = "workload-local.cloudera.site";
+        ReflectionTestUtils.setField(underTest, "rootDomain", rootDomain);
+
+        String commonName = underTest.getCommonName(endpointName, envName, accountName);
+
+        String expected = String.format("bbd9025ff9fd7c4d.%s.%s.%s", envName, accountName, rootDomain);
+        assertEquals(expected, commonName);
+    }
+
+    @Test
+    void testGetCommonNameWhenTheEndpointNameIsLongerThan17AndEnvNameLongerThan8Chars() {
+        String endpointName = "test-cl-longyloooooooooooong-name-master0";
+        String envName = "notashort-env-name-as28chars";
+        String accountName = "xcu2-8y8x";
+        String rootDomain = "workload-local.cloudera.site";
+        ReflectionTestUtils.setField(underTest, "rootDomain", rootDomain);
+
+        String commonName = underTest.getCommonName(endpointName, envName, accountName);
+
+        String expected = String.format("a7c2a45fc8f917fe.%s.%s.%s", envName.substring(0, 8), accountName, rootDomain);
+        assertEquals(expected, commonName);
     }
 }

@@ -32,8 +32,21 @@ public class GrpcClusterDnsClient {
             Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             ClusterDnsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
-            LOGGER.info("Fire a create certification request with account id:{}, and requestId: {}", accountId, requestId);
-            String pollRequestId = client.createCertificate(requestId.orElse(UUID.randomUUID().toString()), accountId, endpoint, environment, wildcard, csr);
+            String requestIdValue = requestId.orElse(UUID.randomUUID().toString());
+            LOGGER.info("Fire a create certification request with account id:{}, and requestId: {}", accountId, requestIdValue);
+            String pollRequestId = client.createCertificate(requestIdValue, accountId, endpoint, environment, wildcard, csr);
+            LOGGER.info("The request id for polling the result of creation: {}", pollRequestId);
+            return pollRequestId;
+        }
+    }
+
+    public String signCertificate(String actorCrn, String accountId, String environment, byte[] csr,
+            Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            ClusterDnsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            String requestIdValue = requestId.orElse(UUID.randomUUID().toString());
+            LOGGER.info("Fire a create certification request with account id:{}, and requestId: {}", accountId, requestIdValue);
+            String pollRequestId = client.signCertificate(requestIdValue, accountId, environment, csr);
             LOGGER.info("The request id for polling the result of creation: {}", pollRequestId);
             return pollRequestId;
         }
