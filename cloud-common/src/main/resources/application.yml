@@ -666,11 +666,14 @@ cb:
       - name: salt-bootstrap
         prewarmed: false
         command: "salt-bootstrap version"
+        commandVersionPattern: "Version: (.*)"
       - name: stack
-        pkgName: hdp-select,hdf-select
+        command: "ls /opt/cloudera/parcels | grep -oP 'CDH-\\K([^-]*)'"
         prewarmed: true
-      - name: ambari
-        pkgName: ambari-agent
+      - name: cm
+        pkg:
+          - name: cloudera-manager-agent
+            pattern: "(.*)-(.*)"
         prewarmed: true
 
 # configuration for BlueprintPortConfigCollector.java

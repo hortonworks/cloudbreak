@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -208,8 +209,12 @@ public class SaltStatesTest {
         PackageVersionResponse resp = new PackageVersionResponse();
         resp.setResult(pkgVersionList);
         when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package")).thenReturn(resp);
+
+        Map<String, Optional<String>> packages = new HashMap<>();
+        packages.put("package", Optional.empty());
+
         // WHEN
-        Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, "package");
+        Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, packages);
         // THEN
         for (Map.Entry<String, Map<String, String>> e : actualResponse.entrySet()) {
             String expectedVersion = pkgVersionsOnHosts.get(e.getKey());
@@ -226,8 +231,12 @@ public class SaltStatesTest {
         PackageVersionResponse resp = new PackageVersionResponse();
         resp.setResult(pkgVersionsList);
         when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package")).thenReturn(resp);
+
+        Map<String, Optional<String>> packages = new HashMap<>();
+        packages.put("package", Optional.empty());
+
         // WHEN
-        Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, "package");
+        Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, packages);
         // THEN
         assertTrue(actualResponse.size() == 0);
     }
@@ -249,16 +258,21 @@ public class SaltStatesTest {
         pkgVersionsOnHost1Resp.put("host1", "1.0");
         pkgVersionsOnHost1Resp.put("host2", "2.0");
         Map<String, String> pkgVersionsOnHost2Resp = new HashMap<>();
-        pkgVersionsOnHost2Resp.put("host1", "2.0");
-        pkgVersionsOnHost2Resp.put("host2", "3.0");
+        pkgVersionsOnHost2Resp.put("host1", "2.0-3.0A13466743");
+        pkgVersionsOnHost2Resp.put("host2", "3.0-3.0A13466743");
         PackageVersionResponse resp1 = new PackageVersionResponse();
         resp1.setResult(Lists.newArrayList(pkgVersionsOnHost1Resp));
         PackageVersionResponse resp2 = new PackageVersionResponse();
         resp2.setResult(Lists.newArrayList(pkgVersionsOnHost2Resp));
         when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package1")).thenReturn(resp1);
         when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package2")).thenReturn(resp2);
+
+        Map<String, Optional<String>> packages = new HashMap<>();
+        packages.put("package1", Optional.empty());
+        packages.put("package2", Optional.of("(.*)-(.*)"));
+
         // WHEN
-        Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, "package1", "package2");
+        Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, packages);
         // THEN
         Assert.assertEquals(pkgVersionsOnHosts, actualResponse);
     }
@@ -269,8 +283,13 @@ public class SaltStatesTest {
         PackageVersionResponse resp = new PackageVersionResponse();
         when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package1")).thenReturn(resp);
         when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package2")).thenReturn(resp);
+
+        Map<String, Optional<String>> packages = new HashMap<>();
+        packages.put("package1", Optional.empty());
+        packages.put("package2", Optional.of("(.*)-(.*)"));
+
         // WHEN
-        Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, "package1", "package2");
+        Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, packages);
         // THEN
         assertTrue(actualResponse.size() == 0);
     }
@@ -282,7 +301,11 @@ public class SaltStatesTest {
         when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package1")).thenThrow(exception);
         // WHEN
         try {
-            SaltStates.getPackageVersions(saltConnector, "package1", "package2");
+            Map<String, Optional<String>> packages = new HashMap<>();
+            packages.put("package1", Optional.empty());
+            packages.put("package2", Optional.of("(.*)-(.*)"));
+
+            SaltStates.getPackageVersions(saltConnector, packages);
         } catch (RuntimeException ex) {
             // THEN
             assertEquals(exception, ex);

@@ -88,15 +88,6 @@ public class ClusterComponentConfigProvider {
         return retrieveFromAttribute(component, StackRepoDetails.class);
     }
 
-    public StackRepoDetails getStackRepo(Iterable<ClusterComponent> clusterComponents) {
-        try {
-            return ofNullable(getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDP_REPO_DETAILS))
-                    .orElse(getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDF_REPO_DETAILS));
-        } catch (Exception e) {
-            throw new CloudbreakServiceException("Failed to read HDP repo details.", e);
-        }
-    }
-
     public AmbariRepo getAmbariRepo(Long clusterId) {
         ClusterComponent component = getComponent(clusterId, ComponentType.AMBARI_REPO_DETAILS);
         return retrieveFromAttribute(component, AmbariRepo.class);

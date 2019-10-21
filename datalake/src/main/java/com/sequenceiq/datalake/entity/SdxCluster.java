@@ -86,7 +86,9 @@ public class SdxCluster implements AccountIdAwareResource {
     @Enumerated(EnumType.STRING)
     private FileSystemType cloudStorageFileSystemType;
 
-    // Kept to avoid downtime
+    /**
+     * @deprecated Kept only to avoid downtime
+     */
     @Deprecated
     private String repairFlowChainId;
 

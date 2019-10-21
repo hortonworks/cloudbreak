@@ -87,10 +87,10 @@ public class InstanceMetadataUpdaterTest {
 
         InstanceMetadataUpdater.Package packageByName = new InstanceMetadataUpdater.Package();
         packageByName.setName("packageByName");
-        packageByName.setPkgName(Lists.newArrayList("packageByName"));
+        packageByName.setPkg(Lists.newArrayList(generatePackageName("packageByName", "(.*)-(.*)")));
         InstanceMetadataUpdater.Package packageByCmd = new InstanceMetadataUpdater.Package();
         packageByCmd.setName("packageByCmd");
-        packageByCmd.setPkgName(Lists.newArrayList("packageByCmd"));
+        packageByCmd.setPkg(Lists.newArrayList(generatePackageName("packageByCmd", null)));
 
         underTest.setPackages(Lists.newArrayList(packageByCmd, packageByName));
 
@@ -184,7 +184,7 @@ public class InstanceMetadataUpdaterTest {
 
     private Map<String, String> packageMap() {
         Map<String, String> packageMap = Maps.newHashMap();
-        packageMap.put("packageByName", "1");
+        packageMap.put("packageByName", "1-1");
         packageMap.put("packageByCmd", "1");
         return packageMap;
     }
@@ -209,5 +209,12 @@ public class InstanceMetadataUpdaterTest {
         instanceMetaData.setDiscoveryFQDN(instanceId);
         instanceGroup.setInstanceMetaData(Collections.singleton(instanceMetaData));
         return instanceGroup;
+    }
+
+    private InstanceMetadataUpdater.PackageName generatePackageName(String pkg, String pattern) {
+        InstanceMetadataUpdater.PackageName packageName = new InstanceMetadataUpdater.PackageName();
+        packageName.setName(pkg);
+        packageName.setPattern(pattern);
+        return packageName;
     }
 }
