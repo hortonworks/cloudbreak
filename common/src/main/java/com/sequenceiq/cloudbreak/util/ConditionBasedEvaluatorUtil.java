@@ -41,4 +41,6 @@ public class ConditionBasedEvaluatorUtil {
         }
     }
 
+    public static void throwIfTrue(boolean empty) {
+    }
 }

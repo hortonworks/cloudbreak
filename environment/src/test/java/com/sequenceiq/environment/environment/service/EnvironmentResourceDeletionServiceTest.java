@@ -16,6 +16,7 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
+import com.sequenceiq.environment.environment.experience.service.XService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,12 +31,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.exception.UnableToDeleteClusterDefinitionException;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
-import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 
 @ExtendWith(SpringExtension.class)
@@ -46,13 +45,10 @@ class EnvironmentResourceDeletionServiceTest {
     private static final String ENVIRONMENT_CRN = "someEnvCrn";
 
     @MockBean
+    private XService xService;
+
+    @MockBean
     private SdxEndpoint sdxEndpoint;
-
-    @MockBean
-    private ThreadBasedUserCrnProvider userCrnProvider;
-
-    @MockBean
-    private EventSender eventSender;
 
     @MockBean
     private DistroXV1Endpoint distroXEndpoint;
