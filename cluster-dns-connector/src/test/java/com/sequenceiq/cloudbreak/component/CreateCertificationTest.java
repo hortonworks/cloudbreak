@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,13 +52,19 @@ public class CreateCertificationTest {
         KeyPair keyPair = PkiUtil.generateKeypair();
         LOGGER.info("Key: \n{}", PkiUtil.convert(keyPair.getPrivate()));
         LOGGER.info("Pub: \n{}", PkiUtil.convert(keyPair.getPublic()));
-        String internalFQDN = "ip-10-97-110-78.cloudera.site";
+        String domain = ".tb-local.xcu2-8y8x.workload-dev.cloudera.com";
+        String commonName = "a7c2a45fc8f917fe";
+        String endpointName = "really-really-long-named-cluster-tbihari2";
+        List<String> subjectAlternativeNames = List.of(
+                commonName + domain,
+                endpointName + domain
+        );
+        PKCS10CertificationRequest csr = PkiUtil.csr(keyPair, commonName, subjectAlternativeNames);
         List<String> strings = certificateCreationService.create(actorCrn,
                 accountId,
-                "really-really-long-named-cluster-tbihari2",
+                commonName,
                 "env-tb",
-                false,
-                keyPair);
+                csr);
         LOGGER.info("CERT: \n" + String.join("\n", strings));
     }
 

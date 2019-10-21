@@ -14,6 +14,126 @@ public final class PublicEndpointManagementProto {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
+  /**
+   * <pre>
+   * Status of SignCertificate
+   * </pre>
+   *
+   * Protobuf enum {@code publicendpointmanagement.SigningStatus}
+   */
+  public enum SigningStatus
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>UNKNOWN = 0;</code>
+     */
+    UNKNOWN(0),
+    /**
+     * <code>IN_PROGRESS = 1;</code>
+     */
+    IN_PROGRESS(1),
+    /**
+     * <code>SUCCEEDED = 2;</code>
+     */
+    SUCCEEDED(2),
+    /**
+     * <code>FAILED = 3;</code>
+     */
+    FAILED(3),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>UNKNOWN = 0;</code>
+     */
+    public static final int UNKNOWN_VALUE = 0;
+    /**
+     * <code>IN_PROGRESS = 1;</code>
+     */
+    public static final int IN_PROGRESS_VALUE = 1;
+    /**
+     * <code>SUCCEEDED = 2;</code>
+     */
+    public static final int SUCCEEDED_VALUE = 2;
+    /**
+     * <code>FAILED = 3;</code>
+     */
+    public static final int FAILED_VALUE = 3;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static SigningStatus valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static SigningStatus forNumber(int value) {
+      switch (value) {
+        case 0: return UNKNOWN;
+        case 1: return IN_PROGRESS;
+        case 2: return SUCCEEDED;
+        case 3: return FAILED;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<SigningStatus>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        SigningStatus> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<SigningStatus>() {
+            public SigningStatus findValueByNumber(int number) {
+              return SigningStatus.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final SigningStatus[] VALUES = values();
+
+    public static SigningStatus valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private SigningStatus(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:publicendpointmanagement.SigningStatus)
+  }
+
   public interface AWSElbDnsTargetOrBuilder extends
       // @@protoc_insertion_point(interface_extends:publicendpointmanagement.AWSElbDnsTarget)
       com.google.protobuf.MessageOrBuilder {
@@ -9069,6 +9189,4870 @@ public final class PublicEndpointManagementProto {
 
   }
 
+  public interface GenerateManagedDomainNamesRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:publicendpointmanagement.GenerateManagedDomainNamesRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The account id
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * The account id
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+
+    /**
+     * <pre>
+     * The friendly name of the environment for this cluster
+     * Length of this field is capped at 8 characters and
+     * we truncate provided value down to 8 or the preceding non-hyphen character
+     * </pre>
+     *
+     * <code>string environmentName = 2;</code>
+     */
+    java.lang.String getEnvironmentName();
+    /**
+     * <pre>
+     * The friendly name of the environment for this cluster
+     * Length of this field is capped at 8 characters and
+     * we truncate provided value down to 8 or the preceding non-hyphen character
+     * </pre>
+     *
+     * <code>string environmentName = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getEnvironmentNameBytes();
+
+    /**
+     * <pre>
+     * List of hostnames/subdomain patterns for which we want the expected FQDNs
+     * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+     * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+     * </pre>
+     *
+     * <code>repeated string subdomains = 3;</code>
+     */
+    java.util.List<java.lang.String>
+        getSubdomainsList();
+    /**
+     * <pre>
+     * List of hostnames/subdomain patterns for which we want the expected FQDNs
+     * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+     * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+     * </pre>
+     *
+     * <code>repeated string subdomains = 3;</code>
+     */
+    int getSubdomainsCount();
+    /**
+     * <pre>
+     * List of hostnames/subdomain patterns for which we want the expected FQDNs
+     * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+     * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+     * </pre>
+     *
+     * <code>repeated string subdomains = 3;</code>
+     */
+    java.lang.String getSubdomains(int index);
+    /**
+     * <pre>
+     * List of hostnames/subdomain patterns for which we want the expected FQDNs
+     * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+     * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+     * </pre>
+     *
+     * <code>repeated string subdomains = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getSubdomainsBytes(int index);
+  }
+  /**
+   * <pre>
+   * Request object for the GenerateManagedDomainNames method.
+   * </pre>
+   *
+   * Protobuf type {@code publicendpointmanagement.GenerateManagedDomainNamesRequest}
+   */
+  public  static final class GenerateManagedDomainNamesRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:publicendpointmanagement.GenerateManagedDomainNamesRequest)
+      GenerateManagedDomainNamesRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use GenerateManagedDomainNamesRequest.newBuilder() to construct.
+    private GenerateManagedDomainNamesRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private GenerateManagedDomainNamesRequest() {
+      accountId_ = "";
+      environmentName_ = "";
+      subdomains_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private GenerateManagedDomainNamesRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accountId_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              environmentName_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+                subdomains_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              subdomains_.add(s);
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+          subdomains_ = subdomains_.getUnmodifiableView();
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_GenerateManagedDomainNamesRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_GenerateManagedDomainNamesRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int ACCOUNTID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object accountId_;
+    /**
+     * <pre>
+     * The account id
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     */
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The account id
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ENVIRONMENTNAME_FIELD_NUMBER = 2;
+    private volatile java.lang.Object environmentName_;
+    /**
+     * <pre>
+     * The friendly name of the environment for this cluster
+     * Length of this field is capped at 8 characters and
+     * we truncate provided value down to 8 or the preceding non-hyphen character
+     * </pre>
+     *
+     * <code>string environmentName = 2;</code>
+     */
+    public java.lang.String getEnvironmentName() {
+      java.lang.Object ref = environmentName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environmentName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The friendly name of the environment for this cluster
+     * Length of this field is capped at 8 characters and
+     * we truncate provided value down to 8 or the preceding non-hyphen character
+     * </pre>
+     *
+     * <code>string environmentName = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getEnvironmentNameBytes() {
+      java.lang.Object ref = environmentName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environmentName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int SUBDOMAINS_FIELD_NUMBER = 3;
+    private com.google.protobuf.LazyStringList subdomains_;
+    /**
+     * <pre>
+     * List of hostnames/subdomain patterns for which we want the expected FQDNs
+     * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+     * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+     * </pre>
+     *
+     * <code>repeated string subdomains = 3;</code>
+     */
+    public com.google.protobuf.ProtocolStringList
+        getSubdomainsList() {
+      return subdomains_;
+    }
+    /**
+     * <pre>
+     * List of hostnames/subdomain patterns for which we want the expected FQDNs
+     * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+     * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+     * </pre>
+     *
+     * <code>repeated string subdomains = 3;</code>
+     */
+    public int getSubdomainsCount() {
+      return subdomains_.size();
+    }
+    /**
+     * <pre>
+     * List of hostnames/subdomain patterns for which we want the expected FQDNs
+     * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+     * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+     * </pre>
+     *
+     * <code>repeated string subdomains = 3;</code>
+     */
+    public java.lang.String getSubdomains(int index) {
+      return subdomains_.get(index);
+    }
+    /**
+     * <pre>
+     * List of hostnames/subdomain patterns for which we want the expected FQDNs
+     * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+     * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+     * </pre>
+     *
+     * <code>repeated string subdomains = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getSubdomainsBytes(int index) {
+      return subdomains_.getByteString(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getAccountIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
+      }
+      if (!getEnvironmentNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environmentName_);
+      }
+      for (int i = 0; i < subdomains_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, subdomains_.getRaw(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getAccountIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
+      }
+      if (!getEnvironmentNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environmentName_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < subdomains_.size(); i++) {
+          dataSize += computeStringSizeNoTag(subdomains_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getSubdomainsList().size();
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest) obj;
+
+      boolean result = true;
+      result = result && getAccountId()
+          .equals(other.getAccountId());
+      result = result && getEnvironmentName()
+          .equals(other.getEnvironmentName());
+      result = result && getSubdomainsList()
+          .equals(other.getSubdomainsList());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      hash = (37 * hash) + ENVIRONMENTNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironmentName().hashCode();
+      if (getSubdomainsCount() > 0) {
+        hash = (37 * hash) + SUBDOMAINS_FIELD_NUMBER;
+        hash = (53 * hash) + getSubdomainsList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request object for the GenerateManagedDomainNames method.
+     * </pre>
+     *
+     * Protobuf type {@code publicendpointmanagement.GenerateManagedDomainNamesRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:publicendpointmanagement.GenerateManagedDomainNamesRequest)
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_GenerateManagedDomainNamesRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_GenerateManagedDomainNamesRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        accountId_ = "";
+
+        environmentName_ = "";
+
+        subdomains_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_GenerateManagedDomainNamesRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest build() {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest buildPartial() {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest result = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        result.accountId_ = accountId_;
+        result.environmentName_ = environmentName_;
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          subdomains_ = subdomains_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000004);
+        }
+        result.subdomains_ = subdomains_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest other) {
+        if (other == com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest.getDefaultInstance()) return this;
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          onChanged();
+        }
+        if (!other.getEnvironmentName().isEmpty()) {
+          environmentName_ = other.environmentName_;
+          onChanged();
+        }
+        if (!other.subdomains_.isEmpty()) {
+          if (subdomains_.isEmpty()) {
+            subdomains_ = other.subdomains_;
+            bitField0_ = (bitField0_ & ~0x00000004);
+          } else {
+            ensureSubdomainsIsMutable();
+            subdomains_.addAll(other.subdomains_);
+          }
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * The account id
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The account id
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The account id
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The account id
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public Builder clearAccountId() {
+        
+        accountId_ = getDefaultInstance().getAccountId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The account id
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object environmentName_ = "";
+      /**
+       * <pre>
+       * The friendly name of the environment for this cluster
+       * Length of this field is capped at 8 characters and
+       * we truncate provided value down to 8 or the preceding non-hyphen character
+       * </pre>
+       *
+       * <code>string environmentName = 2;</code>
+       */
+      public java.lang.String getEnvironmentName() {
+        java.lang.Object ref = environmentName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          environmentName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The friendly name of the environment for this cluster
+       * Length of this field is capped at 8 characters and
+       * we truncate provided value down to 8 or the preceding non-hyphen character
+       * </pre>
+       *
+       * <code>string environmentName = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getEnvironmentNameBytes() {
+        java.lang.Object ref = environmentName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          environmentName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The friendly name of the environment for this cluster
+       * Length of this field is capped at 8 characters and
+       * we truncate provided value down to 8 or the preceding non-hyphen character
+       * </pre>
+       *
+       * <code>string environmentName = 2;</code>
+       */
+      public Builder setEnvironmentName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        environmentName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The friendly name of the environment for this cluster
+       * Length of this field is capped at 8 characters and
+       * we truncate provided value down to 8 or the preceding non-hyphen character
+       * </pre>
+       *
+       * <code>string environmentName = 2;</code>
+       */
+      public Builder clearEnvironmentName() {
+        
+        environmentName_ = getDefaultInstance().getEnvironmentName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The friendly name of the environment for this cluster
+       * Length of this field is capped at 8 characters and
+       * we truncate provided value down to 8 or the preceding non-hyphen character
+       * </pre>
+       *
+       * <code>string environmentName = 2;</code>
+       */
+      public Builder setEnvironmentNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        environmentName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.LazyStringList subdomains_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureSubdomainsIsMutable() {
+        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+          subdomains_ = new com.google.protobuf.LazyStringArrayList(subdomains_);
+          bitField0_ |= 0x00000004;
+         }
+      }
+      /**
+       * <pre>
+       * List of hostnames/subdomain patterns for which we want the expected FQDNs
+       * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+       * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+       * </pre>
+       *
+       * <code>repeated string subdomains = 3;</code>
+       */
+      public com.google.protobuf.ProtocolStringList
+          getSubdomainsList() {
+        return subdomains_.getUnmodifiableView();
+      }
+      /**
+       * <pre>
+       * List of hostnames/subdomain patterns for which we want the expected FQDNs
+       * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+       * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+       * </pre>
+       *
+       * <code>repeated string subdomains = 3;</code>
+       */
+      public int getSubdomainsCount() {
+        return subdomains_.size();
+      }
+      /**
+       * <pre>
+       * List of hostnames/subdomain patterns for which we want the expected FQDNs
+       * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+       * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+       * </pre>
+       *
+       * <code>repeated string subdomains = 3;</code>
+       */
+      public java.lang.String getSubdomains(int index) {
+        return subdomains_.get(index);
+      }
+      /**
+       * <pre>
+       * List of hostnames/subdomain patterns for which we want the expected FQDNs
+       * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+       * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+       * </pre>
+       *
+       * <code>repeated string subdomains = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getSubdomainsBytes(int index) {
+        return subdomains_.getByteString(index);
+      }
+      /**
+       * <pre>
+       * List of hostnames/subdomain patterns for which we want the expected FQDNs
+       * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+       * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+       * </pre>
+       *
+       * <code>repeated string subdomains = 3;</code>
+       */
+      public Builder setSubdomains(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureSubdomainsIsMutable();
+        subdomains_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * List of hostnames/subdomain patterns for which we want the expected FQDNs
+       * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+       * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+       * </pre>
+       *
+       * <code>repeated string subdomains = 3;</code>
+       */
+      public Builder addSubdomains(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureSubdomainsIsMutable();
+        subdomains_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * List of hostnames/subdomain patterns for which we want the expected FQDNs
+       * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+       * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+       * </pre>
+       *
+       * <code>repeated string subdomains = 3;</code>
+       */
+      public Builder addAllSubdomains(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureSubdomainsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, subdomains_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * List of hostnames/subdomain patterns for which we want the expected FQDNs
+       * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+       * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+       * </pre>
+       *
+       * <code>repeated string subdomains = 3;</code>
+       */
+      public Builder clearSubdomains() {
+        subdomains_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * List of hostnames/subdomain patterns for which we want the expected FQDNs
+       * Other than the normal simple subdomain, it also accepts nested subdomains and patterns indicating a wildcard fragment
+       * eg. [ "host-a", "*.mlx", "subdomain.mlx", "*" ]
+       * </pre>
+       *
+       * <code>repeated string subdomains = 3;</code>
+       */
+      public Builder addSubdomainsBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        ensureSubdomainsIsMutable();
+        subdomains_.add(value);
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:publicendpointmanagement.GenerateManagedDomainNamesRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:publicendpointmanagement.GenerateManagedDomainNamesRequest)
+    private static final com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<GenerateManagedDomainNamesRequest>
+        PARSER = new com.google.protobuf.AbstractParser<GenerateManagedDomainNamesRequest>() {
+      @java.lang.Override
+      public GenerateManagedDomainNamesRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new GenerateManagedDomainNamesRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<GenerateManagedDomainNamesRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<GenerateManagedDomainNamesRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface GenerateManagedDomainNamesResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:publicendpointmanagement.GenerateManagedDomainNamesResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Map where key is the subdomain from request and value is the generated FQDN
+     * eg. { "host-a": "host-a.env-name.workload-subdomain.cloudera.site" }
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; domains = 1;</code>
+     */
+    int getDomainsCount();
+    /**
+     * <pre>
+     * Map where key is the subdomain from request and value is the generated FQDN
+     * eg. { "host-a": "host-a.env-name.workload-subdomain.cloudera.site" }
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; domains = 1;</code>
+     */
+    boolean containsDomains(
+        java.lang.String key);
+    /**
+     * Use {@link #getDomainsMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, java.lang.String>
+    getDomains();
+    /**
+     * <pre>
+     * Map where key is the subdomain from request and value is the generated FQDN
+     * eg. { "host-a": "host-a.env-name.workload-subdomain.cloudera.site" }
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; domains = 1;</code>
+     */
+    java.util.Map<java.lang.String, java.lang.String>
+    getDomainsMap();
+    /**
+     * <pre>
+     * Map where key is the subdomain from request and value is the generated FQDN
+     * eg. { "host-a": "host-a.env-name.workload-subdomain.cloudera.site" }
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; domains = 1;</code>
+     */
+
+    java.lang.String getDomainsOrDefault(
+        java.lang.String key,
+        java.lang.String defaultValue);
+    /**
+     * <pre>
+     * Map where key is the subdomain from request and value is the generated FQDN
+     * eg. { "host-a": "host-a.env-name.workload-subdomain.cloudera.site" }
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; domains = 1;</code>
+     */
+
+    java.lang.String getDomainsOrThrow(
+        java.lang.String key);
+  }
+  /**
+   * <pre>
+   * Response object for the GenerateManagedDomainNames method.
+   * </pre>
+   *
+   * Protobuf type {@code publicendpointmanagement.GenerateManagedDomainNamesResponse}
+   */
+  public  static final class GenerateManagedDomainNamesResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:publicendpointmanagement.GenerateManagedDomainNamesResponse)
+      GenerateManagedDomainNamesResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use GenerateManagedDomainNamesResponse.newBuilder() to construct.
+    private GenerateManagedDomainNamesResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private GenerateManagedDomainNamesResponse() {
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private GenerateManagedDomainNamesResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                domains_ = com.google.protobuf.MapField.newMapField(
+                    DomainsDefaultEntryHolder.defaultEntry);
+                mutable_bitField0_ |= 0x00000001;
+              }
+              com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+              domains__ = input.readMessage(
+                  DomainsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+              domains_.getMutableMap().put(
+                  domains__.getKey(), domains__.getValue());
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_descriptor;
+    }
+
+    @SuppressWarnings({"rawtypes"})
+    @java.lang.Override
+    protected com.google.protobuf.MapField internalGetMapField(
+        int number) {
+      switch (number) {
+        case 1:
+          return internalGetDomains();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse.Builder.class);
+    }
+
+    public static final int DOMAINS_FIELD_NUMBER = 1;
+    private static final class DomainsDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, java.lang.String> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, java.lang.String>newDefaultInstance(
+                  com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_DomainsEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "");
+    }
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> domains_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetDomains() {
+      if (domains_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            DomainsDefaultEntryHolder.defaultEntry);
+      }
+      return domains_;
+    }
+
+    public int getDomainsCount() {
+      return internalGetDomains().getMap().size();
+    }
+    /**
+     * <pre>
+     * Map where key is the subdomain from request and value is the generated FQDN
+     * eg. { "host-a": "host-a.env-name.workload-subdomain.cloudera.site" }
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; domains = 1;</code>
+     */
+
+    public boolean containsDomains(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      return internalGetDomains().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getDomainsMap()} instead.
+     */
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getDomains() {
+      return getDomainsMap();
+    }
+    /**
+     * <pre>
+     * Map where key is the subdomain from request and value is the generated FQDN
+     * eg. { "host-a": "host-a.env-name.workload-subdomain.cloudera.site" }
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; domains = 1;</code>
+     */
+
+    public java.util.Map<java.lang.String, java.lang.String> getDomainsMap() {
+      return internalGetDomains().getMap();
+    }
+    /**
+     * <pre>
+     * Map where key is the subdomain from request and value is the generated FQDN
+     * eg. { "host-a": "host-a.env-name.workload-subdomain.cloudera.site" }
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; domains = 1;</code>
+     */
+
+    public java.lang.String getDomainsOrDefault(
+        java.lang.String key,
+        java.lang.String defaultValue) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetDomains().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * Map where key is the subdomain from request and value is the generated FQDN
+     * eg. { "host-a": "host-a.env-name.workload-subdomain.cloudera.site" }
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; domains = 1;</code>
+     */
+
+    public java.lang.String getDomainsOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetDomains().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetDomains(),
+          DomainsDefaultEntryHolder.defaultEntry,
+          1);
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+           : internalGetDomains().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+        domains__ = DomainsDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(1, domains__);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse) obj;
+
+      boolean result = true;
+      result = result && internalGetDomains().equals(
+          other.internalGetDomains());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (!internalGetDomains().getMap().isEmpty()) {
+        hash = (37 * hash) + DOMAINS_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetDomains().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for the GenerateManagedDomainNames method.
+     * </pre>
+     *
+     * Protobuf type {@code publicendpointmanagement.GenerateManagedDomainNamesResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:publicendpointmanagement.GenerateManagedDomainNamesResponse)
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_descriptor;
+      }
+
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMapField(
+          int number) {
+        switch (number) {
+          case 1:
+            return internalGetDomains();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMutableMapField(
+          int number) {
+        switch (number) {
+          case 1:
+            return internalGetMutableDomains();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        internalGetMutableDomains().clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse build() {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse buildPartial() {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse result = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse(this);
+        int from_bitField0_ = bitField0_;
+        result.domains_ = internalGetDomains();
+        result.domains_.makeImmutable();
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse other) {
+        if (other == com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse.getDefaultInstance()) return this;
+        internalGetMutableDomains().mergeFrom(
+            other.internalGetDomains());
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.MapField<
+          java.lang.String, java.lang.String> domains_;
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+      internalGetDomains() {
+        if (domains_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+              DomainsDefaultEntryHolder.defaultEntry);
+        }
+        return domains_;
+      }
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+      internalGetMutableDomains() {
+        onChanged();;
+        if (domains_ == null) {
+          domains_ = com.google.protobuf.MapField.newMapField(
+              DomainsDefaultEntryHolder.defaultEntry);
+        }
+        if (!domains_.isMutable()) {
+          domains_ = domains_.copy();
+        }
+        return domains_;
+      }
+
+      public int getDomainsCount() {
+        return internalGetDomains().getMap().size();
+      }
+      /**
+       * <pre>
+       * Map where key is the subdomain from request and value is the generated FQDN
+       * eg. { "host-a": "host-a.env-name.workload-subdomain.cloudera.site" }
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; domains = 1;</code>
+       */
+
+      public boolean containsDomains(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        return internalGetDomains().getMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getDomainsMap()} instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String> getDomains() {
+        return getDomainsMap();
+      }
+      /**
+       * <pre>
+       * Map where key is the subdomain from request and value is the generated FQDN
+       * eg. { "host-a": "host-a.env-name.workload-subdomain.cloudera.site" }
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; domains = 1;</code>
+       */
+
+      public java.util.Map<java.lang.String, java.lang.String> getDomainsMap() {
+        return internalGetDomains().getMap();
+      }
+      /**
+       * <pre>
+       * Map where key is the subdomain from request and value is the generated FQDN
+       * eg. { "host-a": "host-a.env-name.workload-subdomain.cloudera.site" }
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; domains = 1;</code>
+       */
+
+      public java.lang.String getDomainsOrDefault(
+          java.lang.String key,
+          java.lang.String defaultValue) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetDomains().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <pre>
+       * Map where key is the subdomain from request and value is the generated FQDN
+       * eg. { "host-a": "host-a.env-name.workload-subdomain.cloudera.site" }
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; domains = 1;</code>
+       */
+
+      public java.lang.String getDomainsOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetDomains().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+
+      public Builder clearDomains() {
+        internalGetMutableDomains().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <pre>
+       * Map where key is the subdomain from request and value is the generated FQDN
+       * eg. { "host-a": "host-a.env-name.workload-subdomain.cloudera.site" }
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; domains = 1;</code>
+       */
+
+      public Builder removeDomains(
+          java.lang.String key) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        internalGetMutableDomains().getMutableMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String>
+      getMutableDomains() {
+        return internalGetMutableDomains().getMutableMap();
+      }
+      /**
+       * <pre>
+       * Map where key is the subdomain from request and value is the generated FQDN
+       * eg. { "host-a": "host-a.env-name.workload-subdomain.cloudera.site" }
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; domains = 1;</code>
+       */
+      public Builder putDomains(
+          java.lang.String key,
+          java.lang.String value) {
+        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (value == null) { throw new java.lang.NullPointerException(); }
+        internalGetMutableDomains().getMutableMap()
+            .put(key, value);
+        return this;
+      }
+      /**
+       * <pre>
+       * Map where key is the subdomain from request and value is the generated FQDN
+       * eg. { "host-a": "host-a.env-name.workload-subdomain.cloudera.site" }
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; domains = 1;</code>
+       */
+
+      public Builder putAllDomains(
+          java.util.Map<java.lang.String, java.lang.String> values) {
+        internalGetMutableDomains().getMutableMap()
+            .putAll(values);
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:publicendpointmanagement.GenerateManagedDomainNamesResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:publicendpointmanagement.GenerateManagedDomainNamesResponse)
+    private static final com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<GenerateManagedDomainNamesResponse>
+        PARSER = new com.google.protobuf.AbstractParser<GenerateManagedDomainNamesResponse>() {
+      @java.lang.Override
+      public GenerateManagedDomainNamesResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new GenerateManagedDomainNamesResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<GenerateManagedDomainNamesResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<GenerateManagedDomainNamesResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CertificateSigningRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:publicendpointmanagement.CertificateSigningRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The account id
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * The account id
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+
+    /**
+     * <pre>
+     * The friendly name of the environment for this cluster
+     * Length of this field is capped at 8 characters and
+     * we truncate provided value down to 8 or the preceding non-hyphen character
+     * </pre>
+     *
+     * <code>string environmentName = 2;</code>
+     */
+    java.lang.String getEnvironmentName();
+    /**
+     * <pre>
+     * The friendly name of the environment for this cluster
+     * Length of this field is capped at 8 characters and
+     * we truncate provided value down to 8 or the preceding non-hyphen character
+     * </pre>
+     *
+     * <code>string environmentName = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getEnvironmentNameBytes();
+
+    /**
+     * <pre>
+     * The encoded csr request. We pass the csr instead of domains to allow clients
+     * to hold on to the private keys.
+     * The list of domains would be read from CSR.
+     * This byte array should be derived from binary form of the CSR, i.e. DER
+     * </pre>
+     *
+     * <code>bytes csr = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+     */
+    com.google.protobuf.ByteString getCsr();
+  }
+  /**
+   * <pre>
+   * Request object for the SignCertificate method.
+   * </pre>
+   *
+   * Protobuf type {@code publicendpointmanagement.CertificateSigningRequest}
+   */
+  public  static final class CertificateSigningRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:publicendpointmanagement.CertificateSigningRequest)
+      CertificateSigningRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CertificateSigningRequest.newBuilder() to construct.
+    private CertificateSigningRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CertificateSigningRequest() {
+      accountId_ = "";
+      environmentName_ = "";
+      csr_ = com.google.protobuf.ByteString.EMPTY;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CertificateSigningRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accountId_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              environmentName_ = s;
+              break;
+            }
+            case 26: {
+
+              csr_ = input.readBytes();
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_CertificateSigningRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_CertificateSigningRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest.Builder.class);
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object accountId_;
+    /**
+     * <pre>
+     * The account id
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     */
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The account id
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ENVIRONMENTNAME_FIELD_NUMBER = 2;
+    private volatile java.lang.Object environmentName_;
+    /**
+     * <pre>
+     * The friendly name of the environment for this cluster
+     * Length of this field is capped at 8 characters and
+     * we truncate provided value down to 8 or the preceding non-hyphen character
+     * </pre>
+     *
+     * <code>string environmentName = 2;</code>
+     */
+    public java.lang.String getEnvironmentName() {
+      java.lang.Object ref = environmentName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environmentName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The friendly name of the environment for this cluster
+     * Length of this field is capped at 8 characters and
+     * we truncate provided value down to 8 or the preceding non-hyphen character
+     * </pre>
+     *
+     * <code>string environmentName = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getEnvironmentNameBytes() {
+      java.lang.Object ref = environmentName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environmentName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CSR_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString csr_;
+    /**
+     * <pre>
+     * The encoded csr request. We pass the csr instead of domains to allow clients
+     * to hold on to the private keys.
+     * The list of domains would be read from CSR.
+     * This byte array should be derived from binary form of the CSR, i.e. DER
+     * </pre>
+     *
+     * <code>bytes csr = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+     */
+    public com.google.protobuf.ByteString getCsr() {
+      return csr_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getAccountIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
+      }
+      if (!getEnvironmentNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environmentName_);
+      }
+      if (!csr_.isEmpty()) {
+        output.writeBytes(3, csr_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getAccountIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
+      }
+      if (!getEnvironmentNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environmentName_);
+      }
+      if (!csr_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, csr_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest) obj;
+
+      boolean result = true;
+      result = result && getAccountId()
+          .equals(other.getAccountId());
+      result = result && getEnvironmentName()
+          .equals(other.getEnvironmentName());
+      result = result && getCsr()
+          .equals(other.getCsr());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      hash = (37 * hash) + ENVIRONMENTNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironmentName().hashCode();
+      hash = (37 * hash) + CSR_FIELD_NUMBER;
+      hash = (53 * hash) + getCsr().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request object for the SignCertificate method.
+     * </pre>
+     *
+     * Protobuf type {@code publicendpointmanagement.CertificateSigningRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:publicendpointmanagement.CertificateSigningRequest)
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_CertificateSigningRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_CertificateSigningRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        accountId_ = "";
+
+        environmentName_ = "";
+
+        csr_ = com.google.protobuf.ByteString.EMPTY;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_CertificateSigningRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest build() {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest buildPartial() {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest result = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest(this);
+        result.accountId_ = accountId_;
+        result.environmentName_ = environmentName_;
+        result.csr_ = csr_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest other) {
+        if (other == com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest.getDefaultInstance()) return this;
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          onChanged();
+        }
+        if (!other.getEnvironmentName().isEmpty()) {
+          environmentName_ = other.environmentName_;
+          onChanged();
+        }
+        if (other.getCsr() != com.google.protobuf.ByteString.EMPTY) {
+          setCsr(other.getCsr());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * The account id
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The account id
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The account id
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The account id
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public Builder clearAccountId() {
+        
+        accountId_ = getDefaultInstance().getAccountId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The account id
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object environmentName_ = "";
+      /**
+       * <pre>
+       * The friendly name of the environment for this cluster
+       * Length of this field is capped at 8 characters and
+       * we truncate provided value down to 8 or the preceding non-hyphen character
+       * </pre>
+       *
+       * <code>string environmentName = 2;</code>
+       */
+      public java.lang.String getEnvironmentName() {
+        java.lang.Object ref = environmentName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          environmentName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The friendly name of the environment for this cluster
+       * Length of this field is capped at 8 characters and
+       * we truncate provided value down to 8 or the preceding non-hyphen character
+       * </pre>
+       *
+       * <code>string environmentName = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getEnvironmentNameBytes() {
+        java.lang.Object ref = environmentName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          environmentName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The friendly name of the environment for this cluster
+       * Length of this field is capped at 8 characters and
+       * we truncate provided value down to 8 or the preceding non-hyphen character
+       * </pre>
+       *
+       * <code>string environmentName = 2;</code>
+       */
+      public Builder setEnvironmentName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        environmentName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The friendly name of the environment for this cluster
+       * Length of this field is capped at 8 characters and
+       * we truncate provided value down to 8 or the preceding non-hyphen character
+       * </pre>
+       *
+       * <code>string environmentName = 2;</code>
+       */
+      public Builder clearEnvironmentName() {
+        
+        environmentName_ = getDefaultInstance().getEnvironmentName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The friendly name of the environment for this cluster
+       * Length of this field is capped at 8 characters and
+       * we truncate provided value down to 8 or the preceding non-hyphen character
+       * </pre>
+       *
+       * <code>string environmentName = 2;</code>
+       */
+      public Builder setEnvironmentNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        environmentName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.ByteString csr_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * The encoded csr request. We pass the csr instead of domains to allow clients
+       * to hold on to the private keys.
+       * The list of domains would be read from CSR.
+       * This byte array should be derived from binary form of the CSR, i.e. DER
+       * </pre>
+       *
+       * <code>bytes csr = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+       */
+      public com.google.protobuf.ByteString getCsr() {
+        return csr_;
+      }
+      /**
+       * <pre>
+       * The encoded csr request. We pass the csr instead of domains to allow clients
+       * to hold on to the private keys.
+       * The list of domains would be read from CSR.
+       * This byte array should be derived from binary form of the CSR, i.e. DER
+       * </pre>
+       *
+       * <code>bytes csr = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+       */
+      public Builder setCsr(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        csr_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The encoded csr request. We pass the csr instead of domains to allow clients
+       * to hold on to the private keys.
+       * The list of domains would be read from CSR.
+       * This byte array should be derived from binary form of the CSR, i.e. DER
+       * </pre>
+       *
+       * <code>bytes csr = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+       */
+      public Builder clearCsr() {
+        
+        csr_ = getDefaultInstance().getCsr();
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:publicendpointmanagement.CertificateSigningRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:publicendpointmanagement.CertificateSigningRequest)
+    private static final com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CertificateSigningRequest>
+        PARSER = new com.google.protobuf.AbstractParser<CertificateSigningRequest>() {
+      @java.lang.Override
+      public CertificateSigningRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CertificateSigningRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CertificateSigningRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CertificateSigningRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CertificateSigningResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:publicendpointmanagement.CertificateSigningResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The id of the workflow triggered to get CSR signed
+     * </pre>
+     *
+     * <code>string workflowId = 1;</code>
+     */
+    java.lang.String getWorkflowId();
+    /**
+     * <pre>
+     * The id of the workflow triggered to get CSR signed
+     * </pre>
+     *
+     * <code>string workflowId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getWorkflowIdBytes();
+  }
+  /**
+   * <pre>
+   * Response object for the SignCertificate method.
+   * </pre>
+   *
+   * Protobuf type {@code publicendpointmanagement.CertificateSigningResponse}
+   */
+  public  static final class CertificateSigningResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:publicendpointmanagement.CertificateSigningResponse)
+      CertificateSigningResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CertificateSigningResponse.newBuilder() to construct.
+    private CertificateSigningResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CertificateSigningResponse() {
+      workflowId_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CertificateSigningResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              workflowId_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_CertificateSigningResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_CertificateSigningResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse.Builder.class);
+    }
+
+    public static final int WORKFLOWID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object workflowId_;
+    /**
+     * <pre>
+     * The id of the workflow triggered to get CSR signed
+     * </pre>
+     *
+     * <code>string workflowId = 1;</code>
+     */
+    public java.lang.String getWorkflowId() {
+      java.lang.Object ref = workflowId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        workflowId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The id of the workflow triggered to get CSR signed
+     * </pre>
+     *
+     * <code>string workflowId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getWorkflowIdBytes() {
+      java.lang.Object ref = workflowId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        workflowId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getWorkflowIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, workflowId_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getWorkflowIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, workflowId_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse) obj;
+
+      boolean result = true;
+      result = result && getWorkflowId()
+          .equals(other.getWorkflowId());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + WORKFLOWID_FIELD_NUMBER;
+      hash = (53 * hash) + getWorkflowId().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for the SignCertificate method.
+     * </pre>
+     *
+     * Protobuf type {@code publicendpointmanagement.CertificateSigningResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:publicendpointmanagement.CertificateSigningResponse)
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_CertificateSigningResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_CertificateSigningResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        workflowId_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_CertificateSigningResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse build() {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse buildPartial() {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse result = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse(this);
+        result.workflowId_ = workflowId_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse other) {
+        if (other == com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse.getDefaultInstance()) return this;
+        if (!other.getWorkflowId().isEmpty()) {
+          workflowId_ = other.workflowId_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object workflowId_ = "";
+      /**
+       * <pre>
+       * The id of the workflow triggered to get CSR signed
+       * </pre>
+       *
+       * <code>string workflowId = 1;</code>
+       */
+      public java.lang.String getWorkflowId() {
+        java.lang.Object ref = workflowId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          workflowId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the workflow triggered to get CSR signed
+       * </pre>
+       *
+       * <code>string workflowId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getWorkflowIdBytes() {
+        java.lang.Object ref = workflowId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          workflowId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the workflow triggered to get CSR signed
+       * </pre>
+       *
+       * <code>string workflowId = 1;</code>
+       */
+      public Builder setWorkflowId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        workflowId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the workflow triggered to get CSR signed
+       * </pre>
+       *
+       * <code>string workflowId = 1;</code>
+       */
+      public Builder clearWorkflowId() {
+        
+        workflowId_ = getDefaultInstance().getWorkflowId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the workflow triggered to get CSR signed
+       * </pre>
+       *
+       * <code>string workflowId = 1;</code>
+       */
+      public Builder setWorkflowIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        workflowId_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:publicendpointmanagement.CertificateSigningResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:publicendpointmanagement.CertificateSigningResponse)
+    private static final com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CertificateSigningResponse>
+        PARSER = new com.google.protobuf.AbstractParser<CertificateSigningResponse>() {
+      @java.lang.Override
+      public CertificateSigningResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CertificateSigningResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CertificateSigningResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CertificateSigningResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface PollCertificateSigningRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:publicendpointmanagement.PollCertificateSigningRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The id of the workflow triggered to get CSR signed
+     * It can also be used to poll the system of workflow's status
+     * </pre>
+     *
+     * <code>string workflowId = 1;</code>
+     */
+    java.lang.String getWorkflowId();
+    /**
+     * <pre>
+     * The id of the workflow triggered to get CSR signed
+     * It can also be used to poll the system of workflow's status
+     * </pre>
+     *
+     * <code>string workflowId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getWorkflowIdBytes();
+  }
+  /**
+   * <pre>
+   * Request object for the PollCertificateSigning method.
+   * </pre>
+   *
+   * Protobuf type {@code publicendpointmanagement.PollCertificateSigningRequest}
+   */
+  public  static final class PollCertificateSigningRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:publicendpointmanagement.PollCertificateSigningRequest)
+      PollCertificateSigningRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use PollCertificateSigningRequest.newBuilder() to construct.
+    private PollCertificateSigningRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private PollCertificateSigningRequest() {
+      workflowId_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private PollCertificateSigningRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              workflowId_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_PollCertificateSigningRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_PollCertificateSigningRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest.Builder.class);
+    }
+
+    public static final int WORKFLOWID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object workflowId_;
+    /**
+     * <pre>
+     * The id of the workflow triggered to get CSR signed
+     * It can also be used to poll the system of workflow's status
+     * </pre>
+     *
+     * <code>string workflowId = 1;</code>
+     */
+    public java.lang.String getWorkflowId() {
+      java.lang.Object ref = workflowId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        workflowId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The id of the workflow triggered to get CSR signed
+     * It can also be used to poll the system of workflow's status
+     * </pre>
+     *
+     * <code>string workflowId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getWorkflowIdBytes() {
+      java.lang.Object ref = workflowId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        workflowId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getWorkflowIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, workflowId_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getWorkflowIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, workflowId_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest) obj;
+
+      boolean result = true;
+      result = result && getWorkflowId()
+          .equals(other.getWorkflowId());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + WORKFLOWID_FIELD_NUMBER;
+      hash = (53 * hash) + getWorkflowId().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request object for the PollCertificateSigning method.
+     * </pre>
+     *
+     * Protobuf type {@code publicendpointmanagement.PollCertificateSigningRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:publicendpointmanagement.PollCertificateSigningRequest)
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_PollCertificateSigningRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_PollCertificateSigningRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        workflowId_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_PollCertificateSigningRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest build() {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest buildPartial() {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest result = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest(this);
+        result.workflowId_ = workflowId_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest other) {
+        if (other == com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest.getDefaultInstance()) return this;
+        if (!other.getWorkflowId().isEmpty()) {
+          workflowId_ = other.workflowId_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object workflowId_ = "";
+      /**
+       * <pre>
+       * The id of the workflow triggered to get CSR signed
+       * It can also be used to poll the system of workflow's status
+       * </pre>
+       *
+       * <code>string workflowId = 1;</code>
+       */
+      public java.lang.String getWorkflowId() {
+        java.lang.Object ref = workflowId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          workflowId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the workflow triggered to get CSR signed
+       * It can also be used to poll the system of workflow's status
+       * </pre>
+       *
+       * <code>string workflowId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getWorkflowIdBytes() {
+        java.lang.Object ref = workflowId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          workflowId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the workflow triggered to get CSR signed
+       * It can also be used to poll the system of workflow's status
+       * </pre>
+       *
+       * <code>string workflowId = 1;</code>
+       */
+      public Builder setWorkflowId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        workflowId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the workflow triggered to get CSR signed
+       * It can also be used to poll the system of workflow's status
+       * </pre>
+       *
+       * <code>string workflowId = 1;</code>
+       */
+      public Builder clearWorkflowId() {
+        
+        workflowId_ = getDefaultInstance().getWorkflowId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the workflow triggered to get CSR signed
+       * It can also be used to poll the system of workflow's status
+       * </pre>
+       *
+       * <code>string workflowId = 1;</code>
+       */
+      public Builder setWorkflowIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        workflowId_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:publicendpointmanagement.PollCertificateSigningRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:publicendpointmanagement.PollCertificateSigningRequest)
+    private static final com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<PollCertificateSigningRequest>
+        PARSER = new com.google.protobuf.AbstractParser<PollCertificateSigningRequest>() {
+      @java.lang.Override
+      public PollCertificateSigningRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new PollCertificateSigningRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<PollCertificateSigningRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PollCertificateSigningRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface PollCertificateSigningResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:publicendpointmanagement.PollCertificateSigningResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Enumeration indicating the status of workflow
+     * which can be in-progress, failed or successful
+     * </pre>
+     *
+     * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+     */
+    int getStatusValue();
+    /**
+     * <pre>
+     * Enumeration indicating the status of workflow
+     * which can be in-progress, failed or successful
+     * </pre>
+     *
+     * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+     */
+    com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus getStatus();
+
+    /**
+     * <pre>
+     * List of certificates in the trust chain of the signed CSR
+     * The individual certificates are PEM encoded representation of signed X.509 certificates
+     * The first certificate in the list is the signed version of the submitted CSR
+     * Each item in the list following this certificate belongs to the authority
+     * which signed the preceding certificate.
+     * </pre>
+     *
+     * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     */
+    java.util.List<java.lang.String>
+        getCertificatesList();
+    /**
+     * <pre>
+     * List of certificates in the trust chain of the signed CSR
+     * The individual certificates are PEM encoded representation of signed X.509 certificates
+     * The first certificate in the list is the signed version of the submitted CSR
+     * Each item in the list following this certificate belongs to the authority
+     * which signed the preceding certificate.
+     * </pre>
+     *
+     * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     */
+    int getCertificatesCount();
+    /**
+     * <pre>
+     * List of certificates in the trust chain of the signed CSR
+     * The individual certificates are PEM encoded representation of signed X.509 certificates
+     * The first certificate in the list is the signed version of the submitted CSR
+     * Each item in the list following this certificate belongs to the authority
+     * which signed the preceding certificate.
+     * </pre>
+     *
+     * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     */
+    java.lang.String getCertificates(int index);
+    /**
+     * <pre>
+     * List of certificates in the trust chain of the signed CSR
+     * The individual certificates are PEM encoded representation of signed X.509 certificates
+     * The first certificate in the list is the signed version of the submitted CSR
+     * Each item in the list following this certificate belongs to the authority
+     * which signed the preceding certificate.
+     * </pre>
+     *
+     * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     */
+    com.google.protobuf.ByteString
+        getCertificatesBytes(int index);
+  }
+  /**
+   * <pre>
+   * Response object for the PollCertificateSigning method.
+   * </pre>
+   *
+   * Protobuf type {@code publicendpointmanagement.PollCertificateSigningResponse}
+   */
+  public  static final class PollCertificateSigningResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:publicendpointmanagement.PollCertificateSigningResponse)
+      PollCertificateSigningResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use PollCertificateSigningResponse.newBuilder() to construct.
+    private PollCertificateSigningResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private PollCertificateSigningResponse() {
+      status_ = 0;
+      certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private PollCertificateSigningResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+              int rawValue = input.readEnum();
+
+              status_ = rawValue;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+                certificates_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              certificates_.add(s);
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          certificates_ = certificates_.getUnmodifiableView();
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_PollCertificateSigningResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_PollCertificateSigningResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int STATUS_FIELD_NUMBER = 1;
+    private int status_;
+    /**
+     * <pre>
+     * Enumeration indicating the status of workflow
+     * which can be in-progress, failed or successful
+     * </pre>
+     *
+     * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+     */
+    public int getStatusValue() {
+      return status_;
+    }
+    /**
+     * <pre>
+     * Enumeration indicating the status of workflow
+     * which can be in-progress, failed or successful
+     * </pre>
+     *
+     * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+     */
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus getStatus() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus result = com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus.valueOf(status_);
+      return result == null ? com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus.UNRECOGNIZED : result;
+    }
+
+    public static final int CERTIFICATES_FIELD_NUMBER = 2;
+    private com.google.protobuf.LazyStringList certificates_;
+    /**
+     * <pre>
+     * List of certificates in the trust chain of the signed CSR
+     * The individual certificates are PEM encoded representation of signed X.509 certificates
+     * The first certificate in the list is the signed version of the submitted CSR
+     * Each item in the list following this certificate belongs to the authority
+     * which signed the preceding certificate.
+     * </pre>
+     *
+     * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     */
+    public com.google.protobuf.ProtocolStringList
+        getCertificatesList() {
+      return certificates_;
+    }
+    /**
+     * <pre>
+     * List of certificates in the trust chain of the signed CSR
+     * The individual certificates are PEM encoded representation of signed X.509 certificates
+     * The first certificate in the list is the signed version of the submitted CSR
+     * Each item in the list following this certificate belongs to the authority
+     * which signed the preceding certificate.
+     * </pre>
+     *
+     * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     */
+    public int getCertificatesCount() {
+      return certificates_.size();
+    }
+    /**
+     * <pre>
+     * List of certificates in the trust chain of the signed CSR
+     * The individual certificates are PEM encoded representation of signed X.509 certificates
+     * The first certificate in the list is the signed version of the submitted CSR
+     * Each item in the list following this certificate belongs to the authority
+     * which signed the preceding certificate.
+     * </pre>
+     *
+     * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     */
+    public java.lang.String getCertificates(int index) {
+      return certificates_.get(index);
+    }
+    /**
+     * <pre>
+     * List of certificates in the trust chain of the signed CSR
+     * The individual certificates are PEM encoded representation of signed X.509 certificates
+     * The first certificate in the list is the signed version of the submitted CSR
+     * Each item in the list following this certificate belongs to the authority
+     * which signed the preceding certificate.
+     * </pre>
+     *
+     * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     */
+    public com.google.protobuf.ByteString
+        getCertificatesBytes(int index) {
+      return certificates_.getByteString(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (status_ != com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus.UNKNOWN.getNumber()) {
+        output.writeEnum(1, status_);
+      }
+      for (int i = 0; i < certificates_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, certificates_.getRaw(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (status_ != com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus.UNKNOWN.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(1, status_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < certificates_.size(); i++) {
+          dataSize += computeStringSizeNoTag(certificates_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getCertificatesList().size();
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse) obj;
+
+      boolean result = true;
+      result = result && status_ == other.status_;
+      result = result && getCertificatesList()
+          .equals(other.getCertificatesList());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + status_;
+      if (getCertificatesCount() > 0) {
+        hash = (37 * hash) + CERTIFICATES_FIELD_NUMBER;
+        hash = (53 * hash) + getCertificatesList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for the PollCertificateSigning method.
+     * </pre>
+     *
+     * Protobuf type {@code publicendpointmanagement.PollCertificateSigningResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:publicendpointmanagement.PollCertificateSigningResponse)
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_PollCertificateSigningResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_PollCertificateSigningResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        status_ = 0;
+
+        certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_PollCertificateSigningResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse build() {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse buildPartial() {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse result = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        result.status_ = status_;
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          certificates_ = certificates_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000002);
+        }
+        result.certificates_ = certificates_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse other) {
+        if (other == com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.getDefaultInstance()) return this;
+        if (other.status_ != 0) {
+          setStatusValue(other.getStatusValue());
+        }
+        if (!other.certificates_.isEmpty()) {
+          if (certificates_.isEmpty()) {
+            certificates_ = other.certificates_;
+            bitField0_ = (bitField0_ & ~0x00000002);
+          } else {
+            ensureCertificatesIsMutable();
+            certificates_.addAll(other.certificates_);
+          }
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private int status_ = 0;
+      /**
+       * <pre>
+       * Enumeration indicating the status of workflow
+       * which can be in-progress, failed or successful
+       * </pre>
+       *
+       * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+       */
+      public int getStatusValue() {
+        return status_;
+      }
+      /**
+       * <pre>
+       * Enumeration indicating the status of workflow
+       * which can be in-progress, failed or successful
+       * </pre>
+       *
+       * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+       */
+      public Builder setStatusValue(int value) {
+        status_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Enumeration indicating the status of workflow
+       * which can be in-progress, failed or successful
+       * </pre>
+       *
+       * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus getStatus() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus result = com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus.valueOf(status_);
+        return result == null ? com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Enumeration indicating the status of workflow
+       * which can be in-progress, failed or successful
+       * </pre>
+       *
+       * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+       */
+      public Builder setStatus(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        status_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Enumeration indicating the status of workflow
+       * which can be in-progress, failed or successful
+       * </pre>
+       *
+       * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+       */
+      public Builder clearStatus() {
+        
+        status_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.LazyStringList certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureCertificatesIsMutable() {
+        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+          certificates_ = new com.google.protobuf.LazyStringArrayList(certificates_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+      /**
+       * <pre>
+       * List of certificates in the trust chain of the signed CSR
+       * The individual certificates are PEM encoded representation of signed X.509 certificates
+       * The first certificate in the list is the signed version of the submitted CSR
+       * Each item in the list following this certificate belongs to the authority
+       * which signed the preceding certificate.
+       * </pre>
+       *
+       * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       */
+      public com.google.protobuf.ProtocolStringList
+          getCertificatesList() {
+        return certificates_.getUnmodifiableView();
+      }
+      /**
+       * <pre>
+       * List of certificates in the trust chain of the signed CSR
+       * The individual certificates are PEM encoded representation of signed X.509 certificates
+       * The first certificate in the list is the signed version of the submitted CSR
+       * Each item in the list following this certificate belongs to the authority
+       * which signed the preceding certificate.
+       * </pre>
+       *
+       * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       */
+      public int getCertificatesCount() {
+        return certificates_.size();
+      }
+      /**
+       * <pre>
+       * List of certificates in the trust chain of the signed CSR
+       * The individual certificates are PEM encoded representation of signed X.509 certificates
+       * The first certificate in the list is the signed version of the submitted CSR
+       * Each item in the list following this certificate belongs to the authority
+       * which signed the preceding certificate.
+       * </pre>
+       *
+       * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       */
+      public java.lang.String getCertificates(int index) {
+        return certificates_.get(index);
+      }
+      /**
+       * <pre>
+       * List of certificates in the trust chain of the signed CSR
+       * The individual certificates are PEM encoded representation of signed X.509 certificates
+       * The first certificate in the list is the signed version of the submitted CSR
+       * Each item in the list following this certificate belongs to the authority
+       * which signed the preceding certificate.
+       * </pre>
+       *
+       * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       */
+      public com.google.protobuf.ByteString
+          getCertificatesBytes(int index) {
+        return certificates_.getByteString(index);
+      }
+      /**
+       * <pre>
+       * List of certificates in the trust chain of the signed CSR
+       * The individual certificates are PEM encoded representation of signed X.509 certificates
+       * The first certificate in the list is the signed version of the submitted CSR
+       * Each item in the list following this certificate belongs to the authority
+       * which signed the preceding certificate.
+       * </pre>
+       *
+       * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       */
+      public Builder setCertificates(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureCertificatesIsMutable();
+        certificates_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * List of certificates in the trust chain of the signed CSR
+       * The individual certificates are PEM encoded representation of signed X.509 certificates
+       * The first certificate in the list is the signed version of the submitted CSR
+       * Each item in the list following this certificate belongs to the authority
+       * which signed the preceding certificate.
+       * </pre>
+       *
+       * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       */
+      public Builder addCertificates(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureCertificatesIsMutable();
+        certificates_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * List of certificates in the trust chain of the signed CSR
+       * The individual certificates are PEM encoded representation of signed X.509 certificates
+       * The first certificate in the list is the signed version of the submitted CSR
+       * Each item in the list following this certificate belongs to the authority
+       * which signed the preceding certificate.
+       * </pre>
+       *
+       * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       */
+      public Builder addAllCertificates(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureCertificatesIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, certificates_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * List of certificates in the trust chain of the signed CSR
+       * The individual certificates are PEM encoded representation of signed X.509 certificates
+       * The first certificate in the list is the signed version of the submitted CSR
+       * Each item in the list following this certificate belongs to the authority
+       * which signed the preceding certificate.
+       * </pre>
+       *
+       * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       */
+      public Builder clearCertificates() {
+        certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * List of certificates in the trust chain of the signed CSR
+       * The individual certificates are PEM encoded representation of signed X.509 certificates
+       * The first certificate in the list is the signed version of the submitted CSR
+       * Each item in the list following this certificate belongs to the authority
+       * which signed the preceding certificate.
+       * </pre>
+       *
+       * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       */
+      public Builder addCertificatesBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        ensureCertificatesIsMutable();
+        certificates_.add(value);
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:publicendpointmanagement.PollCertificateSigningResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:publicendpointmanagement.PollCertificateSigningResponse)
+    private static final com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<PollCertificateSigningResponse>
+        PARSER = new com.google.protobuf.AbstractParser<PollCertificateSigningResponse>() {
+      @java.lang.Override
+      public PollCertificateSigningResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new PollCertificateSigningResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<PollCertificateSigningResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PollCertificateSigningResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_publicendpointmanagement_AWSElbDnsTarget_descriptor;
   private static final 
@@ -9124,6 +14108,41 @@ public final class PublicEndpointManagementProto {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_publicendpointmanagement_PollCertificateCreationResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_publicendpointmanagement_GenerateManagedDomainNamesRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_publicendpointmanagement_GenerateManagedDomainNamesRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_DomainsEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_DomainsEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_publicendpointmanagement_CertificateSigningRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_publicendpointmanagement_CertificateSigningRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_publicendpointmanagement_CertificateSigningResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_publicendpointmanagement_CertificateSigningResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_publicendpointmanagement_PollCertificateSigningRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_publicendpointmanagement_PollCertificateSigningRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_publicendpointmanagement_PollCertificateSigningResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_publicendpointmanagement_PollCertificateSigningResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -9158,26 +14177,53 @@ public final class PublicEndpointManagementProto {
       "\001 \001(\t\"3\n\036PollCertificateCreationRequest\022" +
       "\021\n\trequestId\030\001 \001(\t\"\\\n\037PollCertificateCre" +
       "ationResponse\022\016\n\006status\030\001 \001(\t\022\r\n\005error\030\002" +
-      " \001(\t\022\032\n\014certificates\030\003 \003(\tB\004\210\265\030\0012\336\004\n\030Pub" +
-      "licEndpointManagement\022A\n\nGetVersion\022\027.ve" +
-      "rsion.VersionRequest\032\030.version.VersionRe" +
-      "sponse\"\000\022u\n\016CreateDnsEntry\022/.publicendpo" +
-      "intmanagement.CreateDnsEntryRequest\0320.pu" +
-      "blicendpointmanagement.CreateDnsEntryRes" +
-      "ponse\"\000\022u\n\016DeleteDnsEntry\022/.publicendpoi" +
-      "ntmanagement.DeleteDnsEntryRequest\0320.pub" +
-      "licendpointmanagement.DeleteDnsEntryResp" +
-      "onse\"\000\022~\n\021CreateCertificate\0222.publicendp" +
-      "ointmanagement.CreateCertificateRequest\032" +
-      "3.publicendpointmanagement.CreateCertifi" +
-      "cateResponse\"\000\022\220\001\n\027PollCertificateCreati" +
-      "on\0228.publicendpointmanagement.PollCertif" +
-      "icateCreationRequest\0329.publicendpointman" +
-      "agement.PollCertificateCreationResponse\"" +
-      "\000Bu\n9com.cloudera.thunderhead.service.pu" +
-      "blicendpointmanagementB\035PublicEndpointMa" +
-      "nagementProtoZ\031com/cloudera/cdp/protobuf" +
-      "b\006proto3"
+      " \001(\t\022\032\n\014certificates\030\003 \003(\tB\004\210\265\030\001\"c\n!Gene" +
+      "rateManagedDomainNamesRequest\022\021\n\taccount" +
+      "Id\030\001 \001(\t\022\027\n\017environmentName\030\002 \001(\t\022\022\n\nsub" +
+      "domains\030\003 \003(\t\"\260\001\n\"GenerateManagedDomainN" +
+      "amesResponse\022Z\n\007domains\030\001 \003(\0132I.publicen" +
+      "dpointmanagement.GenerateManagedDomainNa" +
+      "mesResponse.DomainsEntry\032.\n\014DomainsEntry" +
+      "\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"Z\n\031Cert" +
+      "ificateSigningRequest\022\021\n\taccountId\030\001 \001(\t" +
+      "\022\027\n\017environmentName\030\002 \001(\t\022\021\n\003csr\030\003 \001(\014B\004" +
+      "\210\265\030\001\"0\n\032CertificateSigningResponse\022\022\n\nwo" +
+      "rkflowId\030\001 \001(\t\"3\n\035PollCertificateSigning" +
+      "Request\022\022\n\nworkflowId\030\001 \001(\t\"u\n\036PollCerti" +
+      "ficateSigningResponse\0227\n\006status\030\001 \001(\0162\'." +
+      "publicendpointmanagement.SigningStatus\022\032" +
+      "\n\014certificates\030\002 \003(\tB\004\210\265\030\001*H\n\rSigningSta" +
+      "tus\022\013\n\007UNKNOWN\020\000\022\017\n\013IN_PROGRESS\020\001\022\r\n\tSUC" +
+      "CEEDED\020\002\022\n\n\006FAILED\020\0032\212\010\n\030PublicEndpointM" +
+      "anagement\022A\n\nGetVersion\022\027.version.Versio" +
+      "nRequest\032\030.version.VersionResponse\"\000\022u\n\016" +
+      "CreateDnsEntry\022/.publicendpointmanagemen" +
+      "t.CreateDnsEntryRequest\0320.publicendpoint" +
+      "management.CreateDnsEntryResponse\"\000\022u\n\016D" +
+      "eleteDnsEntry\022/.publicendpointmanagement" +
+      ".DeleteDnsEntryRequest\0320.publicendpointm" +
+      "anagement.DeleteDnsEntryResponse\"\000\022~\n\021Cr" +
+      "eateCertificate\0222.publicendpointmanageme" +
+      "nt.CreateCertificateRequest\0323.publicendp" +
+      "ointmanagement.CreateCertificateResponse" +
+      "\"\000\022\220\001\n\027PollCertificateCreation\0228.publice" +
+      "ndpointmanagement.PollCertificateCreatio" +
+      "nRequest\0329.publicendpointmanagement.Poll" +
+      "CertificateCreationResponse\"\000\022\231\001\n\032Genera" +
+      "teManagedDomainNames\022;.publicendpointman" +
+      "agement.GenerateManagedDomainNamesReques" +
+      "t\032<.publicendpointmanagement.GenerateMan" +
+      "agedDomainNamesResponse\"\000\022~\n\017SignCertifi" +
+      "cate\0223.publicendpointmanagement.Certific" +
+      "ateSigningRequest\0324.publicendpointmanage" +
+      "ment.CertificateSigningResponse\"\000\022\215\001\n\026Po" +
+      "llCertificateSigning\0227.publicendpointman" +
+      "agement.PollCertificateSigningRequest\0328." +
+      "publicendpointmanagement.PollCertificate" +
+      "SigningResponse\"\000Bu\n9com.cloudera.thunde" +
+      "rhead.service.publicendpointmanagementB\035" +
+      "PublicEndpointManagementProtoZ\031com/cloud" +
+      "era/cdp/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -9259,6 +14305,48 @@ public final class PublicEndpointManagementProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_publicendpointmanagement_PollCertificateCreationResponse_descriptor,
         new java.lang.String[] { "Status", "Error", "Certificates", });
+    internal_static_publicendpointmanagement_GenerateManagedDomainNamesRequest_descriptor =
+      getDescriptor().getMessageTypes().get(11);
+    internal_static_publicendpointmanagement_GenerateManagedDomainNamesRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_publicendpointmanagement_GenerateManagedDomainNamesRequest_descriptor,
+        new java.lang.String[] { "AccountId", "EnvironmentName", "Subdomains", });
+    internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_descriptor =
+      getDescriptor().getMessageTypes().get(12);
+    internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_descriptor,
+        new java.lang.String[] { "Domains", });
+    internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_DomainsEntry_descriptor =
+      internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_descriptor.getNestedTypes().get(0);
+    internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_DomainsEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_publicendpointmanagement_GenerateManagedDomainNamesResponse_DomainsEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_publicendpointmanagement_CertificateSigningRequest_descriptor =
+      getDescriptor().getMessageTypes().get(13);
+    internal_static_publicendpointmanagement_CertificateSigningRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_publicendpointmanagement_CertificateSigningRequest_descriptor,
+        new java.lang.String[] { "AccountId", "EnvironmentName", "Csr", });
+    internal_static_publicendpointmanagement_CertificateSigningResponse_descriptor =
+      getDescriptor().getMessageTypes().get(14);
+    internal_static_publicendpointmanagement_CertificateSigningResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_publicendpointmanagement_CertificateSigningResponse_descriptor,
+        new java.lang.String[] { "WorkflowId", });
+    internal_static_publicendpointmanagement_PollCertificateSigningRequest_descriptor =
+      getDescriptor().getMessageTypes().get(15);
+    internal_static_publicendpointmanagement_PollCertificateSigningRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_publicendpointmanagement_PollCertificateSigningRequest_descriptor,
+        new java.lang.String[] { "WorkflowId", });
+    internal_static_publicendpointmanagement_PollCertificateSigningResponse_descriptor =
+      getDescriptor().getMessageTypes().get(16);
+    internal_static_publicendpointmanagement_PollCertificateSigningResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_publicendpointmanagement_PollCertificateSigningResponse_descriptor,
+        new java.lang.String[] { "Status", "Certificates", });
     com.google.protobuf.ExtensionRegistry registry =
         com.google.protobuf.ExtensionRegistry.newInstance();
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.skipLogging);
