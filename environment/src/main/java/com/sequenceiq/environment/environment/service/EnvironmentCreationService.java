@@ -4,6 +4,7 @@ import static com.sequenceiq.environment.CloudPlatform.AWS;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
@@ -57,6 +59,8 @@ public class EnvironmentCreationService {
 
     private final EntitlementService entitlementService;
 
+    private final GrpcUmsClient grpcUmsClient;
+
     public EnvironmentCreationService(
             EnvironmentService environmentService,
             EnvironmentValidatorService validatorService,
@@ -66,7 +70,8 @@ public class EnvironmentCreationService {
             AuthenticationDtoConverter authenticationDtoConverter,
             ParametersService parametersService,
             NetworkService networkService,
-            EntitlementService entitlementService) {
+            EntitlementService entitlementService,
+            GrpcUmsClient grpcUmsClient) {
         this.environmentService = environmentService;
         this.validatorService = validatorService;
         this.environmentResourceService = environmentResourceService;
@@ -76,6 +81,7 @@ public class EnvironmentCreationService {
         this.parametersService = parametersService;
         this.networkService = networkService;
         this.entitlementService = entitlementService;
+        this.grpcUmsClient = grpcUmsClient;
     }
 
     public EnvironmentDto create(EnvironmentCreationDto creationDto) {
@@ -86,7 +92,11 @@ public class EnvironmentCreationService {
         validateTunnel(creationDto.getCreator(), creationDto.getExperimentalFeatures().getTunnel());
         Environment environment = initializeEnvironment(creationDto);
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
-        environmentService.setAdminGroupName(environment, creationDto.getAdminGroupName());
+       String workloadAdministrationGroupName = grpcUmsClient.setWorkloadAdministrationGroupName(creationDto.getCreator(), creationDto.getAccountId(),
+                Optional.empty(), "environments/write", environment.getResourceCrn());
+       LOGGER.info("Configured workloadAdministrationGroupName: {}", workloadAdministrationGroupName);
+       environmentService.setAdminGroupName(environment, workloadAdministrationGroupName);
+
         CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
         validateCreation(creationDto, environment, cloudRegions);
         Map<String, CloudSubnet> subnetMetas = networkService.retrieveSubnetMetadata(environment, creationDto.getNetwork());
