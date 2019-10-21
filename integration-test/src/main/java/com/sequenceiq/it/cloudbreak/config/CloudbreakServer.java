@@ -22,6 +22,11 @@ public class CloudbreakServer {
 
     private static final String WARNING_TEXT_FORMAT = "Following variable must be set whether as environment variables or (test) application.yaml: %s";
 
+    private static final int DEFAULT_CLOUDBREAK_PORT = 9091;
+
+    @Value("${cloudbreak.url:localhost:" + DEFAULT_CLOUDBREAK_PORT + "}")
+    private String cloudbreakUrl;
+
     @Value("${integrationtest.cloudbreak.server}")
     private String server;
 
@@ -52,11 +57,13 @@ public class CloudbreakServer {
         configureFromCliProfile();
 
         checkNonEmpty("integrationtest.cloudbreak.server", server);
+        checkNonEmpty("cloudbreak.url", cloudbreakUrl);
         checkNonEmpty("server.contextPath", cbRootContextPath);
         checkNonEmpty("integrationtest.user.accesskey", accessKey);
         checkNonEmpty("integrationtest.user.secretkey", secretKey);
 
         testParameter.put(CloudbreakTest.CLOUDBREAK_SERVER_ROOT, server + cbRootContextPath);
+        testParameter.put(CloudbreakTest.CLOUDBREAK_SERVER_INTERNAL_ROOT, "http://" + cloudbreakUrl + cbRootContextPath);
         testParameter.put(CloudbreakTest.ACCESS_KEY, accessKey);
         testParameter.put(CloudbreakTest.SECRET_KEY, secretKey);
     }
