@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.CloudPlatform;
+import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverter;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
@@ -25,11 +26,15 @@ public class EnvironmentDtoConverter {
 
     private final AuthenticationDtoConverter authenticationDtoConverter;
 
+    private final CredentialViewConverter credentialViewConverter;
+
     public EnvironmentDtoConverter(Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap,
-            Map<CloudPlatform, EnvironmentParametersConverter> environmentParamsConverterMap, AuthenticationDtoConverter authenticationDtoConverter) {
+            Map<CloudPlatform, EnvironmentParametersConverter> environmentParamsConverterMap,
+            AuthenticationDtoConverter authenticationDtoConverter, CredentialViewConverter credentialViewConverter) {
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
         this.environmentParamsConverterMap = environmentParamsConverterMap;
         this.authenticationDtoConverter = authenticationDtoConverter;
+        this.credentialViewConverter = credentialViewConverter;
     }
 
     public EnvironmentDto environmentToDto(Environment environment) {
@@ -42,6 +47,7 @@ public class EnvironmentDtoConverter {
                 .withArchived(environment.isArchived())
                 .withCloudPlatform(environment.getCloudPlatform())
                 .withCredential(environment.getCredential())
+                .withCredentialView(credentialViewConverter.convert(environment.getCredential()))
                 .withDeletionTimestamp(environment.getDeletionTimestamp())
                 .withLocationDto(environmentToLocationDto(environment))
                 .withRegions(environment.getRegions())

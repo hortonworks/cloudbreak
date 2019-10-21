@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
-import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
@@ -32,9 +31,6 @@ public abstract class EnvironmentBaseResponse {
 
     @ApiModelProperty(EnvironmentModelDescription.CREATE_FREEIPA)
     private Boolean createFreeIpa = Boolean.TRUE;
-
-    @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_RESPONSE)
-    private CredentialResponse credential;
 
     @ApiModelProperty(EnvironmentModelDescription.REGIONS)
     private CompactRegionResponse regions;
@@ -111,14 +107,6 @@ public abstract class EnvironmentBaseResponse {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
-    }
-
-    public CredentialResponse getCredential() {
-        return credential;
-    }
-
-    public void setCredential(CredentialResponse credential) {
-        this.credential = credential;
     }
 
     public LocationResponse getLocation() {
