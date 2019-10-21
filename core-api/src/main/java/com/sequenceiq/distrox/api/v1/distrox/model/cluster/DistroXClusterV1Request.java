@@ -30,11 +30,9 @@ public class DistroXClusterV1Request implements Serializable {
     @Size(max = 15, min = 5, message = "The length of the username has to be in range of 5 to 15")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The username can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
-    @NotNull
     @ApiModelProperty(value = StackModelDescription.USERNAME, required = true)
     private String userName;
 
-    @NotNull
     @Pattern.List({
             @Pattern(regexp = "^.*[a-zA-Z].*$", message = "The password should contain at least one letter."),
             @Pattern(regexp = "^.*[0-9].*$", message = "The password should contain at least one number.")
