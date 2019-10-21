@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.LOCAL_ASYNC;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.RUNNER;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -177,14 +178,15 @@ public class SaltStates {
         sc.action(saltAction);
     }
 
-    public static Map<String, Map<String, String>> getPackageVersions(SaltConnector sc, String... packages) {
-        if (packages.length == 1) {
-            return getSinglePackageVersion(sc, packages[0]);
-        } else if (packages.length > 1) {
+    public static Map<String, Map<String, String>> getPackageVersions(SaltConnector sc, Map<String, Optional<String>> packages) {
+        if (packages.keySet().size() == 1) {
+            Entry<String, Optional<String>> next = packages.entrySet().iterator().next();
+            return getSinglePackageVersion(sc, next.getKey(), next.getValue());
+        } else if (packages.keySet().size() > 1) {
             // Table<host, packageName, version>
             Table<String, String, String> packageTable = HashBasedTable.create();
-            Arrays.stream(packages).forEach(singlePackage -> {
-                Map<String, Map<String, String>> singlePackageVersionByHost = getSinglePackageVersion(sc, singlePackage);
+            packages.entrySet().forEach(singlePackage -> {
+                Map<String, Map<String, String>> singlePackageVersionByHost = getSinglePackageVersion(sc, singlePackage.getKey(), singlePackage.getValue());
                 singlePackageVersionByHost.entrySet()
                         .stream()
                         .forEach(singlePackageVersionByHostEntry -> singlePackageVersionByHostEntry.getValue().entrySet()
@@ -198,14 +200,14 @@ public class SaltStates {
         }
     }
 
-    private static Map<String, Map<String, String>> getSinglePackageVersion(SaltConnector sc, String singlePackage) {
+    private static Map<String, Map<String, String>> getSinglePackageVersion(SaltConnector sc, String singlePackage, Optional<String> versionPattern) {
         PackageVersionResponse packageVersionResponse = sc.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, singlePackage);
         Map<String, String> packageVersionsMap =
                 CollectionUtils.isEmpty(packageVersionResponse.getResult()) ? new HashMap<>() : packageVersionResponse.getResult().get(0);
         Map<String, Map<String, String>> result = new HashMap<>();
         for (Entry<String, String> e : packageVersionsMap.entrySet()) {
             Map<String, String> versionMap = new HashMap<>();
-            versionMap.put(singlePackage, e.getValue());
+            versionMap.put(singlePackage, parseVersion(e.getValue(), versionPattern));
             result.put(e.getKey(), versionMap);
         }
         return result;
@@ -243,5 +245,15 @@ public class SaltStates {
 
     private static ApplyResponse applyStateAllSync(SaltConnector sc, String service) {
         return sc.run(Glob.ALL, "state.apply", LOCAL, ApplyResponse.class, service);
+    }
+
+    private static String parseVersion(String versionCommandOutput, Optional<String> pattern) {
+        if (pattern.isPresent()) {
+            Matcher matcher = Pattern.compile(pattern.get()).matcher(versionCommandOutput);
+            if (matcher.matches()) {
+                return matcher.group(1);
+            }
+        }
+        return versionCommandOutput;
     }
 }
