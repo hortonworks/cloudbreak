@@ -58,7 +58,12 @@ vault:
       login.role: "cloudbreak.default"
 
 environment:
-  cert.dir: /certs/
+  rest:
+    debug: false
+  cert:
+    dir: /certs/
+    ignorePreValidation: false
+    validation: true
   structuredevent:
     rest:
       enabled: false
@@ -160,3 +165,16 @@ spring:
 
 notification:
   urls: http://localhost:3000/notifications
+
+xp:
+  path:
+    componentToReplace: "{crn}"
+    postfix: "/cp-internal/environment/{crn}"
+  protocol: https
+xpservices:
+  experiences[Machine Learning Experience].pathPrefix: ${MLX_PATH_PREFIX}
+  experiences[Machine Learning Experience].pathInfix: ${MLX_PATH_INFIX}
+  experiences[Machine Learning Experience].port: ${MLX_PATH_PORT}
+  experiences[Data Warehouse Experience].pathPrefix: ${DWX_PATH_PREFIX}
+  experiences[Data Warehouse Experience].pathInfix: ${DWX_PATH_INFIX}
+  experiences[Data Warehouse Experience].port: ${DWX_PATH_PORT}

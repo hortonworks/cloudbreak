@@ -20,6 +20,8 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
 
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+
 @Service
 public class EnvironmentDeletionService {
 
@@ -121,6 +123,12 @@ public class EnvironmentDeletionService {
             throw new BadRequestException(String.format("The following Data Hub cluster(s) must be terminated before Environment deletion [%s]",
                     String.join(", ", distroXClusterNames)));
         }
+
+        Set<String> experiencesConnectedToEnvironment = environmentResourceDeletionService.getExperiencesConnectedToEnvironment(env.getResourceCrn());
+        if (isNotEmpty(experiencesConnectedToEnvironment)) {
+            throw new BadRequestException(String.format("You have to delete/remove the following experience(s) before environment deletion [%s]",
+                    String.join(", ", experiencesConnectedToEnvironment)));
+        }
     }
 
     void validateDeletion(Environment environment) {
@@ -130,4 +138,5 @@ public class EnvironmentDeletionService {
                     String.join(", ", childEnvNames)));
         }
     }
+
 }
