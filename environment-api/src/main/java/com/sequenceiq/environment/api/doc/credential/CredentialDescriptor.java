@@ -11,6 +11,8 @@ public class CredentialDescriptor {
 
     public static final String CREDENTIAL = "Credential of the environment.";
 
+    public static final String CREDENTIAL_VIEW = "Credential view of the environment that does not contain secrets.";
+
     private CredentialDescriptor() {
     }
 }

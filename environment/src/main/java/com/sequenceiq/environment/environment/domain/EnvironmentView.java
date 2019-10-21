@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.domain.CredentialView;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -40,7 +40,7 @@ public class EnvironmentView extends CompactView implements AuthResource {
 
     @ManyToOne
     @JoinColumn(nullable = false)
-    private Credential credential;
+    private CredentialView credential;
 
     @Column(nullable = false)
     private String location;
@@ -102,11 +102,11 @@ public class EnvironmentView extends CompactView implements AuthResource {
         this.cloudPlatform = cloudPlatform;
     }
 
-    public Credential getCredential() {
+    public CredentialView getCredential() {
         return credential;
     }
 
-    public void setCredential(Credential credential) {
+    public void setCredentialView(CredentialView credential) {
         this.credential = credential;
     }
 
