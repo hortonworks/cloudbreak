@@ -50,4 +50,12 @@ public class HostGroupView implements ProvisionEntity {
     public void setHostMetadata(Set<HostMetadataView> hostMetadata) {
         this.hostMetadata = hostMetadata;
     }
+
+    public ClusterApiView getCluster() {
+        return cluster;
+    }
+
+    public void setCluster(ClusterApiView cluster) {
+        this.cluster = cluster;
+    }
 }

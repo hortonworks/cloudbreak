@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.converter.stack;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +14,11 @@ import com.sequenceiq.cloudbreak.api.model.CredentialViewResponse;
 import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterViewResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.HostGroupViewResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.HostMetadataViewResponse;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
+import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
+import com.sequenceiq.cloudbreak.domain.view.HostMetadataView;
 
 @Component
 public class StackListItemToStackViewResponseConverter {
@@ -19,7 +26,7 @@ public class StackListItemToStackViewResponseConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackListItemToStackViewResponseConverter.class);
 
     public StackViewResponse convert(StackListItem item, Map<Long, Integer> stackInstanceCounts, Map<Long, Integer> stackUnhealthyInstanceCounts,
-            String sharedClusterName) {
+            String sharedClusterName, List<HostGroupView> hostGroupViews) {
         StackViewResponse response = new StackViewResponse();
         response.setId(item.getId());
         response.setName(item.getName());
@@ -27,7 +34,7 @@ public class StackListItemToStackViewResponseConverter {
         response.setPlatformVariant(item.getPlatformVariant());
         response.setCreated(item.getCreated());
         response.setStatus(item.getStackStatus());
-        response.setCluster(getClusterViewResponse(item, sharedClusterName));
+        response.setCluster(getClusterViewResponse(item, sharedClusterName, hostGroupViews));
         response.setNodeCount(stackInstanceCounts.get(item.getId()));
         response.setUnhealthyNodeCount(stackUnhealthyInstanceCounts.get(item.getId()));
         response.setCredential(getCredentialViewResponse(item));
@@ -35,7 +42,7 @@ public class StackListItemToStackViewResponseConverter {
         return response;
     }
 
-    private ClusterViewResponse getClusterViewResponse(StackListItem item, String sharedClusterName) {
+    private ClusterViewResponse getClusterViewResponse(StackListItem item, String sharedClusterName, List<HostGroupView> hostGroupViews) {
         ClusterViewResponse clusterResponse = new ClusterViewResponse();
         clusterResponse.setId(item.getClusterId());
         clusterResponse.setName(item.getName());
@@ -44,7 +51,28 @@ public class StackListItemToStackViewResponseConverter {
         clusterResponse.setBlueprint(getBlueprintViewResponse(item));
         clusterResponse.setStatus(item.getClusterStatus());
         clusterResponse.setSharedServiceResponse(getSharedServiceResponse(item, sharedClusterName));
+        clusterResponse.setHostGroups(getHostGroupViewResponse(hostGroupViews));
         return clusterResponse;
+    }
+
+    private Set<HostGroupViewResponse> getHostGroupViewResponse(List<HostGroupView> hostGroupViews) {
+        return hostGroupViews.stream().map(hgView -> {
+            HostGroupViewResponse hgResponse = new HostGroupViewResponse();
+            hgResponse.setId(hgView.getId());
+            hgResponse.setName(hgView.getName());
+            hgResponse.setMetadata(getHostMetadataViewResponses(hgView.getHostMetadata()));
+            return hgResponse;
+        }).collect(Collectors.toSet());
+    }
+
+    private Set<HostMetadataViewResponse> getHostMetadataViewResponses(Set<HostMetadataView> hostmetadata) {
+        return hostmetadata.stream().map(hm -> {
+            HostMetadataViewResponse response = new HostMetadataViewResponse();
+            response.setId(hm.getId());
+            response.setName(hm.getHostName());
+            response.setState(hm.getHostMetadataState().name());
+            return response;
+        }).collect(Collectors.toSet());
     }
 
     private BlueprintViewResponse getBlueprintViewResponse(StackListItem item) {
