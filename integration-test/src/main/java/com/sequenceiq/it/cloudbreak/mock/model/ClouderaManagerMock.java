@@ -36,6 +36,7 @@ import com.cloudera.api.swagger.model.ApiServiceRef;
 import com.cloudera.api.swagger.model.ApiServiceState;
 import com.cloudera.api.swagger.model.ApiUser2;
 import com.cloudera.api.swagger.model.ApiUser2List;
+import com.cloudera.api.swagger.model.ApiVersionInfo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.it.cloudbreak.mock.AbstractModelMock;
 import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
@@ -121,6 +122,8 @@ public class ClouderaManagerMock extends AbstractModelMock {
 
     public static final String CDP_REMOTE_CONTEXT = "/api/cdp/remoteContext";
 
+    public static final String CM_VERSION = API_ROOT + "/cm/version";
+
     private DynamicRouteStack dynamicRouteStack;
 
     private final Set<String> activeProfiles;
@@ -153,6 +156,7 @@ public class ClouderaManagerMock extends AbstractModelMock {
         listRoles();
         cmConfig();
         updateCmConfig();
+        getCmVersion();
         startManagementService();
         listCommands();
         listActiveCommands();
@@ -395,6 +399,11 @@ public class ClouderaManagerMock extends AbstractModelMock {
     private void updateCmConfig() {
         dynamicRouteStack.put(CONFIG, new ProfileAwareRoute((request, response)
                 -> new ApiConfigList().items(new ArrayList<>()), activeProfiles));
+    }
+
+    private void getCmVersion() {
+        dynamicRouteStack.get(CM_VERSION, new ProfileAwareRoute((request, response)
+                -> new ApiVersionInfo().version("7.0.1"), activeProfiles));
     }
 
     private void getCdpRemoteContext() {
