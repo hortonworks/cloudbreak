@@ -167,6 +167,10 @@
           {
             "name": "tez_container_size",
             "value": "4096"
+          },
+          {
+            "name": "hive_service_config_safety_valve",
+            "value": "<property><name>hive.server2.authentication.spnego.principal</name><value>HTTP/_HOST@CLOUDERA.SITE</value></property><property><name>hive.server2.authentication.spnego.keytab</name><value>hive.keytab</value></property><property><name>hive.hook.proto.file.per.event</name><value>true</value></property>"
           }
         ],
         "roleConfigGroups": [
@@ -247,6 +251,32 @@
           {
             "refName": "zeppelin-ZEPPELIN_SERVER-BASE",
             "roleType": "ZEPPELIN_SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "das",
+        "serviceType": "DAS",
+        "roleConfigGroups": [
+          {
+            "refName": "das-DAS_WEBAPP",
+            "roleType": "DAS_WEBAPP",
+            "base": true,
+            "configs": [
+              {
+                "name": "data_analytics_studio_user_authentication",
+                "value": "KNOX_PROXY"
+              },
+              {
+                "name": "data_analytics_studio_admin_users",
+                "value": "*"
+              }
+            ]
+          },
+          {
+            "refName": "das-DAS_EVENT_PROCESSOR",
+            "roleType": "DAS_EVENT_PROCESSOR",
             "base": true
           }
         ]
