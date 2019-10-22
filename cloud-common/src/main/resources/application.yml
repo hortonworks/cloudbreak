@@ -668,12 +668,13 @@ cb:
         command: "salt-bootstrap version"
         commandVersionPattern: "Version: (.*)"
       - name: stack
-        command: "ls /opt/cloudera/parcels | grep -oP 'CDH-\\K([^-]*)'"
+        command: "cat /var/lib/cloudera-scm-agent/active_parcels.json | jq -r '.CDH'"
+        commandVersionPattern: "(.*)-.*"
         prewarmed: true
       - name: cm
         pkg:
           - name: cloudera-manager-agent
-            pattern: "(.*)-(.*)"
+            pattern: "(.*)-.*"
         prewarmed: true
 
 # configuration for BlueprintPortConfigCollector.java
