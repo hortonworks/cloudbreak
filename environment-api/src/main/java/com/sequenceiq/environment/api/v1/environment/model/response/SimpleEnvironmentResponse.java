@@ -2,7 +2,7 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
-import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialViewResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 
@@ -11,6 +11,16 @@ import io.swagger.annotations.ApiModel;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiModel(value = "SimpleEnvironmentV1Response")
 public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
+
+    private CredentialViewResponse credential;
+
+    public CredentialViewResponse getCredential() {
+        return credential;
+    }
+
+    public void setCredential(CredentialViewResponse credential) {
+        this.credential = credential;
+    }
 
     public static Builder builder() {
         return new Builder();
@@ -29,7 +39,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String cloudPlatform;
 
-        private CredentialResponse credentialResponse;
+        private CredentialViewResponse credentialViewResponse;
 
         private LocationResponse location;
 
@@ -77,8 +87,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
-        public Builder withCredential(CredentialResponse credentialResponse) {
-            this.credentialResponse = credentialResponse;
+        public Builder withCredentialView(CredentialViewResponse credentialResponse) {
+            this.credentialViewResponse = credentialResponse;
             return this;
         }
 
@@ -139,7 +149,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setDescription(description);
             simpleEnvironmentResponse.setRegions(regions);
             simpleEnvironmentResponse.setCloudPlatform(cloudPlatform);
-            simpleEnvironmentResponse.setCredential(credentialResponse);
+            simpleEnvironmentResponse.setCredential(credentialViewResponse);
             simpleEnvironmentResponse.setLocation(location);
             simpleEnvironmentResponse.setNetwork(network);
             simpleEnvironmentResponse.setEnvironmentStatus(environmentStatus);

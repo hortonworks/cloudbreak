@@ -216,6 +216,117 @@ public final class PublicEndpointManagementGrpc {
      }
      return getPollCertificateCreationMethod;
   }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getGenerateManagedDomainNamesMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest,
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse> METHOD_GENERATE_MANAGED_DOMAIN_NAMES = getGenerateManagedDomainNamesMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest,
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse> getGenerateManagedDomainNamesMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest,
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse> getGenerateManagedDomainNamesMethod() {
+    return getGenerateManagedDomainNamesMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest,
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse> getGenerateManagedDomainNamesMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse> getGenerateManagedDomainNamesMethod;
+    if ((getGenerateManagedDomainNamesMethod = PublicEndpointManagementGrpc.getGenerateManagedDomainNamesMethod) == null) {
+      synchronized (PublicEndpointManagementGrpc.class) {
+        if ((getGenerateManagedDomainNamesMethod = PublicEndpointManagementGrpc.getGenerateManagedDomainNamesMethod) == null) {
+          PublicEndpointManagementGrpc.getGenerateManagedDomainNamesMethod = getGenerateManagedDomainNamesMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "publicendpointmanagement.PublicEndpointManagement", "GenerateManagedDomainNames"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new PublicEndpointManagementMethodDescriptorSupplier("GenerateManagedDomainNames"))
+                  .build();
+          }
+        }
+     }
+     return getGenerateManagedDomainNamesMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getSignCertificateMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest,
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse> METHOD_SIGN_CERTIFICATE = getSignCertificateMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest,
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse> getSignCertificateMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest,
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse> getSignCertificateMethod() {
+    return getSignCertificateMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest,
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse> getSignCertificateMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse> getSignCertificateMethod;
+    if ((getSignCertificateMethod = PublicEndpointManagementGrpc.getSignCertificateMethod) == null) {
+      synchronized (PublicEndpointManagementGrpc.class) {
+        if ((getSignCertificateMethod = PublicEndpointManagementGrpc.getSignCertificateMethod) == null) {
+          PublicEndpointManagementGrpc.getSignCertificateMethod = getSignCertificateMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "publicendpointmanagement.PublicEndpointManagement", "SignCertificate"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new PublicEndpointManagementMethodDescriptorSupplier("SignCertificate"))
+                  .build();
+          }
+        }
+     }
+     return getSignCertificateMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getPollCertificateSigningMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest,
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse> METHOD_POLL_CERTIFICATE_SIGNING = getPollCertificateSigningMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest,
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse> getPollCertificateSigningMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest,
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse> getPollCertificateSigningMethod() {
+    return getPollCertificateSigningMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest,
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse> getPollCertificateSigningMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse> getPollCertificateSigningMethod;
+    if ((getPollCertificateSigningMethod = PublicEndpointManagementGrpc.getPollCertificateSigningMethod) == null) {
+      synchronized (PublicEndpointManagementGrpc.class) {
+        if ((getPollCertificateSigningMethod = PublicEndpointManagementGrpc.getPollCertificateSigningMethod) == null) {
+          PublicEndpointManagementGrpc.getPollCertificateSigningMethod = getPollCertificateSigningMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "publicendpointmanagement.PublicEndpointManagement", "PollCertificateSigning"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new PublicEndpointManagementMethodDescriptorSupplier("PollCertificateSigning"))
+                  .build();
+          }
+        }
+     }
+     return getPollCertificateSigningMethod;
+  }
 
   /**
    * Creates a new async stub that supports all call types for the service
@@ -295,6 +406,50 @@ public final class PublicEndpointManagementGrpc {
       asyncUnimplementedUnaryCall(getPollCertificateCreationMethodHelper(), responseObserver);
     }
 
+    /**
+     * <pre>
+     * Takes in a list subdomain patterns as a list with accountId and name of the environment
+     * and returns a map of subdomain pattern and generate domain name/pattern
+     * For example, if workloadSubdomain of provided accountId is `workload-subdomain`,
+     * name of the environment is `env-name` and the supplied array of subdomain patterns
+     * is [ "host-a", "*.mlx", "subdomain.mlx" ], the method would return the result as following:
+     * {
+     *    "host-a": "host-a.env-name.workload-subdomain.cloudera.site",
+     *    "*.mlx": "*.mlx.env-name.workload-subdomain.cloudera.site",
+     *    "subdomain.mlx": "subdomain.mlx.env-name.workload-subdomain.cloudera.site"
+     *  }
+     * </pre>
+     */
+    public void generateManagedDomainNames(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGenerateManagedDomainNamesMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Takes in byte array representing a DER/binary formatted CSR with accountId and name of the environment,
+     * validates the domains in CSR and triggers a workflow to submit it to LetsEncrypt and returns a workflowId
+     * using which a client can poll the workflow's progress and finally get the signed certificate
+     * </pre>
+     */
+    public void signCertificate(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSignCertificateMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Takes in a workflowId representing a workflow in system which tracks the signing of a CSR
+     * If successfully complete, it returns a list of certificates in the trust chain with status as SigningStatus.SUCCESS
+     * In case of error, it returns the status as SigningStatus.FAILED
+     * If the workflow is not yet complete, it returns the status as SigningStatus.IN_PROGRESS
+     * </pre>
+     */
+    public void pollCertificateSigning(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getPollCertificateSigningMethodHelper(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -332,6 +487,27 @@ public final class PublicEndpointManagementGrpc {
                 com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationRequest,
                 com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse>(
                   this, METHODID_POLL_CERTIFICATE_CREATION)))
+          .addMethod(
+            getGenerateManagedDomainNamesMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest,
+                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse>(
+                  this, METHODID_GENERATE_MANAGED_DOMAIN_NAMES)))
+          .addMethod(
+            getSignCertificateMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest,
+                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse>(
+                  this, METHODID_SIGN_CERTIFICATE)))
+          .addMethod(
+            getPollCertificateSigningMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest,
+                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse>(
+                  this, METHODID_POLL_CERTIFICATE_SIGNING)))
           .build();
     }
   }
@@ -409,6 +585,53 @@ public final class PublicEndpointManagementGrpc {
       asyncUnaryCall(
           getChannel().newCall(getPollCertificateCreationMethodHelper(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * Takes in a list subdomain patterns as a list with accountId and name of the environment
+     * and returns a map of subdomain pattern and generate domain name/pattern
+     * For example, if workloadSubdomain of provided accountId is `workload-subdomain`,
+     * name of the environment is `env-name` and the supplied array of subdomain patterns
+     * is [ "host-a", "*.mlx", "subdomain.mlx" ], the method would return the result as following:
+     * {
+     *    "host-a": "host-a.env-name.workload-subdomain.cloudera.site",
+     *    "*.mlx": "*.mlx.env-name.workload-subdomain.cloudera.site",
+     *    "subdomain.mlx": "subdomain.mlx.env-name.workload-subdomain.cloudera.site"
+     *  }
+     * </pre>
+     */
+    public void generateManagedDomainNames(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGenerateManagedDomainNamesMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Takes in byte array representing a DER/binary formatted CSR with accountId and name of the environment,
+     * validates the domains in CSR and triggers a workflow to submit it to LetsEncrypt and returns a workflowId
+     * using which a client can poll the workflow's progress and finally get the signed certificate
+     * </pre>
+     */
+    public void signCertificate(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSignCertificateMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Takes in a workflowId representing a workflow in system which tracks the signing of a CSR
+     * If successfully complete, it returns a list of certificates in the trust chain with status as SigningStatus.SUCCESS
+     * In case of error, it returns the status as SigningStatus.FAILED
+     * If the workflow is not yet complete, it returns the status as SigningStatus.IN_PROGRESS
+     * </pre>
+     */
+    public void pollCertificateSigning(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getPollCertificateSigningMethodHelper(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -478,6 +701,50 @@ public final class PublicEndpointManagementGrpc {
     public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse pollCertificateCreation(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationRequest request) {
       return blockingUnaryCall(
           getChannel(), getPollCertificateCreationMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Takes in a list subdomain patterns as a list with accountId and name of the environment
+     * and returns a map of subdomain pattern and generate domain name/pattern
+     * For example, if workloadSubdomain of provided accountId is `workload-subdomain`,
+     * name of the environment is `env-name` and the supplied array of subdomain patterns
+     * is [ "host-a", "*.mlx", "subdomain.mlx" ], the method would return the result as following:
+     * {
+     *    "host-a": "host-a.env-name.workload-subdomain.cloudera.site",
+     *    "*.mlx": "*.mlx.env-name.workload-subdomain.cloudera.site",
+     *    "subdomain.mlx": "subdomain.mlx.env-name.workload-subdomain.cloudera.site"
+     *  }
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse generateManagedDomainNames(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGenerateManagedDomainNamesMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Takes in byte array representing a DER/binary formatted CSR with accountId and name of the environment,
+     * validates the domains in CSR and triggers a workflow to submit it to LetsEncrypt and returns a workflowId
+     * using which a client can poll the workflow's progress and finally get the signed certificate
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse signCertificate(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSignCertificateMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Takes in a workflowId representing a workflow in system which tracks the signing of a CSR
+     * If successfully complete, it returns a list of certificates in the trust chain with status as SigningStatus.SUCCESS
+     * In case of error, it returns the status as SigningStatus.FAILED
+     * If the workflow is not yet complete, it returns the status as SigningStatus.IN_PROGRESS
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse pollCertificateSigning(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getPollCertificateSigningMethodHelper(), getCallOptions(), request);
     }
   }
 
@@ -554,6 +821,53 @@ public final class PublicEndpointManagementGrpc {
       return futureUnaryCall(
           getChannel().newCall(getPollCertificateCreationMethodHelper(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Takes in a list subdomain patterns as a list with accountId and name of the environment
+     * and returns a map of subdomain pattern and generate domain name/pattern
+     * For example, if workloadSubdomain of provided accountId is `workload-subdomain`,
+     * name of the environment is `env-name` and the supplied array of subdomain patterns
+     * is [ "host-a", "*.mlx", "subdomain.mlx" ], the method would return the result as following:
+     * {
+     *    "host-a": "host-a.env-name.workload-subdomain.cloudera.site",
+     *    "*.mlx": "*.mlx.env-name.workload-subdomain.cloudera.site",
+     *    "subdomain.mlx": "subdomain.mlx.env-name.workload-subdomain.cloudera.site"
+     *  }
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse> generateManagedDomainNames(
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGenerateManagedDomainNamesMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Takes in byte array representing a DER/binary formatted CSR with accountId and name of the environment,
+     * validates the domains in CSR and triggers a workflow to submit it to LetsEncrypt and returns a workflowId
+     * using which a client can poll the workflow's progress and finally get the signed certificate
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse> signCertificate(
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSignCertificateMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Takes in a workflowId representing a workflow in system which tracks the signing of a CSR
+     * If successfully complete, it returns a list of certificates in the trust chain with status as SigningStatus.SUCCESS
+     * In case of error, it returns the status as SigningStatus.FAILED
+     * If the workflow is not yet complete, it returns the status as SigningStatus.IN_PROGRESS
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse> pollCertificateSigning(
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getPollCertificateSigningMethodHelper(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_VERSION = 0;
@@ -561,6 +875,9 @@ public final class PublicEndpointManagementGrpc {
   private static final int METHODID_DELETE_DNS_ENTRY = 2;
   private static final int METHODID_CREATE_CERTIFICATE = 3;
   private static final int METHODID_POLL_CERTIFICATE_CREATION = 4;
+  private static final int METHODID_GENERATE_MANAGED_DOMAIN_NAMES = 5;
+  private static final int METHODID_SIGN_CERTIFICATE = 6;
+  private static final int METHODID_POLL_CERTIFICATE_SIGNING = 7;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -598,6 +915,18 @@ public final class PublicEndpointManagementGrpc {
         case METHODID_POLL_CERTIFICATE_CREATION:
           serviceImpl.pollCertificateCreation((com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse>) responseObserver);
+          break;
+        case METHODID_GENERATE_MANAGED_DOMAIN_NAMES:
+          serviceImpl.generateManagedDomainNames((com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse>) responseObserver);
+          break;
+        case METHODID_SIGN_CERTIFICATE:
+          serviceImpl.signCertificate((com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse>) responseObserver);
+          break;
+        case METHODID_POLL_CERTIFICATE_SIGNING:
+          serviceImpl.pollCertificateSigning((com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -665,6 +994,9 @@ public final class PublicEndpointManagementGrpc {
               .addMethod(getDeleteDnsEntryMethodHelper())
               .addMethod(getCreateCertificateMethodHelper())
               .addMethod(getPollCertificateCreationMethodHelper())
+              .addMethod(getGenerateManagedDomainNamesMethodHelper())
+              .addMethod(getSignCertificateMethodHelper())
+              .addMethod(getPollCertificateSigningMethodHelper())
               .build();
         }
       }

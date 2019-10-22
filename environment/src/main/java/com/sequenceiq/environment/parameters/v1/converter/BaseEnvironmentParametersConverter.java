@@ -3,7 +3,7 @@ package com.sequenceiq.environment.parameters.v1.converter;
 import javax.inject.Inject;
 
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.v1.EnvironmentViewConverter;
+import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto.Builder;

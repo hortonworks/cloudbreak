@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.domain.CredentialView;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.domain.Region;
@@ -26,7 +27,8 @@ public class EnvironmentDto implements Payload {
 
     private String description;
 
-    // TODO: switch to dto
+    private CredentialView credentialView;
+
     private Credential credential;
 
     private String cloudPlatform;
@@ -103,6 +105,14 @@ public class EnvironmentDto implements Payload {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public CredentialView getCredentialView() {
+        return credentialView;
+    }
+
+    public void setCredentialView(CredentialView credentialView) {
+        this.credentialView = credentialView;
     }
 
     public Credential getCredential() {
@@ -283,6 +293,8 @@ public class EnvironmentDto implements Payload {
 
         private String description;
 
+        private CredentialView credentialView;
+
         private Credential credential;
 
         private String cloudPlatform;
@@ -348,6 +360,11 @@ public class EnvironmentDto implements Payload {
 
         public Builder withCredential(Credential credential) {
             this.credential = credential;
+            return this;
+        }
+
+        public Builder withCredentialView(CredentialView credential) {
+            this.credentialView = credential;
             return this;
         }
 
@@ -453,6 +470,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setName(name);
             environmentDto.setDescription(description);
             environmentDto.setCredential(credential);
+            environmentDto.setCredentialView(credentialView);
             environmentDto.setCloudPlatform(cloudPlatform);
             environmentDto.setTelemetry(telemetry);
             environmentDto.setRegions(regions);
