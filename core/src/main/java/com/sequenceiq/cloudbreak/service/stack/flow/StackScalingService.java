@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -58,8 +57,7 @@ public class StackScalingService {
     private enum Msg {
         STACK_SCALING_HOST_DELETED("stack.scaling.host.deleted"),
         STACK_SCALING_HOST_DELETE_FAILED("stack.scaling.host.delete.failed"),
-        STACK_SCALING_HOST_NOT_FOUND("stack.scaling.host.not.found"),
-        STACK_SCALING_BILLING_CHANGED("stack.scaling.billing.changed");
+        STACK_SCALING_HOST_NOT_FOUND("stack.scaling.host.not.found");
 
         private final String code;
 
@@ -112,8 +110,6 @@ public class StackScalingService {
             }
             int nodeCount = instanceGroup.getNodeCount() - nodesRemoved;
             LOGGER.debug("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
-            eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
-                    cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_BILLING_CHANGED.code()));
             return nodeCount;
         });
     }
