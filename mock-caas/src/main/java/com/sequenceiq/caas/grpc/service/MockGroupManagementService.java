@@ -22,7 +22,7 @@ import io.grpc.stub.StreamObserver;
 @Service
 class MockGroupManagementService {
 
-    private static final String ENVIRONMENT_ADMIN_RIGHT = "environments/write";
+    private static final String CM_ADMIN_RIGHT = "environments/adminClouderaManager";
 
     @Inject
     private MockCrnService mockCrnService;
@@ -56,6 +56,7 @@ class MockGroupManagementService {
 
     void getWorkloadAdministrationGroupName(UserManagementProto.GetWorkloadAdministrationGroupNameRequest request,
             StreamObserver<UserManagementProto.GetWorkloadAdministrationGroupNameResponse> responseObserver) {
+        mockCrnService.ensureInternalActor();
         UserManagementProto.GetWorkloadAdministrationGroupNameResponse.Builder respBuilder =
                 UserManagementProto.GetWorkloadAdministrationGroupNameResponse.getDefaultInstance().toBuilder();
         respBuilder.setWorkloadAdministrationGroupName(generateVirtualGroupName(request.getRightName()));
@@ -65,6 +66,7 @@ class MockGroupManagementService {
 
     void setWorkloadAdministrationGroupName(UserManagementProto.SetWorkloadAdministrationGroupNameRequest request,
             StreamObserver<UserManagementProto.SetWorkloadAdministrationGroupNameResponse> responseObserver) {
+        mockCrnService.ensureInternalActor();
         UserManagementProto.SetWorkloadAdministrationGroupNameResponse.Builder respBuilder =
                 UserManagementProto.SetWorkloadAdministrationGroupNameResponse.getDefaultInstance().toBuilder();
         respBuilder.setWorkloadAdministrationGroupName(generateVirtualGroupName(request.getRightName()));
@@ -74,6 +76,7 @@ class MockGroupManagementService {
 
     void deleteWorkloadAdministrationGroupName(UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request,
             StreamObserver<UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> responseObserver) {
+        mockCrnService.ensureInternalActor();
         UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse.Builder respBuilder =
                 UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse.getDefaultInstance().toBuilder();
         responseObserver.onNext(respBuilder.build());
@@ -98,7 +101,7 @@ class MockGroupManagementService {
 
     private Map<String, UserManagementProto.Group> createVirtualGroups(String accountId) {
         Map<String, UserManagementProto.Group> groups = new HashMap<>();
-        UserManagementProto.Group group = createGroup(accountId, generateVirtualGroupName(ENVIRONMENT_ADMIN_RIGHT));
+        UserManagementProto.Group group = createGroup(accountId, generateVirtualGroupName(CM_ADMIN_RIGHT));
         groups.put(group.getCrn(), group);
         return groups;
     }
