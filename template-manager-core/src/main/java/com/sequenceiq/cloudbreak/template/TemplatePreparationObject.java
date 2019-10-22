@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -78,6 +79,8 @@ public class TemplatePreparationObject {
 
     private final Map<String, Collection<ClusterExposedServiceView>> exposedServices;
 
+    private final StackType stackType;
+
     private TemplatePreparationObject(Builder builder) {
         cloudPlatform = builder.cloudPlatform;
         rdsConfigs = builder.rdsConfigs.stream().collect(Collectors.toMap(
@@ -101,6 +104,7 @@ public class TemplatePreparationObject {
         defaultTags = builder.defaultTags;
         productDetailsView = builder.productDetailsView;
         exposedServices = builder.exposedServices;
+        stackType = builder.stackType;
     }
 
     public Stream<HostgroupView> getHostGroupsWithComponent(String component) {
@@ -190,6 +194,10 @@ public class TemplatePreparationObject {
         return exposedServices;
     }
 
+    public StackType getStackType() {
+        return stackType;
+    }
+
     public static class Builder {
 
         private CloudPlatform cloudPlatform;
@@ -227,6 +235,8 @@ public class TemplatePreparationObject {
         private Optional<PlacementView> placementView = Optional.empty();
 
         private ProductDetailsView productDetailsView;
+
+        private StackType stackType;
 
         private Map<String, Collection<ClusterExposedServiceView>> exposedServices = new HashMap<>();
 
@@ -349,6 +359,11 @@ public class TemplatePreparationObject {
 
         public Builder withDefaultTags(Map<String, String> defaultTags) {
             this.defaultTags = defaultTags == null ? new HashMap<>() : defaultTags;
+            return this;
+        }
+
+        public Builder withStackType(StackType stackType) {
+            this.stackType = stackType;
             return this;
         }
 
