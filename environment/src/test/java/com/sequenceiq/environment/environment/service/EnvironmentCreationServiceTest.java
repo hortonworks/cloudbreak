@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -71,9 +70,6 @@ class EnvironmentCreationServiceTest {
 
     @MockBean
     private NetworkService networkService;
-
-    @MockBean
-    private GrpcUmsClient grpcUmsClient;
 
     @Inject
     private EnvironmentCreationService environmentCreationServiceUnderTest;
