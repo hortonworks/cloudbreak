@@ -57,7 +57,7 @@ public class TelemetryConverter {
                 loggingResponse = new LoggingResponse();
                 loggingResponse.setStorageLocation(logging.getStorageLocation());
                 loggingResponse.setS3(logging.getS3());
-                loggingResponse.setWasb(logging.getWasb());
+                loggingResponse.setAdlsGen2(logging.getAdlsGen2());
             }
             if (telemetry.getWorkloadAnalytics() != null) {
                 WorkloadAnalytics workloadAnalytics = telemetry.getWorkloadAnalytics();
@@ -83,7 +83,7 @@ public class TelemetryConverter {
                 logging = new Logging();
                 logging.setStorageLocation(loggingRequest.getStorageLocation());
                 logging.setS3(loggingRequest.getS3());
-                logging.setWasb(loggingRequest.getWasb());
+                logging.setAdlsGen2(loggingRequest.getAdlsGen2());
             }
             if (request.getWorkloadAnalytics() != null) {
                 WorkloadAnalyticsRequest workloadAnalyticsRequest = request.getWorkloadAnalytics();
@@ -122,7 +122,7 @@ public class TelemetryConverter {
                 loggingRequest = new LoggingRequest();
                 loggingRequest.setStorageLocation(loggingResponse.getStorageLocation());
                 loggingRequest.setS3(loggingResponse.getS3());
-                loggingRequest.setWasb(loggingResponse.getWasb());
+                loggingRequest.setAdlsGen2(loggingResponse.getAdlsGen2());
             }
             telemetryRequest.setLogging(loggingRequest);
             telemetryRequest.setReportDeploymentLogs(response.getReportDeploymentLogs());
@@ -175,7 +175,7 @@ public class TelemetryConverter {
             if (logging != null) {
                 LoggingRequest loggingRequest = new LoggingRequest();
                 loggingRequest.setS3(logging.getS3());
-                loggingRequest.setWasb(logging.getWasb());
+                loggingRequest.setAdlsGen2(logging.getAdlsGen2());
                 loggingRequest.setStorageLocation(logging.getStorageLocation());
                 loggingRequest.setAttributes(logging.getAttributes());
                 telemetryRequest.setLogging(loggingRequest);

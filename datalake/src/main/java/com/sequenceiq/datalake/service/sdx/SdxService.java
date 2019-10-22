@@ -298,7 +298,7 @@ public class SdxService implements ResourceIdProvider {
             TelemetryRequest telemetryRequest = new TelemetryRequest();
             LoggingRequest loggingRequest = new LoggingRequest();
             loggingRequest.setS3(environment.getTelemetry().getLogging().getS3());
-            loggingRequest.setWasb(environment.getTelemetry().getLogging().getWasb());
+            loggingRequest.setAdlsGen2(environment.getTelemetry().getLogging().getAdlsGen2());
             loggingRequest.setStorageLocation(environment.getTelemetry().getLogging().getStorageLocation());
             telemetryRequest.setLogging(loggingRequest);
             telemetryRequest.setReportDeploymentLogs(

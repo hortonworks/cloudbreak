@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
@@ -41,7 +42,7 @@ public class TelemetryApiConverter {
                 logging = new EnvironmentLogging();
                 logging.setStorageLocation(loggingRequest.getStorageLocation());
                 logging.setS3(convertS3(loggingRequest.getS3()));
-                logging.setWasb(convertWasb(loggingRequest.getWasb()));
+                logging.setAdlsGen2(convertAdlsV2(loggingRequest.getAdlsGen2()));
             }
             if (request.getWorkloadAnalytics() != null) {
                 WorkloadAnalyticsRequest waRequest = request.getWorkloadAnalytics();
@@ -92,7 +93,7 @@ public class TelemetryApiConverter {
                 loggingResponse = new LoggingResponse();
                 loggingResponse.setStorageLocation(logging.getStorageLocation());
                 loggingResponse.setS3(convertS3(logging.getS3()));
-                loggingResponse.setWasb(convertWasb(logging.getWasb()));
+                loggingResponse.setAdlsGen2(convertAdlsV2(logging.getAdlsGen2()));
             }
             if (telemetry.getWorkloadAnalytics() != null) {
                 EnvironmentWorkloadAnalytics workloadAnalytics = telemetry.getWorkloadAnalytics();
@@ -119,14 +120,15 @@ public class TelemetryApiConverter {
         return s3CloudStorageV1Parameters;
     }
 
-    private WasbCloudStorageV1Parameters convertWasb(WasbCloudStorageParameters wasb) {
-        WasbCloudStorageV1Parameters s3CloudStorageV1Parameters = null;
-        if (wasb != null) {
-            s3CloudStorageV1Parameters = new WasbCloudStorageV1Parameters();
-            s3CloudStorageV1Parameters.setAccountKey(wasb.getAccountKey());
-            s3CloudStorageV1Parameters.setAccountName(wasb.getAccountName());
-            s3CloudStorageV1Parameters.setSecure(wasb.isSecure());
+    private AdlsGen2CloudStorageV1Parameters convertAdlsV2(AdlsGen2CloudStorageV1Parameters adlsV2) {
+        AdlsGen2CloudStorageV1Parameters adlsGen2CloudStorageV1Parameters = null;
+        if (adlsV2 != null) {
+            adlsGen2CloudStorageV1Parameters = new AdlsGen2CloudStorageV1Parameters();
+            adlsGen2CloudStorageV1Parameters.setAccountKey(adlsV2.getAccountKey());
+            adlsGen2CloudStorageV1Parameters.setAccountName(adlsV2.getAccountName());
+            adlsGen2CloudStorageV1Parameters.setManagedIdentity(adlsV2.getManagedIdentity());
+            adlsGen2CloudStorageV1Parameters.setSecure(adlsV2.isSecure());
         }
-        return s3CloudStorageV1Parameters;
+        return adlsGen2CloudStorageV1Parameters;
     }
 }

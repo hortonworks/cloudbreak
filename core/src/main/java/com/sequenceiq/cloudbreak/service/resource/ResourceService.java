@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -14,9 +15,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class ResourceService {
@@ -37,6 +38,10 @@ public class ResourceService {
         });
 
         return list;
+    }
+
+    public Set<Resource> getNotInstanceRelatedByStackId(Long stackId) {
+        return repository.findAllByStackIdNotInstanceOrDisk(stackId);
     }
 
     public Collection<Resource> getAllByStackId(Long stackId) {

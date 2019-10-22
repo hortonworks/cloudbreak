@@ -154,6 +154,7 @@ dependencyManagement {
 }
 
 dependencies {
+  compile group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: okhttpVersion
   compile group: 'com.google.code.gson',               name: 'gson'
   compile group: 'org.codehaus.groovy',                name: 'groovy-all'
   compile group: 'com.fasterxml.jackson.core',    name: 'jackson-databind'

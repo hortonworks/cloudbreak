@@ -18,6 +18,8 @@ repositories {
 }
 
 dependencies {
+  implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                              version: okhttpVersion
+
   implementation     group: 'com.google.code.gson',      name: 'gson'
   implementation     group: 'dnsjava',                   name: 'dnsjava'
   implementation     group: 'io.micrometer',             name: 'micrometer-registry-prometheus'

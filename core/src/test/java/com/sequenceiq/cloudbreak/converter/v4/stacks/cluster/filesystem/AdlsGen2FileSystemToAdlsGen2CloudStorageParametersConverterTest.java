@@ -33,9 +33,9 @@ public class AdlsGen2FileSystemToAdlsGen2CloudStorageParametersConverterTest {
     }
 
     private AdlsGen2FileSystem createAdlsGen2FileSystem() {
-        AdlsGen2FileSystem wasb = new AdlsGen2FileSystem();
-        wasb.setAccountKey(TEST_ACCOUNT_KEY);
-        wasb.setAccountName(TEST_ACCOUNT_NAME);
-        return wasb;
+        AdlsGen2FileSystem adlsGen2FileSystem = new AdlsGen2FileSystem();
+        adlsGen2FileSystem.setAccountKey(TEST_ACCOUNT_KEY);
+        adlsGen2FileSystem.setAccountName(TEST_ACCOUNT_NAME);
+        return adlsGen2FileSystem;
     }
 }

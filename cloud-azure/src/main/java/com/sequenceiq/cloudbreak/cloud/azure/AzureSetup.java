@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView.TEN
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.security.InvalidKeyException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,10 +19,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.microsoft.azure.AzureEnvironment;
+import com.microsoft.azure.PagedList;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.microsoft.azure.management.datalake.store.DataLakeStoreAccountManagementClient;
 import com.microsoft.azure.management.datalake.store.implementation.DataLakeStoreAccountManagementClientImpl;
-import com.microsoft.azure.management.datalake.store.models.DataLakeStoreAccount;
+import com.microsoft.azure.management.datalake.store.models.DataLakeStoreAccountBasic;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
@@ -175,8 +177,8 @@ public class AzureSetup implements Setup {
     public void validateFileSystem(CloudCredential credential, SpiFileSystem spiFileSystem) throws Exception {
         FileSystemType fileSystemType = spiFileSystem.getType();
         List<CloudFileSystemView> cloudFileSystems = spiFileSystem.getCloudFileSystems();
-        if (cloudFileSystems.size() > 1) {
-            throw new CloudConnectorException("Multiple file systems (identities) are not yet supported on Azure!");
+        if (cloudFileSystems.size() > 2) {
+            throw new CloudConnectorException("More than 2 file systems (identities) are not yet supported on Azure!");
         }
         if (cloudFileSystems.isEmpty()) {
             LOGGER.info("No filesystem was configured.");
@@ -203,10 +205,16 @@ public class AzureSetup implements Setup {
         ApplicationTokenCredentials creds = new ApplicationTokenCredentials(clientId, tenantId, clientSecret, AzureEnvironment.AZURE);
         DataLakeStoreAccountManagementClient adlsClient = new DataLakeStoreAccountManagementClientImpl(creds);
         adlsClient.withSubscriptionId(subscriptionId);
-        List<DataLakeStoreAccount> dataLakeStoreAccounts = adlsClient.accounts().list();
+        PagedList<DataLakeStoreAccountBasic> dataLakeStoreAccountPagedList = adlsClient.accounts().list();
         boolean validAccountname = false;
 
-        for (DataLakeStoreAccount account : dataLakeStoreAccounts) {
+        List<DataLakeStoreAccountBasic> dataLakeStoreAccountList = new ArrayList<>();
+            while (dataLakeStoreAccountPagedList.hasNextPage()) {
+                dataLakeStoreAccountList.addAll(dataLakeStoreAccountPagedList);
+                dataLakeStoreAccountPagedList.loadNextPage();
+            }
+
+            for (DataLakeStoreAccountBasic account : dataLakeStoreAccountList) {
             if (account.name().equalsIgnoreCase(accountName)) {
                 validAccountname = true;
                 break;

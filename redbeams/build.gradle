@@ -18,6 +18,8 @@ repositories {
 }
 
 dependencies {
+  compile           group: 'com.squareup.okhttp3',       name: 'okhttp',                     version: okhttpVersion
+
   compile            group: 'org.yaml',                  name: 'snakeyaml'
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
   compile            group: 'net.bytebuddy',             name: 'byte-buddy', version: '1.9.12'

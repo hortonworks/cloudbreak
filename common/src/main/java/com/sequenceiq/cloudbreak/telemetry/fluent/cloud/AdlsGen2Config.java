@@ -1,22 +1,22 @@
 package com.sequenceiq.cloudbreak.telemetry.fluent.cloud;
 
-public class WasbConfig extends CloudStorageConfig {
+public class AdlsGen2Config extends CloudStorageConfig {
 
-    private final String storageContainer;
+    private final String fileSystem;
 
     private final String account;
 
     private final boolean secure;
 
-    public WasbConfig(String folderPrefix, String storageContainer, String account, boolean secure) {
+    public AdlsGen2Config(String folderPrefix, String fileSystem, String account, boolean secure) {
         super(folderPrefix);
-        this.storageContainer = storageContainer;
+        this.fileSystem = fileSystem;
         this.account = account;
         this.secure = secure;
     }
 
-    public String getStorageContainer() {
-        return storageContainer;
+    public String getFileSystem() {
+        return fileSystem;
     }
 
     public String getAccount() {

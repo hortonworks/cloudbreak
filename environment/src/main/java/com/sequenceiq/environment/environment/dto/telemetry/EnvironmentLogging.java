@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.dto.telemetry;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentLogging extends CommonTelemetryParams {
@@ -9,7 +10,7 @@ public class EnvironmentLogging extends CommonTelemetryParams {
 
     private S3CloudStorageParameters s3;
 
-    private WasbCloudStorageParameters wasb;
+    private AdlsGen2CloudStorageV1Parameters adlsGen2;
 
     public String getStorageLocation() {
         return storageLocation;
@@ -27,11 +28,11 @@ public class EnvironmentLogging extends CommonTelemetryParams {
         this.s3 = s3;
     }
 
-    public WasbCloudStorageParameters getWasb() {
-        return wasb;
+    public AdlsGen2CloudStorageV1Parameters getAdlsGen2() {
+        return adlsGen2;
     }
 
-    public void setWasb(WasbCloudStorageParameters wasb) {
-        this.wasb = wasb;
+    public void setAdlsGen2(AdlsGen2CloudStorageV1Parameters adlsGen2) {
+        this.adlsGen2 = adlsGen2;
     }
 }

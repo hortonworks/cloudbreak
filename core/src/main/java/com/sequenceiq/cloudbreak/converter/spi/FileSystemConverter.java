@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.AdlsGen2Identity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.S3Identity;
@@ -58,6 +59,8 @@ public class FileSystemConverter {
                             return cloudIdentityToS3View(cloudIdentity);
                         } else if (source.getType().isWasb()) {
                             return cloudIdentityToWasbView(cloudIdentity);
+                        } else if (source.getType().isAdlsGen2()) {
+                            return cloudIdentityToAdlsGen2View(cloudIdentity);
                         }
                         return null;
                     })
@@ -85,6 +88,17 @@ public class FileSystemConverter {
         cloudWasbView.setSecure(cloudIdentity.getWasbIdentity().isSecure());
         cloudWasbView.setResourceGroupName(cloudIdentity.getWasbIdentity().getStorageContainerName());
         return cloudWasbView;
+    }
+
+    private CloudFileSystemView cloudIdentityToAdlsGen2View(CloudIdentity cloudIdentity) {
+        CloudAdlsGen2View cloudAdlsGen2View = new CloudAdlsGen2View(cloudIdentity.getIdentityType());
+        AdlsGen2Identity adlsGen2Identity = cloudIdentity.getAdlsGen2Identity();
+        if (Objects.isNull(adlsGen2Identity)) {
+            LOGGER.warn("ADLS Gen2 managed identity with type {} is null.", cloudIdentity.getIdentityType());
+            return null;
+        }
+        cloudAdlsGen2View.setManagedIdentity(adlsGen2Identity.getManagedIdentity());
+        return cloudAdlsGen2View;
     }
 
     private List<CloudFileSystemView> legacyConvertFromConfiguration(FileSystem source) {
@@ -151,6 +165,7 @@ public class FileSystemConverter {
         cloudAdlsGen2View.setAccountKey(source.getAccountKey());
         cloudAdlsGen2View.setResourceGroupName(source.getStorageContainerName());
         cloudAdlsGen2View.setSecure(source.isSecure());
+        cloudAdlsGen2View.setManagedIdentity(source.getManagedIdentity());
         return cloudAdlsGen2View;
     }
 }

@@ -8,8 +8,8 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -20,7 +20,7 @@ public class CloudStorageFolderResolverServiceTest {
     @Before
     public void setUp() {
         underTest = new CloudStorageFolderResolverService(new S3ConfigGenerator(),
-                new WasbConfigGenerator());
+                new AdlsGen2ConfigGenerator());
     }
 
     @Test
@@ -35,31 +35,31 @@ public class CloudStorageFolderResolverServiceTest {
     }
 
     @Test
-    public void testUpdateStorageLocationWasb() {
+    public void testUpdateStorageLocationAdlsGen2() {
         // GIVEN
         Telemetry telemetry = createTelemetry();
         telemetry.getLogging().setS3(null);
-        telemetry.getLogging().setWasb(new WasbCloudStorageV1Parameters());
-        telemetry.getLogging().setStorageLocation("wasb://mycontainer");
+        telemetry.getLogging().setAdlsGen2(new AdlsGen2CloudStorageV1Parameters());
+        telemetry.getLogging().setStorageLocation("abfs://mycontainer");
         // WHEN
         underTest.updateStorageLocation(telemetry, FluentClusterType.DATAHUB.value(), "mycluster",
                 "crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         // THEN
-        assertEquals("wasb://mycontainer@null.blob.core.windows.net/cluster-logs/datahub/mycluster_12345", telemetry.getLogging().getStorageLocation());
+        assertEquals("abfs://mycontainer@null.dfs.core.windows.net/cluster-logs/datahub/mycluster_12345", telemetry.getLogging().getStorageLocation());
     }
 
     @Test
-    public void testUpdateStorageLocationWasbWithoutScheme() {
+    public void testUpdateStorageLocationAdlsGen2WithoutScheme() {
         // GIVEN
         Telemetry telemetry = createTelemetry();
         telemetry.getLogging().setS3(null);
-        telemetry.getLogging().setWasb(new WasbCloudStorageV1Parameters());
-        telemetry.getLogging().setStorageLocation("wasb://mycontainer");
+        telemetry.getLogging().setAdlsGen2(new AdlsGen2CloudStorageV1Parameters());
+        telemetry.getLogging().setStorageLocation("abfs://mycontainer");
         // WHEN
         underTest.updateStorageLocation(telemetry, FluentClusterType.DATAHUB.value(), "mycluster",
                 "crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         // THEN
-        assertEquals("wasb://mycontainer@null.blob.core.windows.net/cluster-logs/datahub/mycluster_12345", telemetry.getLogging().getStorageLocation());
+        assertEquals("abfs://mycontainer@null.dfs.core.windows.net/cluster-logs/datahub/mycluster_12345", telemetry.getLogging().getStorageLocation());
     }
 
     @Test

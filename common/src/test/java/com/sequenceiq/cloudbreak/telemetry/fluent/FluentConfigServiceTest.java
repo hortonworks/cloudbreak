@@ -8,10 +8,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
-import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.WasbConfigGenerator;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -25,7 +25,7 @@ public class FluentConfigServiceTest {
 
     @Before
     public void setUp() {
-        underTest = new FluentConfigService(new S3ConfigGenerator(), new WasbConfigGenerator());
+        underTest = new FluentConfigService(new S3ConfigGenerator(), new AdlsGen2ConfigGenerator());
     }
 
     @Test
@@ -101,13 +101,13 @@ public class FluentConfigServiceTest {
     }
 
     @Test
-    public void testCreateFluentConfigWithWasbPath() {
+    public void testCreateFluentConfigWithAdlsGen2Path() {
         // GIVEN
         Logging logging = new Logging();
-        logging.setStorageLocation("wasb://mycontainer@myaccount.blob.core.windows.net");
-        WasbCloudStorageV1Parameters wasbParams = new WasbCloudStorageV1Parameters();
-        wasbParams.setAccountKey("myAccountKey");
-        logging.setWasb(wasbParams);
+        logging.setStorageLocation("abfs://mycontainer@myaccount.dfs.core.windows.net");
+        AdlsGen2CloudStorageV1Parameters parameters = new AdlsGen2CloudStorageV1Parameters();
+        parameters.setAccountKey("myAccountKey");
+        logging.setAdlsGen2(parameters);
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN
@@ -122,14 +122,14 @@ public class FluentConfigServiceTest {
     }
 
     @Test
-    public void testCreateFluentConfigWithFullWasbPath() {
+    public void testCreateFluentConfigWithFullAdlsGen2Path() {
         // GIVEN
         Logging logging = new Logging();
-        logging.setStorageLocation("wasb://mycontainer@myaccount.blob.core.windows.net/my/custom/path");
-        WasbCloudStorageV1Parameters wasbParams = new WasbCloudStorageV1Parameters();
-        wasbParams.setAccountKey("myAccountKey");
-        wasbParams.setAccountName("myAccount");
-        logging.setWasb(wasbParams);
+        logging.setStorageLocation("abfs://mycontainer@myaccount.dfs.core.windows.net/my/custom/path");
+        AdlsGen2CloudStorageV1Parameters parameters = new AdlsGen2CloudStorageV1Parameters();
+        parameters.setAccountKey("myAccountKey");
+        parameters.setAccountName("myAccount");
+        logging.setAdlsGen2(parameters);
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN
@@ -144,13 +144,13 @@ public class FluentConfigServiceTest {
     }
 
     @Test
-    public void testCreateFluentConfigWithFullWasbPathWithContainer() {
+    public void testCreateFluentConfigWithFullAdlsGen2PathWithContainer() {
         // GIVEN
         Logging logging = new Logging();
-        logging.setStorageLocation("wasb://mycontainer/my/custom/path@myaccount.blob.core.windows.net");
-        WasbCloudStorageV1Parameters wasbParams = new WasbCloudStorageV1Parameters();
-        wasbParams.setAccountKey("myAccountKey");
-        logging.setWasb(wasbParams);
+        logging.setStorageLocation("abfs://mycontainer/my/custom/path@myaccount.dfs.core.windows.net");
+        AdlsGen2CloudStorageV1Parameters parameters = new AdlsGen2CloudStorageV1Parameters();
+        parameters.setAccountKey("myAccountKey");
+        logging.setAdlsGen2(parameters);
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN
@@ -167,10 +167,10 @@ public class FluentConfigServiceTest {
     public void testCreateFluentConfigWithoutScheme() {
         // GIVEN
         Logging logging = new Logging();
-        logging.setStorageLocation("mycontainer/cluster-logs/datahub/cl1@myaccount.blob.core.windows.net");
-        WasbCloudStorageV1Parameters wasbParams = new WasbCloudStorageV1Parameters();
-        wasbParams.setAccountKey("myAccountKey");
-        logging.setWasb(wasbParams);
+        logging.setStorageLocation("mycontainer/cluster-logs/datahub/cl1@myaccount.dfs.core.windows.net");
+        AdlsGen2CloudStorageV1Parameters parameters = new AdlsGen2CloudStorageV1Parameters();
+        parameters.setAccountKey("myAccountKey");
+        logging.setAdlsGen2(parameters);
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN
@@ -254,7 +254,7 @@ public class FluentConfigServiceTest {
         // GIVEN
         Logging logging = new Logging();
         logging.setStorageLocation(null);
-        logging.setWasb(new WasbCloudStorageV1Parameters());
+        logging.setAdlsGen2(new AdlsGen2CloudStorageV1Parameters());
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN
@@ -266,10 +266,10 @@ public class FluentConfigServiceTest {
     public void testCreateFluentConfigWithDoublePath() {
         // GIVEN
         Logging logging = new Logging();
-        logging.setStorageLocation("wasb://mycontainer/my/custom/path@myaccount.blob.core.windows.net/my/custom/path");
-        WasbCloudStorageV1Parameters wasbParams = new WasbCloudStorageV1Parameters();
-        wasbParams.setAccountKey("myAccountKey");
-        logging.setWasb(wasbParams);
+        logging.setStorageLocation("abfs://mycontainer/my/custom/path@myaccount.dfs.core.windows.net/my/custom/path");
+        AdlsGen2CloudStorageV1Parameters parameters = new AdlsGen2CloudStorageV1Parameters();
+        parameters.setAccountKey("myAccountKey");
+        logging.setAdlsGen2(parameters);
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN

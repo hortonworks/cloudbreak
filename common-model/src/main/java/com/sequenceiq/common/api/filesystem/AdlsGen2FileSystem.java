@@ -18,6 +18,8 @@ public class AdlsGen2FileSystem extends BaseFileSystem {
 
     private String storageContainerName;
 
+    private String managedIdentity;
+
     private boolean secure;
 
     public String getAccountKey() {
@@ -52,6 +54,14 @@ public class AdlsGen2FileSystem extends BaseFileSystem {
         this.secure = secure;
     }
 
+    public String getManagedIdentity() {
+        return managedIdentity;
+    }
+
+    public void setManagedIdentity(String managedIdentity) {
+        this.managedIdentity = managedIdentity;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -64,11 +74,12 @@ public class AdlsGen2FileSystem extends BaseFileSystem {
         return secure == that.secure
                 && Objects.equals(accountKey, that.accountKey)
                 && Objects.equals(accountName, that.accountName)
-                && Objects.equals(storageContainerName, that.storageContainerName);
+                && Objects.equals(storageContainerName, that.storageContainerName)
+                && Objects.equals(managedIdentity, that.managedIdentity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountKey, accountName, storageContainerName, secure);
+        return Objects.hash(accountKey, accountName, storageContainerName, secure, managedIdentity);
     }
 }

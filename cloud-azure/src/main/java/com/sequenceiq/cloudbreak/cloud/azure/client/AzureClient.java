@@ -18,6 +18,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -30,14 +31,16 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.Disk;
 import com.microsoft.azure.management.compute.DiskSkuTypes;
+import com.microsoft.azure.management.compute.DiskStorageAccountTypes;
 import com.microsoft.azure.management.compute.OperatingSystemStateTypes;
 import com.microsoft.azure.management.compute.PowerState;
-import com.microsoft.azure.management.compute.StorageAccountTypes;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
 import com.microsoft.azure.management.compute.VirtualMachineDataDisk;
 import com.microsoft.azure.management.compute.VirtualMachineInstanceView;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
+import com.microsoft.azure.management.graphrbac.RoleAssignment;
+import com.microsoft.azure.management.msi.Identity;
 import com.microsoft.azure.management.network.LoadBalancer;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkInterface;
@@ -55,6 +58,7 @@ import com.microsoft.azure.management.resources.ResourceGroups;
 import com.microsoft.azure.management.resources.fluentcore.arm.AvailabilityZoneId;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
+import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.ProvisioningState;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azure.management.storage.StorageAccount.DefinitionStages.WithCreate;
@@ -238,6 +242,13 @@ public class AzureClient {
         return handleAuthException(() -> azure.storageAccounts().getByResourceGroup(resourceGroup, storageName));
     }
 
+    public Optional<StorageAccount> getStorageAccount(String storageName, Kind accountKind) {
+        return handleAuthException(() -> azure.storageAccounts().list().stream()
+                .filter(account -> account.kind().equals(accountKind)
+                        && account.name().equalsIgnoreCase(storageName))
+                .findAny());
+    }
+
     public void deleteContainerInStorage(String resourceGroup, String storageName, String containerName) {
         LOGGER.debug("delete container: RG={}, storageName={}, containerName={}", resourceGroup, storageName, containerName);
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
@@ -311,7 +322,7 @@ public class AzureClient {
     }
 
     public DiskSkuTypes convertAzureDiskTypeToDiskSkuTypes(AzureDiskType diskType) {
-        return Objects.nonNull(diskType) ? DiskSkuTypes.fromStorageAccountType(StorageAccountTypes.fromString(diskType.value())) : DiskSkuTypes.STANDARD_LRS;
+        return Objects.nonNull(diskType) ? DiskSkuTypes.fromStorageAccountType(DiskStorageAccountTypes.fromString(diskType.value())) : DiskSkuTypes.STANDARD_LRS;
     }
 
     public void createContainerInStorage(String resourceGroup, String storageName, String containerName) {
@@ -639,5 +650,34 @@ public class AzureClient {
             ipList.add(publicIpAddress.ipAddress());
         }
         return ipList;
+    }
+
+    public PagedList<Identity> listIdentities() {
+        return handleAuthException(() -> azure.identities().list());
+    }
+
+    public List<Identity> listIdentitiesByRoleAssignement(String roleAssignmentScopeId) {
+        PagedList<Identity> identityList = listIdentities();
+        PagedList<RoleAssignment> roleAssignments = listIdentityRoleAssignmentsByScopeId(roleAssignmentScopeId);
+        return identityList.stream().filter(
+                identity -> roleAssignments.stream()
+                .anyMatch(roleAssignment -> roleAssignment.principalId() != null &&
+                        roleAssignment.principalId().equalsIgnoreCase(identity.principalId())))
+                        .collect(Collectors.toList());
+    }
+
+    public Identity getIdentityById(String id) {
+        return handleAuthException(() -> azure.identities().getById(id));
+    }
+
+    public PagedList<RoleAssignment> listIdentityRoleAssignmentsByScopeId(String scopeId) {
+        return handleAuthException(() -> azure.identities().manager()).graphRbacManager().roleAssignments().listByScope(scopeId);
+    }
+
+    public boolean checkIdentityRoleAssignement(String identityId, String scopeId) {
+        Identity identity = getIdentityById(identityId);
+        PagedList<RoleAssignment> roleAssignments = listIdentityRoleAssignmentsByScopeId(scopeId);
+        return roleAssignments.stream().anyMatch(roleAssignment -> roleAssignment.principalId() != null &&
+                roleAssignment.principalId().equalsIgnoreCase(identity.principalId()));
     }
 }

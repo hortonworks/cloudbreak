@@ -60,12 +60,6 @@ public class KerberosMgmtV1Service {
 
     private static final String PRIVILEGE_DOES_NOT_EXIST = "At least one privilege in the role request does not exist.";
 
-    private static final String IPA_STACK_NOT_FOUND = "Stack for IPA server not found.";
-
-    private static final int NOT_FOUND_ERROR_CODE = 4001;
-
-    private static final int DUPLICATE_ENTRY_ERROR_CODE = 4002;
-
     @Inject
     private StackService stackService;
 
@@ -324,7 +318,7 @@ public class KerberosMgmtV1Service {
         try {
             service = ipaClient.addServiceAlias(canonicalPrincipal, aliasPrincipal);
         } catch (FreeIpaClientException e) {
-            if (!KerberosMgmtUtil.isDuplicateEntryException(e)) {
+            if (!KerberosMgmtUtil.isExceptionWithErrorCode(e, Set.of(KerberosMgmtUtil.NOT_MAPPED_ERROR_CODE, KerberosMgmtUtil.DUPLICATE_ENTRY_ERROR_CODE))) {
                 throw e;
             }
             service = ipaClient.showService(canonicalPrincipal);
