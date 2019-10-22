@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
@@ -40,6 +42,8 @@ import com.sequenceiq.environment.parameters.service.ParametersService;
 public class EnvironmentCreationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentCreationService.class);
+
+    private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     private final EnvironmentService environmentService;
 
@@ -92,11 +96,8 @@ public class EnvironmentCreationService {
         validateTunnel(creationDto.getCreator(), creationDto.getExperimentalFeatures().getTunnel());
         Environment environment = initializeEnvironment(creationDto);
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
-        String workloadAdministrationGroupName = grpcUmsClient.setWorkloadAdministrationGroupName(creationDto.getCreator(), creationDto.getAccountId(),
-                Optional.empty(), "environments/write", environment.getResourceCrn());
-        LOGGER.info("Configured workloadAdministrationGroupName: {}", workloadAdministrationGroupName);
+        String workloadAdministrationGroupName = createAdminGroup(creationDto, environment.getResourceCrn());
         environmentService.setAdminGroupName(environment, workloadAdministrationGroupName);
-
         CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
         validateCreation(creationDto, environment, cloudRegions);
         Map<String, CloudSubnet> subnetMetas = networkService.retrieveSubnetMetadata(environment, creationDto.getNetwork());
@@ -114,6 +115,20 @@ public class EnvironmentCreationService {
         if (!entitlementService.ccmEnabled(userCrn) && Tunnel.CCM.equals(tunnel)) {
             throw new BadRequestException("Reverse SSH tunnel is not enabled for this account.");
         }
+    }
+
+    private String createAdminGroup(EnvironmentCreationDto creationDto, String envCrn) {
+        String workloadAdministrationGroupName = null;
+        if (StringUtils.isEmpty(creationDto.getAdminGroupName())) {
+            workloadAdministrationGroupName = grpcUmsClient.setWorkloadAdministrationGroupName(IAM_INTERNAL_ACTOR_CRN, creationDto.getAccountId(),
+                    Optional.empty(), "environments/adminClouderaManager", envCrn);
+            LOGGER.info("Created workloadAdministrationGroupName: {}", workloadAdministrationGroupName);
+        } else {
+            // To keep backward compatibility, if somebody passes the group name, then we shall just use it
+            workloadAdministrationGroupName = creationDto.getAdminGroupName();
+            LOGGER.info("User has defined aadmin group: {}", workloadAdministrationGroupName);
+        }
+        return workloadAdministrationGroupName;
     }
 
     private void validateNetworkRequest(Environment environment, NetworkDto network, Map<String, CloudSubnet> subnetMetas) {

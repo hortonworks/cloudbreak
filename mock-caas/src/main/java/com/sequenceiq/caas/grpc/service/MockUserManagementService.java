@@ -79,6 +79,8 @@ import io.grpc.stub.StreamObserver;
 @Service
 public class MockUserManagementService extends UserManagementGrpc.UserManagementImplBase {
 
+    private static final String ENV_ACCESS_RIGHT = "environments/accessEnvironment";
+
     private static final MacSigner SIGNATURE_VERIFIER = new MacSigner("titok");
 
     private static final Logger LOG = LoggerFactory.getLogger(MockUserManagementService.class);
