@@ -261,6 +261,7 @@ consul:
     volumes:
         - "/var/run/docker.sock:/var/run/docker.sock"
         - consul-data:/data
+        - "./etc/custom-consul-config.json:/consul-config/custom-consul-config.json"
     ports:
         - "$PRIVATE_IP:53:8600/udp"
         - "8400:8400"
@@ -270,7 +271,7 @@ consul:
         max-size: "10M"
         max-file: "5"
     image: $DOCKER_IMAGE_CBD_CONSUL:$DOCKER_TAG_CONSUL
-    command: --bootstrap --advertise $PRIVATE_IP $DOCKER_CONSUL_OPTIONS
+    command: --bootstrap --advertise $PRIVATE_IP $DOCKER_CONSUL_OPTIONS --config-file=/consul-config/custom-consul-config.json
 
 registrator:
     labels:
