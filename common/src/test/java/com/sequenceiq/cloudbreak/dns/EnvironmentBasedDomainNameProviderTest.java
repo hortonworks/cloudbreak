@@ -127,7 +127,7 @@ class EnvironmentBasedDomainNameProviderTest {
         String endpointName = "test-cl-master0";
         String envName = "shrt-nv";
         String accountName = "xcu2-8y8x";
-        String rootDomain = "workload-local.cloudera.site";
+        String rootDomain = "wl.cloudera.site";
         ReflectionTestUtils.setField(underTest, "rootDomain", rootDomain);
 
         String commonName = underTest.getCommonName(endpointName, envName, accountName);
@@ -141,7 +141,7 @@ class EnvironmentBasedDomainNameProviderTest {
         String endpointName = "test-cl-longyloooooooooooong-name-master0";
         String envName = "notashort-env-name-as28chars";
         String accountName = "xcu2-8y8x";
-        String rootDomain = "workload-local.cloudera.site";
+        String rootDomain = "wl.cloudera.site";
         ReflectionTestUtils.setField(underTest, "rootDomain", rootDomain);
 
         String commonName = underTest.getCommonName(endpointName, envName, accountName);
