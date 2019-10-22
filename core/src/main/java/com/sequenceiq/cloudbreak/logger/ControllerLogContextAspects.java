@@ -31,7 +31,7 @@ public class ControllerLogContextAspects {
             String[] paramNames = sig.getParameterNames();
             logContextService.buildMDCParams(joinPoint.getTarget(), paramNames, args);
             MDCBuilder.addRequestId(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
-            LOGGER.debug("A controller method has been intercepted: {} with params {}, {}, MDC logger context is built.", joinPoint.toShortString(),
+            LOGGER.trace("A controller method has been intercepted: {} with params {}, {}, MDC logger context is built.", joinPoint.toShortString(),
                     sig.getParameterNames(), args);
         } catch (Exception any) {
             LOGGER.warn("MDCContext build failed: ", any);

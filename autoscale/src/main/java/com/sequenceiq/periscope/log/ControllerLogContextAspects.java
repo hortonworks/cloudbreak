@@ -27,7 +27,7 @@ public class ControllerLogContextAspects {
         String[] paramNames = sig.getParameterNames();
         Long clusterId = getClusterId(paramNames, args);
         MDCBuilder.buildMdcContext(clusterId, "", "CLUSTER");
-        LOGGER.debug("A controller method has been intercepted: {} with params {}, {}, MDC logger context is built.", joinPoint.toShortString(),
+        LOGGER.trace("A controller method has been intercepted: {} with params {}, {}, MDC logger context is built.", joinPoint.toShortString(),
                 sig.getParameterNames(), args);
     }
 
