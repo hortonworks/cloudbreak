@@ -76,6 +76,8 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
     @ManyToOne
     private Workspace workspace;
 
+    private Integer gatewayPort;
+
     public Gateway copy() {
         Gateway gateway = new Gateway();
         gateway.topologies = topologies.stream().map(GatewayTopology::copy).collect(Collectors.toSet());
@@ -90,6 +92,7 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
         gateway.signPub = signPub;
         gateway.ssoProvider = ssoProvider;
         gateway.workspace = workspace;
+        gateway.gatewayPort = gatewayPort;
         return gateway;
     }
 
@@ -202,5 +205,13 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setTopologies(Set<GatewayTopology> topologies) {
         this.topologies = topologies;
+    }
+
+    public Integer getGatewayPort() {
+        return gatewayPort;
+    }
+
+    public void setGatewayPort(Integer gatewayPort) {
+        this.gatewayPort = gatewayPort;
     }
 }
