@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -147,14 +148,22 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     private void waitTillFlowInOperation() {
-        while  (getTestContext().getCloudbreakClient().getCloudbreakClient()
-                .flowEndpoint()
-                .getFlowLogsByResourceName(getName()).stream().anyMatch(flowentry -> !flowentry.getFinalized())) {
+        while (hasFlow()) {
             try {
                 Thread.sleep(waitUtil.getPollingInterval());
             } catch (InterruptedException e) {
                 LOGGER.warn("Exception has been occurred during wait for flow end: ", e);
             }
+        }
+    }
+
+    private boolean hasFlow() {
+        try {
+            return getTestContext().getCloudbreakClient().getCloudbreakClient()
+                    .flowEndpoint()
+                    .getFlowLogsByResourceName(getName()).stream().anyMatch(flowentry -> !flowentry.getFinalized());
+        } catch (NotFoundException e) {
+            return false;
         }
     }
 
