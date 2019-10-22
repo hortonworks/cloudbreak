@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
@@ -121,8 +120,6 @@ public class StackUpscaleService {
             } catch (TransactionExecutionException e) {
                 throw e.getCause();
             }
-            eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
-                    flowMessageService.message(Msg.STACK_METADATA_SETUP_BILLING_CHANGED));
             if (scalingAdjustment != newInstances) {
                 flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_METADATA_EXTEND_WITH_COUNT, AVAILABLE.name(), newInstances, scalingAdjustment);
             }
