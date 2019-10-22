@@ -62,6 +62,8 @@ public class Stack {
 
     private Boolean useCcm;
 
+    private Boolean clusterProxyRegistered;
+
     @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<InstanceGroup> instanceGroups = new HashSet<>();
 
@@ -167,6 +169,14 @@ public class Stack {
 
     public void setUseCcm(Boolean useCcm) {
         this.useCcm = useCcm;
+    }
+
+    public Boolean getClusterProxyRegistered() {
+        return clusterProxyRegistered;
+    }
+
+    public void setClusterProxyRegistered(Boolean clusterProxyRegistered) {
+        this.clusterProxyRegistered = clusterProxyRegistered;
     }
 
     public SecurityConfig getSecurityConfig() {

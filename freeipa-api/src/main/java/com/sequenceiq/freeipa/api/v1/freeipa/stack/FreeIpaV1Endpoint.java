@@ -81,4 +81,18 @@ public interface FreeIpaV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FreeIpaOperationDescriptions.STOP, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "stopV1")
     void stop(@QueryParam("environment") @NotEmpty String environmentCrn) throws Exception;
+
+    @POST
+    @Path("cluster-proxy/register")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.REGISTER_WITH_CLUSTER_PROXY, produces = ContentType.JSON,
+            notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "clusterProxyRegisterV1")
+    String registerWithClusterProxy(@QueryParam("environment") @NotEmpty String environmentCrn);
+
+    @POST
+    @Path("cluster-proxy/deregister")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.DEREGISTER_WITH_CLUSTER_PROXY, produces = ContentType.JSON,
+            notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "clusterProxyDeregisterV1")
+    void deregisterWithClusterProxy(@QueryParam("environment") @NotEmpty String environmentCrn);
 }

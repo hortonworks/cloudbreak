@@ -19,16 +19,20 @@ public class ConfigRegistrationRequest {
     @JsonProperty
     private List<ClusterServiceConfig> services;
 
+    @JsonProperty
+    private List<String> certificates;
+
     @JsonCreator
-    public ConfigRegistrationRequest(String clusterCrn, List<String> aliases, List<ClusterServiceConfig> services) {
+    public ConfigRegistrationRequest(String clusterCrn, List<String> aliases, List<ClusterServiceConfig> services, List<String> certificates) {
         this.clusterCrn = clusterCrn;
         this.aliases = aliases;
         this.services = services;
+        this.certificates = certificates;
     }
 
     @JsonCreator
-    public ConfigRegistrationRequest(String clusterCrn, String knoxUrl, List<String> aliases, List<ClusterServiceConfig> services) {
-        this(clusterCrn, aliases, services);
+    public ConfigRegistrationRequest(String clusterCrn, String knoxUrl, List<String> aliases, List<ClusterServiceConfig> services, List<String> certificates) {
+        this(clusterCrn, aliases, services, certificates);
         this.uriOfKnox = knoxUrl;
     }
 
@@ -62,12 +66,13 @@ public class ConfigRegistrationRequest {
         return Objects.equals(clusterCrn, that.clusterCrn) &&
                 Objects.equals(uriOfKnox, that.uriOfKnox) &&
                 Objects.equals(aliases, that.aliases) &&
-                Objects.equals(services, that.services);
+                Objects.equals(services, that.services) &&
+                Objects.equals(certificates, that.certificates);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(clusterCrn, uriOfKnox, aliases, services);
+        return Objects.hash(clusterCrn, uriOfKnox, aliases, services, certificates);
     }
 
     @Override
@@ -77,6 +82,7 @@ public class ConfigRegistrationRequest {
                 ", aliases=" + aliases +
                 ", services=" + services +
                 ", uriOfKnox='" + uriOfKnox + '\'' +
+                ", certificates=" + certificates +
                 '}';
     }
 }

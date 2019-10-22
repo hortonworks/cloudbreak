@@ -10,7 +10,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.test.ClientTestV1Endpoint;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
-
 @Controller
 public class ClientTestV1Controller implements ClientTestV1Endpoint {
 

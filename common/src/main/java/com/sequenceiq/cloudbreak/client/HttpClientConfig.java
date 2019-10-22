@@ -36,4 +36,8 @@ public class HttpClientConfig {
     public String getClientKey() {
         return clientKey;
     }
+
+    public boolean hasSSLConfigs() {
+        return this.serverCert != null || this.clientCert != null || this.clientKey != null;
+    }
 }

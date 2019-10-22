@@ -207,3 +207,10 @@ cb:
       enabled: true
       contentlogging: true
 
+clusterProxy:
+  url: http://localhost:10080/cluster-proxy
+  enabled: false
+  registerConfigPath: /rpc/forceRegisterConfig
+  updateConfigPath: /rpc/updateConfig
+  removeConfigPath: /rpc/removeConfig
+
