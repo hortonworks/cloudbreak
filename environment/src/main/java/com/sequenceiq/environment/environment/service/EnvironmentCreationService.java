@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
@@ -40,6 +41,8 @@ import com.sequenceiq.environment.parameters.service.ParametersService;
 public class EnvironmentCreationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentCreationService.class);
+
+    private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     private final EnvironmentService environmentService;
 
@@ -92,7 +95,7 @@ public class EnvironmentCreationService {
         validateTunnel(creationDto.getCreator(), creationDto.getExperimentalFeatures().getTunnel());
         Environment environment = initializeEnvironment(creationDto);
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
-        String workloadAdministrationGroupName = grpcUmsClient.setWorkloadAdministrationGroupName(creationDto.getCreator(), creationDto.getAccountId(),
+        String workloadAdministrationGroupName = grpcUmsClient.setWorkloadAdministrationGroupName(IAM_INTERNAL_ACTOR_CRN, creationDto.getAccountId(),
                 Optional.empty(), "environments/write", environment.getResourceCrn());
         LOGGER.info("Configured workloadAdministrationGroupName: {}", workloadAdministrationGroupName);
         environmentService.setAdminGroupName(environment, workloadAdministrationGroupName);
