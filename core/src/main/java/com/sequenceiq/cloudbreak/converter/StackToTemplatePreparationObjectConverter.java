@@ -173,7 +173,8 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                             source.getCreator().getUserName(),
                             new HashMap<>(),
                             source.getCloudPlatform()))
-                    .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeResource));
+                    .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeResource))
+                    .withStackType(source.getType());
 
             decorateBuilderWithPlacement(source, builder);
             decorateBuilderWithAccountMapping(source, environment, credential, builder);

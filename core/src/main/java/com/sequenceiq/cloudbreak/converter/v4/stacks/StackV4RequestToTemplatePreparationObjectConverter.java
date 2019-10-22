@@ -172,7 +172,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                     .withGeneralClusterConfigs(generalClusterConfigs)
                     .withLdapConfig(ldapConfig)
                     .withCustomInputs(source.getInputs())
-                    .withKerberosConfig(getKerberosConfig(source));
+                    .withKerberosConfig(getKerberosConfig(source))
+                    .withStackType(source.getType());
 
             SharedServiceV4Request sharedService = source.getSharedService();
             if (sharedService != null && StringUtils.isNotBlank(sharedService.getDatalakeName())) {
@@ -186,7 +187,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                     throw new CloudbreakServiceException("Cannot collect shared service resources from datalake!");
                 }
             }
-
             decorateBuilderWithPlacement(source, builder);
             decorateBuilderWithAccountMapping(source, environment, credential, builder);
 

@@ -5,10 +5,12 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
@@ -18,6 +20,10 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
 public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
+
+    // we need to disable this feature, because the CM team reverted from the CM. If they are support again, we need to delete this condition.
+    @Value("${cb.enable.hms.replication:false}")
+    private boolean enableHmsReplication;
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
@@ -40,6 +46,13 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
             configs.add(config("hive_service_config_safety_valve", safetyValveValue));
         }
 
+        if (source.getStackType() == StackType.DATALAKE && enableHmsReplication) {
+            source.getLdapConfig().ifPresent(ldap -> {
+                configs.add(config("hive_metastore_enable_ldap_auth", "true"));
+                configs.add(config("hive_metastore_ldap_uri", ldap.getConnectionURL()));
+                configs.add(config("hive_metastore_ldap_basedn", ldap.getUserSearchBase()));
+            });
+        }
         return configs;
     }
 
