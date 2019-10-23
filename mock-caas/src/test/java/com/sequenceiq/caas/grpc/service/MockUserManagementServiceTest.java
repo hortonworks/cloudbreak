@@ -14,7 +14,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 import com.sequenceiq.caas.util.JsonUtil;
+
+import io.grpc.internal.testing.StreamRecorder;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MockUserManagementServiceTest {
@@ -60,5 +64,20 @@ public class MockUserManagementServiceTest {
         String expected = "foo_bar22";
 
         Assert.assertEquals(expected, underTest.sanitizeWorkloadUsername(username));
+    }
+
+    @Test
+    public void testGetWorkloadCredentials() {
+        underTest.initializeActorWorkloadCredentials();
+
+        GetActorWorkloadCredentialsRequest req = GetActorWorkloadCredentialsRequest.getDefaultInstance();
+        StreamRecorder<GetActorWorkloadCredentialsResponse> observer = StreamRecorder.create();
+        underTest.getActorWorkloadCredentials(req, observer);
+        Assert.assertEquals(1, observer.getValues().size());
+        GetActorWorkloadCredentialsResponse res = observer.getValues().get(0);
+        Assert.assertNotNull(res);
+        Assert.assertNotNull(res.getPasswordHash());
+        Assert.assertNotNull(res.getKerberosKeysList());
+        Assert.assertEquals(2, res.getKerberosKeysList().size());
     }
 }
