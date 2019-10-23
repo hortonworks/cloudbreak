@@ -29,7 +29,6 @@ import com.sequenceiq.freeipa.entity.SyncOperation;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordRequest;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordResult;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
-import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Service
@@ -38,7 +37,7 @@ public class PasswordService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PasswordService.class);
 
     @Inject
-    private StackService stackService;
+    private AvailableStackProvider availableStackProvider;
 
     @Inject
     private FreeIpaFlowManager freeIpaFlowManager;
@@ -65,7 +64,8 @@ public class PasswordService {
         LOGGER.debug("setting password for user {} in account {}", userCrn, accountId);
         freeIpaPasswordValidator.validate(password);
 
-        List<Stack> stacks = getStacks(accountId, environmentCrnFilter);
+        List<Stack> stacks = availableStackProvider.getAvailableStacksByAccountIdAndEnvironmentCrns(accountId, environmentCrnFilter);
+
         if (stacks.isEmpty()) {
             LOGGER.warn("No stacks found for accountId {}", accountId);
             throw new NotFoundException("No matching FreeIPA stacks found for accountId " + accountId);
@@ -137,16 +137,6 @@ public class PasswordService {
         SetPasswordResult result = request.await();
         if (result.getStatus().equals(EventStatus.FAILED)) {
             throw new OperationException(result.getErrorDetails());
-        }
-    }
-
-    private List<Stack> getStacks(String accountId, Set<String> environmentCrnFilter) {
-        if (environmentCrnFilter.isEmpty()) {
-            LOGGER.debug("Retrieving all stacks for account {}", accountId);
-            return stackService.getAllByAccountId(accountId);
-        } else {
-            LOGGER.debug("Retrieving stacks for account {} that match environment crns {}", accountId, environmentCrnFilter);
-            return stackService.getMultipleByEnvironmentCrnAndAccountId(environmentCrnFilter, accountId);
         }
     }
 }

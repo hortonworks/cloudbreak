@@ -55,7 +55,6 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
-import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.KrbKeySetEncoder;
 
 @Service
@@ -64,7 +63,7 @@ public class UserService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
     @Inject
-    private StackService stackService;
+    private AvailableStackProvider availableStackProvider;
 
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
@@ -91,36 +90,52 @@ public class UserService {
     private UserSyncStatusService userSyncStatusService;
 
     public SyncOperationStatus synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
-                                                Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+            Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+        return synchronizeUsers(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter, false);
+    }
+
+    public SyncOperationStatus forceSynchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
+            Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+        return synchronizeUsers(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter, true);
+    }
+
+    private SyncOperationStatus synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
+                                                Set<String> userCrnFilter, Set<String> machineUserCrnFilter, boolean force) {
 
         validateParameters(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
         LOGGER.debug("Synchronizing users in account {} for environmentCrns {}, userCrns {}, and machineUserCrns {}",
                 accountId, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
 
-        List<Stack> stacks = getStacks(accountId, environmentCrnFilter);
+        List<Stack> stacks = availableStackProvider.getAvailableStacksByAccountIdAndEnvironmentCrns(accountId, environmentCrnFilter);
         LOGGER.debug("Found {} stacks", stacks.size());
         if (stacks.isEmpty()) {
             throw new NotFoundException(String.format("No matching FreeIPA stacks found for account %s with environment crn filter %s",
                     accountId, environmentCrnFilter));
         }
 
+        Set<String> environments = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
         SyncOperation syncOperation = syncOperationStatusService
-                .startOperation(accountId, SyncOperationType.USER_SYNC, environmentCrnFilter, union(userCrnFilter, machineUserCrnFilter));
+                .startOperation(accountId, SyncOperationType.USER_SYNC, environments, union(userCrnFilter, machineUserCrnFilter), force);
 
         LOGGER.info("Starting operation [{}] with status [{}]", syncOperation.getOperationId(), syncOperation.getStatus());
 
         if (syncOperation.getStatus() == SynchronizationStatus.RUNNING) {
-            MDCBuilder.addFlowId(syncOperation.getOperationId());
-            asyncTaskExecutor.submit(() -> asyncSynchronizeUsers(
-                syncOperation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter));
+            asyncSynchronizeStacks(
+                    syncOperation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter);
         }
 
         return syncOperationToSyncOperationStatus.convert(syncOperation);
     }
 
-    private void asyncSynchronizeUsers(
-        String operationId, String accountId, String actorCrn, List<Stack> stacks,
-        Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+    private void asyncSynchronizeStacks(String operationId, String accountId, String actorCrn, List<Stack> stacks,
+            Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+        MDCBuilder.addFlowId(operationId);
+        asyncTaskExecutor.submit(() -> synchronizeStacks(
+                operationId, accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter));
+    }
+
+    private void synchronizeStacks(String operationId, String accountId, String actorCrn, List<Stack> stacks,
+                Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
         try {
             Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
 
@@ -347,16 +362,6 @@ public class UserService {
                 // TODO propagate this information out to API
                 LOGGER.error("Failed to add [{}] to group [{}]", users, group, e);
             }
-        }
-    }
-
-    private List<Stack> getStacks(String accountId, Set<String> environmentCrnFilter) {
-        if (environmentCrnFilter.isEmpty()) {
-            LOGGER.debug("Retrieving all stacks for account {}", accountId);
-            return stackService.getAllByAccountId(accountId);
-        } else {
-            LOGGER.debug("Retrieving stacks for account {} that match environment crns {}", accountId, environmentCrnFilter);
-            return stackService.getMultipleByEnvironmentCrnAndAccountId(environmentCrnFilter, accountId);
         }
     }
 

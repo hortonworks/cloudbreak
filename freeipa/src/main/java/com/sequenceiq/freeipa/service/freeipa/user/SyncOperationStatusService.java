@@ -54,14 +54,23 @@ public class SyncOperationStatusService {
 
     public SyncOperation startOperation(String accountId, SyncOperationType syncOperationType,
             Collection<String> environmentCrns, Collection<String> userCrns) {
-        SyncOperation syncOperation = requestOperation(accountId, syncOperationType, environmentCrns, userCrns);
-        SyncOperationAcceptor acceptor = syncOperationAcceptorMap.get(syncOperationType);
+        return startOperation(accountId, syncOperationType, environmentCrns, userCrns, false);
+    }
 
-        AcceptResult acceptResult = acceptor.accept(syncOperation);
-        if (acceptResult.isAccepted()) {
+    public SyncOperation startOperation(String accountId, SyncOperationType syncOperationType,
+            Collection<String> environmentCrns, Collection<String> userCrns, boolean force) {
+        SyncOperation syncOperation = requestOperation(accountId, syncOperationType, environmentCrns, userCrns);
+
+        if (force) {
             syncOperation = acceptOperation(syncOperation);
         } else {
-            syncOperation = rejectOperation(syncOperation, acceptResult.getRejectionMessage().orElse("Rejected for unspecified reason."));
+            SyncOperationAcceptor acceptor = syncOperationAcceptorMap.get(syncOperationType);
+            AcceptResult acceptResult = acceptor.accept(syncOperation);
+            if (acceptResult.isAccepted()) {
+                syncOperation = acceptOperation(syncOperation);
+            } else {
+                syncOperation = rejectOperation(syncOperation, acceptResult.getRejectionMessage().orElse("Rejected for unspecified reason."));
+            }
         }
 
         return syncOperationRepository.save(syncOperation);

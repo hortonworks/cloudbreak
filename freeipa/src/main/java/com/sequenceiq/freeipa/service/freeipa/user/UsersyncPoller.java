@@ -23,7 +23,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
-import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
 public class UsersyncPoller {
@@ -36,7 +35,7 @@ public class UsersyncPoller {
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Inject
-    private StackService stackService;
+    private AvailableStackProvider availableStackProvider;
 
     @Inject
     private UserSyncStatusService userSyncStatusService;
@@ -70,7 +69,7 @@ public class UsersyncPoller {
         MDCBuilder.addRequestId(requestId.get());
         try {
             LOGGER.debug("Attempting to sync users to FreeIPA stacks");
-            List<Stack> stackList = stackService.findAllRunning();
+            List<Stack> stackList = availableStackProvider.getAvailableStacks();
             LOGGER.debug("Found {} active stacks", stackList.size());
 
             stackList.stream()

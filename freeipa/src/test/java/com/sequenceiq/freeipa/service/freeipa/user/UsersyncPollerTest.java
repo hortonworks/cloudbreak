@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
-import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
 class UsersyncPollerTest {
@@ -36,7 +35,7 @@ class UsersyncPollerTest {
     ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Mock
-    StackService stackService;
+    AvailableStackProvider availableStackProvider;
 
     @Mock
     UserSyncStatusService userSyncStatusService;
@@ -76,7 +75,7 @@ class UsersyncPollerTest {
         when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
         when(stack.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
         setupUserSyncStatus(stack, mock(UmsEventGenerationIds.class));
-        when(stackService.findAllRunning()).thenReturn(List.of(stack));
+        when(availableStackProvider.getAvailableStacks()).thenReturn(List.of(stack));
 
         underTest.syncFreeIpaStacks();
 
@@ -92,7 +91,7 @@ class UsersyncPollerTest {
         when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
         when(stack.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
         setupUserSyncStatus(stack, currentEventGenerationIds);
-        when(stackService.findAllRunning()).thenReturn(List.of(stack));
+        when(availableStackProvider.getAvailableStacks()).thenReturn(List.of(stack));
 
         underTest.syncFreeIpaStacks();
 
