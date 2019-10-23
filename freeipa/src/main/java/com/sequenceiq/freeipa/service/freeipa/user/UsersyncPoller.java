@@ -78,7 +78,7 @@ public class UsersyncPoller {
                     .entrySet().stream()
                     .forEach(stringListEntry -> {
                         UmsEventGenerationIds currentGeneration =
-                                umsEventGenerationIdsProvider.getEventGenerationIds(INTERNAL_ACTOR_CRN, stringListEntry.getKey(), requestId);
+                                umsEventGenerationIdsProvider.getEventGenerationIds(stringListEntry.getKey(), requestId);
                         stringListEntry.getValue().stream()
                                 .forEach(stack -> {
                                     if (isStale(stack, currentGeneration)) {

@@ -25,8 +25,6 @@ class UmsEventGenerationIdsProviderTest {
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
-    private static final String ACTOR_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
-
     @Mock
     GrpcUmsClient grpcUmsClient;
 
@@ -38,7 +36,7 @@ class UmsEventGenerationIdsProviderTest {
         GetEventGenerationIdsResponse response = createGetEventGenerationIdsResponse();
         when(grpcUmsClient.getEventGenerationIds(any(), any(), any())).thenReturn(response);
 
-        UmsEventGenerationIds umsEventGenerationIds = underTest.getEventGenerationIds(ACTOR_CRN, ACCOUNT_ID, Optional.of(UUID.randomUUID().toString()));
+        UmsEventGenerationIds umsEventGenerationIds = underTest.getEventGenerationIds(ACCOUNT_ID, Optional.of(UUID.randomUUID().toString()));
 
         for (UmsEventGenerationIdsProvider.EventMapping eventMapping : UmsEventGenerationIdsProvider.EventMapping.values()) {
             assertEquals(eventMapping.getConverter().apply(response), umsEventGenerationIds.getEventGenerationIds().get(eventMapping.getEventName()));
