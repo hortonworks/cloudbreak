@@ -149,7 +149,13 @@
           {
             "base": true,
             "refName": "hdfs-NAMENODE-BASE",
-            "roleType": "NAMENODE"
+            "roleType": "NAMENODE",
+            "configs": [
+              {
+                "name": "namenode_config_safety_valve",
+                "value": "<property><name>dfs.namenode.fs-limits.max-component-length</name><value>2048</value></property>"
+              }
+            ]
           },
           {
             "base": true,
