@@ -43,7 +43,7 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
             String realm = Optional.ofNullable(kerberosConfigOpt.get().getRealm()).orElse("").toUpperCase();
             String safetyValveValue = "<property><name>hive.server2.authentication.kerberos.principal</name><value>hive/_HOST@" + realm
                     + "</value></property><property><name>hive.server2.authentication.kerberos.keytab</name><value>hive.keytab</value></property>"
-                    + "<property><name>hive.hook.proto.file.per.event</name><value>true</value></property>";;
+                    + "<property><name>hive.hook.proto.file.per.event</name><value>true</value></property>";
             configs.add(config("hive_service_config_safety_valve", safetyValveValue));
         }
 
