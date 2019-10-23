@@ -9,6 +9,7 @@ import static org.springframework.security.jwt.JwtHelper.decodeAndVerify;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -63,6 +64,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.io.Resources;
+import com.google.protobuf.util.JsonFormat;
 import com.sequenceiq.caas.grpc.GrpcActorContext;
 import com.sequenceiq.caas.model.AltusToken;
 import com.sequenceiq.caas.util.CrnHelper;
@@ -143,6 +145,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private LoadingCache<String, GetEventGenerationIdsResponse> eventGenerationIdsCache;
 
+    private GetActorWorkloadCredentialsResponse actorWorkloadCredentialsResponse;
+
     @PostConstruct
     public void init() {
         this.cbLicense = getLicense();
@@ -162,6 +166,21 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                         return respBuilder.build();
                     }
                 });
+
+        initializeActorWorkloadCredentials();
+    }
+
+    @VisibleForTesting
+    void initializeActorWorkloadCredentials() {
+
+        GetActorWorkloadCredentialsResponse.Builder builder = GetActorWorkloadCredentialsResponse.newBuilder();
+        try {
+            JsonFormat.parser().merge(Resources.toString(
+                Resources.getResource("mock-responses/ums/get-workload-credentials.json"), StandardCharsets.UTF_8), builder);
+            actorWorkloadCredentialsResponse = builder.build();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -488,27 +507,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
             io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement
                     .UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
 
-        final int keyType17 = 17;
-        final int keyType18 = 18;
-        final int saltType = 4;
-        GetActorWorkloadCredentialsResponse.Builder respBuilder = GetActorWorkloadCredentialsResponse.getDefaultInstance().toBuilder();
-        respBuilder.addKerberosKeysBuilder(0)
-                .setSaltType(saltType)
-                .setKeyType(keyType17)
-                .setKeyValue("testKeyValue17")
-                .setSaltValue("NonIodizedGrainOfSalt")
-                .build();
-
-        respBuilder.addKerberosKeysBuilder(1)
-                .setSaltType(saltType)
-                .setKeyType(keyType18)
-                .setKeyValue("testKeyValue18")
-                .setSaltValue("IodizedGrainOfSalt")
-                .build();
-
-        // sha256 hashed value of "Password123!"
-        respBuilder.setPasswordHash("008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601");
-        responseObserver.onNext(respBuilder.build());
+        responseObserver.onNext(actorWorkloadCredentialsResponse);
         responseObserver.onCompleted();
     }
 
