@@ -71,7 +71,7 @@ class UsersyncPollerTest {
     @Test
     void testSyncStackWhenStale() throws Exception {
         UmsEventGenerationIds currentEventGenerationIds = mock(UmsEventGenerationIds.class);
-        when(umsEventGenerationIdsProvider.getEventGenerationIds(any(), any(), any())).thenReturn(currentEventGenerationIds);
+        when(umsEventGenerationIdsProvider.getEventGenerationIds(any(), any())).thenReturn(currentEventGenerationIds);
         Stack stack = mock(Stack.class);
         when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
         when(stack.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
@@ -87,7 +87,7 @@ class UsersyncPollerTest {
     @Test
     void testDontSyncStackWhenNotStale() throws Exception {
         UmsEventGenerationIds currentEventGenerationIds = mock(UmsEventGenerationIds.class);
-        when(umsEventGenerationIdsProvider.getEventGenerationIds(any(), any(), any())).thenReturn(currentEventGenerationIds);
+        when(umsEventGenerationIdsProvider.getEventGenerationIds(any(), any())).thenReturn(currentEventGenerationIds);
         Stack stack = mock(Stack.class);
         when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
         when(stack.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
