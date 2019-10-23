@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -143,7 +144,13 @@ public class ClusterProxyService {
     }
 
     private ConfigRegistrationRequest createProxyConfigRequest(Stack stack) {
-        return new ConfigRegistrationRequest(stack.getResourceCrn(), singletonList(clusterId(stack.getCluster())), singletonList(serviceConfig(stack)));
+        return new ConfigRegistrationRequest(stack.getResourceCrn(), tunnelInfo(stack), singletonList(clusterId(stack.getCluster())), singletonList(serviceConfig(stack)));
+    }
+
+    private List<TunnelEntry> tunnelInfo(Stack stack) {
+        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        String gatewayIp = stack.getPrimaryGatewayInstance().getPublicIpWrapper();
+        return singletonList(new TunnelEntry(primaryGatewayInstance.getInstanceId(), "KNOX", gatewayIp, 443));
     }
 
     private ConfigRegistrationRequest createProxyConfigReRegisterRequest(Stack stack) {

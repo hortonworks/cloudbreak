@@ -18,11 +18,24 @@ class ConfigRegistrationRequest {
     @JsonProperty
     private List<ClusterServiceConfig> services;
 
+    @JsonProperty
+    private boolean useTunnel;
+
+    @JsonProperty
+    private List<TunnelEntry> tunnels;
+
     @JsonCreator
     ConfigRegistrationRequest(String clusterCrn, List<String> aliases, List<ClusterServiceConfig> services) {
         this.clusterCrn = clusterCrn;
         this.aliases = aliases;
         this.services = services;
+    }
+
+    @JsonCreator
+    ConfigRegistrationRequest(String clusterCrn, List<TunnelEntry> tunnelEntries, List<String> aliases, List<ClusterServiceConfig> services) {
+        this(clusterCrn, aliases, services);
+        useTunnel = true;
+        this.tunnels = tunnelEntries;
     }
 
     @JsonCreator

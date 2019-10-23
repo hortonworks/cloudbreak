@@ -93,6 +93,22 @@ public class ClusterProxyServiceTest {
     }
 
     @Test
+    public void shouldRegisterSSHTunnelInfoWithClusterProxy() throws URISyntaxException, JsonProcessingException {
+        ConfigRegistrationResponse response = new ConfigRegistrationResponse();
+        response.setX509Unwrapped("X509PublicKey");
+
+        mockServer.expect(once(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + REGISTER_CONFIG_PATH)))
+                .andExpect(content().json(configRegistrationRequest()))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.OK)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(JsonUtil.writeValueAsStringSilent(response)));
+
+        ConfigRegistrationResponse registrationResponse = service.registerCluster(testStack());
+        assertEquals("X509PublicKey", registrationResponse.getX509Unwrapped());
+    }
+
+    @Test
     public void shouldFailIfVaultSecretIsInvalid() throws URISyntaxException {
         mockServer.expect(never(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + REGISTER_CONFIG_PATH)));
 
@@ -137,7 +153,9 @@ public class ClusterProxyServiceTest {
         ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt", "/cb/test-data/secret/dppassword:secret", true);
         ClusterServiceConfig service = new ClusterServiceConfig("cloudera-manager",
                 List.of("https://10.10.10.10/clouderamanager"), asList(cloudbreakUser, dpUser));
-        return JsonUtil.writeValueAsStringSilent(new ConfigRegistrationRequest("stack-crn", List.of(String.valueOf(CLUSTER_ID)), List.of(service)));
+        List<TunnelEntry> tunnelEntries = List.of(new TunnelEntry("i-123foobar", "KNOX", "10.10.10.10", 443));
+        ConfigRegistrationRequest request = new ConfigRegistrationRequest("stack-crn", tunnelEntries, List.of(String.valueOf(CLUSTER_ID)), List.of(service));
+        return JsonUtil.writeValueAsStringSilent(request);
     }
 
     private String configUpdateRequest(String clusterIdentifier) {
@@ -160,6 +178,7 @@ public class ClusterProxyServiceTest {
         instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         InstanceMetaData primaryInstanceMetaData = new InstanceMetaData();
         primaryInstanceMetaData.setPublicIp("10.10.10.10");
+        primaryInstanceMetaData.setInstanceId("i-123foobar");
         primaryInstanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setPublicIp("10.10.10.11");
