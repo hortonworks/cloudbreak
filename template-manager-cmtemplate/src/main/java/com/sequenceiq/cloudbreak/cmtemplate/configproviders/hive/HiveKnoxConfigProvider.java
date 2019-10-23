@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreCloudStorageServiceConfigProvider.HMS_METASTORE_EXTERNAL_DIR;
 
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -23,9 +24,9 @@ public class HiveKnoxConfigProvider implements CmTemplateComponentConfigProvider
         String realm = kerberosConfigOpt.getRealm();
         String keytab = ConfigUtils.getSafetyValveProperty("hive.server2.authentication.spnego.keytab", "hive.keytab");
         String principal = ConfigUtils.getSafetyValveProperty("hive.server2.authentication.spnego.principal", "HTTP/_HOST@" + realm);
+        String filePerEvent = ConfigUtils.getSafetyValveProperty("hive.hook.proto.file.per.event", "true");
         return List.of(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE,
-                principal
-                        + keytab));
+                principal + keytab + filePerEvent));
     }
 
     @Override
