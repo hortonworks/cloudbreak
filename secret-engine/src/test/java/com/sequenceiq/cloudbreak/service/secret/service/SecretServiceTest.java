@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Field;
 import java.security.InvalidKeyException;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,8 +39,10 @@ public class SecretServiceTest {
 
     private final SecretEngine persistentEngine = Mockito.mock(SecretEngine.class);
 
+    private final VaultRetryService vaultRetryService = Mockito.mock(VaultRetryService.class);
+
     @InjectMocks
-    private final SecretService underTest = new SecretService(metricService, List.of(persistentEngine));
+    private final SecretService underTest = new SecretService(metricService, List.of(persistentEngine), vaultRetryService);
 
     @Before
     public void setup() {
@@ -48,6 +51,14 @@ public class SecretServiceTest {
         Field enginesField = ReflectionUtils.findField(SecretService.class, "engines");
         ReflectionUtils.makeAccessible(enginesField);
         ReflectionUtils.setField(enginesField, underTest, List.of(persistentEngine));
+        when(vaultRetryService.tryReadingVault(any())).then(i -> {
+            Supplier s = i.getArgument(0);
+            return s.get();
+        });
+        when(vaultRetryService.tryWritingVault(any())).then(i -> {
+            Supplier s = i.getArgument(0);
+            return s.get();
+        });
     }
 
     @Test
@@ -66,8 +77,8 @@ public class SecretServiceTest {
 
     @Test
     public void testPutOk() throws Exception {
-        when(persistentEngine.put(anyString(), anyString())).thenReturn("secret");
-        when(persistentEngine.isExists(anyString())).thenReturn(false);
+        when(persistentEngine.put("key", "value")).thenReturn("secret");
+        when(persistentEngine.isExists("key")).thenReturn(false);
 
         String result = underTest.put("key", "value");
 

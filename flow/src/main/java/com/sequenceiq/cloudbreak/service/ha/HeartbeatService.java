@@ -104,10 +104,10 @@ public class HeartbeatService {
                     } catch (RuntimeException e) {
                         LOGGER.error("Failed to update the heartbeat timestamp", e);
                         metricService.incrementMetricCounter(MetricType.HEARTBEAT_UPDATE_FAILED);
-                        throw new Retry.ActionWentFailException(e.getMessage());
+                        throw new Retry.ActionFailedException(e.getMessage());
                     }
                 });
-            } catch (Retry.ActionWentFailException af) {
+            } catch (Retry.ActionFailedException af) {
                 LOGGER.error("Failed to update the heartbeat timestamp 5 times for node {}: {}", nodeId, af.getMessage());
                 cancelEveryFlowWithoutDbUpdate();
             }

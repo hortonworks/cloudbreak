@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
+import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
 import com.sequenceiq.periscope.domain.PeriscopeNode;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.PeriscopeNodeRepository;
@@ -66,11 +66,11 @@ public class HeartbeatService {
                         periscopeNodeRepository.save(self);
                     } catch (RuntimeException e) {
                         LOGGER.error("Failed to update the heartbeat timestamp", e);
-                        throw new ActionWentFailException(e.getMessage());
+                        throw new ActionFailedException(e.getMessage());
                     }
                     return Boolean.TRUE;
                 });
-            } catch (ActionWentFailException af) {
+            } catch (ActionFailedException af) {
                 LOGGER.error("Failed to update the heartbeat timestamp 5 times for node {}: {}", nodeId, af.getMessage());
                 try {
                     transactionService.required(() -> {

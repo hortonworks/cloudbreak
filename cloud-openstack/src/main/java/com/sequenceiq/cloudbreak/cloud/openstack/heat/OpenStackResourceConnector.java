@@ -44,7 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.heat.HeatTemplateBuilder.ModelC
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
+import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -263,7 +263,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
             retryService.testWith2SecDelayMax5Times(() -> {
                 boolean exists = client.heat().stacks().getStackByName(resource.getName()) != null;
                 if (!exists) {
-                    throw new ActionWentFailException("Stack not exists");
+                    throw new ActionFailedException("Stack not exists");
                 }
                 return true;
             });
@@ -272,7 +272,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
             if (cloudStack.getInstanceAuthentication().getPublicKeyId() == null) {
                 deleteKeyPair(authenticatedContext, client);
             }
-        } catch (ActionWentFailException ignored) {
+        } catch (ActionFailedException ignored) {
             LOGGER.debug("Stack not found with name: {}", resource.getName());
         }
     }

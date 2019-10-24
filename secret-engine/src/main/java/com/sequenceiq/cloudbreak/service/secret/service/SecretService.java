@@ -41,9 +41,12 @@ public class SecretService {
 
     private SecretEngine persistentEngine;
 
-    public SecretService(MetricService metricService, List<SecretEngine> engines) {
+    private VaultRetryService vaultRetryService;
+
+    public SecretService(MetricService metricService, List<SecretEngine> engines, VaultRetryService vaultRetryService) {
         this.metricService = metricService;
         this.engines = engines;
+        this.vaultRetryService = vaultRetryService;
     }
 
     @PostConstruct
@@ -63,7 +66,7 @@ public class SecretService {
      */
     public String put(String key, String value) throws Exception {
         long start = System.currentTimeMillis();
-        boolean exists = persistentEngine.isExists(key);
+        boolean exists = vaultRetryService.tryReadingVault(() -> persistentEngine.isExists(key));
         long duration = System.currentTimeMillis() - start;
         metricService.submit(MetricType.VAULT_READ, duration);
         LOGGER.trace("Secret read took {} ms", duration);
@@ -71,7 +74,7 @@ public class SecretService {
             throw new InvalidKeyException(format("Key: %s already exists!", key));
         }
         start = System.currentTimeMillis();
-        String secret = persistentEngine.put(key, value);
+        String secret = vaultRetryService.tryWritingVault(() -> persistentEngine.put(key, value));
         duration = System.currentTimeMillis() - start;
         metricService.submit(MetricType.VAULT_WRITE, duration);
         LOGGER.trace("Secret write took {} ms", duration);
@@ -92,10 +95,13 @@ public class SecretService {
         }
         metricService.incrementMetricCounter(() -> "secret.read." + convertSecretToMetric(secret));
         long start = System.currentTimeMillis();
-        String response = getFirstEngineStream(secret)
-                .map(e -> e.get(secret))
-                .filter(Objects::nonNull)
-                .orElse(null);
+
+        String response = vaultRetryService.tryReadingVault(() -> {
+            return getFirstEngineStream(secret)
+                    .map(e -> e.get(secret))
+                    .filter(Objects::nonNull)
+                    .orElse(null);
+        });
         long duration = System.currentTimeMillis() - start;
         metricService.submit(MetricType.VAULT_READ, duration);
         LOGGER.trace("Secret read took {} ms", duration);
