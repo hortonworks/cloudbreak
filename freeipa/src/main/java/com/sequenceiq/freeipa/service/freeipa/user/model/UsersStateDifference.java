@@ -21,19 +21,16 @@ public class UsersStateDifference {
 
     private Set<FmsUser> usersToAdd;
 
-    private Set<FmsGroup> groupsToRemove;
-
     private Set<String> usersToRemove;
 
     private Multimap<String, String> groupMembershipToAdd;
 
     private Multimap<String, String> groupMembershipToRemove;
 
-    public UsersStateDifference(Set<FmsGroup> groupsToAdd, Set<FmsUser> usersToAdd, Set<FmsGroup> groupsToRemove, Set<String> usersToRemove,
+    public UsersStateDifference(Set<FmsGroup> groupsToAdd, Set<FmsUser> usersToAdd, Set<String> usersToRemove,
                                 Multimap<String, String> groupMembershipToAdd, Multimap<String, String> groupMembershipToRemove) {
         this.groupsToAdd = requireNonNull(groupsToAdd);
         this.usersToAdd = requireNonNull(usersToAdd);
-        this.groupsToRemove = requireNonNull(groupsToRemove);
         this.usersToRemove = requireNonNull(usersToRemove);
         this.groupMembershipToAdd = requireNonNull(groupMembershipToAdd);
         this.groupMembershipToRemove = requireNonNull(groupMembershipToRemove);
@@ -45,10 +42,6 @@ public class UsersStateDifference {
 
     public Set<FmsUser> getUsersToAdd() {
         return usersToAdd;
-    }
-
-    public Set<FmsGroup> getGroupsToRemove() {
-        return groupsToRemove;
     }
 
     public Set<String> getUsersToRemove() {
@@ -68,7 +61,6 @@ public class UsersStateDifference {
         return "UsersStateDifference{"
                 + "groupsToAdd=" + groupsToAdd
                 + ", usersToAdd=" + usersToAdd
-                + ", groupsToRemove=" + groupsToRemove
                 + ", usersToRemove=" + usersToRemove
                 + ", groupMembershipToAdd=" + groupMembershipToAdd
                 + ", groupMembershipToRemove=" + groupMembershipToRemove
@@ -104,28 +96,12 @@ public class UsersStateDifference {
                 ipaState.getGroupMembership().get(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP));
         LOGGER.info("usersToRemove size= {}", usersToRemove.size());
 
-        Set<FmsGroup> groupsToBeRemoved = getGroupsToBeRemoved(umsState.getGroups(), ipaState.getGroups());
         return new UsersStateDifference(
             Set.copyOf(Sets.difference(umsState.getGroups(), ipaState.getGroups())),
             Set.copyOf(Sets.difference(umsState.getUsers(), ipaState.getUsers())),
-            groupsToBeRemoved,
             usersToRemove,
             groupMembershipToAdd,
             groupMembershipToRemove);
-    }
-
-    private static Set<FmsGroup> getGroupsToBeRemoved(Set<FmsGroup> umsGroups, Set<FmsGroup> ipaGroups) {
-        Set<FmsGroup> groupsToBeRemoved = new HashSet<>();
-
-        ipaGroups.forEach(group -> {
-            if (!umsGroups.contains(group) && !group.getName().equals("admins")) {
-                groupsToBeRemoved.add(group);
-            }
-        });
-
-        return groupsToBeRemoved;
-
-
     }
 
     private static Set<String> getUsersToBeRemoved(Collection<String> umsStateUsers, Collection<String> ipaStateUsers) {

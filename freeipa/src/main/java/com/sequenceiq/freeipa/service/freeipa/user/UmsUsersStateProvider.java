@@ -176,7 +176,12 @@ public class UmsUsersStateProvider {
             if (isEnvironmentUser(environmentCrn, rightsResponse)) {
                 userStateBuilder.addUser(fmsUser);
                 rightsResponse.getGroupCrnList().stream().forEach(gcrn -> {
-                    userStateBuilder.addMemberToGroup(crnToFmsGroup.get(gcrn).getName(), fmsUser.getName());
+                    FmsGroup group = crnToFmsGroup.get(gcrn);
+                    // If the group is null, then there has been a group membership change after we started the sync
+                    // the group and group membership will be updated on the next sync
+                    if (group != null) {
+                        userStateBuilder.addMemberToGroup(group.getName(), fmsUser.getName());
+                    }
                 });
 
                 // Since this user is eligible, add this user to internal group
