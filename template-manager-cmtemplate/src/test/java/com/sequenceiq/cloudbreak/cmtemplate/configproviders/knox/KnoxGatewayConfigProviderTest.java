@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.dto.LdapView.LdapViewBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -118,13 +120,15 @@ public class KnoxGatewayConfigProviderTest {
 
         assertEquals(
                 List.of(
-                        config("idbroker_master_secret", gateway.getKnoxMasterSecret())
+                        config("idbroker_master_secret", gateway.getKnoxMasterSecret()),
+                        config("idbroker_gateway_knox_admin_groups", "")
                 ),
                 underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
         );
         assertEquals(
                 List.of(
                         config("gateway_master_secret", gateway.getKnoxMasterSecret()),
+                        config("gateway_knox_admin_groups", ""),
                         config("gateway_path", gateway.getPath()),
                         config("gateway_signing_keystore_name", "signing.jks"),
                         config("gateway_signing_keystore_type", "JKS"),
@@ -144,15 +148,52 @@ public class KnoxGatewayConfigProviderTest {
 
         assertEquals(
                 List.of(
-                        config("idbroker_master_secret", gcc.getPassword())
+                        config("idbroker_master_secret", gcc.getPassword()),
+                        config("idbroker_gateway_knox_admin_groups", "")
                 ),
                 underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
         );
         assertEquals(
                 List.of(
-                        config("gateway_master_secret", gcc.getPassword())
+                        config("gateway_master_secret", gcc.getPassword()),
+                        config("gateway_knox_admin_groups", "")
                 ),
                 underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
+        );
+        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
+    }
+
+    @Test
+    public void roleConfigsWithGatewayWithLdapConfig() {
+        Gateway gateway = new Gateway();
+        gateway.setKnoxMasterSecret("admin");
+        gateway.setPath("/a/b/c");
+        LdapView ldapConfig = LdapViewBuilder.aLdapView().withAdminGroup("knox_admins").build();
+
+        TemplatePreparationObject source = Builder.builder()
+                .withGateway(gateway, "key")
+                .withLdapConfig(ldapConfig)
+                .withGeneralClusterConfigs(new GeneralClusterConfigs())
+                .build();
+
+        assertEquals(
+            List.of(
+                config("idbroker_master_secret", gateway.getKnoxMasterSecret()),
+                config("idbroker_gateway_knox_admin_groups", ldapConfig.getAdminGroup())
+            ),
+            underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
+        );
+        assertEquals(
+            List.of(
+                config("gateway_master_secret", gateway.getKnoxMasterSecret()),
+                config("gateway_knox_admin_groups", ldapConfig.getAdminGroup()),
+                config("gateway_path", gateway.getPath()),
+                config("gateway_signing_keystore_name", "signing.jks"),
+                config("gateway_signing_keystore_type", "JKS"),
+                config("gateway_signing_key_alias", "signing-identity"),
+                config("gateway_dispatch_whitelist", "^*.*$")
+            ),
+            underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
         );
         assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
     }
