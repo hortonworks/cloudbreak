@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ClusterServiceConfig {
+
     @JsonProperty
     private String name;
 
@@ -22,14 +23,31 @@ public class ClusterServiceConfig {
     @JsonProperty
     private Boolean tlsStrictCheck;
 
+    @JsonProperty
+    private Boolean useTunnel;
+
+    @JsonProperty
+    private List<Tunnel> tunnels;
+
+    @JsonProperty
+    private String accountId;
+
     @JsonCreator
     public ClusterServiceConfig(String serviceName, List<String> endpoints, List<ClusterServiceCredential> credentials, ClientCertificate clientCertificate,
-                                Boolean tlsStrictCheck) {
+                                Boolean tlsStrictCheck, Boolean useTunnel, List<Tunnel> tunnels, String accountId) {
         this.name = serviceName;
         this.endpoints = endpoints;
         this.credentials = credentials;
         this.clientCertificate = clientCertificate;
         this.tlsStrictCheck = tlsStrictCheck;
+        this.useTunnel = useTunnel;
+        this.tunnels = tunnels;
+        this.accountId = accountId;
+    }
+
+    public ClusterServiceConfig(String serviceName, List<String> endpoints, List<ClusterServiceCredential> credentials, ClientCertificate clientCertificate,
+                                Boolean tlsStrictCheck) {
+        this(serviceName, endpoints, credentials, clientCertificate, tlsStrictCheck, false, List.of(), null);
     }
 
     @Override
@@ -47,12 +65,15 @@ public class ClusterServiceConfig {
                 Objects.equals(endpoints, that.endpoints) &&
                 Objects.equals(credentials, that.credentials) &&
                 Objects.equals(clientCertificate, that.clientCertificate) &&
-                Objects.equals(tlsStrictCheck, that.tlsStrictCheck);
+                Objects.equals(tlsStrictCheck, that.tlsStrictCheck) &&
+                Objects.equals(useTunnel, that.useTunnel) &&
+                Objects.equals(tunnels, that.tunnels) &&
+                Objects.equals(accountId, that.accountId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, endpoints, credentials, clientCertificate, tlsStrictCheck);
+        return Objects.hash(name, endpoints, credentials, clientCertificate, tlsStrictCheck, useTunnel, tunnels, accountId);
     }
 
     @Override
@@ -62,6 +83,9 @@ public class ClusterServiceConfig {
                 + ", credentials=" + credentials
                 + ", clientCertificate=" + clientCertificate
                 + ", tlsStrictCheck=" + tlsStrictCheck
+                + ", useTunnel=" + useTunnel
+                + ", tunnels=" + tunnels
+                + ", accountId=" + accountId
                 + '}';
     }
 }
