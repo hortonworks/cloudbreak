@@ -124,6 +124,8 @@ public class ClouderaManagerMock extends AbstractModelMock {
 
     public static final String CM_VERSION = API_ROOT + "/cm/version";
 
+    private static final String AUTO_CONFIGURE_COMMAND = API_ROOT + "/cm/service/autoConfigure";
+
     private DynamicRouteStack dynamicRouteStack;
 
     private final Set<String> activeProfiles;
@@ -181,6 +183,7 @@ public class ClouderaManagerMock extends AbstractModelMock {
         postClouderaManagerRestart();
         getCommands();
         postClusterCommandsRestart();
+        putAutoConfigure();
     }
 
     private void readAuthRoles() {
@@ -438,8 +441,13 @@ public class ClouderaManagerMock extends AbstractModelMock {
     }
 
     private void deleteHostById() {
-        dynamicRouteStack.delete(HOST_BY_ID, new ProfileAwareRoute((request, response, model)
-                -> getApiHost(model.getInstanceMap().get(request.params("hostId"))), activeProfiles));
+        dynamicRouteStack.delete(HOST_BY_ID,
+                new ProfileAwareRoute((request, response, model) -> getApiHost(model.getInstanceMap().get(request.params("hostId"))), activeProfiles));
+    }
+
+    private void putAutoConfigure() {
+        dynamicRouteStack.put(AUTO_CONFIGURE_COMMAND, (request, response) -> new ApiCommand().id(new BigDecimal(2)));
+
     }
 
     private ApiHostList getHosts(DefaultModel model) {
