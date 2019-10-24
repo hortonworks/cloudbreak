@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -32,6 +33,8 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String KNOX_MASTER_SECRET = "gateway_master_secret";
 
+    private static final String IDBROKER_MASTER_SECRET = "idbroker_master_secret";
+
     private static final String GATEWAY_PATH = "gateway_path";
 
     private static final String SIGNING_KEYSTORE_NAME = "gateway_signing_keystore_name";
@@ -46,6 +49,10 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String SIGNING_IDENTITY = "signing-identity";
 
+    private static final String GATEWAY_ADMIN_GROUPS = "gateway_knox_admin_groups";
+
+    private static final String IDBROKER_GATEWAY_ADMIN_GROUPS = "idbroker_gateway_knox_admin_groups";
+
     private static final String GATEWAY_WHITELIST = "gateway_dispatch_whitelist";
 
     @Override
@@ -54,10 +61,16 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
         GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
         String masterSecret = gateway != null ? gateway.getMasterSecret() : generalClusterConfigs.getPassword();
 
+        String adminGroup = "";
+        if (source.getLdapConfig().isPresent() && StringUtils.isNotEmpty(source.getLdapConfig().get().getAdminGroup())) {
+            adminGroup = source.getLdapConfig().get().getAdminGroup();
+        }
+
         switch (roleType) {
             case KnoxRoles.KNOX_GATEWAY:
                 List<ApiClusterTemplateConfig> config = new ArrayList<>();
                 config.add(config(KNOX_MASTER_SECRET, masterSecret));
+                config.add(config(GATEWAY_ADMIN_GROUPS, adminGroup));
                 Optional<KerberosConfig> kerberosConfig = source.getKerberosConfig();
                 if (gateway != null) {
                     config.add(config(GATEWAY_PATH, gateway.getPath()));
@@ -73,7 +86,10 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
                 }
                 return config;
             case KnoxRoles.IDBROKER:
-                return List.of(config("idbroker_master_secret", masterSecret));
+                return List.of(
+                    config(IDBROKER_MASTER_SECRET, masterSecret),
+                    config(IDBROKER_GATEWAY_ADMIN_GROUPS, adminGroup)
+                );
             default:
                 return List.of();
         }
