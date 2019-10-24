@@ -12,6 +12,8 @@ import javax.validation.constraints.NotNull;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
@@ -28,6 +30,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentModificationSer
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 
 @Controller
+@InternalReady
 @Transactional(TxType.NEVER)
 public class EnvironmentController implements EnvironmentEndpoint {
 
@@ -69,7 +72,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    public DetailedEnvironmentResponse getByCrn(String crn) {
+    public DetailedEnvironmentResponse getByCrn(@ResourceCrn String crn) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
         return environmentApiConverter.dtoToDetailedResponse(environmentDto);
