@@ -161,6 +161,10 @@
           {
             "name": "tez_container_size",
             "value": "4096"
+          },
+          {
+            "name": "hive_service_config_safety_valve",
+            "value": "<property><name>hive.server2.authentication.spnego.principal</name><value>HTTP/_HOST@CLOUDERA.SITE</value></property><property><name>hive.server2.authentication.spnego.keytab</name><value>hive.keytab</value></property><property><name>hive.hook.proto.file.per.event</name><value>true</value></property>"
           }
         ],
         "roleConfigGroups": [
