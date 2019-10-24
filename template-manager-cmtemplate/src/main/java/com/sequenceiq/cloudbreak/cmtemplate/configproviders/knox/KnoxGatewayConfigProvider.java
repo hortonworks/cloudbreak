@@ -55,11 +55,16 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String GATEWAY_WHITELIST = "gateway_dispatch_whitelist";
 
+    private static final String GATEWAY_DEFAULT_TOPOLOGY_NAME = "gateway_default_topology_name";
+
+    private static final String DEFAULT_TOPOLOGY = "cdp-proxy";
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         GatewayView gateway = source.getGatewayView();
         GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
         String masterSecret = gateway != null ? gateway.getMasterSecret() : generalClusterConfigs.getPassword();
+        String topologyName = gateway != null && gateway.getExposedServices() != null ? gateway.getTopologyName() : DEFAULT_TOPOLOGY;
 
         String adminGroup = "";
         if (source.getLdapConfig().isPresent() && StringUtils.isNotEmpty(source.getLdapConfig().get().getAdminGroup())) {
@@ -70,6 +75,7 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
             case KnoxRoles.KNOX_GATEWAY:
                 List<ApiClusterTemplateConfig> config = new ArrayList<>();
                 config.add(config(KNOX_MASTER_SECRET, masterSecret));
+                config.add(config(GATEWAY_DEFAULT_TOPOLOGY_NAME, topologyName));
                 config.add(config(GATEWAY_ADMIN_GROUPS, adminGroup));
                 Optional<KerberosConfig> kerberosConfig = source.getKerberosConfig();
                 if (gateway != null) {

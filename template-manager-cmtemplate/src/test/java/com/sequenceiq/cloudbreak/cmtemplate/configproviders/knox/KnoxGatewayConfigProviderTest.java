@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.LdapView.LdapViewBuilder;
 import org.junit.Test;
@@ -110,9 +113,14 @@ public class KnoxGatewayConfigProviderTest {
 
     @Test
     public void roleConfigsWithGateway() {
+        GatewayTopology topology = new GatewayTopology();
+        topology.setTopologyName("my-topology");
+        topology.setExposedServices(Json.silent(new ExposedServices()));
+
         Gateway gateway = new Gateway();
         gateway.setKnoxMasterSecret("admin");
         gateway.setPath("/a/b/c");
+        gateway.setTopologies(Set.of(topology));
         TemplatePreparationObject source = Builder.builder()
                 .withGateway(gateway, "key")
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
@@ -128,6 +136,8 @@ public class KnoxGatewayConfigProviderTest {
         assertEquals(
                 List.of(
                         config("gateway_master_secret", gateway.getKnoxMasterSecret()),
+                        config("gateway_default_topology_name",
+                            gateway.getTopologies().iterator().next().getTopologyName()),
                         config("gateway_knox_admin_groups", ""),
                         config("gateway_path", gateway.getPath()),
                         config("gateway_signing_keystore_name", "signing.jks"),
@@ -156,6 +166,7 @@ public class KnoxGatewayConfigProviderTest {
         assertEquals(
                 List.of(
                         config("gateway_master_secret", gcc.getPassword()),
+                        config("gateway_default_topology_name", "cdp-proxy"),
                         config("gateway_knox_admin_groups", "")
                 ),
                 underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
@@ -186,6 +197,7 @@ public class KnoxGatewayConfigProviderTest {
         assertEquals(
             List.of(
                 config("gateway_master_secret", gateway.getKnoxMasterSecret()),
+                config("gateway_default_topology_name", "cdp-proxy"),
                 config("gateway_knox_admin_groups", ldapConfig.getAdminGroup()),
                 config("gateway_path", gateway.getPath()),
                 config("gateway_signing_keystore_name", "signing.jks"),
