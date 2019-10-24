@@ -1,0 +1,58 @@
+package com.sequenceiq.freeipa.flow.stack.provision.handler;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.flow.reactor.api.handler.EventHandler;
+import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationFailed;
+import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationRequest;
+import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationSuccess;
+import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
+
+import reactor.bus.Event;
+import reactor.bus.EventBus;
+
+@Component
+public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProxyRegistrationRequest> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyRegistrationHandler.class);
+
+    @Inject
+    private ClusterProxyConfiguration clusterProxyConfiguration;
+
+    @Inject
+    private EventBus eventBus;
+
+    @Inject
+    private ClusterProxyService clusterProxyService;
+
+    @Override
+    public String selector() {
+        return EventSelectorUtil.selector(ClusterProxyRegistrationRequest.class);
+    }
+
+    @Override
+    public void accept(Event<ClusterProxyRegistrationRequest> event) {
+        ClusterProxyRegistrationRequest request = event.getData();
+        Selectable response;
+        try {
+            if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
+                LOGGER.debug("Cluster Proxy integration enabled. Registering FreeIpa [{}]", request.getResourceId());
+                clusterProxyService.registerFreeIpa(request.getResourceId());
+            } else {
+                LOGGER.debug("Cluster Proxy integration disabled. Skipping registering FreeIpa [{}]", request.getResourceId());
+            }
+            response = new ClusterProxyRegistrationSuccess(request.getResourceId());
+        } catch (Exception e) {
+            LOGGER.error("Cluster Proxy registration has failed", e);
+            response = new ClusterProxyRegistrationFailed(request.getResourceId(), e);
+        }
+        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
+    }
+}

@@ -10,6 +10,8 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationResult;
 import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationSuccess;
 
 public enum StackProvisionEvent implements FlowEvent {
     START_CREATION_EVENT("STACK_PROVISION_TRIGGER_EVENT"),
@@ -34,6 +36,7 @@ public enum StackProvisionEvent implements FlowEvent {
     GET_TLS_INFO_FAILED_EVENT(CloudPlatformResult.failureSelector(GetTlsInfoResult.class)),
     TLS_SETUP_FINISHED_EVENT("TLS_SETUP_FINISHED_EVENT"),
     SETUP_TLS_EVENT("SETUP_TLS_EVENT"),
+    CLUSTER_PROXY_REGISTRATION_FINISHED_EVENT(EventSelectorUtil.selector(ClusterProxyRegistrationSuccess.class)),
     STACK_CREATION_FAILED_EVENT("STACK_CREATION_FAILED"),
     STACK_CREATION_FINISHED_EVENT("STACK_CREATION_FINISHED"),
     STACKCREATION_FAILURE_HANDLED_EVENT("STACK_CREATION_FAILHANDLED");

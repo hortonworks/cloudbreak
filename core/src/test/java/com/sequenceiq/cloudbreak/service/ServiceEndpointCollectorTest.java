@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -92,6 +93,7 @@ public class ServiceEndpointCollectorTest {
 
     @Before
     public void setup() {
+        ReflectionTestUtils.setField(underTest, "httpsPort", "443");
         when(exposedServiceListValidator.validate(any())).thenReturn(ValidationResult.builder().build());
     }
 
@@ -135,15 +137,27 @@ public class ServiceEndpointCollectorTest {
     public void testGetCmServerUrlWithAmbariPresentInTopologiesWithIndividualGateway() {
         Cluster cluster = createClusterWithComponents(new ExposedService[]{CLOUDERA_MANAGER_UI, ATLAS},
                 new ExposedService[]{HIVE_SERVER}, GatewayType.INDIVIDUAL);
+        cluster.getGateway().setGatewayPort(443);
 
         String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
         assertEquals("https://127.0.0.1/gateway-path/topology1/cmf/home/", result);
     }
 
     @Test
+    public void testGetCmServerUrlInTopologiesWithIndividualGatewayOnPort8443() {
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{CLOUDERA_MANAGER_UI, ATLAS},
+                new ExposedService[]{HIVE_SERVER}, GatewayType.INDIVIDUAL);
+        cluster.getGateway().setGatewayPort(8443);
+
+        String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
+        assertEquals("https://127.0.0.1:8443/gateway-path/topology1/cmf/home/", result);
+    }
+
+    @Test
     public void testPrepareClusterExposedServices() {
         Cluster cluster = createClusterWithComponents(new ExposedService[]{ATLAS},
                 new ExposedService[]{HIVE_SERVER, WEBHDFS}, GatewayType.INDIVIDUAL);
+        cluster.getGateway().setGatewayPort(443);
 
         mockBlueprintTextProcessor();
         mockComponentLocator(Lists.newArrayList("10.0.0.1"));

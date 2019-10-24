@@ -35,6 +35,20 @@ public class RdsViewTest {
         Assert.assertEquals(ASSERT_ERROR_MSG, "5432", underTest.getPort());
         Assert.assertEquals(ASSERT_ERROR_MSG, "ranger", underTest.getDatabaseName());
         Assert.assertEquals("postgresql", underTest.getSubprotocol());
+
+        Assert.assertEquals("admin", underTest.getConnectionUserName());
+        Assert.assertEquals("adminpassword", underTest.getConnectionPassword());
+    }
+
+    @Test
+    public void testCreateRdsViewWhenConnectionUserNameHasSuffix() {
+        String connectionUrl = "jdbc:postgresql://some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432/ranger";
+        RDSConfig rdsConfig = createRdsConfig(connectionUrl);
+        rdsConfig.setConnectionUserName(rdsConfig.getConnectionUserName() + "@some-rds");
+
+        RdsView underTest = new RdsView(rdsConfig);
+
+        Assert.assertEquals("admin", underTest.getConnectionUserName());
     }
 
     @Test
@@ -158,7 +172,7 @@ public class RdsViewTest {
     private RDSConfig createRdsConfig(String connectionUrl, DatabaseVendor databaseVendor, DatabaseType databaseType) {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setConnectionURL(connectionUrl);
-        rdsConfig.setConnectionPassword("admin");
+        rdsConfig.setConnectionPassword("adminpassword");
         rdsConfig.setConnectionUserName("admin");
         rdsConfig.setDatabaseEngine(databaseVendor);
         rdsConfig.setType(databaseType.name());

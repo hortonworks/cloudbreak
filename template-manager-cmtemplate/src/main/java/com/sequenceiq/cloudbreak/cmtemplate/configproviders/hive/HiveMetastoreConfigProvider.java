@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -20,10 +19,6 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
 public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
-
-    // we need to disable this feature, because the CM team reverted from the CM. If they are support again, we need to delete this condition.
-    @Value("${cb.enable.hms.replication:false}")
-    private boolean enableHmsReplication;
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
@@ -42,11 +37,12 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
         if (kerberosConfigOpt.isPresent()) {
             String realm = Optional.ofNullable(kerberosConfigOpt.get().getRealm()).orElse("").toUpperCase();
             String safetyValveValue = "<property><name>hive.server2.authentication.kerberos.principal</name><value>hive/_HOST@" + realm
-                    + "</value></property><property><name>hive.server2.authentication.kerberos.keytab</name><value>hive.keytab</value></property>";
+                    + "</value></property><property><name>hive.server2.authentication.kerberos.keytab</name><value>hive.keytab</value></property>"
+                    + "<property><name>hive.hook.proto.file.per.event</name><value>true</value></property>";
             configs.add(config("hive_service_config_safety_valve", safetyValveValue));
         }
 
-        if (source.getStackType() == StackType.DATALAKE && enableHmsReplication) {
+        if (source.getStackType() == StackType.DATALAKE) {
             source.getLdapConfig().ifPresent(ldap -> {
                 configs.add(config("hive_metastore_enable_ldap_auth", "true"));
                 configs.add(config("hive_metastore_ldap_uri", ldap.getConnectionURL()));

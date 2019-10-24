@@ -135,7 +135,7 @@ public class UserService {
 
             boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
             Json umsEventGenerationIdsJson =  fullSync ?
-                    new Json(umsEventGenerationIdsProvider.getEventGenerationIds(actorCrn, accountId, requestIdOptional)) :
+                    new Json(umsEventGenerationIdsProvider.getEventGenerationIds(accountId, requestIdOptional)) :
                     null;
 
             Map<String, UsersState> envToUmsStateMap = umsUsersStateProvider

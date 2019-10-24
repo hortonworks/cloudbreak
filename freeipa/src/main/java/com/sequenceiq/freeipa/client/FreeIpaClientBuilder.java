@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.client.CookieStore;
@@ -54,9 +55,11 @@ public class FreeIpaClientBuilder {
 
     private static final int READ_TIMEOUT_MILLIS = 60 * 1000 * 5;
 
+    private static final String DEFAULT_BASE_PATH  = "/ipa";
+
     private final PoolingHttpClientConnectionManager connectionManager;
 
-    private String basePath = "/ipa";
+    private final String basePath;
 
     private final String user;
 
@@ -66,43 +69,66 @@ public class FreeIpaClientBuilder {
 
     private final SSLContext sslContext;
 
-    private final String port;
+    private final int port;
 
     private final HttpClientConfig clientConfig;
 
-    public FreeIpaClientBuilder(String user, String pass, String realm, HttpClientConfig clientConfig, String port) throws Exception {
+    private Map<String, String> additionalHeaders;
+
+    public FreeIpaClientBuilder(String user, String pass, String realm, HttpClientConfig clientConfig, int port, String basePath,
+                                Map<String, String> additionalHeaders) throws Exception {
         this.user = user;
         this.pass = pass;
         this.realm = realm;
         this.clientConfig = clientConfig;
         this.port = port;
-        sslContext = setupSSLContext(clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
-        RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.create();
-        SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(sslContext, hostnameVerifier());
-        registryBuilder.register("https", socketFactory);
-        Registry<ConnectionSocketFactory> registry = registryBuilder.build();
-        connectionManager = new PoolingHttpClientConnectionManager(registry);
+
+        if (clientConfig.hasSSLConfigs()) {
+            this.sslContext =
+                setupSSLContext(clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
+            RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.create();
+            SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(sslContext, hostnameVerifier());
+            registryBuilder.register("https", socketFactory);
+            Registry<ConnectionSocketFactory> registry = registryBuilder.build();
+            connectionManager = new PoolingHttpClientConnectionManager(registry);
+        } else {
+            this.sslContext = null;
+            connectionManager = new PoolingHttpClientConnectionManager();
+        }
+
         connectionManager.setMaxTotal(CONNECTION_POOL_MAX);
         connectionManager.setDefaultMaxPerRoute(CONNECTION_POOL_MAX_PER_ROOT);
+
+        this.basePath = basePath;
+        this.additionalHeaders = Map.copyOf(additionalHeaders);
     }
 
-    public FreeIpaClientBuilder(String user, String pass, String realm, HttpClientConfig clientConfig, String port, String basePath) throws Exception {
-        this(user, pass, realm, clientConfig, port);
-        this.basePath = basePath;
+    public FreeIpaClientBuilder(String user, String pass, String realm,
+                                HttpClientConfig clientConfig, int port) throws Exception {
+        this(user, pass, realm, clientConfig, port, DEFAULT_BASE_PATH, Map.of());
     }
 
     public FreeIpaClient build() throws URISyntaxException, FreeIpaClientException, IOException {
-        String sessionCookie = connect(user, pass, sslContext, clientConfig.getApiAddress(), port);
+        String sessionCookie = connect(user, pass, clientConfig.getApiAddress(), port);
+
+        Map<String, String> headers = ImmutableMap.<String, String>builder()
+            .put("Cookie", "ipa_session=" + sessionCookie)
+            .putAll(additionalHeaders)
+            .build();
+
         JsonRpcHttpClient jsonRpcHttpClient = new JsonRpcHttpClient(ObjectMapperBuilder.getObjectMapper(),
-                getIpaUrl(clientConfig.getApiAddress(), port, basePath, "/session/json"),
-                Map.of("Cookie", "ipa_session=" + sessionCookie));
-        jsonRpcHttpClient.setSslContext(sslContext);
+                getIpaUrl(clientConfig.getApiAddress(), port, basePath, "/session/json"), headers);
+
+        if (sslContext != null) {
+            jsonRpcHttpClient.setSslContext(sslContext);
+        }
+
         jsonRpcHttpClient.setHostNameVerifier(hostnameVerifier());
         jsonRpcHttpClient.setReadTimeoutMillis(READ_TIMEOUT_MILLIS);
         return new FreeIpaClient(jsonRpcHttpClient);
     }
 
-    private String connect(String user, String pass, SSLContext sslContext, String apiAddress, String port)
+    private String connect(String user, String pass, String apiAddress, int port)
             throws IOException, URISyntaxException, FreeIpaClientException {
 
         URI target = getIpaUrl(apiAddress, port, basePath, "/session/login_password").toURI();
@@ -160,10 +186,11 @@ public class FreeIpaClientBuilder {
         return context;
     }
 
-    private URL getIpaUrl(String apiAddress, String port, String basePath, String context) throws MalformedURLException {
+    private URL getIpaUrl(String apiAddress, int port, String basePath, String context) throws MalformedURLException {
+        String scheme = clientConfig.hasSSLConfigs() ? "https://" : "http://";
         String path = StringUtils.isBlank(basePath) ? "" : basePath;
         path += context;
-        return new URL("https://" + apiAddress + ':' + port + path);
+        return new URL(scheme + apiAddress + ':' + port + path);
     }
 
     private HttpPost getPost(URI target) {
@@ -171,6 +198,7 @@ public class FreeIpaClientBuilder {
         post.addHeader("Accept", ContentType.APPLICATION_XML.getMimeType());
         post.addHeader("Content-Type",
                 ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        additionalHeaders.forEach(post::addHeader);
         return post;
     }
 

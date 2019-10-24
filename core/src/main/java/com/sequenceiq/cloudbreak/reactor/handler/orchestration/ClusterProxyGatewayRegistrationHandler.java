@@ -4,9 +4,9 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyGatewayRegistrationFailed;
@@ -22,8 +22,8 @@ import reactor.bus.EventBus;
 public class ClusterProxyGatewayRegistrationHandler implements EventHandler<ClusterProxyGatewayRegistrationRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyGatewayRegistrationHandler.class);
 
-    @Value("${clusterProxy.enabled:false}")
-    private boolean clusterProxyIntegrationEnabled;
+    @Inject
+    private ClusterProxyConfiguration clusterProxyConfiguration;
 
     @Inject
     private EventBus eventBus;
@@ -41,7 +41,7 @@ public class ClusterProxyGatewayRegistrationHandler implements EventHandler<Clus
         ClusterProxyGatewayRegistrationRequest request = event.getData();
         Selectable response;
         try {
-            if (clusterProxyIntegrationEnabled) {
+            if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
                 clusterProxyService.registerGatewayConfiguration(request.getResourceId());
                 response = new ClusterProxyGatewayRegistrationSuccess(request.getResourceId());
             } else {

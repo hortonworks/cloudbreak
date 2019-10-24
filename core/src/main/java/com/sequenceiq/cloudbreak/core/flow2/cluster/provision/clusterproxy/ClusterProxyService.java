@@ -68,12 +68,12 @@ public class ClusterProxyService {
     }
 
     private ConfigRegistrationRequest createProxyConfigRequest(Stack stack) {
-        return new ConfigRegistrationRequest(stack.getResourceCrn(), singletonList(clusterId(stack.getCluster())), singletonList(serviceConfig(stack)));
+        return new ConfigRegistrationRequest(stack.getResourceCrn(), singletonList(clusterId(stack.getCluster())), singletonList(serviceConfig(stack)), null);
     }
 
     private ConfigRegistrationRequest createProxyConfigReRegisterRequest(Stack stack) {
         return new ConfigRegistrationRequest(stack.getResourceCrn(), knoxUrl(stack), singletonList(clusterId(stack.getCluster())),
-                singletonList(serviceConfig(stack)));
+                singletonList(serviceConfig(stack)), null);
     }
 
     private ClusterServiceConfig serviceConfig(Stack stack) {
@@ -87,7 +87,7 @@ public class ClusterProxyService {
 
         List<ClusterServiceCredential> credentials = asList(new ClusterServiceCredential(cloudbreakUser, cloudbreakPasswordVaultPath),
                 new ClusterServiceCredential(dpUser, dpPasswordVaultPath, true));
-        return new ClusterServiceConfig("cloudera-manager", singletonList(clusterManagerUrl(stack)), credentials);
+        return new ClusterServiceConfig("cloudera-manager", singletonList(clusterManagerUrl(stack)), credentials, null, null);
     }
 
     private String knoxUrl(Stack stack) {
