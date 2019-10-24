@@ -14,9 +14,9 @@ import org.springframework.statemachine.transition.Transition;
 import org.springframework.statemachine.trigger.Trigger;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
+import com.sequenceiq.flow.core.FlowEventListener;
 
 @Primary
 @Component

@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
@@ -16,7 +15,6 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
@@ -40,7 +38,6 @@ public class ClusterToClusterDetailsConverter {
         clusterDetails.setDescription(source.getDescription());
         clusterDetails.setStatus(source.getStatus().toString());
         clusterDetails.setStatusReason(source.getStatusReason());
-        convertKerberosConfig(clusterDetails, source);
         convertGatewayProperties(clusterDetails, source.getGateway());
         convertFileSystemProperties(clusterDetails, source.getFileSystem());
         convertComponents(clusterDetails, source);
@@ -56,17 +53,6 @@ public class ClusterToClusterDetailsConverter {
         } else {
             clusterDetails.setDatabaseType(rdsConfig.getDatabaseEngine().name());
             clusterDetails.setExternalDatabase(Boolean.TRUE);
-        }
-    }
-
-    private void convertKerberosConfig(ClusterDetails clusterDetails, Cluster source) {
-        KerberosConfig kerberosConfig = kerberosConfigService.get(source.getEnvironmentCrn(), source.getName()).orElse(null);
-        if (kerberosConfig != null) {
-            String kerberosType = "New MIT Kerberos";
-            if (StringUtils.isNotEmpty(kerberosConfig.getUrl())) {
-                kerberosType = StringUtils.isNotEmpty(kerberosConfig.getLdapUrl()) ? "Active Directory" : "MIT Kerberos";
-            }
-            clusterDetails.setKerberosType(kerberosType);
         }
     }
 

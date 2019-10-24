@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.converter.ClusterToClusterDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
@@ -71,19 +70,12 @@ public class StructuredFlowEventFactory {
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
         BlueprintDetails blueprintDetails = null;
-        try {
-            if (detailed) {
-                stackDetails = conversionService.convert(stack, StackDetails.class);
-                Cluster cluster = stack.getCluster();
-                if (cluster != null) {
-                    clusterDetails = clusterToClusterDetailsConverter.convert(cluster);
-                    blueprintDetails = conversionService.convert(cluster.getBlueprint(), BlueprintDetails.class);
-                }
-            }
-        } catch (BadRequestException ex) {
-            LOGGER.error("Error happened during conversion, not all details will be available in Structured Event", ex);
-            if (exception == null) {
-                exception = ex;
+        if (detailed) {
+            stackDetails = conversionService.convert(stack, StackDetails.class);
+            Cluster cluster = stack.getCluster();
+            if (cluster != null) {
+                clusterDetails = clusterToClusterDetailsConverter.convert(cluster);
+                blueprintDetails = conversionService.convert(cluster.getBlueprint(), BlueprintDetails.class);
             }
         }
         StructuredFlowEvent event = new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails);
