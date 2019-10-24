@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
+import com.sequenceiq.cloudbreak.clusterproxy.Tunnel;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -26,6 +27,12 @@ public class ClusterProxyService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyService.class);
 
     private static final String VAULT_KEY_SUFFIX = ":secret";
+
+    private static final Boolean NO_TLS_STRICT_CHECK = false;
+
+    private static final Boolean USE_TUNNEL = true;
+
+    private static final String GATEWAY_SERVICE_TYPE = "GATEWAY";
 
     @Inject
     private StackService stackService;
@@ -60,9 +67,13 @@ public class ClusterProxyService {
         HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(
                 stack.getId(), primaryGatewayConfig.getGatewayUrl());
 
-        // TODO check useCCM flag and create different registration request
+        GatewaySecreVaultRef gatewaySecretVaultRef = putGatewaySecretInVault(stack, primaryGatewayConfig.getClientCert(), primaryGatewayConfig.getClientKey());
 
-        List<ClusterServiceConfig> serviceConfigs = List.of(createServiceConfig(stack, httpClientConfig));
+        ClusterServiceConfig serviceConfig = stack.getUseCcm() ?
+                createServiceConfigWithTunnelEnabled(stack, httpClientConfig, primaryGatewayConfig, gatewaySecretVaultRef) :
+                createServiceConfig(stack, httpClientConfig, gatewaySecretVaultRef);
+
+        List<ClusterServiceConfig> serviceConfigs = List.of(serviceConfig);
         LOGGER.debug("Registering service configs [{}]", serviceConfigs);
         ConfigRegistrationRequest request = new ConfigRegistrationRequest(stack.getResourceCrn(), List.of(), serviceConfigs, null);
         ConfigRegistrationResponse response = clusterProxyRegistrationClient.registerConfig(request);
@@ -88,17 +99,56 @@ public class ClusterProxyService {
         freeIpaCertVaultComponent.cleanupSecrets(stack);
     }
 
-    private ClusterServiceConfig createServiceConfig(Stack stack, HttpClientConfig httpClientConfig) {
+    private GatewaySecreVaultRef putGatewaySecretInVault(Stack stack, String clientCert, String clientKey) {
         LOGGER.debug("Putting vault secret for cluster-proxy");
         SecretResponse clientCertificateSecret =
-            freeIpaCertVaultComponent.putGatewayClientCertificate(stack, httpClientConfig.getClientCert());
+                freeIpaCertVaultComponent.putGatewayClientCertificate(stack, clientCert);
         SecretResponse clientKeySecret =
-            freeIpaCertVaultComponent.putGatewayClientKey(stack, httpClientConfig.getClientKey());
-
+                freeIpaCertVaultComponent.putGatewayClientKey(stack, clientKey);
         String keyRef = clientKeySecret.getSecretPath() + VAULT_KEY_SUFFIX;
         String secretRef = clientCertificateSecret.getSecretPath() + VAULT_KEY_SUFFIX;
-
-        return new ClusterServiceConfig(ClusterProxyConfiguration.FREEIPA_SERVICE_NAME, List.of(httpClientConfig.getApiAddress()), List.of(),
-            new ClientCertificate(keyRef, secretRef), false);
+        return new GatewaySecreVaultRef(keyRef, secretRef);
     }
+
+    private ClusterServiceConfig createServiceConfig(Stack stack, HttpClientConfig httpClientConfig, GatewaySecreVaultRef gatewaySecretVaultRef) {
+        return new ClusterServiceConfig(ClusterProxyConfiguration.FREEIPA_SERVICE_NAME,
+                List.of(httpClientConfig.getApiAddress()),
+                List.of(),
+                new ClientCertificate(gatewaySecretVaultRef.keyRef, gatewaySecretVaultRef.secretRef),
+                NO_TLS_STRICT_CHECK
+        );
+    }
+
+    private ClusterServiceConfig createServiceConfigWithTunnelEnabled(
+            Stack stack, HttpClientConfig httpClientConfig, GatewayConfig primaryGatewayConfig, GatewaySecreVaultRef gatewaySecretVaultRef) {
+
+        String tunnelKey = primaryGatewayConfig.getInstanceId();
+        String tunnelHost = primaryGatewayConfig.getPrivateAddress();
+        Integer tunnelPort = primaryGatewayConfig.getGatewayPort();
+
+        Tunnel tunnel = new Tunnel(tunnelKey, GATEWAY_SERVICE_TYPE, tunnelHost, tunnelPort);
+
+        return new ClusterServiceConfig(ClusterProxyConfiguration.FREEIPA_SERVICE_NAME,
+                List.of(httpClientConfig.getApiAddress()),
+                List.of(),
+                new ClientCertificate(gatewaySecretVaultRef.keyRef, gatewaySecretVaultRef.secretRef),
+                NO_TLS_STRICT_CHECK,
+                USE_TUNNEL,
+                List.of(tunnel),
+                stack.getAccountId()
+        );
+    }
+
+    private static class GatewaySecreVaultRef {
+
+        private final String keyRef;
+
+        private final String secretRef;
+
+        GatewaySecreVaultRef(String keyRef, String secretRef) {
+            this.keyRef = keyRef;
+            this.secretRef = secretRef;
+        }
+    }
+
 }
