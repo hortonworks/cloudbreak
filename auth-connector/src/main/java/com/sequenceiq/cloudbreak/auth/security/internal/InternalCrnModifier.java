@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.security.CrnUser;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 
 @Service
@@ -21,6 +22,9 @@ public class InternalCrnModifier {
 
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
+    @Inject
+    private InternalUserModifier internalUserModifier;
 
     @Inject
     private ReflectionUtil reflectionUtil;
@@ -42,8 +46,14 @@ public class InternalCrnModifier {
                         .build();
                 LOGGER.debug("Changing internal CRN to {}", newUserCrn);
                 threadBasedUserCrnProvider.setUserCrn(newUserCrn.toString());
+                createNewUser(newUserCrn);
             }
         }
         return reflectionUtil.proceed(proceedingJoinPoint, methodSignature);
+    }
+
+    public void createNewUser(Crn newUserCrn) {
+        CrnUser newUser = InternalCrnBuilder.createInternalCrnUser(newUserCrn);
+        internalUserModifier.persistModifiedInternalUser(newUser);
     }
 }
