@@ -5,13 +5,11 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMeta
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
@@ -23,12 +21,6 @@ import com.sequenceiq.common.model.FileSystemType;
 public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
 
     private static final String CORE_SITE_SAFETY_VALVE = "core_site_safety_valve";
-
-    private static final String HADOOP_HTTP_FILTER_INITIALIZERS_PARAM = "hadoop.http.filter.initializers";
-
-    private static final String HADOOP_HTTP_FILTER_INITIALIZERS_VALUE =
-            "org.apache.hadoop.security.HttpCrossOriginFilterInitializer,"
-                    + "org.apache.hadoop.security.authentication.server.ProxyUserAuthenticationFilterInitializer";
 
     private static final String S3GUARD_METADATASTORE_IMPL_PARAM = "fs.s3a.metadatastore.impl";
 
@@ -54,12 +46,6 @@ public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
         StringBuilder hdfsCoreSiteSafetyValveValue = new StringBuilder();
 
-        if (isHadoopHttpFilterInitializationNeeded(templateProcessor, templatePreparationObject)) {
-            hdfsCoreSiteSafetyValveValue.append(
-                    ConfigUtils.getSafetyValveProperty(HADOOP_HTTP_FILTER_INITIALIZERS_PARAM,
-                            HADOOP_HTTP_FILTER_INITIALIZERS_VALUE));
-        }
-
         if (isS3FileSystemConfigured(templatePreparationObject)) {
             configureS3GuardCoreSiteParameters(templatePreparationObject, hdfsCoreSiteSafetyValveValue);
         }
@@ -81,12 +67,6 @@ public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
-    }
-
-    private boolean isHadoopHttpFilterInitializationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return Objects.nonNull(source.getGatewayView())
-                && Objects.nonNull(source.getGatewayView().getExposedServices())
-                && source.getGatewayView().getExposedServices().contains(ExposedService.NAMENODE.getKnoxService());
     }
 
     private boolean isS3FileSystemConfigured(TemplatePreparationObject source) {

@@ -45,12 +45,7 @@ public class HdfsConfigProviderTest {
 
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
 
-        assertEquals(1, serviceConfigs.size());
-        assertEquals("core_site_safety_valve", serviceConfigs.get(0).getName());
-        assertEquals("<property><name>hadoop.http.filter.initializers</name>"
-                +  "<value>org.apache.hadoop.security.HttpCrossOriginFilterInitializer,"
-                +  "org.apache.hadoop.security.authentication.server.ProxyUserAuthenticationFilterInitializer"
-                +  "</value></property>", serviceConfigs.get(0).getValue());
+        assertEquals(0, serviceConfigs.size());
     }
 
     @Test
@@ -61,12 +56,7 @@ public class HdfsConfigProviderTest {
 
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
 
-        assertEquals(1, serviceConfigs.size());
-        assertEquals("core_site_safety_valve", serviceConfigs.get(0).getName());
-        assertEquals("<property><name>hadoop.http.filter.initializers</name>"
-                +  "<value>org.apache.hadoop.security.HttpCrossOriginFilterInitializer,"
-                +  "org.apache.hadoop.security.authentication.server.ProxyUserAuthenticationFilterInitializer"
-                +  "</value></property>", serviceConfigs.get(0).getValue());
+        assertEquals(0, serviceConfigs.size());
     }
 
     @Test
@@ -79,12 +69,7 @@ public class HdfsConfigProviderTest {
 
         assertEquals(1, serviceConfigs.size());
         assertEquals("core_site_safety_valve", serviceConfigs.get(0).getName());
-        assertEquals("<property>" +
-                "<name>hadoop.http.filter.initializers</name>" +
-                "<value>org.apache.hadoop.security.HttpCrossOriginFilterInitializer," +
-                "org.apache.hadoop.security.authentication.server.ProxyUserAuthenticationFilterInitializer</value>" +
-                "</property>" +
-                "<property><name>fs.s3a.metadatastore.impl</name>" +
+        assertEquals("<property><name>fs.s3a.metadatastore.impl</name>" +
                 "<value>org.apache.hadoop.fs.s3a.s3guard.DynamoDBMetadataStore</value></property>" +
                 "<property><name>fs.s3a.s3guard.ddb.table.tag.apple</name><value>apple1</value></property>" +
                 "<property><name>fs.s3a.s3guard.ddb.table.tag.cdp_table_role</name><value>s3guard</value></property>" +
@@ -103,11 +88,7 @@ public class HdfsConfigProviderTest {
 
         assertEquals(1, serviceConfigs.size());
         assertEquals("core_site_safety_valve", serviceConfigs.get(0).getName());
-        assertEquals("<property><name>hadoop.http.filter.initializers</name>" +
-                "<value>org.apache.hadoop.security.HttpCrossOriginFilterInitializer," +
-                "org.apache.hadoop.security.authentication.server.ProxyUserAuthenticationFilterInitializer</value>" +
-                "</property>" +
-                "<property><name>fs.s3a.metadatastore.impl</name>" +
+        assertEquals("<property><name>fs.s3a.metadatastore.impl</name>" +
                 "<value>org.apache.hadoop.fs.s3a.s3guard.DynamoDBMetadataStore</value></property>" +
                 "<property><name>fs.s3a.s3guard.ddb.table.tag.apple</name><value>apple1</value></property>" +
                 "<property><name>fs.s3a.s3guard.ddb.table.tag.cdp_table_role</name><value>s3guard</value></property>" +
