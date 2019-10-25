@@ -1,11 +1,21 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import java.util.List;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClientCertificate;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
+import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequestBuilder;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.Tunnel;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -15,13 +25,6 @@ import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
 import com.sequenceiq.freeipa.service.config.FmsClusterProxyEnablement;
 import com.sequenceiq.freeipa.vault.FreeIpaCertVaultComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ClusterProxyService {
@@ -86,7 +89,8 @@ public class ClusterProxyService {
 
         List<ClusterServiceConfig> serviceConfigs = List.of(serviceConfig);
         LOGGER.debug("Registering service configs [{}]", serviceConfigs);
-        ConfigRegistrationRequest request = new ConfigRegistrationRequest(stack.getResourceCrn(), List.of(), serviceConfigs, null);
+        ConfigRegistrationRequest request = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
+                .with(List.of(), serviceConfigs, null).build();
         ConfigRegistrationResponse response = clusterProxyRegistrationClient.registerConfig(request);
 
         stackUpdater.updateClusterProxyRegisteredFlag(stack, true);

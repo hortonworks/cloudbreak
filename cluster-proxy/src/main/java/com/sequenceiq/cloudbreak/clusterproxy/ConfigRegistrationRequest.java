@@ -6,7 +6,13 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class ConfigRegistrationRequest {
+    @SuppressFBWarnings("URF_UNREAD_FIELD")
+    @JsonProperty
+    private String accountId;
+
     @JsonProperty
     private String clusterCrn;
 
@@ -22,30 +28,27 @@ public class ConfigRegistrationRequest {
     @JsonProperty
     private List<String> certificates;
 
+    @JsonProperty
+    private boolean useTunnel;
+
+    @JsonProperty
+    private List<TunnelEntry> tunnels;
+
     @JsonCreator
-    public ConfigRegistrationRequest(String clusterCrn, List<String> aliases, List<ClusterServiceConfig> services, List<String> certificates) {
+    public ConfigRegistrationRequest(String clusterCrn, String knoxUrl, String accountId, boolean useTunnel, List<TunnelEntry> tunnelEntries,
+            List<String> aliases, List<ClusterServiceConfig> services, List<String> certificates) {
         this.clusterCrn = clusterCrn;
+        this.uriOfKnox = knoxUrl;
+        this.accountId = accountId;
+        this.useTunnel = useTunnel;
+        this.tunnels = tunnelEntries;
         this.aliases = aliases;
         this.services = services;
         this.certificates = certificates;
     }
 
-    @JsonCreator
-    public ConfigRegistrationRequest(String clusterCrn, String knoxUrl, List<String> aliases, List<ClusterServiceConfig> services, List<String> certificates) {
-        this(clusterCrn, aliases, services, certificates);
-        this.uriOfKnox = knoxUrl;
-    }
-
     public String getClusterCrn() {
         return clusterCrn;
-    }
-
-    public String getUriOfKnox() {
-        return uriOfKnox;
-    }
-
-    public List<String> getAliases() {
-        return aliases;
     }
 
     public List<ClusterServiceConfig> getServices() {
@@ -60,29 +63,31 @@ public class ConfigRegistrationRequest {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         ConfigRegistrationRequest that = (ConfigRegistrationRequest) o;
-
-        return Objects.equals(clusterCrn, that.clusterCrn) &&
+        return useTunnel == that.useTunnel &&
+                Objects.equals(clusterCrn, that.clusterCrn) &&
                 Objects.equals(uriOfKnox, that.uriOfKnox) &&
                 Objects.equals(aliases, that.aliases) &&
                 Objects.equals(services, that.services) &&
-                Objects.equals(certificates, that.certificates);
+                Objects.equals(certificates, that.certificates) &&
+                Objects.equals(tunnels, that.tunnels);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(clusterCrn, uriOfKnox, aliases, services, certificates);
+        return Objects.hash(clusterCrn, uriOfKnox, aliases, services, certificates, useTunnel, tunnels);
     }
 
     @Override
     public String toString() {
         return "ConfigRegistrationRequest{" +
                 "clusterCrn='" + clusterCrn + '\'' +
+                ", uriOfKnox='" + uriOfKnox + '\'' +
                 ", aliases=" + aliases +
                 ", services=" + services +
-                ", uriOfKnox='" + uriOfKnox + '\'' +
                 ", certificates=" + certificates +
+                ", useTunnel=" + useTunnel +
+                ", tunnels=" + tunnels +
                 '}';
     }
 }

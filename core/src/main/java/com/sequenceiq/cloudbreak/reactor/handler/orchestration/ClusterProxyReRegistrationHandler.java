@@ -76,7 +76,7 @@ public class ClusterProxyReRegistrationHandler implements EventHandler<ClusterPr
                 LOGGER.info("Not re-registering with Cluster Proxy as this is not a gateway host group. stack crn: {}", stack.getResourceCrn());
                 return new ClusterProxyReRegistrationResult(request);
             }
-            clusterProxyService.reRegisterCluster(stack);
+            clusterProxyService.reRegisterCluster(stack, request.getAccountId());
             return new ClusterProxyReRegistrationResult(request);
         } catch (Exception e) {
             LOGGER.error("Error occurred re-registering cluster {} in environment {} to cluster proxy",

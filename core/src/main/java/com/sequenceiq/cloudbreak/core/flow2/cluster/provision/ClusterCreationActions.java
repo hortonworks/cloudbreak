@@ -55,7 +55,7 @@ public class ClusterCreationActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                return new ClusterProxyRegistrationRequest(context.getStack().getId());
+                return new ClusterProxyRegistrationRequest(context.getStack().getId(), context.getCloudContext().getAccountId());
             }
         };
     }
