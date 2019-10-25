@@ -20,6 +20,10 @@ public class EntitlementService {
         return isEntitlementRegistered(userCrn, "CDP_REVERSE_SSH_TUNNEL");
     }
 
+    public boolean azureEnabled(String userCrn) {
+        return isEntitlementRegistered(userCrn, "CDP_AZURE");
+    }
+
     public List<String> getEntitlements(String userCrn) {
         return getAccount(userCrn).getEntitlementsList()
                 .stream()

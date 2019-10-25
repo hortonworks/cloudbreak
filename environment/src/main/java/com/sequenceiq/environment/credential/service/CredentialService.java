@@ -127,44 +127,44 @@ public class CredentialService extends AbstractCredentialService {
     }
 
     @Retryable(value = BadRequestException.class, maxAttempts = 30, backoff = @Backoff(delay = 2000))
-    public void createWithRetry(Credential credential, String accountId, String creator) {
-        create(credential, accountId, creator);
+    public void createWithRetry(Credential credential, String accountId, String creatorUserCrn) {
+        create(credential, accountId, creatorUserCrn);
     }
 
-    public Credential create(Credential credential, @Nonnull String accountId, @Nonnull String creator) {
+    public Credential create(Credential credential, @Nonnull String accountId, @Nonnull String creatorUserCrn) {
         repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms())
                 .map(Credential::getName)
                 .ifPresent(name -> {
                     throw new BadRequestException("Credential already exists with name: " + name);
                 });
-        credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform());
+        credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform(), creatorUserCrn);
         credentialValidator.validateParameters(Platform.platform(credential.getCloudPlatform()), new Json(credential.getAttributes()));
         credential.setResourceCrn(createCRN(accountId));
-        credential.setCreator(creator);
+        credential.setCreator(creatorUserCrn);
         credential.setAccountId(accountId);
         Credential created = repository.save(credentialAdapter.verify(credential, accountId).getCredential());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
         return created;
     }
 
-    public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String deploymentAddress) {
+    public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String deploymentAddress, String userCrn) {
         String cloudPlatformUppercased = cloudPlatform.toUpperCase();
-        credentialValidator.validateCredentialCloudPlatform(cloudPlatformUppercased);
+        credentialValidator.validateCredentialCloudPlatform(cloudPlatformUppercased, userCrn);
         return credentialPrerequisiteService.getPrerequisites(cloudPlatformUppercased, deploymentAddress);
     }
 
-    public String initCodeGrantFlow(String accountId, @Nonnull Credential credential, String userId) {
+    public String initCodeGrantFlow(String accountId, @Nonnull Credential credential, String creatorUserCrn) {
         repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms())
                 .map(Credential::getName)
                 .ifPresent(name -> {
                     throw new BadRequestException("Credential already exists with name: " + name);
                 });
-        credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform());
+        credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform(), creatorUserCrn);
         validateDeploymentAddress(credential);
-        Credential created = credentialAdapter.initCodeGrantFlow(credential, accountId, userId);
+        Credential created = credentialAdapter.initCodeGrantFlow(credential, accountId, creatorUserCrn);
         created.setResourceCrn(createCRN(accountId));
         created.setAccountId(accountId);
-        created.setCreator(userId);
+        created.setCreator(creatorUserCrn);
         created = repository.save(created);
         return getCodeGrantFlowAppLoginUrl(created);
     }

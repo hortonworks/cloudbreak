@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.environment.CloudPlatform.AWS;
+import static com.sequenceiq.environment.CloudPlatform.AZURE;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -94,6 +95,7 @@ public class EnvironmentCreationService {
                     creationDto.getName(), creationDto.getAccountId()));
         }
         validateTunnel(creationDto.getCreator(), creationDto.getExperimentalFeatures().getTunnel());
+        validateCloudPlatform(creationDto.getCreator(), creationDto.getCloudPlatform());
         Environment environment = initializeEnvironment(creationDto);
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
         String workloadAdministrationGroupName = createAdminGroup(creationDto, environment.getResourceCrn());
@@ -114,6 +116,12 @@ public class EnvironmentCreationService {
     private void validateTunnel(String userCrn, Tunnel tunnel) {
         if (!entitlementService.ccmEnabled(userCrn) && Tunnel.CCM.equals(tunnel)) {
             throw new BadRequestException("Reverse SSH tunnel is not enabled for this account.");
+        }
+    }
+
+    private void validateCloudPlatform(String userCrn, String cloudPlatform) {
+        if (AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(userCrn)) {
+            throw new BadRequestException("Provisioning in Microsoft Azure is not enabled for this account.");
         }
     }
 
