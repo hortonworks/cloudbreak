@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -41,7 +42,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorFactory;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
+import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Service
 public class CloudResourceAdvisor {
@@ -69,7 +70,7 @@ public class CloudResourceAdvisor {
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
     public PlatformRecommendation createForBlueprint(Long workspaceId, String blueprintName, String credentialName,
-            String region, String platformVariant, String availabilityZone) {
+        String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
         Credential credential = credentialClientService.getByName(credentialName);
         String cloudPlatform = credential.cloudPlatform();
         Map<String, VmType> vmTypesByHostGroup = new HashMap<>();
@@ -93,7 +94,11 @@ public class CloudResourceAdvisor {
                 platformDisks.getDiskMappings().get(platform),
                 platformDisks.getDiskDisplayNames().get(platform));
 
-        CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(extendedCloudCredentialConverter.convert(credential), region, platformVariant,
+        CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(
+                extendedCloudCredentialConverter.convert(credential),
+                region,
+                platformVariant,
+                cdpResourceType,
                 Maps.newHashMap());
         VmType defaultVmType = getDefaultVmType(availabilityZone, vmTypes);
         if (defaultVmType != null) {

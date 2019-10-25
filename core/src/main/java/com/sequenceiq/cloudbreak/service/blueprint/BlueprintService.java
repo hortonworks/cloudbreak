@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;
+import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Service
 public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blueprint> {
@@ -174,11 +175,11 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public PlatformRecommendation getRecommendation(Long workspaceId, String blueprintName, String credentialName,
-            String region, String platformVariant, String availabilityZone) {
+        String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
         if (!ObjectUtils.allNotNull(region, availabilityZone)) {
             throw new BadRequestException("region and availabilityZone cannot be null");
         }
-        return cloudResourceAdvisor.createForBlueprint(workspaceId, blueprintName, credentialName, region, platformVariant, availabilityZone);
+        return cloudResourceAdvisor.createForBlueprint(workspaceId, blueprintName, credentialName, region, platformVariant, availabilityZone, cdpResourceType);
     }
 
     @Override

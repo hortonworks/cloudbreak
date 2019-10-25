@@ -29,7 +29,9 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.service.CdpResourceTypeProvider;
 import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -108,6 +110,9 @@ public class StackDecorator {
 
     @Inject
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
+    @Inject
+    private CdpResourceTypeProvider cdpResourceTypeProvider;
 
     @Measure(StackDecorator.class)
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackV4Request request, User user, Workspace workspace) {
@@ -206,8 +211,11 @@ public class StackDecorator {
                     String availabilityZone = placement != null ? placement.getAvailabilityZone() : subject.getAvailabilityZone();
                     String region = placement != null ? placement.getRegion() : subject.getRegion();
 
-                    templateValidator.validateTemplateRequest(credential, template, region, availabilityZone, subject.getPlatformVariant());
-                    template = templateDecorator.decorate(credential, template, region, availabilityZone, subject.getPlatformVariant());
+                    CdpResourceType cdpResourceType = cdpResourceTypeProvider.fromStackType(request.getType());
+                    templateValidator.validateTemplateRequest(credential, template, region, availabilityZone, subject.getPlatformVariant(),
+                            cdpResourceType);
+                    template = templateDecorator.decorate(credential, template, region, availabilityZone, subject.getPlatformVariant(),
+                            cdpResourceType);
                     template.setWorkspace(subject.getWorkspace());
                     template = templateService.create(user, template);
                     instanceGroup.setTemplate(template);

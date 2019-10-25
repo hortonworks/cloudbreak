@@ -6066,7 +6066,7 @@
           "Memory": 8.0
         }
       }, 
-      "value": "c5.xlarge"
+      "value": "c5.9xlarge"
     }, 
     {
       "meta": {

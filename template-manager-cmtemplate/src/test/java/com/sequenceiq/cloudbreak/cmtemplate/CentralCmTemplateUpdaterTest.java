@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static java.util.stream.Collectors.toSet;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3guard.S3GuardConfigProvider;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -79,6 +82,9 @@ public class CentralCmTemplateUpdaterTest {
     private BlueprintView blueprintView;
 
     @Mock
+    private S3GuardConfigProvider s3GuardConfigProvider;
+
+    @Mock
     private GeneralClusterConfigs generalClusterConfigs;
 
     private ClouderaManagerRepo clouderaManagerRepo;
@@ -90,6 +96,7 @@ public class CentralCmTemplateUpdaterTest {
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
         when(templatePreparationObject.getHostgroupViews()).thenReturn(toHostgroupViews(getHostgroupMappings()));
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
+        doNothing().when(s3GuardConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
         RDSConfig rdsConfig = TestUtil.rdsConfig(DatabaseType.HIVE);
         when(templatePreparationObject.getRdsConfigs()).thenReturn(Set.of(rdsConfig));
         when(templatePreparationObject.getRdsConfig(DatabaseType.HIVE)).thenReturn(rdsConfig);
@@ -171,7 +178,9 @@ public class CentralCmTemplateUpdaterTest {
 
     @Test
     public void getKafkaPropertiesWhenNoHdfsInClusterShouldPresentCoreSettings() {
-        List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviders = List.of(new CoreConfigProvider());
+        CoreConfigProvider coreConfigProvider = new CoreConfigProvider();
+        ReflectionTestUtils.setField(coreConfigProvider, "s3GuardConfigProvider", s3GuardConfigProvider);
+        List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviders = List.of(coreConfigProvider);
         ReflectionTestUtils.setField(cmTemplateComponentConfigProviderProcessor, "providers", cmTemplateComponentConfigProviders);
         S3FileSystem s3FileSystem = new S3FileSystem();
         s3FileSystem.setInstanceProfile("profile");

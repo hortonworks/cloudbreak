@@ -5,6 +5,7 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.common.api.type.CdpResourceType;
 
 public class GetPlatformVmTypesRequest  extends CloudPlatformRequest<GetPlatformVmTypesResult> {
 
@@ -14,15 +15,18 @@ public class GetPlatformVmTypesRequest  extends CloudPlatformRequest<GetPlatform
 
     private final ExtendedCloudCredential extendedCloudCredential;
 
+    private final CdpResourceType cdpResourceType;
+
     private final Map<String, String> filters;
 
-    public GetPlatformVmTypesRequest(CloudCredential cloudCredential, ExtendedCloudCredential extendedCloudCredential, String variant, String region,
-            Map<String, String> filters) {
+    public GetPlatformVmTypesRequest(CloudCredential cloudCredential, ExtendedCloudCredential extendedCloudCredential,
+        String variant, String region, CdpResourceType cdpResourceType, Map<String, String> filters) {
         super(null, cloudCredential);
         this.extendedCloudCredential = extendedCloudCredential;
         this.variant = variant;
         this.region = region;
         this.filters = filters;
+        this.cdpResourceType = cdpResourceType;
     }
 
     public String getVariant() {
@@ -35,6 +39,10 @@ public class GetPlatformVmTypesRequest  extends CloudPlatformRequest<GetPlatform
 
     public String getRegion() {
         return region;
+    }
+
+    public CdpResourceType getCdpResourceType() {
+        return cdpResourceType;
     }
 
     public Map<String, String> getFilters() {

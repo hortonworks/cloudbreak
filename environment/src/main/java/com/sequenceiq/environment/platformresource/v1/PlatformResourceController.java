@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
+import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDisksResponse;
@@ -60,7 +61,8 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
             String credentialCrn,
             String region,
             String platformVariant,
-            String availabilityZone) {
+            String availabilityZone,
+            CdpResourceType cdpResourceType) {
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -68,7 +70,9 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
                 credentialCrn,
                 region,
                 platformVariant,
-                availabilityZone);
+                availabilityZone,
+                cdpResourceType);
+
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
         return convertersionService.convert(cloudVmTypes, PlatformVmtypesResponse.class);
     }

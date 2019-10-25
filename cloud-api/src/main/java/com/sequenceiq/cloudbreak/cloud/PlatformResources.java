@@ -54,12 +54,22 @@ public interface PlatformResources {
     CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception;
 
     /**
-     * Return the securitygroup in the defined region
+     * Return the virtual machines in the defined region
      * @param region region of the resources (if null then the method will query every region)
      * @param filters the filter statement
      * @return the {@link CloudVmTypes} contains every vmtype per region
      */
     CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters);
+
+    /**
+     * Return the virtual machines in the defined region
+     * @param region region of the resources (if null then the method will query every region)
+     * @param filters the filter statement
+     * @return the {@link CloudVmTypes} contains every vmtype per region
+     */
+    default CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        return virtualMachines(cloudCredential, region, filters);
+    }
 
     /**
      * Return the gateways

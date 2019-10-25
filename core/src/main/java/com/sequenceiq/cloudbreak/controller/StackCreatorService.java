@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller;
 import static com.sequenceiq.cloudbreak.service.metrics.MetricType.STACK_PREPARATION;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
+import static com.sequenceiq.common.api.type.CdpResourceType.fromStackType;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -205,8 +206,13 @@ public class StackCreatorService {
                 measure(() -> {
                     for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
                         LOGGER.info("Validate template for {} name with {} instanceGroup.", stackName, instanceGroup.toString());
-                        templateValidator.validateTemplateRequest(credential, instanceGroup.getTemplate(), stack.getRegion(),
-                                stack.getAvailabilityZone(), stack.getPlatformVariant());
+                        StackType type = stack.getType();
+                        templateValidator.validateTemplateRequest(credential,
+                                instanceGroup.getTemplate(),
+                                stack.getRegion(),
+                                stack.getAvailabilityZone(),
+                                stack.getPlatformVariant(),
+                                fromStackType(type == null ? null : type.name()));
                     }
                 }, LOGGER, "Stack's instance templates have been validated in {} ms for stack {}", stackName);
 

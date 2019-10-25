@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
+import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -37,9 +38,15 @@ public class BlueprintUtilV4Controller extends NotificationController implements
 
     @Override
     public RecommendationV4Response createRecommendation(Long workspaceId, String blueprintName, String credentialName,
-            String region, String platformVariant, String availabilityZone) {
-        PlatformRecommendation recommendation
-                = blueprintService.getRecommendation(workspaceId, blueprintName, credentialName, region, platformVariant, availabilityZone);
+        String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
+        PlatformRecommendation recommendation = blueprintService.getRecommendation(
+                workspaceId,
+                blueprintName,
+                credentialName,
+                region,
+                platformVariant,
+                availabilityZone,
+                cdpResourceType);
         return converterUtil.convert(recommendation, RecommendationV4Response.class);
     }
 

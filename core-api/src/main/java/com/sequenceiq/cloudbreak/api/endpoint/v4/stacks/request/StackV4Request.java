@@ -81,7 +81,7 @@ public class StackV4Request extends StackV4Base {
     @Max(value = 65535, message = "Port should be between 1025 and 65535")
     private Integer gatewayPort;
 
-    private StackType type;
+    private StackType type = StackType.WORKLOAD;
 
     @ApiModelProperty(ClusterModelDescription.SHARED_SERVICE_REQUEST)
     private SharedServiceV4Request sharedService;

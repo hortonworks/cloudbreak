@@ -25,10 +25,11 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Component
 public class TemplateValidator {
@@ -48,8 +49,14 @@ public class TemplateValidator {
     private final Supplier<Map<Platform, PlatformParameters>> platformParameters =
             Suppliers.memoize(() -> cloudParameterService.getPlatformParameters());
 
-    public void validateTemplateRequest(Credential credential, Template value, String region, String availabilityZone, String variant) {
-        CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(extendedCloudCredentialConverter.convert(credential), region, variant, new HashMap<>());
+    public void validateTemplateRequest(Credential credential, Template value, String region, String availabilityZone,
+        String variant, CdpResourceType stackType) {
+        CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(
+                extendedCloudCredentialConverter.convert(credential),
+                region,
+                variant,
+                stackType,
+                new HashMap<>());
 
         if (StringUtils.isEmpty(value.getInstanceType())) {
             validateCustomInstanceType(value);

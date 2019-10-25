@@ -3,6 +3,7 @@ package com.sequenceiq.environment.platformresource;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.credential.domain.Credential;
 
 public class PlatformResourceRequest {
@@ -16,6 +17,8 @@ public class PlatformResourceRequest {
     private String platformVariant;
 
     private String availabilityZone;
+
+    private CdpResourceType cdpResourceType = CdpResourceType.DEFAULT;
 
     private Map<String, String> filters = new HashMap<>();
 
@@ -65,5 +68,13 @@ public class PlatformResourceRequest {
 
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
+    }
+
+    public CdpResourceType getCdpResourceType() {
+        return cdpResourceType;
+    }
+
+    public void setCdpResourceType(CdpResourceType cdpResourceType) {
+        this.cdpResourceType = cdpResourceType;
     }
 }

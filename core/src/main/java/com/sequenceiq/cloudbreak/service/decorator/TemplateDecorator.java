@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
+import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Component
 public class TemplateDecorator {
@@ -42,10 +43,15 @@ public class TemplateDecorator {
     @Inject
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
-    public Template decorate(Credential credential, Template template, String region, String availabilityZone, String variant) {
+    public Template decorate(Credential credential, Template template, String region, String availabilityZone, String variant, CdpResourceType cdpResourceType) {
         setRootVolumeSize(template);
         PlatformDisks platformDisks = cloudParameterService.getDiskTypes();
-        CloudVmTypes vmTypesV2 = cloudParameterService.getVmTypesV2(extendedCloudCredentialConverter.convert(credential), region, variant, new HashMap<>());
+        CloudVmTypes vmTypesV2 = cloudParameterService.getVmTypesV2(
+                extendedCloudCredentialConverter.convert(credential),
+                region,
+                variant,
+                cdpResourceType,
+                new HashMap<>());
         String locationString = locationService.location(region, availabilityZone);
         VolumeParameterConfig config;
         for (VolumeTemplate volumeTemplate : template.getVolumeTemplates()) {

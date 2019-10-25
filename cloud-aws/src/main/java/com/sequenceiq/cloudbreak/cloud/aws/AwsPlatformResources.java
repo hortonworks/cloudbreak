@@ -53,7 +53,6 @@ import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.InternetGateway;
 import com.amazonaws.services.ec2.model.InternetGatewayAttachment;
 import com.amazonaws.services.ec2.model.KeyPairInfo;
-import com.amazonaws.services.ec2.model.RouteTable;
 import com.amazonaws.services.ec2.model.SecurityGroup;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.Tag;
@@ -147,8 +146,18 @@ public class AwsPlatformResources implements PlatformResources {
     @Value("#{'${cb.aws.disabled.instance.types:}'.split(',')}")
     private List<String> disabledInstanceTypes;
 
+    @Value("#{'${cb.aws.distrox.disabled.instance.types:}'.split(',')}")
+    private List<String> disabledDistroxInstanceTypes;
+
     private final Predicate<VmType> enabledInstanceTypeFilter = vmt -> disabledInstanceTypes.stream()
             .filter(it -> !it.isEmpty())
+            .noneMatch(di -> vmt.value().startsWith(di));
+
+    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> disabledDistroxInstanceTypes.stream()
+            .filter(it -> !it.isEmpty())
+            .map(it -> getMachineType(it))
+            .collect(Collectors.toList())
+            .stream()
             .noneMatch(di -> vmt.value().startsWith(di));
 
     private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
@@ -157,6 +166,8 @@ public class AwsPlatformResources implements PlatformResources {
 
     private final Map<Region, VmType> defaultVmTypes = new HashMap<>();
 
+    private final Map<Region, VmType> defaultDistroxVmTypes = new HashMap<>();
+
     private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
 
     @PostConstruct
@@ -164,6 +175,10 @@ public class AwsPlatformResources implements PlatformResources {
         regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone-coordinates"));
         regionCoordinates = readRegionCoordinates(resourceDefinition("zone-coordinates"));
         readVmTypes();
+    }
+
+    private String getMachineType(String it) {
+        return it.toLowerCase().trim().replaceAll("\\s+", "");
     }
 
     private String getDefinition(String parameter, String type) {
@@ -205,6 +220,9 @@ public class AwsPlatformResources implements PlatformResources {
                 Optional.ofNullable(vmTypeMap.get(zvs.getDefaultVmType()))
                         .filter(enabledInstanceTypeFilter)
                         .ifPresent(vmType -> defaultVmTypes.put(region(zvs.getZone()), vmType));
+                Optional.ofNullable(vmTypeMap.get(zvs.getDefaultVmType()))
+                        .filter(enabledDistroxInstanceTypeFilter)
+                        .ifPresent(vmType -> defaultDistroxVmTypes.put(region(zvs.getZone()), vmType));
             }
         } catch (IOException e) {
             LOGGER.error("Cannot initialize platform parameters for aws", e);
@@ -359,17 +377,6 @@ public class AwsPlatformResources implements PlatformResources {
         properties.put("instanceTenancy", vpc.getInstanceTenancy());
         properties.put("state", vpc.getState());
         return properties;
-    }
-
-    private Optional<RouteTable> getRouteTableForSubnet(DescribeRouteTablesResult describeRouteTablesResult, Subnet subnet) {
-        List<RouteTable> routeTables = describeRouteTablesResult.getRouteTables();
-        return routeTables.stream().filter(rt -> {
-            return rt.getAssociations().stream().anyMatch(rta -> subnet.getSubnetId().equals(rta.getSubnetId()));
-        }).findFirst();
-    }
-
-    private boolean hasInternetGateway(RouteTable rt) {
-        return rt.getRoutes().stream().anyMatch(route -> route.getGatewayId() != null && OPEN_CIDR_BLOCK.equals(route.getDestinationCidrBlock()));
     }
 
     private Optional<String> getName(List<Tag> tags) {
@@ -549,6 +556,17 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
     public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        return getCloudVmTypes(cloudCredential, region, filters, enabledInstanceTypeFilter);
+    }
+
+    @Override
+    @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
+    public CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        return getCloudVmTypes(cloudCredential, region, filters, enabledDistroxInstanceTypeFilter);
+    }
+
+    private CloudVmTypes getCloudVmTypes(CloudCredential cloudCredential, Region region, Map<String, String> filters,
+        Predicate<VmType> enabledInstanceTypeFilter) {
         CloudRegions regions = regions(cloudCredential, region, filters);
 
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();

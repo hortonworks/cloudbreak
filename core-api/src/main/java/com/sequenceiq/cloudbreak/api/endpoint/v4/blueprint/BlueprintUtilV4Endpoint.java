@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.SupportedVe
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ConnectorOpDescription;
+import com.sequenceiq.common.api.type.CdpResourceType;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -58,9 +59,12 @@ public interface BlueprintUtilV4Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "createRecommendationForWorkspace")
     RecommendationV4Response createRecommendation(@PathParam("workspaceId") Long workspaceId,
-            @QueryParam("blueprintName") String blueprintName, @QueryParam("credentialName") String credentialName,
-            @QueryParam("region") String region, @QueryParam("platformVariant") String platformVariant,
-            @QueryParam("availabilityZone") String availabilityZone);
+            @QueryParam("blueprintName") String blueprintName,
+            @QueryParam("credentialName") String credentialName,
+            @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone,
+            @QueryParam("resourceType") CdpResourceType resourceType);
 
     @GET
     @Path("service_versions")
