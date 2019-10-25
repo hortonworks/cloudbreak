@@ -65,6 +65,7 @@ dependencies {
   
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: springBootVersion
   testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api',               version: junitJupiterVersion
+  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-params',           version: junitJupiterVersion
   testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',            version: junitJupiterVersion
   testImplementation group: 'org.mockito',               name: 'mockito-core',                    version: mockitoVersion
   testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter',           version: mockitoVersion

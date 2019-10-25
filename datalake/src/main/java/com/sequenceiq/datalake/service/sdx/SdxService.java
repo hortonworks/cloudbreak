@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -168,8 +170,7 @@ public class SdxService implements ResourceIdProvider {
         sdxCluster.setClusterShape(sdxClusterRequest.getClusterShape());
         sdxCluster.setCreated(clock.getCurrentTimeMillis());
         sdxCluster.setCreateDatabase(sdxClusterRequest.getExternalDatabase() != null && sdxClusterRequest.getExternalDatabase().getCreate());
-
-        createDatabaseByDefaultForAWS(sdxClusterRequest, sdxCluster, environment);
+        setPlatformDefaultForCreateDatabaseIfNeeded(sdxClusterRequest, sdxCluster, environment.getCloudPlatform());
         validateDatabaseRequest(sdxCluster, environment);
         sdxCluster.setEnvName(environment.getName());
         sdxCluster.setEnvCrn(environment.getCrn());
@@ -221,12 +222,14 @@ public class SdxService implements ResourceIdProvider {
         return getSdxByNameInAccount(userCrn, resourceName).getId();
     }
 
-    private void createDatabaseByDefaultForAWS(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
-        //if (AWS.equals(environment.getCloudPlatform()) &&
-        if (dbServiceSupportedPlatforms.contains(environment.getCloudPlatform()) &&
+    @VisibleForTesting
+    void setPlatformDefaultForCreateDatabaseIfNeeded(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster, String cloudPlatform) {
+        if (dbServiceSupportedPlatforms.contains(cloudPlatform) &&
                 (sdxClusterRequest.getExternalDatabase() == null ||
                         sdxClusterRequest.getExternalDatabase().getCreate() == null)) {
-            sdxCluster.setCreateDatabase(true);
+            // Azure external db temporarily not supported: Azure needs username@short-hostname, but CM did not support it so far (7.0.1).
+            // Once supported by CM, please delete restrictions for azure.
+            sdxCluster.setCreateDatabase(!CloudPlatform.AZURE.name().equals(cloudPlatform));
         }
     }
 
