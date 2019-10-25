@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.flow.reactor.config.EventBusStatisticReporter;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -51,6 +52,9 @@ public class ReactorFlowManagerTest {
 
     @Mock
     private EventBus reactor;
+
+    @Mock
+    private EventBusStatisticReporter reactorReporter;
 
     @Mock
     private ErrorHandlerAwareReactorEventFactory eventFactory;

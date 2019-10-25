@@ -15,7 +15,6 @@ import com.sequenceiq.flow.reactor.handler.ConsumerNotFoundHandler;
 import reactor.Environment;
 import reactor.bus.EventBus;
 import reactor.bus.spec.EventBusSpec;
-import reactor.core.Dispatcher;
 import reactor.core.dispatch.ThreadPoolExecutorDispatcher;
 import reactor.core.support.NamedDaemonThreadFactory;
 import reactor.fn.timer.Timer;
@@ -45,26 +44,24 @@ public class EventBusConfig {
     }
 
     @Bean
-    public EventBus reactor(Environment env) {
+    public EventBus reactor(MDCCleanerThreadPoolExecutor threadPoolExecutor, Environment env) {
         return new EventBusSpec()
                 .env(env)
-                .dispatcher(getEventBusDispatcher())
+                .dispatcher(new ThreadPoolExecutorDispatcher(eventBusThreadPoolBacklogSize, eventBusThreadPoolCoreSize, threadPoolExecutor))
                 .traceEventPath()
                 .consumerNotFoundHandler(new ConsumerNotFoundHandler())
                 .get();
     }
 
-    private Dispatcher getEventBusDispatcher() {
-        ClassLoader context = new ClassLoader(Thread.currentThread()
-                .getContextClassLoader()) {
-        };
-        MDCCleanerThreadPoolExecutor executorService = new MDCCleanerThreadPoolExecutor(eventBusThreadPoolCoreSize,
+    @Bean("eventBusThreadPoolExecutor")
+    public MDCCleanerThreadPoolExecutor getPoolExecutor() {
+        return new MDCCleanerThreadPoolExecutor(eventBusThreadPoolCoreSize,
                 eventBusThreadPoolMaxSize,
                 0L,
                 TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(eventBusThreadPoolBacklogSize),
-                new NamedDaemonThreadFactory("reactorDispatcher", context),
+                new NamedDaemonThreadFactory("reactorDispatcher"),
                 (r, executor) -> LOGGER.error("Task has been rejected from 'reactorDispatcher' threadpool. Executor state: " + executor));
-        return new ThreadPoolExecutorDispatcher(eventBusThreadPoolBacklogSize, eventBusThreadPoolCoreSize, executorService);
+
     }
 }

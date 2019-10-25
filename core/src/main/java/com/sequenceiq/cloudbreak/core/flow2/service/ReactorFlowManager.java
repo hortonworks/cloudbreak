@@ -291,19 +291,19 @@ public class ReactorFlowManager {
 
         Stack stack = getStackFn.apply(event.getData().getResourceId());
         Optional.ofNullable(stack).map(Stack::getCluster).map(Cluster::getStatus).ifPresent(isTriggerAllowedInMaintenance(selector));
-        reactorReporter.logInfoReport(reactor);
+        reactorReporter.logInfoReport();
         reactor.notify(selector, event);
         try {
             Boolean accepted = true;
             if (event.getData().accepted() != null) {
                 accepted = event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
             }
-            if( accepted == null) {
-                reactorReporter.logErrorReport(reactor);
+            if (accepted == null) {
+                reactorReporter.logErrorReport();
                 throw new FlowNotAcceptedException(String.format("Timeout happened when trying to start the flow for stack %s.", stack.getName()));
             }
             if (!accepted) {
-                reactorReporter.logErrorReport(reactor);
+                reactorReporter.logErrorReport();
                 throw new FlowsAlreadyRunningException(String.format("Stack %s has flows under operation, request not allowed.", stack.getName()));
             }
         } catch (InterruptedException e) {
