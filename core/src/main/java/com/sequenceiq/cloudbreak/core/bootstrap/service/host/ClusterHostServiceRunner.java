@@ -554,11 +554,12 @@ public class ClusterHostServiceRunner {
     private void addGatewayUserFacingCertAndFqdn(GatewayConfig gatewayConfig, Cluster cluster, Map<String, Object> gateway) {
         boolean userFacingCertHasBeenGenerated = StringUtils.isNotEmpty(gatewayConfig.getUserFacingCert())
                 && StringUtils.isNotEmpty(gatewayConfig.getUserFacingKey());
-        if (userFacingCertHasBeenGenerated
-                && StringUtils.isNotEmpty(cluster.getFqdn())) {
+        if (userFacingCertHasBeenGenerated) {
             gateway.put("userfacingcert_configured", Boolean.TRUE);
             gateway.put("userfacingkey", cluster.getStack().getSecurityConfig().getUserFacingKey());
             gateway.put("userfacingcert", cluster.getStack().getSecurityConfig().getUserFacingCert());
+        }
+        if (StringUtils.isNotEmpty(cluster.getFqdn())) {
             gateway.put("userfacingfqdn", cluster.getFqdn());
         }
     }

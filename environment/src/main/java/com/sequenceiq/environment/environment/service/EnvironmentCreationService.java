@@ -4,6 +4,7 @@ import static com.sequenceiq.environment.CloudPlatform.AWS;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -11,12 +12,15 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
@@ -39,6 +43,8 @@ public class EnvironmentCreationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentCreationService.class);
 
+    private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
+
     private final EnvironmentService environmentService;
 
     private final EnvironmentValidatorService validatorService;
@@ -57,6 +63,8 @@ public class EnvironmentCreationService {
 
     private final EntitlementService entitlementService;
 
+    private final GrpcUmsClient grpcUmsClient;
+
     public EnvironmentCreationService(
             EnvironmentService environmentService,
             EnvironmentValidatorService validatorService,
@@ -66,7 +74,8 @@ public class EnvironmentCreationService {
             AuthenticationDtoConverter authenticationDtoConverter,
             ParametersService parametersService,
             NetworkService networkService,
-            EntitlementService entitlementService) {
+            EntitlementService entitlementService,
+            GrpcUmsClient grpcUmsClient) {
         this.environmentService = environmentService;
         this.validatorService = validatorService;
         this.environmentResourceService = environmentResourceService;
@@ -76,6 +85,7 @@ public class EnvironmentCreationService {
         this.parametersService = parametersService;
         this.networkService = networkService;
         this.entitlementService = entitlementService;
+        this.grpcUmsClient = grpcUmsClient;
     }
 
     public EnvironmentDto create(EnvironmentCreationDto creationDto) {
@@ -86,7 +96,8 @@ public class EnvironmentCreationService {
         validateTunnel(creationDto.getCreator(), creationDto.getExperimentalFeatures().getTunnel());
         Environment environment = initializeEnvironment(creationDto);
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
-        environmentService.setAdminGroupName(environment, creationDto.getAdminGroupName());
+        String workloadAdministrationGroupName = createAdminGroup(creationDto, environment.getResourceCrn());
+        environmentService.setAdminGroupName(environment, workloadAdministrationGroupName);
         CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
         validateCreation(creationDto, environment, cloudRegions);
         Map<String, CloudSubnet> subnetMetas = networkService.retrieveSubnetMetadata(environment, creationDto.getNetwork());
@@ -104,6 +115,20 @@ public class EnvironmentCreationService {
         if (!entitlementService.ccmEnabled(userCrn) && Tunnel.CCM.equals(tunnel)) {
             throw new BadRequestException("Reverse SSH tunnel is not enabled for this account.");
         }
+    }
+
+    private String createAdminGroup(EnvironmentCreationDto creationDto, String envCrn) {
+        String workloadAdministrationGroupName = null;
+        if (StringUtils.isEmpty(creationDto.getAdminGroupName())) {
+            workloadAdministrationGroupName = grpcUmsClient.setWorkloadAdministrationGroupName(IAM_INTERNAL_ACTOR_CRN, creationDto.getAccountId(),
+                    Optional.empty(), "environments/adminClouderaManager", envCrn);
+            LOGGER.info("Created workloadAdministrationGroupName: {}", workloadAdministrationGroupName);
+        } else {
+            // To keep backward compatibility, if somebody passes the group name, then we shall just use it
+            workloadAdministrationGroupName = creationDto.getAdminGroupName();
+            LOGGER.info("User has defined aadmin group: {}", workloadAdministrationGroupName);
+        }
+        return workloadAdministrationGroupName;
     }
 
     private void validateNetworkRequest(Environment environment, NetworkDto network, Map<String, CloudSubnet> subnetMetas) {

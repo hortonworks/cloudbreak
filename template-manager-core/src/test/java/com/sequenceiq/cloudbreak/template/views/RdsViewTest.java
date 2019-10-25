@@ -40,6 +40,7 @@ public class RdsViewTest {
         Assert.assertEquals("adminpassword", underTest.getConnectionPassword());
     }
 
+    // Do pass the Azure-specific hostname suffix to CM. See CB-3791.
     @Test
     public void testCreateRdsViewWhenConnectionUserNameHasSuffix() {
         String connectionUrl = "jdbc:postgresql://some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432/ranger";
@@ -48,7 +49,7 @@ public class RdsViewTest {
 
         RdsView underTest = new RdsView(rdsConfig);
 
-        Assert.assertEquals("admin", underTest.getConnectionUserName());
+        Assert.assertEquals("admin@some-rds", underTest.getConnectionUserName());
     }
 
     @Test
