@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -38,6 +39,8 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXTestDto.class);
 
     private GeneratedBlueprintV4Response generatedBlueprint;
+
+    private StackViewV4Response internalStackResponse;
 
     @Inject
     private DistroXTestClient distroXTestClient;
@@ -170,4 +173,12 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return this;
     }
 
+    public StackViewV4Response getInternalStackResponse() {
+        return internalStackResponse;
+    }
+
+    public DistroXTestDto withInternalStackResponse(StackViewV4Response internalStackResponse) {
+        this.internalStackResponse = internalStackResponse;
+        return this;
+    }
 }

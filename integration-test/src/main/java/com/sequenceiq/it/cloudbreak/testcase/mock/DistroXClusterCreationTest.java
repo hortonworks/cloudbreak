@@ -4,6 +4,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
 import org.testng.annotations.Test;
 
@@ -240,6 +241,34 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .validate();
     }
 
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "a DistroX with Cloudera Manager is created",
+            then = "the cluster should be available AND internal distrox crn should be equal with non-internal distrox response crn")
+    public void testInternalDistroXResponse(MockedTestContext testContext) {
+        testContext
+                .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
+                .given(DIX_IMG_KEY, DistroXImageTestDto.class)
+                .withImageCatalog(getImageCatalogName(testContext))
+                .withImageId(IMAGE_CATALOG_ID)
+                .given(CM_FOR_DISTRO_X, DistroXClouderaManagerTestDto.class)
+                .given(CLUSTER_KEY, DistroXClusterTestDto.class)
+                .withBlueprintName(getBlueprintName(testContext))
+                .withValidateBlueprint(false)
+                .withClouderaManager(CM_FOR_DISTRO_X)
+                .given(DistroXTestDto.class)
+                .withGatewayPort(testContext.getSparkServer().getPort())
+                .withCluster(CLUSTER_KEY)
+                .withImageSettings(DIX_IMG_KEY)
+                .withNetwork(DIX_NET_KEY)
+                .when(distroXClient.create())
+                .await(STACK_AVAILABLE)
+                .when(distroXClient.getInternal())
+                .then(DistroXClusterCreationTest::assertInternalStackResponse)
+                .validate();
+    }
+
     @Override
     protected BlueprintTestClient blueprintTestClient() {
         return blueprintTestClient;
@@ -340,6 +369,22 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         vaildateDistroxHasCloudStorage(testDto);
         if (testDto.getResponse().getCluster().getCloudStorage().getLocations().isEmpty()) {
             throw new TestFailException("Cloud storage locations should not be empty on DistroX");
+        }
+        return testDto;
+    }
+
+    private static DistroXTestDto assertInternalStackResponse(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
+        if (testDto.getResponse() == null) {
+            throw new TestFailException("Stack response cannot be empty.");
+        }
+        if (testDto.getInternalStackResponse() == null) {
+            throw new TestFailException("Internal stack response (by internal actor) cannot be empty.");
+        }
+        if (StringUtils.isBlank(testDto.getResponse().getCrn())) {
+            throw new TestFailException("Crn from stack response be empty.");
+        }
+        if (!testDto.getResponse().getCrn().equals(testDto.getInternalStackResponse().getCrn())) {
+            throw new TestFailException("Stack Response CRN and Internal Stack Response CRN should be equal.");
         }
         return testDto;
     }

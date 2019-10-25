@@ -33,6 +33,8 @@ public class CloudbreakTest extends GherkinTest {
 
     public static final String CLOUDBREAK_SERVER_ROOT = "CLOUDBREAK_SERVER_ROOT";
 
+    public static final String CLOUDBREAK_SERVER_INTERNAL_ROOT = "CLOUDBREAK_SERVER_INTERNAL_ROOT";
+
     public static final String AUTOSCALE_CLIENT_ID = "AUTOSCALE_CLIENTID";
 
     public static final String AUTOSCALE_SECRET = "AUTOSCALE_SECRET";
