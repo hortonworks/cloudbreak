@@ -32,7 +32,7 @@ public class YarnConfigProviderTest {
     public void testGetConfigsWhenLlapIsPresent() {
         when(cmTemplateProcessor.getServiceByType(eq(HiveRoles.HIVELLAP))).thenReturn(Optional.of(new ApiClusterTemplateService()));
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, null);
-        assertEquals(2, serviceConfigs.size());
+        assertEquals(1, serviceConfigs.size());
         assertTrue(serviceConfigs.stream().anyMatch(sc -> StringUtils.equals(sc.getName(), "yarn_service_config_safety_valve")));
     }
 
@@ -40,7 +40,7 @@ public class YarnConfigProviderTest {
     public void testGetConfigsWhenLlapIsNotPresent() {
         when(cmTemplateProcessor.getServiceByType(eq(HiveRoles.HIVELLAP))).thenReturn(Optional.empty());
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, null);
-        assertEquals(1, serviceConfigs.size());
+        assertEquals(0, serviceConfigs.size());
         assertFalse(serviceConfigs.stream().anyMatch(sc -> StringUtils.equals(sc.getName(), "yarn_service_config_safety_valve")));
     }
 
