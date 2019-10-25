@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service;
 
 
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ACCOUNT_ID;
+import static com.sequenceiq.environment.environment.service.EnvironmentTestData.CRN;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.USER;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.getCloudRegions;
@@ -86,6 +87,22 @@ class EnvironmentCreationServiceTest {
                 .build();
 
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(true);
+        assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
+        verify(environmentService, never()).save(any());
+        verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
+        verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
+    }
+
+    @Test
+    void testCreateAzureDisabled() {
+        EnvironmentCreationDto environmentCreationDto = new EnvironmentCreationDto.Builder()
+                .withName(ENVIRONMENT_NAME)
+                .withAccountId(ACCOUNT_ID)
+                .withCreator(CRN)
+                .withCloudPlatform("AZURE")
+                .build();
+
+        when(entitlementService.azureEnabled(eq(CRN))).thenReturn(false);
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());

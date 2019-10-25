@@ -231,7 +231,7 @@ public class CredentialServiceTest {
                 .thenReturn(Optional.empty());
         when(credentialAdapter.verify(any(), anyString())).thenAnswer(i -> new CredentialVerification(i.getArgument(0), true));
         credentialServiceUnderTest.create(CREDENTIAL, ACCOUNT_ID, USER_ID);
-        verify(credentialValidator).validateCredentialCloudPlatform(eq(PLATFORM));
+        verify(credentialValidator).validateCredentialCloudPlatform(eq(PLATFORM), eq(USER_ID));
         verify(credentialValidator).validateParameters(any(), any());
         verify(repository).save(any());
     }
@@ -247,8 +247,8 @@ public class CredentialServiceTest {
 
     @Test
     public void testGetPrerequisites() {
-        credentialServiceUnderTest.getPrerequisites(PLATFORM, DEPLOYMENT_ADDRESS);
-        verify(credentialValidator).validateCredentialCloudPlatform(PLATFORM);
+        credentialServiceUnderTest.getPrerequisites(PLATFORM, DEPLOYMENT_ADDRESS, USER_ID);
+        verify(credentialValidator).validateCredentialCloudPlatform(PLATFORM, USER_ID);
         verify(credentialPrerequisiteService).getPrerequisites(PLATFORM, DEPLOYMENT_ADDRESS);
     }
 
@@ -272,7 +272,7 @@ public class CredentialServiceTest {
 
     @Test
     public void testInitCodeGrantFlowValidationErrorNotSaved() {
-        doThrow(BadRequestException.class).when(credentialValidator).validateCredentialCloudPlatform(anyString());
+        doThrow(BadRequestException.class).when(credentialValidator).validateCredentialCloudPlatform(anyString(), anyString());
         assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.initCodeGrantFlow(ACCOUNT_ID, CREDENTIAL, USER_ID));
         verify(repository, never()).save(eq(CREDENTIAL));
     }
