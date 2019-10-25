@@ -33,6 +33,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String description;
 
+        private String creator;
+
         private boolean createFreeIpa;
 
         private CompactRegionResponse regions;
@@ -92,6 +94,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withCreator(String creator) {
+            this.creator = creator;
+            return this;
+        }
+
         public Builder withTelemetry(TelemetryResponse telemetry) {
             this.telemetry = telemetry;
             return this;
@@ -146,6 +153,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();
             simpleEnvironmentResponse.setCrn(crn);
             simpleEnvironmentResponse.setName(name);
+            simpleEnvironmentResponse.setCreator(creator);
             simpleEnvironmentResponse.setDescription(description);
             simpleEnvironmentResponse.setRegions(regions);
             simpleEnvironmentResponse.setCloudPlatform(cloudPlatform);
