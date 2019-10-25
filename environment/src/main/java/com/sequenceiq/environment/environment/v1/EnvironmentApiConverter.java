@@ -234,6 +234,7 @@ public class EnvironmentApiConverter {
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
                 .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
+                .withCreator(environmentDto.getCreator())
                 .withAuthentication(authenticationDtoToResponse(environmentDto.getAuthentication()))
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())

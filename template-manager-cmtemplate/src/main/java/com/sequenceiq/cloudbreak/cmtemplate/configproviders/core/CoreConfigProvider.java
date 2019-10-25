@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -23,6 +25,7 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3guard.S3GuardConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -31,6 +34,11 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 public class CoreConfigProvider extends AbstractRoleConfigProvider {
 
     public static final String CORE_DEFAULTFS = "core_defaultfs";
+
+    private static final String CORE_SITE_SAFETY_VALVE = "core_site_safety_valve";
+
+    @Inject
+    private S3GuardConfigProvider s3GuardConfigProvider;
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
@@ -42,6 +50,13 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
         List<ApiClusterTemplateConfig> apiClusterTemplateConfigs = new ArrayList<>();
         ConfigUtils.getStorageLocationForServiceProperty(source, CORE_DEFAULTFS)
                 .ifPresent(location -> apiClusterTemplateConfigs.add(config(CORE_DEFAULTFS, location.getValue())));
+
+        StringBuilder hdfsCoreSiteSafetyValveValue = new StringBuilder();
+        s3GuardConfigProvider.getServiceConfigs(source, hdfsCoreSiteSafetyValveValue);
+        if (!hdfsCoreSiteSafetyValveValue.toString().isEmpty()) {
+            apiClusterTemplateConfigs.add(config(CORE_SITE_SAFETY_VALVE, hdfsCoreSiteSafetyValveValue.toString()));
+        }
+
         return apiClusterTemplateConfigs;
     }
 
