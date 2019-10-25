@@ -8,7 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
@@ -25,8 +24,10 @@ import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceCredential;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
+import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequestBuilder;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigUpdateRequest;
+import com.sequenceiq.cloudbreak.clusterproxy.TunnelEntry;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -45,6 +46,8 @@ public class ClusterProxyServiceTest {
 
     private static final long CLUSTER_ID = 1000L;
 
+    private static final String TEST_ACCOUNT_ID = "test-tenant";
+
     @Mock
     private StackService stackService;
 
@@ -59,7 +62,21 @@ public class ClusterProxyServiceTest {
     }
 
     @Test
-    public void shouldRegisterProxyConfigurationWithClusterProxy() throws URISyntaxException, ClusterProxyException {
+    public void shouldRegisterProxyConfigurationWithClusterProxy() throws ClusterProxyException {
+        ConfigRegistrationResponse response = new ConfigRegistrationResponse();
+        response.setX509Unwrapped("X509PublicKey");
+
+        ConfigRegistrationRequest request = configRegistrationRequestWithTunnelEntries();
+
+        when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(response);
+
+        ConfigRegistrationResponse registrationResponse = service.registerCluster(testStackUsingCCM(), TEST_ACCOUNT_ID);
+        assertEquals("X509PublicKey", registrationResponse.getX509Unwrapped());
+        verify(clusterProxyRegistrationClient).registerConfig(request);
+    }
+
+    @Test
+    public void shouldNotRegisterSSHTunnelInfoIfCCMIsDisabled() throws ClusterProxyException {
         ConfigRegistrationResponse response = new ConfigRegistrationResponse();
         response.setX509Unwrapped("X509PublicKey");
 
@@ -67,19 +84,19 @@ public class ClusterProxyServiceTest {
 
         when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(response);
 
-        ConfigRegistrationResponse registrationResponse = service.registerCluster(testStack());
+        ConfigRegistrationResponse registrationResponse = service.registerCluster(testStack(), TEST_ACCOUNT_ID);
         assertEquals("X509PublicKey", registrationResponse.getX509Unwrapped());
         verify(clusterProxyRegistrationClient).registerConfig(request);
     }
 
     @Test
-    public void shouldFailIfVaultSecretIsInvalid() throws URISyntaxException, ClusterProxyException {
-        assertThrows(VaultConfigException.class, () -> service.registerCluster(testStackWithInvalidSecret()));
+    public void shouldFailIfVaultSecretIsInvalid() throws ClusterProxyException {
+        assertThrows(VaultConfigException.class, () -> service.registerCluster(testStackWithInvalidSecret(), TEST_ACCOUNT_ID));
         verify(clusterProxyRegistrationClient, times(0)).registerConfig(any());
     }
 
     @Test
-    public void shouldUpdateKnoxUrlWithClusterProxy() throws URISyntaxException, ClusterProxyException {
+    public void shouldUpdateKnoxUrlWithClusterProxy() throws ClusterProxyException {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackWithKnox());
 
         ConfigUpdateRequest request = configUpdateRequest("stack-crn");
@@ -89,7 +106,7 @@ public class ClusterProxyServiceTest {
     }
 
     @Test
-    public void shouldNotUpdateProxyConfigIfClusterIsNotConfiguredWithGateway() throws URISyntaxException, ClusterProxyException {
+    public void shouldNotUpdateProxyConfigIfClusterIsNotConfiguredWithGateway() throws ClusterProxyException {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStack());
 
         service.registerGatewayConfiguration(STACK_ID);
@@ -97,17 +114,29 @@ public class ClusterProxyServiceTest {
     }
 
     @Test
-    public void shouldDeregisterCluster() throws URISyntaxException, ClusterProxyException {
+    public void shouldDeregisterCluster() throws ClusterProxyException {
         service.deregisterCluster(testStack());
         verify(clusterProxyRegistrationClient).deregisterConfig("stack-crn");
     }
 
     private ConfigRegistrationRequest configRegistrationRequest() {
+        return new ConfigRegistrationRequestBuilder("stack-crn")
+                .with(List.of(String.valueOf(CLUSTER_ID)), List.of(serviceConfig()), null).build();
+    }
+
+    private ConfigRegistrationRequest configRegistrationRequestWithTunnelEntries() {
+        List<TunnelEntry> tunnelEntries = List.of(new TunnelEntry("i-abc123", "GATEWAY", "10.10.10.10", 443));
+        return new ConfigRegistrationRequestBuilder("stack-crn")
+                .with(List.of(String.valueOf(CLUSTER_ID)), List.of(serviceConfig()), null)
+                .withAccountId(TEST_ACCOUNT_ID)
+                .withTunnelEntries(tunnelEntries).build();
+    }
+
+    private ClusterServiceConfig serviceConfig() {
         ClusterServiceCredential cloudbreakUser = new ClusterServiceCredential("cloudbreak", "/cb/test-data/secret/cbpassword:secret");
         ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt", "/cb/test-data/secret/dppassword:secret", true);
-        ClusterServiceConfig service = new ClusterServiceConfig("cloudera-manager",
+        return new ClusterServiceConfig("cloudera-manager",
                 List.of("https://10.10.10.10/clouderamanager"), asList(cloudbreakUser, dpUser), null, null);
-        return new ConfigRegistrationRequest("stack-crn", List.of(String.valueOf(CLUSTER_ID)), List.of(service), null);
     }
 
     private ConfigUpdateRequest configUpdateRequest(String clusterIdentifier) {
@@ -124,11 +153,18 @@ public class ClusterProxyServiceTest {
         instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         InstanceMetaData primaryInstanceMetaData = new InstanceMetaData();
         primaryInstanceMetaData.setPublicIp("10.10.10.10");
+        primaryInstanceMetaData.setInstanceId("i-abc123");
         primaryInstanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setPublicIp("10.10.10.11");
         instanceGroup.setInstanceMetaData(Set.of(instanceMetaData, primaryInstanceMetaData));
         stack.setInstanceGroups(Set.of(instanceGroup));
+        return stack;
+    }
+
+    private Stack testStackUsingCCM() {
+        Stack stack = testStack();
+        stack.setUseCcm(true);
         return stack;
     }
 

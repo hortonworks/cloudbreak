@@ -61,7 +61,7 @@ public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProx
             if (!clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
                 return new ClusterProxyRegistrationSuccess(request.getResourceId());
             }
-            ConfigRegistrationResponse registerResponse = clusterProxyService.registerCluster(stack);
+            ConfigRegistrationResponse registerResponse = clusterProxyService.registerCluster(stack, request.getAccountId());
             Cluster cluster = stack.getCluster();
             if (cluster.hasGateway()) {
                 LOGGER.debug("Updating Gateway for cluster {} in environment {} with public key certificate retrieved from Cluster Proxy",

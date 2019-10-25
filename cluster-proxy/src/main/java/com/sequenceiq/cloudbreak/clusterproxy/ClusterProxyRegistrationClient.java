@@ -32,11 +32,11 @@ public class ClusterProxyRegistrationClient {
     public ConfigRegistrationResponse registerConfig(ConfigRegistrationRequest configRegistrationRequest) {
         String registerConfigUrl = clusterProxyConfiguration.getRegisterConfigUrl();
         try {
-            LOGGER.debug("Registering cluster proxy configuration: {}", configRegistrationRequest);
+            LOGGER.info("Registering cluster proxy configuration: {}", configRegistrationRequest);
             ResponseEntity<ConfigRegistrationResponse> response = restTemplate.postForEntity(registerConfigUrl,
                     requestEntity(configRegistrationRequest), ConfigRegistrationResponse.class);
 
-            LOGGER.debug("Cluster Proxy config registration response: {}", response);
+            LOGGER.info("Cluster Proxy config registration response: {}", response);
             return response.getBody();
         } catch (Exception e) {
             String message = String.format("Error registering proxy configuration for cluster '%s' with Cluster Proxy. URL: '%s'",
@@ -50,10 +50,10 @@ public class ClusterProxyRegistrationClient {
     public void updateConfig(ConfigUpdateRequest configUpdateRequest) {
         String updateConfigUrl = clusterProxyConfiguration.getUpdateConfigUrl();
         try {
-            LOGGER.debug("Updating cluster proxy configuration: {}", configUpdateRequest);
+            LOGGER.info("Updating cluster proxy configuration: {}", configUpdateRequest);
             ResponseEntity<ConfigRegistrationResponse> response = restTemplate.postForEntity(updateConfigUrl,
                     requestEntity(configUpdateRequest), ConfigRegistrationResponse.class);
-            LOGGER.debug("Cluster Proxy config update response: {}", response);
+            LOGGER.info("Cluster Proxy config update response: {}", response);
         } catch (Exception e) {
             String message = String.format("Error updating configuration for cluster '%s' with Cluster Proxy. URL: '%s'",
                     configUpdateRequest.getClusterCrn(), updateConfigUrl);
@@ -65,10 +65,10 @@ public class ClusterProxyRegistrationClient {
     public void deregisterConfig(String clusterIdentifier) {
         String removeConfigUrl = clusterProxyConfiguration.getRemoveConfigUrl();
         try {
-            LOGGER.debug("Removing cluster proxy configuration for cluster identifier: {}", clusterIdentifier);
+            LOGGER.info("Removing cluster proxy configuration for cluster identifier: {}", clusterIdentifier);
             ResponseEntity<ConfigRegistrationResponse> response = restTemplate.postForEntity(removeConfigUrl,
                     requestEntity(new ConfigDeleteRequest(clusterIdentifier)), ConfigRegistrationResponse.class);
-            LOGGER.debug("Cluster proxy deregistration response: {}", response);
+            LOGGER.info("Cluster proxy deregistration response: {}", response);
         } catch (Exception e) {
             String message = String.format("Error de-registering proxy configuration for cluster identifier '%s' from Cluster Proxy. URL: '%s'",
                     clusterIdentifier, removeConfigUrl);

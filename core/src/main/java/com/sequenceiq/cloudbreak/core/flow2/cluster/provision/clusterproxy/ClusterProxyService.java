@@ -11,15 +11,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
+import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceCredential;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
+import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequestBuilder;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigUpdateRequest;
+import com.sequenceiq.cloudbreak.clusterproxy.TunnelEntry;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -38,13 +43,13 @@ public class ClusterProxyService {
         this.clusterProxyRegistrationClient = clusterProxyRegistrationClient;
     }
 
-    public ConfigRegistrationResponse registerCluster(Stack stack) {
-            ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack);
+    public ConfigRegistrationResponse registerCluster(Stack stack, String accountId) {
+            ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack, accountId);
             return clusterProxyRegistrationClient.registerConfig(proxyConfigRequest);
     }
 
-    public ConfigRegistrationResponse reRegisterCluster(Stack stack) {
-            ConfigRegistrationRequest proxyConfigRequest = createProxyConfigReRegisterRequest(stack);
+    public ConfigRegistrationResponse reRegisterCluster(Stack stack, String accountId) {
+            ConfigRegistrationRequest proxyConfigRequest = createProxyConfigReRegisterRequest(stack, accountId);
             return clusterProxyRegistrationClient.registerConfig(proxyConfigRequest);
     }
 
@@ -67,13 +72,30 @@ public class ClusterProxyService {
         clusterProxyRegistrationClient.deregisterConfig(stack.getResourceCrn());
     }
 
-    private ConfigRegistrationRequest createProxyConfigRequest(Stack stack) {
-        return new ConfigRegistrationRequest(stack.getResourceCrn(), singletonList(clusterId(stack.getCluster())), singletonList(serviceConfig(stack)), null);
+    private ConfigRegistrationRequest createProxyConfigRequest(Stack stack, String accountId) {
+        ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
+                .with(singletonList(clusterId(stack.getCluster())), singletonList(serviceConfig(stack)), null);
+        if (Boolean.TRUE.equals(stack.getUseCcm())) {
+            return requestBuilder.withAccountId(accountId).withTunnelEntries(tunnelEntries(stack)).build();
+        }
+        return requestBuilder.build();
     }
 
-    private ConfigRegistrationRequest createProxyConfigReRegisterRequest(Stack stack) {
-        return new ConfigRegistrationRequest(stack.getResourceCrn(), knoxUrl(stack), singletonList(clusterId(stack.getCluster())),
-                singletonList(serviceConfig(stack)), null);
+    private ConfigRegistrationRequest createProxyConfigReRegisterRequest(Stack stack, String accountId) {
+        ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
+                .with(singletonList(clusterId(stack.getCluster())), singletonList(serviceConfig(stack)), null)
+                .withKnoxUrl(knoxUrl(stack));
+        if (Boolean.TRUE.equals(stack.getUseCcm())) {
+            return requestBuilder.withAccountId(accountId).withTunnelEntries(tunnelEntries(stack)).build();
+        }
+        return requestBuilder.build();
+    }
+
+    private List<TunnelEntry> tunnelEntries(Stack stack) {
+        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        String gatewayIp = stack.getPrimaryGatewayInstance().getPublicIpWrapper();
+        int gatewayPort = ServiceFamilies.KNOX.getDefaultPort();
+        return singletonList(new TunnelEntry(primaryGatewayInstance.getInstanceId(), KnownServiceIdentifier.GATEWAY.name(), gatewayIp, gatewayPort));
     }
 
     private ClusterServiceConfig serviceConfig(Stack stack) {

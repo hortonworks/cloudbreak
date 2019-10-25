@@ -105,7 +105,8 @@ public class ClusterUpscaleActions {
 
             @Override
             protected Selectable createRequest(ClusterUpscaleContext context) {
-                return new ClusterProxyReRegistrationRequest(context.getStackId(), context.getHostGroupName());
+                String accountId = context.getClusterView().getTenant().getId().toString();
+                return new ClusterProxyReRegistrationRequest(context.getStackId(), accountId, context.getHostGroupName());
             }
         };
     }
