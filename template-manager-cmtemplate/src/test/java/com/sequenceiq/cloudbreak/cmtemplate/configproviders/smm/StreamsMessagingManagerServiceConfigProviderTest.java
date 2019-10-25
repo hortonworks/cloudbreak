@@ -28,13 +28,13 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
 
     @Test
     public void testGetStreamsMessagingManagerServiceConfigsWhenInternalFqdn() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject("cm.fqdn.host");
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject("cm.fqdn.host", false);
         String inputJson = getBlueprintText("input/cdp-streaming.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         List<ApiClusterTemplateConfig> streamsMessagingManagerServiceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
 
-        assertEquals(3, streamsMessagingManagerServiceConfigs.size());
+        assertEquals(5, streamsMessagingManagerServiceConfigs.size());
         assertEquals("cm.metrics.host", streamsMessagingManagerServiceConfigs.get(0).getName());
         assertEquals("cm.fqdn.host", streamsMessagingManagerServiceConfigs.get(0).getValue());
 
@@ -47,20 +47,52 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
 
     @Test
     public void testGetStreamsMessagingManagerServiceConfigsWhenNoInternalFqdn() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(null);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(null, false);
         String inputJson = getBlueprintText("input/cdp-streaming.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         List<ApiClusterTemplateConfig> streamsMessagingManagerServiceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
 
-        assertEquals(3, streamsMessagingManagerServiceConfigs.size());
+        assertEquals(5, streamsMessagingManagerServiceConfigs.size());
         assertEquals("cm.metrics.host", streamsMessagingManagerServiceConfigs.get(0).getName());
         assertEquals("122.0.0.1", streamsMessagingManagerServiceConfigs.get(0).getValue());
     }
 
     @Test
+    public void testGetStreamsMessagingManagerServiceConfigsNoSsl() {
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject("cm.fqdn.host", false);
+        String inputJson = getBlueprintText("input/cdp-streaming.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
+        List<ApiClusterTemplateConfig> streamsMessagingManagerServiceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
+
+        assertEquals(5, streamsMessagingManagerServiceConfigs.size());
+        assertEquals("cm.metrics.protocol", streamsMessagingManagerServiceConfigs.get(3).getName());
+        assertEquals("http", streamsMessagingManagerServiceConfigs.get(3).getValue());
+
+        assertEquals("cm.metrics.port", streamsMessagingManagerServiceConfigs.get(4).getName());
+        assertEquals("7180", streamsMessagingManagerServiceConfigs.get(4).getValue());
+    }
+
+    @Test
+    public void testGetStreamsMessagingManagerServiceConfigsSsl() {
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject("cm.fqdn.host", true);
+        String inputJson = getBlueprintText("input/cdp-streaming.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
+        List<ApiClusterTemplateConfig> streamsMessagingManagerServiceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
+
+        assertEquals(5, streamsMessagingManagerServiceConfigs.size());
+        assertEquals("cm.metrics.protocol", streamsMessagingManagerServiceConfigs.get(3).getName());
+        assertEquals("https", streamsMessagingManagerServiceConfigs.get(3).getValue());
+
+        assertEquals("cm.metrics.port", streamsMessagingManagerServiceConfigs.get(4).getName());
+        assertEquals("7183", streamsMessagingManagerServiceConfigs.get(4).getValue());
+    }
+
+    @Test
     public void testGetStreamsMessagingManagerServerRoleConfigs() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(null);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(null, false);
         String inputJson = getBlueprintText("input/cdp-streaming.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -78,7 +110,7 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
         assertEquals("smm_server_db_password", streamsMessagingManager.get(2).getValue());
     }
 
-    private TemplatePreparationObject getTemplatePreparationObject(String internalFqdn) {
+    private TemplatePreparationObject getTemplatePreparationObject(String internalFqdn, boolean ssl) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
 
@@ -93,6 +125,7 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
         gcc.setClusterManagerIp("122.0.0.1");
         gcc.setCloudbreakAmbariUser("cbambariuser");
         gcc.setCloudbreakAmbariPassword("cbambaripassword");
+        gcc.setAutoTlsEnabled(ssl);
 
         return TemplatePreparationObject.Builder.builder()
                 .withHostgroupViews(Set.of(master, worker))
