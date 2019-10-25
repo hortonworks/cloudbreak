@@ -22,9 +22,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -48,7 +47,7 @@ public class AmbariDecommissionTimeCalculatorTest {
     @Test
     public void testCalculateDecommissioningTimeWhenTheCalculatedTimeLessThanOneHour() {
         Stack stack = TestUtil.stack();
-        List<HostMetadata> hostMetadata = createHostMetadataList();
+        List<InstanceMetaData> hostMetadata = createInstanceMetadataList();
         Map<String, Map<Long, Long>> dfsSpace = createDfsSpaceMapsWithLowUsage();
         long usedSpace = 384 * BYTE_TO_GB;
 
@@ -60,7 +59,7 @@ public class AmbariDecommissionTimeCalculatorTest {
     @Test
     public void testCalculateDecommissioningTimeWhenTheCalculatedTimeMoreThanOneHour() {
         Stack stack = TestUtil.stack();
-        List<HostMetadata> hostMetadata = createHostMetadataList();
+        List<InstanceMetaData> hostMetadata = createInstanceMetadataList();
         Map<String, Map<Long, Long>> dfsSpace = createDfsSpaceMapsWithHalfUsage();
         long usedSpace = 5128 * BYTE_TO_GB;
 
@@ -72,8 +71,8 @@ public class AmbariDecommissionTimeCalculatorTest {
     @Test
     public void testCalculateWithNullRootVolumeSize() {
         Stack stack = TestUtil.stack();
-        List<HostMetadata> hostMetadata = createHostMetadataList();
-        hostMetadata.forEach(data -> data.getHostGroup().getInstanceGroup().getTemplate().setRootVolumeSize(null));
+        List<InstanceMetaData> hostMetadata = createInstanceMetadataList();
+        hostMetadata.forEach(data -> data.getInstanceGroup().getTemplate().setRootVolumeSize(null));
         Map<String, Map<Long, Long>> dfsSpace = createDfsSpaceMapsWithHalfUsage();
         long usedSpace = 5128 * BYTE_TO_GB;
         when(defaultRootVolumeSizeProvider.getForPlatform(anyString())).thenReturn(50);
@@ -83,18 +82,16 @@ public class AmbariDecommissionTimeCalculatorTest {
         verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_DECOMMISSIONING_TIME, AVAILABLE.name(), "5 hours");
     }
 
-    private List<HostMetadata> createHostMetadataList() {
+    private List<InstanceMetaData> createInstanceMetadataList() {
         Template template = new Template();
         template.setRootVolumeSize(50);
         template.setVolumeCount(12);
         template.setVolumeSize(1024);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setTemplate(template);
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setInstanceGroup(instanceGroup);
-        HostMetadata hm = new HostMetadata();
-        hm.setHostGroup(hostGroup);
-        return Collections.singletonList(hm);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceGroup(instanceGroup);
+        return Collections.singletonList(instanceMetaData);
     }
 
     private Map<String, Map<Long, Long>> createDfsSpaceMapsWithLowUsage() {

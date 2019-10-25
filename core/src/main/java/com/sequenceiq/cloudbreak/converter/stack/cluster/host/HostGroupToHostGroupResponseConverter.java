@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.GeneratedRecipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 @Component
 public class HostGroupToHostGroupResponseConverter extends AbstractConversionServiceAwareConverter<HostGroup, HostGroupResponse> {
@@ -33,11 +33,43 @@ public class HostGroupToHostGroupResponseConverter extends AbstractConversionSer
         hostGroupBase.setName(source.getName());
         hostGroupBase.setInstanceGroupName(source.getInstanceGroup().getGroupName());
         hostGroupBase.setRecipeIds(getRecipeIds(source.getRecipes()));
-        hostGroupBase.setMetadata(getHostMetadata(source.getHostMetadata()));
         hostGroupBase.setRecoveryMode(source.getRecoveryMode());
         hostGroupBase.setRecipes(getRecipes(source.getRecipes()));
         hostGroupBase.setExtendedRecipes(getExtendedRecipes(source.getGeneratedRecipes()));
+        hostGroupBase.setMetadata(getHostMetaDataResponses(source));
         return hostGroupBase;
+    }
+
+    private Set<HostMetadataResponse> getHostMetaDataResponses(HostGroup source) {
+        Set<InstanceMetaData> attachedInstanceMetaDataSet = source.getInstanceGroup().getAttachedInstanceMetaDataSet();
+        Set<HostMetadataResponse> hostMetadataResponseList = new HashSet<>();
+        for (InstanceMetaData instanceMetaData : attachedInstanceMetaDataSet) {
+            HostMetadataResponse hostMetadataResponse = new HostMetadataResponse();
+            hostMetadataResponse.setId(instanceMetaData.getId());
+            hostMetadataResponse.setName(instanceMetaData.getInstanceId());
+            hostMetadataResponse.setGroupName(source.getName());
+            String status;
+            switch (instanceMetaData.getInstanceStatus()) {
+                case SERVICES_HEALTHY:
+                    status = "HEALTHY";
+                    break;
+                case SERVICES_UNHEALTHY:
+                    status = "UNHEALTHY";
+                    break;
+                case WAITING_FOR_REPAIR:
+                    status = "WAITING_FOR_REPAIR";
+                    break;
+                case SERVICES_RUNNING:
+                    status = "RUNNING";
+                    break;
+                default:
+                    status = "UNKNOWN";
+                    break;
+            }
+            hostMetadataResponse.setState(status);
+            hostMetadataResponseList.add(hostMetadataResponse);
+        }
+        return hostMetadataResponseList;
     }
 
     private Set<String> getExtendedRecipes(Set<GeneratedRecipe> generatedRecipes) {
@@ -51,14 +83,6 @@ public class HostGroupToHostGroupResponseConverter extends AbstractConversionSer
             }
         }
         return extendedRecipes;
-    }
-
-    private Set<HostMetadataResponse> getHostMetadata(Iterable<HostMetadata> hostMetadataCollection) {
-        Set<HostMetadataResponse> hostMetadataResponses = new HashSet<>();
-        for (HostMetadata hostMetadata : hostMetadataCollection) {
-            hostMetadataResponses.add(getConversionService().convert(hostMetadata, HostMetadataResponse.class));
-        }
-        return hostMetadataResponses;
     }
 
     private Set<Long> getRecipeIds(Collection<Recipe> recipes) {

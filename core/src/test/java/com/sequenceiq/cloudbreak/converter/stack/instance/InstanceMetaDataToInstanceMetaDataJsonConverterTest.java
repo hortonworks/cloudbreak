@@ -35,7 +35,7 @@ public class InstanceMetaDataToInstanceMetaDataJsonConverterTest extends Abstrac
 
     @Override
     public InstanceMetaData createSource() {
-        return TestUtil.instanceMetaData(1L, 1L, InstanceStatus.REGISTERED, true,
+        return TestUtil.instanceMetaData(1L, 1L, InstanceStatus.SERVICES_RUNNING, true,
                 TestUtil.instanceGroup(1L, InstanceGroupType.GATEWAY, TestUtil.gcpTemplate(1L)));
     }
 }

@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 
 @Component
@@ -29,10 +29,10 @@ public class AmbariDecommissionTimeCalculator {
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
-    public void calculateDecommissioningTime(Stack stack, Collection<HostMetadata> filteredHostList, Map<String, Map<Long, Long>> dfsSpace, long usedSpace) {
-        Optional<HostMetadata> aHostMetadata = filteredHostList.stream().findFirst();
-        if (aHostMetadata.isPresent()) {
-            Template template = aHostMetadata.get().getHostGroup().getInstanceGroup().getTemplate();
+    public void calculateDecommissioningTime(Stack stack, Collection<InstanceMetaData> filteredHostList, Map<String, Map<Long, Long>> dfsSpace, long usedSpace) {
+        Optional<InstanceMetaData> instanceMetaData = filteredHostList.stream().findFirst();
+        if (instanceMetaData.isPresent()) {
+            Template template = instanceMetaData.get().getInstanceGroup().getTemplate();
             int rootVolumeSize = template.getRootVolumeSize() == null
                     ? defaultRootVolumeSizeProvider.getForPlatform(stack.cloudPlatform())
                     : template.getRootVolumeSize();

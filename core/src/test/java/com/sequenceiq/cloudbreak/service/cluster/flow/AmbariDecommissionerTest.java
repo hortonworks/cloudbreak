@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -46,7 +45,6 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -54,12 +52,10 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.PollingResult;
@@ -99,9 +95,6 @@ public class AmbariDecommissionerTest {
     private HostOrchestratorResolver hostOrchestratorResolver;
 
     @Mock
-    private HostMetadataRepository hostMetadataRepository;
-
-    @Mock
     private GatewayConfigService gatewayConfigService;
 
     @Mock
@@ -139,10 +132,10 @@ public class AmbariDecommissionerTest {
         String hostname1 = "10.0.0.1";
         String hostname2 = "10.0.0.2";
 
-        HostMetadata unhealhtyNode = getHostMetadata(hostname1, HostMetadataState.UNHEALTHY);
-        HostMetadata healhtyNode = getHostMetadata(hostname2, HostMetadataState.HEALTHY);
+        InstanceMetaData unhealhtyNode = getInstanceMetadata(hostname1, InstanceStatus.SERVICES_UNHEALTHY);
+        InstanceMetaData healhtyNode = getInstanceMetadata(hostname2, InstanceStatus.SERVICES_HEALTHY);
 
-        Collection<HostMetadata> nodes = Arrays.asList(unhealhtyNode, healhtyNode);
+        Collection<InstanceMetaData> nodes = Arrays.asList(unhealhtyNode, healhtyNode);
 
         Map<String, Long> ascendingNodes = new LinkedHashMap<>();
         ascendingNodes.put(hostname1, 100L);
@@ -161,11 +154,11 @@ public class AmbariDecommissionerTest {
         String hostname2 = "10.0.0.2";
         String hostname3 = "10.0.0.3";
 
-        HostMetadata unhealhtyNode = getHostMetadata(hostname1, HostMetadataState.UNHEALTHY);
-        HostMetadata healhtyNode1 = getHostMetadata(hostname2, HostMetadataState.HEALTHY);
-        HostMetadata healhtyNode2 = getHostMetadata(hostname3, HostMetadataState.HEALTHY);
+        InstanceMetaData unhealhtyNode = getInstanceMetadata(hostname1, InstanceStatus.SERVICES_UNHEALTHY);
+        InstanceMetaData healhtyNode1 = getInstanceMetadata(hostname2, InstanceStatus.SERVICES_HEALTHY);
+        InstanceMetaData healhtyNode2 = getInstanceMetadata(hostname3, InstanceStatus.SERVICES_HEALTHY);
 
-        List<HostMetadata> nodes = Arrays.asList(unhealhtyNode, healhtyNode1, healhtyNode2);
+        List<InstanceMetaData> nodes = Arrays.asList(unhealhtyNode, healhtyNode1, healhtyNode2);
 
         Map<String, Long> ascendingNodes = new LinkedHashMap<>();
         ascendingNodes.put(hostname1, 100L);
@@ -187,13 +180,13 @@ public class AmbariDecommissionerTest {
         String hostname4 = "10.0.0.4";
         String hostname5 = "10.0.0.5";
 
-        HostMetadata unhealhtyNode1 = getHostMetadata(hostname1, HostMetadataState.UNHEALTHY);
-        HostMetadata unhealhtyNode2 = getHostMetadata(hostname2, HostMetadataState.UNHEALTHY);
-        HostMetadata unhealhtyNode3 = getHostMetadata(hostname3, HostMetadataState.UNHEALTHY);
-        HostMetadata healhtyNode1 = getHostMetadata(hostname4, HostMetadataState.HEALTHY);
-        HostMetadata healhtyNode2 = getHostMetadata(hostname5, HostMetadataState.HEALTHY);
+        InstanceMetaData unhealhtyNode1 = getInstanceMetadata(hostname1, InstanceStatus.SERVICES_UNHEALTHY);
+        InstanceMetaData unhealhtyNode2 = getInstanceMetadata(hostname2, InstanceStatus.SERVICES_UNHEALTHY);
+        InstanceMetaData unhealhtyNode3 = getInstanceMetadata(hostname3, InstanceStatus.SERVICES_UNHEALTHY);
+        InstanceMetaData healhtyNode1 = getInstanceMetadata(hostname4, InstanceStatus.SERVICES_HEALTHY);
+        InstanceMetaData healhtyNode2 = getInstanceMetadata(hostname5, InstanceStatus.SERVICES_HEALTHY);
 
-        List<HostMetadata> nodes = Arrays.asList(unhealhtyNode1, unhealhtyNode2, unhealhtyNode3, healhtyNode1, healhtyNode2);
+        List<InstanceMetaData> nodes = Arrays.asList(unhealhtyNode1, unhealhtyNode2, unhealhtyNode3, healhtyNode1, healhtyNode2);
 
         Map<String, Long> ascendingNodes = new LinkedHashMap<>();
         ascendingNodes.put(hostname1, 100L);
@@ -215,11 +208,11 @@ public class AmbariDecommissionerTest {
         String hostname2 = "10.0.0.2";
         String hostname3 = "10.0.0.3";
 
-        HostMetadata unhealhtyNode1 = getHostMetadata(hostname1, HostMetadataState.UNHEALTHY);
-        HostMetadata healhtyNode1 = getHostMetadata(hostname2, HostMetadataState.HEALTHY);
-        HostMetadata healhtyNode2 = getHostMetadata(hostname3, HostMetadataState.HEALTHY);
+        InstanceMetaData unhealhtyNode1 = getInstanceMetadata(hostname1, InstanceStatus.SERVICES_UNHEALTHY);
+        InstanceMetaData healhtyNode1 = getInstanceMetadata(hostname2, InstanceStatus.SERVICES_HEALTHY);
+        InstanceMetaData healhtyNode2 = getInstanceMetadata(hostname3, InstanceStatus.SERVICES_HEALTHY);
 
-        List<HostMetadata> nodes = Arrays.asList(unhealhtyNode1, healhtyNode1, healhtyNode2);
+        List<InstanceMetaData> nodes = Arrays.asList(unhealhtyNode1, healhtyNode1, healhtyNode2);
 
         Map<String, Long> ascendingNodes = new LinkedHashMap<>();
         ascendingNodes.put(hostname2, 110L);
@@ -236,9 +229,9 @@ public class AmbariDecommissionerTest {
 
         String hostname1 = "10.0.0.1";
 
-        HostMetadata healhtyNode1 = getHostMetadata(hostname1, HostMetadataState.HEALTHY);
+        InstanceMetaData healhtyNode1 = getInstanceMetadata(hostname1, InstanceStatus.SERVICES_HEALTHY);
 
-        List<HostMetadata> nodes = Collections.singletonList(healhtyNode1);
+        List<InstanceMetaData> nodes = Collections.singletonList(healhtyNode1);
 
         Map<String, Long> ascendingNodes = new LinkedHashMap<>();
         ascendingNodes.put(hostname1, 100L);
@@ -285,10 +278,6 @@ public class AmbariDecommissionerTest {
         when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
 
         doReturn(Sets.newHashSet(masterHostGroup, slaveHostGroup)).when(hostGroupService).getByCluster(nullable(Long.class));
-        doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
-                .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
-                .findFirst().get())
-                .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
         when(ambariClientRetryer.getBlueprintMap(ambariClient, ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), "3"));
@@ -301,8 +290,8 @@ public class AmbariDecommissionerTest {
 
         doAnswer(invocation -> {
             List<String> removableFQDNs = removableNodes.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
-            return slaveHostGroup.getHostMetadata().stream()
-                    .filter(hostMetadata -> removableFQDNs.contains(hostMetadata.getHostName()))
+            return slaveInstanceGroup.getNotDeletedInstanceMetaDataSet().stream()
+                    .filter(instanceMetaData -> removableFQDNs.contains(instanceMetaData.getDiscoveryFQDN()))
                     .collect(Collectors.toList());
         }).when(hostFilterService).filterHostsForDecommission(any(), any(), any());
 
@@ -349,10 +338,6 @@ public class AmbariDecommissionerTest {
         when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
 
         doReturn(Sets.newHashSet(masterHostGroup, slaveHostGroup)).when(hostGroupService).getByCluster(nullable(Long.class));
-        doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
-                .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
-                .findFirst().get())
-                .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
         when(ambariClientRetryer.getBlueprintMap(ambariClient, ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), "3"));
@@ -364,9 +349,9 @@ public class AmbariDecommissionerTest {
 
         doAnswer(invocation -> {
             List<String> removableFQDNs = removableNodes.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
-            return slaveHostGroup.getHostMetadata().stream()
-                    .filter(hostMetadata -> !"10-0-1-0.example.com".equals(hostMetadata.getHostName()))
-                    .filter(hostMetadata -> removableFQDNs.contains(hostMetadata.getHostName()))
+            return slaveInstanceGroup.getNotDeletedInstanceMetaDataSet().stream()
+                    .filter(metadata -> !"10-0-1-0.example.com".equals(metadata.getDiscoveryFQDN()))
+                    .filter(metadata -> removableFQDNs.contains(metadata.getDiscoveryFQDN()))
                     .collect(Collectors.toList());
         }).when(hostFilterService).filterHostsForDecommission(any(), any(), any());
 
@@ -415,10 +400,6 @@ public class AmbariDecommissionerTest {
         when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
 
         doReturn(Sets.newHashSet(masterHostGroup, slaveHostGroup)).when(hostGroupService).getByCluster(nullable(Long.class));
-        doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
-                .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
-                .findFirst().get())
-                .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
         when(ambariClientRetryer.getBlueprintMap(ambariClient, ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), replication));
@@ -430,8 +411,8 @@ public class AmbariDecommissionerTest {
 
         doAnswer(invocation -> {
             List<String> removableFQDNs = removableNodes.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
-            return slaveHostGroup.getHostMetadata().stream()
-                    .filter(hostMetadata -> removableFQDNs.contains(hostMetadata.getHostName()))
+            return slaveInstanceGroup.getNotDeletedInstanceMetaDataSet().stream()
+                    .filter(metadata -> removableFQDNs.contains(metadata.getDiscoveryFQDN()))
                     .collect(Collectors.toList());
         }).when(hostFilterService).filterHostsForDecommission(any(), any(), any());
 
@@ -480,10 +461,6 @@ public class AmbariDecommissionerTest {
         when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
 
         doReturn(Sets.newHashSet(masterHostGroup, slaveHostGroup)).when(hostGroupService).getByCluster(nullable(Long.class));
-        doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
-                .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
-                .findFirst().get())
-                .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
         when(ambariClientRetryer.getBlueprintMap(ambariClient, ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), replication));
@@ -496,8 +473,8 @@ public class AmbariDecommissionerTest {
 
         doAnswer(invocation -> {
             List<String> removableFQDNs = removableNodes.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
-            return slaveHostGroup.getHostMetadata().stream()
-                    .filter(hostMetadata -> removableFQDNs.contains(hostMetadata.getHostName()))
+            return slaveInstanceGroup.getNotDeletedInstanceMetaDataSet().stream()
+                    .filter(metadata -> removableFQDNs.contains(metadata.getDiscoveryFQDN()))
                     .collect(Collectors.toList());
         }).when(hostFilterService).filterHostsForDecommission(any(), any(), any());
 
@@ -539,14 +516,6 @@ public class AmbariDecommissionerTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName(instanceGroup.getGroupName());
         hostGroup.setId(id);
-        Set<HostMetadata> hostMetadataSet = instanceGroup.getInstanceMetaDataSet().stream().map(instanceMetaData -> {
-            HostMetadata hostMetadata = new HostMetadata();
-            hostMetadata.setHostName(instanceMetaData.getDiscoveryFQDN());
-            hostMetadata.setHostMetadataState(HostMetadataState.HEALTHY);
-            hostMetadata.setHostGroup(hostGroup);
-            return hostMetadata;
-        }).collect(Collectors.toSet());
-        hostGroup.setHostMetadata(hostMetadataSet);
         return hostGroup;
     }
 
@@ -557,7 +526,7 @@ public class AmbariDecommissionerTest {
         masterInstanceGroup.setInstanceMetaData(new HashSet<>());
         for (int i = 0; i < 5; i++) {
             InstanceMetaData instanceMetaData = new InstanceMetaData();
-            instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
+            instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
             instanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
             instanceMetaData.setAmbariServer(true);
             instanceMetaData.setDiscoveryFQDN("10-0-0-" + i + ".example.com");
@@ -576,7 +545,7 @@ public class AmbariDecommissionerTest {
         slaveInstanceGroup.setInstanceMetaData(new HashSet<>());
         for (int i = 0; i < nodeCount; i++) {
             InstanceMetaData instanceMetaData = new InstanceMetaData();
-            instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
+            instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
             instanceMetaData.setInstanceMetadataType(InstanceMetadataType.CORE);
             instanceMetaData.setAmbariServer(false);
             instanceMetaData.setDiscoveryFQDN("10-0-1-" + i + ".example.com");
@@ -588,16 +557,10 @@ public class AmbariDecommissionerTest {
         return slaveInstanceGroup;
     }
 
-    protected HostMetadata getHostMetadata(Long id) {
-        HostMetadata hostMetadata = new HostMetadata();
-        hostMetadata.setId(id);
-        return hostMetadata;
-    }
-
-    private HostMetadata getHostMetadata(String hostname2, HostMetadataState state) {
-        HostMetadata healhtyNode = new HostMetadata();
-        healhtyNode.setHostName(hostname2);
-        healhtyNode.setHostMetadataState(state);
-        return healhtyNode;
+    private InstanceMetaData getInstanceMetadata(String hostname, InstanceStatus state) {
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN(hostname);
+        instanceMetaData.setInstanceStatus(state);
+        return instanceMetaData;
     }
 }
