@@ -19,8 +19,8 @@ public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
 
     private static final String CORE_SITE_SAFETY_VALVE = "core_site_safety_valve";
 
-   @Inject
-   private S3GuardConfigProvider s3GuardConfigProvider;
+    @Inject
+    private S3GuardConfigProvider s3GuardConfigProvider;
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {

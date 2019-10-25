@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
+import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCloudCredentialConverter;
 
@@ -45,6 +46,24 @@ public class PlatformParameterService {
             String region,
             String platformVariant,
             String availabilityZone) {
+        return getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                region,
+                platformVariant,
+                availabilityZone,
+                CdpResourceType.DEFAULT);
+    }
+
+    public PlatformResourceRequest getPlatformResourceRequest(
+            String accountId,
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
+            String availabilityZone,
+            CdpResourceType cdpResourceType) {
 
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
 
@@ -62,6 +81,11 @@ public class PlatformParameterService {
             platformResourceRequest.setPlatformVariant(
                     Strings.isNullOrEmpty(platformVariant) ? platformResourceRequest.getCredential().getCloudPlatform() : platformVariant);
         }
+        if (cdpResourceType == null) {
+            platformResourceRequest.setCdpResourceType(CdpResourceType.DEFAULT);
+        } else {
+            platformResourceRequest.setCdpResourceType(cdpResourceType);
+        }
         platformResourceRequest.setRegion(region);
         platformResourceRequest.setCloudPlatform(platformResourceRequest.getCredential().getCloudPlatform());
         if (!Strings.isNullOrEmpty(availabilityZone)) {
@@ -72,8 +96,12 @@ public class PlatformParameterService {
 
     public CloudVmTypes getVmTypesByCredential(PlatformResourceRequest request) {
         checkFieldIsNotEmpty(request.getRegion(), "region");
-        return cloudParameterService.getVmTypesV2(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
-                request.getPlatformVariant(), request.getFilters());
+        return cloudParameterService.getVmTypesV2(
+                extendedCloudCredentialConverter.convert(request.getCredential()),
+                request.getRegion(),
+                request.getPlatformVariant(),
+                request.getCdpResourceType(),
+                request.getFilters());
     }
 
     public CloudRegions getRegionsByCredential(PlatformResourceRequest request) {

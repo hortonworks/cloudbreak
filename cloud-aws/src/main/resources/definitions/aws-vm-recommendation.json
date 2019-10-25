@@ -9,7 +9,7 @@
   },
   "worker": {
     "type": "worker",
-    "flavor": "m5.xlarge",
+    "flavor": "m5.2xlarge",
     "cardinality": 3,
     "volumeType": "MAGNETIC",
     "volumeCount": 1,
@@ -25,7 +25,7 @@
   },
   "quorum": {
     "type": "quorum",
-    "flavor": "m5.xlarge",
+    "flavor": "m5.2xlarge",
     "cardinality": 3,
     "volumeType": "MAGNETIC",
     "volumeCount": 1,

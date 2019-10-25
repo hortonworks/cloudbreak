@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
+import com.sequenceiq.common.api.type.CdpResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TemplateDecoratorTest {
@@ -110,10 +111,11 @@ public class TemplateDecoratorTest {
         cloudVmTypes.setCloudVmResponses(region1);
 
         when(cloudParameterService.getDiskTypes()).thenReturn(platformDisk);
-        when(cloudParameterService.getVmTypesV2(eq(extendedCloudCredential), eq(REGION), eq(VARIANT), anyMap())).thenReturn(cloudVmTypes);
+        when(cloudParameterService.getVmTypesV2(eq(extendedCloudCredential), eq(REGION), eq(VARIANT),
+                eq(CdpResourceType.DATAHUB), anyMap())).thenReturn(cloudVmTypes);
         when(locationService.location(REGION, AVAILABILITY_ZONE)).thenReturn(REGION);
 
-        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
 
         VolumeTemplate next = actual.getVolumeTemplates().iterator().next();
         assertEquals(maximumNumber, next.getVolumeCount().longValue());
@@ -124,7 +126,7 @@ public class TemplateDecoratorTest {
     public void testDecoratorWhenNoLocation() {
         Template template = initTemplate();
 
-        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
 
         Assert.assertTrue(actual.getVolumeTemplates().isEmpty());
     }
@@ -158,10 +160,11 @@ public class TemplateDecoratorTest {
         cloudVmTypes.setCloudVmResponses(region1);
 
         when(cloudParameterService.getDiskTypes()).thenReturn(platformDisk);
-        when(cloudParameterService.getVmTypesV2(eq(extendedCloudCredential), eq(REGION), eq(VARIANT), anyMap())).thenReturn(cloudVmTypes);
+        when(cloudParameterService.getVmTypesV2(eq(extendedCloudCredential), eq(REGION), eq(VARIANT),
+                eq(CdpResourceType.DATAHUB), anyMap())).thenReturn(cloudVmTypes);
         when(locationService.location(REGION, AVAILABILITY_ZONE)).thenReturn(REGION);
 
-        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
 
         VolumeTemplate next = actual.getVolumeTemplates().iterator().next();
         Assert.assertNull(next.getVolumeCount());
@@ -174,7 +177,7 @@ public class TemplateDecoratorTest {
 
         template.setRootVolumeSize(70);
 
-        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
         assertEquals(70L, (long) actual.getRootVolumeSize());
     }
 
@@ -184,7 +187,7 @@ public class TemplateDecoratorTest {
 
         when(defaultRootVolumeSizeProvider.getForPlatform(any())).thenReturn(100);
 
-        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
         assertEquals(100L, (long) actual.getRootVolumeSize());
     }
 
@@ -193,7 +196,8 @@ public class TemplateDecoratorTest {
         template.setVolumeTemplates(Sets.newHashSet());
 
         CloudVmTypes cloudVmTypes = new CloudVmTypes(singletonMap(REGION, emptySet()), emptyMap());
-        when(cloudParameterService.getVmTypesV2(eq(extendedCloudCredential), eq(REGION), eq(VARIANT), anyMap())).thenReturn(cloudVmTypes);
+        when(cloudParameterService.getVmTypesV2(eq(extendedCloudCredential), eq(REGION), eq(VARIANT), eq(CdpResourceType.DATAHUB), anyMap()))
+                .thenReturn(cloudVmTypes);
         when(locationService.location(REGION, AVAILABILITY_ZONE)).thenReturn(null);
         return template;
     }

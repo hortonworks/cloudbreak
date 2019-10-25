@@ -72,6 +72,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.Event;
@@ -284,10 +285,11 @@ public class CloudParameterService {
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public CloudVmTypes getVmTypesV2(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
+    public CloudVmTypes getVmTypesV2(ExtendedCloudCredential cloudCredential, String region, String variant,
+        CdpResourceType stackType, Map<String, String> filters) {
         LOGGER.debug("Get platform vmtypes");
         GetPlatformVmTypesRequest getPlatformVmTypesRequest =
-                new GetPlatformVmTypesRequest(cloudCredential, cloudCredential, variant, region, filters);
+                new GetPlatformVmTypesRequest(cloudCredential, cloudCredential, variant, region, stackType, filters);
         eventBus.notify(getPlatformVmTypesRequest.selector(), Event.wrap(getPlatformVmTypesRequest));
         try {
             GetPlatformVmTypesResult res = getPlatformVmTypesRequest.await();

@@ -47,17 +47,23 @@ public class NifiKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
     }
 
     private Optional<ClusterExposedServiceView> getNifi(TemplatePreparationObject source) {
-        return source.getExposedServices().get("cdp-proxy")
-                        .stream()
-                        .filter(e -> e.getKnoxService().equalsIgnoreCase(ExposedService.NIFI.name()))
-                        .findFirst();
+        if (source.getExposedServices() != null && !source.getExposedServices().isEmpty()) {
+            return source.getExposedServices().get("cdp-proxy")
+                    .stream()
+                    .filter(e -> e.getKnoxService().equalsIgnoreCase(ExposedService.NIFI.name()))
+                    .findFirst();
+        }
+        return Optional.empty();
     }
 
     private Optional<ClouderaManagerProduct> getClouderaManagerProduct(TemplatePreparationObject source) {
-        return source.getProductDetailsView().getProducts()
+        if (source.getProductDetailsView() != null) {
+            source.getProductDetailsView().getProducts()
                     .stream()
                     .filter(e -> e.getName().equalsIgnoreCase(CFM))
                     .findFirst();
+        }
+        return Optional.empty();
     }
 
     @Override

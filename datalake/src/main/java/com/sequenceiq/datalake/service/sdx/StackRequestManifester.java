@@ -21,6 +21,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
@@ -85,6 +86,7 @@ public class StackRequestManifester {
             LOGGER.info("Setting up stack request of SDX {} for cloudbreak", sdxCluster.getClusterName());
             StackV4Request stackRequest = JsonUtil.readValue(sdxCluster.getStackRequest(), StackV4Request.class);
             stackRequest.setName(sdxCluster.getClusterName());
+            stackRequest.setType(StackType.DATALAKE);
             if (stackRequest.getTags() == null) {
                 TagsV4Request tags = new TagsV4Request();
                 try {

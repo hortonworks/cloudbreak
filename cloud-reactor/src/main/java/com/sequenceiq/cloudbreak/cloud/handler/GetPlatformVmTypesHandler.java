@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVmTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVmTypesResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -14,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.common.api.type.CdpResourceType;
 
 import reactor.bus.Event;
 
@@ -38,9 +40,15 @@ public class GetPlatformVmTypesHandler implements CloudPlatformEventHandler<GetP
             CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(
                     Platform.platform(request.getExtendedCloudCredential().getCloudPlatform()),
                     Variant.variant(request.getVariant()));
-            CloudVmTypes platformVirtualMachinesJson = cloudPlatformConnectors.get(cloudPlatformVariant)
-                    .platformResources()
-                    .virtualMachines(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
+            PlatformResources platformResources = cloudPlatformConnectors.get(cloudPlatformVariant).platformResources();
+            CloudVmTypes platformVirtualMachinesJson;
+            if (CdpResourceType.DATAHUB.equals(request.getCdpResourceType())) {
+                platformVirtualMachinesJson = platformResources
+                        .virtualMachinesForDistroX(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
+            } else {
+                platformVirtualMachinesJson = platformResources
+                        .virtualMachines(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
+            }
             GetPlatformVmTypesResult getPlatformSecurityGroupsResult = new GetPlatformVmTypesResult(request.getResourceId(), platformVirtualMachinesJson);
             request.getResult().onNext(getPlatformSecurityGroupsResult);
             LOGGER.debug("Query platform vmtypes types finished.");

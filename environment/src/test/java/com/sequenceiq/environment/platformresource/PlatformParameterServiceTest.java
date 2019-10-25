@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
+import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCloudCredentialConverter;
@@ -119,7 +120,7 @@ class PlatformParameterServiceTest {
     @Test
     void getVmTypesByCredential() {
         platformParameterServiceUnderTest.getVmTypesByCredential(request);
-        verify(cloudParameterService).getVmTypesV2(any(), eq(REGION), eq(PLATFORM_VARIANT), any());
+        verify(cloudParameterService).getVmTypesV2(any(), eq(REGION), eq(PLATFORM_VARIANT), eq(CdpResourceType.DEFAULT), any());
     }
 
     @Test
