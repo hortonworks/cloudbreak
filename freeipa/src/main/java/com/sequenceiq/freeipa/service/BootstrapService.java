@@ -1,25 +1,14 @@
 package com.sequenceiq.freeipa.service;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import javax.inject.Inject;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
@@ -28,6 +17,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.util.CompressUtil;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Image;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -93,38 +83,6 @@ public class BootstrapService {
     }
 
     private byte[] getStateConfigZip() throws IOException {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            try (ZipOutputStream zout = new ZipOutputStream(baos)) {
-                ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-                Map<String, List<Resource>> structure = new TreeMap<>();
-                for (Resource resource : resolver.getResources("classpath*:freeipa-salt/**")) {
-                    String path = resource.getURL().getPath();
-                    String dir = path.substring(path.indexOf("/freeipa-salt") + "/freeipa-salt".length(), path.lastIndexOf('/') + 1);
-                    List<Resource> list = structure.get(dir);
-                    if (list == null) {
-                        list = new ArrayList<>();
-                    }
-                    structure.put(dir, list);
-                    if (!path.endsWith("/")) {
-                        list.add(resource);
-                    }
-                }
-                for (Map.Entry<String, List<Resource>> entry : structure.entrySet()) {
-                    zout.putNextEntry(new ZipEntry(entry.getKey()));
-                    for (Resource resource : entry.getValue()) {
-                        LOGGER.debug("Zip salt entry: {}", resource.getFilename());
-                        zout.putNextEntry(new ZipEntry(entry.getKey() + resource.getFilename()));
-                        InputStream inputStream = resource.getInputStream();
-                        byte[] bytes = IOUtils.toByteArray(inputStream);
-                        zout.write(bytes);
-                        zout.closeEntry();
-                    }
-                }
-            } catch (IOException e) {
-                LOGGER.error("Failed to zip salt configurations", e);
-                throw new IOException("Failed to zip salt configurations", e);
-            }
-            return baos.toByteArray();
-        }
+        return CompressUtil.generateCompressedOutputFromFolders("salt-common", "freeipa-salt");
     }
 }

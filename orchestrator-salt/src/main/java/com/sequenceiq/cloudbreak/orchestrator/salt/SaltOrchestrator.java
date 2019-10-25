@@ -4,9 +4,7 @@ import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
 import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.convert;
 import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
@@ -20,22 +18,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.http.HttpStatus;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -81,6 +72,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.util.CompressUtil;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -659,39 +651,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     public byte[] getStateConfigZip() throws IOException {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            try (ZipOutputStream zout = new ZipOutputStream(baos)) {
-                ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-                Map<String, List<Resource>> structure = new TreeMap<>();
-                for (Resource resource : resolver.getResources("classpath*:salt/**")) {
-                    String path = resource.getURL().getPath();
-                    String dir = path.substring(path.indexOf("/salt") + "/salt".length(), path.lastIndexOf('/') + 1);
-                    List<Resource> list = structure.get(dir);
-                    if (list == null) {
-                        list = new ArrayList<>();
-                    }
-                    structure.put(dir, list);
-                    if (!path.endsWith("/")) {
-                        list.add(resource);
-                    }
-                }
-                for (Entry<String, List<Resource>> entry : structure.entrySet()) {
-                    zout.putNextEntry(new ZipEntry(entry.getKey()));
-                    for (Resource resource : entry.getValue()) {
-                        LOGGER.debug("Zip salt entry: {}", resource.getFilename());
-                        zout.putNextEntry(new ZipEntry(entry.getKey() + resource.getFilename()));
-                        InputStream inputStream = resource.getInputStream();
-                        byte[] bytes = IOUtils.toByteArray(inputStream);
-                        zout.write(bytes);
-                        zout.closeEntry();
-                    }
-                }
-            } catch (IOException e) {
-                LOGGER.error("Failed to zip salt configurations", e);
-                throw new IOException("Failed to zip salt configurations", e);
-            }
-            return baos.toByteArray();
-        }
+        return CompressUtil.generateCompressedOutputFromFolders("salt-common", "salt");
     }
 
     @Override
