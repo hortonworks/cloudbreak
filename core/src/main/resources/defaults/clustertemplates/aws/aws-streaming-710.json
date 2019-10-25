@@ -1,0 +1,86 @@
+{
+  "name": "CDP 1.3 - Streams Messaging Heavy Duty",
+  "description": "",
+  "type": "STREAMING",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "CDP 1.3 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager"
+    },
+    "instanceGroups": [
+      {
+        "name": "master",
+        "template": {
+          "instanceType": "m5.2xlarge",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "rootVolume": {
+            "size": 100
+          },
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          }
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "quorum",
+        "template": {
+          "instanceType": "m5.2xlarge",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "rootVolume": {
+            "size": 50
+          }
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "broker",
+        "template": {
+          "instanceType": "m5.2xlarge",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 1000,
+              "type": "st1"
+            }
+          ],
+          "rootVolume": {
+            "size": 50
+          },
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          }
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "recipeNames": []
+      }
+    ]
+  }
+}
