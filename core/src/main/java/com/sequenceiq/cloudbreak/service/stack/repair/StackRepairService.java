@@ -14,10 +14,8 @@ import com.sequenceiq.cloudbreak.controller.exception.FlowsAlreadyRunningExcepti
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 
 @Component
@@ -29,9 +27,6 @@ public class StackRepairService {
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
-
-    @Inject
-    private HostMetadataRepository hostMetadataRepository;
 
     @Inject
     private ReactorFlowManager reactorFlowManager;
@@ -55,9 +50,8 @@ public class StackRepairService {
         UnhealthyInstances unhealthyInstances = new UnhealthyInstances();
         for (String instanceId : unhealthyInstanceIds) {
             InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), instanceId);
-            HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
-            String hostGroupName = hostMetadata.getHostGroup().getName();
-            unhealthyInstances.addInstance(instanceId, hostGroupName);
+            String instanceGroupName = instanceMetaData.getInstanceGroup().getGroupName();
+            unhealthyInstances.addInstance(instanceId, instanceGroupName);
         }
         return unhealthyInstances;
     }

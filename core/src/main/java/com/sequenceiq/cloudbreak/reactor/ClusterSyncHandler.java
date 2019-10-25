@@ -54,7 +54,7 @@ public class ClusterSyncHandler implements ReactorEventHandler<ClusterSyncReques
             Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(request.getStackId());
             ambariClusterStatusUpdater.updateClusterStatus(stack, cluster);
             if (cluster.isAvailable() || cluster.isMaintenanceModeEnabled()) {
-                instanceMetadataUpdater.updatePackageVersionsOnAllInstances(stack);
+                instanceMetadataUpdater.updatePackageVersionsOnAllInstances(stack.getId());
             }
             result = new ClusterSyncResult(request);
         } catch (Exception e) {

@@ -15,10 +15,8 @@ import com.sequenceiq.cloudbreak.api.model.SharedServiceResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterViewResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.HostGroupViewResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.HostMetadataViewResponse;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
-import com.sequenceiq.cloudbreak.domain.view.HostMetadataView;
 
 @Component
 public class StackListItemToStackViewResponseConverter {
@@ -60,18 +58,7 @@ public class StackListItemToStackViewResponseConverter {
             HostGroupViewResponse hgResponse = new HostGroupViewResponse();
             hgResponse.setId(hgView.getId());
             hgResponse.setName(hgView.getName());
-            hgResponse.setMetadata(getHostMetadataViewResponses(hgView.getHostMetadata()));
             return hgResponse;
-        }).collect(Collectors.toSet());
-    }
-
-    private Set<HostMetadataViewResponse> getHostMetadataViewResponses(Set<HostMetadataView> hostmetadata) {
-        return hostmetadata.stream().map(hm -> {
-            HostMetadataViewResponse response = new HostMetadataViewResponse();
-            response.setId(hm.getId());
-            response.setName(hm.getHostName());
-            response.setState(hm.getHostMetadataState().name());
-            return response;
         }).collect(Collectors.toSet());
     }
 

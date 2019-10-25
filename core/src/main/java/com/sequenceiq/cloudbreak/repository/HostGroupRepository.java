@@ -26,13 +26,12 @@ public interface HostGroupRepository extends DisabledBaseRepository<HostGroup, L
 
     @EntityGraph(value = "HostGroup.instanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
     @Query("SELECT h FROM HostGroup h WHERE h.cluster.id= :clusterId AND h.name= :hostGroupName")
-    HostGroup findHostGroupInClusterByName(@Param("clusterId") Long clusterId, @Param("hostGroupName") String hostGroupName);
+    HostGroup findHostGroupInClusterByNameWithInstanceMetadas(@Param("clusterId") Long clusterId, @Param("hostGroupName") String hostGroupName);
 
     @EntityGraph(value = "HostGroup.instanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
     @Query("SELECT h FROM HostGroup h JOIN h.recipes r WHERE r.id= :recipeId")
     Set<HostGroup> findAllHostGroupsByRecipe(@Param("recipeId") Long recipeId);
 
-    @EntityGraph(value = "HostGroup.instanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
     @Query("SELECT h FROM HostGroup h WHERE h.cluster.id= :clusterId AND h.instanceGroup.groupName= :instanceGroupName")
     HostGroup findHostGroupsByInstanceGroupName(@Param("clusterId") Long clusterId, @Param("instanceGroupName") String instanceGroupName);
 
@@ -43,9 +42,4 @@ public interface HostGroupRepository extends DisabledBaseRepository<HostGroup, L
     @Query("SELECT h FROM HostGroup h LEFT JOIN FETCH h.recipes WHERE h.cluster.id= :clusterId AND h.name= :hostGroupName")
     HostGroup findHostGroupInClusterByNameWithRecipes(@Param("clusterId") Long clusterId, @Param("hostGroupName") String hostGroupName);
 
-    @Query("SELECT h FROM HostGroup h LEFT JOIN FETCH h.hostMetadata WHERE h.cluster.id= :clusterId AND h.name= :hostGroupName")
-    HostGroup findHostGroupInClusterByNameWithHostMetadata(@Param("clusterId") Long clusterId, @Param("hostGroupName") String hostGroupName);
-
-    @Query("SELECT h FROM HostGroup h LEFT JOIN FETCH h.hostMetadata LEFT JOIN FETCH h.recipes WHERE h.cluster.id= :clusterId")
-    Set<HostGroup> findHostGroupsInClusterWithRecipesAndHostmetadata(@Param("clusterId") Long clusterId);
 }

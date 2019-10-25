@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -82,20 +81,9 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
                     hardwareInfoResponse.setPrivateIp(instanceMetaData.getPrivateIp());
                     hardwareInfoResponse.setPublicIp(instanceMetaData.getPublicIp());
                     hardwareInfoResponse.setSshPort(instanceMetaData.getSshPort());
-
-                    Optional.ofNullable(cluster).map(Cluster::getHostGroups).stream().flatMap(Collection::stream)
-                            .filter(hg -> instanceGroup.getGroupName().equals(hg.getName()))
-                            .map(HostGroup::getHostMetadata)
-                            .flatMap(Collection::stream)
-                            .filter(hmd -> Optional.ofNullable(instanceMetaData.getDiscoveryFQDN())
-                                    .map(hmd.getHostName()::equals)
-                                    .orElse(Boolean.FALSE))
-                            .findFirst()
-                            .ifPresent(hostMetadata -> {
-                                hardwareInfoResponse.setGroupName(hostMetadata.getHostGroup().getName());
-                                hardwareInfoResponse.setName(hostMetadata.getHostName());
-                                hardwareInfoResponse.setState(hostMetadata.getHostMetadataState().name());
-                            });
+                    hardwareInfoResponse.setGroupName(instanceMetaData.getInstanceGroupName());
+                    hardwareInfoResponse.setName(instanceMetaData.getInstanceName());
+                    hardwareInfoResponse.setState(instanceMetaData.getInstanceStatus().name());
 
                     if (cluster != null && template != null) {
                         hardwareInfoResponse.setTemplate(conversionService.convert(template, TemplateResponse.class));

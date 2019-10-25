@@ -1,9 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster.api;
 
-import java.util.Collection;
-
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
@@ -49,8 +45,8 @@ public interface ClusterApi {
         clusterSecurityService().changeOriginalAmbariCredentialsAndCreateCloudbreakUser(stack);
     }
 
-    default void upscaleCluster(Stack stack, HostGroup hostGroup, Collection<HostMetadata> hostMetadata) throws CloudbreakException {
-        clusterModificationService().upscaleCluster(stack, hostGroup, hostMetadata);
+    default void upscaleCluster(Stack stack, String hostGroupName) throws CloudbreakException {
+        clusterModificationService().upscaleCluster(stack, hostGroupName);
     }
 
     default void stopCluster(Stack stack) throws CloudbreakException {

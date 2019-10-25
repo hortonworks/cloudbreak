@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
 
 @Component
@@ -30,18 +30,18 @@ public class AmbariHostsJoinStatusCheckerTask extends ClusterBasedStatusCheckerT
         AmbariClient ambariClient = ambariHostsCheckerContext.getAmbariClient();
         Map<String, String> hostNamesToStatuses = ambariClient.getHostStatuses();
         boolean allHostsJoined = true;
-        for (HostMetadata host : ambariHostsCheckerContext.getHostsInCluster()) {
+        for (InstanceMetaData host : ambariHostsCheckerContext.getHostsInCluster()) {
             if (!isHostJoined(host, hostNamesToStatuses)) {
-                LOGGER.info("Host {} is currently not part of the cluster, waiting for it to join.", host.getHostName());
+                LOGGER.info("Host {} is currently not part of the cluster, waiting for it to join.", host.getDiscoveryFQDN());
                 allHostsJoined = false;
             }
         }
         return allHostsJoined;
     }
 
-    private boolean isHostJoined(HostMetadata hostMetadata, Map<String, String> hostNamesToStatuses) {
+    private boolean isHostJoined(InstanceMetaData hostMetadata, Map<String, String> hostNamesToStatuses) {
         for (Entry<String, String> hostWithState : hostNamesToStatuses.entrySet()) {
-            if (hostWithState.getKey().equals(hostMetadata.getHostName()) && !"UNKNOWN".equals(hostWithState.getValue())) {
+            if (hostWithState.getKey().equals(hostMetadata.getDiscoveryFQDN()) && !"UNKNOWN".equals(hostWithState.getValue())) {
                 return true;
             }
         }

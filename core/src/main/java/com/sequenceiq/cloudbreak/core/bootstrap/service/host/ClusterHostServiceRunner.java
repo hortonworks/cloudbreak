@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
@@ -147,7 +147,7 @@ public class ClusterHostServiceRunner {
             SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
             hostOrchestrator.initServiceRun(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
-            recipeEngine.executePreAmbariStartRecipes(stack, hostGroupService.getByClusterWithRecipes(cluster.getId()));
+            recipeEngine.executePreAmbariStartRecipes(stack, hostGroupService.getRecipesByCluster(cluster.getId()));
             hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
@@ -298,10 +298,12 @@ public class ClusterHostServiceRunner {
             BlueprintTextProcessor blueprintTextProcessor = blueprintProcessorFactory.get(dataLakeCluster.getBlueprint().getBlueprintText());
 
             Set<String> groupNames = blueprintTextProcessor.getHostGroupsWithComponent("RANGER_ADMIN");
-            List<HostGroup> groups = dataLakeCluster.getHostGroups().stream().filter(hg -> groupNames.contains(hg.getName())).collect(Collectors.toList());
-            Set<String> hostNames = new HashSet<>();
-            groups.forEach(hg -> hostNames.addAll(hostGroupService.getByClusterIdAndName(dataLakeCluster.getId(), hg.getName())
-                    .getHostMetadata().stream().map(HostMetadata::getHostName).collect(Collectors.toList())));
+            List<InstanceGroup> groups = stack.getInstanceGroupsAsList().stream()
+                    .filter(instanceGroup -> groupNames.contains(instanceGroup.getGroupName()))
+                    .collect(Collectors.toList());
+            Set<String> hostNames = groups.stream().flatMap(instanceGroup -> instanceGroup.getAllInstanceMetaData().stream())
+                    .map(InstanceMetaData::getDiscoveryFQDN)
+                    .collect(Collectors.toSet());
 
             Map<String, String> rangerAdminConfigs = blueprintTextProcessor.getConfigurationEntries().getOrDefault("ranger-admin-site", new HashMap<>());
             String rangerPort = rangerAdminConfigs.getOrDefault("ranger.service.http.port", "6080");

@@ -9,7 +9,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostMetadataResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
@@ -31,8 +32,8 @@ public class RecoveryTests extends ClusterTests {
                     .filter(hostGroup -> hostGroup.getName().equals(HostGroupType.WORKER.getName()))
                     .collect(Collectors.toList());
             Assert.assertTrue(hostgroupList.size() == 1);
-            List<HostMetadataResponse> nodeList = hostgroupList.get(0).getMetadata().stream()
-                    .filter(node -> node.getState().equals("UNHEALTHY"))
+            List<InstanceMetaDataJson> nodeList = stack.getInstanceGroups().get(0).getMetadata().stream()
+                    .filter(node -> node.getInstanceStatus().equals(InstanceStatus.SERVICES_UNHEALTHY))
                     .collect(Collectors.toList());
             Assert.assertTrue(nodeList.size() == 1);
         }));

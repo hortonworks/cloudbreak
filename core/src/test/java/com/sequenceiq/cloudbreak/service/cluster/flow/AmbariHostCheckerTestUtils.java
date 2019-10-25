@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 public class AmbariHostCheckerTestUtils {
 
@@ -40,12 +40,12 @@ public class AmbariHostCheckerTestUtils {
         return compStates;
     }
 
-    public static Set<HostMetadata> getHostMetadataSet(int count) {
-        Set<HostMetadata> result = new HashSet<>();
+    public static Set<InstanceMetaData> getMetadataSet(int count) {
+        Set<InstanceMetaData> result = new HashSet<>();
         IntStream.range(1, count + 1).forEach(value -> {
-            HostMetadata hostMetadata = new HostMetadata();
-            hostMetadata.setHostName("host" + value);
-            result.add(hostMetadata);
+            InstanceMetaData metadata = new InstanceMetaData();
+            metadata.setDiscoveryFQDN("host" + value);
+            result.add(metadata);
         });
         return result;
     }

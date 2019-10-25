@@ -70,7 +70,6 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
@@ -89,13 +88,11 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.KerberosConfigRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -121,6 +118,8 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 @Service
 public class ClusterService {
 
+    public static final String AMBARI_HEALTHY_STATE = "HEALTHY";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterService.class);
 
     private static final String MASTER_CATEGORY = "MASTER";
@@ -139,9 +138,6 @@ public class ClusterService {
 
     @Inject
     private KerberosConfigRepository kerberosConfigRepository;
-
-    @Inject
-    private HostMetadataRepository hostMetadataRepository;
 
     @Inject
     private InstanceMetaDataRepository instanceMetadataRepository;
@@ -319,25 +315,17 @@ public class ClusterService {
         return cluster;
     }
 
-    public void updateHostMetadata(Long clusterId, Map<String, List<String>> hostsPerHostGroup, HostMetadataState hostMetadataState) {
+    public void updateInstancesToRunning(Long clusterId, Map<String, List<String>> hostsPerHostGroup) {
         try {
             transactionService.required(() -> {
                 for (Entry<String, List<String>> hostGroupEntry : hostsPerHostGroup.entrySet()) {
                     HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterId, hostGroupEntry.getKey());
                     if (hostGroup != null) {
-                        Set<String> existingHosts = hostMetadataRepository.findEmptyHostsInHostGroup(hostGroup.getId()).stream()
-                                .map(HostMetadata::getHostName)
-                                .collect(Collectors.toSet());
-                        hostGroupEntry.getValue().stream()
-                                .filter(hostName -> !existingHosts.contains(hostName))
-                                .forEach(hostName -> {
-                                    HostMetadata hostMetadataEntry = new HostMetadata();
-                                    hostMetadataEntry.setHostName(hostName);
-                                    hostMetadataEntry.setHostGroup(hostGroup);
-                                    hostMetadataEntry.setHostMetadataState(hostMetadataState);
-                                    hostGroup.getHostMetadata().add(hostMetadataEntry);
+                        hostGroup.getInstanceGroup().getUnattachedInstanceMetaDataSet()
+                                .forEach(instanceMetaData -> {
+                                    instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
+                                    instanceMetaDataRepository.save(instanceMetaData);
                                 });
-                        hostGroupService.save(hostGroup);
                     }
                 }
                 return null;
@@ -458,22 +446,23 @@ public class ClusterService {
     private void handleNodeStateChanges(Long stackId, Set<String> failedNodes, Set<String> newHealthyNodes, Stack stack) {
         Cluster cluster = stack.getCluster();
         Map<String, List<String>> autoRecoveryNodesMap = new HashMap<>();
-        Map<String, HostMetadata> autoRecoveryHostMetadata = new HashMap<>();
-        Map<String, HostMetadata> failedHostMetadata = new HashMap<>();
+        Map<String, InstanceMetaData> autoRecoveryMetadata = new HashMap<>();
+        Map<String, InstanceMetaData> failedMetaData = new HashMap<>();
         for (String failedNode : failedNodes) {
-            HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), failedNode);
-            if (hostMetadata == null) {
-                throw new BadRequestException("No metadata information for the node: " + failedNode);
-            }
-            HostGroup hostGroup = hostMetadata.getHostGroup();
-            if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
-                validateRepair(stack, hostMetadata);
-            }
-            String hostGroupName = hostGroup.getName();
-            if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
-                prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryHostMetadata, failedNode, hostMetadata, hostGroupName);
-            } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
-                failedHostMetadata.put(failedNode, hostMetadata);
+            InstanceMetaData instanceMetadata = instanceMetadataRepository.findHostInStack(stackId, failedNode);
+            if (instanceMetadata == null) {
+                LOGGER.error("No metadata information for the node: " + failedNode);
+            } else {
+                HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(cluster.getId(), instanceMetadata.getInstanceGroupName());
+                if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
+                    validateRepair(stack, instanceMetadata);
+                }
+                String hostGroupName = hostGroup.getName();
+                if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
+                    prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryMetadata, failedNode, instanceMetadata, hostGroupName);
+                } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
+                    failedMetaData.put(failedNode, instanceMetadata);
+                }
             }
         }
         try {
@@ -481,17 +470,17 @@ public class ClusterService {
                 flowManager.triggerClusterRepairFlow(stackId, autoRecoveryNodesMap, false);
                 String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AUTORECOVERY_REQUESTED.code(),
                         Collections.singletonList(autoRecoveryNodesMap));
-                updateChangedHosts(cluster, autoRecoveryHostMetadata.keySet(), HostMetadataState.HEALTHY, HostMetadataState.WAITING_FOR_REPAIR, recoveryMessage);
+                updateChangedHosts(cluster, autoRecoveryMetadata.keySet(), InstanceStatus.SERVICES_HEALTHY, InstanceStatus.WAITING_FOR_REPAIR, recoveryMessage);
             }
-            if (!failedHostMetadata.isEmpty()) {
+            if (!failedMetaData.isEmpty()) {
                 String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_FAILED_NODES_REPORTED.code(),
-                        Collections.singletonList(failedHostMetadata.keySet()));
-                updateChangedHosts(cluster, failedHostMetadata.keySet(), HostMetadataState.HEALTHY, HostMetadataState.UNHEALTHY, recoveryMessage);
+                        Collections.singletonList(failedMetaData.keySet()));
+                updateChangedHosts(cluster, failedMetaData.keySet(), InstanceStatus.SERVICES_HEALTHY, InstanceStatus.SERVICES_UNHEALTHY, recoveryMessage);
             }
             if (!newHealthyNodes.isEmpty()) {
                 String recoveredMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_RECOVERED_NODES_REPORTED.code(),
                         Collections.singletonList(newHealthyNodes));
-                updateChangedHosts(cluster, newHealthyNodes, HostMetadataState.UNHEALTHY, HostMetadataState.HEALTHY, recoveredMessage);
+                updateChangedHosts(cluster, newHealthyNodes, InstanceStatus.SERVICES_UNHEALTHY, InstanceStatus.SERVICES_HEALTHY, recoveredMessage);
             }
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
@@ -500,9 +489,9 @@ public class ClusterService {
 
     public void prepareForAutoRecovery(Stack stack,
             Map<String, List<String>> autoRecoveryNodesMap,
-            Map<String, HostMetadata> autoRecoveryHostMetadata,
+            Map<String, InstanceMetaData> autoRecoveryHostMetadata,
             String failedNode,
-            HostMetadata hostMetadata,
+            InstanceMetaData hostMetadata,
             String hostGroupName) {
         List<String> nodeList = autoRecoveryNodesMap.get(hostGroupName);
         if (nodeList == null) {
@@ -524,13 +513,13 @@ public class ClusterService {
                 for (HostGroup hg : hostGroups) {
                     List<String> failedNodes = new ArrayList<>();
                     if (repairedHostGroups.contains(hg.getName()) && hg.getRecoveryMode() == RecoveryMode.MANUAL) {
-                        for (HostMetadata hmd : hg.getHostMetadata()) {
-                            if (hmd.getHostMetadataState() == HostMetadataState.UNHEALTHY) {
-                                validateRepair(inTransactionStack, hmd);
+                        for (InstanceMetaData instanceMetaData : hg.getInstanceGroup().getAttachedInstanceMetaDataSet()) {
+                            if (instanceMetaData.getInstanceStatus() == InstanceStatus.SERVICES_UNHEALTHY) {
+                                validateRepair(inTransactionStack, instanceMetaData);
                                 if (!failedNodeMap.containsKey(hg.getName())) {
                                     failedNodeMap.put(hg.getName(), failedNodes);
                                 }
-                                failedNodes.add(hmd.getHostName());
+                                failedNodes.add(instanceMetaData.getDiscoveryFQDN());
                             }
                         }
                     }
@@ -549,17 +538,17 @@ public class ClusterService {
         }
     }
 
-    private void validateRepair(Stack stack, HostMetadata hostMetadata) {
-        if (isGateway(hostMetadata) && !isMultipleGateway(stack)) {
+    private void validateRepair(Stack stack, InstanceMetaData instanceMetaData) {
+        if (isGateway(instanceMetaData) && !isMultipleGateway(stack)) {
             throw new BadRequestException("Ambari server failure cannot be repaired with single gateway!");
         }
-        if (isGateway(hostMetadata) && withEmbeddedAmbariDB(stack.getCluster())) {
+        if (isGateway(instanceMetaData) && withEmbeddedAmbariDB(stack.getCluster())) {
             throw new BadRequestException("Ambari server failure with embedded database cannot be repaired!");
         }
     }
 
-    private boolean isGateway(HostMetadata hostMetadata) {
-        return hostMetadata.getHostGroup().getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY;
+    private boolean isGateway(InstanceMetaData instanceMetaData) {
+        return instanceMetaData.getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY;
     }
 
     private boolean withEmbeddedAmbariDB(Cluster cluster) {
@@ -567,14 +556,14 @@ public class ClusterService {
         return rdsConfig == null || DatabaseVendor.EMBEDDED == rdsConfig.getDatabaseEngine();
     }
 
-    private void updateChangedHosts(Cluster cluster, Set<String> hostNames, HostMetadataState expectedState,
-            HostMetadataState newState, String recoveryMessage) throws TransactionExecutionException {
-        Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(cluster.getId());
-        Collection<HostMetadata> changedHosts = new HashSet<>();
+    private void updateChangedHosts(Cluster cluster, Set<String> hostNames, InstanceStatus expectedState,
+            InstanceStatus newState, String recoveryMessage) throws TransactionExecutionException {
+        Set<InstanceMetaData> notTerminatedInstanceMetaDatasForStack = instanceMetadataRepository.findNotTerminatedForStack(cluster.getStack().getId());
+        Collection<InstanceMetaData> changedHosts = new HashSet<>();
         transactionService.required(() -> {
-            for (HostMetadata host : hosts) {
-                if (host.getHostMetadataState() == expectedState && hostNames.contains(host.getHostName())) {
-                    host.setHostMetadataState(newState);
+            for (InstanceMetaData host : notTerminatedInstanceMetaDatasForStack) {
+                if (host.getInstanceStatus() == expectedState && hostNames.contains(host.getDiscoveryFQDN())) {
+                    host.setInstanceStatus(newState);
                     host.setStatusReason(recoveryMessage);
                     changedHosts.add(host);
                 }
@@ -582,13 +571,13 @@ public class ClusterService {
             if (!changedHosts.isEmpty()) {
                 LOGGER.info(recoveryMessage);
                 String eventType;
-                if (HostMetadataState.HEALTHY.equals(newState)) {
+                if (InstanceStatus.SERVICES_HEALTHY.equals(newState)) {
                     eventType = AVAILABLE.name();
                 } else {
                     eventType = "RECOVERY";
                 }
                 eventService.fireCloudbreakEvent(cluster.getStack().getId(), eventType, recoveryMessage);
-                hostMetadataRepository.saveAll(changedHosts);
+                instanceMetadataRepository.saveAll(changedHosts);
             }
             return null;
         });
@@ -690,17 +679,23 @@ public class ClusterService {
     public Cluster updateClusterMetadata(Long stackId) {
         Stack stack = stackService.getById(stackId);
         AmbariClient ambariClient = getAmbariClient(stack);
-        Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
+        Set<InstanceMetaData> notTerminatedInstanceMetaDatas = instanceMetadataRepository.findNotTerminatedForStack(stackId);
         Map<String, String> hostStatuses = ambariClient.getHostStatuses();
         try {
             return transactionService.required(() -> {
-                for (HostMetadata host : hosts) {
-                    if (hostStatuses.containsKey(host.getHostName())) {
-                        HostMetadataState newState = HostMetadataState.HEALTHY.name().equals(hostStatuses.get(host.getHostName()))
-                                ? HostMetadataState.HEALTHY : HostMetadataState.UNHEALTHY;
-                        boolean stateChanged = updateHostMetadataByHostState(stack, host.getHostName(), newState, getStatusReason(newState));
-                        if (stateChanged && HostMetadataState.HEALTHY == newState) {
-                            updateInstanceMetadataStateToRegistered(stackId, host);
+                for (InstanceMetaData instanceMetaData : notTerminatedInstanceMetaDatas) {
+                    if (hostStatuses.containsKey(instanceMetaData.getDiscoveryFQDN())) {
+                        if (instanceMetaData.getInstanceStatus().equals(InstanceStatus.SERVICES_RUNNING)) {
+                            String ambariHostStatus = hostStatuses.get(instanceMetaData.getDiscoveryFQDN());
+                            InstanceStatus newState = AMBARI_HEALTHY_STATE.equals(ambariHostStatus) ?
+                                    InstanceStatus.SERVICES_HEALTHY : InstanceStatus.SERVICES_UNHEALTHY;
+                            instanceMetaData.setInstanceStatus(newState);
+                            instanceMetaData.setStatusReason(getStatusReason(newState));
+                            instanceMetadataRepository.save(instanceMetaData);
+                            // TODO: don't send events one by one and save all of the instancemetadata with one repo call
+                            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                                    cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_STATUS_UPDATED.code(),
+                                            Arrays.asList(instanceMetaData.getDiscoveryFQDN(), newState.name())));
                         }
                     }
                 }
@@ -711,19 +706,11 @@ public class ClusterService {
         }
     }
 
-    private String getStatusReason(HostMetadataState newState) {
-        if (HostMetadataState.UNHEALTHY == newState) {
+    private String getStatusReason(InstanceStatus newState) {
+        if (InstanceStatus.SERVICES_UNHEALTHY == newState) {
             return "Host is reported as UNHEALTHY by Ambari.";
         }
         return null;
-    }
-
-    private void updateInstanceMetadataStateToRegistered(Long stackId, HostMetadata host) {
-        InstanceMetaData instanceMetaData = instanceMetaDataRepository.findHostInStack(stackId, host.getHostName());
-        if (instanceMetaData != null) {
-            instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
-            instanceMetadataRepository.save(instanceMetaData);
-        }
     }
 
     public void cleanupKerberosCredential(Long clusterId) {
@@ -770,7 +757,7 @@ public class ClusterService {
             }
 
             try {
-                Set<HostGroup> newHostGroups = hostGroupService.saveOrUpdateWithMetadata(hostGroups, cluster);
+                hostGroupService.saveOrUpdateWithMetadata(hostGroups, cluster);
                 cluster = prepareCluster(hostGroups, stackRepoDetails, blueprint, stackWithLists, cluster);
                 triggerClusterInstall(stackWithLists, cluster);
             } catch (TransactionExecutionException | CloudbreakException e) {
@@ -955,17 +942,24 @@ public class ClusterService {
     }
 
     private void validateRegisteredHosts(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
-        String hostGroup = hostGroupAdjustment.getHostGroup();
-        Long hostsCount = hostGroupService.countByClusterIdAndName(stack.getCluster().getId(), hostGroup);
-        int adjustment = Math.abs(hostGroupAdjustment.getScalingAdjustment());
-        Boolean validateNodeCount = hostGroupAdjustment.getValidateNodeCount();
-        if (validateNodeCount == null || validateNodeCount) {
-            if (hostsCount <= adjustment) {
-                String errorMessage = String.format("[hostGroup: '%s', current hosts: %s, decommissions requested: %s]", hostGroup, hostsCount, adjustment);
-                throw new BadRequestException(String.format("The host group must contain at least 1 host after the decommission: %s", errorMessage));
+        String hostGroupName = hostGroupAdjustment.getHostGroup();
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
+        if (hostGroup == null || hostGroup.getInstanceGroup() == null) {
+            throw new BadRequestException(String.format("Can't find hostgroup: {}", hostGroupName));
+        } else {
+            InstanceGroup instanceGroup = hostGroup.getInstanceGroup();
+            int hostsCount = instanceGroup.getNotDeletedInstanceMetaDataSet().size();
+            int adjustment = Math.abs(hostGroupAdjustment.getScalingAdjustment());
+            Boolean validateNodeCount = hostGroupAdjustment.getValidateNodeCount();
+            if (validateNodeCount == null || validateNodeCount) {
+                if (hostsCount <= adjustment) {
+                    String errorMessage = String.format("[hostGroup: '%s', current hosts: %s, decommissions requested: %s]",
+                            hostGroupName, hostsCount, adjustment);
+                    throw new BadRequestException(String.format("The host group must contain at least 1 host after the decommission: %s", errorMessage));
+                }
+            } else if (hostsCount - adjustment < 0) {
+                throw new BadRequestException(String.format("There are not enough hosts in host group: %s to remove", hostGroupName));
             }
-        } else if (hostsCount - adjustment < 0) {
-            throw new BadRequestException(String.format("There are not enough hosts in host group: %s to remove", hostGroup));
         }
     }
 
@@ -977,21 +971,6 @@ public class ClusterService {
                     stack.getCluster().getName(), hostGroupAdjustment.getHostGroup()));
         }
         return hostGroup;
-    }
-
-    private boolean updateHostMetadataByHostState(Stack stack, String hostName, HostMetadataState newState, String statusReason) {
-        boolean stateChanged = false;
-        HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName);
-        HostMetadataState oldState = hostMetadata.getHostMetadataState();
-        if (!oldState.equals(newState)) {
-            stateChanged = true;
-            hostMetadata.setHostMetadataState(newState);
-            hostMetadata.setStatusReason(statusReason);
-            hostMetadataRepository.save(hostMetadata);
-            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                    cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_STATUS_UPDATED.code(), Arrays.asList(hostName, newState.name())));
-        }
-        return stateChanged;
     }
 
     public <R extends ClusterResponse> R getClusterResponse(R response, String clusterJson) {

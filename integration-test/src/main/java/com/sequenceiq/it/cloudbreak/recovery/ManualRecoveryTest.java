@@ -59,7 +59,7 @@ public class ManualRecoveryTest extends AbstractCloudbreakIntegrationTest {
         Integer expectedNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV3Endpoint, ambariPort, workspaceId, stackName,
                 ambariUser, ambariPassword, itContext) - removedInstanceCount;
 
-        WaitResult waitResult = CloudbreakUtil.waitForHostStatusStack(stackV3Endpoint, workspaceId, stackName, hostGroup, "UNHEALTHY");
+        WaitResult waitResult = CloudbreakUtil.waitForHostStatusStack(stackV3Endpoint, workspaceId, stackName, hostGroup, "SERVICES_UNHEALTHY");
 
         if (waitResult == WaitResult.TIMEOUT) {
             Assert.fail("Timeout happened when waiting for the desired host state");
