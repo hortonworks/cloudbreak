@@ -34,7 +34,7 @@
   	},
     "resources": [
             {
-                 "apiVersion": "2015-05-01-preview",
+                 "apiVersion": "2019-04-01",
                  "type": "Microsoft.Network/virtualNetworks",
                  "tags": {
                     "cb-resource-type": "${network_resource}"
@@ -52,7 +52,12 @@
                          {
                              "name": "subnet${subnetPrefix?index}",
                              "properties": {
-                                 "addressPrefix": "[parameters('subnet${subnetPrefix?index}Prefix')]"
+                                 "addressPrefix": "[parameters('subnet${subnetPrefix?index}Prefix')]",
+                                 "serviceEndpoints": [
+                                     {
+                                         "service": "Microsoft.Sql"
+                                     }
+                                 ]
                              }
                          }<#if subnetPrefix_has_next>,</#if>
                          </#list>
