@@ -19,19 +19,11 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @Component
 public class YarnConfigProvider implements CmTemplateComponentConfigProvider {
 
-    private static final String HADOOP_PROXYUSER_KNOX_GROUPS = "hadoop.proxyuser.knox.groups";
-
-    private static final String HADOOP_PROXYUSER_KNOX_HOSTS = "hadoop.proxyuser.knox.hosts";
-
-    private static final String YARN_CORE_SITE_SAFETY_VALVE = "yarn_core_site_safety_valve";
-
     private static final String YARN_SITE_SERVICE_SAFETY_VALVE = "yarn_service_config_safety_valve";
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
         List<ApiClusterTemplateConfig> apiClusterTemplateConfigs = Lists.newArrayList();
-        apiClusterTemplateConfigs.add(config(YARN_CORE_SITE_SAFETY_VALVE, ConfigUtils.getSafetyValveProperty(HADOOP_PROXYUSER_KNOX_GROUPS, "*")
-                + ConfigUtils.getSafetyValveProperty(HADOOP_PROXYUSER_KNOX_HOSTS, "*")));
         if (templateProcessor.getServiceByType(HiveRoles.HIVELLAP).isPresent()) {
             apiClusterTemplateConfigs.add(config(YARN_SITE_SERVICE_SAFETY_VALVE, getYarnSiteServiceValveValue()));
         }
