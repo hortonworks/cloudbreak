@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.user;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,10 +23,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.auth.security.CrnUser;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.tenant.TenantService;
 import com.sequenceiq.cloudbreak.service.user.CachedUserService;
 import com.sequenceiq.cloudbreak.service.user.UserPreferencesService;
@@ -56,6 +60,9 @@ public class UserServiceTest {
 
     @Spy
     private TransactionService transactionService = new TransactionService();
+
+    @Mock
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @InjectMocks
     private UserService underTest;
@@ -118,6 +125,27 @@ public class UserServiceTest {
         verify(tenantService, times(1)).save(any());
     }
 
+    @Test
+    public void testPersistModifiedInternalUser() throws TransactionExecutionException {
+        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).requiresNew(any());
+        when(userRepository.findByTenantNameAndUserId(anyString(), anyString())).thenReturn(Optional.empty());
+        when(tenantService.findByName(anyString())).thenReturn(Optional.empty());
+        when(tenantService.save(any())).thenReturn(createTenant());
+        when(workspaceService.create(any())).thenReturn(createWorkspace());
+        when(userPreferencesService.save(any())).thenReturn(createUserPref());
+        when(userRepository.save(any())).thenReturn(createUser());
+        doNothing().when(restRequestThreadLocalService).setCloudbreakUser(any());
+
+        CrnUser cbUser = createCrnUser();
+        underTest.persistModifiedInternalUser(cbUser);
+
+        assertNotNull(cbUser);
+        verify(cachedUserService, times(1)).getUser(any(), any(), any());
+        verify(workspaceService, times(1)).create(any());
+        verify(tenantService, times(1)).save(any());
+        verify(restRequestThreadLocalService, times(1)).setCloudbreakUser(eq(cbUser));
+    }
+
     private User createUser() {
         User user = new User();
         user.setTenant(createTenant());
@@ -146,6 +174,11 @@ public class UserServiceTest {
     private CloudbreakUser createCbUser() {
         return new CloudbreakUser("userId", "crn:cdp:iam:us-west-1:tenantName:user:userName",
                 "userName", "email@email.com", "tenantName");
+    }
+
+    private CrnUser createCrnUser() {
+        return new CrnUser("userId", "crn:cdp:iam:us-west-1:tenantName:user:userName",
+                "userName", "email@email.com", "tenantName", "role");
     }
 
 }

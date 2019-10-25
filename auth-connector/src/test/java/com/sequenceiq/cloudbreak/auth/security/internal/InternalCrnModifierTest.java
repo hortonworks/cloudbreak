@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.CrnUser;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InternalCrnModifierTest {
@@ -44,6 +46,9 @@ public class InternalCrnModifierTest {
 
     @Mock
     private MethodSignature methodSignature;
+
+    @Mock
+    private InternalUserModifier internalUserModifier;
 
     @InjectMocks
     private InternalCrnModifier underTest;
@@ -107,11 +112,15 @@ public class InternalCrnModifierTest {
     public void testModificationIfUserCrnIsInternal() {
         when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(INTERNAL_CRN);
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.of(STACK_CRN));
+        doNothing().when(internalUserModifier).persistModifiedInternalUser(any());
 
         underTest.changeInternalCrn(proceedingJoinPoint);
 
         ArgumentCaptor<String> newCrnCaptor = ArgumentCaptor.forClass(String.class);
         verify(threadBasedUserCrnProvider, times(1)).setUserCrn(newCrnCaptor.capture());
-        assertEquals(newCrnCaptor.getValue(), EXPECTED_INTERNAL_CRN);
+        assertEquals(EXPECTED_INTERNAL_CRN, newCrnCaptor.getValue());
+        ArgumentCaptor<CrnUser> newUserCaptor = ArgumentCaptor.forClass(CrnUser.class);
+        verify(internalUserModifier, times(1)).persistModifiedInternalUser(newUserCaptor.capture());
+        assertEquals("1234", newUserCaptor.getValue().getTenant());
     }
 }
