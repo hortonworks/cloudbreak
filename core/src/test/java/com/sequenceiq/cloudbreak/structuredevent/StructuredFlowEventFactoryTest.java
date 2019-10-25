@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.structuredevent;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -19,7 +18,6 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.converter.ClusterToClusterDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
@@ -68,18 +66,4 @@ public class StructuredFlowEventFactoryTest {
         assertEquals(bpName, result.getBlueprintDetails().getBlueprintName());
     }
 
-    @Test
-    public void createStucturedConverterError() {
-        Stack stack = TestUtil.stack();
-        stack.setCluster(TestUtil.cluster());
-        when(stackService.getByIdWithTransaction(1L)).thenReturn(stack);
-        StackDetails stackDetails = new StackDetails();
-        stackDetails.setCloudPlatform("AWS");
-        when(conversionService.convert(stack, StackDetails.class)).thenReturn(stackDetails);
-        when(clusterToClusterDetailsConverter.convert(stack.getCluster()))
-                .thenThrow(new BadRequestException("Failed to get Kerberos config from FreeIpa service due to"));
-        StructuredFlowEvent result = structuredFlowEventFactory.createStucturedFlowEvent(1L, new FlowDetails(), true);
-        assertEquals("AWS", result.getStack().getCloudPlatform());
-        assertTrue(result.getException().contains("BadRequestException: Failed to get Kerberos config from FreeIpa"));
-    }
 }

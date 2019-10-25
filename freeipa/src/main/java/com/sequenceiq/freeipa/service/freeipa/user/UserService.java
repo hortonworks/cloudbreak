@@ -223,7 +223,6 @@ public class UserService {
 
         removeUsersFromGroups(freeIpaClient, stateDifference.getGroupMembershipToRemove());
         removeUsers(freeIpaClient, stateDifference.getUsersToRemove());
-        removeGroups(freeIpaClient, stateDifference.getGroupsToRemove());
     }
 
     private void processUsersWorkloadCredentials(
