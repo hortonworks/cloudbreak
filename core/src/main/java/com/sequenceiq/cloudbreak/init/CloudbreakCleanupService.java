@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -146,7 +147,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
                 fireEvent(stack.getId());
                 flowManager.triggerClusterSyncWithoutCheck(stack.getId());
             }
-        } catch (OptimisticLockingFailureException | FlowsAlreadyRunningException e) {
+        } catch (OptimisticLockingFailureException | FlowsAlreadyRunningException | FlowNotAcceptedException e) {
             LOGGER.error("Cannot trigger sync on stacks. Maybe another node is already syncing them?", e);
         }
     }

@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEv
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -58,6 +59,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.flow.reactor.config.EventBusStatisticReporter;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -83,6 +85,9 @@ public class ReactorFlowManager {
 
     @Inject
     private EventBus reactor;
+
+    @Inject
+    private EventBusStatisticReporter reactorReporter;
 
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
@@ -286,14 +291,19 @@ public class ReactorFlowManager {
 
         Stack stack = getStackFn.apply(event.getData().getResourceId());
         Optional.ofNullable(stack).map(Stack::getCluster).map(Cluster::getStatus).ifPresent(isTriggerAllowedInMaintenance(selector));
-
+        reactorReporter.logInfoReport(reactor);
         reactor.notify(selector, event);
         try {
             Boolean accepted = true;
             if (event.getData().accepted() != null) {
                 accepted = event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
             }
-            if (accepted == null || !accepted) {
+            if( accepted == null) {
+                reactorReporter.logErrorReport(reactor);
+                throw new FlowNotAcceptedException(String.format("Timeout happened when trying to start the flow for stack %s.", stack.getName()));
+            }
+            if (!accepted) {
+                reactorReporter.logErrorReport(reactor);
                 throw new FlowsAlreadyRunningException(String.format("Stack %s has flows under operation, request not allowed.", stack.getName()));
             }
         } catch (InterruptedException e) {
