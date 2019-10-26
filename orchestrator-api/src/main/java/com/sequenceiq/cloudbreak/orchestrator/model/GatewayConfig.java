@@ -51,16 +51,18 @@ public class GatewayConfig {
 
     private final String userFacingKey;
 
+    private Boolean useCcm;
+
     public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress,
             Integer gatewayPort, String instanceId, Boolean knoxGatewayEnabled) {
         this(connectionAddress, publicAddress, privateAddress, null, gatewayPort,
-                instanceId, null, null, null, null, null, null, knoxGatewayEnabled, true, null, null, null, null);
+                instanceId, null, null, null, null, null, null, knoxGatewayEnabled, true, null, null, null, null, null);
     }
 
     public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress, String hostname,
             Integer gatewayPort, String instanceId, String serverCert, String clientCert, String clientKey, String saltPassword, String saltBootPassword,
             String signatureKey, Boolean knoxGatewayEnabled, boolean primary, String saltSignPrivateKey, String saltSignPublicKey,
-            String userFacingCert, String userFacingKey) {
+            String userFacingCert, String userFacingKey, Boolean useCcm) {
         this.connectionAddress = connectionAddress;
         this.publicAddress = publicAddress;
         this.privateAddress = privateAddress;
@@ -79,6 +81,7 @@ public class GatewayConfig {
         this.saltSignPublicKey = saltSignPublicKey;
         this.userFacingCert = userFacingCert;
         this.userFacingKey = userFacingKey;
+        this.useCcm = useCcm;
     }
 
     private GatewayConfig(GatewayConfig gatewayConfig, @Nonnull ServiceEndpoint serviceEndpoint) {
@@ -89,7 +92,7 @@ public class GatewayConfig {
                 gatewayConfig.saltPassword, gatewayConfig.saltBootPassword, gatewayConfig.signatureKey,
                 gatewayConfig.knoxGatewayEnabled, gatewayConfig.primary,
                 gatewayConfig.saltSignPrivateKey, gatewayConfig.saltSignPublicKey,
-                gatewayConfig.getUserFacingCert(), gatewayConfig.getUserFacingKey());
+                gatewayConfig.getUserFacingCert(), gatewayConfig.getUserFacingKey(), gatewayConfig.getUseCcm());
     }
 
     public String getConnectionAddress() {
@@ -168,6 +171,10 @@ public class GatewayConfig {
         return userFacingKey;
     }
 
+    public Boolean getUseCcm() {
+        return useCcm;
+    }
+
     /**
      * Returns a gateway config for the nginx service on the gateway.
      * The returned gateway config is identical to this one, except that
@@ -181,32 +188,34 @@ public class GatewayConfig {
      */
     public GatewayConfig getGatewayConfig(ServiceEndpointFinder serviceEndpointFinder)
             throws ServiceEndpointLookupException, InterruptedException {
-        return new GatewayConfig(this, getServiceEndpoint(serviceEndpointFinder));
+        return new GatewayConfig(this, getServiceEndpoint(serviceEndpointFinder, !Boolean.TRUE.equals(getUseCcm())));
     }
 
     /**
      * Returns a service endpoint for the nginx service on the gateway.
      *
      * @param serviceEndpointFinder  the service endpoint finder
+     * @param directAccessRequired whether the lookup should only allow direct access to the target service
      * @return a service endpoint for the nginx service on the gateway
      * @throws ServiceEndpointLookupException if an exception occurs looking up the endpoint
      * @throws InterruptedException           if the lookup is interrupted
      */
-    private ServiceEndpoint getServiceEndpoint(ServiceEndpointFinder serviceEndpointFinder)
+    private ServiceEndpoint getServiceEndpoint(ServiceEndpointFinder serviceEndpointFinder, boolean directAccessRequired)
             throws ServiceEndpointLookupException, InterruptedException {
         ServiceEndpointRequest<HttpsServiceEndpoint> serviceEndpointRequest =
-                createServiceEndpointRequest();
+                createServiceEndpointRequest(directAccessRequired);
         return serviceEndpointFinder.getServiceEndpoint(serviceEndpointRequest);
     }
 
     /**
      * Creates a service endpoint request for connecting to the nginx service on the gateway.
      *
+     * @param directAccessRequired whether the lookup should only allow direct access to the target service
      * @return a service endpoint request for connecting to the specified service on the gateway
      */
-    private ServiceEndpointRequest<HttpsServiceEndpoint> createServiceEndpointRequest() {
+    private ServiceEndpointRequest<HttpsServiceEndpoint> createServiceEndpointRequest(boolean directAccessRequired) {
         return ServiceEndpointRequest.createDefaultServiceEndpointRequest(
-                instanceId, new HostEndpoint(connectionAddress), gatewayPort, ServiceFamilies.GATEWAY);
+                instanceId, new HostEndpoint(connectionAddress), gatewayPort, ServiceFamilies.GATEWAY, directAccessRequired);
     }
 
     public String toString() {

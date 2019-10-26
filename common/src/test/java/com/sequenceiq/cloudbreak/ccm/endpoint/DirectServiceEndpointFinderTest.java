@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.ccm.endpoint;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -41,7 +42,7 @@ public class DirectServiceEndpointFinderTest {
         when(hostEndpoint.getHostAddressString()).thenReturn(hostAddressString);
         int randomValue = RandomUtils.nextInt(0, 2);
         ServiceFamily<HttpsServiceEndpoint> serviceFamily = (randomValue == 0) ? ServiceFamilies.GATEWAY : ServiceFamilies.KNOX;
-        return ServiceEndpointRequest.createDefaultServiceEndpointRequest(targetInstanceId, hostEndpoint, port, serviceFamily);
+        return ServiceEndpointRequest.createDefaultServiceEndpointRequest(targetInstanceId, hostEndpoint, port, serviceFamily, false);
     }
 
     private void verifyGetServiceEndpoint(DirectServiceEndpointFinder endpointFinder,
@@ -52,6 +53,7 @@ public class DirectServiceEndpointFinderTest {
         Optional<Integer> expectedPort =
                 Optional.ofNullable(port).or(() -> Optional.of(serviceEndpointRequest.getServiceFamily().getDefaultPort()));
         assertEquals(expectedPort, serviceEndpoint.getPort());
+        assertFalse(serviceEndpointRequest.isDirectAccessRequired());
     }
 
     private String randomHostname() {

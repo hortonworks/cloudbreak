@@ -9,7 +9,7 @@ import io.netty.util.internal.StringUtil;
 @Configuration
 public class MinaSshdManagementConfig {
 
-    @Value("${altus.minasshdmgmt.host:}")
+    @Value("${altus.minasshdmgmt.host:thunderhead-clusterconnectivitymanagement.thunderhead-clusterconnectivitymanagement.svc.cluster.local}")
     private String endpoint;
 
     @Value("${altus.minasshdmgmt.port:8982}")
