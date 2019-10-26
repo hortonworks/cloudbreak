@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.ccmimpl.endpoint;
 
+import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
+
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
@@ -81,7 +83,8 @@ public class MinaSshdServiceEndpointFinder implements ServiceEndpointFinder {
         Preconditions.checkArgument(lookupPort >= MIN_PORT && lookupPort <= MAX_PORT, "Invalid lookup port, not in [1,65535].");
 
         channel = ManagedChannelBuilder.forAddress(lookupHost, lookupPort)
-                // JSA todo revisit Not using TLS since implementation is local loopback interface for Altus
+                .usePlaintext()
+                .maxInboundMessageSize(DEFAULT_MAX_MESSAGE_SIZE)
                 .build();
         blockingStub = MinaSshdGrpc.newBlockingStub(channel);
     }

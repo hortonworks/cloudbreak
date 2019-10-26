@@ -24,16 +24,18 @@ public interface ServiceEndpointRequest<T extends ServiceEndpoint> {
     /**
      * Returns a default service endpoint request for the specified target service.
      *
+     * @param <T>              the type of endpoint
      * @param targetInstanceId the target instance ID
      * @param hostEndpoint     the optional host endpoint
      * @param port             the optional port
      * @param serviceFamily    the service family
-     * @param <T>              the type of endpoint
+     * @param directAccessRequired whether the lookup should only allow direct access to the target service
      * @return a default service endpoint request for the specified target service
      */
     @Nonnull
     static <T extends ServiceEndpoint> ServiceEndpointRequest<T> createDefaultServiceEndpointRequest(
-            @Nonnull String targetInstanceId, @Nullable HostEndpoint hostEndpoint, @Nullable Integer port, @Nonnull ServiceFamily<T> serviceFamily) {
+            @Nonnull String targetInstanceId, @Nullable HostEndpoint hostEndpoint, @Nullable Integer port, @Nonnull ServiceFamily<T> serviceFamily,
+            boolean directAccessRequired) {
 
         return new ServiceEndpointRequest<T>() {
 
@@ -72,6 +74,11 @@ public interface ServiceEndpointRequest<T extends ServiceEndpoint> {
             @Override
             public long getPollingIntervalInMs() {
                 return DEFAULT_POLLING_INTERVAL_MS;
+            }
+
+            @Override
+            public boolean isDirectAccessRequired() {
+                return directAccessRequired;
             }
         };
     }
@@ -122,8 +129,7 @@ public interface ServiceEndpointRequest<T extends ServiceEndpoint> {
      *
      * @return whether the lookup should only allow direct access to the target service
      */
-    // JSA TODO This is a workaround until we can turn reverse SSH lookup on and off in the environment
     default boolean isDirectAccessRequired() {
-        return false;
+        return true;
     }
 }
