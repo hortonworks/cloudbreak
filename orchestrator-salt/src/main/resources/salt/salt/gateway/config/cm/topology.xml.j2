@@ -200,7 +200,7 @@
 
              {% if 'IMPALA_DEBUG_UI' in exposed and 'IMPALA_DEBUG_UI' in salt['pillar.get']('gateway:location') -%}
              <param>
-                 <name>IMPALA</name>
+                 <name>IMPALAUI</name>
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
              </param>
              {%- endif %}
@@ -529,7 +529,7 @@
     {% if 'IMPALA_DEBUG_UI' in salt['pillar.get']('gateway:location') -%}
     {% if 'IMPALA_DEBUG_UI' in exposed -%}
     <service>
-        <role>IMPALA</role>
+        <role>IMPALAUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['IMPALA_DEBUG_UI'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['IMPALA_DEBUG_UI'] }}</url>
         {%- endfor %}
