@@ -442,10 +442,10 @@ public class ServiceEndpointCollector {
         Gateway gateway = gt.getGateway();
         Integer port = autoTlsEnabled ? ExposedService.IMPALA_DEBUG_UI.getTlsPort() : ExposedService.IMPALA_DEBUG_UI.getPort();
         if (gatewayListeningOnHttpsPort(gateway)) {
-            return String.format("https://%s/%s/%s%s?scheme=http&host=%s://%s&port=%s", managerIp, gateway.getPath(), gt.getTopologyName(),
+            return String.format("https://%s/%s/%s%s?scheme=%s&host=%s&port=%s", managerIp, gateway.getPath(), gt.getTopologyName(),
                     ExposedService.IMPALA_DEBUG_UI.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), impalaPrivateIp, port);
         } else {
-            return String.format("https://%s:%s/%s/%s%s?scheme=http&host=%s://%s&port=%s", managerIp, gateway.getGatewayPort(), gateway.getPath(),
+            return String.format("https://%s:%s/%s/%s%s?scheme=%s&host=%s&port=%s", managerIp, gateway.getGatewayPort(), gateway.getPath(),
                     gt.getTopologyName(), ExposedService.IMPALA_DEBUG_UI.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), impalaPrivateIp, port);
         }
     }
