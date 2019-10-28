@@ -50,6 +50,7 @@ public class ClusterServiceConfig {
         this(serviceName, endpoints, credentials, clientCertificate, tlsStrictCheck, false, List.of(), null);
     }
 
+    //CHECKSTYLE:OFF: CyclomaticComplexity
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -70,6 +71,7 @@ public class ClusterServiceConfig {
                 Objects.equals(tunnels, that.tunnels) &&
                 Objects.equals(accountId, that.accountId);
     }
+    //CHECKSTYLE:ON
 
     @Override
     public int hashCode() {

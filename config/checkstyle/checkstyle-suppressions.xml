@@ -23,7 +23,7 @@
     <suppress checks="ParameterNumber" files="UserDataBuilder.java|ServiceEndpointCollector.java"/>
     <suppress checks="EmptyLineSeparator" files=".*Description.java|.*Descriptions.java|Notes.java"/>
     <suppress checks=".*" files="PrometheusResponse.java"/>
-    <suppress checks="CyclomaticComplexity" files="PrometheusEvaluator.java|MetadataSetupService.java|AzureRoleManager.java|DBStackToDatabaseStackConverter.java|ClusterServiceConfig.java"/>
+    <suppress checks="CyclomaticComplexity" files="PrometheusEvaluator.java|MetadataSetupService.java|AzureRoleManager.java|DBStackToDatabaseStackConverter.java"/>
     <suppress checks="ModifierOrderCheck" files="EncryptedJsonToString.java"/>
     <suppress checks="TrailingComment" files="HeartbeatServiceTest.java"/>
     <suppress checks="VisibilityModifier" files="AbstractAction.java"/>
