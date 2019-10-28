@@ -72,7 +72,7 @@ public class AbstractRdsConfigProviderTest {
 
         Map<String, Object> postgresData = (Map<String, Object>) result.get("clouderamanager");
         assertEquals("clouderamanager", postgresData.get("database"));
-        assertNull(postgresData.get("remote_db_host"));
+        assertNull(postgresData.get("remote_db_url"));
         assertNotNull(postgresData.get("password"));
     }
 
@@ -105,7 +105,7 @@ public class AbstractRdsConfigProviderTest {
         assertEquals("clouderamanager", postgresData.get("database"));
         assertEquals(REMOTE_ADMIN, postgresData.get("remote_admin"));
         assertEquals(REMOTE_ADMIN_PASSWORD, postgresData.get("remote_admin_pw"));
-        assertEquals(DB_HOST, postgresData.get("remote_db_host"));
+        assertEquals(DB_HOST, postgresData.get("remote_db_url"));
         assertEquals(DB_PORT, postgresData.get("remote_db_port"));
         assertNotNull(postgresData.get("password"));
     }
