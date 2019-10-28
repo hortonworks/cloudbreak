@@ -149,28 +149,14 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         Long clusterId = cluster.getId();
         try {
             waitForHosts(hostsInCluster);
-            HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(apiClient);
-            Optional<ApiHost> optionalCmHost = hostsResourceApi.readHosts(DataView.SUMMARY.name()).getItems().stream().filter(
-                    host -> host.getHostname().equals(templatePreparationObject.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN().get()))
-                    .findFirst();
-
             clouderaManagerLicenseService.validateClouderaManagerLicense(stack.getCreator());
             String sdxContextName = Optional.ofNullable(sdxContext).map(this::createDataContext).orElse(null);
 
-            if (optionalCmHost.isPresent()) {
-                ApiHost cmHost = optionalCmHost.get();
-                ApiHostRef cmHostRef = new ApiHostRef();
-                cmHostRef.setHostId(cmHost.getHostId());
-                cmHostRef.setHostname(cmHost.getHostname());
-                mgmtSetupService.setupMgmtServices(stack, apiClient, cmHostRef, templatePreparationObject.getRdsConfigs(), telemetry, sdxContextName, sdxCrn);
-            } else {
-                LOGGER.warn("Unable to determine Cloudera Manager host. Skipping management services installation.");
-            }
-            Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(instanceMetaDataByHostGroup);
+            startCmMgmtServices(templatePreparationObject, sdxCrn, telemetry, sdxContextName);
+
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
-            List<ClouderaManagerProduct> clouderaManagerProductDetails = clusterComponentProvider.getClouderaManagerProductDetails(clusterId);
-            ApiClusterTemplate apiClusterTemplate = cmTemplateUpdater.getCmTemplate(templatePreparationObject, hostGroupMappings, clouderaManagerRepoDetails,
-                    clouderaManagerProductDetails, sdxContextName);
+            ApiClusterTemplate apiClusterTemplate = getCmTemplate(templatePreparationObject, sdxContextName, instanceMetaDataByHostGroup,
+                    clouderaManagerRepoDetails, clusterId);
 
             cluster.setExtendedBlueprintText(getExtendedBlueprintText(apiClusterTemplate));
             LOGGER.info("Generated Cloudera cluster template: {}", AnonymizerUtil.anonymize(cluster.getExtendedBlueprintText()));
@@ -197,6 +183,36 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
         return cluster;
+    }
+
+    private ApiClusterTemplate getCmTemplate(TemplatePreparationObject templatePreparationObject, String sdxContextName,
+            Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, ClouderaManagerRepo clouderaManagerRepoDetails, Long clusterId) {
+
+        List<ClouderaManagerProduct> clouderaManagerProductDetails = clusterComponentProvider.getClouderaManagerProductDetails(clusterId);
+        Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(instanceMetaDataByHostGroup);
+        return cmTemplateUpdater.getCmTemplate(templatePreparationObject, hostGroupMappings, clouderaManagerRepoDetails,
+                clouderaManagerProductDetails, sdxContextName);
+    }
+
+    private void startCmMgmtServices(TemplatePreparationObject templatePreparationObject, String sdxCrn, Telemetry telemetry,
+            String sdxContextName) throws ApiException {
+        Optional<ApiHost> optionalCmHost = getCmHost(templatePreparationObject, apiClient);
+        if (optionalCmHost.isPresent()) {
+            ApiHost cmHost = optionalCmHost.get();
+            ApiHostRef cmHostRef = new ApiHostRef();
+            cmHostRef.setHostId(cmHost.getHostId());
+            cmHostRef.setHostname(cmHost.getHostname());
+            mgmtSetupService.setupMgmtServices(stack, apiClient, cmHostRef, templatePreparationObject.getRdsConfigs(), telemetry, sdxContextName, sdxCrn);
+        } else {
+            LOGGER.warn("Unable to determine Cloudera Manager host. Skipping management services installation.");
+        }
+    }
+
+    private Optional<ApiHost> getCmHost(TemplatePreparationObject templatePreparationObject, ApiClient apiClient) throws ApiException {
+        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(apiClient);
+        return hostsResourceApi.readHosts(DataView.SUMMARY.name()).getItems().stream().filter(
+                host -> host.getHostname().equals(templatePreparationObject.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN().get()))
+                .findFirst();
     }
 
     private String createDataContext(String sdxContext) {
@@ -233,7 +249,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 .stream().filter(cmd -> "ClusterTemplateImport".equals(cmd.getName())).findFirst();
         if (cmCluster == null) {
             try {
-                // addRepositories - if true the parcels repositories in the cluster template will be added.
+                // addRepositories - if true the parcels repositories in the cluster template
+                // will be added.
                 clusterInstallCommand = Optional.of(clouderaManagerResourceApi.importClusterTemplate(!prewarmed, apiClusterTemplate));
                 LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
             } catch (ApiException e) {

@@ -30,7 +30,6 @@ import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.cloudera.api.swagger.model.ApiService;
-import com.cloudera.api.swagger.model.ApiServiceState;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
@@ -130,7 +129,6 @@ public class ClouderaManagerMgmtSetupService {
         telemetryService.updateTelemetryConfigs(stack, apiClient, telemetry, sdxContextName, sdxStackCrn);
         createMgmtDatabases(apiClient, rdsConfigs);
         waitForGenerateCredentialsToFinish(stack, apiClient);
-        startMgmtServices(stack, apiClient, mgmtServiceResourceApi);
         setUpAutoConfiguration(mgmtServiceResourceApi);
     }
 
@@ -163,18 +161,6 @@ public class ClouderaManagerMgmtSetupService {
                 throw ex;
             }
         }
-    }
-
-    private void startMgmtServices(Stack stack, ApiClient apiClient, MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException {
-        ApiService mgmtService = mgmtServiceResourceApi.readService(DataView.SUMMARY.name());
-        Optional<ApiCommand> startCommand = Optional.empty();
-        if (mgmtService.getServiceState() == ApiServiceState.STARTING) {
-            startCommand = mgmtServiceResourceApi.listActiveCommands(DataView.SUMMARY.name()).getItems()
-                    .stream().filter(c -> "Start".equals(c.getName())).findFirst();
-        } else if (mgmtService.getServiceState() != ApiServiceState.STARTED) {
-            startCommand = Optional.of(mgmtServiceResourceApi.startCommand());
-        }
-        startCommand.ifPresent(sc -> clouderaManagerPollingServiceProvider.startPollingCmManagementServiceStartup(stack, apiClient, sc.getId()));
     }
 
     private void setUpAutoConfiguration(MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException {
