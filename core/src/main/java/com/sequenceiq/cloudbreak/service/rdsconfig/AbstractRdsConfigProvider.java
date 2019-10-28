@@ -65,7 +65,7 @@ public abstract class AbstractRdsConfigProvider {
                 Map<String, Object> postgres = new HashMap<>();
                 if (dbServerConfigurer.isRemoteDatabaseNeeded(cluster)) {
                     DatabaseServerV4Response dbServerResponse = dbServerConfigurer.getDatabaseServer(cluster.getDatabaseServerCrn());
-                    postgres.put("remote_db_host", dbServerResponse.getHost());
+                    postgres.put("remote_db_url", dbServerResponse.getHost());
                     postgres.put("remote_db_port", dbServerResponse.getPort());
                     postgres.put("remote_admin", secretService.getByResponse(dbServerResponse.getConnectionUserName()));
                     postgres.put("remote_admin_pw", secretService.getByResponse(dbServerResponse.getConnectionPassword()));
