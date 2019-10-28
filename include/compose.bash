@@ -265,7 +265,7 @@ consul:
     ports:
         - "$PRIVATE_IP:53:8600/udp"
         - "8400:8400"
-        - "8500:8500"
+        - "$( if [[ -n "$CB_LOCAL_DEV" ]]; then echo "8500:"; fi )8500"
     hostname: node1
     log_opt:
         max-size: "10M"
