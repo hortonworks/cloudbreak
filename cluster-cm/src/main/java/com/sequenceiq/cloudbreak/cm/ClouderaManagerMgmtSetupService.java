@@ -131,6 +131,7 @@ public class ClouderaManagerMgmtSetupService {
         createMgmtDatabases(apiClient, rdsConfigs);
         waitForGenerateCredentialsToFinish(stack, apiClient);
         startMgmtServices(stack, apiClient, mgmtServiceResourceApi);
+        setUpAutoConfiguration(mgmtServiceResourceApi);
     }
 
     private void waitForGenerateCredentialsToFinish(Stack stack, ApiClient apiClient) throws ApiException {
@@ -174,6 +175,12 @@ public class ClouderaManagerMgmtSetupService {
             startCommand = Optional.of(mgmtServiceResourceApi.startCommand());
         }
         startCommand.ifPresent(sc -> clouderaManagerPollingServiceProvider.startPollingCmManagementServiceStartup(stack, apiClient, sc.getId()));
+    }
+
+    private void setUpAutoConfiguration(MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException {
+        LOGGER.debug("Setting up auto configuration for management services.");
+        mgmtServiceResourceApi.autoConfigure();
+        LOGGER.debug("Management service auto configuration finished.");
     }
 
     private void setupCMS(MgmtServiceResourceApi mgmtServiceResourceApi, ApiService mgmtService) throws ApiException {
