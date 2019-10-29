@@ -651,6 +651,10 @@ public class StackService implements ResourceIdProvider {
         }
     }
 
+    Optional<Stack> findTemplateWithLists(Long id) {
+        return stackRepository.findTemplateWithLists(id);
+    }
+
     public List<InstanceMetaData> getInstanceMetaDataForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
         return instanceMetaDataList.stream()
                 .filter(instanceMetaData -> privateIds.contains(instanceMetaData.getPrivateId()))
@@ -1118,4 +1122,9 @@ public class StackService implements ResourceIdProvider {
             return code;
         }
     }
+
+    StackRepository repository() {
+        return stackRepository;
+    }
+
 }

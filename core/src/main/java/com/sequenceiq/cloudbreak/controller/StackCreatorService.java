@@ -60,7 +60,6 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -151,9 +150,6 @@ public class StackCreatorService {
 
     @Inject
     private ClusterService clusterService;
-
-    @Inject
-    private ClusterComponentRepository clusterComponentRepository;
 
     @Inject
     private RecipeService recipeService;
