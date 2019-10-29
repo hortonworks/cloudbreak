@@ -19,14 +19,14 @@ import org.springframework.security.access.AccessDeniedException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.structuredevent.db.StructuredEventRepository;
+import com.sequenceiq.cloudbreak.structuredevent.db.StructuredEventDBService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 public class AuditEventServiceTest {
 
@@ -45,7 +45,7 @@ public class AuditEventServiceTest {
     private ConverterUtil converterUtil;
 
     @Mock
-    private StructuredEventRepository structuredEventRepository;
+    private StructuredEventDBService structuredEventDBService;
 
     @Mock
     private WorkspaceService workspaceService;
@@ -82,31 +82,31 @@ public class AuditEventServiceTest {
         AuditEventV4Response expected = mock(AuditEventV4Response.class);
         StructuredEventEntity repoResult = new StructuredEventEntity();
         when(converterUtil.convert(repoResult, AuditEventV4Response.class)).thenReturn(expected);
-        when(structuredEventRepository.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID)).thenReturn(repoResult);
+        when(structuredEventDBService.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID)).thenReturn(repoResult);
 
         AuditEventV4Response actual = underTest.getAuditEvent(TEST_AUDIT_ID);
 
         Assert.assertEquals(expected, actual);
         verify(converterUtil, times(1)).convert(repoResult, AuditEventV4Response.class);
-        verify(structuredEventRepository, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
+        verify(structuredEventDBService, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
     }
 
     @Test
     public void testGetAuditEventWhenThereIsNoRecordForGivenAuditIdThenNotFoundExceptionShouldCome() {
-        when(structuredEventRepository.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID)).thenReturn(null);
+        when(structuredEventDBService.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID)).thenReturn(null);
 
         thrown.expect(NotFoundException.class);
         thrown.expectMessage(NOT_FOUND_EXCEPTION_MESSAGE);
 
         underTest.getAuditEvent(TEST_AUDIT_ID);
 
-        verify(structuredEventRepository, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
+        verify(structuredEventDBService, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
         verify(converterUtil, times(0)).convert(any(StructuredEventEntity.class), AuditEventV4Response.class);
     }
 
     @Test
     public void testGetAuditEventWhenUserHasNoRightToReadEntryThenAccessDeniedEceptionShouldCome() {
-        when(structuredEventRepository.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID))
+        when(structuredEventDBService.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID))
                 .thenThrow(new AccessDeniedException(REPO_ACCESS_DENIED_MESSAGE));
 
         thrown.expect(AccessDeniedException.class);
@@ -114,7 +114,7 @@ public class AuditEventServiceTest {
 
         underTest.getAuditEvent(TEST_AUDIT_ID);
 
-        verify(structuredEventRepository, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
+        verify(structuredEventDBService, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
         verify(converterUtil, times(0)).convert(any(StructuredEventEntity.class), AuditEventV4Response.class);
     }
 
@@ -123,31 +123,31 @@ public class AuditEventServiceTest {
         AuditEventV4Response expected = mock(AuditEventV4Response.class);
         StructuredEventEntity repoResult = new StructuredEventEntity();
         when(converterUtil.convert(repoResult, AuditEventV4Response.class)).thenReturn(expected);
-        when(structuredEventRepository.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID)).thenReturn(repoResult);
+        when(structuredEventDBService.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID)).thenReturn(repoResult);
 
         AuditEventV4Response actual = underTest.getAuditEventByWorkspaceId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
 
         Assert.assertEquals(expected, actual);
         verify(converterUtil, times(1)).convert(repoResult, AuditEventV4Response.class);
-        verify(structuredEventRepository, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
+        verify(structuredEventDBService, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
     }
 
     @Test
     public void testGetAuditEventByWorkspaceIdWhenThereIsNoRecordForGivenAuditIdThenNotFoundExceptionShouldCome() {
-        when(structuredEventRepository.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID)).thenReturn(null);
+        when(structuredEventDBService.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID)).thenReturn(null);
 
         thrown.expect(NotFoundException.class);
         thrown.expectMessage(NOT_FOUND_EXCEPTION_MESSAGE);
 
         underTest.getAuditEvent(TEST_AUDIT_ID);
 
-        verify(structuredEventRepository, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
+        verify(structuredEventDBService, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
         verify(converterUtil, times(0)).convert(any(StructuredEventEntity.class), AuditEventV4Response.class);
     }
 
     @Test
     public void testGetAuditEventByWorkspaceIdWhenUserHasNoRightToReadEntryThenAccessDeniedEceptionShouldCome() {
-        when(structuredEventRepository.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID))
+        when(structuredEventDBService.findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID))
                 .thenThrow(new AccessDeniedException(REPO_ACCESS_DENIED_MESSAGE));
 
         thrown.expect(AccessDeniedException.class);
@@ -155,7 +155,7 @@ public class AuditEventServiceTest {
 
         underTest.getAuditEvent(TEST_AUDIT_ID);
 
-        verify(structuredEventRepository, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
+        verify(structuredEventDBService, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
         verify(converterUtil, times(0)).convert(any(StructuredEventEntity.class), AuditEventV4Response.class);
     }
 }

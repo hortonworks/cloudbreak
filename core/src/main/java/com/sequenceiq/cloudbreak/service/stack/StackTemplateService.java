@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -16,18 +15,18 @@ import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourc
 public class StackTemplateService extends AbstractWorkspaceAwareResourceService<Stack> {
 
     @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Inject
     private ClusterService clusterService;
 
     public Optional<Stack> getByIdWithLists(Long id) {
-        return stackRepository.findTemplateWithLists(id);
+        return stackService.findTemplateWithLists(id);
     }
 
     @Override
     protected WorkspaceResourceRepository<Stack, Long> repository() {
-        return stackRepository;
+        return stackService.repository();
     }
 
     @Override

@@ -130,6 +130,18 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
         return getEventsForUserWithResourceId("stacks", getStackIfAvailable(workspaceId, name).getId());
     }
 
+    public StructuredEventEntity findByWorkspaceIdAndId(Long workspaceId, Long id) {
+        return structuredEventRepository.findByWorkspaceIdAndId(workspaceId, id);
+    }
+
+    public List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceCrn(Workspace workspace, String resourceType, String resourceCrn) {
+        return structuredEventRepository.findByWorkspaceAndResourceTypeAndResourceCrn(workspace, resourceType, resourceCrn);
+    }
+
+    public List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceId(Workspace workspace, String resourceType, Long resourceId) {
+        return structuredEventRepository.findByWorkspaceAndResourceTypeAndResourceId(workspace, resourceType, resourceId);
+    }
+
     private Stack getStackIfAvailable(Long workspaceId, String name) {
         return Optional.ofNullable(stackService.getByNameInWorkspace(name, workspaceId)).orElseThrow(notFound("stack", name));
     }

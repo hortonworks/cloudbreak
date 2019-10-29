@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.structuredevent.db.StructuredEventRepository;
+import com.sequenceiq.cloudbreak.structuredevent.db.StructuredEventDBService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -31,13 +31,13 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
     private ConverterUtil converterUtil;
 
     @Inject
-    private StructuredEventRepository structuredEventRepository;
-
-    @Inject
     private WorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
+
+    @Inject
+    private StructuredEventDBService structuredEventDBService;
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
@@ -48,7 +48,7 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
     }
 
     public AuditEventV4Response getAuditEventByWorkspaceId(Long workspaceId, Long auditId) {
-        StructuredEventEntity event = Optional.ofNullable(structuredEventRepository.findByWorkspaceIdAndId(workspaceId, auditId))
+        StructuredEventEntity event = Optional.ofNullable(structuredEventDBService.findByWorkspaceIdAndId(workspaceId, auditId))
                 .orElseThrow(notFound("StructuredEvent", auditId));
         return converterUtil.convert(event, AuditEventV4Response.class);
     }
@@ -66,16 +66,16 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
         Long resourceId, String resourceCrn) {
         List<StructuredEventEntity> events;
         if (!Strings.isNullOrEmpty(resourceCrn)) {
-            events = structuredEventRepository.findByWorkspaceAndResourceTypeAndResourceCrn(workspace, resourceType, resourceCrn);
+            events = structuredEventDBService.findByWorkspaceAndResourceTypeAndResourceCrn(workspace, resourceType, resourceCrn);
         } else {
-            events = structuredEventRepository.findByWorkspaceAndResourceTypeAndResourceId(workspace, resourceType, resourceId);
+            events = structuredEventDBService.findByWorkspaceAndResourceTypeAndResourceId(workspace, resourceType, resourceId);
         }
         return events != null ? converterUtil.convertAll(events, AuditEventV4Response.class) : Collections.emptyList();
     }
 
     @Override
     public WorkspaceResourceRepository<StructuredEventEntity, Long> repository() {
-        return structuredEventRepository;
+        return structuredEventDBService.repository();
     }
 
     @Override
