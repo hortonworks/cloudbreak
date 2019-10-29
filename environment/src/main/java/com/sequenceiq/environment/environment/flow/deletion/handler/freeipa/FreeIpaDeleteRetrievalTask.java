@@ -7,6 +7,7 @@ import javax.ws.rs.WebApplicationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.polling.SimpleStatusCheckerTask;
 import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.FreeIpaPollerObject;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
@@ -20,6 +21,12 @@ public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaP
     public static final int FREEIPA_RETRYING_COUNT = 900;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaDeleteRetrievalTask.class);
+
+    private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    public FreeIpaDeleteRetrievalTask(WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
+        this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
+    }
 
     @Override
     public boolean checkStatus(FreeIpaPollerObject freeIpaPollerObject) {
@@ -41,6 +48,9 @@ public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaP
             return true;
         } catch (FreeIpaOperationFailedException fiofe) {
             throw fiofe;
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            throw new FreeIpaOperationFailedException("FreeIpa deletion operation failed. " + e.getMessage() + ". " + errorMessage, e);
         } catch (Exception e) {
             throw new FreeIpaOperationFailedException("FreeIpa deletion operation failed. " + e.getMessage(), e);
         }
@@ -53,6 +63,10 @@ public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaP
             DescribeFreeIpaResponse freeIpa = freeIpaPollerObject.getFreeIpaV1Endpoint().describe(freeIpaPollerObject.getEnvironmentCrn());
             throw new FreeIpaOperationFailedException(String.format("Polling operation timed out, FreeIpa deletion failed. FreeIpa status: '%s' "
                     + "statusReason: '%s'", freeIpa.getStatus(), freeIpa.getStatusReason()));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            throw new FreeIpaOperationFailedException("Polling operation timed out, FreeIpa deletion failed. Also failed to get FreeIpa status: "
+                    + e.getMessage() + ". " + errorMessage, e);
         } catch (Exception e) {
             throw new FreeIpaOperationFailedException("Polling operation timed out, FreeIpa deletion failed. Also failed to get FreeIpa status: "
                     + e.getMessage(), e);
@@ -73,8 +87,11 @@ public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaP
                 return false;
             }
             return status.isFailed();
-        } catch (WebApplicationException | ProcessingException clientException) {
-            LOGGER.info("Failed to describe FreeIpa cluster due to API client exception: {}", clientException.getMessage());
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.info("Failed to describe FreeIpa cluster due to API client exception: {}. {}.", e.getMessage(), errorMessage);
+        } catch (ProcessingException clientException) {
+            LOGGER.info("Failed to describe FreeIpa cluster due to API client exception: {}.", clientException.getMessage());
         } catch (Exception e) {
             return true;
         }

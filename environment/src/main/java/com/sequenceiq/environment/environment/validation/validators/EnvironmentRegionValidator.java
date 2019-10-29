@@ -7,15 +7,14 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.dto.LocationDto;
 
 @Component
 public class EnvironmentRegionValidator {
 
-    public ValidationResultBuilder validateRegions(Set<String> requestedRegions, CloudRegions cloudRegions,
-            String cloudPlatform, ValidationResultBuilder resultBuilder) {
+    public ValidationResultBuilder validateRegions(Set<String> requestedRegions, CloudRegions cloudRegions, String cloudPlatform) {
+        ValidationResultBuilder resultBuilder = ValidationResult.builder();
         if (cloudRegions.areRegionsSupported()) {
             validateRegionsWhereSupported(requestedRegions, cloudRegions.getRegionNames(), resultBuilder, cloudPlatform);
         } else if (!requestedRegions.isEmpty()) {
@@ -24,14 +23,13 @@ public class EnvironmentRegionValidator {
         return resultBuilder;
     }
 
-    public ValidationResultBuilder validateLocation(LocationDto location, Set<String> requestedRegions,
-            Environment environment, ValidationResultBuilder resultBuilder) {
-        String cloudPlatform = environment.getCloudPlatform();
-        if (!requestedRegions.contains(location.getName())
-                && !requestedRegions.isEmpty()) {
+    public ValidationResultBuilder validateLocation(String requestedLocation, Set<String> requestedRegions, String cloudPlatform) {
+        ValidationResultBuilder resultBuilder = ValidationResult.builder();
+        Set<String> requestedRegionNames = new HashSet<>(requestedRegions);
+        if (!requestedRegionNames.contains(requestedLocation)) {
             if (!cloudPlatform.equalsIgnoreCase(CloudConstants.OPENSTACK) && !cloudPlatform.equalsIgnoreCase(CloudConstants.MOCK)) {
-                resultBuilder.error(String.format("Location [%s] is not one of the regions: [%s].", location.getName(),
-                        String.join(", ", requestedRegions)));
+                resultBuilder.error(String.format("Location [%s] is not one of the regions: [%s].", requestedLocation,
+                        String.join(", ", requestedRegionNames)));
             }
         }
         return resultBuilder;
@@ -39,16 +37,16 @@ public class EnvironmentRegionValidator {
 
     private void validateRegionsWhereSupported(Set<String> requestedRegions, Set<String> supportedRegions, ValidationResultBuilder resultBuilder,
             String cloudPlatform) {
-        if (requestedRegions.isEmpty()) {
-            resultBuilder.error(String.format("Regions are mandatory on cloudprovider: [%s]", cloudPlatform));
+        Set<String> requestedRegionNames = new HashSet<>(requestedRegions);
+        if (requestedRegionNames.isEmpty()) {
+            resultBuilder.error(String.format("Regions are mandatory on cloud provider: [%s]", cloudPlatform));
         } else {
             Set<String> existingRegionNames = new HashSet<>(supportedRegions);
-            requestedRegions = new HashSet<>(requestedRegions);
-            requestedRegions.removeAll(existingRegionNames);
-            if (!requestedRegions.isEmpty()) {
+            requestedRegionNames.removeAll(existingRegionNames);
+            if (!requestedRegionNames.isEmpty()) {
                 resultBuilder.error(String.format("The following regions does not exist in your cloud provider: [%s]. "
                                 + "Existing regions are: [%s]",
-                        String.join(", ", requestedRegions),
+                        String.join(", ", requestedRegionNames),
                         String.join(", ", existingRegionNames)
                 ));
             }

@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -42,12 +43,15 @@ public class FreeIpaDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
 
     private final PollingService<FreeIpaPollerObject> freeIpaPollingService;
 
+    private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
     protected FreeIpaDeleteHandler(EventSender eventSender, EnvironmentService environmentService, FreeIpaV1Endpoint freeIpaV1Endpoint,
-            PollingService<FreeIpaPollerObject> freeIpaPollingService) {
+            PollingService<FreeIpaPollerObject> freeIpaPollingService, WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
         super(eventSender);
         this.environmentService = environmentService;
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
         this.freeIpaPollingService = freeIpaPollingService;
+        this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
     }
 
     @Override
@@ -58,7 +62,7 @@ public class FreeIpaDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
             if (env.isPresent() && isFreeIpaExistsForEnvironment(env.get())) {
                 freeIpaV1Endpoint.delete(env.get().getResourceCrn());
                 Pair<PollingResult, Exception> result = freeIpaPollingService.pollWithTimeout(
-                        new FreeIpaDeleteRetrievalTask(),
+                        new FreeIpaDeleteRetrievalTask(webApplicationExceptionMessageExtractor),
                         new FreeIpaPollerObject(env.get().getId(), env.get().getResourceCrn(), freeIpaV1Endpoint),
                         FreeIpaDeleteRetrievalTask.FREEIPA_RETRYING_INTERVAL,
                         FreeIpaDeleteRetrievalTask.FREEIPA_RETRYING_COUNT,

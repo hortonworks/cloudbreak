@@ -5,7 +5,6 @@ import static com.sequenceiq.environment.environment.service.EnvironmentTestData
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.USER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -17,11 +16,13 @@ import static org.mockito.Mockito.when;
 import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -91,7 +92,7 @@ class EnvironmentResourceDeletionServiceTest {
 
     @Test
     void getAttachedDistroXClusterNames() {
-        when(distroXEndpoint.list(anyString(), anyObject())).thenReturn(new StackViewV4Responses());
+        when(distroXEndpoint.list(anyString(), any())).thenReturn(new StackViewV4Responses());
         environmentResourceDeletionServiceUnderTest.getAttachedDistroXClusterNames(environment);
         verify(distroXEndpoint, times(1)).list(eq(ENVIRONMENT_NAME), isNull());
     }
@@ -105,7 +106,11 @@ class EnvironmentResourceDeletionServiceTest {
 
     @Test
     void testWhenDeleteClusterDefinitionsOnCloudbreakThrowsWebApplicationExceptionThenItShouldBeCatchedAndEnvironmentServiceExceptionShouldBeThrown() {
-        doThrow(WebApplicationException.class).when(clusterTemplateV4Endpoint).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
+        WebApplicationException exception = Mockito.mock(WebApplicationException.class);
+        doThrow(exception).when(clusterTemplateV4Endpoint).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
+        Response response = Mockito.mock(Response.class);
+        when(exception.getResponse()).thenReturn(response);
+        when(response.readEntity(any(Class.class))).thenReturn("error");
 
         Assertions.assertThrows(EnvironmentServiceException.class,
                 () -> environmentResourceDeletionServiceUnderTest.deleteClusterDefinitionsOnCloudbreak(ENVIRONMENT_CRN));

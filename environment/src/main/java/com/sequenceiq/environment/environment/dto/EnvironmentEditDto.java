@@ -120,6 +120,10 @@ public class EnvironmentEditDto {
         return parameters;
     }
 
+    public static EnvironmentEditDtoBuilder builder() {
+        return new EnvironmentEditDtoBuilder();
+    }
+
     public static final class EnvironmentEditDtoBuilder {
         private String description;
 
@@ -146,10 +150,6 @@ public class EnvironmentEditDto {
         private ParametersDto parameters;
 
         private EnvironmentEditDtoBuilder() {
-        }
-
-        public static EnvironmentEditDtoBuilder anEnvironmentEditDto() {
-            return new EnvironmentEditDtoBuilder();
         }
 
         public EnvironmentEditDtoBuilder withDescription(String description) {

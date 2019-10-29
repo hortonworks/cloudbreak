@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.validation.validators;
 
-import static com.sequenceiq.environment.environment.dto.EnvironmentCreationDto.Builder.anEnvironmentCreationDto;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -17,13 +16,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
-class EnvironmentCreationValidatorTest {
+class EnvironmentNetworkProviderValidatorTest {
 
     private static final CloudPlatform CLOUD_PLATFORM = CloudPlatform.AWS;
 
@@ -42,30 +42,31 @@ class EnvironmentCreationValidatorTest {
     @Mock
     private CloudRegions cloudRegions;
 
-    private EnvironmentCreationValidator underTest;
+    private EnvironmentNetworkProviderValidator underTest;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
         when(environment.getCloudPlatform()).thenReturn(CLOUD_PLATFORM.name());
-        underTest = new EnvironmentCreationValidator(
-                environmentRegionValidator,
+        underTest = new EnvironmentNetworkProviderValidator(
                 Map.of(CLOUD_PLATFORM, networkValidator),
                 Map.of(CLOUD_PLATFORM, securityGroupValidator));
     }
 
     @Test
     void testIfCloudPlatformMatchesWithTheGivenNetworkInstanceThenItShouldBeFine() {
-        NetworkDto network = NetworkDto.Builder.aNetworkDto().withAws(new AwsParams()).build();
-        ValidationResult result = underTest.validate(environment, anEnvironmentCreationDto().withNetwork(network).build(), cloudRegions);
+        NetworkDto network = NetworkDto.builder().withAws(new AwsParams()).build();
+
+        ValidationResult result = underTest.validate(getEnvDto(network));
 
         assertFalse(result.hasError());
     }
 
     @Test
     void testIfCloudPlatformDoesNotMatchWithTheGivenNetworkParamInstanceThenErrorComes() {
-        NetworkDto network = NetworkDto.Builder.aNetworkDto().withAzure(new AzureParams()).build();
-        ValidationResult result = underTest.validate(environment, anEnvironmentCreationDto().withNetwork(network).build(), cloudRegions);
+        NetworkDto network = NetworkDto.builder().withAzure(new AzureParams()).build();
+
+        ValidationResult result = underTest.validate(getEnvDto(network));
 
         assertTrue(result.hasError());
         assertEquals(1, result.getErrors().size());
@@ -74,9 +75,13 @@ class EnvironmentCreationValidatorTest {
 
     @Test
     void testIfNetworkParamsHasNotSpecifiedThenNoErrorComes() {
-        ValidationResult result = underTest.validate(environment, anEnvironmentCreationDto().build(), cloudRegions);
+        ValidationResult result = underTest.validate(EnvironmentDto.builder().build());
 
         assertFalse(result.hasError());
+    }
+
+    private EnvironmentDto getEnvDto(NetworkDto network) {
+        return EnvironmentDto.builder().withCloudPlatform("AWS").withNetwork(network).build();
     }
 
 }

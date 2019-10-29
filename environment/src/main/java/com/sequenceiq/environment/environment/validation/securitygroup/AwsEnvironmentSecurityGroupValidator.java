@@ -9,7 +9,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.CloudPlatform;
-import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
+import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
@@ -24,7 +25,7 @@ public class AwsEnvironmentSecurityGroupValidator implements EnvironmentSecurity
     }
 
     @Override
-    public void validate(EnvironmentCreationDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder) {
+    public void validate(EnvironmentDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder) {
         SecurityAccessDto securityAccessDto = environmentDto.getSecurityAccess();
         if (securityAccessDto != null) {
             if (onlyOneSecurityGroupIdDefined(securityAccessDto)) {
@@ -45,20 +46,20 @@ public class AwsEnvironmentSecurityGroupValidator implements EnvironmentSecurity
         }
     }
 
-    private void checkSecurityGroupVpc(EnvironmentCreationDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder, String securityGroupId) {
-        String region = environmentDto.getRegions().iterator().next();
+    private void checkSecurityGroupVpc(EnvironmentDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder, String securityGroupId) {
+        Region region = environmentDto.getRegions().iterator().next();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 environmentDto.getAccountId(),
-                environmentDto.getCredential().getCredentialName(),
+                environmentDto.getCredential().getName(),
                 null,
-                region,
+                region.getName(),
                 getCloudPlatform().name(),
                 null);
 
         CloudSecurityGroups securityGroups = platformParameterService.getSecurityGroups(request);
 
         boolean securityGroupInVpc = false;
-        for (CloudSecurityGroup cloudSecurityGroup : securityGroups.getCloudSecurityGroupsResponses().get(region)) {
+        for (CloudSecurityGroup cloudSecurityGroup : securityGroups.getCloudSecurityGroupsResponses().get(region.getName())) {
             Object vpcId = cloudSecurityGroup.getProperties().get("vpcId");
             if (cloudSecurityGroup.getGroupId().equals(securityGroupId)) {
                 if (vpcId != null && vpcId.toString().equals(environmentDto.getNetwork().getAws().getVpcId())) {

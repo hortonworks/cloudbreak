@@ -21,6 +21,7 @@ import javax.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -29,6 +30,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
+import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
@@ -36,6 +38,7 @@ import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
+import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.NetworkService;
@@ -73,6 +76,9 @@ class EnvironmentCreationServiceTest {
     @MockBean
     private NetworkService networkService;
 
+    @Mock
+    private ValidationResultBuilder validationResult;
+
     @MockBean
     private GrpcUmsClient grpcUmsClient;
 
@@ -81,13 +87,14 @@ class EnvironmentCreationServiceTest {
 
     @Test
     void testCreateOccupied() {
-        EnvironmentCreationDto environmentCreationDto = new EnvironmentCreationDto.Builder()
+        EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
                 .withAccountId(ACCOUNT_ID)
                 .build();
-
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(true);
+
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
+
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
@@ -95,15 +102,40 @@ class EnvironmentCreationServiceTest {
 
     @Test
     void testCreateAzureDisabled() {
-        EnvironmentCreationDto environmentCreationDto = new EnvironmentCreationDto.Builder()
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
+        final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
-                .withAccountId(ACCOUNT_ID)
-                .withCreator(CRN)
                 .withCloudPlatform("AZURE")
+                .withCreator(USER)
+                .withAccountId(ACCOUNT_ID)
+                .withAuthentication(AuthenticationDto.builder().build())
+                .withParameters(parametersDto)
+                .withLocation(LocationDto.builder()
+                        .withName("test")
+                        .withDisplayName("test")
+                        .withLatitude(0.1)
+                        .withLongitude(0.1)
+                        .build())
                 .build();
-
+        final Environment environment = new Environment();
+        environment.setName(ENVIRONMENT_NAME);
+        environment.setId(1L);
+        environment.setAccountId(ACCOUNT_ID);
+        Credential credential = new Credential();
+        credential.setCloudPlatform("platform");
+        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
+        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
+        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(EnvironmentTestData.USER)))
+                .thenReturn(credential);
+        when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateNetworkCreation(any(), any(), any())).thenReturn(ValidationResult.builder());
+        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
+        when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
+        when(environmentService.save(any())).thenReturn(environment);
         when(entitlementService.azureEnabled(eq(CRN))).thenReturn(false);
+
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
+
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
@@ -112,12 +144,18 @@ class EnvironmentCreationServiceTest {
     @Test
     void testCreate() {
         ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
-        final EnvironmentCreationDto environmentCreationDto = new EnvironmentCreationDto.Builder()
+        final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
                 .withCreator(USER)
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
                 .withParameters(parametersDto)
+                .withLocation(LocationDto.builder()
+                        .withName("test")
+                        .withDisplayName("test")
+                        .withLatitude(0.1)
+                        .withLongitude(0.1)
+                        .build())
                 .build();
         final Environment environment = new Environment();
         environment.setName(ENVIRONMENT_NAME);
@@ -125,18 +163,18 @@ class EnvironmentCreationServiceTest {
         environment.setAccountId(ACCOUNT_ID);
         Credential credential = new Credential();
         credential.setCloudPlatform("platform");
-
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
         when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(EnvironmentTestData.USER)))
                 .thenReturn(credential);
+        when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateNetworkCreation(any(), any(), any())).thenReturn(ValidationResult.builder());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
-        when(validatorService.validateCreation(any(), any(), any())).thenReturn(ValidationResult.builder().build());
-        when(validatorService.validateTelemetryLoggingStorageLocation(any())).thenReturn(ValidationResult.builder().build());
-        when(validatorService.validateAndDetermineAwsParameters(any(), any())).thenReturn(ValidationResult.builder().build());
         when(environmentService.save(any())).thenReturn(environment);
+
         environmentCreationServiceUnderTest.create(environmentCreationDto);
+
         verify(environmentService, times(2)).save(any());
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any());
@@ -146,13 +184,19 @@ class EnvironmentCreationServiceTest {
     @Test
     void testCreationVerificationError() {
         ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
-        final EnvironmentCreationDto environmentCreationDto = new EnvironmentCreationDto.Builder()
+        final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
                 .withCreator(USER)
                 .withAccountId(ACCOUNT_ID)
                 .withParameters(parametersDto)
+                .withLocation(LocationDto.builder()
+                        .withName("test")
+                        .withDisplayName("test")
+                        .withLatitude(0.1)
+                        .withLongitude(0.1)
+                        .build())
                 .build();
         final Environment environment = new Environment();
         environment.setName(ENVIRONMENT_NAME);
@@ -160,18 +204,19 @@ class EnvironmentCreationServiceTest {
         environment.setAccountId(ACCOUNT_ID);
         Credential credential = new Credential();
         credential.setCloudPlatform("platform");
-
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
         when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(EnvironmentTestData.USER)))
                 .thenReturn(credential);
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
-        when(validatorService.validateCreation(any(), any(), any())).thenReturn(ValidationResult.builder().error("nogood").build());
-        when(validatorService.validateTelemetryLoggingStorageLocation(any())).thenReturn(ValidationResult.builder().build());
-        when(validatorService.validateAndDetermineAwsParameters(any(), any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(validationResult);
+        when(validatorService.validateNetworkCreation(any(), any(), any())).thenReturn(validationResult);
+        when(validationResult.merge(any())).thenReturn(ValidationResult.builder().error("nogood"));
         when(environmentService.save(any())).thenReturn(environment);
+
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
+
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
@@ -180,13 +225,19 @@ class EnvironmentCreationServiceTest {
     @Test
     void testParameterVerificationError() {
         ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
-        final EnvironmentCreationDto environmentCreationDto = new EnvironmentCreationDto.Builder()
+        final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
                 .withCreator(USER)
                 .withAccountId(ACCOUNT_ID)
                 .withParameters(parametersDto)
+                .withLocation(LocationDto.builder()
+                        .withName("test")
+                        .withDisplayName("test")
+                        .withLatitude(0.1)
+                        .withLongitude(0.1)
+                        .build())
                 .build();
         final Environment environment = new Environment();
         environment.setName(ENVIRONMENT_NAME);
@@ -194,18 +245,20 @@ class EnvironmentCreationServiceTest {
         environment.setAccountId(ACCOUNT_ID);
         Credential credential = new Credential();
         credential.setCloudPlatform("platform");
-
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
         when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(EnvironmentTestData.USER)))
                 .thenReturn(credential);
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
-        when(validatorService.validateCreation(any(), any(), any())).thenReturn(ValidationResult.builder().build());
-        when(validatorService.validateTelemetryLoggingStorageLocation(any())).thenReturn(ValidationResult.builder().build());
-        when(validatorService.validateAndDetermineAwsParameters(any(), any())).thenReturn(ValidationResult.builder().error("nogood").build());
+        when(environmentDtoConverter.environmentToLocationDto(any())).thenReturn(LocationDto.builder().withName("loc").build());
+        when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(validationResult);
+        when(validatorService.validateNetworkCreation(any(), any(), any())).thenReturn(validationResult);
+        when(validationResult.merge(any())).thenReturn(ValidationResult.builder().error("nogood"));
         when(environmentService.save(any())).thenReturn(environment);
+
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
+
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());

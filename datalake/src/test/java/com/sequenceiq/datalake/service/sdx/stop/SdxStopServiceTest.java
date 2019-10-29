@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -14,14 +15,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -39,7 +38,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
-import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -75,6 +74,9 @@ public class SdxStopServiceTest {
 
     @Mock
     private DistroxService distroxService;
+
+    @Mock
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @Test
     public void testTriggerStopWhenSdxRunning() {
@@ -153,12 +155,10 @@ public class SdxStopServiceTest {
     }
 
     @Test
-    public void testStopWheClientErrorException() {
+    public void testStopWhenClientErrorException() {
         SdxCluster sdxCluster = sdxCluster();
         ClientErrorException clientErrorException = mock(ClientErrorException.class);
-        Response response = mock(Response.class);
-        when(clientErrorException.getResponse()).thenReturn(response);
-        when(response.readEntity(String.class)).thenReturn(Json.silent(Map.of("message", "error")).getValue());
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("Error message: \"error\"");
         doThrow(clientErrorException).when(stackV4Endpoint).putStop(0L, CLUSTER_NAME);
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
@@ -170,7 +170,7 @@ public class SdxStopServiceTest {
     public void testStopWhenWebApplicationException() {
         SdxCluster sdxCluster = sdxCluster();
         WebApplicationException clientErrorException = mock(WebApplicationException.class);
-        when(clientErrorException.getMessage()).thenReturn("error");
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("error");
         doThrow(clientErrorException).when(stackV4Endpoint).putStop(0L, CLUSTER_NAME);
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 

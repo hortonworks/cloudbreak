@@ -102,7 +102,7 @@ public class EnvironmentApiConverter {
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
-        EnvironmentCreationDto.Builder builder = EnvironmentCreationDto.Builder.anEnvironmentCreationDto()
+        EnvironmentCreationDto.Builder builder = EnvironmentCreationDto.builder()
                 .withAccountId(threadBasedUserCrnProvider.getAccountId())
                 .withCreator(threadBasedUserCrnProvider.getUserCrn())
                 .withName(request.getName())
@@ -148,7 +148,7 @@ public class EnvironmentApiConverter {
     }
 
     public LocationDto locationRequestToDto(LocationRequest location) {
-        return LocationDto.LocationDtoBuilder.aLocationDto()
+        return LocationDto.builder()
                 .withName(location.getName())
                 .withLatitude(location.getLatitude())
                 .withLongitude(location.getLongitude())
@@ -158,7 +158,7 @@ public class EnvironmentApiConverter {
 
     public NetworkDto networkRequestToDto(EnvironmentNetworkRequest network) {
         LOGGER.debug("Converting network request to dto");
-        NetworkDto.Builder builder = NetworkDto.Builder.aNetworkDto();
+        NetworkDto.Builder builder = NetworkDto.builder();
         if (network.getAws() != null) {
             LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "AWS");
             AwsParams awsParams = new AwsParams();
@@ -233,12 +233,12 @@ public class EnvironmentApiConverter {
                 .withEnvironmentStatus(environmentDto.getStatus().getResponseStatus())
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
                 .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
-                .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()))
+                .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
                 .withAuthentication(authenticationDtoToResponse(environmentDto.getAuthentication()))
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
-                .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()))
+                .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
                 .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())
                 .withIdBrokerMappingSource(environmentDto.getExperimentalFeatures().getIdBrokerMappingSource())
                 .withAdminGroupName(environmentDto.getAdminGroupName())
@@ -264,7 +264,7 @@ public class EnvironmentApiConverter {
                 .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())
                 .withAdminGroupName(environmentDto.getAdminGroupName())
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
-                .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()))
+                .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
@@ -323,7 +323,7 @@ public class EnvironmentApiConverter {
     }
 
     public EnvironmentEditDto initEditDto(EnvironmentEditRequest request) {
-        EnvironmentEditDto.EnvironmentEditDtoBuilder builder = EnvironmentEditDto.EnvironmentEditDtoBuilder.anEnvironmentEditDto()
+        EnvironmentEditDto.EnvironmentEditDtoBuilder builder = EnvironmentEditDto.builder()
                 .withDescription(request.getDescription())
                 .withAccountId(threadBasedUserCrnProvider.getAccountId())
                 .withRegions(request.getRegions())

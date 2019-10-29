@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.creation;
 
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.VALIDATE_ENVIRONMENT_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINALIZE_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.HANDLED_FAILED_ENV_CREATION_EVENT;
 
@@ -43,15 +44,43 @@ public class EnvCreationActions {
 
     private final EnvironmentApiConverter environmentApiConverter;
 
-    public EnvCreationActions(EnvironmentService environmentService, NotificationService notificationService, EnvironmentApiConverter environmentApiConverter) {
+    public EnvCreationActions(EnvironmentService environmentService, NotificationService notificationService,
+            EnvironmentApiConverter environmentApiConverter) {
         this.environmentService = environmentService;
         this.notificationService = notificationService;
         this.environmentApiConverter = environmentApiConverter;
     }
 
+    @Bean(name = "ENVIRONMENT_CREATION_VALIDATION_STATE")
+    public Action<?, ?> environmentValidationAction() {
+        return new AbstractEnvironmentCreationAction<>(EnvCreationEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
+                environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
+                    LOGGER.info("ENVIRONMENT_CREATION_VALIDATION_STATE");
+                    environment.setStatus(EnvironmentStatus.ENVIRONMENT_VALIDATION_IN_PROGRESS);
+                    environment = environmentService.save(environment);
+                    EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
+                    SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                    notificationService.send(ResourceEvent.ENVIRONMENT_VALIDATION_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
+                    sendEvent(context, VALIDATE_ENVIRONMENT_EVENT.selector(), environmentDto);
+                }, () -> {
+                    EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
+                            payload.getResourceId(),
+                            payload.getResourceName(),
+                            null,
+                            payload.getResourceCrn());
+                    notificationService.send(ResourceEvent.ENVIRONMENT_VALIDATION_FAILED, payload, context.getFlowTriggerUserCrn());
+                    LOGGER.warn("Failed to validate environment creation request! No environment found with id '{}'.", payload.getResourceId());
+                    sendEvent(context, failureEvent);
+                });
+            }
+        };
+    }
+
     @Bean(name = "NETWORK_CREATION_STARTED_STATE")
     public Action<?, ?> networkCreationAction() {
-        return new AbstractVpcCreateAction<>(EnvCreationEvent.class) {
+        return new AbstractEnvironmentCreationAction<>(EnvCreationEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
@@ -78,7 +107,7 @@ public class EnvCreationActions {
 
     @Bean(name = "FREEIPA_CREATION_STARTED_STATE")
     public Action<?, ?> freeipaCreationAction() {
-        return new AbstractVpcCreateAction<>(EnvCreationEvent.class) {
+        return new AbstractEnvironmentCreationAction<>(EnvCreationEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
@@ -105,7 +134,7 @@ public class EnvCreationActions {
 
     @Bean(name = "ENV_CREATION_FINISHED_STATE")
     public Action<?, ?> finishedAction() {
-        return new AbstractVpcCreateAction<>(EnvCreationEvent.class) {
+        return new AbstractEnvironmentCreationAction<>(EnvCreationEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService
@@ -127,7 +156,7 @@ public class EnvCreationActions {
 
     @Bean(name = "ENV_CREATION_FAILED_STATE")
     public Action<?, ?> failedAction() {
-        return new AbstractVpcCreateAction<>(EnvCreationFailureEvent.class) {
+        return new AbstractEnvironmentCreationAction<>(EnvCreationFailureEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvCreationFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.warn("Failed to create environment", payload.getException());
@@ -148,10 +177,10 @@ public class EnvCreationActions {
         };
     }
 
-    private abstract class AbstractVpcCreateAction<P extends ResourceCrnPayload>
+    private abstract class AbstractEnvironmentCreationAction<P extends ResourceCrnPayload>
             extends AbstractAction<EnvCreationState, EnvCreationStateSelectors, CommonContext, P> {
 
-        protected AbstractVpcCreateAction(Class<P> payloadClass) {
+        protected AbstractEnvironmentCreationAction(Class<P> payloadClass) {
             super(payloadClass);
         }
 

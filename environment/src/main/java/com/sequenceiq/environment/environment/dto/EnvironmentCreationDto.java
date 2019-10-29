@@ -84,6 +84,10 @@ public class EnvironmentCreationDto {
         this.experimentalFeatures = experimentalFeatures != null ? experimentalFeatures : new ExperimentalFeatures();
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public String getName() {
         return name;
     }
@@ -193,11 +197,7 @@ public class EnvironmentCreationDto {
 
         private ExperimentalFeatures experimentalFeatures;
 
-        public Builder() {
-        }
-
-        public static Builder anEnvironmentCreationDto() {
-            return new Builder();
+        private Builder() {
         }
 
         public Builder withName(String name) {

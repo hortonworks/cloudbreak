@@ -33,7 +33,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
 
     @Override
     public NetworkDto convertToDto(BaseNetwork source) {
-        NetworkDto.Builder builder = NetworkDto.Builder.aNetworkDto()
+        NetworkDto.Builder builder = NetworkDto.builder()
                 .withId(source.getId())
                 .withName(source.getName())
                 .withSubnetMetas(source.getSubnetMetas())

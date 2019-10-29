@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.environment.flow;
 
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_VALIDATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
 
 import java.util.Map;
@@ -41,7 +41,7 @@ public class EnvironmentReactorFlowManager {
     public void triggerCreationFlow(long envId, String envName, String userCrn, String envCrn) {
         LOGGER.info("Trigger flow creation");
         EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
-                .withSelector(START_NETWORK_CREATION_EVENT.selector())
+                .withSelector(START_ENVIRONMENT_VALIDATION_EVENT.selector())
                 .withResourceId(envId)
                 .withResourceName(envName)
                 .withResourceCrn(envCrn)

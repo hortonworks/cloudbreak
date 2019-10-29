@@ -46,9 +46,6 @@ class EnvironmentServiceTest {
     private EnvironmentService environmentServiceUnderTest;
 
     @MockBean
-    private EnvironmentValidatorService validatorService;
-
-    @MockBean
     private EnvironmentRepository environmentRepository;
 
     @MockBean
@@ -62,6 +59,9 @@ class EnvironmentServiceTest {
 
     @MockBean
     private EnvironmentReactorFlowManager reactorFlowManager;
+
+    @MockBean
+    private EnvironmentValidatorService environmentValidatorService;
 
     private Environment environment;
 
