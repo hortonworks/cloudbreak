@@ -20,8 +20,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.aspects.RequestLogging;
-import com.sequenceiq.periscope.domain.ClusterManager;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ClusterManager;
 import com.sequenceiq.periscope.domain.ClusterManagerVariant;
 import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.History;
@@ -33,8 +33,8 @@ import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
+import com.sequenceiq.periscope.service.security.SecurityConfigService;
 import com.sequenceiq.periscope.service.security.TlsConfigurationException;
-import com.sequenceiq.periscope.service.security.TlsSecurityService;
 
 @Component("AmbariClusterCreationEvaluator")
 @Scope("prototype")
@@ -50,7 +50,7 @@ public class AmbariClusterCreationEvaluator extends ClusterCreationEvaluator {
     private AmbariClientProvider ambariClientProvider;
 
     @Inject
-    private TlsSecurityService tlsSecurityService;
+    private SecurityConfigService securityConfigService;
 
     @Inject
     private HistoryService historyService;
@@ -74,7 +74,11 @@ public class AmbariClusterCreationEvaluator extends ClusterCreationEvaluator {
         AutoscaleStackV4Response stack = (AutoscaleStackV4Response) context.getData();
         try {
             Cluster cluster = clusterService.findOneByStackId(stack.getStackId());
-            MonitoredStack resolvedAmbari = createAmbariStack(stack);
+            Long clusterId = null;
+            if (cluster != null) {
+                clusterId = cluster.getId();
+            }
+            MonitoredStack resolvedAmbari = createAmbariStack(stack, clusterId);
             if (cluster != null) {
                 ambariHealthCheck(resolvedAmbari);
                 updateCluster(stack, cluster, resolvedAmbari);
@@ -125,10 +129,13 @@ public class AmbariClusterCreationEvaluator extends ClusterCreationEvaluator {
         }
     }
 
-    private MonitoredStack createAmbariStack(AutoscaleStackV4Response stack) {
+    private MonitoredStack createAmbariStack(AutoscaleStackV4Response stack, Long clusterId) {
         String host = stack.getAmbariServerIp();
         String gatewayPort = String.valueOf(stack.getGatewayPort());
-        SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(stack.getStackCrn());
+        SecurityConfig securityConfig = null;
+        if (clusterId != null) {
+            securityConfig = securityConfigService.getSecurityConfig(clusterId);
+        }
         ClusterManager clusterManager = new ClusterManager(host, gatewayPort, stack.getUserNamePath(), stack.getPasswordPath(), ClusterManagerVariant.AMBARI);
         return new MonitoredStack(clusterManager, stack.getStackCrn(), stack.getStackId(), securityConfig);
     }

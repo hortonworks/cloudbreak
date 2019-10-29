@@ -11,7 +11,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,6 +36,7 @@ import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.repository.FailedNodeRepository;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
+import com.sequenceiq.periscope.service.evaluator.HostHealthEvaluatorService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterManagerHostHealthEvaluatorTest {
@@ -58,7 +58,7 @@ public class ClusterManagerHostHealthEvaluatorTest {
     private ClusterService clusterService;
 
     @Mock
-    private Map<ClusterManagerVariant, ClusterManagerSpecificHostHealthEvaluator> hostHealthEvaluatorMap;
+    private HostHealthEvaluatorService hostHealthEvaluatorService;
 
     @Mock
     private ClusterManagerSpecificHostHealthEvaluator clusterManagerSpecificHostHealthEvaluator;
@@ -90,7 +90,7 @@ public class ClusterManagerHostHealthEvaluatorTest {
     @Before
     public void setUp() {
         when(evaluatorContext.getData()).thenReturn(CLUSTER_ID);
-        when(hostHealthEvaluatorMap.get(ClusterManagerVariant.CLOUDERA_MANAGER)).thenReturn(clusterManagerSpecificHostHealthEvaluator);
+        when(hostHealthEvaluatorService.get(ClusterManagerVariant.CLOUDERA_MANAGER)).thenReturn(clusterManagerSpecificHostHealthEvaluator);
 
         underTest.setContext(evaluatorContext);
 

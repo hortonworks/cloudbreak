@@ -1,71 +1,45 @@
 package com.sequenceiq.periscope.service.security;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.bouncycastle.util.encoders.Base64;
-import org.springframework.security.access.AccessDeniedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
-import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
-import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.TlsConfiguration;
-import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 
 @Service
 public class TlsSecurityService {
 
-    @Inject
-    private CloudbreakInternalCrnClient internalCrnClient;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TlsSecurityService.class);
 
     @Inject
-    private SecurityConfigRepository securityConfigRepository;
+    private SecurityConfigService securityConfigService;
 
     @Inject
     private SecretService secretService;
 
-    public SecurityConfig prepareSecurityConfig(String stackCrn) {
-        CertificateV4Response response = internalCrnClient.withInternalCrn().autoscaleEndpoint().getCertificate(stackCrn);
-        return new SecurityConfig(response.getClientKeyPath(), response.getClientCertPath(), response.getServerCert());
+    @PostConstruct
+    public void init() {
+        LOGGER.info("init TlsSecurityService");
     }
 
-    public TlsConfiguration getConfiguration(Cluster cluster) {
-        SecurityConfig securityConfig = cluster.getSecurityConfig();
-        if (securityConfig == null) {
-            securityConfig = getSecurityConfigSilently(cluster);
-        }
-        if (securityConfig == null) {
-            securityConfig = prepareSecurityConfig(cluster.getStackCrn());
-        }
+    @Cacheable(cacheNames = "tlsConfigurationCache")
+    public TlsConfiguration getTls(Long clusterId) {
+        LOGGER.info("Get TlsConfiguration for clusterId: {}", clusterId);
+        SecurityConfig securityConfig = securityConfigService.getSecurityConfig(clusterId);
+        return createTls(securityConfig);
+    }
+
+    private TlsConfiguration createTls(SecurityConfig securityConfig) {
         String clientKey = new String(Base64.decode(secretService.get(securityConfig.getClientKey())));
         String clientCert = new String(Base64.decode(secretService.get(securityConfig.getClientCert())));
         String serverCert = new String(Base64.decode(securityConfig.getServerCert()));
         return new TlsConfiguration(clientKey, clientCert, serverCert);
     }
-
-    public HttpClientConfig buildTLSClientConfig(Cluster cluster) {
-        SecurityConfig securityConfig = cluster.getSecurityConfig();
-        if (securityConfig == null) {
-            securityConfig = getSecurityConfigSilently(cluster);
-        }
-        if (securityConfig == null) {
-            securityConfig = prepareSecurityConfig(cluster.getStackCrn());
-        }
-        String clientKey = new String(Base64.decode(secretService.get(securityConfig.getClientKey())));
-        String clientCert = new String(Base64.decode(secretService.get(securityConfig.getClientCert())));
-        String serverCert = new String(Base64.decode(securityConfig.getServerCert()));
-        return new HttpClientConfig(cluster.getClusterManager().getHost(), serverCert, clientCert, clientKey);
-    }
-
-    private SecurityConfig getSecurityConfigSilently(Cluster cluster) {
-        try {
-            return securityConfigRepository.findByClusterId(cluster.getId());
-        } catch (AccessDeniedException ignore) {
-            return null;
-        }
-    }
-
 }

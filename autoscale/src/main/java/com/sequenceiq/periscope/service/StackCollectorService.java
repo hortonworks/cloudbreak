@@ -1,7 +1,6 @@
 package com.sequenceiq.periscope.service;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -20,6 +19,7 @@ import com.sequenceiq.periscope.monitor.context.ClusterCreationEvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterCreationEvaluator;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
+import com.sequenceiq.periscope.service.evaluator.ClusterCreationEvaluatorService;
 
 @Service
 public class StackCollectorService {
@@ -41,7 +41,7 @@ public class StackCollectorService {
     private RejectedThreadService rejectedThreadService;
 
     @Inject
-    private Map<ClusterManagerVariant, Class<? extends ClusterCreationEvaluator>> clusterCreationEvaluatorMap;
+    private ClusterCreationEvaluatorService clusterCreationEvaluatorService;
 
     public void collectStackDetails() {
         if (LOCK.tryLock()) {
@@ -53,7 +53,7 @@ public class StackCollectorService {
                         LOGGER.debug("Evaluate cluster management for stack: {} (ID:{})", stack.getName(), stack.getStackId());
 
                         ClusterManagerVariant variant = ClusterManagerVariant.valueOf(stack.getClusterManagerVariant());
-                        Class<? extends ClusterCreationEvaluator> clusterCreationEvaluatorClass = clusterCreationEvaluatorMap.get(variant);
+                        Class<? extends ClusterCreationEvaluator> clusterCreationEvaluatorClass = clusterCreationEvaluatorService.get(variant);
                         ClusterCreationEvaluator clusterCreationEvaluator = applicationContext.getBean(clusterCreationEvaluatorClass);
                         clusterCreationEvaluator.setContext(new ClusterCreationEvaluatorContext(stack));
                         executorServiceWithRegistry.submitIfAbsent(clusterCreationEvaluator, stack.getStackId());

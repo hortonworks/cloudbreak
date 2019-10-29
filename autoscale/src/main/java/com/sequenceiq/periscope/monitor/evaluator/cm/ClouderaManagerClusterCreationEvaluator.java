@@ -37,7 +37,9 @@ import com.sequenceiq.periscope.monitor.evaluator.ClusterCreationEvaluator;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
+import com.sequenceiq.periscope.service.security.SecurityConfigService;
 import com.sequenceiq.periscope.service.security.TlsConfigurationException;
+import com.sequenceiq.periscope.service.security.TlsHttpClientConfigurationService;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
 
 @Component("ClouderaManagerClusterCreationEvaluator")
@@ -58,6 +60,12 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
 
     @Inject
     private TlsSecurityService tlsSecurityService;
+
+    @Inject
+    private TlsHttpClientConfigurationService tlsHttpClientConfigurationService;
+
+    @Inject
+    private SecurityConfigService securityConfigService;
 
     @Inject
     private HistoryService historyService;
@@ -84,7 +92,11 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
         AutoscaleStackV4Response stack = (AutoscaleStackV4Response) context.getData();
         try {
             Cluster cluster = clusterService.findOneByStackId(stack.getStackId());
-            MonitoredStack resolvedStack = createMonitoredStack(stack);
+            Long clusterId = null;
+            if (cluster != null) {
+                clusterId = cluster.getId();
+            }
+            MonitoredStack resolvedStack = createMonitoredStack(stack, clusterId);
             if (cluster != null) {
                 cmHealthCheck(resolvedStack);
                 updateCluster(stack, cluster, resolvedStack);
@@ -135,10 +147,13 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
         }
     }
 
-    private MonitoredStack createMonitoredStack(AutoscaleStackV4Response stack) {
+    private MonitoredStack createMonitoredStack(AutoscaleStackV4Response stack, Long clusterId) {
         String host = stack.getAmbariServerIp();
         String gatewayPort = String.valueOf(stack.getGatewayPort());
-        SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(stack.getStackCrn());
+        SecurityConfig securityConfig = null;
+        if (clusterId != null) {
+            securityConfig = securityConfigService.getSecurityConfig(clusterId);
+        }
         ClusterManager clusterManager =
                 new ClusterManager(host, gatewayPort, stack.getUserNamePath(), stack.getPasswordPath(), ClusterManagerVariant.CLOUDERA_MANAGER);
         return new MonitoredStack(clusterManager, stack.getStackCrn(), stack.getStackId(), securityConfig);
@@ -148,8 +163,7 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
         ClusterManager cm = monitoredStack.getClusterManager();
         String host = cm.getHost();
         try {
-            Cluster cluster = new Cluster(monitoredStack);
-            HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(cluster);
+            HttpClientConfig httpClientConfig = tlsHttpClientConfigurationService.buildTLSClientConfig(monitoredStack.getStackCrn(), cm.getHost());
             String user = secretService.get(cm.getUser());
             String pass = secretService.get(cm.getPass());
             ApiClient client = clouderaManagerApiClientProvider.getClient(Integer.valueOf(cm.getPort()), user, pass, httpClientConfig);

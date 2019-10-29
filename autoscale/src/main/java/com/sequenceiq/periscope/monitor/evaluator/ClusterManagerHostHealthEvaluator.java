@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -26,6 +25,7 @@ import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.repository.FailedNodeRepository;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
+import com.sequenceiq.periscope.service.evaluator.HostHealthEvaluatorService;
 
 @Component("ClusterManagerHostHealthEvaluator")
 @Scope("prototype")
@@ -39,7 +39,7 @@ public class ClusterManagerHostHealthEvaluator extends EvaluatorExecutor {
     private ClusterService clusterService;
 
     @Inject
-    private Map<ClusterManagerVariant, ClusterManagerSpecificHostHealthEvaluator> hostHealthEvaluatorMap;
+    private HostHealthEvaluatorService hostHealthEvaluatorService;
 
     @Inject
     private CloudbreakClientConfiguration cloudbreakClientConfiguration;
@@ -69,7 +69,7 @@ public class ClusterManagerHostHealthEvaluator extends EvaluatorExecutor {
     public void execute() {
         Cluster cluster = clusterService.findById(clusterId);
         ClusterManagerVariant variant = cluster.getClusterManager().getVariant();
-        List<String> hostNamesToRecover = hostHealthEvaluatorMap.get(variant).determineHostnamesToRecover(cluster);
+        List<String> hostNamesToRecover = hostHealthEvaluatorService.get(variant).determineHostnamesToRecover(cluster);
         List<FailedNode> failedNodes = failedNodeRepository.findByClusterId(clusterId);
         Optional<ChangedNodesReportV4Request> changedNodesRequest = getChangedNodes(Set.copyOf(hostNamesToRecover), failedNodes);
         if (changedNodesRequest.isPresent()) {
