@@ -60,9 +60,9 @@ public class Stack {
 
     private Integer gatewayport;
 
-    private Boolean useCcm;
+    private Boolean useCcm = Boolean.FALSE;
 
-    private Boolean clusterProxyRegistered;
+    private Boolean clusterProxyRegistered = Boolean.FALSE;
 
     @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<InstanceGroup> instanceGroups = new HashSet<>();

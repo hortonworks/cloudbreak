@@ -107,6 +107,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final String NO_TUNNEL_PROVISIONING = "NO_TUNNEL_PROVISIONING";
 
+    private static final String CDP_AZURE = "CDP_AZURE";
+
     @Inject
     private JsonUtil jsonUtil;
 
@@ -178,7 +180,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         GetActorWorkloadCredentialsResponse.Builder builder = GetActorWorkloadCredentialsResponse.newBuilder();
         try {
             JsonFormat.parser().merge(Resources.toString(
-                Resources.getResource("mock-responses/ums/get-workload-credentials.json"), StandardCharsets.UTF_8), builder);
+                    Resources.getResource("mock-responses/ums/get-workload-credentials.json"), StandardCharsets.UTF_8), builder);
             actorWorkloadCredentialsResponse = builder.build();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -309,19 +311,22 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Override
     public void getAccount(GetAccountRequest request, StreamObserver<GetAccountResponse> responseObserver) {
-        UserManagementProto.Entitlement entitlement = UserManagementProto.Entitlement.newBuilder()
-                .setEntitlementName(NO_TUNNEL_PROVISIONING)
-                .build();
-
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
                         .setAccount(UserManagementProto.Account.newBuilder()
                                 .setClouderaManagerLicenseKey(cbLicense)
                                 .setWorkloadSubdomain(ACCOUNT_SUBDOMAIN)
-                                .addEntitlements(entitlement)
+                                .addEntitlements(createEntitlement(NO_TUNNEL_PROVISIONING))
+                                .addEntitlements(createEntitlement(CDP_AZURE))
                                 .build())
                         .build());
         responseObserver.onCompleted();
+    }
+
+    private UserManagementProto.Entitlement createEntitlement(String entitlementName) {
+        return UserManagementProto.Entitlement.newBuilder()
+                .setEntitlementName(entitlementName)
+                .build();
     }
 
     @Override

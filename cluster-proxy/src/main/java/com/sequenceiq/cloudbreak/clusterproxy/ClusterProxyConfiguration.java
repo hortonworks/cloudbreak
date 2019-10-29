@@ -6,9 +6,9 @@ import java.net.URL;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
+@Component
 public class ClusterProxyConfiguration {
 
     public static final String FREEIPA_SERVICE_NAME = "freeipa";

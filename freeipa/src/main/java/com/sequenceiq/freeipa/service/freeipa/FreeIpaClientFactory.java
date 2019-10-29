@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -17,8 +19,6 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-
-import java.util.Map;
 
 @Service
 public class FreeIpaClientFactory {
@@ -65,7 +65,7 @@ public class FreeIpaClientFactory {
         LOGGER.debug("Creating FreeIpaClient for stack {}", stack.getResourceCrn());
 
         try {
-            if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled() && stack.getClusterProxyRegistered()) {
+            if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled() && Boolean.TRUE.equals(stack.getClusterProxyRegistered())) {
                 HttpClientConfig httpClientConfig = new HttpClientConfig(clusterProxyConfiguration.getClusterProxyHost());
                 FreeIpa freeIpa = freeIpaService.findByStack(stack);
                 String clusterProxyPath = toClusterProxyBasepath(stack.getResourceCrn());

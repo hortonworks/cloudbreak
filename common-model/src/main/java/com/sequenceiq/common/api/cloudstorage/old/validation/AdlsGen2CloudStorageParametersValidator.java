@@ -87,8 +87,9 @@ public class AdlsGen2CloudStorageParametersValidator implements ConstraintValida
         if (Objects.isNull(managedIdentity)) {
             result = true;
         } else if (!managedIdentity.matches("^/subscriptions/[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}/"
-                + "resourceGroups/[-\\w._()]+/providers/Microsoft.ManagedIdentity/userAssignedIdentities/[A-Za-z0-9-_]*$")) {
-            failMessage = "Must be a full valid managed identity id.";
+                + "(resourceGroups|resourcegroups)/[-\\w._()]+/providers/Microsoft.ManagedIdentity/userAssignedIdentities/[A-Za-z0-9-_]*$")) {
+            failMessage = "Must be a full valid managed identity resource ID in the format of /subscriptions/[your-subscription-id]/resourceGroups/" +
+                    "[your-resource-group]/providers/Microsoft.ManagedIdentity/userAssignedIdentities/[name-of-your-identity]]";
             result = false;
         } else {
             result = true;
