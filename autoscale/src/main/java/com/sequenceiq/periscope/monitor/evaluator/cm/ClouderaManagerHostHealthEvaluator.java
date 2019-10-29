@@ -28,6 +28,7 @@ import com.sequenceiq.periscope.domain.ClusterManagerVariant;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterManagerSpecificHostHealthEvaluator;
 import com.sequenceiq.periscope.monitor.evaluator.EventPublisher;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
+import com.sequenceiq.periscope.service.security.TlsHttpClientConfigurationService;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
 
 @Component("ClouderaManagerHostHealthEvaluator")
@@ -40,6 +41,9 @@ public class ClouderaManagerHostHealthEvaluator implements ClusterManagerSpecifi
 
     @Inject
     private TlsSecurityService tlsSecurityService;
+
+    @Inject
+    private TlsHttpClientConfigurationService tlsHttpClientConfigurationService;
 
     @Inject
     private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
@@ -65,7 +69,8 @@ public class ClouderaManagerHostHealthEvaluator implements ClusterManagerSpecifi
         try {
             MDCBuilder.buildMdcContext(cluster);
             LOGGER.debug("Checking '{}' alerts for cluster {}.", CM_HOST_HEARTBEAT, clusterId);
-            HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(cluster);
+            HttpClientConfig httpClientConfig = tlsHttpClientConfigurationService.buildTLSClientConfig(cluster.getStackCrn(),
+                    cluster.getClusterManager().getHost());
             ClusterManager cm = cluster.getClusterManager();
             String user = secretService.get(cm.getUser());
             String pass = secretService.get(cm.getPass());

@@ -1,10 +1,7 @@
 package com.sequenceiq.periscope.modul.rejected;
 
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -26,8 +23,6 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.aspects.RequestLogging;
-import com.sequenceiq.periscope.domain.ClusterManagerVariant;
-import com.sequenceiq.periscope.monitor.evaluator.ClusterCreationEvaluator;
 import com.sequenceiq.periscope.monitor.evaluator.ambari.AmbariClusterCreationEvaluator;
 import com.sequenceiq.periscope.monitor.executor.EvaluatorExecutorRegistry;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
@@ -39,7 +34,9 @@ import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 import com.sequenceiq.periscope.service.StackCollectorService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
+import com.sequenceiq.periscope.service.evaluator.ClusterCreationEvaluatorService;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
+import com.sequenceiq.periscope.service.security.SecurityConfigService;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
 import com.sequenceiq.periscope.utils.MetricUtils;
 
@@ -59,19 +56,17 @@ public class StackCollectorContext {
                             StackCollectorService.class,
                             ExecutorServiceWithRegistry.class,
                             EvaluatorExecutorRegistry.class,
+                            ClusterCreationEvaluatorService.class,
                             Clock.class
                     })
     )
-    @MockBean({ClusterService.class, AmbariClientProvider.class, CloudbreakClientConfiguration.class, TlsSecurityService.class, HistoryService.class,
-            HttpNotificationSender.class, MetricUtils.class, Clock.class, ClouderaManagerApiFactory.class, SecretService.class})
+    @MockBean({ClusterService.class, AmbariClientProvider.class, CloudbreakClientConfiguration.class, TlsSecurityService.class, SecurityConfigService.class,
+            HistoryService.class, HttpNotificationSender.class, MetricUtils.class, Clock.class, ClouderaManagerApiFactory.class, SecretService.class})
     @EnableAsync
     public static class StackCollectorSpringConfig implements AsyncConfigurer {
 
         @Inject
         private PersistRejectedThreadExecutionHandler persistRejectedThreadExecutionHandler;
-
-        @Inject
-        private List<ClusterCreationEvaluator> clusterCreationEvaluators;
 
         @Bean("periscopeListeningScheduledExecutorService")
         ExecutorService listeningScheduledExecutorService() {
@@ -86,15 +81,6 @@ public class StackCollectorContext {
             executorFactoryBean.setQueueCapacity(2);
             executorFactoryBean.setRejectedExecutionHandler(persistRejectedThreadExecutionHandler);
             return executorFactoryBean;
-        }
-
-        @Bean
-        public Map<ClusterManagerVariant, Class<? extends ClusterCreationEvaluator>> clusterCreationEvaluatorMap() {
-            return clusterCreationEvaluators.stream()
-                    .collect(Collectors.toMap(
-                            ClusterCreationEvaluator::getSupportedClusterManagerVariant,
-                            ClusterCreationEvaluator::getClass
-                    ));
         }
 
         @Bean

@@ -46,6 +46,8 @@ import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
+import com.sequenceiq.periscope.service.security.SecurityConfigService;
+import com.sequenceiq.periscope.service.security.TlsHttpClientConfigurationService;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -69,6 +71,12 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
 
     @Mock
     private TlsSecurityService tlsSecurityService;
+
+    @Mock
+    private TlsHttpClientConfigurationService tlsHttpClientConfigurationService;
+
+    @Mock
+    private SecurityConfigService securityConfigService;
 
     @Mock
     private HistoryService historyService;
@@ -189,7 +197,7 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
             History history) {
         AutoscaleStackV4Response stack = getStackResponse();
         when(evaluatorContext.getData()).thenReturn(stack);
-        when(tlsSecurityService.prepareSecurityConfig(STACK_CRN)).thenReturn(new SecurityConfig());
+        when(securityConfigService.getSecurityConfig(anyLong())).thenReturn(new SecurityConfig());
         when(clusterService.findOneByStackId(anyLong())).thenReturn(cluster);
         when(requestLogging.logging(any(), any())).thenReturn(healthy);
         if (cluster != null) {

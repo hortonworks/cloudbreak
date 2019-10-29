@@ -19,6 +19,12 @@ public interface ClusterRepository extends BaseRepository<Cluster, Long> {
 
     Cluster findByStackId(@Param("stackId") Long stackId);
 
+    @Query("SELECT c.stackCrn FROM Cluster c WHERE c.id = :id")
+    String findStackCrnById(@Param("id") Long id);
+
+    @Query("SELECT c.id FROM Cluster c WHERE c.stackCrn = :stackCrn")
+    Long findIdStackCrn(@Param("stackCrn") String stackCrn);
+
     @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain WHERE c.clusterPertain.userId = :userId")
     List<Cluster> findByUserId(@Param("userId") String userId);
 
@@ -30,10 +36,6 @@ public interface ClusterRepository extends BaseRepository<Cluster, Long> {
     int countByStateAndAutoscalingEnabledAndPeriscopeNodeId(ClusterState state, boolean autoscalingEnabled, String nodeId);
 
     List<Cluster> findAllByPeriscopeNodeIdNotInOrPeriscopeNodeIdIsNull(List<String> nodes);
-
-    @Modifying
-    @Query("UPDATE Cluster c SET c.periscopeNodeId = :periscopeNodeId WHERE c.id = :id")
-    void allocateClusterForNode(@Param("id") long id, @Param("periscopeNodeId") String periscopeNodeId);
 
     @Modifying
     @Query("UPDATE Cluster c SET c.periscopeNodeId = NULL WHERE c.periscopeNodeId = :periscopeNodeId")

@@ -7,6 +7,7 @@ import org.springframework.boot.actuate.autoconfigure.metrics.web.servlet.WebMvc
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -14,6 +15,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableAutoConfiguration(exclude = WebMvcMetricsAutoConfiguration.class)
 @EnableSwagger2
 @ComponentScan(basePackages = {"com.sequenceiq"})
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 public class PeriscopeApplication {
 
     public static void main(String[] args) {
