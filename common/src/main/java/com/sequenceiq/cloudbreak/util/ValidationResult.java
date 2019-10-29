@@ -27,9 +27,9 @@ public class ValidationResult {
 
     public ValidationResult merge(ValidationResult other) {
         State mergeState = state == ERROR || other.state == ERROR ? ERROR : VALID;
-        List<String> mergedError = new ArrayList<>(errors);
-        mergedError.addAll(other.errors);
-        return new ValidationResult(mergeState, mergedError);
+        List<String> mergedErrors = new ArrayList<>(errors);
+        mergedErrors.addAll(other.errors);
+        return new ValidationResult(mergeState, mergedErrors);
     }
 
     public State getState() {

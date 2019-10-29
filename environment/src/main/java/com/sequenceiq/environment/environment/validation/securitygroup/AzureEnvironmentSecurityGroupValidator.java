@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.CloudPlatform;
-import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 
 @Component
@@ -17,7 +17,7 @@ public class AzureEnvironmentSecurityGroupValidator implements EnvironmentSecuri
     }
 
     @Override
-    public void validate(EnvironmentCreationDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder) {
+    public void validate(EnvironmentDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder) {
         SecurityAccessDto securityAccessDto = environmentDto.getSecurityAccess();
         if (securityAccessDto != null) {
             if (onlyOneSecurityGroupIdDefined(securityAccessDto)) {

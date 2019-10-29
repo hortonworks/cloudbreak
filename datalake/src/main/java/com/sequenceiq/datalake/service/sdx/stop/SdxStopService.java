@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
-import com.sequenceiq.cloudbreak.common.exception.ClientErrorExceptionHandler;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -59,6 +59,9 @@ public class SdxStopService {
     @Inject
     private DistroxService distroxService;
 
+    @Inject
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
     public void triggerStopIfClusterNotStopped(SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
         if (sdxStatusService.getActualStatusForSdx(cluster).getStatus() == DatalakeStatusEnum.STOPPED) {
@@ -78,12 +81,13 @@ public class SdxStopService {
         } catch (NotFoundException e) {
             LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
         } catch (ClientErrorException e) {
-            String errorMessage = ClientErrorExceptionHandler.getErrorMessage(e);
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.info("Can not stop stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
             throw new RuntimeException("Can not stop stack, client error happened on Cloudbreak side: " + errorMessage);
         } catch (WebApplicationException e) {
-            LOGGER.info("Can not stop stack {} from cloudbreak: {}", sdxCluster.getStackId(), e.getMessage(), e);
-            throw new RuntimeException("Can not stop stack, web application error happened on Cloudbreak side: " + e.getMessage());
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.info("Can not stop stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
+            throw new RuntimeException("Can not stop stack, web application error happened on Cloudbreak side: " + errorMessage);
         }
     }
 

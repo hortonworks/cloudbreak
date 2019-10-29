@@ -1,11 +1,14 @@
 package com.sequenceiq.environment.network.v1.converter;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.environment.CloudPlatform;
@@ -47,6 +50,12 @@ public class MockEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
                 )
         );
         return mockNetwork;
+    }
+
+    @Override
+    public Network convertToNetwork(BaseNetwork baseNetwork) {
+        Subnet subnet = new Subnet(baseNetwork.getNetworkCidr());
+        return new Network(subnet, Collections.emptyMap());
     }
 
     @Override

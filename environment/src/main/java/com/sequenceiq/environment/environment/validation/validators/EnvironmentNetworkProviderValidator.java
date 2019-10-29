@@ -18,47 +18,41 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.validation.SubnetValidator;
 import com.sequenceiq.environment.CloudPlatform;
-import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Component
-public class EnvironmentCreationValidator {
+public class EnvironmentNetworkProviderValidator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentCreationValidator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentNetworkProviderValidator.class);
 
     private static final String EXPECTED_NETWORK_MASK = "16";
-
-    private final EnvironmentRegionValidator environmentRegionValidator;
 
     private final Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform;
 
     private final Map<CloudPlatform, EnvironmentSecurityGroupValidator> environmentSecurityGroupValidatorsByCloudPlatform;
 
-    public EnvironmentCreationValidator(EnvironmentRegionValidator environmentRegionValidator,
-                                        Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform,
-                                        Map<CloudPlatform, EnvironmentSecurityGroupValidator> environmentSecurityGroupValidatorsByCloudPlatform) {
-        this.environmentRegionValidator = environmentRegionValidator;
+    public EnvironmentNetworkProviderValidator(
+            Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform,
+            Map<CloudPlatform, EnvironmentSecurityGroupValidator> environmentSecurityGroupValidatorsByCloudPlatform) {
         this.environmentNetworkValidatorsByCloudPlatform = environmentNetworkValidatorsByCloudPlatform;
         this.environmentSecurityGroupValidatorsByCloudPlatform = environmentSecurityGroupValidatorsByCloudPlatform;
     }
 
-    public ValidationResult validate(Environment environment, EnvironmentCreationDto creationDto, CloudRegions cloudRegions) {
-        String cloudPlatform = environment.getCloudPlatform();
+    public ValidationResult validate(EnvironmentDto environmentDto) {
+        NetworkDto network = environmentDto.getNetwork();
+        String cloudPlatform = environmentDto.getCloudPlatform();
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        environmentRegionValidator.validateRegions(creationDto.getRegions(), cloudRegions, cloudPlatform, resultBuilder);
-        environmentRegionValidator.validateLocation(creationDto.getLocation(), creationDto.getRegions(), environment, resultBuilder);
-        validateNetworkHasTheSamePropertyFilledAsTheDesiredCloudPlatform(creationDto.getNetwork(), cloudPlatform, resultBuilder);
-        validateNetwork(creationDto, cloudPlatform, resultBuilder);
-        validateSecurityGroup(creationDto, cloudPlatform, resultBuilder);
+        validateNetworkHasTheSamePropertyFilledAsTheDesiredCloudPlatform(network, cloudPlatform, resultBuilder);
+        validateNetwork(network, cloudPlatform, resultBuilder);
+        validateSecurityGroup(environmentDto, cloudPlatform, resultBuilder);
         return resultBuilder.build();
     }
 
@@ -67,10 +61,10 @@ public class EnvironmentCreationValidator {
 
         if (nonNull(networkDto) && isEmpty(networkDto.getNetworkCidr())) {
             Map<CloudPlatform, Optional<Object>> providerNetworkParamPair = Map.of(
-                    AWS,   optional(networkDto.getAws()),
+                    AWS, optional(networkDto.getAws()),
                     AZURE, optional(networkDto.getAzure()),
-                    MOCK,  optional(networkDto.getMock()),
-                    YARN,  optional(networkDto.getYarn())
+                    MOCK, optional(networkDto.getMock()),
+                    YARN, optional(networkDto.getYarn())
             );
 
             LOGGER.debug("About to validate network properties for cloud platform \"{}\" against the following supported platforms: {}",
@@ -87,15 +81,14 @@ public class EnvironmentCreationValidator {
     private void evaluateProviderNetworkRelation(boolean networkParamExists, String cloudPlatform, ValidationResultBuilder resultBuilder) {
         doIfFalse(networkParamExists, cloudPlatform,
                 ignore -> resultBuilder.error(String.format("The related network parameter for the cloud platform \"%s\" has not given!",
-                cloudPlatform)));
+                        cloudPlatform)));
     }
 
     private Optional<Object> optional(Object o) {
         return Optional.ofNullable(o);
     }
 
-    private void validateNetwork(EnvironmentCreationDto request, String cloudPlatform, ValidationResultBuilder resultBuilder) {
-        NetworkDto networkDto = request.getNetwork();
+    private void validateNetwork(NetworkDto networkDto, String cloudPlatform, ValidationResultBuilder resultBuilder) {
         if (networkDto != null && Strings.isNullOrEmpty(networkDto.getNetworkCidr())) {
             EnvironmentNetworkValidator environmentNetworkValidator = environmentNetworkValidatorsByCloudPlatform.get(valueOf(cloudPlatform));
             if (networkDto.getNetworkCidr() != null && isInvalidNetworkMask(networkDto.getNetworkCidr())) {
@@ -113,7 +106,7 @@ public class EnvironmentCreationValidator {
         return !new SubnetValidator().isValid(networkCidr, null) || !networkCidr.split("/")[1].equals(EXPECTED_NETWORK_MASK);
     }
 
-    private void validateSecurityGroup(EnvironmentCreationDto request, String cloudPlatform, ValidationResultBuilder resultBuilder) {
+    private void validateSecurityGroup(EnvironmentDto request, String cloudPlatform, ValidationResultBuilder resultBuilder) {
         SecurityAccessDto securityAccess = request.getSecurityAccess();
         NetworkDto networkDto = request.getNetwork();
         if (securityAccess != null && networkDto != null && Strings.isNullOrEmpty(securityAccess.getCidr())) {

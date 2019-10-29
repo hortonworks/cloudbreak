@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
@@ -26,10 +27,18 @@ public class EnvironmentClientService {
     @Inject
     private EnvironmentEndpoint environmentEndpoint;
 
+    @Inject
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
     public DetailedEnvironmentResponse getByName(String name) {
         try {
             return environmentEndpoint.getByName(name);
-        } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to GET Environment by name: %s, due to: %s. %s.", name, e.getMessage(), errorMessage);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        } catch (ProcessingException | IllegalStateException e) {
             String message = String.format("Failed to GET Environment by name: %s, due to: '%s' ", name, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
@@ -39,7 +48,12 @@ public class EnvironmentClientService {
     public DetailedEnvironmentResponse getByCrn(String crn) {
         try {
             return environmentEndpoint.getByCrn(crn);
-        } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to GET Environment by crn: %s, due to: %s. %s.", crn, e.getMessage(), errorMessage);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        } catch (ProcessingException | IllegalStateException e) {
             String message = String.format("Failed to GET Environment by crn: %s, due to: '%s' ", crn, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
@@ -49,7 +63,12 @@ public class EnvironmentClientService {
     public SimpleEnvironmentResponses list() {
         try {
             return environmentEndpoint.list();
-        } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to LIST Environment due to: %s. %s.", e.getMessage(), errorMessage);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        } catch (ProcessingException | IllegalStateException e) {
             String message = String.format("Failed to LIST Environment due to: '%s' ", e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
@@ -59,7 +78,12 @@ public class EnvironmentClientService {
     public DetailedEnvironmentResponse create(@Valid EnvironmentRequest request) {
         try {
             return environmentEndpoint.post(request);
-        } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to CREATE Environment by name: %s, due to: %s. %s.", request.getName(), e.getMessage(), errorMessage);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        } catch (ProcessingException | IllegalStateException e) {
             String message = String.format("Failed to CREATE Environment by name: %s, due to: '%s' ", request.getName(), e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
@@ -69,7 +93,12 @@ public class EnvironmentClientService {
     public DetailedEnvironmentResponse edit(String environmentCrn, @NotNull EnvironmentEditRequest request) {
         try {
             return environmentEndpoint.editByCrn(environmentCrn, request);
-        } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to EDIT Environment by crn: %s, due to: %s. %s.", environmentCrn, e.getMessage(), errorMessage);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        } catch (ProcessingException | IllegalStateException e) {
             String message = String.format("Failed to EDIT Environment by crn: %s, due to: '%s' ", environmentCrn, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
@@ -79,7 +108,12 @@ public class EnvironmentClientService {
     public SimpleEnvironmentResponse delete(String name) {
         try {
             return environmentEndpoint.deleteByName(name);
-        } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to DELETE Environment by name: %s, due to: %s. %s.", name, e.getMessage(), errorMessage);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        } catch (ProcessingException | IllegalStateException e) {
             String message = String.format("Failed to DELETE Environment by name: %s, due to: '%s' ", name, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);

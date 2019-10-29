@@ -19,7 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.credential.domain.Credential;
-import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.service.NoSqlTableCreationModeDeterminerService;
 import com.sequenceiq.environment.parameters.dao.domain.S3GuardTableCreation;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
@@ -37,15 +38,15 @@ class AwsParameterValidatorTest {
     @InjectMocks
     private AwsParameterValidator underTest;
 
-    private Environment environment;
+    private EnvironmentDto environmentDto;
 
     @BeforeEach
     void setUp() {
         Credential credential = new Credential();
         credential.setCloudPlatform("platform");
-        environment = new Environment();
-        environment.setLocation("location");
-        environment.setCredential(credential);
+        environmentDto = new EnvironmentDto();
+        environmentDto.setLocation(new LocationDto("location", "location", 1.0, 1.0));
+        environmentDto.setCredential(credential);
     }
 
     @Test
@@ -54,7 +55,7 @@ class AwsParameterValidatorTest {
                 .withDynamoDbTableName("tablename")
                 .build();
         when(parametersService.isS3GuardTableUsed(any(), any(), any(), any())).thenReturn(true);
-        ValidationResult validationResult = underTest.validateAndDetermineAwsParameters(environment, awsParameters);
+        ValidationResult validationResult = underTest.validateAndDetermineAwsParameters(environmentDto, awsParameters);
         assertTrue(validationResult.hasError());
         assertEquals(1L, validationResult.getErrors().size());
         assertEquals("S3Guard table 'tablename' is already attached to another active environment. "
@@ -63,14 +64,14 @@ class AwsParameterValidatorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = S3GuardTableCreation.class, names = { "USE_EXISTING", "CREATE_NEW" })
+    @EnumSource(value = S3GuardTableCreation.class, names = {"USE_EXISTING", "CREATE_NEW"})
     void validateAndDetermineAwsParametersUseExisting(S3GuardTableCreation creation) {
         AwsParametersDto awsParameters = AwsParametersDto.builder()
                 .withDynamoDbTableName("tablename")
                 .build();
         when(parametersService.isS3GuardTableUsed(any(), any(), any(), any())).thenReturn(false);
         when(noSqlTableCreationModeDeterminerService.determineCreationMode(any(), any())).thenReturn(creation);
-        ValidationResult validationResult = underTest.validateAndDetermineAwsParameters(environment, awsParameters);
+        ValidationResult validationResult = underTest.validateAndDetermineAwsParameters(environmentDto, awsParameters);
         assertFalse(validationResult.hasError());
         verify(noSqlTableCreationModeDeterminerService).determineCreationMode(any(), any());
         assertEquals(creation, awsParameters.getDynamoDbTableCreation());

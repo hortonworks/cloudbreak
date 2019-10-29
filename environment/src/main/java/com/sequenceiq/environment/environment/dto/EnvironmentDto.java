@@ -3,10 +3,8 @@ package com.sequenceiq.environment.environment.dto;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.domain.CredentialView;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -33,7 +31,7 @@ public class EnvironmentDto implements Payload {
 
     private String cloudPlatform;
 
-    private Json regions;
+    private Set<Region> regions;
 
     private EnvironmentTelemetry telemetry;
 
@@ -131,16 +129,15 @@ public class EnvironmentDto implements Payload {
         this.cloudPlatform = cloudPlatform;
     }
 
-    public Json getRegions() {
+    public Json getRegionsJson() {
+        return Json.silent(regions);
+    }
+
+    public Set<Region> getRegions() {
         return regions;
     }
 
-    public Set<Region> getRegionSet() {
-        return JsonUtil.jsonToType(regions.getValue(), new TypeReference<>() {
-        });
-    }
-
-    public void setRegions(Json regions) {
+    public void setRegions(Set<Region> regions) {
         this.regions = regions;
     }
 
@@ -299,7 +296,7 @@ public class EnvironmentDto implements Payload {
 
         private String cloudPlatform;
 
-        private Json regions;
+        private Set<Region> regions;
 
         private EnvironmentTelemetry telemetry;
 
@@ -373,7 +370,7 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
-        public Builder withRegions(Json regions) {
+        public Builder withRegions(Set<Region> regions) {
             this.regions = regions;
             return this;
         }

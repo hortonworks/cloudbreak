@@ -50,7 +50,7 @@ public class EnvironmentDtoConverter {
                 .withCredentialView(credentialViewConverter.convert(environment.getCredential()))
                 .withDeletionTimestamp(environment.getDeletionTimestamp())
                 .withLocationDto(environmentToLocationDto(environment))
-                .withRegions(environment.getRegions())
+                .withRegions(environment.getRegionSet())
                 .withTelemetry(environment.getTelemetry())
                 .withEnvironmentStatus(environment.getStatus())
                 .withCreator(environment.getCreator())
@@ -91,7 +91,7 @@ public class EnvironmentDtoConverter {
     }
 
     public LocationDto environmentToLocationDto(Environment environment) {
-        return LocationDto.LocationDtoBuilder.aLocationDto()
+        return LocationDto.builder()
                 .withName(environment.getLocation())
                 .withDisplayName(environment.getLocationDisplayName())
                 .withLongitude(environment.getLongitude())

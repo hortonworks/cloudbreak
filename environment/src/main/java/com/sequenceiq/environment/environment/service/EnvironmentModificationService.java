@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
-import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
@@ -32,7 +31,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
-import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
+import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -60,9 +59,12 @@ public class EnvironmentModificationService {
 
     private final ParametersService parametersService;
 
+    private final EnvironmentFlowValidatorService environmentFlowValidatorService;
+
     public EnvironmentModificationService(EnvironmentDtoConverter environmentDtoConverter, EnvironmentRepository environmentRepository,
             EnvironmentService environmentService, CredentialService credentialService, NetworkService networkService,
-            AuthenticationDtoConverter authenticationDtoConverter, ParametersService parametersService) {
+            AuthenticationDtoConverter authenticationDtoConverter, ParametersService parametersService,
+            EnvironmentFlowValidatorService environmentFlowValidatorService) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentRepository = environmentRepository;
         this.environmentService = environmentService;
@@ -70,6 +72,7 @@ public class EnvironmentModificationService {
         this.networkService = networkService;
         this.authenticationDtoConverter = authenticationDtoConverter;
         this.parametersService = parametersService;
+        this.environmentFlowValidatorService = environmentFlowValidatorService;
     }
 
     public EnvironmentDto editByName(String environmentName, EnvironmentEditDto editDto) {
@@ -187,10 +190,9 @@ public class EnvironmentModificationService {
 
     private void validateRegionAndLocation(LocationDto location, Set<String> requestedRegions,
             CloudRegions cloudRegions, Environment environment) {
-        ValidationResultBuilder validationResultBuilder = environmentService.getValidatorService().validateRegions(requestedRegions,
-                cloudRegions, environment.getCloudPlatform(), ValidationResult.builder());
-        environmentService.getValidatorService().validateLocation(location, requestedRegions, environment, validationResultBuilder);
-        ValidationResult validationResult = validationResultBuilder.build();
+        ValidationResult validationResult = environmentService.getValidatorService()
+                .validateRegionsAndLocation(location.getName(), requestedRegions, environment, cloudRegions)
+                .build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
@@ -225,7 +227,7 @@ public class EnvironmentModificationService {
 
     private void editTelemetryIfChanged(Environment environment, EnvironmentEditDto editDto) {
         if (editDto.getTelemetry() != null) {
-            ValidationResult validationResult = environmentService.getValidatorService().validateTelemetryLoggingStorageLocation(environment);
+            ValidationResult validationResult = environmentFlowValidatorService.validateTelemetryLoggingStorageLocation(environment);
             if (validationResult.hasError()) {
                 throw new BadRequestException(validationResult.getFormattedErrors());
             }
@@ -266,8 +268,9 @@ public class EnvironmentModificationService {
 
     private void validateAwsParameters(Environment environment, ParametersDto parametersDto) {
         if (parametersDto.getAwsParametersDto() != null) {
-            EnvironmentValidatorService validatorService = environmentService.getValidatorService();
-            ValidationResult validationResult = validatorService.validateAndDetermineAwsParameters(environment, parametersDto.getAwsParametersDto());
+            EnvironmentDto environmentDto = environmentDtoConverter.environmentToDto(environment);
+            ValidationResult validationResult = environmentFlowValidatorService
+                    .validateAndDetermineAwsParameters(environmentDto, parametersDto.getAwsParametersDto());
             if (validationResult.hasError()) {
                 throw new BadRequestException(validationResult.getFormattedErrors());
             }

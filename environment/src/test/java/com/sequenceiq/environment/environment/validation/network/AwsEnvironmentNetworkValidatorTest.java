@@ -35,8 +35,7 @@ class AwsEnvironmentNetworkValidatorTest {
     @Test
     void testValidateWhenTheNetworkDoesNotContainAwsNetworkParams() {
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-        NetworkDto networkDto = NetworkDto.Builder
-                .aNetworkDto()
+        NetworkDto networkDto = NetworkDto.builder()
                 .withId(1L)
                 .withName("networkName")
                 .withResourceCrn("aResourceCRN")
@@ -59,8 +58,7 @@ class AwsEnvironmentNetworkValidatorTest {
                 .anAwsParams()
                 .build();
 
-        NetworkDto networkDto = NetworkDto.Builder
-                .aNetworkDto()
+        NetworkDto networkDto = NetworkDto.builder()
                 .withId(1L)
                 .withName("networkName")
                 .withResourceCrn("aResourceCRN")
@@ -84,8 +82,7 @@ class AwsEnvironmentNetworkValidatorTest {
                 .withVpcId("aVPCResourceIDFromAWS")
                 .build();
 
-        NetworkDto networkDto = NetworkDto.Builder
-                .aNetworkDto()
+        NetworkDto networkDto = NetworkDto.builder()
                 .withId(1L)
                 .withName("networkName")
                 .withResourceCrn("aResourceCRN")

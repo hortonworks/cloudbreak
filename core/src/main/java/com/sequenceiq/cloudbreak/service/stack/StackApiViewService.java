@@ -66,6 +66,7 @@ public class StackApiViewService {
         } else {
             LOGGER.info("Environment name was defined so we will query all the stack in the {} environment.", environmentName);
             DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(environmentName);
+            // TODO: fix this. this is overkill. create a getEnvCrnByName endpoint.
             stackViewResponses = getAllByWorkspaceAndEnvironment(workspaceId, environmentResponse.getCrn(), showTerminatedClustersAfterConfig);
         }
 

@@ -62,10 +62,10 @@ public class EnvironmentResourceDeletionService {
     public void deleteClusterDefinitionsOnCloudbreak(String environmentCrn) {
         try {
             clusterTemplateV4Endpoint.deleteMultiple(TEMP_WORKSPACE_ID, null, null, environmentCrn);
-        } catch (WebApplicationException | ProcessingException | UnableToDeleteClusterDefinitionException e) {
-            String message = String.format("Failed to delete cluster definition(s) from Cloudbreak due to: '%s' ", e.getMessage());
-            LOGGER.error(message, e);
-            throw new EnvironmentServiceException(message, e);
+        } catch (WebApplicationException e) {
+            propagateException("Failed to delete cluster definition(s) from Cloudbreak due to:", e);
+        } catch (ProcessingException | UnableToDeleteClusterDefinitionException e) {
+            propagateException("Failed to delete cluster definition(s) from Cloudbreak due to:", e);
         }
     }
 
@@ -79,10 +79,10 @@ public class EnvironmentResourceDeletionService {
                     .map(SdxClusterResponse::getName)
                     .collect(Collectors.toSet());
             clusterNames.addAll(sdxClusterNames);
-        } catch (WebApplicationException | ProcessingException e) {
-            String message = String.format("Failed to get SDX clusters from SDX service due to: '%s' ", e.getMessage());
-            LOGGER.error(message, e);
-            throw new EnvironmentServiceException(message, e);
+        } catch (WebApplicationException e) {
+            propagateException("Failed to get SDX clusters from SDX service due to:", e);
+        } catch (ProcessingException e) {
+            propagateException("Failed to get SDX clusters from SDX service due to:", e);
         }
         return clusterNames;
     }
@@ -98,10 +98,10 @@ public class EnvironmentResourceDeletionService {
                     .map(StackViewV4Response::getName)
                     .collect(Collectors.toSet());
             clusterNames.addAll(datalakeClusterNames);
-        } catch (WebApplicationException | ProcessingException e) {
-            String message = String.format("Failed to get Datalake clusters from Cloudbreak service due to: '%s' ", e.getMessage());
-            LOGGER.error(message, e);
-            throw new EnvironmentServiceException(message, e);
+        } catch (WebApplicationException e) {
+            propagateException("Failed to get Datalake clusters from Cloudbreak service due to:", e);
+        } catch (ProcessingException e) {
+            propagateException("Failed to get Datalake clusters from Cloudbreak service due to:", e);
         }
         return clusterNames;
     }
@@ -117,10 +117,10 @@ public class EnvironmentResourceDeletionService {
                     .map(StackViewV4Response::getName)
                     .collect(Collectors.toSet());
             clusterNames.addAll(distroXClusterNames);
-        } catch (WebApplicationException | ProcessingException e) {
-            String message = String.format("Failed to get DistroX clusters from Cloudbreak service due to: '%s' ", e.getMessage());
-            LOGGER.error(message, e);
-            throw new EnvironmentServiceException(message, e);
+        } catch (WebApplicationException e) {
+            propagateException("Failed to get DistroX clusters from Cloudbreak service due to:", e);
+        } catch (ProcessingException e) {
+            propagateException("Failed to get DistroX clusters from Cloudbreak service due to:", e);
         }
         return clusterNames;
     }
@@ -139,4 +139,19 @@ public class EnvironmentResourceDeletionService {
         eventSender.sendEvent(envDeleteEvent, new Event.Headers(flowTriggerUsercrn));
     }
 
+    private void propagateException(String messagePrefix, WebApplicationException e) {
+        String responseMessage = e.getResponse().readEntity(String.class);
+        String message = String.format("%s %s. %s", messagePrefix, e.getMessage(), responseMessage);
+        throwServiceException(e, message);
+    }
+
+    private void propagateException(String messagePrefix, Exception e) {
+        String message = String.format("%s '%s' ", messagePrefix, e.getMessage());
+        throwServiceException(e, message);
+    }
+
+    private void throwServiceException(Exception e, String message) {
+        LOGGER.error(message, e);
+        throw new EnvironmentServiceException(message, e);
+    }
 }

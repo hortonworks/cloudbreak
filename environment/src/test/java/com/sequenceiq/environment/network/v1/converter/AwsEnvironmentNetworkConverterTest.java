@@ -74,7 +74,7 @@ class AwsEnvironmentNetworkConverterTest {
     @Test
     void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDto() {
         Environment environment = createEnvironment();
-        NetworkDto networkDto = NetworkDto.Builder.aNetworkDto()
+        NetworkDto networkDto = NetworkDto.builder()
                 .withAws(AwsParams.AwsParamsBuilder.anAwsParams().withVpcId(VPC_ID).build())
                 .withName(NETWORK_NAME)
                 .withNetworkCidr(NETWORK_CIDR)
@@ -94,7 +94,7 @@ class AwsEnvironmentNetworkConverterTest {
     @Test
     void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDtoWhenOptionalFieldsAreNotPresent() {
         Environment environment = createEnvironment();
-        NetworkDto networkDto = NetworkDto.Builder.aNetworkDto()
+        NetworkDto networkDto = NetworkDto.builder()
                 .withNetworkCidr(NETWORK_CIDR)
                 .withSubnetMetas(createSubnetMetas())
                 .build();

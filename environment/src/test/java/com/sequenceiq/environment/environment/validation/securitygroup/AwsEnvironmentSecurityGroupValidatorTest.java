@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,12 +18,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
-import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
+import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -46,20 +47,19 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
 
     @Test
     public void testValidationWhenGroupsInTheSameVpcReturnValid() {
-        String region = "eu-west-1";
+        Region region = getRegion();
         String sec1 = "sec-1";
         String sec2 = "sec-2";
         String vpcId = "vpc-123";
 
         when(platformParameterService.getSecurityGroups(any(PlatformResourceRequest.class)))
-                .thenReturn(cloudSecurityGroups(region, vpcId, sec1, sec2));
+                .thenReturn(cloudSecurityGroups(region.getName(), vpcId, sec1, sec2));
 
-        EnvironmentCreationDto environmentDto = EnvironmentCreationDto.Builder
-                .anEnvironmentCreationDto()
-                .withRegions(Sets.newHashSet(region))
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withRegions(Set.of(region))
                 .withSecurityAccess(getSecurityAccessDto(sec1, sec2))
                 .withNetwork(getNetworkDto(vpcId))
-                .withCredential(getEnvironmentRequest())
+                .withCredential(getCredential())
                 .build();
 
         ValidationResult.ValidationResultBuilder builder = ValidationResult.builder();
@@ -69,20 +69,19 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
 
     @Test
     public void testValidationWhenOnlyOneGroupDefinedReturnInValid() {
-        String region = "eu-west-1";
+        Region region = getRegion();
         String sec1 = null;
         String sec2 = "sec-2";
         String vpcId = "vpc-123";
 
         when(platformParameterService.getSecurityGroups(any(PlatformResourceRequest.class)))
-                .thenReturn(cloudSecurityGroups(region, vpcId, sec1, sec2));
+                .thenReturn(cloudSecurityGroups(region.getName(), vpcId, sec1, sec2));
 
-        EnvironmentCreationDto environmentDto = EnvironmentCreationDto.Builder
-                .anEnvironmentCreationDto()
-                .withRegions(Sets.newHashSet(region))
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withRegions(Set.of(region))
                 .withSecurityAccess(getSecurityAccessDto(sec1, sec2))
                 .withNetwork(getNetworkDto(vpcId))
-                .withCredential(getEnvironmentRequest())
+                .withCredential(getCredential())
                 .build();
 
         ValidationResult.ValidationResultBuilder builder = ValidationResult.builder();
@@ -92,44 +91,41 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
 
     @Test
     public void testValidationWhenGroupsInDifferentVpcReturnInValid() {
-        String region = "eu-west-1";
+        Region region = getRegion();
         String sec1 = "sec-1";
         String sec2 = "sec-2";
         String vpcId = "vpc-123";
         String requestVpcId = "vpc-124";
-
         when(platformParameterService.getSecurityGroups(any(PlatformResourceRequest.class)))
-                .thenReturn(cloudSecurityGroups(region, vpcId, sec1, sec2));
-
-        EnvironmentCreationDto environmentDto = EnvironmentCreationDto.Builder
-                .anEnvironmentCreationDto()
-                .withRegions(Sets.newHashSet(region))
+                .thenReturn(cloudSecurityGroups(region.getName(), vpcId, sec1, sec2));
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withRegions(Set.of(region))
                 .withSecurityAccess(getSecurityAccessDto(sec1, sec2))
                 .withNetwork(getNetworkDto(requestVpcId))
-                .withCredential(getEnvironmentRequest())
+                .withCredential(getCredential())
                 .build();
-
         ValidationResult.ValidationResultBuilder builder = ValidationResult.builder();
+
         underTest.validate(environmentDto, builder);
+
         requestIsInValid(builder);
     }
 
     @Test
     public void testValidationWhenGroupsDefinedButUserWantNewVpcReturnInValid() {
-        String region = "eu-west-1";
+        Region region = getRegion();
         String sec1 = "sec-1";
         String sec2 = "sec-2";
         String vpcId = "vpc-123";
 
         when(platformParameterService.getSecurityGroups(any(PlatformResourceRequest.class)))
-                .thenReturn(cloudSecurityGroups(region, vpcId, sec1, sec2));
+                .thenReturn(cloudSecurityGroups(region.getName(), vpcId, sec1, sec2));
 
-        EnvironmentCreationDto environmentDto = EnvironmentCreationDto.Builder
-                .anEnvironmentCreationDto()
-                .withRegions(Sets.newHashSet(region))
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withRegions(Set.of(region))
                 .withSecurityAccess(getSecurityAccessDto(sec1, sec2))
                 .withNetwork(getNewNetworkDto())
-                .withCredential(getEnvironmentRequest())
+                .withCredential(getCredential())
                 .build();
 
         ValidationResult.ValidationResultBuilder builder = ValidationResult.builder();
@@ -139,14 +135,11 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
 
     @Test
     public void testValidationWhenNewGroupsRequestedAndUserWantNewVpcReturnValid() {
-        String region = "eu-west-1";
-
-        EnvironmentCreationDto environmentDto = EnvironmentCreationDto.Builder
-                .anEnvironmentCreationDto()
-                .withRegions(Sets.newHashSet(region))
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withRegions(Set.of(getRegion()))
                 .withSecurityAccess(getNewSecurityAccessDto())
                 .withNetwork(getNewNetworkDto())
-                .withCredential(getEnvironmentRequest())
+                .withCredential(getCredential())
                 .build();
 
         ValidationResult.ValidationResultBuilder builder = ValidationResult.builder();
@@ -158,15 +151,22 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
         assertFalse(builder.build().hasError());
     }
 
+    private Region getRegion() {
+        String regionName = "eu-west-1";
+        Region region = new Region();
+        region.setName(regionName);
+        return region;
+    }
+
     private void requestIsInValid(ValidationResult.ValidationResultBuilder builder) {
         assertTrue(builder.build().hasError());
     }
 
     private SecurityAccessDto getSecurityAccessDto(String sec1, String sec2) {
         return SecurityAccessDto.builder()
-                    .withDefaultSecurityGroupId(sec1)
-                    .withSecurityGroupIdForKnox(sec2)
-                    .build();
+                .withDefaultSecurityGroupId(sec1)
+                .withSecurityGroupIdForKnox(sec2)
+                .build();
     }
 
     private SecurityAccessDto getNewSecurityAccessDto() {
@@ -179,21 +179,21 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
         AwsParams awsParams = new AwsParams();
         awsParams.setVpcId(vpcId);
 
-        return NetworkDto.Builder.aNetworkDto()
+        return NetworkDto.builder()
                 .withAws(awsParams)
                 .build();
     }
 
     private NetworkDto getNewNetworkDto() {
-        return NetworkDto.Builder.aNetworkDto()
+        return NetworkDto.builder()
                 .withNetworkCidr("0.0.0.0/0")
                 .build();
     }
 
-    private EnvironmentRequest getEnvironmentRequest() {
-        EnvironmentRequest environmentRequest = new EnvironmentRequest();
-        environmentRequest.setCredentialName("apple");
-        return environmentRequest;
+    private Credential getCredential() {
+        Credential credential = new Credential();
+        credential.setName("apple");
+        return credential;
     }
 
     public CloudSecurityGroups cloudSecurityGroups(String region, String vpcId, String... securityGroupIds) {

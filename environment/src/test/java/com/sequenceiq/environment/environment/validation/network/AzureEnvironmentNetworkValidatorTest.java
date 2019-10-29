@@ -35,8 +35,7 @@ class AzureEnvironmentNetworkValidatorTest {
     @Test
     void testValidateWhenTheNetworkDoesNotContainAzureNetworkParams() {
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-        NetworkDto networkDto = NetworkDto.Builder
-                .aNetworkDto()
+        NetworkDto networkDto = NetworkDto.builder()
                 .withId(1L)
                 .withName("networkName")
                 .withResourceCrn("aResourceCRN")
@@ -60,8 +59,7 @@ class AzureEnvironmentNetworkValidatorTest {
                 .withNetworkId("aNetworkId")
                 .build();
 
-        NetworkDto networkDto = NetworkDto.Builder
-                .aNetworkDto()
+        NetworkDto networkDto = NetworkDto.builder()
                 .withId(1L)
                 .withName("networkName")
                 .withResourceCrn("aResourceCRN")
@@ -85,8 +83,7 @@ class AzureEnvironmentNetworkValidatorTest {
                 .withResourceGroupName("aResourceGroupId")
                 .build();
 
-        NetworkDto networkDto = NetworkDto.Builder
-                .aNetworkDto()
+        NetworkDto networkDto = NetworkDto.builder()
                 .withId(1L)
                 .withName("networkName")
                 .withResourceCrn("aResourceCRN")
@@ -111,8 +108,7 @@ class AzureEnvironmentNetworkValidatorTest {
                 .withResourceGroupName("aResourceGroupId")
                 .build();
 
-        NetworkDto networkDto = NetworkDto.Builder
-                .aNetworkDto()
+        NetworkDto networkDto = NetworkDto.builder()
                 .withId(1L)
                 .withName("networkName")
                 .withResourceCrn("aResourceCRN")

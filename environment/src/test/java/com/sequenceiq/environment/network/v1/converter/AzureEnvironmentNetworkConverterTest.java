@@ -73,7 +73,7 @@ class AzureEnvironmentNetworkConverterTest {
     @Test
     void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDto() {
         Environment environment = createEnvironment();
-        NetworkDto networkDto = NetworkDto.Builder.aNetworkDto()
+        NetworkDto networkDto = NetworkDto.builder()
                 .withAzure(AzureParams.AzureParamsBuilder.anAzureParams()
                         .withNetworkId(NETWORK_ID)
                         .withResourceGroupName(RESOURCE_GROUP_NAME)
@@ -101,7 +101,7 @@ class AzureEnvironmentNetworkConverterTest {
     @Test
     void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDtoWhenOptionalFieldsAreNotPresent() {
         Environment environment = createEnvironment();
-        NetworkDto networkDto = NetworkDto.Builder.aNetworkDto()
+        NetworkDto networkDto = NetworkDto.builder()
                 .withNetworkCidr(NETWORK_CIDR)
                 .withSubnetMetas(createSubnetMetas())
                 .build();

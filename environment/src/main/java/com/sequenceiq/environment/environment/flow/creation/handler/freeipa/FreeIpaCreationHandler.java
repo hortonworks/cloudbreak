@@ -13,9 +13,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -24,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.common.exception.ClientErrorExceptionHandler;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -82,8 +81,9 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final PollingService<FreeIpaPollerObject> freeIpaPollingService;
 
-    @Inject
-    private FreeIpaServerRequestProvider freeIpaServerRequestProvider;
+    private final FreeIpaServerRequestProvider freeIpaServerRequestProvider;
+
+    private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     public FreeIpaCreationHandler(
             EventSender eventSender,
@@ -92,7 +92,9 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             DnsV1Endpoint dnsV1Endpoint,
             SupportedPlatforms supportedPlatforms,
             Map<CloudPlatform, FreeIpaNetworkProvider> freeIpaNetworkProviderMapByCloudPlatform,
-            PollingService<FreeIpaPollerObject> freeIpaPollingService) {
+            PollingService<FreeIpaPollerObject> freeIpaPollingService,
+            FreeIpaServerRequestProvider freeIpaServerRequestProvider,
+            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
         super(eventSender);
         this.environmentService = environmentService;
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
@@ -100,6 +102,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         this.supportedPlatforms = supportedPlatforms;
         this.freeIpaNetworkProviderMapByCloudPlatform = freeIpaNetworkProviderMapByCloudPlatform;
         this.freeIpaPollingService = freeIpaPollingService;
+        this.freeIpaServerRequestProvider = freeIpaServerRequestProvider;
+        this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
     }
 
     @Override
@@ -133,12 +137,12 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             CreateFreeIpaRequest createFreeIpaRequest = createFreeIpaRequest(environmentDto);
             freeIpaV1Endpoint.create(createFreeIpaRequest);
             awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
-            AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(createFreeIpaRequest, environmentDto);
+            AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(environmentDto);
             if (shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
                 dnsV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
             }
-        } catch (ClientErrorException e) {
-            String errorMessage = ClientErrorExceptionHandler.getErrorMessage(e);
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.info("Can not start FreeIPA provisioning: {}", errorMessage, e);
             throw new CloudbreakException("Can not start FreeIPA provisioning, client error happened on FreeIPA side: " + errorMessage, e);
         } catch (Exception e) {
@@ -151,7 +155,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         return StringUtils.isNotBlank(addDnsZoneNetwork.getNetworkId()) && !addDnsZoneNetwork.getSubnetIds().isEmpty();
     }
 
-    private AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest(CreateFreeIpaRequest createFreeIpaRequest, EnvironmentDto environmentDto) {
+    private AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest(EnvironmentDto environmentDto) {
         AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = new AddDnsZoneForSubnetIdsRequest();
         addDnsZoneForSubnetIdsRequest.setEnvironmentCrn(environmentDto.getResourceCrn());
         AddDnsZoneNetwork addDnsZoneNetwork = new AddDnsZoneNetwork();
@@ -184,7 +188,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private void setPlacementAndNetwork(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest) {
         PlacementRequest placementRequest = new PlacementRequest();
-        placementRequest.setRegion(environment.getRegionSet().iterator().next().getName());
+        placementRequest.setRegion(environment.getRegions().iterator().next().getName());
         createFreeIpaRequest.setPlacement(placementRequest);
 
         FreeIpaNetworkProvider freeIpaNetworkProvider = freeIpaNetworkProviderMapByCloudPlatform

@@ -204,8 +204,8 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     private EnvironmentNetworkMockParams getMockNetworkParams() {
         EnvironmentNetworkMockParams environmentNetworkMockParams = new EnvironmentNetworkMockParams();
-        environmentNetworkMockParams.setVpcId(getVpcId());
         environmentNetworkMockParams.setInternetGatewayId(getInternetGatewayId());
+        environmentNetworkMockParams.setVpcId(getVpcId());
         return environmentNetworkMockParams;
     }
 

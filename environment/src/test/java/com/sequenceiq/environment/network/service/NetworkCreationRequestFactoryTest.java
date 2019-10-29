@@ -98,13 +98,13 @@ class NetworkCreationRequestFactoryTest {
                 .withName(ENV_NAME)
                 .withCredential(new Credential())
                 .withCloudPlatform(CLOUD_PLATFORM)
-                .withLocationDto(LocationDto.LocationDtoBuilder.aLocationDto().withName(REGION).build())
-                .withNetwork(NetworkDto.Builder.aNetworkDto().withId(NETWORK_ID).withNetworkCidr(NETWORK_CIDR).build());
+                .withLocationDto(LocationDto.builder().withName(REGION).build())
+                .withNetwork(NetworkDto.builder().withId(NETWORK_ID).withNetworkCidr(NETWORK_CIDR).build());
     }
 
     private EnvironmentDto.Builder createEnvironmentDtoWithAureParams() {
         EnvironmentDto.Builder builder = createEnvironmentDtoWithoutAureParams();
-        builder.withNetwork(NetworkDto.Builder.aNetworkDto()
+        builder.withNetwork(NetworkDto.builder()
                 .withId(NETWORK_ID)
                 .withNetworkCidr(NETWORK_CIDR)
                 .withAzure(AzureParams.AzureParamsBuilder.anAzureParams()

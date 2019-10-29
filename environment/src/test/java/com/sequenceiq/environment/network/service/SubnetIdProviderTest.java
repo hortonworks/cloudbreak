@@ -22,7 +22,7 @@ class SubnetIdProviderTest {
     @Test
     void testProvideShouldReturnARandomIDWhenTheNetworkIsExisting() {
         Map<String, CloudSubnet> subnetMetas = createSubnetMetas();
-        NetworkDto networkDto = NetworkDto.Builder.aNetworkDto()
+        NetworkDto networkDto = NetworkDto.builder()
                 .withRegistrationType(RegistrationType.EXISTING)
                 .withSubnetMetas(subnetMetas)
                 .build();
@@ -35,7 +35,7 @@ class SubnetIdProviderTest {
     @Test
     void testProvideShouldReturnAPublicSubnetIDWhenTheNetworkIsNew() {
         Map<String, CloudSubnet> subnetMetas = createSubnetMetas();
-        NetworkDto networkDto = NetworkDto.Builder.aNetworkDto()
+        NetworkDto networkDto = NetworkDto.builder()
                 .withRegistrationType(RegistrationType.CREATE_NEW)
                 .withSubnetMetas(subnetMetas)
                 .build();

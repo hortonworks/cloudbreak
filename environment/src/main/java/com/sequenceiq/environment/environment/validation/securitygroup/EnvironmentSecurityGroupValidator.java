@@ -3,12 +3,12 @@ package com.sequenceiq.environment.environment.validation.securitygroup;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.CloudPlatform;
-import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 
 public interface EnvironmentSecurityGroupValidator {
 
-    void validate(EnvironmentCreationDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder);
+    void validate(EnvironmentDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder);
 
     CloudPlatform getCloudPlatform();
 

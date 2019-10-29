@@ -51,6 +51,10 @@ public class NetworkDto {
         this.registrationType = builder.registrationType;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public Long getId() {
         return id;
     }
@@ -137,10 +141,6 @@ public class NetworkDto {
         private RegistrationType registrationType;
 
         private Builder() {
-        }
-
-        public static Builder aNetworkDto() {
-            return new Builder();
         }
 
         public Builder withId(Long id) {

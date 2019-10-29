@@ -2,23 +2,23 @@ package com.sequenceiq.cloudbreak.common.exception;
 
 import java.io.IOException;
 
-import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
-public class ClientErrorExceptionHandler {
+@Component
+public class WebApplicationExceptionMessageExtractor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientErrorExceptionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebApplicationExceptionMessageExtractor.class);
 
-    private ClientErrorExceptionHandler() { }
-
-    public static String getErrorMessage(ClientErrorException cee) {
-        try (Response response = cee.getResponse()) {
+    public String getErrorMessage(WebApplicationException exception) {
+        try (Response response = exception.getResponse()) {
             String errorResponse = response.readEntity(String.class);
             LOGGER.info("Client error response is " + errorResponse);
             try {

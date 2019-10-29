@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.flow.creation.handler.network;
+package com.sequenceiq.environment.environment.flow.creation.handler;
 
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_FREEIPA_CREATION_EVENT;
