@@ -485,6 +485,11 @@ public class FreeIpaClient {
         try {
             RPCResponse<T> response = (RPCResponse<T>) jsonRpcHttpClient.invoke(method, List.of(flags, parameterMap), type);
             LOGGER.debug("Response object: {}", response);
+            if (response == null) {
+                // TODO CDPCP-1028 investigate why invoke returns null instead of throwing an exception
+                // when the cluster-proxy request times out.
+                throw new NullPointerException("JSON-RPC response is null");
+            }
             return response;
         } catch (Throwable throwable) {
             String message = String.format("Invoke FreeIpa failed: %s", throwable.getLocalizedMessage());
