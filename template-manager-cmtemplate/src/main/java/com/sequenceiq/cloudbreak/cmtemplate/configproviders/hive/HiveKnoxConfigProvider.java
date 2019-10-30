@@ -23,9 +23,9 @@ public class HiveKnoxConfigProvider implements CmTemplateComponentConfigProvider
         String realm = kerberosConfigOpt.getRealm();
         String keytab = ConfigUtils.getSafetyValveProperty("hive.server2.authentication.spnego.keytab", "hive.keytab");
         String principal = ConfigUtils.getSafetyValveProperty("hive.server2.authentication.spnego.principal", "HTTP/_HOST@" + realm);
+        String filePerEvent = ConfigUtils.getSafetyValveProperty("hive.hook.proto.file.per.event", "true");
         return List.of(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE,
-                principal
-                        + keytab));
+                principal + keytab + filePerEvent));
     }
 
     @Override

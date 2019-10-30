@@ -116,13 +116,7 @@
           {
             "refName": "tez-GATEWAY-BASE",
             "roleType": "GATEWAY",
-            "base": true,
-            "configs": [
-              {
-                "name": "tez-conf/tez-site.xml_client_config_safety_valve",
-                "value": "<property><name>tez.am.history.logging.enabled</name><value>false</value></property>"
-              }
-            ]
+            "base": true
           }
         ]
       },
@@ -252,6 +246,32 @@
         ]
       },
       {
+        "refName": "das",
+        "serviceType": "DAS",
+        "roleConfigGroups": [
+          {
+            "refName": "das-DAS_WEBAPP",
+            "roleType": "DAS_WEBAPP",
+            "base": true,
+            "configs": [
+              {
+                "name": "data_analytics_studio_user_authentication",
+                "value": "KNOX_PROXY"
+              },
+              {
+                "name": "data_analytics_studio_admin_users",
+                "value": "*"
+              }
+            ]
+          },
+          {
+            "refName": "das-DAS_EVENT_PROCESSOR",
+            "roleType": "DAS_EVENT_PROCESSOR",
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "oozie",
         "serviceType": "OOZIE",
         "roleConfigGroups": [
@@ -285,7 +305,9 @@
           "oozie-OOZIE_SERVER-BASE",
           "yarn-JOBHISTORY-BASE",
           "yarn-RESOURCEMANAGER-BASE",
-          "zookeeper-SERVER-BASE"
+          "zookeeper-SERVER-BASE",
+          "das-DAS_WEBAPP",
+          "das-DAS_EVENT_PROCESSOR"
         ]
       },
       {
