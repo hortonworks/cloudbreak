@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.Msg;
@@ -99,7 +100,7 @@ public class StackRepairService {
                     reactorFlowManager.triggerStackRepairFlow(stackId, unhealthyInstances);
                     flowMessageService.fireEventAndLog(stackId, Msg.STACK_REPAIR_TRIGGERED, Status.UPDATE_IN_PROGRESS.name());
                     submitted = true;
-                } catch (FlowsAlreadyRunningException ignored) {
+                } catch (FlowsAlreadyRunningException | FlowNotAcceptedException ignored) {
                     trials++;
                     if (trials == RETRIES) {
                         LOGGER.info("Could not submit because other flows are running for stack " + stackId);
