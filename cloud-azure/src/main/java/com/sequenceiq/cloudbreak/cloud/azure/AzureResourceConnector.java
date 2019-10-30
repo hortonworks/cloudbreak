@@ -419,6 +419,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
     private List<String> getResourcesByResourceType(Map<String, Map<String, Object>> resourcesToRemove, String resourceType) {
         return resourcesToRemove.entrySet().stream()
+                .filter(instanceResources -> instanceResources.getValue().get(resourceType) != null)
                 .flatMap(instanceResources -> ((Collection<String>) instanceResources.getValue().get(resourceType)).stream())
                 .collect(Collectors.toList());
     }
