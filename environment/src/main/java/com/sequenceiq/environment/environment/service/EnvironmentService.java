@@ -250,6 +250,14 @@ public class EnvironmentService implements ResourceIdProvider {
         return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
     }
 
+    Optional<Environment> findByNameAndAccountIdAndArchivedIsFalse(String name, String accountId) {
+        return environmentRepository.findByNameAndAccountIdAndArchivedIsFalse(name, accountId);
+    }
+
+    Optional<Environment> findByResourceCrnAndAccountIdAndArchivedIsFalse(String resourceCrn, String accountId) {
+        return environmentRepository.findByResourceCrnAndAccountIdAndArchivedIsFalse(resourceCrn, accountId);
+    }
+
     void setSecurityAccess(Environment environment, SecurityAccessDto securityAccess) {
         if (securityAccess != null) {
             environment.setCidr(securityAccess.getCidr());

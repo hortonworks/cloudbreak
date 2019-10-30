@@ -47,8 +47,6 @@ public class EnvironmentModificationService {
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
-    private final EnvironmentRepository environmentRepository;
-
     private final EnvironmentService environmentService;
 
     private final CredentialService credentialService;
@@ -66,7 +64,6 @@ public class EnvironmentModificationService {
             AuthenticationDtoConverter authenticationDtoConverter, ParametersService parametersService,
             EnvironmentFlowValidatorService environmentFlowValidatorService) {
         this.environmentDtoConverter = environmentDtoConverter;
-        this.environmentRepository = environmentRepository;
         this.environmentService = environmentService;
         this.credentialService = credentialService;
         this.networkService = networkService;
@@ -76,28 +73,28 @@ public class EnvironmentModificationService {
     }
 
     public EnvironmentDto editByName(String environmentName, EnvironmentEditDto editDto) {
-        Environment env = environmentRepository
+        Environment env = environmentService
                 .findByNameAndAccountIdAndArchivedIsFalse(environmentName, editDto.getAccountId())
                 .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
         return edit(editDto, env);
     }
 
     public EnvironmentDto editByCrn(String crn, EnvironmentEditDto editDto) {
-        Environment env = environmentRepository
+        Environment env = environmentService
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, editDto.getAccountId())
                 .orElseThrow(() -> new NotFoundException(String.format("No environment found with crn '%s'", crn)));
         return edit(editDto, env);
     }
 
     public EnvironmentDto changeCredentialByEnvironmentName(String accountId, String environmentName, EnvironmentChangeCredentialDto dto) {
-        Environment environment = environmentRepository
+        Environment environment = environmentService
                 .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId)
                 .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
         return changeCredential(accountId, environmentName, dto, environment);
     }
 
     public EnvironmentDto changeCredentialByEnvironmentCrn(String accountId, String crn, EnvironmentChangeCredentialDto dto) {
-        Environment environment = environmentRepository
+        Environment environment = environmentService
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId)
                 .orElseThrow(() -> new NotFoundException(String.format("No environment found with CRN '%s'", crn)));
         return changeCredential(accountId, crn, dto, environment);
@@ -113,7 +110,7 @@ public class EnvironmentModificationService {
         editSecurityAccessIfChanged(editDto, env);
         editIdBrokerMappingSource(editDto, env);
         editEnvironmentParameters(editDto, env);
-        Environment saved = environmentRepository.save(env);
+        Environment saved = environmentService.save(env);
         return environmentDtoConverter.environmentToDto(saved);
     }
 
@@ -124,7 +121,7 @@ public class EnvironmentModificationService {
         Credential credential = credentialService.getByNameForAccountId(dto.getCredentialName(), accountId);
         environment.setCredential(credential);
         LOGGER.debug("About to change credential on environment \"{}\"", environmentName);
-        Environment saved = environmentRepository.save(environment);
+        Environment saved = environmentService.save(environment);
         return environmentDtoConverter.environmentToDto(saved);
     }
 

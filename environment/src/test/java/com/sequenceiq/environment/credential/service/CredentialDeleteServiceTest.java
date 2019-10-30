@@ -28,7 +28,6 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.environment.credential.domain.Credential;
-import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.service.EnvironmentViewService;
 import com.sequenceiq.notification.Notification;
@@ -41,7 +40,7 @@ class CredentialDeleteServiceTest {
     private CredentialDeleteService underTest;
 
     @Mock
-    private CredentialRepository repository;
+    private CredentialService credentialService;
 
     @Mock
     private NotificationSender notificationSender;
@@ -55,7 +54,7 @@ class CredentialDeleteServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        underTest = new CredentialDeleteService(repository, notificationSender, messagesService, environmentViewService, Set.of("AWS", "AZURE", "YARN"));
+        underTest = new CredentialDeleteService(credentialService, notificationSender, messagesService, environmentViewService, Set.of("AWS", "AZURE", "YARN"));
     }
 
     @Test
@@ -65,10 +64,10 @@ class CredentialDeleteServiceTest {
         Credential firstCred = createCredentialWithName(firstCredentialName);
         Credential secondCred = createCredentialWithName(secondCredentialName);
         Set<String> names = Set.of(firstCredentialName, secondCredentialName);
-        when(repository.findByNameAndAccountId(eq(firstCredentialName), eq(ACCOUNT_ID), any(Set.class))).thenReturn(Optional.of(firstCred));
-        when(repository.findByNameAndAccountId(eq(secondCredentialName), eq(ACCOUNT_ID), any(Set.class))).thenReturn(Optional.of(secondCred));
-        when(repository.save(firstCred)).thenReturn(firstCred);
-        when(repository.save(secondCred)).thenReturn(secondCred);
+        when(credentialService.findByNameAndAccountId(eq(firstCredentialName), eq(ACCOUNT_ID), any(Set.class))).thenReturn(Optional.of(firstCred));
+        when(credentialService.findByNameAndAccountId(eq(secondCredentialName), eq(ACCOUNT_ID), any(Set.class))).thenReturn(Optional.of(secondCred));
+        when(credentialService.save(firstCred)).thenReturn(firstCred);
+        when(credentialService.save(secondCred)).thenReturn(secondCred);
 
         Set<Credential> result = underTest.deleteMultiple(names, ACCOUNT_ID);
 
@@ -78,21 +77,21 @@ class CredentialDeleteServiceTest {
         assertTrue(result.stream().anyMatch(credential -> credential.getName().startsWith(secondCredentialName)));
         assertTrue(result.stream().allMatch(Credential::isArchived));
 
-        verify(repository, times(2)).findByNameAndAccountId(anyString(), anyString(), anyCollection());
+        verify(credentialService, times(2)).findByNameAndAccountId(anyString(), anyString(), anyCollection());
         verify(environmentViewService, times(2)).findAllByCredentialId(any());
-        verify(repository, times(2)).save(any());
-        verify(repository, times(1)).save(firstCred);
-        verify(repository, times(1)).save(secondCred);
+        verify(credentialService, times(2)).save(any());
+        verify(credentialService, times(1)).save(firstCred);
+        verify(credentialService, times(1)).save(secondCred);
     }
 
     @Test
     void testMultipleIfOneOfTheCredentialsIsNotExistsThenNotFoundExceptionComes() {
-        when(repository.findByNameAndAccountId(anyString(), anyString(), any(Set.class))).thenReturn(Optional.empty());
+        when(credentialService.findByNameAndAccountId(anyString(), anyString(), any(Set.class))).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> underTest.deleteMultiple(Set.of("someCredNameWhichDoesNotExists"), ACCOUNT_ID));
 
-        verify(repository, times(1)).findByNameAndAccountId(anyString(), anyString(), anyCollection());
+        verify(credentialService, times(1)).findByNameAndAccountId(anyString(), anyString(), anyCollection());
         verify(environmentViewService, times(0)).findAllByCredentialId(anyLong());
-        verify(repository, times(0)).save(any());
+        verify(credentialService, times(0)).save(any());
     }
 
     @Test
@@ -100,22 +99,22 @@ class CredentialDeleteServiceTest {
         String name = "something";
         Credential cred = createCredentialWithName(name);
         cred.setId(1L);
-        when(repository.findByNameAndAccountId(eq(name), eq(ACCOUNT_ID), any(Set.class))).thenReturn(Optional.of(cred));
+        when(credentialService.findByNameAndAccountId(eq(name), eq(ACCOUNT_ID), any(Set.class))).thenReturn(Optional.of(cred));
         when(environmentViewService.findAllByCredentialId(cred.getId())).thenReturn(Set.of(new EnvironmentView()));
 
         assertThrows(BadRequestException.class, () -> underTest.deleteMultiple(Set.of(name), ACCOUNT_ID));
 
-        verify(repository, times(1)).findByNameAndAccountId(anyString(), anyString(), anyCollection());
+        verify(credentialService, times(1)).findByNameAndAccountId(anyString(), anyString(), anyCollection());
         verify(environmentViewService, times(1)).findAllByCredentialId(anyLong());
         verify(environmentViewService, times(1)).findAllByCredentialId(cred.getId());
-        verify(repository, times(0)).save(any());
+        verify(credentialService, times(0)).save(any());
     }
 
     @Test
     void testWhenCredentialDeleteIsSuccessfulThenNotificationShouldBeSent() {
         Credential cred = createCredentialWithName("first");
-        when(repository.findByNameAndAccountId(eq(cred.getName()), eq(ACCOUNT_ID), any(Set.class))).thenReturn(Optional.of(cred));
-        when(repository.save(cred)).thenReturn(cred);
+        when(credentialService.findByNameAndAccountId(eq(cred.getName()), eq(ACCOUNT_ID), any(Set.class))).thenReturn(Optional.of(cred));
+        when(credentialService.save(cred)).thenReturn(cred);
 
         underTest.deleteMultiple(Set.of(cred.getName()), ACCOUNT_ID);
 

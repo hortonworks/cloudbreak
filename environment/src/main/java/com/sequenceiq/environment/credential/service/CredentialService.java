@@ -4,6 +4,7 @@ package com.sequenceiq.environment.credential.service;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -192,6 +193,18 @@ public class CredentialService extends AbstractCredentialService {
         Credential updated = repository.save(credentialAdapter.verify(original, accountId).getCredential());
         secretService.delete(attributesSecret);
         return updated;
+    }
+
+    Optional<Credential> findByNameAndAccountId(String name, String accountId, Collection<String> cloudPlatforms) {
+        return repository.findByNameAndAccountId(name, accountId, cloudPlatforms);
+    }
+
+    Optional<Credential> findByCrnAndAccountId(String crn, String accountId, Collection<String> cloudPlatforms) {
+        return repository.findByCrnAndAccountId(crn, accountId, cloudPlatforms);
+    }
+
+    Credential save(Credential credential) {
+        return repository.save(credential);
     }
 
     private void validateDeploymentAddress(Credential credential) {
