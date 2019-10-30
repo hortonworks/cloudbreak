@@ -12,7 +12,7 @@ public class MinaSshdManagementConfig {
     @Value("${altus.minasshdmgmt.host:thunderhead-clusterconnectivitymanagement.thunderhead-clusterconnectivitymanagement.svc.cluster.local}")
     private String endpoint;
 
-    @Value("${altus.minasshdmgmt.port:8982}")
+    @Value("${altus.minasshdmgmt.port:80}")
     private int port;
 
     public String getEndpoint() {
