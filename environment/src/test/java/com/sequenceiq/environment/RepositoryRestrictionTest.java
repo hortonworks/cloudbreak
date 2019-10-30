@@ -4,14 +4,12 @@ import static java.util.stream.Collectors.toSet;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.inject.Inject;
-
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
@@ -27,6 +25,7 @@ class RepositoryRestrictionTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    @DisplayName("Testing if environment module's components are using the repositories trough delegated method(s) from the related service")
     void testForSingleRepositoryUsage() {
         Set<Class<? extends Repository>> repos = getRepos();
         Set<Class<?>> compos = getServicesAndComponents();
@@ -36,7 +35,6 @@ class RepositoryRestrictionTest {
             compos.forEach(service -> {
                 Set<? extends Class<?>> injectedFields = ReflectionUtils.getFields(service)
                         .stream()
-                        .filter(this::isFieldInjected)
                         .map(Field::getType)
                         .collect(toSet());
                 if (injectedFields.stream().anyMatch(fieldClass -> fieldClass.equals(repo))) {
@@ -65,10 +63,6 @@ class RepositoryRestrictionTest {
             servicesAndComponents.addAll(reflections.getTypesAnnotatedWith(annotationClass));
         }
         return servicesAndComponents;
-    }
-
-    private boolean isFieldInjected(Field field) {
-        return Arrays.stream(field.getAnnotations()).anyMatch(annotation -> Inject.class.equals(annotation.annotationType()));
     }
 
     private String getExceptionMessage(String repoName, Set<String> affectedClasses) {

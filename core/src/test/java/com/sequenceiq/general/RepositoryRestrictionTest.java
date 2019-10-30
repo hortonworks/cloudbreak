@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -31,8 +32,9 @@ class RepositoryRestrictionTest {
     private static final String DISTROX_BASE_PACKAGE = BASE_PATH + ".distrox";
 
     @ParameterizedTest
-    @MethodSource("testDataProvider")
     @SuppressWarnings("unchecked")
+    @MethodSource("testDataProvider")
+    @DisplayName("Testing if core module's components are using the repositories trough delegated method(s) from the related service")
     void testForSingleRepositoryUsage(String basePath) {
         Set<Class<? extends Repository>> repos = getRepos(basePath);
         Set<Class<?>> compos = getServicesAndComponents(basePath);
