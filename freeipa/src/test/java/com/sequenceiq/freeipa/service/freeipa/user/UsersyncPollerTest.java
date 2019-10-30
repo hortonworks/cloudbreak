@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
@@ -47,6 +48,9 @@ class UsersyncPollerTest {
     @Mock
     UmsEventGenerationIdsProvider umsEventGenerationIdsProvider;
 
+    @Mock
+    EntitlementService entitlementService;
+
     @InjectMocks
     UsersyncPoller underTest;
 
@@ -70,34 +74,59 @@ class UsersyncPollerTest {
 
     @Test
     void testSyncStackWhenStale() throws Exception {
-        UmsEventGenerationIds currentEventGenerationIds = mock(UmsEventGenerationIds.class);
-        when(umsEventGenerationIdsProvider.getEventGenerationIds(any(), any())).thenReturn(currentEventGenerationIds);
-        Stack stack = mock(Stack.class);
-        when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
-        when(stack.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
-        setupUserSyncStatus(stack, mock(UmsEventGenerationIds.class));
-        when(stackService.findAllRunning()).thenReturn(List.of(stack));
+        Stack stack = setupStack();
+        setupEntitlement(true);
+        setupEventGenerationIds(stack, true);
 
         underTest.syncFreeIpaStacks();
 
-        verify(userService).synchronizeUsers(stack.getAccountId(), UsersyncPoller.INTERNAL_ACTOR_CRN,
-                Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
+        verify(userService).synchronizeUsers(ACCOUNT_ID, UsersyncPoller.INTERNAL_ACTOR_CRN,
+                Set.of(ENVIRONMENT_CRN), Set.of(), Set.of());
     }
 
     @Test
     void testDontSyncStackWhenNotStale() throws Exception {
-        UmsEventGenerationIds currentEventGenerationIds = mock(UmsEventGenerationIds.class);
-        when(umsEventGenerationIdsProvider.getEventGenerationIds(any(), any())).thenReturn(currentEventGenerationIds);
-        Stack stack = mock(Stack.class);
-        when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
-        when(stack.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
-        setupUserSyncStatus(stack, currentEventGenerationIds);
-        when(stackService.findAllRunning()).thenReturn(List.of(stack));
+        Stack stack = setupStack();
+        setupEntitlement(true);
+        setupEventGenerationIds(stack, false);
 
         underTest.syncFreeIpaStacks();
 
         verify(userService, times(0))
                 .synchronizeUsers(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void testDontSyncStackWhenNotEntitled() throws Exception {
+        setupStack();
+        setupEntitlement(false);
+
+        underTest.syncFreeIpaStacks();
+
+        verify(userService, times(0))
+                .synchronizeUsers(any(), any(), any(), any(), any());
+    }
+
+    private Stack setupStack() {
+        Stack stack = new Stack();
+        stack.setAccountId(ACCOUNT_ID);
+        stack.setEnvironmentCrn(ENVIRONMENT_CRN);
+        when(stackService.findAllRunning()).thenReturn(List.of(stack));
+        return stack;
+    }
+
+    private void setupEntitlement(boolean entitled) {
+        when(entitlementService.automaticUsersyncPollerEnabled(any(), any())).thenReturn(entitled);
+    }
+
+    private void setupEventGenerationIds(Stack stack, boolean stale) throws Exception {
+        UmsEventGenerationIds currentEventGenerationIds = mock(UmsEventGenerationIds.class);
+        when(umsEventGenerationIdsProvider.getEventGenerationIds(any(), any())).thenReturn(currentEventGenerationIds);
+        if (stale) {
+            setupUserSyncStatus(stack, mock(UmsEventGenerationIds.class));
+        } else {
+            setupUserSyncStatus(stack, currentEventGenerationIds);
+        }
     }
 
     private void setupUserSyncStatus(Stack stack, UmsEventGenerationIds umsEventGenerationIds) throws Exception {

@@ -440,15 +440,15 @@ public class UmsClient {
      * Wraps a call to getAccount.
      *
      * @param requestId the request ID for the request
-     * @param userCrn   the user CRN
+     * @param accountId the account ID
      * @return the account
      */
-    public Account getAccount(String requestId, String userCrn) {
+    public Account getAccount(String requestId, String accountId) {
         checkNotNull(requestId);
-        checkNotNull(userCrn);
+        checkNotNull(accountId);
         return newStub(requestId).getAccount(
                 GetAccountRequest.newBuilder()
-                        .setAccountId(Crn.fromString(userCrn).getAccountId())
+                        .setAccountId(accountId)
                         .build()
         ).getAccount();
     }

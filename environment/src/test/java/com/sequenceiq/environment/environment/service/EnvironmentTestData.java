@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -23,9 +24,9 @@ import com.sequenceiq.environment.parameters.dao.domain.S3GuardTableCreation;
 public class EnvironmentTestData {
     public static final String ACCOUNT_ID = "accid";
 
-    public static final String USER = "userid";
+    public static final String USER = UUID.randomUUID().toString();
 
-    public static final String CRN = "crnid";
+    public static final String CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":user:" + USER;
 
     public static final String ENVIRONMENT_NAME = "envname";
 

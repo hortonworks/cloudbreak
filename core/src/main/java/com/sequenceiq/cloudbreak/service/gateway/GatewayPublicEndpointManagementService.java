@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.certificate.service.CertificateCreationService;
@@ -189,7 +190,7 @@ public class GatewayPublicEndpointManagementService {
 
     private String getWorkloadSubdomain(String actorCrn) {
         Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
-        UserManagementProto.Account account = grpcUmsClient.getAccountDetails(actorCrn, actorCrn, requestIdOptional);
+        UserManagementProto.Account account = grpcUmsClient.getAccountDetails(actorCrn, Crn.safeFromString(actorCrn).getAccountId(), requestIdOptional);
         return account.getWorkloadSubdomain();
     }
 }
