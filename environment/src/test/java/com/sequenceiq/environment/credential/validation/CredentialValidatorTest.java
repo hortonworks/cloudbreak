@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.ws.rs.BadRequestException;
 
@@ -27,7 +28,9 @@ import com.sequenceiq.environment.credential.validation.definition.CredentialDef
 @ExtendWith(MockitoExtension.class)
 class CredentialValidatorTest {
 
-    private static final String USER_CRN = "USER_CRN";
+    private static final String ACCOUNT_ID = UUID.randomUUID().toString();
+
+    private static final String USER_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
 
     @Mock
     private CredentialDefinitionService credentialDefinitionService;
@@ -49,13 +52,13 @@ class CredentialValidatorTest {
 
     @Test
     void testValidateCredentialCloudPlatformWhenAzureDisabled() {
-        when(entitlementService.azureEnabled(USER_CRN)).thenReturn(false);
+        when(entitlementService.azureEnabled(USER_CRN, ACCOUNT_ID)).thenReturn(false);
         assertThrows(BadRequestException.class, () -> underTest.validateCredentialCloudPlatform("AZURE", USER_CRN));
     }
 
     @Test
     void testValidateCredentialCloudPlatformWhenAzureSuccess() {
-        when(entitlementService.azureEnabled(USER_CRN)).thenReturn(true);
+        when(entitlementService.azureEnabled(USER_CRN, ACCOUNT_ID)).thenReturn(true);
         underTest.validateCredentialCloudPlatform("AZURE", USER_CRN);
     }
 

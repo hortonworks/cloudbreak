@@ -278,16 +278,16 @@ public class GrpcUmsClient {
      * Retrieves account details from UMS, which includes the CM license.
      *
      * @param actorCrn  the CRN of the actor
-     * @param userCrn   the CRN of the user
+     * @param accountId the account ID
      * @param requestId an optional request Id
      * @return the account associated with this user CRN
      */
     @Cacheable(cacheNames = "umsAccountCache", key = "{ #actorCrn, #userCrn }")
-    public Account getAccountDetails(String actorCrn, String userCrn, Optional<String> requestId) {
+    public Account getAccountDetails(String actorCrn, String accountId, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
-            LOGGER.debug("Getting account information for {} using request ID {}", userCrn, requestId);
-            return client.getAccount(requestId.orElse(UUID.randomUUID().toString()), userCrn);
+            LOGGER.debug("Getting information for account ID {} using request ID {}", accountId, requestId);
+            return client.getAccount(requestId.orElse(UUID.randomUUID().toString()), accountId);
         }
     }
 

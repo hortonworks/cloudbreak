@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,9 +24,11 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 @ExtendWith(MockitoExtension.class)
 class FreeIpaServerRequestProviderTest {
 
-    private static final String ENV_NAME = "userCrn";
+    private static final String ENV_NAME = "envName";
 
-    private static final String USER_CRN = "userCrn";
+    private static final String ACCOUNT_ID = UUID.randomUUID().toString();
+
+    private static final String USER_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private GrpcUmsClient grpcUmsClient;
@@ -43,7 +46,7 @@ class FreeIpaServerRequestProviderTest {
     void testCreateWithLegacyDomain() {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder().build();
         when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
-        when(grpcUmsClient.getAccountDetails(USER_CRN, USER_CRN, Optional.empty())).thenReturn(account);
+        when(grpcUmsClient.getAccountDetails(USER_CRN, ACCOUNT_ID, Optional.empty())).thenReturn(account);
         when(environmentBasedDomainNameProvider.getDomainName(ENV_NAME, "internal")).thenReturn("mydomain");
 
         EnvironmentDto environmentDto = new EnvironmentDto();
@@ -57,7 +60,7 @@ class FreeIpaServerRequestProviderTest {
     void testCreateWithDomainReturnedFromUms() {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder().setWorkloadSubdomain("checkme").build();
         when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
-        when(grpcUmsClient.getAccountDetails(USER_CRN, USER_CRN, Optional.empty())).thenReturn(account);
+        when(grpcUmsClient.getAccountDetails(USER_CRN, ACCOUNT_ID, Optional.empty())).thenReturn(account);
         when(environmentBasedDomainNameProvider.getDomainName(ENV_NAME, "checkme")).thenReturn("checkme.mydomain");
 
         EnvironmentDto environmentDto = new EnvironmentDto();

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 
@@ -28,7 +29,8 @@ class ClouderaManagerLicenseService {
     }
 
     private boolean hasNoLicense(String userCrn) {
-        return StringUtils.isEmpty(umsClient.getAccountDetails(userCrn, userCrn, Optional.empty()).getClouderaManagerLicenseKey());
+        return StringUtils.isEmpty(umsClient.getAccountDetails(userCrn, Crn.safeFromString(userCrn).getAccountId(), Optional.empty())
+                .getClouderaManagerLicenseKey());
     }
 
 }

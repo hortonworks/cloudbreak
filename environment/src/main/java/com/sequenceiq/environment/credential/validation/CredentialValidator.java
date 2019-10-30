@@ -13,6 +13,7 @@ import javax.ws.rs.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -50,7 +51,7 @@ public class CredentialValidator {
         if (!enabledPlatforms.contains(cloudPlatform)) {
             throw new BadRequestException(String.format("There is no such cloud platform as '%s'", cloudPlatform));
         }
-        if (AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(userCrn)) {
+        if (AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(userCrn, Crn.safeFromString(userCrn).getAccountId())) {
             throw new BadRequestException("Provisioning in Microsoft Azure is not enabled for this account.");
         }
     }

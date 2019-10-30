@@ -109,6 +109,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final String CDP_AZURE = "CDP_AZURE";
 
+    private static final String CDP_AUTOMATIC_USERSYNC_POLLER = "CDP_AUTOMATIC_USERSYNC_POLLER";
+
     @Inject
     private JsonUtil jsonUtil;
 
@@ -318,6 +320,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                                 .setWorkloadSubdomain(ACCOUNT_SUBDOMAIN)
                                 .addEntitlements(createEntitlement(NO_TUNNEL_PROVISIONING))
                                 .addEntitlements(createEntitlement(CDP_AZURE))
+                                .addEntitlements(createEntitlement(CDP_AUTOMATIC_USERSYNC_POLLER))
                                 .build())
                         .build());
         responseObserver.onCompleted();
@@ -520,6 +523,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Override
     public void getEventGenerationIds(GetEventGenerationIdsRequest request, StreamObserver<GetEventGenerationIdsResponse> responseObserver) {
+        mockCrnService.ensureInternalActor();
         try {
             responseObserver.onNext(eventGenerationIdsCache.get(request.getAccountId()));
             responseObserver.onCompleted();

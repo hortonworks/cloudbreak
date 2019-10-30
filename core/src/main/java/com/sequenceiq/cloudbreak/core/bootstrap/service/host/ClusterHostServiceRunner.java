@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -414,7 +415,7 @@ public class ClusterHostServiceRunner {
             throws CloudbreakOrchestratorFailedException {
         String userCrn = stackService.get(stackId).getCreator().getUserCrn();
 
-        UserManagementProto.Account account = umsClient.getAccountDetails(userCrn, userCrn, Optional.empty());
+        UserManagementProto.Account account = umsClient.getAccountDetails(userCrn, Crn.safeFromString(userCrn).getAccountId(), Optional.empty());
 
         if (StringUtils.isNotEmpty(account.getClouderaManagerLicenseKey())) {
             LOGGER.debug("Got license key from UMS: {}", account.getClouderaManagerLicenseKey());

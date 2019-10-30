@@ -102,7 +102,7 @@ class EnvironmentCreationServiceTest {
                 .withCloudPlatform("AZURE")
                 .build();
 
-        when(entitlementService.azureEnabled(eq(CRN))).thenReturn(false);
+        when(entitlementService.azureEnabled(eq(CRN), eq(ACCOUNT_ID))).thenReturn(false);
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
@@ -114,7 +114,7 @@ class EnvironmentCreationServiceTest {
         ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
         final EnvironmentCreationDto environmentCreationDto = new EnvironmentCreationDto.Builder()
                 .withName(ENVIRONMENT_NAME)
-                .withCreator(USER)
+                .withCreator(CRN)
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
                 .withParameters(parametersDto)
@@ -128,7 +128,7 @@ class EnvironmentCreationServiceTest {
 
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(EnvironmentTestData.USER)))
+        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(CRN)))
                 .thenReturn(credential);
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
@@ -140,7 +140,7 @@ class EnvironmentCreationServiceTest {
         verify(environmentService, times(2)).save(any());
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any());
-        verify(reactorFlowManager).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
+        verify(reactorFlowManager).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
     }
 
     @Test
@@ -150,7 +150,7 @@ class EnvironmentCreationServiceTest {
                 .withName(ENVIRONMENT_NAME)
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
-                .withCreator(USER)
+                .withCreator(CRN)
                 .withAccountId(ACCOUNT_ID)
                 .withParameters(parametersDto)
                 .build();
@@ -163,7 +163,7 @@ class EnvironmentCreationServiceTest {
 
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(EnvironmentTestData.USER)))
+        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(CRN)))
                 .thenReturn(credential);
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
@@ -184,7 +184,7 @@ class EnvironmentCreationServiceTest {
                 .withName(ENVIRONMENT_NAME)
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
-                .withCreator(USER)
+                .withCreator(CRN)
                 .withAccountId(ACCOUNT_ID)
                 .withParameters(parametersDto)
                 .build();
@@ -197,7 +197,7 @@ class EnvironmentCreationServiceTest {
 
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(EnvironmentTestData.USER)))
+        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(CRN)))
                 .thenReturn(credential);
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());

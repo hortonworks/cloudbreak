@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
@@ -50,6 +51,9 @@ public class UsersyncPoller {
     @Value("${freeipa.syncoperation.poller.enabled:true}")
     private boolean enabled;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Scheduled(fixedDelayString = "${freeipa.syncoperation.poller.fixed-delay-millis:60000}",
             initialDelayString = "${freeipa.syncoperation.poller.initial-delay-millis:300000}")
     public void pollUms() {
@@ -77,19 +81,25 @@ public class UsersyncPoller {
                     .collect(Collectors.groupingBy(Stack::getAccountId))
                     .entrySet().stream()
                     .forEach(stringListEntry -> {
-                        UmsEventGenerationIds currentGeneration =
-                                umsEventGenerationIdsProvider.getEventGenerationIds(stringListEntry.getKey(), requestId);
-                        stringListEntry.getValue().stream()
-                                .forEach(stack -> {
-                                    if (isStale(stack, currentGeneration)) {
-                                        LOGGER.debug("Environment {} in Account {} is stale.", stack.getEnvironmentCrn(), stack.getAccountId());
-                                        SyncOperationStatus status = userService.synchronizeUsers(stack.getAccountId(), INTERNAL_ACTOR_CRN,
-                                                Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
-                                        LOGGER.debug("Sync request resulted in operation {}", status);
-                                    } else {
-                                        LOGGER.debug("Environment {} in Account {} is up-to-date.", stack.getEnvironmentCrn(), stack.getAccountId());
-                                    }
-                                });
+                        String accountId = stringListEntry.getKey();
+                        if (entitlementService.automaticUsersyncPollerEnabled(INTERNAL_ACTOR_CRN, accountId)) {
+                            LOGGER.debug("Usersync polling entitled in account {}", accountId);
+                            UmsEventGenerationIds currentGeneration =
+                                    umsEventGenerationIdsProvider.getEventGenerationIds(accountId, requestId);
+                            stringListEntry.getValue().stream()
+                                    .forEach(stack -> {
+                                        if (isStale(stack, currentGeneration)) {
+                                            LOGGER.debug("Environment {} in Account {} is stale.", stack.getEnvironmentCrn(), stack.getAccountId());
+                                            SyncOperationStatus status = userService.synchronizeUsers(stack.getAccountId(), INTERNAL_ACTOR_CRN,
+                                                    Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
+                                            LOGGER.debug("Sync request resulted in operation {}", status);
+                                        } else {
+                                            LOGGER.debug("Environment {} in Account {} is up-to-date.", stack.getEnvironmentCrn(), stack.getAccountId());
+                                        }
+                                    });
+                        } else {
+                            LOGGER.debug("Usersync polling not entitled in account {}. skipping", accountId);
+                        }
                     });
         } finally {
             threadBasedUserCrnProvider.removeUserCrn();

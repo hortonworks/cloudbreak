@@ -114,13 +114,13 @@ public class EnvironmentCreationService {
     }
 
     private void validateTunnel(String userCrn, Tunnel tunnel) {
-        if (!entitlementService.ccmEnabled(userCrn) && Tunnel.CCM.equals(tunnel)) {
+        if (!entitlementService.ccmEnabled(userCrn, Crn.safeFromString(userCrn).getAccountId()) && Tunnel.CCM.equals(tunnel)) {
             throw new BadRequestException("Reverse SSH tunnel is not enabled for this account.");
         }
     }
 
     private void validateCloudPlatform(String userCrn, String cloudPlatform) {
-        if (AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(userCrn)) {
+        if (AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(userCrn, Crn.safeFromString(userCrn).getAccountId())) {
             throw new BadRequestException("Provisioning in Microsoft Azure is not enabled for this account.");
         }
     }
