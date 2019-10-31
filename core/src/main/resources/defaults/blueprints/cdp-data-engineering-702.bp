@@ -255,10 +255,6 @@
             "base": true,
             "configs": [
               {
-                "name": "data_analytics_studio_user_authentication",
-                "value": "KNOX_PROXY"
-              },
-              {
                 "name": "data_analytics_studio_admin_users",
                 "value": "*"
               }
