@@ -7,6 +7,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_NETWORK_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_RDBMS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_S3GUARD_TABLE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_UMS_RESOURCE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINALIZE_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.HANDLED_FAILED_ENV_DELETE_EVENT;
 
@@ -207,6 +208,23 @@ public class EnvDeleteActions {
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 LOGGER.info("Flow entered into ENV_DELETE_FAILED_STATE");
                 sendEvent(context, HANDLED_FAILED_ENV_DELETE_EVENT.event(), payload);
+            }
+        };
+    }
+
+    @Bean(name = "UMS_RESOURCE_DELETE_STARTED_STATE")
+    public Action<?, ?> umsResourceDeleteAction() {
+        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
+
+            @Override
+            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
+                EnvironmentStatus environmentStatus = EnvironmentStatus.UMS_RESOURCE_DELETE_IN_PROGRESS;
+                ResourceEvent resourceEvent = ResourceEvent.ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED;
+                EnvDeleteState envDeleteState = EnvDeleteState.UMS_RESOURCE_DELETE_STARTED_STATE;
+                String logDeleteState = "assigned UMS resources";
+
+                EnvironmentDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent, envDeleteState, logDeleteState);
+                sendEvent(context, DELETE_UMS_RESOURCE_EVENT.selector(), envDto);
             }
         };
     }
