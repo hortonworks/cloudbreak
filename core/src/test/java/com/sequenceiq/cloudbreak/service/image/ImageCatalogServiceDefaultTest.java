@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -137,7 +138,8 @@ public class ImageCatalogServiceDefaultTest {
         if (StringUtils.isNotEmpty(os)) {
             operatingSystems = Collections.singleton(os);
         }
-        StatedImage statedImage = underTest.getPrewarmImageDefaultPreferred(provider, clusterType, clusterVersion, operatingSystems, imageCatalog, packageVersions);
+        StatedImage statedImage = underTest.getPrewarmImageDefaultPreferred(provider, clusterType, clusterVersion, operatingSystems, imageCatalog,
+                Optional.empty());
         // THEN
         Assert.assertEquals("Wrong default image has been selected", expectedImageId, statedImage.getImage().getUuid());
     }
