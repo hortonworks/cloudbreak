@@ -400,7 +400,8 @@ public class StackCreatorService {
             try {
                 boolean base = blueprintService.isAmbariBlueprint(blueprint) ? shouldUseBaseAmbariImage(clusterRequest) : shouldUseBaseCMImage(clusterRequest);
                 LOGGER.info("The stack with name {} will use base image: {}", stackName, base);
-                return imageService.determineImageFromCatalog(workspace.getId(), stackRequest.getImage(), platformString, blueprint, base, user);
+                return imageService.determineImageFromCatalog(workspace.getId(), stackRequest.getImage(), platformString, blueprint, base, user,
+                        Optional.empty());
             } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                 throw new BadRequestException(e.getMessage(), e);
             }

@@ -126,7 +126,7 @@ public class ImageService {
     //CHECKSTYLE:OFF
     @Measure(ImageService.class)
     public StatedImage determineImageFromCatalog(Long workspaceId, ImageSettingsV4Request imageSettins, String platformString,
-            Blueprint blueprint, boolean useBaseImage, User user) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+            Blueprint blueprint, boolean useBaseImage, User user, Optional<Map<String, String>> packageVersions) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         String clusterType = ImageCatalogService.UNDEFINED;
         String clusterVersion = ImageCatalogService.UNDEFINED;
         if (blueprint != null) {
@@ -154,24 +154,23 @@ public class ImageService {
         if (imageSettins != null && imageSettins.getId() != null) {
             return imageCatalogService.getImageByCatalogName(workspaceId, imageSettins.getId(), imageSettins.getCatalog());
         }
-        ImageCatalog imageCatalog = getImageCatalogFromRequestOrDefault(imageSettins, user);
+        ImageCatalog imageCatalog = getImageCatalogFromRequestOrDefault(workspaceId, imageSettins, user);
         if (useBaseImage) {
             LOGGER.debug("Image id isn't specified for the stack, falling back to a base imageSettins, because repo information is provided");
-            return imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, operatingSystems, imageCatalog);
+            return imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, operatingSystems, imageCatalog, packageVersions);
         }
         LOGGER.debug("Image id isn't specified for the stack, falling back to a prewarmed "
                 + "imageSettins of {}-{} or to a base imageSettins if prewarmed doesn't exist", clusterType, clusterVersion);
-        return imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, operatingSystems, imageCatalog);
+        return imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, operatingSystems, imageCatalog,
+                packageVersions);
     }
     //CHECKSTYLE:ON
 
-    private ImageCatalog getImageCatalogFromRequestOrDefault(ImageSettingsV4Request imageSettings, User user) {
+    private ImageCatalog getImageCatalogFromRequestOrDefault(Long workspaceId, ImageSettingsV4Request imageSettings, User user) {
         if (imageSettings == null || imageSettings.getCatalog() == null) {
             return imageCatalogService.getDefaultImageCatalog(user);
         } else {
-            ImageCatalog imageCatalog = new ImageCatalog();
-            imageCatalog.setImageCatalogUrl(imageSettings.getCatalog());
-            return imageCatalog;
+            return imageCatalogService.get(workspaceId, imageSettings.getCatalog());
         }
     }
 

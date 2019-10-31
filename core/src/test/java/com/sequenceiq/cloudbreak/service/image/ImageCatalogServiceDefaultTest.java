@@ -137,7 +137,7 @@ public class ImageCatalogServiceDefaultTest {
         if (StringUtils.isNotEmpty(os)) {
             operatingSystems = Collections.singleton(os);
         }
-        StatedImage statedImage = underTest.getPrewarmImageDefaultPreferred(provider, clusterType, clusterVersion, operatingSystems, imageCatalog);
+        StatedImage statedImage = underTest.getPrewarmImageDefaultPreferred(provider, clusterType, clusterVersion, operatingSystems, imageCatalog, packageVersions);
         // THEN
         Assert.assertEquals("Wrong default image has been selected", expectedImageId, statedImage.getImage().getUuid());
     }

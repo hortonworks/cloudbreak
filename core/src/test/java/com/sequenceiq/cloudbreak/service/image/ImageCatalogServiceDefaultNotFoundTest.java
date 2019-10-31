@@ -68,7 +68,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         ReflectionTestUtils.setField(underTest, "cbVersion", "5.0.0");
         ReflectionTestUtils.setField(underTest, "defaultCatalogUrl", "");
         // WHEN
-        underTest.getPrewarmImageDefaultPreferred("gcp", "notimportant", "notimportant", null, imageCatalog);
+        underTest.getPrewarmImageDefaultPreferred("gcp", "notimportant", "notimportant", null, imageCatalog, packageVersions);
         // THEN throw CloudbreakImageNotFoundException
     }
 }
