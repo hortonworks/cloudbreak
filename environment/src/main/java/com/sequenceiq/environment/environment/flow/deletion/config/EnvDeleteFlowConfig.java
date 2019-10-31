@@ -10,6 +10,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteStat
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.NETWORK_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.RDBMS_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.S3GUARD_TABLE_DELETE_STARTED_STATE;
+import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.UMS_RESOURCE_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINALIZE_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINISH_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.HANDLED_FAILED_ENV_DELETE_EVENT;
@@ -19,6 +20,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_NETWORK_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_RDBMS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_S3GUARD_TABLE_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_UMS_RESOURCE_DELETE_EVENT;
 
 import java.util.List;
 
@@ -54,7 +56,10 @@ public class EnvDeleteFlowConfig extends AbstractFlowConfiguration<EnvDeleteStat
             .from(S3GUARD_TABLE_DELETE_STARTED_STATE).to(CLUSTER_DEFINITION_DELETE_STARTED_STATE)
             .event(START_CLUSTER_DEFINITION_CLEANUP_EVENT).defaultFailureEvent()
 
-            .from(CLUSTER_DEFINITION_DELETE_STARTED_STATE).to(ENV_DELETE_FINISHED_STATE)
+            .from(CLUSTER_DEFINITION_DELETE_STARTED_STATE).to(UMS_RESOURCE_DELETE_STARTED_STATE)
+            .event(START_UMS_RESOURCE_DELETE_EVENT).defaultFailureEvent()
+
+            .from(UMS_RESOURCE_DELETE_STARTED_STATE).to(ENV_DELETE_FINISHED_STATE)
             .event(FINISH_ENV_DELETE_EVENT).defaultFailureEvent()
 
             .from(ENV_DELETE_FINISHED_STATE).to(FINAL_STATE)
