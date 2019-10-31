@@ -26,6 +26,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentN
 @Component
 public class NetworkV1ToNetworkV4Converter {
 
+    private static final String NO_SUBNET_ID_FOUND_MESSAGE = "No subnet id found for this environment.";
+
     public NetworkV4Request convertToNetworkV4Request(Pair<NetworkV1Request, DetailedEnvironmentResponse> network) {
         EnvironmentNetworkResponse value = network.getValue().getNetwork();
         NetworkV1Request key = network.getKey();
@@ -73,7 +75,10 @@ public class NetworkV1ToNetworkV4Converter {
 
         if (key != null) {
             String subnetId = key.getSubnetId();
-            evaluateIfTrueDoOtherwise(subnetId, StringUtils::isNotEmpty, params::setSubnetId, s -> params.setSubnetId(getFirstSubnetIdFromEnvironment(value)));
+            if (value != null) {
+                evaluateIfTrueDoOtherwise(subnetId, StringUtils::isNotEmpty, params::setSubnetId,
+                        s -> params.setSubnetId(getFirstSubnetIdFromEnvironment(value)));
+            }
             params.setInternetGatewayId(key.getInternetGatewayId());
             params.setVpcId(key.getVpcId());
         }
@@ -105,7 +110,7 @@ public class NetworkV1ToNetworkV4Converter {
     }
 
     private String getFirstSubnetIdFromEnvironment(EnvironmentNetworkResponse enr) {
-        return enr.getSubnetIds().stream().findFirst().orElseThrow(() -> new BadRequestException("No subnet id for this environment"));
+        return enr.getSubnetIds().stream().findFirst().orElseThrow(() -> new BadRequestException(NO_SUBNET_ID_FOUND_MESSAGE));
     }
 
     private AwsNetworkV4Parameters convertToAwsStackRequest(Pair<AwsNetworkV1Parameters, EnvironmentNetworkResponse> source) {
@@ -122,7 +127,7 @@ public class NetworkV1ToNetworkV4Converter {
                 response.setSubnetId(key.getSubnetId());
             } else {
                 response.setSubnetId(value.getSubnetIds().stream().findFirst()
-                        .orElseThrow(() -> new BadRequestException("No subnet id for this environment")));
+                        .orElseThrow(() -> new BadRequestException(NO_SUBNET_ID_FOUND_MESSAGE)));
             }
         }
 

@@ -5,9 +5,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class StackUnderOperationService {
 
-    private static final ThreadLocal<Boolean> ON_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> ON_LOCAL = new InheritableThreadLocal<>();
 
-    private static final ThreadLocal<Long> STACK_ID_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<Long> STACK_ID_LOCAL = new InheritableThreadLocal<>();
 
     public void on() {
         ON_LOCAL.set(Boolean.TRUE);

@@ -16,6 +16,7 @@ public class DistroXOpDescription {
     public static final String CREATE = "create stack";
     public static final String DELETE_BY_NAME = "delete stack by name";
     public static final String DELETE_BY_CRN = "delete stack by crn";
+    public static final String DELETE_MULTIPLE = "delete multiple stacks by their names";
     public static final String SYNC_BY_NAME = "syncs the stack by name";
     public static final String SYNC_BY_CRN = "syncs the stack by crn";
     public static final String RETRY_BY_NAME = "retries the stack by name";
