@@ -122,26 +122,38 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     public void deleteMultiple(DistroXMultiDeleteV1Request multiDeleteRequest, Boolean forced) {
+        validateMultidelete(multiDeleteRequest);
+        if (CollectionUtils.isNotEmpty(multiDeleteRequest.getNames())) {
+            multideleteByNames(multiDeleteRequest, forced);
+        } else {
+            multideleteByCrn(multiDeleteRequest, forced);
+        }
+
+    }
+
+    private void validateMultidelete(DistroXMultiDeleteV1Request multiDeleteRequest) {
         if (CollectionUtils.isNotEmpty(multiDeleteRequest.getNames()) && CollectionUtils.isNotEmpty(multiDeleteRequest.getCrns())) {
             throw new BadRequestException("Both names and crns cannot be provided, only one of them.");
         }
         if (CollectionUtils.isEmpty(multiDeleteRequest.getNames()) && CollectionUtils.isEmpty(multiDeleteRequest.getCrns())) {
             throw new BadRequestException("No names or crns were provided. At least one name or crn should be provided.");
         }
-        if (CollectionUtils.isNotEmpty(multiDeleteRequest.getNames())) {
-            Set<StackAccessDto> stackAccessDtos = multiDeleteRequest.getNames().stream()
-                    .map(name -> StackAccessDto.builder().withName(name).build())
-                    .collect(Collectors.toSet());
-            stackAccessDtos
-                    .forEach(stackAccessDto -> stackOperations.asyncDelete(stackAccessDto, workspaceService.getForCurrentUser().getId(), forced));
-        } else {
-            Set<StackAccessDto> stackAccessDtos = multiDeleteRequest.getCrns().stream()
-                    .map(crn -> StackAccessDto.builder().withCrn(crn).build())
-                    .collect(Collectors.toSet());
-            stackAccessDtos
-                    .forEach(stackAccessDto -> stackOperations.asyncDelete(stackAccessDto, workspaceService.getForCurrentUser().getId(), forced));
-        }
+    }
 
+    private void multideleteByNames(DistroXMultiDeleteV1Request multiDeleteRequest, Boolean forced) {
+        Set<StackAccessDto> stackAccessDtos = multiDeleteRequest.getNames().stream()
+                .map(name -> StackAccessDto.builder().withName(name).build())
+                .collect(Collectors.toSet());
+        stackAccessDtos
+                .forEach(stackAccessDto -> stackOperations.asyncDelete(stackAccessDto, workspaceService.getForCurrentUser().getId(), forced));
+    }
+
+    private void multideleteByCrn(DistroXMultiDeleteV1Request multiDeleteRequest, Boolean forced) {
+        Set<StackAccessDto> stackAccessDtos = multiDeleteRequest.getCrns().stream()
+                .map(crn -> StackAccessDto.builder().withCrn(crn).build())
+                .collect(Collectors.toSet());
+        stackAccessDtos
+                .forEach(stackAccessDto -> stackOperations.asyncDelete(stackAccessDto, workspaceService.getForCurrentUser().getId(), forced));
     }
 
     @Override
