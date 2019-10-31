@@ -22,7 +22,7 @@ public class CloudbreakApiConfig {
     @Value("${cert.validation:true}")
     private boolean certificateValidation;
 
-    @Value("${cert.ignorePreValidation:false}")
+    @Value("${cert.ignorePreValidation:true}")
     private boolean ignorePreValidation;
 
     @Bean

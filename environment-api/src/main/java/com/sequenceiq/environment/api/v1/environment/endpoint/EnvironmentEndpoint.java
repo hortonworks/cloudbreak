@@ -124,6 +124,34 @@ public interface EnvironmentEndpoint {
     DetailedEnvironmentResponse changeCredentialByEnvironmentCrn(@PathParam("crn") String crn, @Valid EnvironmentChangeCredentialRequest request);
 
     @POST
+    @Path("/name/{name}/start")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.START_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "startEnvironmentByNameV1")
+    void postStartByName(@PathParam("name") String name);
+
+    @POST
+    @Path("/crn/{crn}/start")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.START_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "startEnvironmentByCrnV1")
+    void postStartByCrn(@PathParam("crn") String crn);
+
+    @POST
+    @Path("/name/{name}/stop")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.STOP_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "stopEnvironmentByNameV1")
+    void postStopByName(@PathParam("name") String name);
+
+    @POST
+    @Path("/crn/{crn}/stop")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.STOP_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "stopEnvironmentByCrnV1")
+    void postStopByCrn(@PathParam("crn") String crn);
+
+    @POST
     @Path("/crn/{crn}/cli_create")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.CLI_COMMAND, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,

@@ -90,6 +90,19 @@ public enum ResourceEvent {
     ENVIRONMENT_DELETION_FINISHED("environment.deletion.finished"),
     ENVIRONMENT_DELETION_FAILED("environment.deletion.failed"),
 
+    ENVIRONMENT_STOP_DATAHUB_STARTED("environment.stop.datahub.started"),
+    ENVIRONMENT_STOP_DATAHUB_FAILED("environment.stop.datahub.failed"),
+    ENVIRONMENT_STOP_DATAHUB_SUCCESS("environment.stop.datahub.success"),
+    ENVIRONMENT_STOP_DATALAKE_STARTED("environment.stop.datalake.started"),
+    ENVIRONMENT_STOP_DATALAKE_FAILED("environment.stop.datalake.failed"),
+    ENVIRONMENT_STOP_DATALAKE_SUCCESS("environment.stop.datalake.success"),
+    ENVIRONMENT_STOP_FREEIPA_STARTED("environment.stop.freeipa.started"),
+    ENVIRONMENT_STOP_FREEIPA_FAILED("environment.stop.freeipa.failed"),
+    ENVIRONMENT_STOP_FREEIPA_SUCCESS("environment.stop.freeipa.success"),
+
+    ENVIRONMENT_STOPPED("environment.stop.success"),
+    ENVIRONMENT_STOP_FAILED("environment.stop.failed"),
+
     CREDENTIAL_AZURE_INTERACTIVE_CREATED("credential.azure.interactive.created"),
     CREDENTIAL_AZURE_INTERACTIVE_STATUS("credential.azure.interactive.status"),
     CREDENTIAL_AZURE_INTERACTIVE_FAILED("credential.azure.interactive.failed");

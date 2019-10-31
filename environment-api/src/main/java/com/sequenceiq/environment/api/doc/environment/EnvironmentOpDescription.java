@@ -18,6 +18,10 @@ public class EnvironmentOpDescription {
     public static final String EDIT_BY_NAME = "Edit an environment by name. Location, regions and description can be changed.";
     public static final String EDIT_BY_CRN = "Edit an environment by CRN. Location, regions and description can be changed.";
     public static final String DATALAKE_PREREQUISITES = "Returns datalake prerequisites.";
+    public static final String START_BY_NAME = "Start an environment by name. The freeipa, datalake and datahubs will be started in this order";
+    public static final String START_BY_CRN = "Start an environment by CRN. The freeipa, datalake and datahubs will be started in this order";
+    public static final String STOP_BY_NAME = "Stop an environment by name. The datahubs, datalake and freeipa will be stopped in this order";
+    public static final String STOP_BY_CRN = "Stop an environment by CRN. The datahubs, datalake and freeipa will be stopped in this order";
     public static final String CLI_COMMAND = "produce cli command input for environment creation";
 
     private EnvironmentOpDescription() {

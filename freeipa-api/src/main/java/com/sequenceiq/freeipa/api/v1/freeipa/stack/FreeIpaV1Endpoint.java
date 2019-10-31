@@ -74,13 +74,13 @@ public interface FreeIpaV1Endpoint {
     @Path("start")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FreeIpaOperationDescriptions.START, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "startV1")
-    void start(@QueryParam("environment") @NotEmpty String environmentCrn) throws Exception;
+    void start(@QueryParam("environment") @NotEmpty String environmentCrn);
 
     @PUT
     @Path("stop")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FreeIpaOperationDescriptions.STOP, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "stopV1")
-    void stop(@QueryParam("environment") @NotEmpty String environmentCrn) throws Exception;
+    void stop(@QueryParam("environment") @NotEmpty String environmentCrn);
 
     @POST
     @Path("cluster-proxy/register")
