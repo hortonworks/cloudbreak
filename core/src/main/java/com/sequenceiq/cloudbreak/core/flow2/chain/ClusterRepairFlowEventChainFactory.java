@@ -114,11 +114,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             flowTriggers.add(changePrimaryGatewayEvent(event));
         }
         for (Repair repair : repairConfig.getRepairs()) {
-            if (repairConfig.getSinglePrimaryGateway().isPresent()) {
-                flowTriggers.add(stackDownscaleEvent(event, repair.getHostGroupName(), repair.getHostNames()));
-            } else {
-                flowTriggers.add(fullDownscaleEvent(event, repair.getHostGroupName(), repair.getHostNames()));
-            }
+            flowTriggers.add(fullDownscaleEvent(event, repair.getHostGroupName(), repair.getHostNames()));
             if (!event.isRemoveOnly()) {
                 flowTriggers.add(fullUpscaleEvent(event, repair.getHostGroupName(), repair.getHostNames(), false, false));
             }

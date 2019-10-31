@@ -16,6 +16,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
@@ -46,6 +47,9 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     @Mock
     private User user;
 
+    @Mock
+    private ImageCatalog imageCatalog;
+
     @InjectMocks
     private ImageCatalogService underTest;
 
@@ -64,7 +68,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         ReflectionTestUtils.setField(underTest, "cbVersion", "5.0.0");
         ReflectionTestUtils.setField(underTest, "defaultCatalogUrl", "");
         // WHEN
-        underTest.getPrewarmImageDefaultPreferred("gcp", "notimportant", "notimportant", null, user);
+        underTest.getPrewarmImageDefaultPreferred("gcp", "notimportant", "notimportant", null, imageCatalog);
         // THEN throw CloudbreakImageNotFoundException
     }
 }

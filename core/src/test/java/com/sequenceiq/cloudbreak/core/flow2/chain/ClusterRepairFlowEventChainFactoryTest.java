@@ -124,7 +124,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
                 new TriggerEventBuilder(stack).withFailedPrimaryGateway().withFailedCore().build());
 
         List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("STACK_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT", "STACK_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT"),
+        assertEquals(List.of("STACK_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT", "FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT"),
                 triggeredOperations);
     }
 
