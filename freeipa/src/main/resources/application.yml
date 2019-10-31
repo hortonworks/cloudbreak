@@ -61,6 +61,7 @@ freeipa:
     failure-reset-interval: 3
     lockout-duration: 10
   syncoperation:
+    max-subjects-per-request: 10
     cleanup:
       timeout-millis: 1800000
       initial-delay-millis: 60000
