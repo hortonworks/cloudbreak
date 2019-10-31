@@ -4,6 +4,7 @@ import static com.sequenceiq.environment.CloudPlatform.AWS;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -47,10 +49,16 @@ public class NetworkCreationValidator {
             Map<String, Long> zones = subnetMetas.values().stream()
                     .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone, Collectors.counting()));
             if (zones.size() < 2) {
-                message = "Cannot create environment, the subnets in the vpc should be at least in two different availabilityzones";
+                message = "Cannot create environment, the subnets in the vpc should be present at least in two different availability zones";
                 LOGGER.debug(message);
                 resultBuilder.error(message);
             }
+        }
+        if (Objects.nonNull(environment.getNetwork())
+                && !Strings.isNullOrEmpty(environment.getNetwork().getNetworkCidr())
+                && Strings.isNullOrEmpty(environment.getNetwork().getNetworkId())) {
+            String message = String.format("The '%s' network id has to be defined if cidr is defined!", environment.getCloudPlatform());
+            resultBuilder.error(message);
         }
         return resultBuilder;
     }
@@ -64,5 +72,4 @@ public class NetworkCreationValidator {
         }
         return diff;
     }
-
 }

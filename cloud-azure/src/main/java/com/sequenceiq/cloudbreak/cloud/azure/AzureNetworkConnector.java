@@ -99,9 +99,7 @@ public class AzureNetworkConnector implements NetworkConnector {
             } else {
                 throw new CloudConnectorException(String.format("Stack deletion failed: '%s', please go to Azure Portal for detailed message", e));
             }
-
         }
-
     }
 
     @Override
