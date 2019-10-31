@@ -32,6 +32,8 @@ import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.service.EnvironmentCreationService;
 import com.sequenceiq.environment.environment.service.EnvironmentModificationService;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.EnvironmentStartService;
+import com.sequenceiq.environment.environment.service.EnvironmentStopService;
 
 @Controller
 @InternalReady
@@ -48,6 +50,10 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentModificationService environmentModificationService;
 
+    private final EnvironmentStartService environmentStartService;
+
+    private final EnvironmentStopService environmentStopService;
+
     private final CredentialService credentialService;
 
     public EnvironmentController(
@@ -56,12 +62,16 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentCreationService environmentCreationService,
             ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
             EnvironmentModificationService environmentModificationService,
+            EnvironmentStartService environmentStartService,
+            EnvironmentStopService environmentStopService,
             CredentialService credentialService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentService = environmentService;
         this.environmentCreationService = environmentCreationService;
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.environmentModificationService = environmentModificationService;
+        this.environmentStartService = environmentStartService;
+        this.environmentStopService = environmentStopService;
         this.credentialService = credentialService;
     }
 
@@ -159,6 +169,26 @@ public class EnvironmentController implements EnvironmentEndpoint {
         EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentCrn(accountId, crn,
                 environmentApiConverter.convertEnvironmentChangeCredentialDto(request));
         return environmentApiConverter.dtoToDetailedResponse(result);
+    }
+
+    @Override
+    public void postStartByName(String name) {
+        environmentStartService.startByName(name);
+    }
+
+    @Override
+    public void postStartByCrn(String crn) {
+        environmentStartService.startByCrn(crn);
+    }
+
+    @Override
+    public void postStopByName(String name) {
+        environmentStopService.stopByName(name);
+    }
+
+    @Override
+    public void postStopByCrn(String crn) {
+        environmentStopService.stopByCrn(crn);
     }
 
     @Override

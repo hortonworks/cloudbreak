@@ -33,7 +33,16 @@ public enum EnvironmentStatus {
 
     CREATE_FAILED,
     DELETE_FAILED,
-    UPDATE_FAILED;
+    UPDATE_FAILED,
+
+    STOP_DATAHUB_STARTED,
+    STOP_DATAHUB_FAILED,
+    STOP_DATALAKE_STARTED,
+    STOP_DATALAKE_FAILED,
+    STOP_FREEIPA_STARTED,
+    STOP_FREEIPA_FAILED,
+
+    ENV_STOPPED;
 
     public boolean isAvailable() {
         return equals(AVAILABLE);

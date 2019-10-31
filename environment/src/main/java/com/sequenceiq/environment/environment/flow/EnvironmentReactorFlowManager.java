@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
+import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
+import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelectors;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -76,6 +78,18 @@ public class EnvironmentReactorFlowManager {
 
         Map<String, Object> flowTriggerUserCrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
         eventSender.sendEvent(envDeleteEvent, new Event.Headers(flowTriggerUserCrn));
+    }
+
+    public void triggerStopFlow(long envId, String envName, String userCrn) {
+        LOGGER.info("Trigger stop flow");
+        EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
+                .withSelector(EnvStopStateSelectors.ENV_STOP_DATAHUB_EVENT.selector())
+                .withResourceId(envId)
+                .withResourceName(envName)
+                .build();
+
+        Map<String, Object> flowTriggerUserCrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
+        eventSender.sendEvent(envStopEvent, new Event.Headers(flowTriggerUserCrn));
     }
 
     public void cancelRunningFlows(Long environmentId, String environmentName, String environmentCrn) {

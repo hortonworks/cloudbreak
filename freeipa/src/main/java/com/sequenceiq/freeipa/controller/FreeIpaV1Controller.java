@@ -116,13 +116,13 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    public void start(@NotEmpty String environmentCrn) throws Exception {
+    public void start(@NotEmpty String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         freeIpaStartService.start(environmentCrn, accountId);
     }
 
     @Override
-    public void stop(@NotEmpty String environmentCrn) throws Exception {
+    public void stop(@NotEmpty String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         freeIpaStopService.stop(environmentCrn, accountId);
     }
