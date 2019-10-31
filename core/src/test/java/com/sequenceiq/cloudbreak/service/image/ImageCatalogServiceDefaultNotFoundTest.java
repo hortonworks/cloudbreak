@@ -4,6 +4,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -68,7 +69,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         ReflectionTestUtils.setField(underTest, "cbVersion", "5.0.0");
         ReflectionTestUtils.setField(underTest, "defaultCatalogUrl", "");
         // WHEN
-        underTest.getPrewarmImageDefaultPreferred("gcp", "notimportant", "notimportant", null, imageCatalog, packageVersions);
+        underTest.getPrewarmImageDefaultPreferred("gcp", "notimportant", "notimportant", null, imageCatalog, Optional.empty());
         // THEN throw CloudbreakImageNotFoundException
     }
 }
