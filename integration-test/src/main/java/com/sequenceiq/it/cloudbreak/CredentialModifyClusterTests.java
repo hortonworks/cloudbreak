@@ -1,18 +1,13 @@
 package com.sequenceiq.it.cloudbreak;
 
-import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
-import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClusterTestConfiguration;
-import com.sequenceiq.it.cloudbreak.newway.Cluster;
-import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.StackOperationEntity;
-import com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider;
-import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
-import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,18 +17,24 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
+import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageResponse;
+import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClusterTestConfiguration;
+import com.sequenceiq.it.cloudbreak.newway.Cluster;
+import com.sequenceiq.it.cloudbreak.newway.Credential;
+import com.sequenceiq.it.cloudbreak.newway.Stack;
+import com.sequenceiq.it.cloudbreak.newway.StackOperationEntity;
+import com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.cloud.CloudProviderHelper;
 
 public class CredentialModifyClusterTests extends CloudbreakClusterTestConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialModifyClusterTests.class);
 
-    @Test(dataProvider = "providernameblueprintimage", priority = 10)
+    @Test(dataProvider = "providernameblueprint", priority = 10)
     public void testCreateNewRegularCluster(CloudProvider cloudProvider, String clusterName, String credentialName, String blueprintName, String imageId)
             throws Exception {
         given(CloudbreakClient.created());
@@ -42,9 +43,6 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
         given(Cluster.request()
                 .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
                 "a cluster request");
-        given(ImageSettingsEntity.request()
-                .withImageCatalog("")
-                .withImageId(imageId));
         given(cloudProvider.aValidStackRequest()
                 .withName(clusterName), "a stack request");
         when(Stack.post(), "post the stack request");
@@ -147,19 +145,17 @@ public class CredentialModifyClusterTests extends CloudbreakClusterTestConfigura
         then(Stack.waitAndCheckClusterDeleted(), "stack has been deleted");
     }
 
-    @DataProvider(name = "providernameblueprintimage")
+    @DataProvider(name = "providernameblueprint")
     public Object[][] providerAndImage() throws Exception {
         String blueprint = getTestParameter().get("blueprintName");
         String provider = getTestParameter().get("provider").toLowerCase();
-        String imageDescription = getTestParameter().get("image");
 
         CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
 
         String clusterName = getTestParameter().get("clusterName");
         String credentialName = getTestParameter().get("credentialName");
-        String image = getImageId(provider, imageDescription, blueprint);
         return new Object[][]{
-                {cloudProvider, clusterName, credentialName, blueprint, image}
+                {cloudProvider, clusterName, credentialName, blueprint}
         };
     }
 

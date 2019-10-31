@@ -18,8 +18,8 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 public class RecoveryTests extends ClusterTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(RecoveryTests.class);
 
-    @Test(dataProvider = "providernameblueprintimage", priority = 15)
-    public void testManualRecovery(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
+    @Test(dataProvider = "providernameblueprint", priority = 15)
+    public void testManualRecovery(CloudProvider cloudProvider, String clusterName, String blueprintName) throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackCreated()
@@ -41,8 +41,8 @@ public class RecoveryTests extends ClusterTests {
         then(Stack.waitAndCheckClusterIsAvailable());
     }
 
-    @Test(dataProvider = "providernameblueprintimage", priority = 15)
-    public void testAutoRecovery(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
+    @Test(dataProvider = "providernameblueprint", priority = 15)
+    public void testAutoRecovery(CloudProvider cloudProvider, String clusterName, String blueprintName) throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(cloudProvider.aValidStackCreated()
