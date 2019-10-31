@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.api.model.v2.template.GcpEncryption;
 import com.sequenceiq.cloudbreak.api.model.v2.template.GcpParameters;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Cluster;
-import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
@@ -25,16 +24,13 @@ public class EncryptedClusterTests extends ClusterTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EncryptedClusterTests.class);
 
-    @Test(dataProvider = "providernameblueprintimage", priority = 10)
-    public void testCreateNewEncryptedCluster(CloudProvider cloudProvider, String clusterName, String blueprintName, String imageId) throws Exception {
+    @Test(dataProvider = "providernameblueprint", priority = 10)
+    public void testCreateNewEncryptedCluster(CloudProvider cloudProvider, String clusterName, String blueprintName) throws Exception {
         given(CloudbreakClient.created());
         given(cloudProvider.aValidCredential());
         given(Cluster.request()
                         .withAmbariRequest(cloudProvider.ambariRequestWithBlueprintName(blueprintName)),
                 "a cluster request");
-        given(ImageSettingsEntity.request()
-                .withImageCatalog("")
-                .withImageId(imageId));
         given(aValidStackRequestWithDifferentEncryptedTypes(cloudProvider).withName(clusterName), "a stack request");
         when(Stack.post(), "post the stack request");
         then(Stack.waitAndCheckClusterAndStackAvailabilityStatus(),
