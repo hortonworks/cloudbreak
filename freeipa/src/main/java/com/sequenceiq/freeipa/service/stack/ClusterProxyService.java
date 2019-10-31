@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
+import com.sequenceiq.freeipa.service.config.FmsClusterProxyEnablement;
 import com.sequenceiq.freeipa.vault.FreeIpaCertVaultComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ClusterProxyService {
@@ -52,15 +54,24 @@ public class ClusterProxyService {
     @Inject
     private StackUpdater stackUpdater;
 
-    public ConfigRegistrationResponse registerFreeIpa(String accountId, String environmentCrn) {
+    @Inject
+    private FmsClusterProxyEnablement fmsClusterProxyEnablement;
+
+    public Optional<ConfigRegistrationResponse> registerFreeIpa(String accountId, String environmentCrn) {
         return registerFreeIpa(stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId));
     }
 
-    public ConfigRegistrationResponse registerFreeIpa(Long stackId) {
+    public Optional<ConfigRegistrationResponse> registerFreeIpa(Long stackId) {
         return registerFreeIpa(stackService.getStackById(stackId));
     }
 
-    public ConfigRegistrationResponse registerFreeIpa(Stack stack) {
+    private Optional<ConfigRegistrationResponse> registerFreeIpa(Stack stack) {
+
+        if (!fmsClusterProxyEnablement.isEnabled(stack)) {
+            LOGGER.debug("Cluster Proxy integration disabled. Skipping registering FreeIpa [{}]", stack);
+            return Optional.empty();
+        }
+
         LOGGER.debug("Registering freeipa with cluster-proxy: Environment CRN = [{}], Stack CRN = [{}]", stack.getEnvironmentCrn(), stack.getResourceCrn());
 
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
@@ -80,7 +91,7 @@ public class ClusterProxyService {
 
         stackUpdater.updateClusterProxyRegisteredFlag(stack, true);
 
-        return response;
+        return Optional.of(response);
     }
 
     public void deregisterFreeIpa(String accountId, String environmentCrn) {
@@ -91,7 +102,11 @@ public class ClusterProxyService {
         deregisterFreeIpa(stackService.getStackById(stackId));
     }
 
-    public void deregisterFreeIpa(Stack stack) {
+    private void deregisterFreeIpa(Stack stack) {
+        if (!fmsClusterProxyEnablement.isEnabled(stack)) {
+            LOGGER.debug("Cluster Proxy integration disabled. Skipping deregistering FreeIpa [{}]", stack);
+            return;
+        }
         LOGGER.debug("Deregistering freeipa with cluster-proxy: Environment CRN = [{}], Stack CRN = [{}]", stack.getEnvironmentCrn(), stack.getResourceCrn());
         stackUpdater.updateClusterProxyRegisteredFlag(stack, false);
         clusterProxyRegistrationClient.deregisterConfig(stack.getResourceCrn());

@@ -28,6 +28,10 @@ public class EntitlementService {
         return isEntitlementRegistered(actorCrn, accountId, "CDP_AUTOMATIC_USERSYNC_POLLER");
     }
 
+    public boolean fmsClusterProxyEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, "CDP_FMS_CLUSTER_PROXY");
+    }
+
     public List<String> getEntitlements(String actorCrn, String accountId) {
         return getAccount(actorCrn, accountId).getEntitlementsList()
                 .stream()
