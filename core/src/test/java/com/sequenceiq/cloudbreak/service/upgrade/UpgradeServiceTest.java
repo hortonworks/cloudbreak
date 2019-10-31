@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -100,7 +101,8 @@ public class UpgradeServiceTest {
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
-                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false), eq(user));
+                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false), eq(user),
+                        eq(Optional.of(Map.of())));
         assertThat(result.getImageId()).isEqualTo("id-2");
     }
 
@@ -117,7 +119,8 @@ public class UpgradeServiceTest {
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
-                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(true), eq(user));
+                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(true), eq(user),
+                        eq(Optional.of(Map.of())));
         assertThat(result.getImageId()).isEqualTo(null);
     }
 
@@ -132,7 +135,7 @@ public class UpgradeServiceTest {
         StatedImage currentImageFromCatalog = imageFromCatalog(prewarmedImage, oldImage);
         when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(currentImageFromCatalog);
         StatedImage latestImage = imageFromCatalog(true, newImage);
-        when(imageService.determineImageFromCatalog(anyLong(), any(), anyString(), any(), anyBoolean(), any())).thenReturn(latestImage);
+        when(imageService.determineImageFromCatalog(anyLong(), any(), anyString(), any(), anyBoolean(), any(), any())).thenReturn(latestImage);
     }
 
     private Image getImage(String imageId) {
@@ -144,7 +147,7 @@ public class UpgradeServiceTest {
                 "catalogUrl",
                 "catalogName",
                 imageId,
-                null
+                Map.of()
         );
     }
 

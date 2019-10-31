@@ -29,6 +29,8 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 public class PackageVersionChecker {
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageVersionChecker.class);
 
+    private static final String SALT_BOOTSTRAP = "salt-bootstrap";
+
     @Inject
     private InstanceMetadataUpdater instanceMetadataUpdater;
 
@@ -55,14 +57,16 @@ public class PackageVersionChecker {
         }
 
         for (String packageToCompare : packagesToCompare) {
-            String packageVersionInImage = packageVersions.get(packageToCompare);
-            if (StringUtils.isBlank(packageVersionInImage)) {
-                LOGGER.debug("Missing package in image: " + packageToCompare);
-                missingPackageVersion.add(packageToCompare);
-            } else if (!instanceMetadataUpdater.isPackagesVersionEqual(packageVersionInImage, instancePackageVersions.get(packageToCompare))) {
-                LOGGER.debug(String.format("Different package [%s] version on image [%s] and on instance [%s]",
-                        packageToCompare, packageVersionInImage, instancePackageVersions.get(packageToCompare)));
-                differentPackageVersion.add(packageToCompare);
+            if (!SALT_BOOTSTRAP.equals(packageToCompare)) {
+                String packageVersionInImage = packageVersions.get(packageToCompare);
+                if (StringUtils.isBlank(packageVersionInImage)) {
+                    LOGGER.debug("Missing package in image: " + packageToCompare);
+                    missingPackageVersion.add(packageToCompare);
+                } else if (!instanceMetadataUpdater.isPackagesVersionEqual(packageVersionInImage, instancePackageVersions.get(packageToCompare))) {
+                    LOGGER.debug(String.format("Different package [%s] version on image [%s] and on instance [%s]",
+                            packageToCompare, packageVersionInImage, instancePackageVersions.get(packageToCompare)));
+                    differentPackageVersion.add(packageToCompare);
+                }
             }
         }
 

@@ -114,7 +114,8 @@ public class UpgradeService {
                 ImageSettingsV4Request imageSettingsV4Request = toImageSettingsRequest(image);
                 boolean baseImage = useBaseImage(image);
                 StatedImage latestImage = imageService
-                        .determineImageFromCatalog(workspaceId, imageSettingsV4Request, stack.getCloudPlatform().toLowerCase(), blueprint, baseImage, user);
+                        .determineImageFromCatalog(workspaceId, imageSettingsV4Request, stack.getCloudPlatform().toLowerCase(), blueprint, baseImage, user,
+                                Optional.of(image.getPackageVersions()));
                 if (!Objects.equals(image.getImageId(), latestImage.getImage().getUuid())) {
                     return new UpgradeOptionV4Response(latestImage.getImage().getUuid(), image.getImageCatalogName());
                 } else {
@@ -154,7 +155,7 @@ public class UpgradeService {
     private ImageSettingsV4Request toImageSettingsRequest(Image image) {
         ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
         imageSettingsV4Request.setOs(image.getOs());
-        imageSettingsV4Request.setCatalog(image.getImageCatalogUrl());
+        imageSettingsV4Request.setCatalog(image.getImageCatalogName());
         return imageSettingsV4Request;
     }
 }
