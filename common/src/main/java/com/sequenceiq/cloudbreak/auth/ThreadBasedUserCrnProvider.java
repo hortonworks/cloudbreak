@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 @Service
 public class ThreadBasedUserCrnProvider {
 
-    private static final ThreadLocal<Stack<String>> USER_CRN = new ThreadLocal<>();
+    private static final ThreadLocal<Stack<String>> USER_CRN = new InheritableThreadLocal<>();
 
     @Nullable
     public String getUserCrn() {

@@ -1,13 +1,15 @@
 package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 
+import static com.sequenceiq.cloudbreak.doc.ContentType.JSON;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_CRN;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_NAME;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE;
-import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.WorkspaceOpDescription.DELETE_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.CREATE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_BY_CRN;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_INSTANCE_BY_ID_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_INSTANCE_BY_ID_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_MULTIPLE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_WITH_KERBEROS_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_WITH_KERBEROS_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_CRN;
@@ -62,6 +64,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Reque
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -77,8 +80,8 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = LIST, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "listDistroXV1")
     StackViewV4Responses list(
-        @QueryParam("environmentName") String environmentName,
-        @QueryParam("environmentCrn") String environmentCrn);
+            @QueryParam("environmentName") String environmentName,
+            @QueryParam("environmentCrn") String environmentCrn);
 
     @POST
     @Path("")
@@ -109,6 +112,11 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteDistroXV1ByCrn")
     void deleteByCrn(@PathParam("crn") String crn, @QueryParam("forced") @DefaultValue("false") Boolean forced);
+
+    @DELETE
+    @Path("")
+    @ApiOperation(value = DELETE_MULTIPLE, produces = JSON, notes = Notes.STACK_NOTES, nickname = "deleteMultipleDistroXClustersByNamesV1")
+    void deleteMultiple(DistroXMultiDeleteV1Request multiDeleteRequest, @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @POST
     @Path("name/{name}/sync")
@@ -240,8 +248,8 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = DELETE_INSTANCE_BY_ID_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstanceDistroXV1ByCrn")
     void deleteInstanceByCrn(@PathParam("crn") String crn,
-                        @QueryParam("forced") @DefaultValue("false") Boolean forced,
-                        @QueryParam("instanceId") String instanceId);
+            @QueryParam("forced") @DefaultValue("false") Boolean forced,
+            @QueryParam("instanceId") String instanceId);
 
     @DELETE
     @Path("name/{name}/instances")
@@ -271,7 +279,7 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = SET_MAINTENANCE_MODE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.MAINTENANCE_NOTES,
             nickname = "setDistroXMaintenanceModeByCrn")
     void setClusterMaintenanceModeByCrn(@PathParam("crn") String crn,
-        @NotNull DistroXMaintenanceModeV1Request maintenanceMode);
+            @NotNull DistroXMaintenanceModeV1Request maintenanceMode);
 
     @DELETE
     @Path("name/{name}/cluster")

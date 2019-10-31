@@ -10,14 +10,17 @@ public class StackAccessDto extends GeneralAccessDto  {
         super(name, crn);
     }
 
+    public static StackAccessDtoBuilder builder() {
+        return new StackAccessDtoBuilder();
+    }
+
     public static class StackAccessDtoBuilder {
 
         private String name;
 
         private String crn;
 
-        public static StackAccessDtoBuilder aStackAccessDtoBuilder() {
-            return new StackAccessDtoBuilder();
+        private StackAccessDtoBuilder() {
         }
 
         public StackAccessDtoBuilder withName(String name) {

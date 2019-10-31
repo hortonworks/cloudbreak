@@ -13,6 +13,7 @@ import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -48,9 +49,9 @@ import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.distrox.v1.distrox.service.SdxServiceDecorator;
 
 @Service
-public class StackOperation {
+public class StackOperations {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackOperation.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackOperations.class);
 
     @Inject
     private StackCommonService stackCommonService;
@@ -169,6 +170,35 @@ public class StackOperation {
         }
     }
 
+    @Async
+    public void asyncDelete(StackAccessDto stackAccessDto, Long workspaceId, Boolean forced) {
+        validateAccessDto(stackAccessDto);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        if (isNotEmpty(stackAccessDto.getName())) {
+            LOGGER.info("Delete Stack in workspace {} with name {}.", workspaceId, stackAccessDto.getName());
+            stackCommonService.deleteByNameInWorkspace(stackAccessDto.getName(), workspaceId, forced, user);
+        } else {
+            LOGGER.info("Delete Stack in workspace {} with crn {}.", workspaceId, stackAccessDto.getCrn());
+            stackCommonService.deleteByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, forced, user);
+        }
+    }
+
+    public void deleteInstance(@NotNull StackAccessDto stackAccessDto, Long workspaceId, Boolean forced, String instanceId) {
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stackCommonService.deleteInstanceByNameInWorkspace(stackAccessDto.getName(), workspaceId, instanceId, forced);
+        } else {
+            stackCommonService.deleteInstanceByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, instanceId, forced);
+        }
+    }
+
+    public void deleteInstances(StackAccessDto stackAccessDto, Long workspaceId, List<String> instanceIds, boolean forced) {
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stackCommonService.deleteMultipleInstancesByNameInWorkspace(stackAccessDto.getName(), workspaceId, instanceIds, forced);
+        } else {
+            stackCommonService.deleteMultipleInstancesByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, instanceIds, forced);
+        }
+    }
+
     public void sync(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
         if (isNotEmpty(stackAccessDto.getName())) {
             stackCommonService.syncInWorkspace(stackAccessDto.getName(), null, workspaceId);
@@ -257,22 +287,6 @@ public class StackOperation {
         return converterUtil.convert(stack, StackStatusV4Response.class);
     }
 
-    public void deleteInstance(@NotNull StackAccessDto stackAccessDto, Long workspaceId, Boolean forced, String instanceId) {
-        if (isNotEmpty(stackAccessDto.getName())) {
-            stackCommonService.deleteInstanceByNameInWorkspace(stackAccessDto.getName(), workspaceId, instanceId, forced);
-        } else {
-            stackCommonService.deleteInstanceByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, instanceId, forced);
-        }
-    }
-
-    public void deleteInstances(StackAccessDto stackAccessDto, Long workspaceId, List<String> instanceIds, boolean forced) {
-        if (isNotEmpty(stackAccessDto.getName())) {
-            stackCommonService.deleteMultipleInstancesByNameInWorkspace(stackAccessDto.getName(), workspaceId, instanceIds, forced);
-        } else {
-            stackCommonService.deleteMultipleInstancesByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, instanceIds, forced);
-        }
-    }
-
     public void putPassword(@NotNull StackAccessDto stackAccessDto, Long workspaceId, @Valid UserNamePasswordV4Request userNamePasswordJson) {
         Stack stack;
         if (isNotEmpty(stackAccessDto.getName())) {
@@ -322,14 +336,14 @@ public class StackOperation {
         return stackService.getByCrnInWorkspace(crn, workspaceService.getForCurrentUser().getId());
     }
 
+    public List<RetryableFlow> getRetryableFlows(String name, Long workspaceId) {
+        return stackCommonService.getRetryableFlows(name, workspaceId);
+    }
+
     private void validateAccessDto(StackAccessDto dto) {
-        throwIfNull(dto, () -> new IllegalArgumentException("StackAccessDto should not be null"));
+        throwIfNull(dto, () -> new IllegalArgumentException("StackAccessDto should not be null."));
         if (dto.isNotValid()) {
             throw new BadRequestException("A stack name or crn must be provided. One and only one of them.");
         }
-    }
-
-    public List<RetryableFlow> getRetryableFlows(String name, Long workspaceId) {
-        return stackCommonService.getRetryableFlows(name, workspaceId);
     }
 }

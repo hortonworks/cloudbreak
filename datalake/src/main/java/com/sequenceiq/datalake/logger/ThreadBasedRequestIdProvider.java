@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ThreadBasedRequestIdProvider {
 
-    private static final ThreadLocal<String> REQUEST_ID = new ThreadLocal<>();
+    private static final ThreadLocal<String> REQUEST_ID = new InheritableThreadLocal<>();
 
     @Nullable
     public String getRequestId() {
