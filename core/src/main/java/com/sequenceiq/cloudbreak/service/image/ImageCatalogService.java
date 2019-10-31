@@ -151,7 +151,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
         if (isNotEmpty(platform)) {
             User user = getLoggedInUser();
-            return getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, user).getImages();
+            return getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, getDefaultImageCatalog(user)).getImages();
         } else if (isNotEmpty(stackName)) {
             return stackImageFilterService.getApplicableImages(workspaceId, stackName);
         } else {
@@ -159,9 +159,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
     }
 
-    public StatedImages getStatedImagesFilteredByOperatingSystems(String provider, Set<String> operatingSystems, User user)
+    public StatedImages getStatedImagesFilteredByOperatingSystems(String provider, Set<String> operatingSystems, ImageCatalog imageCatalog)
             throws CloudbreakImageCatalogException {
-        StatedImages images = getImages(new ImageFilter(getDefaultImageCatalog(user), Collections.singleton(provider), cbVersion));
+        StatedImages images = getImages(new ImageFilter(imageCatalog, Collections.singleton(provider), cbVersion));
         if (!CollectionUtils.isEmpty(operatingSystems)) {
             Images rawImages = images.getImages();
             List<Image> baseImages = filterImagesByOperatingSystems(rawImages.getBaseImages(), operatingSystems);
@@ -174,9 +174,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return images;
     }
 
-    public StatedImage getLatestBaseImageDefaultPreferred(String platform, Set<String> operatingSystems, User user)
+    public StatedImage getLatestBaseImageDefaultPreferred(String platform, Set<String> operatingSystems, ImageCatalog imageCatalog)
             throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
-        StatedImages statedImages = getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, user);
+        StatedImages statedImages = getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, imageCatalog);
         Optional<Image> defaultBaseImage = getLatestBaseImageDefaultPreferred(statedImages);
         if (defaultBaseImage.isPresent()) {
             return statedImage(defaultBaseImage.get(), statedImages.getImageCatalogUrl(), statedImages.getImageCatalogName());
@@ -190,9 +190,10 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return getLatestImageDefaultPreferred(baseImages);
     }
 
-    public StatedImage getPrewarmImageDefaultPreferred(String platform, String clusterType, String clusterVersion, Set<String> operatingSystems, User user)
+    public StatedImage getPrewarmImageDefaultPreferred(String platform, String clusterType, String clusterVersion, Set<String> operatingSystems,
+            ImageCatalog imageCatalog)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        StatedImages statedImages = getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, user);
+        StatedImages statedImages = getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, imageCatalog);
         List<Image> images = getImagesForClusterType(statedImages, clusterType);
         Optional<Image> selectedImage = Optional.empty();
         if (!CollectionUtils.isEmpty(images)) {
@@ -535,7 +536,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     @Nonnull
-    private ImageCatalog getDefaultImageCatalog(User user) {
+    public ImageCatalog getDefaultImageCatalog(User user) {
         ImageCatalog imageCatalog = getUserProfile(user).getImageCatalog();
         if (imageCatalog == null) {
             imageCatalog = new ImageCatalog();

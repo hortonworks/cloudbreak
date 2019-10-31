@@ -116,7 +116,7 @@ public class UpgradeService {
                 StatedImage latestImage = imageService
                         .determineImageFromCatalog(workspaceId, imageSettingsV4Request, stack.getCloudPlatform().toLowerCase(), blueprint, baseImage, user);
                 if (!Objects.equals(image.getImageId(), latestImage.getImage().getUuid())) {
-                    return new UpgradeOptionV4Response(latestImage.getImage().getUuid(), latestImage.getImageCatalogName());
+                    return new UpgradeOptionV4Response(latestImage.getImage().getUuid(), image.getImageCatalogName());
                 } else {
                     return new UpgradeOptionV4Response();
                 }

@@ -139,6 +139,9 @@ public class ImageCatalogServiceTest {
     @Mock
     private User user;
 
+    @Mock
+    private ImageCatalog imageCatalog;
+
     @Before
     public void beforeTest() throws Exception {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, V2_CATALOG_FILE);
@@ -161,7 +164,7 @@ public class ImageCatalogServiceTest {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, user);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, imageCatalog);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertFalse(image.getImage().isDefaultImage());
@@ -173,7 +176,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.200", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, user);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, imageCatalog);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -185,7 +188,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.1", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, user);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, imageCatalog);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -197,7 +200,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.2", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, user);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, imageCatalog);
 
         assertEquals("f6e778fc-7f17-4535-9021-515351df3691", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -208,7 +211,7 @@ public class ImageCatalogServiceTest {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, DEV_CATALOG_FILE);
         Set<String> operatingSystems = new HashSet<>(Arrays.asList("redhat7", "redhat6", "amazonlinux2"));
-        StatedImages images = underTest.getStatedImagesFilteredByOperatingSystems("aws", operatingSystems, user);
+        StatedImages images = underTest.getStatedImagesFilteredByOperatingSystems("aws", operatingSystems, imageCatalog);
 
         Set<Image> allImage = Stream.of(images.getImages().getHdpImages(), images.getImages().getHdpImages(), images.getImages().getBaseImages())
                 .flatMap(Collection::stream)
@@ -641,6 +644,7 @@ public class ImageCatalogServiceTest {
     private void setupImageCatalogProvider(String catalogUrl, String catalogFile) throws IOException, CloudbreakImageCatalogException {
         String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFile);
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
+        when(imageCatalog.getImageCatalogUrl()).thenReturn(catalogUrl);
         when(imageCatalogProvider.getImageCatalogV2(catalogUrl)).thenReturn(catalog);
     }
 

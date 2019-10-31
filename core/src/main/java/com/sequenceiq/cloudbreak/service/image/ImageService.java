@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
@@ -124,7 +125,7 @@ public class ImageService {
 
     //CHECKSTYLE:OFF
     @Measure(ImageService.class)
-    public StatedImage determineImageFromCatalog(Long workspaceId, ImageSettingsV4Request image, String platformString,
+    public StatedImage determineImageFromCatalog(Long workspaceId, ImageSettingsV4Request imageSettins, String platformString,
             Blueprint blueprint, boolean useBaseImage, User user) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         String clusterType = ImageCatalogService.UNDEFINED;
         String clusterVersion = ImageCatalogService.UNDEFINED;
@@ -143,25 +144,36 @@ public class ImageService {
             }
         }
         Set<String> operatingSystems = stackMatrixService.getSupportedOperatingSystems(clusterType, clusterVersion);
-        if (image != null && StringUtils.isNotEmpty(image.getOs())) {
+        if (imageSettins != null && StringUtils.isNotEmpty(imageSettins.getOs())) {
             if (operatingSystems.isEmpty()) {
-                operatingSystems = Collections.singleton(image.getOs());
+                operatingSystems = Collections.singleton(imageSettins.getOs());
             } else {
-                operatingSystems = operatingSystems.stream().filter(os -> os.equalsIgnoreCase(image.getOs())).collect(Collectors.toSet());
+                operatingSystems = operatingSystems.stream().filter(os -> os.equalsIgnoreCase(imageSettins.getOs())).collect(Collectors.toSet());
             }
         }
-        if (image != null && image.getId() != null) {
-            return imageCatalogService.getImageByCatalogName(workspaceId, image.getId(), image.getCatalog());
+        if (imageSettins != null && imageSettins.getId() != null) {
+            return imageCatalogService.getImageByCatalogName(workspaceId, imageSettins.getId(), imageSettins.getCatalog());
         }
+        ImageCatalog imageCatalog = getImageCatalogFromRequestOrDefault(imageSettins, user);
         if (useBaseImage) {
-            LOGGER.debug("Image id isn't specified for the stack, falling back to a base image, because repo information is provided");
-            return imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, operatingSystems, user);
+            LOGGER.debug("Image id isn't specified for the stack, falling back to a base imageSettins, because repo information is provided");
+            return imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, operatingSystems, imageCatalog);
         }
         LOGGER.debug("Image id isn't specified for the stack, falling back to a prewarmed "
-                + "image of {}-{} or to a base image if prewarmed doesn't exist", clusterType, clusterVersion);
-        return imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, operatingSystems, user);
+                + "imageSettins of {}-{} or to a base imageSettins if prewarmed doesn't exist", clusterType, clusterVersion);
+        return imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, operatingSystems, imageCatalog);
     }
     //CHECKSTYLE:ON
+
+    private ImageCatalog getImageCatalogFromRequestOrDefault(ImageSettingsV4Request imageSettings, User user) {
+        if (imageSettings == null || imageSettings.getCatalog() == null) {
+            return imageCatalogService.getDefaultImageCatalog(user);
+        } else {
+            ImageCatalog imageCatalog = new ImageCatalog();
+            imageCatalog.setImageCatalogUrl(imageSettings.getCatalog());
+            return imageCatalog;
+        }
+    }
 
     public String determineImageName(String platformString, String region, com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog)
             throws CloudbreakImageNotFoundException {

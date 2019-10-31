@@ -161,11 +161,19 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
         ApiCommand refreshParcelRepos = clouderaManagerResourceApi.refreshParcelRepos();
         PollingResult activateParcelsPollingResult =
-                clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(stack, apiClient, refreshParcelRepos.getId());
+                clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClient, refreshParcelRepos.getId());
         if (isExited(activateParcelsPollingResult)) {
-            throw new CancellationException("Cluster was terminated while waiting for parcel activation");
+            throw new CancellationException("Cluster was terminated while waiting for parcel repository refresh");
         } else if (isTimeout(activateParcelsPollingResult)) {
-            throw new CloudbreakException("Timeout while Cloudera Manager was activating parcels.");
+            throw new CloudbreakException("Timeout while Cloudera Manager was refreshing parcel repositories.");
+        }
+
+        PollingResult downloadPollingResult =
+                clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClient, refreshParcelRepos.getId());
+        if (isExited(downloadPollingResult)) {
+            throw new CancellationException("Cluster was terminated while waiting for parcel download");
+        } else if (isTimeout(downloadPollingResult)) {
+            throw new CloudbreakException("Timeout while Cloudera Manager was downloading parcels.");
         }
         LOGGER.debug("Refreshed parcel repos");
     }
