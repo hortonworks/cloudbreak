@@ -80,26 +80,30 @@ public class UsersyncPoller {
             stackList.stream()
                     .collect(Collectors.groupingBy(Stack::getAccountId))
                     .entrySet().stream()
+                    .filter(stringListEntry -> {
+                        String accountId = stringListEntry.getKey();
+                        boolean entitled = entitlementService.automaticUsersyncPollerEnabled(INTERNAL_ACTOR_CRN, accountId);
+                        if (!entitled) {
+                            LOGGER.debug("Usersync polling is not entitled in accout {}. skipping", accountId);
+                        }
+                        return entitled;
+                    })
                     .forEach(stringListEntry -> {
                         String accountId = stringListEntry.getKey();
-                        if (entitlementService.automaticUsersyncPollerEnabled(INTERNAL_ACTOR_CRN, accountId)) {
-                            LOGGER.debug("Usersync polling entitled in account {}", accountId);
-                            UmsEventGenerationIds currentGeneration =
-                                    umsEventGenerationIdsProvider.getEventGenerationIds(accountId, requestId);
-                            stringListEntry.getValue().stream()
-                                    .forEach(stack -> {
-                                        if (isStale(stack, currentGeneration)) {
-                                            LOGGER.debug("Environment {} in Account {} is stale.", stack.getEnvironmentCrn(), stack.getAccountId());
-                                            SyncOperationStatus status = userService.synchronizeUsers(stack.getAccountId(), INTERNAL_ACTOR_CRN,
-                                                    Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
-                                            LOGGER.debug("Sync request resulted in operation {}", status);
-                                        } else {
-                                            LOGGER.debug("Environment {} in Account {} is up-to-date.", stack.getEnvironmentCrn(), stack.getAccountId());
-                                        }
-                                    });
-                        } else {
-                            LOGGER.debug("Usersync polling not entitled in account {}. skipping", accountId);
-                        }
+                        LOGGER.debug("Usersync polling is entitled in account {}", accountId);
+                        UmsEventGenerationIds currentGeneration =
+                                umsEventGenerationIdsProvider.getEventGenerationIds(accountId, requestId);
+                        stringListEntry.getValue().stream()
+                                .forEach(stack -> {
+                                    if (isStale(stack, currentGeneration)) {
+                                        LOGGER.debug("Environment {} in Account {} is stale.", stack.getEnvironmentCrn(), stack.getAccountId());
+                                        SyncOperationStatus status = userService.synchronizeUsers(stack.getAccountId(), INTERNAL_ACTOR_CRN,
+                                                Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
+                                        LOGGER.debug("Sync request resulted in operation {}", status);
+                                    } else {
+                                        LOGGER.debug("Environment {} in Account {} is up-to-date.", stack.getEnvironmentCrn(), stack.getAccountId());
+                                    }
+                                });
                     });
         } finally {
             threadBasedUserCrnProvider.removeUserCrn();
