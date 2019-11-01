@@ -158,7 +158,8 @@ public class Crn {
         WORKSPACES("workspaces", NON_ADMIN_SERVICE),
         FREEIPA("freeipa", NON_ADMIN_SERVICE),
         DATAHUB("datahub", NON_ADMIN_SERVICE),
-        DATALAKE("datalake", NON_ADMIN_SERVICE);
+        DATALAKE("datalake", NON_ADMIN_SERVICE),
+        ML("ml", NON_ADMIN_SERVICE);
 
         private static final ImmutableMap<String, Service> FROM_STRING;
 
