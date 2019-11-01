@@ -12,6 +12,8 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableMetadataResponse;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.cloudprovider.CloudProviderService;
 
@@ -28,6 +30,15 @@ public class CloudProviderServicesV4Controller implements CloudProviderServicesV
     public ObjectStorageMetadataResponse getObjectStorageMetaData(@Valid ObjectStorageMetadataRequest request) {
         try {
             return cloudProviderService.getObjectStorageMetaData(request);
+        } catch (CloudConnectorException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @Override
+    public ObjectStorageValidateResponse validateObjectStorage(@Valid ObjectStorageValidateRequest request) {
+        try {
+            return cloudProviderService.validateObjectStorage(request);
         } catch (CloudConnectorException e) {
             throw new BadRequestException(e.getMessage());
         }

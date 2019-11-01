@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
 import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 
 @ExtendWith(MockitoExtension.class)
@@ -142,7 +143,7 @@ public class StackRequestManifesterTest {
         clusterV4Request.setCloudStorage(cloudStorage);
 
         Assertions.assertThrows(
-                IdbmmsOperationException.class,
+                BadRequestException.class,
                 () -> underTest.setupCloudStorageAccountMapping(stackV4Request, BAD_ENVIRONMENT_CRN, IdBrokerMappingSource.IDBMMS, CLOUD_PLATFORM_AWS));
     }
 

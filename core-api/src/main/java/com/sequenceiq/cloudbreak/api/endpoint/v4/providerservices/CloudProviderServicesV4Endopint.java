@@ -14,6 +14,8 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableMetadataResponse;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 
 @Path("/v4/cloudprovider")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -23,6 +25,11 @@ public interface CloudProviderServicesV4Endopint {
     @Path("objectstorage/getmetadata")
     @Produces(MediaType.APPLICATION_JSON)
     ObjectStorageMetadataResponse getObjectStorageMetaData(@Valid ObjectStorageMetadataRequest request);
+
+    @POST
+    @Path("objectstorage/validate")
+    @Produces(MediaType.APPLICATION_JSON)
+    ObjectStorageValidateResponse validateObjectStorage(@Valid ObjectStorageValidateRequest request);
 
     @POST
     @Path("nosql/getmetadata")
