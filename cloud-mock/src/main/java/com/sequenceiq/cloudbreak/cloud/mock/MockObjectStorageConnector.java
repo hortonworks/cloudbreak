@@ -5,10 +5,13 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
+import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 
 @Service
 public class MockObjectStorageConnector implements ObjectStorageConnector {
@@ -18,6 +21,11 @@ public class MockObjectStorageConnector implements ObjectStorageConnector {
         // for mocking it's necessary to pass the environment's location hence please provide it at the end of the storage request separated by a colon
         // e.g.: someStorageLocationStuff:London
         return ObjectStorageMetadataResponse.builder().withRegion(extractRegionFromStoragePath(request.getObjectStoragePath()).orElse(null)).build();
+    }
+
+    @Override
+    public ObjectStorageValidateResponse validateObjectStorage(ObjectStorageValidateRequest request) {
+        return ObjectStorageValidateResponse.builder().withStatus(ResponseStatus.OK).build();
     }
 
     @Override

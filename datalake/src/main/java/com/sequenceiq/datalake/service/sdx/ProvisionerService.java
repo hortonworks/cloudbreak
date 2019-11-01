@@ -48,9 +48,6 @@ public class ProvisionerService {
     private SdxStatusService sdxStatusService;
 
     @Inject
-    private StackRequestManifester stackRequestManifester;
-
-    @Inject
     private StackV4Endpoint stackV4Endpoint;
 
     @Inject
@@ -110,7 +107,6 @@ public class ProvisionerService {
 
     public void startStackProvisioning(Long id, DetailedEnvironmentResponse environment, DatabaseServerStatusV4Response database) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
-            stackRequestManifester.configureStackForSdxCluster(sdxCluster, environment);
             LOGGER.info("Call cloudbreak with stackrequest");
             try {
                 StackV4Request stackV4Request = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class);

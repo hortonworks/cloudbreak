@@ -124,28 +124,42 @@ public class CloudStorageConverter {
         FileSystemType type = null;
         if (cloudStorageRequest.getIdentities() != null && !cloudStorageRequest.getIdentities().isEmpty()) {
             for (StorageIdentityBase storageIdentity : cloudStorageRequest.getIdentities()) {
-                if (storageIdentity != null) {
-                    if (storageIdentity.getAdls() != null) {
-                        cloudFileSystemViews.add(cloudStorageParametersConverter.adlsToCloudView(storageIdentity));
-                        type = FileSystemType.ADLS;
-                    } else if (storageIdentity.getGcs() != null) {
-                        cloudFileSystemViews.add(cloudStorageParametersConverter.gcsToCloudView(storageIdentity));
-                        type = FileSystemType.GCS;
-                    } else if (storageIdentity.getS3() != null) {
-                        cloudFileSystemViews.add(cloudStorageParametersConverter.s3ToCloudView(storageIdentity));
-                        type = FileSystemType.S3;
-                    } else if (storageIdentity.getWasb() != null) {
-                        cloudFileSystemViews.add(cloudStorageParametersConverter.wasbToCloudView(storageIdentity));
-                        type = FileSystemType.WASB;
-                    } else if (storageIdentity.getAdlsGen2() != null) {
-                        cloudFileSystemViews.add(cloudStorageParametersConverter.adlsGen2ToCloudView(storageIdentity));
-                        type = FileSystemType.ADLS_GEN_2;
-                    }
-                }
+                type = getCloudFileSystemView(cloudStorageRequest, cloudFileSystemViews, storageIdentity);
             }
         }
         validateCloudFileSystemViews(cloudFileSystemViews, type);
         return new SpiFileSystem("", type, cloudFileSystemViews);
+    }
+
+    private FileSystemType getCloudFileSystemView(CloudStorageBase cloudStorageRequest,
+                                                    List<CloudFileSystemView> cloudFileSystemViews,
+                                                    StorageIdentityBase storageIdentity) {
+        FileSystemType type = null;
+        if (storageIdentity != null) {
+            CloudFileSystemView cloudFileSystemView = null;
+            if (storageIdentity.getAdls() != null) {
+                cloudFileSystemView = cloudStorageParametersConverter.adlsToCloudView(storageIdentity);
+                type = FileSystemType.ADLS;
+            } else if (storageIdentity.getGcs() != null) {
+                cloudFileSystemView = cloudStorageParametersConverter.gcsToCloudView(storageIdentity);
+                type = FileSystemType.GCS;
+            } else if (storageIdentity.getS3() != null) {
+                cloudFileSystemView = cloudStorageParametersConverter.s3ToCloudView(storageIdentity);
+                type = FileSystemType.S3;
+            } else if (storageIdentity.getWasb() != null) {
+                cloudFileSystemView = cloudStorageParametersConverter.wasbToCloudView(storageIdentity);
+                type = FileSystemType.WASB;
+            } else if (storageIdentity.getAdlsGen2() != null) {
+                cloudFileSystemView = cloudStorageParametersConverter.adlsGen2ToCloudView(storageIdentity);
+                type = FileSystemType.ADLS_GEN_2;
+            }
+            if (cloudFileSystemView != null) {
+                cloudFileSystemView.setAccountMapping(cloudStorageRequest.getAccountMapping());
+                cloudFileSystemView.setLocations(cloudStorageRequest.getLocations());
+                cloudFileSystemViews.add(cloudFileSystemView);
+            }
+        }
+        return type;
     }
 
     private void validateCloudFileSystemViews(List<CloudFileSystemView> cloudFileSystemViews, FileSystemType type) {

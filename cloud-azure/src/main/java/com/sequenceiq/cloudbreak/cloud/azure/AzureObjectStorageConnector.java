@@ -16,6 +16,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 
 @Service
 public class AzureObjectStorageConnector implements ObjectStorageConnector {
@@ -41,6 +43,11 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
                     .build();
         }
 
+    }
+
+    @Override
+    public ObjectStorageValidateResponse validateObjectStorage(ObjectStorageValidateRequest request) {
+        return ObjectStorageValidateResponse.builder().withStatus(ResponseStatus.OK).build();
     }
 
     @Override

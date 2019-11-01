@@ -14,6 +14,8 @@ import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
+import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -44,13 +46,17 @@ import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
+import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 
 @Service
 public class StackRequestManifester {
@@ -63,10 +69,17 @@ public class StackRequestManifester {
     private GatewayManifester gatewayManifester;
 
     @Inject
+    private CloudStorageManifester cloudStorageManifester;
+
+    @Inject
+    private CloudStorageValidator cloudStorageValidator;
+
+    @Inject
     private GrpcIdbmmsClient idbmmsClient;
 
-    public void configureStackForSdxCluster(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
-        StackV4Request generatedStackV4Request = setupStackRequestForCloudbreak(sdxCluster, environment);
+    public void configureStackForSdxCluster(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster,
+                                            StackV4Request stackRequest, DetailedEnvironmentResponse environment) {
+        StackV4Request generatedStackV4Request = setupStackRequestForCloudbreak(sdxClusterRequest, sdxCluster, stackRequest, environment);
         gatewayManifester.configureGatewayForSdxCluster(generatedStackV4Request);
         addStackV4RequestAsString(sdxCluster, generatedStackV4Request);
     }
@@ -81,45 +94,44 @@ public class StackRequestManifester {
         }
     }
 
-    private StackV4Request setupStackRequestForCloudbreak(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
-        try {
-            LOGGER.info("Setting up stack request of SDX {} for cloudbreak", sdxCluster.getClusterName());
-            StackV4Request stackRequest = JsonUtil.readValue(sdxCluster.getStackRequest(), StackV4Request.class);
-            stackRequest.setName(sdxCluster.getClusterName());
-            stackRequest.setType(StackType.DATALAKE);
-            if (stackRequest.getTags() == null) {
-                TagsV4Request tags = new TagsV4Request();
-                try {
-                    tags.setUserDefined(sdxCluster.getTags().get(HashMap.class));
-                } catch (IOException e) {
-                    LOGGER.error("Can not parse JSON to tags");
-                    throw new BadRequestException("Can not parse JSON to tags", e);
-                }
-                stackRequest.setTags(tags);
+    private StackV4Request setupStackRequestForCloudbreak(SdxClusterRequest sdxClusterRequest,
+                                                            SdxCluster sdxCluster, StackV4Request stackRequest,
+                                                            DetailedEnvironmentResponse environment) {
+        LOGGER.info("Setting up stack request of SDX {} for cloudbreak", sdxCluster.getClusterName());
+        stackRequest.setName(sdxCluster.getClusterName());
+        stackRequest.setType(StackType.DATALAKE);
+        if (stackRequest.getTags() == null) {
+            TagsV4Request tags = new TagsV4Request();
+            try {
+                tags.setUserDefined(sdxCluster.getTags().get(HashMap.class));
+            } catch (IOException e) {
+                LOGGER.error("Can not parse JSON to tags");
+                throw new BadRequestException("Can not parse JSON to tags", e);
             }
-            stackRequest.setEnvironmentCrn(sdxCluster.getEnvCrn());
-
-            if (CloudPlatform.YARN.name().equals(environment.getCloudPlatform())) {
-                setupYarnDetails(environment, stackRequest);
-            }
-
-            if (environment.getNetwork() != null
-                    && environment.getNetwork().getSubnetMetas() != null
-                    && !environment.getNetwork().getSubnetMetas().isEmpty()) {
-                CloudSubnet cloudSubnet = getSubnet(environment.getNetwork());
-                setupPlacement(environment, cloudSubnet, stackRequest);
-                setupNetwork(environment, cloudSubnet, stackRequest);
-            }
-
-            setupAuthentication(environment, stackRequest);
-            setupSecurityAccess(environment, stackRequest);
-            setupClusterRequest(stackRequest);
-            setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
-            return stackRequest;
-        } catch (IOException e) {
-            LOGGER.error("Can not parse JSON to stack request");
-            throw new IllegalStateException("Can not parse JSON to stack request", e);
+            stackRequest.setTags(tags);
         }
+        stackRequest.setEnvironmentCrn(sdxCluster.getEnvCrn());
+
+        if (CloudPlatform.YARN.name().equals(environment.getCloudPlatform())) {
+            setupYarnDetails(environment, stackRequest);
+        }
+
+        if (environment.getNetwork() != null
+                && environment.getNetwork().getSubnetMetas() != null
+                && !environment.getNetwork().getSubnetMetas().isEmpty()) {
+            CloudSubnet cloudSubnet = getSubnet(environment.getNetwork());
+            setupPlacement(environment, cloudSubnet, stackRequest);
+            setupNetwork(environment, cloudSubnet, stackRequest);
+        }
+
+        setupAuthentication(environment, stackRequest);
+        setupSecurityAccess(environment, stackRequest);
+        setupClusterRequest(stackRequest);
+        prepareTelemetryForStack(stackRequest, environment);
+        prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
+        setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
+        cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment);
+        return stackRequest;
     }
 
     private CloudSubnet getSubnet(EnvironmentNetworkResponse network) {
@@ -249,6 +261,32 @@ public class StackRequestManifester {
         }
     }
 
+    private void prepareTelemetryForStack(StackV4Request stackV4Request, DetailedEnvironmentResponse environment) {
+        if (environment.getTelemetry() != null && environment.getTelemetry().getLogging() != null) {
+            TelemetryRequest telemetryRequest = new TelemetryRequest();
+            LoggingRequest loggingRequest = new LoggingRequest();
+            loggingRequest.setS3(environment.getTelemetry().getLogging().getS3());
+            loggingRequest.setAdlsGen2(environment.getTelemetry().getLogging().getAdlsGen2());
+            loggingRequest.setStorageLocation(environment.getTelemetry().getLogging().getStorageLocation());
+            telemetryRequest.setLogging(loggingRequest);
+            if (environment.getTelemetry().getFeatures() != null
+                    && environment.getTelemetry().getFeatures().getReportDeploymentLogs() != null) {
+                FeaturesRequest featuresRequest = new FeaturesRequest();
+                featuresRequest.setReportDeploymentLogs(
+                    environment.getTelemetry().getFeatures().getReportDeploymentLogs());
+                telemetryRequest.setFeatures(featuresRequest);
+            }
+            stackV4Request.setTelemetry(telemetryRequest);
+        }
+    }
+
+    private void prepareCloudStorageForStack(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request,
+                                                SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
+        CloudStorageRequest cloudStorageRequest = cloudStorageManifester.initCloudStorageRequest(environment,
+            stackV4Request.getCluster(), sdxCluster, sdxClusterRequest);
+        stackV4Request.getCluster().setCloudStorage(cloudStorageRequest);
+    }
+
     void setupCloudStorageAccountMapping(StackV4Request stackRequest, String environmentCrn, IdBrokerMappingSource mappingSource, String cloudPlatform) {
         String stackName = stackRequest.getName();
         CloudStorageRequest cloudStorage = stackRequest.getCluster().getCloudStorage();
@@ -258,7 +296,13 @@ public class StackRequestManifester {
             if (mappingSource == IdBrokerMappingSource.IDBMMS) {
                 LOGGER.info("Fetching account mappings from IDBMMS associated with environment {} for stack {}.", environmentCrn, stackName);
                 // Must pass the internal actor here as this operation is internal-use only; requests with other actors will be always rejected.
-                MappingsConfig mappingsConfig = idbmmsClient.getMappingsConfig(IAM_INTERNAL_ACTOR_CRN, environmentCrn, Optional.empty());
+                MappingsConfig mappingsConfig;
+                try {
+                    mappingsConfig = idbmmsClient.getMappingsConfig(IAM_INTERNAL_ACTOR_CRN, environmentCrn, Optional.empty());
+                } catch (IdbmmsOperationException e) {
+                    throw new BadRequestException(String.format("Unable to get mappings: %s",
+                        e.getMessage()), e);
+                }
                 AccountMappingBase accountMapping = new AccountMappingBase();
                 accountMapping.setGroupMappings(mappingsConfig.getGroupMappings());
                 accountMapping.setUserMappings(mappingsConfig.getActorMappings());
@@ -275,5 +319,4 @@ public class StackRequestManifester {
                     stackName, environmentCrn);
         }
     }
-
 }
