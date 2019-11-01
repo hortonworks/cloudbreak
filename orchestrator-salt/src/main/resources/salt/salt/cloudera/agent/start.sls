@@ -5,7 +5,7 @@ check_token:
   file.exists:
     - name: /etc/cloudera-scm-agent/cmagent.token
     - retry:
-        attempts: 20
+        attempts: 10
 {% endif %}
 
 start_agent:
