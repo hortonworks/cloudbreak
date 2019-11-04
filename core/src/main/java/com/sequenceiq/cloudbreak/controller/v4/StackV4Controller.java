@@ -100,12 +100,12 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     public void upgradeCluster(Long workspaceId, String name) {
-        stackOperation.upgradeCluster(aStackAccessDtoBuilder().withName(name).build(), workspaceId);
+        stackOperations.upgradeCluster(StackAccessDto.builder().withName(name).build(), workspaceId);
     }
 
     @Override
     public UpgradeOptionV4Response checkForUpgrade(Long workspaceId, String name) {
-        return stackOperation.checkForUpgrade(aStackAccessDtoBuilder().withName(name).build(), workspaceId);
+        return stackOperations.checkForUpgrade(StackAccessDto.builder().withName(name).build(), workspaceId);
     }
 
     @Override
