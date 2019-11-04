@@ -13,6 +13,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentS
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
@@ -33,6 +34,14 @@ public class MockSdxTests extends AbstractIntegrationTest {
 
     @Inject
     private SdxTestClient sdxTestClient;
+
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
+        createDefaultCredential(testContext);
+        createDefaultEnvironmentWithNetwork(testContext);
+        createDefaultImageCatalog(testContext);
+        initializeDefaultBlueprints(testContext);
+    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(

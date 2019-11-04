@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
+import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -424,6 +425,11 @@ public class OfflineStateGenerator {
         @Override
         public Optional<Long> findIdByNameAndWorkspaceId(String name, Long workspaceId) {
             return Optional.empty();
+        }
+
+        @Override
+        public Set<StackListItem> findByWorkspaceId(Long id, String environmentCrn, StackType stackType) {
+            return null;
         }
 
         @Override

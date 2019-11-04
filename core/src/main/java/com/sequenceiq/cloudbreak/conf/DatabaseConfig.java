@@ -142,6 +142,7 @@ public class DatabaseConfig {
         properties.setProperty("hibernate.show_sql", Boolean.toString(debug));
         properties.setProperty("hibernate.format_sql", Boolean.toString(debug));
         properties.setProperty("hibernate.use_sql_comments", Boolean.toString(debug));
+        properties.setProperty("hibernate.generate_statistics", Boolean.toString(debug));
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         properties.setProperty("hibernate.default_schema", dbSchemaName);
         properties.setProperty("hibernate.jdbc.lob.non_contextual_creation", Boolean.toString(true));

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -11,10 +12,12 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
+import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -22,6 +25,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -50,9 +54,18 @@ public class ClusterServiceRunner {
     @Inject
     private GatewayConfigService gatewayConfigService;
 
+    @Inject
+    private GatewayConvertUtil convertUtil;
+
+    @Inject
+    private GatewayService gatewayService;
+
     public void runAmbariServices(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Cluster cluster = stack.getCluster();
+        Cluster cluster = clusterService.getById(stack.getCluster().getId());
+
+        generateGatewaySignKeys(cluster);
+
         Orchestrator orchestrator = stack.getOrchestrator();
         MDCBuilder.buildMdcContext(cluster);
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
@@ -65,6 +78,14 @@ public class ClusterServiceRunner {
         } else {
             LOGGER.info("Please implement {} orchestrator because it is not on classpath.", orchestrator.getType());
             throw new CloudbreakException(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
+        }
+    }
+
+    private void generateGatewaySignKeys(Cluster cluster) {
+        Gateway gateway = cluster.getGateway();
+        if (Objects.nonNull(gateway)) {
+            convertUtil.generateSignKeys(gateway);
+            gatewayService.save(gateway);
         }
     }
 

@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
@@ -19,6 +20,9 @@ public class HostGroupView implements ProvisionEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private ClusterApiView cluster;
+
+    @OneToOne
+    private InstanceGroupView instanceGroup;
 
     public Long getId() {
         return id;
@@ -44,4 +48,11 @@ public class HostGroupView implements ProvisionEntity {
         this.cluster = cluster;
     }
 
+    public InstanceGroupView getInstanceGroup() {
+        return instanceGroup;
+    }
+
+    public void setInstanceGroup(InstanceGroupView instanceGroup) {
+        this.instanceGroup = instanceGroup;
+    }
 }

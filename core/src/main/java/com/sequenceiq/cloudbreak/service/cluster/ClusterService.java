@@ -262,10 +262,6 @@ public class ClusterService {
             cluster.setStack(stack);
             stack.setCluster(cluster);
 
-            start = System.currentTimeMillis();
-            gateWayUtil.generateSignKeys(cluster.getGateway());
-            LOGGER.debug("Sign key generated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
             Cluster savedCluster = saveClusterAndComponent(cluster, components, stackName);
             usageLoggingUtil.logClusterRequestedUsageEvent(cluster);
             if (stack.isAvailable()) {

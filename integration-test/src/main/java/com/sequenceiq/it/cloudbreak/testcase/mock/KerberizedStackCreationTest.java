@@ -15,6 +15,7 @@ import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.FreeIPAKerberosDescriptorTestDto;
@@ -32,6 +33,14 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
 
     @Inject
     private StackTestClient stackTestClient;
+
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
+        createDefaultCredential(testContext);
+        createDefaultEnvironmentWithNetwork(testContext);
+        createDefaultImageCatalog(testContext);
+        initializeDefaultBlueprints(testContext);
+    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(

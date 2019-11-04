@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
+import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
 import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
@@ -1132,6 +1133,10 @@ public class StackService implements ResourceIdProvider {
 
     public Set<StackIdView> findClustersConnectedToDatalake(Long stackId) {
         return stackRepository.findEphemeralClusters(stackId);
+    }
+
+    public Set<StackListItem> getByWorkspaceId(Long workspaceId, String environmentCrn, StackType stackType) {
+        return stackRepository.findByWorkspaceId(workspaceId, environmentCrn, stackType);
     }
 
     private enum Msg {

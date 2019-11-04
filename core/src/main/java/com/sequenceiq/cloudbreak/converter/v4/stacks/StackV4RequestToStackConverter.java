@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -55,16 +56,14 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.freeipa.FreeIpaAdapter;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -108,7 +107,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private TelemetryConverter telemetryConverter;
 
     @Inject
-    private KerberosConfigService kerberosConfigService;
+    private FreeIpaAdapter freeIPAAdapter;
 
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
@@ -128,14 +127,16 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         DetailedEnvironmentResponse environment = null;
         if (isTemplate(source)) {
             if (source.getEnvironmentCrn() != null) {
-                environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
+                environment = measure(() -> environmentClientService.getByCrn(source.getEnvironmentCrn()),
+                        LOGGER, "Environment responded in {} ms for stack {}", source.getName());
                 updateCustomDomainOrKerberos(source, stack);
                 updateCloudPlatformAndRelatedFields(source, stack, environment);
             }
             convertAsStackTemplate(source, stack, environment);
             setNetworkAsTemplate(source, stack);
         } else {
-            environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
+            environment = measure(() -> environmentClientService.getByCrn(source.getEnvironmentCrn()),
+                    LOGGER, "Environment responded in {} ms for stack {}", source.getName());
             convertAsStack(source, stack);
             updateCloudPlatformAndRelatedFields(source, stack, environment);
             setNetworkIfApplicable(source, stack, environment);
@@ -154,7 +155,8 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
         stack.setCreated(clock.getCurrentTimeMillis());
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
-        updateCluster(source, stack, workspace);
+        measure(() -> updateCluster(source, stack, workspace),
+                LOGGER, "Converted cluster and updated the stack in {} ms for stack {}", source.getName());
         stack.getComponents().add(getTelemetryComponent(stack, source));
 
         stack.setGatewayPort(source.getGatewayPort());
@@ -218,16 +220,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             stack.setCustomHostname(source.getCustomDomain().getHostname());
             stack.setClusterNameAsSubdomain(source.getCustomDomain().isClusterNameAsSubdomain());
             stack.setHostgroupNameAsHostname(source.getCustomDomain().isHostgroupNameAsHostname());
-        } else if (!isTemplate(source)) {
-            Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
-            kerberosConfig.ifPresent(kb -> {
-                if (kb.getType() == KerberosType.ACTIVE_DIRECTORY) {
-                    if (isEmpty(kb.getRealm())) {
-                        throw new BadRequestException("Realm cannot be null in case of ACTIVE_DIRECTORY");
-                    }
-                    stack.setCustomDomain(kb.getRealm().toLowerCase());
-                }
-            });
         }
         // Host names shall be prefixed with stack name if not configured otherwise
         if (StringUtils.isEmpty(stack.getCustomHostname())) {

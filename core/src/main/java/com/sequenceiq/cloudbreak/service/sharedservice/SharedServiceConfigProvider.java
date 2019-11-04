@@ -17,7 +17,6 @@ import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
-import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -62,7 +61,6 @@ public class SharedServiceConfigProvider {
     @Measure(SharedServiceConfigProvider.class)
     public Stack prepareDatalakeConfigs(Stack publicStack) {
         try {
-            DatalakeConfigApi connector = null;
             Optional<DatalakeResources> datalakeResource = Optional.empty();
             Set<DatalakeResources> datalakeResources = datalakeResourcesService
                     .findDatalakeResourcesByWorkspaceAndEnvironment(publicStack.getWorkspace().getId(), publicStack.getEnvironmentCrn());

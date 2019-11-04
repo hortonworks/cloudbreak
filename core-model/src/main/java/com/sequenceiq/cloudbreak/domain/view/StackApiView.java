@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -56,6 +57,9 @@ public class StackApiView extends CompactView {
     private String environmentCrn;
 
     private String resourceCrn;
+
+    @Transient
+    private Integer nodeCount;
 
     public String getResourceCrn() {
         return resourceCrn;
@@ -155,5 +159,13 @@ public class StackApiView extends CompactView {
 
     public void setTerminated(Long terminated) {
         this.terminated = terminated;
+    }
+
+    public void setNodeCount(Integer nodeCount) {
+        this.nodeCount = nodeCount;
+    }
+
+    public Integer getNodeCount() {
+        return nodeCount;
     }
 }

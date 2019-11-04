@@ -26,4 +26,11 @@ public class StackStatusView implements ProvisionEntity {
         return status;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 }

@@ -12,15 +12,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.shareds
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.HostGroupViewV4Response;
 import com.sequenceiq.cloudbreak.converter.CompactViewToCompactViewResponseConverter;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 
 @Component
 public class ClusterApiViewToClusterViewV4ResponseConverter extends CompactViewToCompactViewResponseConverter<ClusterApiView, ClusterViewV4Response> {
 
     @Inject
-    private StackService stackService;
+    private DatalakeResourcesService datalakeResourcesService;
 
     @Override
     public ClusterViewV4Response convert(ClusterApiView source) {
@@ -50,7 +51,11 @@ public class ClusterApiViewToClusterViewV4ResponseConverter extends CompactViewT
         SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
         if (cluster.getStack().getDatalakeId() != null) {
             sharedServiceResponse.setSharedClusterId(cluster.getStack().getDatalakeId());
-            sharedServiceResponse.setSharedClusterName(stackService.getByIdWithTransaction(cluster.getStack().getDatalakeId()).getName());
+            Long datalakeId = cluster.getStack().getDatalakeId();
+            datalakeResourcesService.findById(datalakeId)
+                    .or(() -> datalakeResourcesService.findByDatalakeStackId(datalakeId))
+                    .map(DatalakeResources::getName)
+                    .ifPresent(sharedServiceResponse::setSharedClusterName);
         }
         clusterResponse.setSharedServiceResponse(sharedServiceResponse);
     }

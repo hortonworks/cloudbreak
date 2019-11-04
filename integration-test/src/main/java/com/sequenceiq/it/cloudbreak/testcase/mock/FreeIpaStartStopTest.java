@@ -13,6 +13,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
@@ -26,6 +27,15 @@ public class FreeIpaStartStopTest extends AbstractIntegrationTest {
 
     @Inject
     private FreeIpaRouteHandler freeIpaRouteHandler;
+
+    @Override
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
+        createDefaultCredential(testContext);
+        createDefaultEnvironmentWithNetwork(testContext);
+        createDefaultImageCatalog(testContext);
+        initializeDefaultBlueprints(testContext);
+    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(

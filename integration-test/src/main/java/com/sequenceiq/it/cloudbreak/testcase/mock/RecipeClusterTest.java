@@ -154,10 +154,10 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(2))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(4))
                 .when(stackTestClient.deleteV4())
                 .await(STACK_DELETED)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(6))
                 .validate();
     }
 
@@ -220,7 +220,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
                 .await(STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(4))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(7))
                 .validate();
     }
 
@@ -263,7 +263,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
                 .await(STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(5))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(7))
                 .validate();
     }
 

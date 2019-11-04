@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -169,8 +170,8 @@ public class InstanceMetaDataService {
         return repository.findRemovableInstances(stackId, groupName);
     }
 
-    public Set<StackInstanceCount> countByWorkspaceId(Long workspaceId) {
-        return repository.countByWorkspaceId(workspaceId);
+    public Set<StackInstanceCount> countByWorkspaceId(Long workspaceId, String environmentCrn, StackType stackType) {
+        return repository.countByWorkspaceId(workspaceId, environmentCrn, stackType);
     }
 
     public Set<InstanceMetaData> findAllRequestedInStack(Long stackId) {
