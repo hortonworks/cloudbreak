@@ -61,7 +61,7 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.xlarge",
+          "instanceType": "m5.2xlarge",
           "rootVolume": {
             "size": 50
           }
@@ -96,7 +96,7 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.xlarge",
+          "instanceType": "m5.2xlarge",
           "rootVolume": {
             "size": 50
           }
