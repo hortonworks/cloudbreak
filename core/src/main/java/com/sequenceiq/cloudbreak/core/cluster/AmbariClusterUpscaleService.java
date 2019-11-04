@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.core.cluster;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -12,18 +14,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -44,6 +50,9 @@ public class AmbariClusterUpscaleService {
 
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private HostGroupService hostGroupService;
@@ -68,11 +77,16 @@ public class AmbariClusterUpscaleService {
                 }
                 hostsPerHostGroup.get(hostGroupName).add(hostName);
             }
-            clusterService.updateInstancesToRunning(stack.getCluster().getId(), hostsPerHostGroup);
+            clusterService.updateHostMetadata(stack.getCluster().getId(), hostsPerHostGroup, HostMetadataState.SERVICES_RUNNING);
         } else {
             LOGGER.info("Please implement {} orchestrator because it is not on classpath.", orchestrator.getType());
             throw new CloudbreakException(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
         }
+        Set<String> allHosts = new HashSet<>();
+        for (Entry<String, List<String>> hostsPerHostGroupEntry : hostsPerHostGroup.entrySet()) {
+            allHosts.addAll(hostsPerHostGroupEntry.getValue());
+        }
+        instanceMetaDataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, allHosts);
         ambariClusterConnector.waitForHosts(stackService.getByIdWithListsInTransaction(stackId));
     }
 
@@ -88,12 +102,14 @@ public class AmbariClusterUpscaleService {
     public void installServicesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.info("Start installing Ambari services");
-        ambariClusterConnector.upscaleCluster(stack, hostGroupName);
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName);
+        Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
+        ambariClusterConnector.upscaleCluster(stack, hostGroup, hostMetadata);
     }
 
     public void executePostRecipesOnNewHosts(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.info("Start executing post recipes");
-        recipeEngine.executePostInstallRecipes(stack);
+        recipeEngine.executePostInstallRecipes(stack, hostGroupService.getByCluster(stack.getCluster().getId()));
     }
 }

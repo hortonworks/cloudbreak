@@ -35,7 +35,8 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
@@ -74,6 +75,9 @@ public class AmbariClusterSetupService implements ClusterSetupService {
     private AmbariClientFactory clientFactory;
 
     @Inject
+    private AmbariUserHandler ambariUserHandler;
+
+    @Inject
     private AmbariClusterConnectorPollingResultChecker ambariClusterConnectorPollingResultChecker;
 
     @Inject
@@ -84,6 +88,9 @@ public class AmbariClusterSetupService implements ClusterSetupService {
 
     @Inject
     private RecipeEngine recipeEngine;
+
+    @Inject
+    private HostMetadataRepository hostMetadataRepository;
 
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
@@ -139,18 +146,18 @@ public class AmbariClusterSetupService implements ClusterSetupService {
         try {
             clusterService.updateCreationDateOnCluster(cluster);
             AmbariClient ambariClient = clientFactory.getAmbariClient(stack, stack.getCluster());
-            Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
+            Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipesAndHostmetadata(cluster.getId());
             TemplatePreparationObject templatePreparationObject = conversionService.convert(stack, TemplatePreparationObject.class);
             Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(hostGroups);
-            Set<InstanceMetaData> runningInstanceMetaDataSet = stack.getRunningInstanceMetaDataSet();
+            Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
 
-            recipeEngine.executePostAmbariStartRecipes(stack, hostGroupService.getRecipesByCluster(cluster.getId()));
+            recipeEngine.executePostAmbariStartRecipes(stack, hostGroups);
             ambariRepositoryVersionService.setBaseRepoURL(stack.getName(), cluster.getId(), stack.getOrchestrator(), ambariClient);
             String blueprintText = centralBlueprintUpdater.getBlueprintText(templatePreparationObject);
             addBlueprint(stack.getId(), ambariClient, blueprintText, cluster.getTopologyValidation());
             cluster.setExtendedBlueprintText(blueprintText);
             clusterService.updateCluster(cluster);
-            PollingResult waitForHostsResult = ambariPollingServiceProvider.hostsPollingService(stack, ambariClient, runningInstanceMetaDataSet);
+            PollingResult waitForHostsResult = ambariPollingServiceProvider.hostsPollingService(stack, ambariClient, hostsInCluster);
             ambariClusterConnectorPollingResultChecker
                     .checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
             ambariClusterTemplateSubmitter.addClusterTemplate(cluster, hostGroupMappings, ambariClient);
@@ -165,10 +172,10 @@ public class AmbariClusterSetupService implements ClusterSetupService {
 
             ambariClusterConnectorPollingResultChecker
                     .checkPollingResult(pollingResultExceptionPair.getLeft(), constructClusterFailedMessage(cluster.getId(), ambariClient));
-            recipeEngine.executePostInstallRecipes(stack);
+            recipeEngine.executePostInstallRecipes(stack, hostGroups);
             ambariSmartSenseCapturer.capture(0, ambariClient);
             cluster = ambariViewProvider.provideViewInformation(ambariClient, cluster);
-            ambariClusterCreationSuccessHandler.handleClusterCreationSuccess(runningInstanceMetaDataSet, cluster);
+            ambariClusterCreationSuccessHandler.handleClusterCreationSuccess(stack, cluster);
         } catch (CancellationException cancellationException) {
             throw cancellationException;
         } catch (Exception e) {
@@ -190,7 +197,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
                 .hostsPollingService(
                         stack,
                         clientFactory.getAmbariClient(stack, stack.getCluster()),
-                        stack.getRunningInstanceMetaDataSet());
+                        hostMetadataRepository.findHostsInCluster(stack.getCluster().getId()));
     }
 
     @Override

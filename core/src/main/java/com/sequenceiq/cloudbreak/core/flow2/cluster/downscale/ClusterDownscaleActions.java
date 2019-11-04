@@ -77,7 +77,7 @@ public class ClusterDownscaleActions {
         return new AbstractClusterAction<>(RemoveHostsSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, RemoveHostsSuccess payload, Map<Object, Object> variables) {
-                clusterDownscaleService.finalizeClusterScaleDown(context.getStackId());
+                clusterDownscaleService.updateMetadata(context.getStackId(), payload.getHostNames(), payload.getHostGroupName());
                 sendEvent(context);
             }
 

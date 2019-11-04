@@ -89,22 +89,17 @@ public class Verification {
     }
 
     private void logVerify() {
-        LOGGER.info("Verification call {} {}, at least: {}, exactly: {}", httpMethod, path, atLeast, exactTimes);
-        if (bodyContainsList.size() > 0) {
-            LOGGER.info("Body must contains: " + StringUtils.join(bodyContainsList, ","));
-        }
+        LOGGER.info("Verification call: " + path);
+        LOGGER.info("Body must contains: " + StringUtils.join(bodyContainsList, ","));
         List<String> patternStringList = patternList.stream().map(Pattern::pattern).collect(Collectors.toList());
-        if (patternList.size() > 0) {
-            LOGGER.info("Body must match: " + StringUtils.join(patternStringList, ","));
-        }
+        LOGGER.info("Body must match: " + StringUtils.join(patternStringList, ","));
     }
 
     private void checkExactTimes(int times) {
         if (exactTimes != null) {
             if (exactTimes != times) {
                 logRequests();
-                logVerify();
-                fail(httpMethod + " " + path + " request should have been invoked exactly " + exactTimes + " times, but it was invoked " + times + " times");
+                fail(path + " request should have been invoked exactly " + exactTimes + " times, but it was invoked " + times + " times");
             }
         }
     }
@@ -113,8 +108,7 @@ public class Verification {
         if (atLeast != null) {
             if (times < atLeast) {
                 logRequests();
-                logVerify();
-                fail(httpMethod + " " + path + " request should have been invoked at least " + atLeast + " times, but it was invoked " + times + " times");
+                fail(path + " request should have been invoked at least " + atLeast + " times, but it was invoked " + times + " times");
             }
         }
     }
@@ -148,6 +142,7 @@ public class Verification {
     }
 
     private boolean isPathMatched(Call call) {
+        boolean pathMatched;
         return regex ? Pattern.matches(path, call.getUri()) : call.getUri().equals(path);
     }
 

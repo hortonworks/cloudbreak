@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -10,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -27,15 +30,29 @@ public class InstanceMetaDataService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    public void updateInstanceStatus(InstanceMetaData instanceMetaData, com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus newStatus) {
-        updateInstanceStatus(instanceMetaData, newStatus, null);
+    public void updateInstanceStatus(Iterable<InstanceGroup> instanceGroup,
+            Map<InstanceGroupType, com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus> newStatusByGroupType) {
+        for (InstanceGroup group : instanceGroup) {
+            com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus newStatus = newStatusByGroupType.get(group.getInstanceGroupType());
+            if (newStatus != null) {
+                for (InstanceMetaData instanceMetaData : group.getNotDeletedInstanceMetaDataSet()) {
+                    instanceMetaData.setInstanceStatus(newStatus);
+                    instanceMetaDataRepository.save(instanceMetaData);
+                }
+            }
+        }
     }
 
-    public void updateInstanceStatus(InstanceMetaData instanceMetaData, com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus newStatus,
-            String statusReason) {
-        instanceMetaData.setInstanceStatus(newStatus);
-        instanceMetaData.setStatusReason(statusReason);
-        instanceMetaDataRepository.save(instanceMetaData);
+    public void updateInstanceStatus(Iterable<InstanceGroup> instanceGroup, com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus newStatus,
+            Collection<String> candidateAddresses) {
+        for (InstanceGroup group : instanceGroup) {
+            for (InstanceMetaData instanceMetaData : group.getNotDeletedInstanceMetaDataSet()) {
+                if (candidateAddresses.contains(instanceMetaData.getDiscoveryFQDN())) {
+                    instanceMetaData.setInstanceStatus(newStatus);
+                    instanceMetaDataRepository.save(instanceMetaData);
+                }
+            }
+        }
     }
 
     public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances, boolean save) {
@@ -85,6 +102,10 @@ public class InstanceMetaDataService {
         }
     }
 
+    public Set<InstanceMetaData> unusedInstancesInInstanceGroupByName(Long stackId, String instanceGroupName) {
+        return instanceMetaDataRepository.findUnusedHostsInInstanceGroup(stackId, instanceGroupName);
+    }
+
     public Set<InstanceMetaData> getAllInstanceMetadataByStackId(Long stackId) {
         return instanceMetaDataRepository.findAllInStack(stackId);
     }
@@ -98,16 +119,13 @@ public class InstanceMetaDataService {
         return null;
     }
 
-    public InstanceMetaData getPrimaryGatewayInstanceMetadata(long stackId) {
+    public InstanceMetaData
+    getPrimaryGatewayInstanceMetadata(long stackId) {
         try {
             return instanceMetaDataRepository.getPrimaryGatewayInstanceMetadata(stackId);
         } catch (AccessDeniedException ignore) {
             LOGGER.info("No primary gateway for stack [{}]", stackId);
             return null;
         }
-    }
-
-    public InstanceMetaData findByHostname(Long stackId, String hostName) {
-        return instanceMetaDataRepository.findHostInStack(stackId, hostName);
     }
 }

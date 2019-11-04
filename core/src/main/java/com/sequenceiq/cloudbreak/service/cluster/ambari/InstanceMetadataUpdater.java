@@ -37,6 +37,7 @@ import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -49,7 +50,6 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 @ConfigurationProperties(prefix = "cb.instance")
@@ -76,13 +76,9 @@ public class InstanceMetadataUpdater {
     private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Inject
-    private StackService stackService;
-
-    @Inject
     private HostGroupService hostGroupService;
 
-    public void updatePackageVersionsOnAllInstances(Long stackId) throws Exception {
-        Stack stack = getStackForFreshInstanceStatuses(stackId);
+    public void updatePackageVersionsOnAllInstances(Stack stack) throws Exception {
         Boolean enableKnox = stack.getCluster().getGateway() != null;
         GatewayConfig gatewayConfig = getGatewayConfig(stack, enableKnox);
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
@@ -106,10 +102,6 @@ public class InstanceMetadataUpdater {
         notifyIfInstancesMissingPackageVersion(stack, instancesWithMissingPackageVersions);
     }
 
-    private Stack getStackForFreshInstanceStatuses(Long stackId) {
-        return stackService.getByIdWithLists(stackId);
-    }
-
     private GatewayConfig getGatewayConfig(Stack stack, Boolean enableKnox) {
         GatewayConfig gatewayConfig = null;
         for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
@@ -127,13 +119,15 @@ public class InstanceMetadataUpdater {
         List<String> failedVersionQueriesByHost = Lists.newArrayList();
         for (InstanceMetaData im : instanceMetaDataSet) {
             Map<String, String> packageVersionsOnHost = packageVersionsByNameByHost.get(im.getDiscoveryFQDN());
-            if (CollectionUtils.isEmpty(packageVersionsOnHost) && im.isRunning()) {
+            if (CollectionUtils.isEmpty(packageVersionsOnHost)) {
                 failedVersionQueriesByHost.add(im.getDiscoveryFQDN());
                 Image image = im.getImage().get(Image.class);
                 image.getPackageVersions().clear();
                 im.setImage(new Json(image));
-                im.setInstanceStatus(InstanceStatus.SERVICES_UNHEALTHY);
+                im.setInstanceStatus(InstanceStatus.ORCHESTRATION_FAILED);
                 instanceMetaDataRepository.save(im);
+                hostGroupService.updateHostMetaDataStatus(stack.getCluster(), im.getDiscoveryFQDN(), HostMetadataState.UNHEALTHY,
+                        "Version query is failed on host");
             }
         }
         return failedVersionQueriesByHost;

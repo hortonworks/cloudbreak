@@ -14,7 +14,7 @@ import javax.ws.rs.core.MediaType;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
@@ -30,8 +30,8 @@ public class AppMasterFilter implements HostFilter {
     private Client restClient;
 
     @Override
-    public List<InstanceMetaData> filter(long clusterId, Map<String, String> config, List<InstanceMetaData> hosts) throws HostFilterException {
-        List<InstanceMetaData> result = new ArrayList<>(hosts);
+    public List<HostMetadata> filter(long clusterId, Map<String, String> config, List<HostMetadata> hosts) throws HostFilterException {
+        List<HostMetadata> result = new ArrayList<>(hosts);
         try {
             String resourceManagerAddress = config.get(ConfigParam.YARN_RM_WEB_ADDRESS.key());
             WebTarget target = restClient.target("http://" + resourceManagerAddress + HostFilterService.RM_WS_PATH).path("apps").queryParam("state", "RUNNING");
@@ -45,7 +45,7 @@ public class AppMasterFilter implements HostFilter {
                     String hostName = node.get(AM_KEY).textValue();
                     hostsWithAM.add(hostName.substring(0, hostName.lastIndexOf(':')));
                 }
-                result.removeIf(host -> hostsWithAM.contains(host.getDiscoveryFQDN()));
+                result.removeIf(host -> hostsWithAM.contains(host.getHostName()));
             }
         } catch (Exception e) {
             throw new HostFilterException("Error filtering based on ApplicationMaster location", e);

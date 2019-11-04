@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
-import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus.SERVICES_UNHEALTHY;
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus.ORCHESTRATION_FAILED;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -47,7 +48,6 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 public class InstanceMetadataUpdaterTest {
 
@@ -74,9 +74,6 @@ public class InstanceMetadataUpdaterTest {
 
     @Mock
     private HostGroupService hostGroupService;
-
-    @Mock
-    private StackService stackService;
 
     @InjectMocks
     private InstanceMetadataUpdater underTest;
@@ -119,8 +116,7 @@ public class InstanceMetadataUpdaterTest {
 
     @Test
     public void updatePackageVersionsOnAllInstances() throws Exception {
-        when(stackService.getByIdWithLists(anyLong())).thenReturn(createStack());
-        underTest.updatePackageVersionsOnAllInstances(1L);
+        underTest.updatePackageVersionsOnAllInstances(createStack());
 
         verify(cloudbreakEventService, times(0)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
     }
@@ -134,13 +130,13 @@ public class InstanceMetadataUpdaterTest {
         hostPackageMap.put("hostByCmd", falsePackageMap());
         when(hostOrchestrator.getPackageVersionsFromAllHosts(any(GatewayConfig.class), any())).thenReturn(hostPackageMap);
 
-        when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
-        underTest.updatePackageVersionsOnAllInstances(1L);
+        underTest.updatePackageVersionsOnAllInstances(stack);
 
-        verify(cloudbreakEventService, times(2)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
+        verify(hostGroupService, times(1)).updateHostMetaDataStatus(any(), anyString(), eq(HostMetadataState.UNHEALTHY), anyString());
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
         verify(cloudbreakMessagesService, times(1))
                 .getMessage(eq(InstanceMetadataUpdater.Msg.PACKAGE_VERSION_CANNOT_BE_QUERIED.code()), anyCollection());
-        assertEquals(SERVICES_UNHEALTHY, stack.getInstanceGroups().stream()
+        assertEquals(ORCHESTRATION_FAILED, stack.getInstanceGroups().stream()
             .filter(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream()
                 .filter(instanceMetaData -> StringUtils.equals(instanceMetaData.getDiscoveryFQDN(), "hostByCmd"))
                 .findFirst()
@@ -158,8 +154,7 @@ public class InstanceMetadataUpdaterTest {
         hostPackageMap.put("hostByCmd", packageMap);
         when(hostOrchestrator.getPackageVersionsFromAllHosts(any(GatewayConfig.class), any())).thenReturn(hostPackageMap);
 
-        when(stackService.getByIdWithLists(anyLong())).thenReturn(createStack());
-        underTest.updatePackageVersionsOnAllInstances(1L);
+        underTest.updatePackageVersionsOnAllInstances(createStack());
 
         verify(cloudbreakEventService, times(2)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
         verify(cloudbreakMessagesService, times(1))
@@ -177,8 +172,7 @@ public class InstanceMetadataUpdaterTest {
         hostPackageMap.put("hostByCmd", packageMap);
         when(hostOrchestrator.getPackageVersionsFromAllHosts(any(GatewayConfig.class), any())).thenReturn(hostPackageMap);
 
-        when(stackService.getByIdWithLists(anyLong())).thenReturn(createStack());
-        underTest.updatePackageVersionsOnAllInstances(1L);
+        underTest.updatePackageVersionsOnAllInstances(createStack());
 
         verify(cloudbreakEventService, times(2)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
         verify(cloudbreakMessagesService, times(1))
@@ -205,7 +199,7 @@ public class InstanceMetadataUpdaterTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceGroupType(instanceGroupType);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
+        instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
         instanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         Image image = new Image("imagename", null, "os", "ostype", "catalogurl",
                 "catalogname", "iamgeid", packageMap());

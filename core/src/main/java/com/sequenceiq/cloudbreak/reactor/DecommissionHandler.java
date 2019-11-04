@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
@@ -66,7 +67,7 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
             hostNames = getHostNamesForPrivateIds(request, stack);
-            Map<String, InstanceMetaData> hostsToRemove = ambariDecommissioner.collectHostsToRemove(stack, hostGroupName, hostNames);
+            Map<String, HostMetadata> hostsToRemove = ambariDecommissioner.collectHostsToRemove(stack, hostGroupName, hostNames);
             Set<String> decommissionedHostNames;
             if (skipAmbariDecomission(request, hostsToRemove)) {
                 decommissionedHostNames = hostNames;
@@ -83,7 +84,7 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 
-    private boolean skipAmbariDecomission(DecommissionRequest request, Map<String, InstanceMetaData> hostsToRemove) {
+    private boolean skipAmbariDecomission(DecommissionRequest request, Map<String, HostMetadata> hostsToRemove) {
         return hostsToRemove.isEmpty() || request.getDetails() != null && request.getDetails().isForced();
     }
 
@@ -97,7 +98,7 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
     private void executePreTerminationRecipes(Stack stack, String hostGroupName, Set<String> hostNames) {
         try {
             HostGroup hostGroup = hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName);
-            recipeEngine.executePreTerminationRecipes(stack, hostGroup.getRecipes(), hostNames);
+            recipeEngine.executePreTerminationRecipes(stack, Collections.singleton(hostGroup), hostNames);
         } catch (Exception ex) {
             LOGGER.error(ex.getLocalizedMessage(), ex);
         }

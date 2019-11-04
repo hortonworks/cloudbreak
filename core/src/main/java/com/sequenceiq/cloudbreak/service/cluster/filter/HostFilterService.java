@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariConfigurationService;
@@ -38,8 +38,8 @@ public class HostFilterService {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
-    public List<InstanceMetaData> filterHostsForDecommission(Cluster cluster, Collection<InstanceMetaData> hosts, String hostGroup) {
-        List<InstanceMetaData> filteredList = new ArrayList<>(hosts);
+    public List<HostMetadata> filterHostsForDecommission(Cluster cluster, Collection<HostMetadata> hosts, String hostGroup) {
+        List<HostMetadata> filteredList = new ArrayList<>(hosts);
         LOGGER.info("Ambari service config, hostGroup: {}, originalList: {}", hostGroup, filteredList);
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(cluster.getStack().getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, cluster.getStack().getGatewayPort(), cluster);

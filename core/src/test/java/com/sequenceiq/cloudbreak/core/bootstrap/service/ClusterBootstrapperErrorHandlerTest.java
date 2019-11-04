@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
@@ -56,6 +57,9 @@ public class ClusterBootstrapperErrorHandlerTest {
 
     @Mock
     private InstanceGroupRepository instanceGroupRepository;
+
+    @Mock
+    private HostMetadataRepository hostMetadataRepository;
 
     @Mock
     private CloudbreakEventService eventService;

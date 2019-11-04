@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
@@ -66,6 +67,9 @@ public class AmbariClusterSetupServiceTest {
 
     @Mock
     private RecipeEngine recipeEngine;
+
+    @Mock
+    private HostMetadataRepository hostMetadataRepository;
 
     @Mock
     private CloudbreakMessagesService cloudbreakMessagesService;

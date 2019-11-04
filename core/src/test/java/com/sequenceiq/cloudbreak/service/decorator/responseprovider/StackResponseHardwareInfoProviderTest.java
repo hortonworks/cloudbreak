@@ -19,7 +19,6 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -140,9 +139,8 @@ public class StackResponseHardwareInfoProviderTest {
     private Set<InstanceGroup> getInstanceGroups(InstanceMetaData... instanceMetaData) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName("master");
-        for (InstanceMetaData im : instanceMetaData) {
-            im.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
-            im.setInstanceGroup(instanceGroup);
+        for (InstanceMetaData instanceMetaDatum : instanceMetaData) {
+            instanceMetaDatum.setInstanceGroup(instanceGroup);
         }
         instanceGroup.setInstanceMetaData(Sets.newHashSet(instanceMetaData));
         return Sets.newHashSet(instanceGroup);

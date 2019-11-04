@@ -59,7 +59,7 @@ public class InstanceGroupToInstanceGroupResponseConverterTest extends AbstractE
     }
 
     private Set<InstanceMetaData> getInstanceMetaData(InstanceGroup instanceGroup) {
-        InstanceMetaData metadata = TestUtil.instanceMetaData(1L, 1L, InstanceStatus.SERVICES_RUNNING, false, instanceGroup);
+        InstanceMetaData metadata = TestUtil.instanceMetaData(1L, 1L, InstanceStatus.REGISTERED, false, instanceGroup);
         return Sets.newHashSet(metadata);
     }
 }

@@ -30,8 +30,11 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -59,6 +62,9 @@ public class StackSyncService {
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
+
+    @Inject
+    private HostMetadataRepository hostMetadataRepository;
 
     @Inject
     private ResourceRepository resourceRepository;
@@ -169,9 +175,9 @@ public class StackSyncService {
             instanceMetaDataRepository.save(instance);
             eventService.fireCloudbreakEvent(stack.getId(), CREATE_FAILED.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_FAILED.code(), Collections.singletonList(instance.getDiscoveryFQDN())));
-        } else if (!instance.isRunning()) {
+        } else if (!instance.isRunning() && !instance.isDecommissioned() && !instance.isCreated() && !instance.isFailed()) {
             LOGGER.info("Instance '{}' is reported as running on the cloud provider, updating metadata.", instance.getInstanceId());
-            updateMetaDataToRunning(instance);
+            updateMetaDataToRunning(stack.getId(), stack.getCluster(), instance);
         }
     }
 
@@ -254,9 +260,15 @@ public class StackSyncService {
                         Collections.singletonList(name)));
     }
 
-    private void updateMetaDataToRunning(InstanceMetaData instanceMetaData) {
-        LOGGER.info("Instance '{}' state to RUNNING.", instanceMetaData.getInstanceId());
-        instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
+    private void updateMetaDataToRunning(Long stackId, Cluster cluster, InstanceMetaData instanceMetaData) {
+        HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), instanceMetaData.getDiscoveryFQDN());
+        if (hostMetadata != null) {
+            LOGGER.info("Instance '{}' was found in the cluster metadata, setting it's state to REGISTERED.", instanceMetaData.getInstanceId());
+            instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
+        } else {
+            LOGGER.info("Instance '{}' was not found in the cluster metadata, setting it's state to UNREGISTERED.", instanceMetaData.getInstanceId());
+            instanceMetaData.setInstanceStatus(InstanceStatus.UNREGISTERED);
+        }
         instanceMetaDataRepository.save(instanceMetaData);
     }
 

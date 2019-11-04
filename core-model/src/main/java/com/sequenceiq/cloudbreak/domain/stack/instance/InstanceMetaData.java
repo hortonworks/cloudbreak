@@ -43,6 +43,8 @@ public class InstanceMetaData implements ProvisionEntity {
 
     private Boolean ambariServer;
 
+    private Boolean consulServer;
+
     private String discoveryFQDN;
 
     @Convert(converter = EncryptionConverter.class)
@@ -69,9 +71,6 @@ public class InstanceMetaData implements ProvisionEntity {
     private String subnetId;
 
     private String instanceName;
-
-    @Column(columnDefinition = "TEXT")
-    private String statusReason;
 
     public InstanceGroup getInstanceGroup() {
         return instanceGroup;
@@ -173,16 +172,29 @@ public class InstanceMetaData implements ProvisionEntity {
         this.terminationDate = terminationDate;
     }
 
+    public Boolean getConsulServer() {
+        return consulServer;
+    }
+
+    public void setConsulServer(Boolean consulServer) {
+        this.consulServer = consulServer;
+    }
+
     public boolean isCreated() {
         return InstanceStatus.CREATED.equals(instanceStatus);
     }
 
     public boolean isFailed() {
-        return instanceStatus == InstanceStatus.FAILED || instanceStatus == InstanceStatus.ORCHESTRATION_FAILED;
+        return instanceStatus == InstanceStatus.FAILED || instanceStatus == InstanceStatus.DECOMMISSION_FAILED
+                || instanceStatus == InstanceStatus.ORCHESTRATION_FAILED;
     }
 
-    public boolean isDeleteRequested() {
-        return InstanceStatus.DELETE_REQUESTED.equals(instanceStatus);
+    public boolean isDecommissioned() {
+        return InstanceStatus.DECOMMISSIONED.equals(instanceStatus);
+    }
+
+    public boolean isUnRegistered() {
+        return InstanceStatus.UNREGISTERED.equals(instanceStatus);
     }
 
     public boolean isTerminated() {
@@ -193,18 +205,12 @@ public class InstanceMetaData implements ProvisionEntity {
         return InstanceStatus.DELETED_ON_PROVIDER_SIDE.equals(instanceStatus);
     }
 
-    public boolean isUnhealthy() {
-        return InstanceStatus.SERVICES_UNHEALTHY.equals(instanceStatus);
+    public boolean isRegistered() {
+        return InstanceStatus.REGISTERED.equals(instanceStatus);
     }
 
     public boolean isRunning() {
-        return InstanceStatus.CREATED.equals(instanceStatus) || InstanceStatus.SERVICES_RUNNING.equals(instanceStatus)
-                || InstanceStatus.SERVICES_HEALTHY.equals(instanceStatus) || InstanceStatus.SERVICES_UNHEALTHY.equals(instanceStatus);
-    }
-
-    public boolean isAttached() {
-        return InstanceStatus.SERVICES_RUNNING.equals(instanceStatus) || InstanceStatus.SERVICES_HEALTHY.equals(instanceStatus)
-                || InstanceStatus.SERVICES_UNHEALTHY.equals(instanceStatus);
+        return InstanceStatus.REGISTERED.equals(instanceStatus) || InstanceStatus.UNREGISTERED.equals(instanceStatus);
     }
 
     public String getLocalityIndicator() {
@@ -274,13 +280,5 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setImage(Json image) {
         this.image = image;
-    }
-
-    public String getStatusReason() {
-        return statusReason;
-    }
-
-    public void setStatusReason(String statusReason) {
-        this.statusReason = statusReason;
     }
 }

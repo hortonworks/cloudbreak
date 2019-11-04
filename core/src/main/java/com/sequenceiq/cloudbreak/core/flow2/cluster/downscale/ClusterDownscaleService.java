@@ -3,8 +3,10 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.downscale;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -16,18 +18,21 @@ import org.springframework.util.CollectionUtils;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.NotEnoughNodeException;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -48,7 +53,7 @@ public class ClusterDownscaleService {
     private FlowMessageService flowMessageService;
 
     @Inject
-    private InstanceMetaDataService instanceMetaDataService;
+    private HostGroupService hostGroupService;
 
     public void clusterDownscaleStarted(long stackId, String hostGroupName, Integer scalingAdjustment, Set<Long> privateIds, ClusterDownscaleDetails details) {
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
@@ -67,8 +72,18 @@ public class ClusterDownscaleService {
         }
     }
 
-    public void finalizeClusterScaleDown(Long stackId) {
+    public void updateMetadata(Long stackId, Collection<String> hostNames, String hostGroupName) {
         StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
+        ClusterView clusterView = stackView.getClusterView();
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndNameWithHostMetadata(clusterView.getId(), hostGroupName);
+        List<HostMetadata> hostMetaToRemove = hostGroup.getHostMetadata().stream()
+                .filter(md -> hostNames.contains(md.getHostName())).collect(Collectors.toList());
+        hostGroup.getHostMetadata().removeAll(hostMetaToRemove);
+        hostGroupService.save(hostGroup);
+        LOGGER.info("Start updating metadata");
+        for (String hostName : hostNames) {
+            stackService.updateMetaDataStatusIfFound(stackView.getId(), hostName, InstanceStatus.DECOMMISSIONED);
+        }
         clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALED_DOWN, AVAILABLE.name());
     }
@@ -76,25 +91,35 @@ public class ClusterDownscaleService {
     public void updateMetadataStatus(DecommissionResult payload) {
         if (payload.getErrorPhase() != null) {
             Stack stack = stackService.getByIdWithListsInTransaction(payload.getStackId());
+            InstanceStatus status = getStatus(payload.getErrorPhase());
             for (String hostName : payload.getHostNames()) {
-                InstanceMetaData instanceMetaData = instanceMetaDataService.findByHostname(stack.getId(), hostName);
-                instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.SERVICES_UNHEALTHY, payload.getStatusReason());
+                stackService.updateMetaDataStatusIfFound(payload.getStackId(), hostName, status);
+                hostGroupService.updateHostMetaDataStatus(stack.getCluster(), hostName, HostMetadataState.UNHEALTHY, payload.getStatusReason());
             }
-            String errorDetailes = String.format("The following hosts are '%s': %s", InstanceStatus.SERVICES_UNHEALTHY,
-                    String.join(", ", payload.getHostNames()));
+            String errorDetailes = String.format("The following hosts are in '%s': %s", status, String.join(", ", payload.getHostNames()));
             flowMessageService.fireEventAndLog(payload.getStackId(),
                     Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "removed from", errorDetailes);
         }
     }
 
     public void updateMetadataStatus(RemoveHostsFailed payload) {
+        Stack stack = stackService.getByIdWithListsInTransaction(payload.getStackId());
         for (String hostName : payload.getFailedHostNames()) {
-            stackService.updateMetaDataStatusIfFound(payload.getStackId(), hostName, InstanceStatus.ORCHESTRATION_FAILED, payload.getException().getMessage());
+            stackService.updateMetaDataStatusIfFound(payload.getStackId(), hostName, InstanceStatus.ORCHESTRATION_FAILED);
+            hostGroupService.updateHostMetaDataStatus(stack.getCluster(), hostName, HostMetadataState.UNHEALTHY, payload.getException().getMessage());
         }
         String errorDetailes = String.format("The following hosts are in '%s': %s",
                 InstanceStatus.ORCHESTRATION_FAILED, String.join(", ", payload.getFailedHostNames()));
         flowMessageService.fireEventAndLog(payload.getStackId(),
                 Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "removed from", errorDetailes);
+    }
+
+    private InstanceStatus getStatus(String errorPhase) {
+        if (errorPhase.equals(DecommissionResult.DECOMMISSION_ERROR_PHASE)) {
+            return InstanceStatus.DECOMMISSION_FAILED;
+        } else {
+            return InstanceStatus.FAILED;
+        }
     }
 
     public void handleClusterDownscaleFailure(long stackId, Exception error) {

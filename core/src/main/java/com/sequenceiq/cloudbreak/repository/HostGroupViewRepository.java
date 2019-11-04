@@ -17,6 +17,6 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @DisableHasPermission
 public interface HostGroupViewRepository extends DisabledBaseRepository<HostGroupView, Long> {
 
-    @Query("SELECT h FROM HostGroupView h LEFT JOIN FETCH h.cluster c WHERE c.id IN :clusterIds")
+    @Query("SELECT h FROM HostGroupView h LEFT JOIN FETCH h.hostMetadata hm LEFT JOIN FETCH h.cluster c WHERE c.id IN :clusterIds")
     Set<HostGroupView> findHostGroupsInClusterList(@Param("clusterIds") Set<Long> clusterIds);
 }

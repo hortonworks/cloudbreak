@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.service.cluster.filter;
 import java.util.List;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 
 public interface HostFilter {
 
-    List<InstanceMetaData> filter(long clusterId, Map<String, String> config, List<InstanceMetaData> hosts) throws HostFilterException;
+    List<HostMetadata> filter(long clusterId, Map<String, String> config, List<HostMetadata> hosts) throws HostFilterException;
 }

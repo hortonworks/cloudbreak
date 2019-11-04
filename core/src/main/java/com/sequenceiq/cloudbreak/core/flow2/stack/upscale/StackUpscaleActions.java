@@ -53,7 +53,6 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 
 @Configuration
 public class StackUpscaleActions {
@@ -82,9 +81,6 @@ public class StackUpscaleActions {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private StackScalingService stackScalingService;
 
     @Bean(name = "UPSCALE_PREVALIDATION_STATE")
     public Action<?, ?> prevalidate() {
@@ -147,8 +143,8 @@ public class StackUpscaleActions {
     }
 
     private int getInstanceCountToCreate(Stack stack, String instanceGroupName, int adjusment) {
-        Map<String, String> unusedInstanceIds = stackScalingService.getUnusedInstanceIds(instanceGroupName, adjusment, stack);
-        return adjusment - unusedInstanceIds.size();
+        Set<InstanceMetaData> instanceMetadata = instanceMetaDataService.unusedInstancesInInstanceGroupByName(stack.getId(), instanceGroupName);
+        return adjusment - instanceMetadata.size();
     }
 
     @Bean(name = "ADD_INSTANCES_FINISHED_STATE")
@@ -180,10 +176,13 @@ public class StackUpscaleActions {
             protected Selectable createRequest(StackScalingFlowContext context) {
                 List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
                 List<CloudInstance> allKnownInstances = cloudStackConverter.buildInstances(context.getStack());
-                Map<String, String> unusedInstanceIds = stackScalingService.getUnusedInstanceIds(context.getInstanceGroupName(), context.getStack());
+                Set<String> instanceMetaData = instanceMetaDataService.unusedInstancesInInstanceGroupByName(context.getStack().getId(),
+                        context.getInstanceGroupName()).stream()
+                        .map(InstanceMetaData::getInstanceId)
+                        .collect(Collectors.toSet());
                 List<CloudInstance> newCloudInstances = allKnownInstances.stream()
                         .filter(cloudInstance -> InstanceStatus.CREATE_REQUESTED.equals(cloudInstance.getTemplate().getStatus())
-                                || unusedInstanceIds.keySet().contains(cloudInstance.getInstanceId()))
+                                || instanceMetaData.contains(cloudInstance.getInstanceId()))
                         .collect(Collectors.toList());
                 return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, newCloudInstances, allKnownInstances);
             }

@@ -34,8 +34,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostMetadataResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -141,12 +142,12 @@ public class CloudbreakUtil {
             LOGGER.info("Waiting for host status {} in hostgroup {} ...", desiredStatus, hostGroup);
             sleep();
             StackResponse stackResponse = stackV3Endpoint.getByNameInWorkspace(workspaceId, stackName, new HashSet<>());
-            List<InstanceGroupResponse> instanceGroups = stackResponse.getInstanceGroups();
-            for (InstanceGroupResponse instanceGroupResponse : instanceGroups) {
-                if (instanceGroupResponse.getGroup().equals(hostGroup)) {
-                    Set<InstanceMetaDataJson> hostMetadataResponses = instanceGroupResponse.getMetadata();
-                    for (InstanceMetaDataJson instanceMetaDataJson : hostMetadataResponses) {
-                        if (instanceMetaDataJson.getInstanceStatus().name().equals(desiredStatus)) {
+            Set<HostGroupResponse> hostGroupResponse = stackResponse.getCluster().getHostGroups();
+            for (HostGroupResponse hr : hostGroupResponse) {
+                if (hr.getName().equals(hostGroup)) {
+                    Set<HostMetadataResponse> hostMetadataResponses = hr.getMetadata();
+                    for (HostMetadataResponse hmr : hostMetadataResponses) {
+                        if (hmr.getState().equals(desiredStatus)) {
                             found = Boolean.TRUE;
                         }
                     }

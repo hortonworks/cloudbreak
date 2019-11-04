@@ -22,9 +22,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.stack.repair.StackRepairService.StackRepairFlowSubmitter;
 
@@ -33,6 +36,9 @@ public class StackRepairServiceTest {
 
     @Mock
     private InstanceMetaDataRepository instanceMetaDataRepository;
+
+    @Mock
+    private HostMetadataRepository hostMetadataRepository;
 
     @Mock
     private ExecutorService executorService;
@@ -45,10 +51,15 @@ public class StackRepairServiceTest {
 
     private Stack stack;
 
+    private Cluster cluster;
+
     @Before
     public void setUp() {
         stack = mock(Stack.class);
         when(stack.getId()).thenReturn(1L);
+        cluster = mock(Cluster.class);
+        when(stack.getCluster()).thenReturn(cluster);
+        when(cluster.getId()).thenReturn(2L);
     }
 
     @Test
@@ -69,23 +80,21 @@ public class StackRepairServiceTest {
         String privateIp2 = "ip-10-0-0-2.ec2.internal";
         String privateIp3 = "ip-10-0-0-3.ec2.internal";
 
+        setupInstanceMetadata(stack.getId(), instanceId1, privateIp1);
+        setupInstanceMetadata(stack.getId(), instanceId2, privateIp2);
+        setupInstanceMetadata(stack.getId(), instanceId3, privateIp3);
+
         String slaveGroup1 = "slave_group1";
         String slaveGroup2 = "slave_group2";
 
-        InstanceGroup slaveInstanceGroup1 = new InstanceGroup();
-        slaveInstanceGroup1.setGroupName(slaveGroup1);
-
-        InstanceGroup slaveInstanceGroup2 = new InstanceGroup();
-        slaveInstanceGroup2.setGroupName(slaveGroup2);
+        setupHostMetadata(cluster.getId(), privateIp1, slaveGroup1);
+        setupHostMetadata(cluster.getId(), privateIp2, slaveGroup2);
+        setupHostMetadata(cluster.getId(), privateIp3, slaveGroup2);
 
         Set<String> instanceIds = new HashSet<>();
         instanceIds.add(instanceId1);
         instanceIds.add(instanceId2);
         instanceIds.add(instanceId3);
-
-        setupInstanceMetadata(stack.getId(), instanceId1, privateIp1, slaveInstanceGroup1);
-        setupInstanceMetadata(stack.getId(), instanceId2, privateIp2, slaveInstanceGroup2);
-        setupInstanceMetadata(stack.getId(), instanceId3, privateIp3, slaveInstanceGroup2);
 
         underTest.add(stack, instanceIds);
 
@@ -98,9 +107,17 @@ public class StackRepairServiceTest {
         verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_ATTEMPTING, Status.UPDATE_IN_PROGRESS.name());
     }
 
-    private void setupInstanceMetadata(Long stackId, String instanceId, String privateIp, InstanceGroup instanceGroup) {
+    private void setupHostMetadata(Long clusterId, String privateIp, String hostGroupName) {
+        HostMetadata hmd1 = mock(HostMetadata.class);
+        HostGroup hg1 = mock(HostGroup.class);
+        when(hg1.getName()).thenReturn(hostGroupName);
+        when(hmd1.getHostGroup()).thenReturn(hg1);
+        when(hostMetadataRepository.findHostInClusterByName(clusterId, privateIp)).thenReturn(hmd1);
+    }
+
+    private void setupInstanceMetadata(Long stackId, String instanceId, String privateIp) {
         InstanceMetaData imd1 = mock(InstanceMetaData.class);
-        when(imd1.getInstanceGroup()).thenReturn(instanceGroup);
+        when(imd1.getDiscoveryFQDN()).thenReturn(privateIp);
         when(instanceMetaDataRepository.findByInstanceId(stackId, instanceId)).thenReturn(imd1);
     }
 

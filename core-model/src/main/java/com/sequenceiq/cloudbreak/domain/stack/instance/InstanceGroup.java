@@ -114,21 +114,9 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
                 .collect(Collectors.toSet());
     }
 
-    public Set<InstanceMetaData> getUnattachedInstanceMetaDataSet() {
-        return instanceMetaData.stream()
-                .filter(metaData -> !metaData.isAttached())
-                .collect(Collectors.toSet());
-    }
-
-    public Set<InstanceMetaData> getAttachedInstanceMetaDataSet() {
-        return instanceMetaData.stream()
-                .filter(InstanceMetaData::isAttached)
-                .collect(Collectors.toSet());
-    }
-
     public Set<InstanceMetaData> getRunningInstanceMetaDataSet() {
         return instanceMetaData.stream()
-                .filter(InstanceMetaData::isRunning)
+                .filter(metaData -> metaData.isRunning())
                 .collect(Collectors.toSet());
     }
 

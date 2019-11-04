@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.TopologyRecord;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 
@@ -33,6 +33,7 @@ public class HostGroupAssociationBuilder {
         LOGGER.info("Computing host - hostGroup mappings based on hostGroup - instanceGroup associations");
         for (HostGroup hostGroup : hostGroups) {
             List<Map<String, String>> hostInfoForHostGroup = buildHostGroupAssociation(hostGroup);
+
             hostGroupMappings.put(hostGroup.getName(), hostInfoForHostGroup);
         }
         LOGGER.info("Computed host-hostGroup associations: {}", hostGroupMappings);
@@ -41,29 +42,45 @@ public class HostGroupAssociationBuilder {
 
     public List<Map<String, String>> buildHostGroupAssociation(HostGroup hostGroup) {
         List<Map<String, String>> hostInfoForHostGroup = new ArrayList<>();
-        Map<String, String> topologyMapping = getTopologyMapping(hostGroup);
-        Set<InstanceMetaData> notTerminatedInstanceMetaDataSet = hostGroup.getInstanceGroup().getNotTerminatedInstanceMetaDataSet();
-
-        for (InstanceMetaData instanceMetaData : notTerminatedInstanceMetaDataSet) {
-            Map<String, String> hostInfo = new HashMap<>();
-            hostInfo.put(FQDN, instanceMetaData.getDiscoveryFQDN());
-            String localityIndicator = instanceMetaData.getLocalityIndicator();
-            if (localityIndicator != null) {
-                if (topologyMapping.isEmpty()) {
-                    // Azure
-                    if (localityIndicator.startsWith("/")) {
-                        hostInfo.put("rack", instanceMetaData.getLocalityIndicator());
-                        // Openstack
-                    } else {
-                        hostInfo.put("rack", '/' + instanceMetaData.getLocalityIndicator());
+        if (hostGroup.getInstanceGroup() != null) {
+            Map<String, String> topologyMapping = getTopologyMapping(hostGroup);
+            Long instanceGroupId = hostGroup.getInstanceGroup().getId();
+            List<InstanceMetaData> metas = instanceMetadataRepository.findAliveInstancesInInstanceGroup(instanceGroupId);
+            if (metas.isEmpty()) {
+                for (HostMetadata hostMetadata : hostGroup.getHostMetadata()) {
+                    Map<String, String> hostInfo = new HashMap<>();
+                    hostInfo.put(FQDN, hostMetadata.getHostName());
+                    hostInfoForHostGroup.add(hostInfo);
+                }
+            } else {
+                for (InstanceMetaData meta : metas) {
+                    Map<String, String> hostInfo = new HashMap<>();
+                    hostInfo.put(FQDN, meta.getDiscoveryFQDN());
+                    String localityIndicator = meta.getLocalityIndicator();
+                    if (localityIndicator != null) {
+                        if (topologyMapping.isEmpty()) {
+                            // Azure
+                            if (localityIndicator.startsWith("/")) {
+                                hostInfo.put("rack", meta.getLocalityIndicator());
+                                // Openstack
+                            } else {
+                                hostInfo.put("rack", '/' + meta.getLocalityIndicator());
+                            }
+                            // With topology mapping
+                        } else {
+                            hostInfo.put("hypervisor", meta.getLocalityIndicator());
+                            hostInfo.put("rack", topologyMapping.get(meta.getLocalityIndicator()));
+                        }
                     }
-                    // With topology mapping
-                } else {
-                    hostInfo.put("hypervisor", instanceMetaData.getLocalityIndicator());
-                    hostInfo.put("rack", topologyMapping.get(instanceMetaData.getLocalityIndicator()));
+                    hostInfoForHostGroup.add(hostInfo);
                 }
             }
-            hostInfoForHostGroup.add(hostInfo);
+        } else {
+            for (HostMetadata hostMetadata : hostGroup.getHostMetadata()) {
+                Map<String, String> hostInfo = new HashMap<>();
+                hostInfo.put(FQDN, hostMetadata.getHostName());
+                hostInfoForHostGroup.add(hostInfo);
+            }
         }
         return hostInfoForHostGroup;
     }

@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
 import com.sequenceiq.cloudbreak.repository.HostGroupViewRepository;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
@@ -38,12 +39,15 @@ public class StackApiViewService {
     private HostGroupViewRepository hostGroupViewRepository;
 
     @Inject
+    private HostMetadataRepository hostMetadataRepository;
+
+    @Inject
     private StackListItemToStackViewResponseConverter stackListItemToStackViewResponseConverter;
 
     public Set<StackViewResponse> retrieveStackViewsByWorkspaceId(Long workspaceId) {
         Map<Long, Integer> stackInstanceCounts = instanceMetaDataRepository.countByWorkspaceId(workspaceId).stream()
                 .collect(Collectors.toMap(StackInstanceCount::getStackId, StackInstanceCount::getInstanceCount));
-        Map<Long, Integer> stackUnhealthyInstanceCounts = instanceMetaDataRepository.countUnhealthyByWorkspaceId(workspaceId).stream()
+        Map<Long, Integer> stackUnhealthyInstanceCounts = hostMetadataRepository.countUnhealthyByWorkspaceId(workspaceId).stream()
                 .collect(Collectors.toMap(StackInstanceCount::getStackId, StackInstanceCount::getInstanceCount));
         Set<StackListItem> stackList = stackRepository.findByWorkspaceId(workspaceId);
         Set<Long> clusterIds = stackList.stream().map(StackListItem::getClusterId).collect(Collectors.toSet());

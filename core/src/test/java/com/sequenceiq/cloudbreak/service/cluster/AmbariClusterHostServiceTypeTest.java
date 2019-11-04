@@ -1,14 +1,20 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -25,7 +31,6 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupAdjustmentJson;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -34,7 +39,7 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
@@ -165,11 +170,7 @@ public class AmbariClusterHostServiceTypeTest {
         hga1.setHostGroup("slave_1");
         hga1.setScalingAdjustment(-2);
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("slave_1");
-        InstanceGroup instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, null, 0);
-        hostGroup.setInstanceGroup(instanceGroup);
-        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(new HostGroup());
 
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("The host group must contain at least 1 host after the decommission: [hostGroup: 'slave_1', current hosts: 0, "
@@ -179,15 +180,38 @@ public class AmbariClusterHostServiceTypeTest {
     }
 
     @Test
+    public void testUpdateHostsForDownscaleFilterAllHosts() {
+        HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
+        json.setHostGroup("slave_1");
+        json.setScalingAdjustment(-1);
+        HostMetadata metadata1 = mock(HostMetadata.class);
+        HostMetadata metadata2 = mock(HostMetadata.class);
+        HostMetadata metadata3 = mock(HostMetadata.class);
+        Set<HostMetadata> hostsMetaData = new HashSet<>(asList(metadata1, metadata2, metadata3));
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setHostMetadata(hostsMetaData);
+        hostGroup.setName("slave_1");
+        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(hostGroupService.countByClusterIdAndName(anyLong(), anyString())).thenReturn(Integer.toUnsignedLong(hostsMetaData.size()));
+
+        underTest.updateHosts(stack.getId(), json);
+    }
+
+    @Test
     public void testUpdateHostsForDownscaleCannotGoBelowReplication() {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
+        HostMetadata metadata1 = mock(HostMetadata.class);
+        HostMetadata metadata2 = mock(HostMetadata.class);
+        HostMetadata metadata3 = mock(HostMetadata.class);
+        List<HostMetadata> hostsMetadataList = asList(metadata1, metadata2, metadata3);
+        Set<HostMetadata> hostsMetaData = new HashSet<>(hostsMetadataList);
         HostGroup hostGroup = new HostGroup();
+        hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
-        InstanceGroup instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, null, 2);
-        hostGroup.setInstanceGroup(instanceGroup);
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(hostGroupService.countByClusterIdAndName(anyLong(), anyString())).thenReturn(Integer.toUnsignedLong(hostsMetadataList.size()));
 
         underTest.updateHosts(stack.getId(), json);
 
@@ -200,11 +224,16 @@ public class AmbariClusterHostServiceTypeTest {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
+        HostMetadata metadata1 = mock(HostMetadata.class);
+        HostMetadata metadata2 = mock(HostMetadata.class);
+        HostMetadata metadata3 = mock(HostMetadata.class);
+        HostMetadata metadata4 = mock(HostMetadata.class);
+        Set<HostMetadata> hostsMetaData = new HashSet<>(asList(metadata1, metadata2, metadata3, metadata4));
         HostGroup hostGroup = new HostGroup();
+        hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
-        InstanceGroup instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, null, 4);
-        hostGroup.setInstanceGroup(instanceGroup);
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(hostGroupService.countByClusterIdAndName(anyLong(), anyString())).thenReturn(Integer.toUnsignedLong(hostsMetaData.size()));
 
         underTest.updateHosts(stack.getId(), json);
 
@@ -217,11 +246,16 @@ public class AmbariClusterHostServiceTypeTest {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
+        HostMetadata metadata1 = mock(HostMetadata.class);
+        HostMetadata metadata2 = mock(HostMetadata.class);
+        HostMetadata metadata3 = mock(HostMetadata.class);
+        List<HostMetadata> hostsMetadataList = asList(metadata1, metadata2, metadata3);
+        Set<HostMetadata> hostsMetaData = new HashSet<>(hostsMetadataList);
         HostGroup hostGroup = new HostGroup();
+        hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
-        InstanceGroup instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, null, 3);
-        hostGroup.setInstanceGroup(instanceGroup);
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(hostGroupService.countByClusterIdAndName(anyLong(), anyString())).thenReturn(Integer.toUnsignedLong(hostsMetaData.size()));
 
         underTest.updateHosts(stack.getId(), json);
 
@@ -234,11 +268,17 @@ public class AmbariClusterHostServiceTypeTest {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-2);
+        HostMetadata metadata1 = mock(HostMetadata.class);
+        HostMetadata metadata2 = mock(HostMetadata.class);
+        HostMetadata metadata3 = mock(HostMetadata.class);
+        HostMetadata metadata4 = mock(HostMetadata.class);
+        List<HostMetadata> hostsMetadataList = asList(metadata1, metadata2, metadata3, metadata4);
+        Set<HostMetadata> hostsMetaData = new HashSet<>(hostsMetadataList);
         HostGroup hostGroup = new HostGroup();
+        hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
-        InstanceGroup instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, null, 4);
-        hostGroup.setInstanceGroup(instanceGroup);
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(hostGroupService.countByClusterIdAndName(anyLong(), anyString())).thenReturn(Integer.toUnsignedLong(hostsMetaData.size()));
 
         underTest.updateHosts(stack.getId(), json);
 
@@ -251,11 +291,16 @@ public class AmbariClusterHostServiceTypeTest {
         HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
         json.setHostGroup("slave_1");
         json.setScalingAdjustment(-1);
+        HostMetadata metadata1 = mock(HostMetadata.class);
+        HostMetadata metadata2 = mock(HostMetadata.class);
+        HostMetadata metadata3 = mock(HostMetadata.class);
+        List<HostMetadata> hostsMetadataList = asList(metadata1, metadata2, metadata3);
+        Set<HostMetadata> hostsMetaData = new HashSet<>(hostsMetadataList);
         HostGroup hostGroup = new HostGroup();
+        hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
-        InstanceGroup instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, null, 3);
-        hostGroup.setInstanceGroup(instanceGroup);
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(hostGroupService.countByClusterIdAndName(anyLong(), anyString())).thenReturn(Integer.toUnsignedLong(hostsMetaData.size()));
 
         underTest.updateHosts(stack.getId(), json);
 
