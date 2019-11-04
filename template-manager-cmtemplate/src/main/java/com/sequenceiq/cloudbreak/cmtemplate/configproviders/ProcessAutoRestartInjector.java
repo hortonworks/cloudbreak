@@ -26,6 +26,7 @@ public class ProcessAutoRestartInjector implements CmTemplateConfigInjector {
             "HBASE",
             HdfsRoles.HDFS,
             HiveRoles.HIVE,
+            HiveRoles.HIVE_ON_TEZ,
             "KAFKA",
             KnoxRoles.KNOX,
             "LIVY",
