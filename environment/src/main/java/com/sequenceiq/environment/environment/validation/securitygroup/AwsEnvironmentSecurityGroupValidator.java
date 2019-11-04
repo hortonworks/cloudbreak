@@ -29,11 +29,10 @@ public class AwsEnvironmentSecurityGroupValidator implements EnvironmentSecurity
         SecurityAccessDto securityAccessDto = environmentDto.getSecurityAccess();
         if (securityAccessDto != null) {
             if (onlyOneSecurityGroupIdDefined(securityAccessDto)) {
-                resultBuilder.error(securityGroupIdsMustBePresented());
-                return;
+                resultBuilder.error(securityGroupIdsMustBePresent());
             } else if (isSecurityGroupIdDefined(securityAccessDto)) {
                 if (!Strings.isNullOrEmpty(environmentDto.getNetwork().getNetworkCidr())) {
-                    resultBuilder.error(networkIdMustBePresented(getCloudPlatform().name()));
+                    resultBuilder.error(networkIdMustBePresent(getCloudPlatform().name()));
                     return;
                 }
                 if (!Strings.isNullOrEmpty(securityAccessDto.getDefaultSecurityGroupId())) {

@@ -2,18 +2,28 @@ package com.sequenceiq.environment.environment.validation.securitygroup;
 
 import static com.sequenceiq.environment.CloudPlatform.AZURE;
 
+import java.util.Objects;
+
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.CloudPlatform;
+import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
+import com.sequenceiq.environment.platformresource.PlatformParameterService;
+import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 
 @Component
 public class AzureEnvironmentSecurityGroupValidator implements EnvironmentSecurityGroupValidator {
 
-    public AzureEnvironmentSecurityGroupValidator() {
+    private PlatformParameterService platformParameterService;
+
+    public AzureEnvironmentSecurityGroupValidator(PlatformParameterService platformParameterService) {
+        this.platformParameterService = platformParameterService;
     }
 
     @Override
@@ -21,14 +31,43 @@ public class AzureEnvironmentSecurityGroupValidator implements EnvironmentSecuri
         SecurityAccessDto securityAccessDto = environmentDto.getSecurityAccess();
         if (securityAccessDto != null) {
             if (onlyOneSecurityGroupIdDefined(securityAccessDto)) {
-                resultBuilder.error(securityGroupIdsMustBePresented());
-                return;
+                resultBuilder.error(securityGroupIdsMustBePresent());
             } else if (isSecurityGroupIdDefined(securityAccessDto)) {
-                if (!Strings.isNullOrEmpty(environmentDto.getNetwork().getNetworkCidr())) {
-                    resultBuilder.error(networkIdMustBePresented(getCloudPlatform().name()));
-                    return;
+                if (!Strings.isNullOrEmpty(securityAccessDto.getDefaultSecurityGroupId())) {
+                    validateSecurityGroup(environmentDto, resultBuilder, environmentDto.getSecurityAccess().getDefaultSecurityGroupId());
+                }
+                if (!Strings.isNullOrEmpty(securityAccessDto.getSecurityGroupIdForKnox())) {
+                    validateSecurityGroup(environmentDto, resultBuilder, environmentDto.getSecurityAccess().getSecurityGroupIdForKnox());
                 }
             }
+        }
+    }
+
+    private void validateSecurityGroup(EnvironmentDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder, String securityGroupId) {
+        Region region = environmentDto.getRegions().iterator().next();
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
+                environmentDto.getAccountId(),
+                environmentDto.getCredential().getName(),
+                null,
+                region.getName(),
+                getCloudPlatform().name(),
+                null);
+
+        CloudSecurityGroups securityGroups = platformParameterService.getSecurityGroups(request);
+
+        boolean securityGroupFoundInRegion = false;
+        if (Objects.nonNull(securityGroups.getCloudSecurityGroupsResponses())
+                && Objects.nonNull(securityGroups.getCloudSecurityGroupsResponses().get(region.getName()))) {
+            for (CloudSecurityGroup cloudSecurityGroup : securityGroups.getCloudSecurityGroupsResponses().get(region.getName())) {
+                String groupId = cloudSecurityGroup.getGroupId();
+                if (groupId.equalsIgnoreCase(securityGroupId)) {
+                    securityGroupFoundInRegion = true;
+                    break;
+                }
+            }
+        }
+        if (!securityGroupFoundInRegion) {
+            resultBuilder.error(securityGroupNotInTheSameRegion(securityGroupId, region.getName()));
         }
     }
 

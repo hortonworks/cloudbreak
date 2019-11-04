@@ -12,16 +12,20 @@ public interface EnvironmentSecurityGroupValidator {
 
     CloudPlatform getCloudPlatform();
 
-    default String networkIdMustBePresented(String cloudPlatform) {
-        return String.format("The '%s' network id has to be presented!", cloudPlatform);
+    default String networkIdMustBePresent(String cloudPlatform) {
+        return String.format("The '%s' network id has to be defined!", cloudPlatform);
     }
 
-    default String securityGroupIdsMustBePresented() {
-        return String.format("You must present two securitygroupId!");
+    default String securityGroupIdsMustBePresent() {
+        return String.format("You must define two security group id-s, one for Knox and a default one!");
     }
 
     default String securityGroupNotInTheSameVpc(String securityGroupId) {
-        return String.format("The '%s' security group must be in the same vpc what you defined in the request!", securityGroupId);
+        return String.format("The '%s' security group must be in the same vpc that you defined in the request!", securityGroupId);
+    }
+
+    default String securityGroupNotInTheSameRegion(String securityGroupId, String region) {
+        return String.format("The '%s' security group must be in the same region that you defined in the request (%s)!", securityGroupId, region);
     }
 
     default boolean isSecurityGroupIdDefined(SecurityAccessDto securityAccessDto) {
