@@ -105,16 +105,16 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltOrchestrator.class);
 
-    @Value("${cb.max.salt.new.service.retry:90}")
+    @Value("${cb.max.salt.new.service.retry}")
     private int maxRetry;
 
-    @Value("${cb.max.salt.new.service.leave.retry:10}")
+    @Value("${cb.max.salt.new.service.leave.retry}")
     private int maxRetryLeave;
 
-    @Value("${cb.max.salt.new.service.retry.onerror:20}")
+    @Value("${cb.max.salt.new.service.retry.onerror}")
     private int maxRetryOnError;
 
-    @Value("${cb.max.salt.recipe.execution.retry:90}")
+    @Value("${cb.max.salt.recipe.execution.retry}")
     private int maxRetryRecipe;
 
     @Value("${rest.debug}")
