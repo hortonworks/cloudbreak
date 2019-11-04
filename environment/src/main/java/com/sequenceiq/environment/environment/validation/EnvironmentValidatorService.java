@@ -31,7 +31,7 @@ public class EnvironmentValidatorService {
         ValidationResultBuilder regionValidationResult
                 = environmentRegionValidator.validateRegions(requestedRegions, cloudRegions, cloudPlatform);
         ValidationResultBuilder locationValidationResult
-                = environmentRegionValidator.validateLocation(location, requestedRegions, cloudPlatform);
+                = environmentRegionValidator.validateLocation(location, requestedRegions, cloudRegions, cloudPlatform);
         return regionValidationResult.merge(locationValidationResult.build());
     }
 
