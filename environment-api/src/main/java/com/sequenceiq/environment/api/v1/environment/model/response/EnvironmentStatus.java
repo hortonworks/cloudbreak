@@ -42,7 +42,14 @@ public enum EnvironmentStatus {
     STOP_FREEIPA_STARTED,
     STOP_FREEIPA_FAILED,
 
-    ENV_STOPPED;
+    ENV_STOPPED,
+
+    START_DATAHUB_STARTED,
+    START_DATAHUB_FAILED,
+    START_DATALAKE_STARTED,
+    START_DATALAKE_FAILED,
+    START_FREEIPA_STARTED,
+    START_FREEIPA_FAILED;
 
     public boolean isAvailable() {
         return equals(AVAILABLE);

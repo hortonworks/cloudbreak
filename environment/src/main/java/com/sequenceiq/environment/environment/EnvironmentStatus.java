@@ -43,7 +43,14 @@ public enum EnvironmentStatus {
     STOP_FREEIPA_STARTED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.STOP_FREEIPA_STARTED),
     STOP_FREEIPA_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.STOP_FREEIPA_FAILED),
 
-    ENV_STOPPED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENV_STOPPED);
+    ENV_STOPPED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENV_STOPPED),
+
+    START_DATAHUB_STARTED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_DATAHUB_STARTED),
+    START_DATAHUB_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_DATAHUB_FAILED),
+    START_DATALAKE_STARTED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_DATALAKE_STARTED),
+    START_DATALAKE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_DATALAKE_FAILED),
+    START_FREEIPA_STARTED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_FREEIPA_STARTED),
+    START_FREEIPA_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_FREEIPA_FAILED);
 
     public static final Set<EnvironmentStatus> AVAILABLE_STATUSES = Set.of(
             CREATION_INITIATED,

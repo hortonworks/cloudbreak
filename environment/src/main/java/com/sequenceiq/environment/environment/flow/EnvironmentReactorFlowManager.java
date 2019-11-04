@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
+import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
+import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSelectors;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelectors;
 import com.sequenceiq.flow.core.Flow2Handler;
@@ -90,6 +92,18 @@ public class EnvironmentReactorFlowManager {
 
         Map<String, Object> flowTriggerUserCrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
         eventSender.sendEvent(envStopEvent, new Event.Headers(flowTriggerUserCrn));
+    }
+
+    public void triggerStartFlow(long envId, String envName, String userCrn) {
+        LOGGER.info("Trigger start flow");
+        EnvStartEvent envSrartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
+                .withSelector(EnvStartStateSelectors.ENV_START_FREEIPA_EVENT.selector())
+                .withResourceId(envId)
+                .withResourceName(envName)
+                .build();
+
+        Map<String, Object> flowTriggerUserCrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
+        eventSender.sendEvent(envSrartEvent, new Event.Headers(flowTriggerUserCrn));
     }
 
     public void cancelRunningFlows(Long environmentId, String environmentName, String environmentCrn) {

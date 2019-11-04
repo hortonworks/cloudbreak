@@ -2,10 +2,6 @@ package com.sequenceiq.environment.environment.service;
 
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,23 +25,14 @@ public class FreeipaService {
     @Value("${env.stop.polling.sleep.time:5}")
     private Integer sleeptime;
 
-    @Inject
-    private FreeIpaV1Endpoint freeIpaV1Endpoint;
+    private final FreeIpaV1Endpoint freeIpaV1Endpoint;
 
-    public DescribeFreeIpaResponse getAttachedFreeipa(String environmentCrn) {
-        LOGGER.debug("Get freeipa for the environment: '{}'", environmentCrn);
-        try {
-            return freeIpaV1Endpoint.describe(environmentCrn);
-        } catch (WebApplicationException | ProcessingException e) {
-            String message = String.format("Failed to get Freeipa from service due to: '%s' ", e.getMessage());
-            LOGGER.error(message, e);
-            throw e;
-        }
+    public FreeipaService(FreeIpaV1Endpoint freeIpaV1Endpoint) {
+        this.freeIpaV1Endpoint = freeIpaV1Endpoint;
     }
 
     public void stopAttachedFreeipa(String envCrn) {
         freeIpaV1Endpoint.stop(envCrn);
-
         Polling.stopAfterAttempt(attempt)
                 .stopIfException(true)
                 .waitPeriodly(sleeptime, TimeUnit.SECONDS)
@@ -54,29 +41,52 @@ public class FreeipaService {
                     if (freeipaStopped(freeIpaResponse)) {
                         return AttemptResults.finishWith(null);
                     } else {
-                        return checkStatus(freeIpaResponse);
+                        return checkStopStatus(freeIpaResponse);
                     }
                 });
 
     }
 
-    private AttemptResult<Void> checkStatus(DescribeFreeIpaResponse freeIpaResponse) {
+    public void startAttachedFreeipa(String envCrn) {
+        freeIpaV1Endpoint.start(envCrn);
+        Polling.stopAfterAttempt(attempt)
+                .stopIfException(true)
+                .waitPeriodly(sleeptime, TimeUnit.SECONDS)
+                .run(() -> {
+                    DescribeFreeIpaResponse freeIpaResponse = freeIpaV1Endpoint.describe(envCrn);
+                    if (freeipaAvailable(freeIpaResponse)) {
+                        return AttemptResults.finishWith(null);
+                    } else {
+                        return checkStartStatus(freeIpaResponse);
+                    }
+                });
+
+    }
+
+    private AttemptResult<Void> checkStopStatus(DescribeFreeIpaResponse freeIpaResponse) {
         if (freeIpaResponse.getStatus() == Status.STOP_FAILED) {
             LOGGER.info("Freeipa stop failed for '{}' with status {}, reason: {}", freeIpaResponse.getName(), freeIpaResponse.getStatus(), freeIpaResponse.getStatusReason());
-            return sdxStopFailed(freeIpaResponse, freeIpaResponse.getStatusReason());
-        } else if (!isStopState(freeIpaResponse.getStatus())) {
-            return AttemptResults.breakFor("Freeipa stop failed '" + freeIpaResponse.getName() + "', stack is in inconsistency state: " + freeIpaResponse.getStatus());
+            return AttemptResults.breakFor("Freeipa stop failed '" + freeIpaResponse.getName() + "', " + freeIpaResponse.getStatusReason());
         } else {
             return AttemptResults.justContinue();
         }
     }
 
-    private AttemptResult<Void> sdxStopFailed(DescribeFreeIpaResponse freeIpaResponse, String statusReason) {
-        return AttemptResults.breakFor("Freeipa stop failed '" + freeIpaResponse.getName() + "', " + statusReason);
+    private AttemptResult<Void> checkStartStatus(DescribeFreeIpaResponse freeIpaResponse) {
+        if (freeIpaResponse.getStatus() == Status.START_FAILED) {
+            LOGGER.info("Freeipa start failed for '{}' with status {}, reason: {}", freeIpaResponse.getName(), freeIpaResponse.getStatus(), freeIpaResponse.getStatusReason());
+            return AttemptResults.breakFor("Freeipa start failed '" + freeIpaResponse.getName() + "', " + freeIpaResponse.getStatusReason());
+        } else {
+            return AttemptResults.justContinue();
+        }
     }
 
     private boolean freeipaStopped(DescribeFreeIpaResponse freeipa) {
         return freeipa.getStatus() == Status.STOPPED;
+    }
+
+    private boolean freeipaAvailable(DescribeFreeIpaResponse freeipa) {
+        return freeipa.getStatus() == Status.AVAILABLE;
     }
 
     private boolean isStopState(Status status) {
@@ -84,5 +94,12 @@ public class FreeipaService {
                 || Status.STOP_IN_PROGRESS.equals(status)
                 || Status.STOP_REQUESTED.equals(status)
                 || Status.STOP_FAILED.equals(status);
+    }
+
+    private boolean isStartState(Status status) {
+        return Status.AVAILABLE.equals(status)
+                || Status.START_IN_PROGRESS.equals(status)
+                || Status.START_REQUESTED.equals(status)
+                || Status.START_FAILED.equals(status);
     }
 }
