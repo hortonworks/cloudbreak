@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.client;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -219,7 +220,7 @@ public class FreeIpaClient {
     //    "version": "4.6.4"
     //}
     // TODO the response to this API call not currently deserializable
-    public RPCResponse<Object> groupAddMembers(String group, Set<String> users) throws FreeIpaClientException {
+    public RPCResponse<Object> groupAddMembers(String group, Collection<String> users) throws FreeIpaClientException {
         List<String> flags = List.of(group);
         Map<String, Object> params = Map.of(
                 "user", users
@@ -227,7 +228,7 @@ public class FreeIpaClient {
         return invoke("group_add_member", flags, params, Object.class);
     }
 
-    public RPCResponse<Object> groupRemoveMembers(String group, Set<String> users) throws FreeIpaClientException {
+    public RPCResponse<Object> groupRemoveMembers(String group, Collection<String> users) throws FreeIpaClientException {
         List<String> flags = List.of(group);
         Map<String, Object> params = Map.of(
                 "user", users
@@ -485,6 +486,11 @@ public class FreeIpaClient {
         try {
             RPCResponse<T> response = (RPCResponse<T>) jsonRpcHttpClient.invoke(method, List.of(flags, parameterMap), type);
             LOGGER.debug("Response object: {}", response);
+            if (response == null) {
+                // TODO CDPCP-1028 investigate why invoke returns null instead of throwing an exception
+                // when the cluster-proxy request times out.
+                throw new NullPointerException("JSON-RPC response is null");
+            }
             return response;
         } catch (Throwable throwable) {
             String message = String.format("Invoke FreeIpa failed: %s", throwable.getLocalizedMessage());

@@ -172,10 +172,10 @@ public class EnvironmentCreationService {
     }
 
     private boolean isTunnelInvalid(String userCrn, Tunnel tunnel) {
-        return !entitlementService.ccmEnabled(userCrn) && Tunnel.CCM.equals(tunnel);
+        return !entitlementService.ccmEnabled(userCrn, Crn.safeFromString(userCrn).getAccountId()) && Tunnel.CCM.equals(tunnel);
     }
 
     private boolean isCloudPlatformInvalid(String userCrn, String cloudPlatform) {
-        return AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(userCrn);
+        return AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(userCrn, Crn.safeFromString(userCrn).getAccountId());
     }
 }

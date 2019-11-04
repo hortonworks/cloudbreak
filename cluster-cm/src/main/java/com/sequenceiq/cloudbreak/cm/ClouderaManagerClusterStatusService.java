@@ -57,6 +57,8 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
 
     static final String FULL_VIEW = "FULL";
 
+    static final String FULL_WITH_EXPLANATION_VIEW = "FULL_WITH_HEALTH_CHECK_EXPLANATION";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClusterStatusService.class);
 
     private static final Set<ApiServiceState> IGNORED_SERVICE_STATES = Sets.immutableEnumSet(
@@ -258,7 +260,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     private Map<String, ApiHealthCheck> getHostHealth() {
         HostsResourceApi api = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
-            return api.readHosts(FULL_VIEW).getItems().stream()
+            return api.readHosts(FULL_WITH_EXPLANATION_VIEW).getItems().stream()
                     .filter(host -> host.getHealthChecks() != null)
                     .flatMap(host -> host.getHealthChecks().stream()
                             .filter(check -> HOST_SCM_HEALTH.equals(check.getName()))

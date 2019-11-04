@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -27,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
@@ -63,6 +65,12 @@ import com.sequenceiq.freeipa.util.KrbKeySetEncoder;
 public class UserService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
+
+    private static final int DEFAULT_MAX_SUBJECTS_PER_REQUEST = 10;
+
+    @VisibleForTesting
+    @Value("${freeipa.syncoperation.max-subjects-per-request:10}")
+    int maxSubjectsPerRequest = DEFAULT_MAX_SUBJECTS_PER_REQUEST;
 
     @Inject
     private StackService stackService;
@@ -317,36 +325,38 @@ public class UserService {
 
     }
 
-    private void addUsersToGroups(FreeIpaClient freeIpaClient, Multimap<String, String> groupMapping) throws FreeIpaClientException {
+    @VisibleForTesting
+    void addUsersToGroups(FreeIpaClient freeIpaClient, Multimap<String, String> groupMapping) throws FreeIpaClientException {
         LOGGER.debug("adding users to groups: [{}]", groupMapping);
         for (String group : groupMapping.keySet()) {
-            Set<String> users = Set.copyOf(groupMapping.get(group));
-            LOGGER.debug("adding users [{}] to group [{}]", users, group);
-
-            try {
-                // TODO specialize response object
-                RPCResponse<Object> groupAddMember = freeIpaClient.groupAddMembers(group, users);
-                LOGGER.debug("Success: {}", groupAddMember.getResult());
-            } catch (FreeIpaClientException e) {
-                // TODO propagate this information out to API
-                LOGGER.error("Failed to add [{}] to group [{}]", users, group, e);
-            }
+            Iterables.partition(groupMapping.get(group), maxSubjectsPerRequest).forEach(users -> {
+                LOGGER.debug("adding users [{}] to group [{}]", users, group);
+                try {
+                    // TODO specialize response object
+                    RPCResponse<Object> groupAddMember = freeIpaClient.groupAddMembers(group, users);
+                    LOGGER.debug("Success: {}", groupAddMember.getResult());
+                } catch (FreeIpaClientException e) {
+                    // TODO propagate this information out to API
+                    LOGGER.error("Failed to add [{}] to group [{}]", users, group, e);
+                }
+            });
         }
     }
 
-    private void removeUsersFromGroups(FreeIpaClient freeIpaClient, Multimap<String, String> groupMapping) throws FreeIpaClientException {
+    @VisibleForTesting
+    void removeUsersFromGroups(FreeIpaClient freeIpaClient, Multimap<String, String> groupMapping) throws FreeIpaClientException {
         for (String group : groupMapping.keySet()) {
-            Set<String> users = Set.copyOf(groupMapping.get(group));
-            LOGGER.debug("removing users {} from group {}", users, group);
-
-            try {
-                // TODO specialize response object
-                RPCResponse<Object> groupRemoveMembers = freeIpaClient.groupRemoveMembers(group, users);
-                LOGGER.debug("Success: {}", groupRemoveMembers.getResult());
-            } catch (FreeIpaClientException e) {
-                // TODO propagate this information out to API
-                LOGGER.error("Failed to add [{}] to group [{}]", users, group, e);
-            }
+            Iterables.partition(groupMapping.get(group), maxSubjectsPerRequest).forEach(users -> {
+                LOGGER.debug("removing users {} from group {}", users, group);
+                try {
+                    // TODO specialize response object
+                    RPCResponse<Object> groupRemoveMembers = freeIpaClient.groupRemoveMembers(group, users);
+                    LOGGER.debug("Success: {}", groupRemoveMembers.getResult());
+                } catch (FreeIpaClientException e) {
+                    // TODO propagate this information out to API
+                    LOGGER.error("Failed to add [{}] to group [{}]", users, group, e);
+                }
+            });
         }
     }
 

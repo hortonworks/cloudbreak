@@ -63,7 +63,7 @@ import com.sequenceiq.cloudbreak.retry.RetryUtil;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
+import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 import groovyx.net.http.HttpResponseException;
@@ -354,11 +354,11 @@ public class AmbariClusterModificationService implements ClusterModificationServ
                 Map<String, String> masterSlaveWithState = collectMasterSlaveComponents(components).stream()
                         .collect(Collectors.toMap(Function.identity(), componentStatus::get));
                 if (masterSlaveWithState.values().stream().anyMatch("UNKNOWN"::equals)) {
-                    throw new ActionWentFailException("Ambari has not recovered");
+                    throw new ActionFailedException("Ambari has not recovered");
                 }
                 return componentStatus;
             });
-        } catch (ActionWentFailException e) {
+        } catch (ActionFailedException e) {
             throw new CloudbreakException("Status of one or more components in ambari remained in UNKNOWN status.");
         }
     }

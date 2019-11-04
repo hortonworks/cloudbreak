@@ -10,18 +10,18 @@ import org.springframework.stereotype.Service;
 public class RetryService implements Retry {
 
     @Override
-    @Retryable(value = ActionWentFailException.class, maxAttempts = 5, backoff = @Backoff(delay = 2000))
-    public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFailException {
+    @Retryable(value = ActionFailedException.class, maxAttempts = 5, backoff = @Backoff(delay = 2000))
+    public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionFailedException {
         return action.get();
     }
 
     @Override
     @Retryable(
-            value = ActionWentFailException.class,
+            value = ActionFailedException.class,
             maxAttempts = 15,
             backoff = @Backoff(delay = 2000, multiplier = 2, maxDelay = 10000)
     )
-    public <T> T testWith2SecDelayMax15Times(Supplier<T> action) throws ActionWentFailException {
+    public <T> T testWith2SecDelayMax15Times(Supplier<T> action) throws ActionFailedException {
         return action.get();
     }
 }

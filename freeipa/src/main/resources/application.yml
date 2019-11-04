@@ -61,6 +61,7 @@ freeipa:
     failure-reset-interval: 3
     lockout-duration: 10
   syncoperation:
+    max-subjects-per-request: 10
     cleanup:
       timeout-millis: 1800000
       initial-delay-millis: 60000
@@ -177,6 +178,8 @@ cb:
     yarn.resource.name.length: 63
 
     salt.new.service.retry: 90
+    salt.new.service.leave.retry: 10
+    salt.new.service.retry.onerror: 20
     salt.recipe.execution.retry: 90
 
   address.resolving.timeout: 60000

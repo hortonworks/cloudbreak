@@ -16,27 +16,35 @@ public class EntitlementService {
     @Inject
     private GrpcUmsClient umsClient;
 
-    public boolean ccmEnabled(String userCrn) {
-        return isEntitlementRegistered(userCrn, "CDP_REVERSE_SSH_TUNNEL");
+    public boolean ccmEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, "CDP_REVERSE_SSH_TUNNEL");
     }
 
-    public boolean azureEnabled(String userCrn) {
-        return isEntitlementRegistered(userCrn, "CDP_AZURE");
+    public boolean azureEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, "CDP_AZURE");
     }
 
-    public List<String> getEntitlements(String userCrn) {
-        return getAccount(userCrn).getEntitlementsList()
+    public boolean automaticUsersyncPollerEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, "CDP_AUTOMATIC_USERSYNC_POLLER");
+    }
+
+    public boolean fmsClusterProxyEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, "CDP_FMS_CLUSTER_PROXY");
+    }
+
+    public List<String> getEntitlements(String actorCrn, String accountId) {
+        return getAccount(actorCrn, accountId).getEntitlementsList()
                 .stream()
                 .map(e -> e.getEntitlementName().toUpperCase())
                 .collect(Collectors.toList());
     }
 
-    private UserManagementProto.Account getAccount(String userCrn) {
-        return umsClient.getAccountDetails(userCrn, userCrn, Optional.empty());
+    private UserManagementProto.Account getAccount(String actorCrn, String accountId) {
+        return umsClient.getAccountDetails(actorCrn, accountId, Optional.empty());
     }
 
-    private boolean isEntitlementRegistered(String userCrn, String entitlement) {
-        return getEntitlements(userCrn)
+    private boolean isEntitlementRegistered(String actorCrn, String accountId, String entitlement) {
+        return getEntitlements(actorCrn, accountId)
                 .stream()
                 .filter(e -> e.equalsIgnoreCase(entitlement))
                 .findFirst()

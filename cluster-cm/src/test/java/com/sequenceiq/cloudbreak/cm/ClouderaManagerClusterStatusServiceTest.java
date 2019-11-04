@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.FULL_VIEW;
+import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.FULL_WITH_EXPLANATION_VIEW;
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.HOST_SCM_HEALTH;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -280,6 +281,7 @@ public class ClouderaManagerClusterStatusServiceTest {
     private void hostsAre(ApiHost... hosts) throws ApiException {
         ApiHostList list = new ApiHostList().items(Arrays.asList(hosts));
         when(hostsApi.readHosts(FULL_VIEW)).thenReturn(list);
+        when(hostsApi.readHosts(FULL_WITH_EXPLANATION_VIEW)).thenReturn(list);
     }
 
     private void servicesAre(ApiService... services) throws ApiException {

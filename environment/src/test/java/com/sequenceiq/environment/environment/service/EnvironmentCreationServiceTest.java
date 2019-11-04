@@ -132,8 +132,7 @@ class EnvironmentCreationServiceTest {
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(any())).thenReturn(environment);
-        when(entitlementService.azureEnabled(eq(CRN))).thenReturn(false);
-
+        when(entitlementService.azureEnabled(eq(CRN), eq(ACCOUNT_ID))).thenReturn(false);
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
 
         verify(environmentService, never()).save(any());
@@ -146,7 +145,7 @@ class EnvironmentCreationServiceTest {
         ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
         final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
-                .withCreator(USER)
+                .withCreator(CRN)
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
                 .withParameters(parametersDto)
@@ -165,7 +164,7 @@ class EnvironmentCreationServiceTest {
         credential.setCloudPlatform("platform");
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(EnvironmentTestData.USER)))
+        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(CRN)))
                 .thenReturn(credential);
         when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateNetworkCreation(any(), any(), any())).thenReturn(ValidationResult.builder());
@@ -178,7 +177,7 @@ class EnvironmentCreationServiceTest {
         verify(environmentService, times(2)).save(any());
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any());
-        verify(reactorFlowManager).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
+        verify(reactorFlowManager).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
     }
 
     @Test
@@ -188,7 +187,7 @@ class EnvironmentCreationServiceTest {
                 .withName(ENVIRONMENT_NAME)
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
-                .withCreator(USER)
+                .withCreator(CRN)
                 .withAccountId(ACCOUNT_ID)
                 .withParameters(parametersDto)
                 .withLocation(LocationDto.builder()
@@ -206,7 +205,7 @@ class EnvironmentCreationServiceTest {
         credential.setCloudPlatform("platform");
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(EnvironmentTestData.USER)))
+        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(CRN)))
                 .thenReturn(credential);
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
@@ -229,7 +228,7 @@ class EnvironmentCreationServiceTest {
                 .withName(ENVIRONMENT_NAME)
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
-                .withCreator(USER)
+                .withCreator(CRN)
                 .withAccountId(ACCOUNT_ID)
                 .withParameters(parametersDto)
                 .withLocation(LocationDto.builder()
@@ -247,7 +246,7 @@ class EnvironmentCreationServiceTest {
         credential.setCloudPlatform("platform");
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(EnvironmentTestData.USER)))
+        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(CRN)))
                 .thenReturn(credential);
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());

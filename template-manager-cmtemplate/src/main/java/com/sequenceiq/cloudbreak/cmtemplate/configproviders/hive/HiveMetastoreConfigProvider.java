@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
@@ -30,6 +32,12 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
                 config("hive_metastore_database_type", hiveView.getSubprotocol()),
                 config("hive_metastore_database_user", hiveView.getConnectionUserName())
         );
+
+        Optional<KerberosConfig> kerberosConfigOpt = source.getKerberosConfig();
+        if (kerberosConfigOpt.isPresent()) {
+            String safetyValveValue = "<property><name>hive.hook.proto.file.per.event</name><value>true</value></property>";
+            configs.add(config("hive_service_config_safety_valve", safetyValveValue));
+        }
 
         if (source.getStackType() == StackType.DATALAKE) {
             source.getLdapConfig().ifPresent(ldap -> {

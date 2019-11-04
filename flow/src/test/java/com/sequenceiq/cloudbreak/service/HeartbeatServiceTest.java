@@ -445,7 +445,7 @@ public class HeartbeatServiceTest {
             }
 
             @Override
-            public <T> T testWith2SecDelayMax15Times(Supplier<T> action) throws ActionWentFailException {
+            public <T> T testWith2SecDelayMax15Times(Supplier<T> action) throws ActionFailedException {
                 return null;
             }
         }
@@ -476,11 +476,11 @@ public class HeartbeatServiceTest {
 
             @Override
             public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) {
-                throw new ActionWentFailException("Test failed");
+                throw new ActionFailedException("Test failed");
             }
 
             @Override
-            public <T> T testWith2SecDelayMax15Times(Supplier<T> action) throws ActionWentFailException {
+            public <T> T testWith2SecDelayMax15Times(Supplier<T> action) throws ActionFailedException {
                 return null;
             }
         }

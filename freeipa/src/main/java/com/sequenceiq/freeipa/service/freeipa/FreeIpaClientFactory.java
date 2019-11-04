@@ -4,6 +4,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.freeipa.service.config.FmsClusterProxyEnablement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,9 @@ public class FreeIpaClientFactory {
 
     @Inject
     private ClusterProxyConfiguration clusterProxyConfiguration;
+
+    @Inject
+    private FmsClusterProxyEnablement fmsClusterProxyEnablement;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -65,7 +69,7 @@ public class FreeIpaClientFactory {
         LOGGER.debug("Creating FreeIpaClient for stack {}", stack.getResourceCrn());
 
         try {
-            if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled() && Boolean.TRUE.equals(stack.getClusterProxyRegistered())) {
+            if (fmsClusterProxyEnablement.isEnabled(stack) && Boolean.TRUE.equals(stack.getClusterProxyRegistered())) {
                 HttpClientConfig httpClientConfig = new HttpClientConfig(clusterProxyConfiguration.getClusterProxyHost());
                 FreeIpa freeIpa = freeIpaService.findByStack(stack);
                 String clusterProxyPath = toClusterProxyBasepath(stack.getResourceCrn());

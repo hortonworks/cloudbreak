@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
@@ -50,6 +51,9 @@ public class UsersyncPoller {
     @Value("${freeipa.syncoperation.poller.enabled:true}")
     private boolean enabled;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Scheduled(fixedDelayString = "${freeipa.syncoperation.poller.fixed-delay-millis:60000}",
             initialDelayString = "${freeipa.syncoperation.poller.initial-delay-millis:300000}")
     public void pollUms() {
@@ -76,9 +80,19 @@ public class UsersyncPoller {
             stackList.stream()
                     .collect(Collectors.groupingBy(Stack::getAccountId))
                     .entrySet().stream()
+                    .filter(stringListEntry -> {
+                        String accountId = stringListEntry.getKey();
+                        boolean entitled = entitlementService.automaticUsersyncPollerEnabled(INTERNAL_ACTOR_CRN, accountId);
+                        if (!entitled) {
+                            LOGGER.debug("Usersync polling is not entitled in accout {}. skipping", accountId);
+                        }
+                        return entitled;
+                    })
                     .forEach(stringListEntry -> {
+                        String accountId = stringListEntry.getKey();
+                        LOGGER.debug("Usersync polling is entitled in account {}", accountId);
                         UmsEventGenerationIds currentGeneration =
-                                umsEventGenerationIdsProvider.getEventGenerationIds(stringListEntry.getKey(), requestId);
+                                umsEventGenerationIdsProvider.getEventGenerationIds(accountId, requestId);
                         stringListEntry.getValue().stream()
                                 .forEach(stack -> {
                                     if (isStale(stack, currentGeneration)) {

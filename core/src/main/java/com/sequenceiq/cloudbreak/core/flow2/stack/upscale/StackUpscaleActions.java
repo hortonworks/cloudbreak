@@ -211,11 +211,6 @@ public class StackUpscaleActions {
                     Stack stack = stackService.getByIdWithListsInTransaction(context.getStack().getId());
                     InstanceMetaData gatewayMetaData = stack.getPrimaryGatewayInstance();
                     CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);
-                    if (gatewayPublicEndpointManagementService.isCertGenerationEnabled()) {
-                        String ipWrapper = gatewayMetaData.getPublicIpWrapper();
-                        LOGGER.info("Gateway's DNS entry needs to be updated because primary gateway IP has been updated to: '{}'", ipWrapper);
-                        gatewayPublicEndpointManagementService.updateDnsEntry(stack, ipWrapper);
-                    }
                     Selectable sshFingerPrintReq = new GetSSHFingerprintsRequest<GetSSHFingerprintsResult>(context.getCloudContext(),
                             context.getCloudCredential(), gatewayInstance);
                     sendEvent(context, sshFingerPrintReq);
@@ -271,7 +266,26 @@ public class StackUpscaleActions {
         return new AbstractStackUpscaleAction<>(ExtendHostMetadataResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, ExtendHostMetadataResult payload, Map<Object, Object> variables) {
-                stackUpscaleService.finishExtendHostMetadata(context.getStack());
+                Stack stack = context.getStack();
+                if (gatewayPublicEndpointManagementService.isCertGenerationEnabled()) {
+                    InstanceMetaData gatewayInstanceMetadata = stack.getPrimaryGatewayInstance();
+                    String ipWrapper = gatewayInstanceMetadata.getPublicIpWrapper();
+                    LOGGER.info("Gateway's DNS entry needs to be updated because primary gateway IP has been updated to: '{}'", ipWrapper);
+                    gatewayPublicEndpointManagementService.updateDnsEntry(stack, ipWrapper);
+                }
+                Selectable request = new MountDisksOnNewHostsRequest(stack.getId(),
+                        payload.getRequest().getUpscaleCandidateAddresses());
+                sendEvent(context, request);
+            }
+        };
+    }
+
+    @Bean(name = "MOUNT_DISKS_ON_NEW_HOSTS_STATE")
+    public Action<?, ?> mountDisksOnNewHosts() {
+        return new AbstractStackUpscaleAction<>(MountDisksOnNewHostsResult.class) {
+            @Override
+            protected void doExecute(StackScalingFlowContext context, MountDisksOnNewHostsResult payload, Map<Object, Object> variables) {
+                stackUpscaleService.mountDisksOnNewHosts(context.getStack());
                 getMetricService().incrementMetricCounter(MetricType.STACK_UPSCALE_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
