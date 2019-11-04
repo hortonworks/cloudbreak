@@ -126,6 +126,10 @@ public class ClouderaManagerMock extends AbstractModelMock {
 
     private static final String AUTO_CONFIGURE_COMMAND = API_ROOT + "/cm/service/autoConfigure";
 
+    private static final String CONFIGURE_KERBEROS = API_ROOT + "/clusters/:clusterName/commands/configureForKerberos";
+
+    private static final String GENERATE_CREDENTIALS = API_ROOT + "/cm/commands/generateCredentials";
+
     private DynamicRouteStack dynamicRouteStack;
 
     private final Set<String> activeProfiles;
@@ -184,6 +188,10 @@ public class ClouderaManagerMock extends AbstractModelMock {
         getCommands();
         postClusterCommandsRestart();
         putAutoConfigure();
+        dynamicRouteStack.post(CONFIGURE_KERBEROS, new ProfileAwareRoute(
+                (request, response) -> new ApiCommand().id(BigDecimal.ONE).active(Boolean.TRUE).name("Configure Kerberos"), activeProfiles));
+        dynamicRouteStack.post(GENERATE_CREDENTIALS, new ProfileAwareRoute(
+                (request, response) -> new ApiCommand().id(BigDecimal.ONE).active(Boolean.TRUE).name("Generate Credentials"), activeProfiles));
     }
 
     private void readAuthRoles() {

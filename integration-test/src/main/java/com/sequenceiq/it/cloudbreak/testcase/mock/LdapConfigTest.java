@@ -22,6 +22,14 @@ public class LdapConfigTest extends AbstractIntegrationTest {
     @Inject
     private LdapTestClient ldapTestClient;
 
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
+        createDefaultCredential(testContext);
+        createDefaultEnvironmentWithNetwork(testContext);
+        createDefaultImageCatalog(testContext);
+        initializeDefaultBlueprints(testContext);
+    }
+
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a valid ldap request",

@@ -8,7 +8,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.UserViewV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 
 @Component
@@ -24,7 +23,7 @@ public class StackApiViewToStackViewV4ResponseConverter extends AbstractConversi
         if (source.getCluster() != null) {
             stackViewResponse.setCluster(getConversionService().convert(source.getCluster(), ClusterViewV4Response.class));
         }
-        addNodeCount(source, stackViewResponse);
+        stackViewResponse.setNodeCount(source.getNodeCount());
         stackViewResponse.setStatus(source.getStatus());
         stackViewResponse.setCreated(source.getCreated());
         stackViewResponse.setTerminated(source.getTerminated());
@@ -32,14 +31,6 @@ public class StackApiViewToStackViewV4ResponseConverter extends AbstractConversi
         stackViewResponse.setCloudPlatform(source.getCloudPlatform());
         stackViewResponse.setEnvironmentCrn(source.getEnvironmentCrn());
         return stackViewResponse;
-    }
-
-    private void addNodeCount(StackApiView source, StackViewV4Response stackViewResponse) {
-        int nodeCount = 0;
-        for (InstanceGroupView instanceGroupView : source.getInstanceGroups()) {
-            nodeCount += instanceGroupView.getNodeCount();
-        }
-        stackViewResponse.setNodeCount(nodeCount);
     }
 
     private void addUser(StackApiView source, StackViewV4Response stackJson) {

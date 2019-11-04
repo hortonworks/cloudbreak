@@ -10,6 +10,7 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -75,8 +76,8 @@ public interface InstanceMetaDataRepository extends DisabledBaseRepository<Insta
 
     @Query("SELECT s.id as stackId, COUNT(i) as instanceCount "
             + "FROM InstanceMetaData i JOIN i.instanceGroup ig JOIN ig.stack s WHERE s.workspace.id= :id AND i.instanceStatus <> 'TERMINATED' "
-            + "GROUP BY s.id")
-    Set<StackInstanceCount> countByWorkspaceId(@Param("id") Long id);
+            + "AND (:environmentCrn IS null OR s.environmentCrn = :environmentCrn) AND (:stackType IS null OR s.type = :stackType) GROUP BY s.id")
+    Set<StackInstanceCount> countByWorkspaceId(@Param("id") Long id, @Param("environmentCrn") String environmentCrn, @Param("stackType") StackType stackType);
 
     @Query("SELECT i FROM InstanceMetaData i ")
     Set<InstanceMetaData> findAllRequestedByStackId(@Param("id") Long stackId);

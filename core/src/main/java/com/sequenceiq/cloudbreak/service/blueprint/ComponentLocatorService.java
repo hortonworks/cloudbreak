@@ -62,11 +62,6 @@ public class ComponentLocatorService {
         return getComponentAttribute(clusterId, blueprintTextProcessor, componentNames, InstanceMetaData::getDiscoveryFQDN);
     }
 
-    public Map<String, List<String>> getComponentPrivateIp(Long clusterId, BlueprintTextProcessor blueprintTextProcessor,
-            Collection<String> componentNames) {
-        return getComponentAttribute(clusterId, blueprintTextProcessor, componentNames, InstanceMetaData::getPrivateIp);
-    }
-
     private Map<String, List<String>> getComponentAttribute(Cluster cluster, Collection<String> componentNames, Function<InstanceMetaData, String> fqdn) {
         Map<String, List<String>> result = new HashMap<>();
         String blueprintText = cluster.getBlueprint().getBlueprintText();

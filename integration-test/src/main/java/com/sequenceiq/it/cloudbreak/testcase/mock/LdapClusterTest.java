@@ -19,7 +19,6 @@ import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
@@ -45,8 +44,7 @@ public class LdapClusterTest extends AbstractIntegrationTest {
         dynamicRouteStack.post(ClouderaManagerMock.API_ROOT + "/externalUserMappings",
                 (request, response) -> new ApiExternalUserMappingList());
 
-        testContext.given(LdapTestDto.class)
-                .when(ldapTestClient.createV1())
+        testContext
                 .given(ClusterTestDto.class)
                 .given(StackTestDto.class)
                 .withCluster()

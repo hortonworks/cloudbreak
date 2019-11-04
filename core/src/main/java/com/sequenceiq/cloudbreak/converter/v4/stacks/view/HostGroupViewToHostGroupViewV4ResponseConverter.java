@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.view;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
@@ -9,6 +10,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.HostGroupViewV4Res
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.HostMetadataViewV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
+import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.domain.view.InstanceMetaDataView;
 
 @Component
@@ -25,12 +27,10 @@ public class HostGroupViewToHostGroupViewV4ResponseConverter extends AbstractCon
 
     private Set<HostMetadataViewV4Response> getHostMetadata(HostGroupView hostGroupView) {
         Set<HostMetadataViewV4Response> hostMetadataResponses = new HashSet<>();
-        hostGroupView.getCluster().getStack().getInstanceGroups()
-                .stream()
-                .filter(instanceGroupView -> instanceGroupView.getGroupName().equals(hostGroupView.getName()))
-                .findFirst()
-                .ifPresent(instanceGroupView -> {
-                    for (InstanceMetaDataView instanceMetaData : instanceGroupView.getNotTerminatedInstanceMetaDataSet()) {
+        Optional.ofNullable(hostGroupView.getInstanceGroup())
+                .map(InstanceGroupView::getNotTerminatedInstanceMetaDataSet)
+                .ifPresent(instanceMetaDataSet -> {
+                    for (InstanceMetaDataView instanceMetaData : instanceMetaDataSet) {
                         HostMetadataViewV4Response hostMetadataViewV4Response = new HostMetadataViewV4Response();
                         hostMetadataViewV4Response.setId(instanceMetaData.getId());
                         hostMetadataViewV4Response.setName(instanceMetaData.getInstanceName());

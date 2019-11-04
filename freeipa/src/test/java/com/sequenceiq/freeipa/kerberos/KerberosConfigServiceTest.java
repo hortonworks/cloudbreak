@@ -1,6 +1,10 @@
 package com.sequenceiq.freeipa.kerberos;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -33,6 +37,17 @@ public class KerberosConfigServiceTest {
 
     @InjectMocks
     private KerberosConfigService underTest;
+
+    @Test
+    public void name() {
+        List<Integer> numbers = List.of(1, 3, 1, 4, 5, 6, 3, 2);
+        final long c = numbers.stream()
+                .collect(Collectors.toMap(n -> n, n -> 1, (l, r) -> l + r))
+                .values().stream()
+                .filter(v -> v > 1)
+                .count();
+        assertEquals(2, c);
+    }
 
     @Test
     public void testCreateKerberosConfig() {
@@ -72,7 +87,7 @@ public class KerberosConfigServiceTest {
         // WHEN
         KerberosConfig actualResult = underTest.get(ENVIRONMENT_ID);
         // THEN
-        Assert.assertEquals(expectedKerberosConfig, actualResult);
+        assertEquals(expectedKerberosConfig, actualResult);
     }
 
     @Test

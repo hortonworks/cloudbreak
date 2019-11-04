@@ -11,9 +11,13 @@ import com.sequenceiq.it.util.ResourceUtil;
 public abstract class AbstractClouderaManagerTest extends AbstractIntegrationTest {
 
     @Override
-    protected void setupTest(TestContext testContext)  {
+    protected void setupTest(TestContext testContext) {
+        super.setupTest(testContext);
+        createCmBlueprint(testContext);
+    }
+
+    protected void createCmBlueprint(TestContext testContext) {
         try {
-            super.setupTest(testContext);
             testContext.given(BlueprintTestDto.class)
                     .withName(resourcePropertyProvider().getName())
                     .withBlueprint(ResourceUtil.readResourceAsString(applicationContext, "classpath:/blueprint/clouderamanager.bp"))

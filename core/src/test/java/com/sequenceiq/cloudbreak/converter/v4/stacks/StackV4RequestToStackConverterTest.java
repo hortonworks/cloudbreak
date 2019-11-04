@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.freeipa.FreeIpaAdapter;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
@@ -138,6 +139,9 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
     private KerberosConfigService kerberosConfigService;
 
     @Mock
+    private FreeIpaAdapter freeIPAAdapter;
+
+    @Mock
     private CredentialResponse credentialResponse;
 
     private Credential credential;
@@ -160,6 +164,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
                 .cloudPlatform("AWS")
                 .build();
         ReflectionTestUtils.setField(underTest, "defaultGatewayCidr", Set.of(""));
+        when(freeIPAAdapter.getDomain(anyString())).thenReturn("cloudera.site");
     }
 
     @Test

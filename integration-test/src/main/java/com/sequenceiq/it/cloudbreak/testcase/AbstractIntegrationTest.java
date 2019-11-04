@@ -42,6 +42,7 @@ import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
@@ -59,6 +60,7 @@ import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
@@ -66,7 +68,10 @@ import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestCaseDescriptionMissingException;
+import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 import com.sequenceiq.it.cloudbreak.mock.ThreadLocalProfiles;
+import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
+import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.cloudbreak.util.azurecloudblob.AzureCloudBlobUtil;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
@@ -119,6 +124,12 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     private DatabaseTestClient databaseTestClient;
 
     @Inject
+    private FreeIPATestClient freeIPATestClient;
+
+    @Inject
+    private FreeIpaRouteHandler freeIpaRouteHandler;
+
+    @Inject
     private CommonCloudProperties commonCloudProperties;
 
     @Value("${integrationtest.cleanup.purge:false}")
@@ -160,6 +171,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultEnvironmentWithNetwork(testContext);
+        createDefaultFreeIPA(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }
@@ -229,6 +241,32 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     public LongStringGeneratorUtil getLongNameGenerator() {
         return longStringGeneratorUtil;
+    }
+
+    protected void createDefaultFreeIPA(TestContext testContext) {
+        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
+        DynamicRouteStack dynamicRouteStack = mockedTestContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
+        dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/login_password", (request, response) -> {
+            response.cookie("ipa_session", "dummysession");
+            return "";
+        });
+        dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/json", freeIpaRouteHandler);
+        dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/session/json", freeIpaRouteHandler);
+        dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/user_find", freeIpaRouteHandler);
+        dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/user_mod", freeIpaRouteHandler);
+        dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/role_add_member", freeIpaRouteHandler);
+        dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/cert_find", freeIpaRouteHandler);
+        dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/host_find", freeIpaRouteHandler);
+        dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/service_find", freeIpaRouteHandler);
+        dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/dnszone_find", freeIpaRouteHandler);
+        dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/dnsrecord_find", freeIpaRouteHandler);
+        dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/host_del", freeIpaRouteHandler);
+        dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/role_find", freeIpaRouteHandler);
+        testContext
+                .given(FreeIPATestDto.class).withCatalog(mockedTestContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                .when(freeIPATestClient.create())
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
+                .validate();
     }
 
     protected void createDefaultEnvironment(TestContext testContext) {

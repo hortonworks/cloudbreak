@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
+import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -203,4 +204,36 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @DisableCheckPermissions
     @Query("SELECT s.id FROM Stack s WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.terminated = null")
     Optional<Long> findIdByNameAndWorkspaceId(@Param("name") String name, @Param("workspaceId") Long workspaceId);
+
+    @CheckPermissionsByWorkspaceId
+    @Query("SELECT s.id as id, "
+            + "s.resourceCrn as resourceCrn, "
+            + "s.name as name, "
+            + "s.environmentCrn as environmentCrn, "
+            + "s.type as type, "
+            + "b.resourceCrn as blueprintCrn, "
+            + "b.name as blueprintName, "
+            + "b.created as blueprintCreated, "
+            + "b.stackType as stackType, "
+            + "b.stackVersion as stackVersion, "
+            + "ss.status as stackStatus, "
+            + "s.cloudPlatform as cloudPlatform, "
+            + "c.status as clusterStatus, "
+            + "s.created as created, "
+            + "s.datalakeResourceId as sharedClusterId, "
+            + "b.tags as blueprintTags,"
+            + "c.id as clusterId, "
+            + "s.platformVariant as platformVariant, "
+            + "c.clusterManagerIp as clusterManagerIp, "
+            + "b.id as blueprintId, "
+            + "b.hostGroupCount as hostGroupCount, "
+            + "b.status as blueprintStatus, "
+            + "s.terminated as terminated, "
+            + "u.id as userDOId, "
+            + "u.userId as userId, "
+            + "u.userName as username "
+            + "FROM Stack s LEFT JOIN s.cluster c LEFT JOIN c.blueprint b LEFT JOIN s.stackStatus ss LEFT JOIN s.creator u "
+            + "WHERE s.workspace.id= :id AND s.terminated = null AND (:environmentCrn IS null OR s.environmentCrn = :environmentCrn) "
+            + "AND (:stackType IS null OR s.type = :stackType)")
+    Set<StackListItem> findByWorkspaceId(@Param("id") Long id, @Param("environmentCrn") String environmentCrn, @Param("stackType") StackType stackType);
 }

@@ -30,8 +30,6 @@ import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.mock.model.SaltMock;
@@ -64,11 +62,6 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
         CreateKerberosConfigRequest request = testData.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(KerberosTestDto.class)
-                .withRequest(request)
-                .withEnvironment(EnvironmentTestDto.class)
-                .withName(request.getName())
-                .when(kerberosTestClient.createV1())
                 .given("master", InstanceGroupTestDto.class)
                 .withHostGroup(HostGroupType.MASTER)
                 .withNodeCount(1)
@@ -156,7 +149,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
                 List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
                 verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
-                verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(2));
+                verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(4));
                 return verifications;
             }
 
@@ -183,7 +176,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
                 List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
                 verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
-                verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(2));
+                verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(4));
                 return verifications;
             }
 

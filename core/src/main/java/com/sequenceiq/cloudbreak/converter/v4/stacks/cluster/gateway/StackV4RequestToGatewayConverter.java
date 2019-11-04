@@ -33,7 +33,6 @@ public class StackV4RequestToGatewayConverter extends AbstractConversionServiceA
         convertUtil.setBasicProperties(gatewayJson, gateway);
         convertUtil.setTopologies(gatewayJson, gateway);
         convertUtil.setGatewayPathAndSsoProvider(gatewayJson, gateway);
-        convertUtil.generateSignKeys(gateway);
         return gateway;
     }
 

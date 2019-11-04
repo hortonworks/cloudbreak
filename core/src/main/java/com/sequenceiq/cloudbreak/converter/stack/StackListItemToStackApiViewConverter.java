@@ -1,0 +1,80 @@
+package com.sequenceiq.cloudbreak.converter.stack;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
+import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
+import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
+import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
+import com.sequenceiq.cloudbreak.domain.view.StackApiView;
+import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
+import com.sequenceiq.cloudbreak.domain.view.UserView;
+
+@Component
+public class StackListItemToStackApiViewConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackListItemToStackApiViewConverter.class);
+
+    public StackApiView convert(StackListItem item, Map<Long, Integer> stackInstanceCounts,
+            List<HostGroupView> hostGroupViews) {
+        StackApiView response = new StackApiView();
+        response.setId(item.getId());
+        response.setResourceCrn(item.getResourceCrn());
+        response.setName(item.getName());
+        response.setCloudPlatform(item.getCloudPlatform());
+        response.setPlatformVariant(item.getPlatformVariant());
+        response.setCreated(item.getCreated());
+        StackStatusView stackStatusView = new StackStatusView();
+        stackStatusView.setStatus(item.getStackStatus());
+        response.setStackStatus(stackStatusView);
+        response.setCluster(getClusterApiView(item, hostGroupViews));
+        response.setNodeCount(stackInstanceCounts.get(item.getId()));
+        response.setEnvironmentCrn(item.getEnvironmentCrn());
+        response.setType(item.getType());
+        response.setDatalakeId(item.getSharedClusterId());
+        response.setUserView(getUserView(item));
+        response.setTerminated(item.getTerminated());
+        response.getCluster().setStack(response);
+        return response;
+    }
+
+    private UserView getUserView(StackListItem item) {
+        UserView userView = new UserView();
+        userView.setId(item.getUserDOId());
+        userView.setUserId(item.getUserId());
+        userView.setUserName(item.getUsername());
+        return userView;
+    }
+
+    private ClusterApiView getClusterApiView(StackListItem item, List<HostGroupView> hostGroupViews) {
+        ClusterApiView clusterResponse = new ClusterApiView();
+        clusterResponse.setId(item.getClusterId());
+        clusterResponse.setEnvironmentCrn(item.getEnvironmentCrn());
+        clusterResponse.setName(item.getName());
+        clusterResponse.setClusterManagerIp(item.getClusterManagerIp());
+        clusterResponse.setBlueprint(getBlueprintView(item));
+        clusterResponse.setStatus(item.getClusterStatus());
+        clusterResponse.setHostGroups(new HashSet<>(hostGroupViews));
+        return clusterResponse;
+    }
+
+    private BlueprintView getBlueprintView(StackListItem item) {
+        BlueprintView blueprintResponse = new BlueprintView();
+        blueprintResponse.setId(item.getBlueprintId());
+        blueprintResponse.setResourceCrn(item.getBlueprintCrn());
+        blueprintResponse.setCreated(item.getBlueprintCreated());
+        blueprintResponse.setName(item.getBlueprintName());
+        blueprintResponse.setStackType(item.getStackType());
+        blueprintResponse.setStackVersion(item.getStackVersion());
+        blueprintResponse.setHostGroupCount(item.getHostGroupCount());
+        blueprintResponse.setStatus(item.getBlueprintStatus());
+        blueprintResponse.setTags(item.getBlueprintTags());
+        return blueprintResponse;
+    }
+}

@@ -37,7 +37,7 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     Optional<Cluster> findOneByStackId(long stackId);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.hostGroups LEFT JOIN FETCH c.containers LEFT JOIN FETCH c.components "
+    @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.gateway LEFT JOIN FETCH c.hostGroups LEFT JOIN FETCH c.containers LEFT JOIN FETCH c.components "
             + "LEFT JOIN FETCH c.rdsConfigs WHERE c.id= :id")
     Optional<Cluster> findOneWithLists(@Param("id") Long id);
 

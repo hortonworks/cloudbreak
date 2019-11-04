@@ -71,6 +71,16 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
     @Inject
     private SdxTestClient sdxTestClient;
 
+    @Override
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
+        createDefaultCredential(testContext);
+        createDefaultEnvironmentWithNetwork(testContext);
+        createDefaultImageCatalog(testContext);
+        initializeDefaultBlueprints(testContext);
+        createCmBlueprint(testContext);
+    }
+
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak",
