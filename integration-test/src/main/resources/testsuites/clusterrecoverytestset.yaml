@@ -2,8 +2,8 @@ name: "AWS cluster recovery tests"
 parallel: tests
 threadCount: 2
 parameters:
-  awsRegion: eu-west-1
-  awsAvailabilityZone: eu-west-1a
+  awsRegion: eu-central-1
+  awsAvailabilityZone: eu-central-1a
   awsCredentialName: autotesting-clusters-aws
 listeners:
   - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
