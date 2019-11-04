@@ -11,7 +11,7 @@
     {
       "name": "idbroker",
       "template": {
-        "instanceType": "Standard_D12_v2",
+        "instanceType": "Standard_D2s_v3",
         "attachedVolumes": [
           {
             "count": 1,
@@ -31,7 +31,7 @@
     {
       "name": "master",
       "template": {
-        "instanceType": "Standard_D12_v2",
+        "instanceType": "Standard_D8s_v3",
         "attachedVolumes": [
           {
             "count": 1,
@@ -40,7 +40,7 @@
           }
         ],
         "rootVolume": {
-          "size": 50
+          "size": 100
         }
       },
       "nodeCount": 1,
