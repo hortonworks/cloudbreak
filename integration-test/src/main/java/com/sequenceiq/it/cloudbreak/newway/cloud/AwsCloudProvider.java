@@ -1,5 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
+import static java.util.Set.of;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
@@ -16,14 +25,6 @@ import com.sequenceiq.it.cloudbreak.newway.StackEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Database.Hive;
 import com.sequenceiq.it.cloudbreak.parameters.RequiredInputParameters.Aws.Database.Ranger;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-
-import static java.util.Set.of;
 
 public class AwsCloudProvider extends CloudProviderHelper {
 
@@ -98,12 +99,12 @@ public class AwsCloudProvider extends CloudProviderHelper {
 
     @Override
     public String availabilityZone() {
-        return getTestParameter().getWithDefault("awsAvailabilityZone", "eu-west-1a");
+        return getTestParameter().getWithDefault("awsAvailabilityZone", "eu-central-1a");
     }
 
     @Override
     public String region() {
-        return getTestParameter().getWithDefault("awsRegion", "eu-west-1");
+        return getTestParameter().getWithDefault("awsRegion", "eu-central-1");
     }
 
     @Override

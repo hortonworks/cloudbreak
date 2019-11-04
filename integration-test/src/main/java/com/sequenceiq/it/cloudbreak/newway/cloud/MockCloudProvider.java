@@ -66,7 +66,7 @@ public class MockCloudProvider extends CloudProviderHelper {
 
     @Override
     public String availabilityZone() {
-        String availabilityZone = "eu-west-1a";
+        String availabilityZone = "eu-central-1a";
         String availabilityZoneParam = getTestParameter().get("mockAvailabilityZone");
 
         return availabilityZoneParam == null ? availabilityZone : availabilityZoneParam;
@@ -102,7 +102,7 @@ public class MockCloudProvider extends CloudProviderHelper {
 
     @Override
     public String region() {
-        String region = "eu-west-1";
+        String region = "eu-central-1";
         String regionParam = getTestParameter().get("mockRegion");
 
         return regionParam == null ? region : regionParam;
