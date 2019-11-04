@@ -59,6 +59,7 @@ public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProx
         Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
         try {
             if (!clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
+                LOGGER.warn("Cluster Proxy integration is DISABLED, skipping registering with Cluster Proxy service. Cluster CRN: {}", stack.getResourceCrn());
                 return new ClusterProxyRegistrationSuccess(request.getResourceId());
             }
             ConfigRegistrationResponse registerResponse = clusterProxyService.registerCluster(stack, request.getAccountId());

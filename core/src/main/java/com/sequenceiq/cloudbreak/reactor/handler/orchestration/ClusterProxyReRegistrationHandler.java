@@ -61,6 +61,7 @@ public class ClusterProxyReRegistrationHandler implements EventHandler<ClusterPr
 
     private Selectable registerCluster(ClusterProxyReRegistrationRequest request) {
         if (!clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
+            LOGGER.warn("Cluster Proxy integration is DISABLED, skipping re-registering with Cluster Proxy service");
             return new ClusterProxyReRegistrationResult(request);
         }
 
