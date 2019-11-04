@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
@@ -43,13 +44,13 @@ public class ClusterProxyService {
         this.clusterProxyRegistrationClient = clusterProxyRegistrationClient;
     }
 
-    public ConfigRegistrationResponse registerCluster(Stack stack, String accountId) {
-            ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack, accountId);
+    public ConfigRegistrationResponse registerCluster(Stack stack) {
+            ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack);
             return clusterProxyRegistrationClient.registerConfig(proxyConfigRequest);
     }
 
-    public ConfigRegistrationResponse reRegisterCluster(Stack stack, String accountId) {
-            ConfigRegistrationRequest proxyConfigRequest = createProxyConfigReRegisterRequest(stack, accountId);
+    public ConfigRegistrationResponse reRegisterCluster(Stack stack) {
+            ConfigRegistrationRequest proxyConfigRequest = createProxyConfigReRegisterRequest(stack);
             return clusterProxyRegistrationClient.registerConfig(proxyConfigRequest);
     }
 
@@ -72,23 +73,27 @@ public class ClusterProxyService {
         clusterProxyRegistrationClient.deregisterConfig(stack.getResourceCrn());
     }
 
-    private ConfigRegistrationRequest createProxyConfigRequest(Stack stack, String accountId) {
+    private ConfigRegistrationRequest createProxyConfigRequest(Stack stack) {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .with(singletonList(clusterId(stack.getCluster())), singletonList(serviceConfig(stack)), null);
         if (Boolean.TRUE.equals(stack.getUseCcm())) {
-            return requestBuilder.withAccountId(accountId).withTunnelEntries(tunnelEntries(stack)).build();
+            return requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack)).build();
         }
         return requestBuilder.build();
     }
 
-    private ConfigRegistrationRequest createProxyConfigReRegisterRequest(Stack stack, String accountId) {
+    private ConfigRegistrationRequest createProxyConfigReRegisterRequest(Stack stack) {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .with(singletonList(clusterId(stack.getCluster())), singletonList(serviceConfig(stack)), null)
                 .withKnoxUrl(knoxUrl(stack));
         if (Boolean.TRUE.equals(stack.getUseCcm())) {
-            return requestBuilder.withAccountId(accountId).withTunnelEntries(tunnelEntries(stack)).build();
+            return requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack)).build();
         }
         return requestBuilder.build();
+    }
+
+    private String getAccountId(Stack stack) {
+        return Crn.safeFromString(stack.getResourceCrn()).getAccountId();
     }
 
     private List<TunnelEntry> tunnelEntries(Stack stack) {

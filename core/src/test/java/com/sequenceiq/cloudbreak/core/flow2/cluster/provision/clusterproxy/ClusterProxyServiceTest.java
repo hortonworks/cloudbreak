@@ -46,7 +46,9 @@ public class ClusterProxyServiceTest {
 
     private static final long CLUSTER_ID = 1000L;
 
-    private static final String TEST_ACCOUNT_ID = "test-tenant";
+    private static final String TEST_ACCOUNT_ID = "9d74eee4-1cad-45d7-b645-7ccf9edbb73d";
+
+    private static final String STACK_CRN = "crn:cdp:datahub:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:cluster:c681a099-bff3-4f3f-8884-1de9604a3a09";
 
     @Mock
     private StackService stackService;
@@ -70,7 +72,7 @@ public class ClusterProxyServiceTest {
 
         when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(response);
 
-        ConfigRegistrationResponse registrationResponse = service.registerCluster(testStackUsingCCM(), TEST_ACCOUNT_ID);
+        ConfigRegistrationResponse registrationResponse = service.registerCluster(testStackUsingCCM());
         assertEquals("X509PublicKey", registrationResponse.getX509Unwrapped());
         verify(clusterProxyRegistrationClient).registerConfig(request);
     }
@@ -84,14 +86,14 @@ public class ClusterProxyServiceTest {
 
         when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(response);
 
-        ConfigRegistrationResponse registrationResponse = service.registerCluster(testStack(), TEST_ACCOUNT_ID);
+        ConfigRegistrationResponse registrationResponse = service.registerCluster(testStack());
         assertEquals("X509PublicKey", registrationResponse.getX509Unwrapped());
         verify(clusterProxyRegistrationClient).registerConfig(request);
     }
 
     @Test
     public void shouldFailIfVaultSecretIsInvalid() throws ClusterProxyException {
-        assertThrows(VaultConfigException.class, () -> service.registerCluster(testStackWithInvalidSecret(), TEST_ACCOUNT_ID));
+        assertThrows(VaultConfigException.class, () -> service.registerCluster(testStackWithInvalidSecret()));
         verify(clusterProxyRegistrationClient, times(0)).registerConfig(any());
     }
 
@@ -99,7 +101,7 @@ public class ClusterProxyServiceTest {
     public void shouldUpdateKnoxUrlWithClusterProxy() throws ClusterProxyException {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackWithKnox());
 
-        ConfigUpdateRequest request = configUpdateRequest("stack-crn");
+        ConfigUpdateRequest request = configUpdateRequest(STACK_CRN);
 
         service.registerGatewayConfiguration(STACK_ID);
         verify(clusterProxyRegistrationClient).updateConfig(request);
@@ -116,17 +118,17 @@ public class ClusterProxyServiceTest {
     @Test
     public void shouldDeregisterCluster() throws ClusterProxyException {
         service.deregisterCluster(testStack());
-        verify(clusterProxyRegistrationClient).deregisterConfig("stack-crn");
+        verify(clusterProxyRegistrationClient).deregisterConfig(STACK_CRN);
     }
 
     private ConfigRegistrationRequest configRegistrationRequest() {
-        return new ConfigRegistrationRequestBuilder("stack-crn")
+        return new ConfigRegistrationRequestBuilder(STACK_CRN)
                 .with(List.of(String.valueOf(CLUSTER_ID)), List.of(serviceConfig()), null).build();
     }
 
     private ConfigRegistrationRequest configRegistrationRequestWithTunnelEntries() {
         List<TunnelEntry> tunnelEntries = List.of(new TunnelEntry("i-abc123", "GATEWAY", "10.10.10.10", 443));
-        return new ConfigRegistrationRequestBuilder("stack-crn")
+        return new ConfigRegistrationRequestBuilder(STACK_CRN)
                 .with(List.of(String.valueOf(CLUSTER_ID)), List.of(serviceConfig()), null)
                 .withAccountId(TEST_ACCOUNT_ID)
                 .withTunnelEntries(tunnelEntries).build();
@@ -145,7 +147,7 @@ public class ClusterProxyServiceTest {
 
     private Stack testStack() {
         Stack stack = new Stack();
-        stack.setResourceCrn("stack-crn");
+        stack.setResourceCrn(STACK_CRN);
         stack.setId(STACK_ID);
         stack.setCluster(testCluster());
         stack.setGatewayPort(9443);
