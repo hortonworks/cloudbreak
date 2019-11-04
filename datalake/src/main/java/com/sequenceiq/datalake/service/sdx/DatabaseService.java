@@ -11,6 +11,7 @@ import javax.ws.rs.NotFoundException;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
@@ -42,6 +43,12 @@ public class DatabaseService {
     public static final int DURATION_IN_MINUTES_FOR_DB_POLLING = 60;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseService.class);
+
+    @Value("${sdx.db.multiaz:true}")
+    private String multiAz;
+
+    @Value("${sdx.db.retentionperiod:1}")
+    private int retentionPeriod;
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
@@ -116,8 +123,9 @@ public class DatabaseService {
 
     private AwsDatabaseServerV4Parameters getAwsDatabaseServerParameters() {
         AwsDatabaseServerV4Parameters params = new AwsDatabaseServerV4Parameters();
-        params.setBackupRetentionPeriod(1);
+        params.setBackupRetentionPeriod(retentionPeriod);
         params.setEngineVersion("10.6");
+        params.setMultiAZ(multiAz);
         return params;
     }
 
