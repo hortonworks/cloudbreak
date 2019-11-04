@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
@@ -35,8 +34,11 @@ public class DatalakeService {
     @Value("${env.stop.polling.sleep.time:5}")
     private Integer sleeptime;
 
-    @Inject
-    private SdxEndpoint sdxEndpoint;
+    private final SdxEndpoint sdxEndpoint;
+
+    public DatalakeService(SdxEndpoint sdxEndpoint) {
+        this.sdxEndpoint = sdxEndpoint;
+    }
 
     public Collection<SdxClusterResponse> getAttachedDatalake(String environmentName) {
         LOGGER.debug("Get Datalake for the environment: '{}'", environmentName);
@@ -73,7 +75,7 @@ public class DatalakeService {
                                     return AttemptResults.<Void>finishWith(null);
                                 } else {
                                     remaining.add(crn);
-                                    return checkStatus(sdx);
+                                    return checkStopStatus(sdx);
                                 }
                             }).collect(Collectors.toList());
 
@@ -91,29 +93,84 @@ public class DatalakeService {
 
     }
 
-    private AttemptResult<Void> checkStatus(SdxClusterResponse sdx) {
+    public void startAttachedDatalake(String envName) {
+        Collection<SdxClusterResponse> attachedDatalake = getAttachedDatalake(envName);
+        List<String> pollingCrn = new ArrayList<>();
+        attachedDatalake.forEach(d -> {
+            if (!isStartState(d.getStatus())) {
+                sdxEndpoint.startByCrn(d.getCrn());
+            }
+            pollingCrn.add(d.getCrn());
+        });
+
+        List<String> remaining = new ArrayList<>();
+
+        Polling.stopAfterAttempt(attempt)
+                .stopIfException(true)
+                .waitPeriodly(sleeptime, TimeUnit.SECONDS)
+                .run(() -> {
+                    remaining.clear();
+                    List<AttemptResult<Void>> results = pollingCrn.stream()
+                            .map(crn -> {
+                                SdxClusterResponse sdx = sdxEndpoint.getByCrn(crn);
+                                if (sdxStarted(sdx)) {
+                                    return AttemptResults.<Void>finishWith(null);
+                                } else {
+                                    remaining.add(crn);
+                                    return checkStartStatus(sdx);
+                                }
+                            }).collect(Collectors.toList());
+
+                    Optional<AttemptResult<Void>> error = results.stream().filter(it -> it.getState() == AttemptState.BREAK).findFirst();
+                    if (error.isPresent()) {
+                        return error.get();
+                    }
+                    long count = results.stream().filter(it -> it.getState() == AttemptState.CONTINUE).count();
+                    if (count > 0) {
+                        pollingCrn.retainAll(remaining);
+                        return AttemptResults.justContinue();
+                    }
+                    return AttemptResults.finishWith(null);
+                });
+
+    }
+
+    private AttemptResult<Void> checkStopStatus(SdxClusterResponse sdx) {
         if (sdx.getStatus() == SdxClusterStatusResponse.STOP_FAILED) {
             LOGGER.info("SDX stop failed for '{}' with status {}, reason: {}", sdx.getName(), sdx.getStatus(), sdx.getStatusReason());
-            return sdxStopFailed(sdx, sdx.getStatusReason());
-        } else if (!isStopState(sdx.getStatus())) {
-            return AttemptResults.breakFor("SDX stop failed '" + sdx.getName() + "', stack is in inconsistency state: " + sdx.getStatus());
+            return AttemptResults.breakFor("SDX stop failed '" + sdx.getName() + "', " + sdx.getStatusReason());
         } else {
             return AttemptResults.justContinue();
         }
     }
 
-    private AttemptResult<Void> sdxStopFailed(SdxClusterResponse sdx, String statusReason) {
-        return AttemptResults.breakFor("SDX stop failed '" + sdx.getName() + "', " + statusReason);
+    private AttemptResult<Void> checkStartStatus(SdxClusterResponse sdx) {
+        if (sdx.getStatus() == SdxClusterStatusResponse.START_FAILED) {
+            LOGGER.info("SDX start failed for '{}' with status {}, reason: {}", sdx.getName(), sdx.getStatus(), sdx.getStatusReason());
+            return AttemptResults.breakFor("SDX start failed '" + sdx.getName() + "', " + sdx.getStatusReason());
+        } else {
+            return AttemptResults.justContinue();
+        }
     }
 
     private boolean sdxStopped(SdxClusterResponse sdx) {
         return sdx.getStatus() == SdxClusterStatusResponse.STOPPED;
     }
 
+    private boolean sdxStarted(SdxClusterResponse sdx) {
+        return sdx.getStatus() == SdxClusterStatusResponse.RUNNING;
+    }
+
     private boolean isStopState(SdxClusterStatusResponse status) {
         return SdxClusterStatusResponse.STOPPED.equals(status)
                 || SdxClusterStatusResponse.STOP_IN_PROGRESS.equals(status)
-                || SdxClusterStatusResponse.STOP_REQUESTED.equals(status)
-                || SdxClusterStatusResponse.STOP_FAILED.equals(status);
+                || SdxClusterStatusResponse.STOP_REQUESTED.equals(status);
+    }
+
+    private boolean isStartState(SdxClusterStatusResponse status) {
+        return SdxClusterStatusResponse.RUNNING.equals(status)
+                || SdxClusterStatusResponse.START_IN_PROGRESS.equals(status)
+                || SdxClusterStatusResponse.START_REQUESTED.equals(status)
+                || SdxClusterStatusResponse.START_FAILED.equals(status);
     }
 }
