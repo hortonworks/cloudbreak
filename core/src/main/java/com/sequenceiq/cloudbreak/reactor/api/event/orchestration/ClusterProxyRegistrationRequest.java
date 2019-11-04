@@ -3,14 +3,7 @@ package com.sequenceiq.cloudbreak.reactor.api.event.orchestration;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class ClusterProxyRegistrationRequest extends StackEvent {
-    private final String accountId;
-
-    public ClusterProxyRegistrationRequest(Long stackId, String accountId) {
+    public ClusterProxyRegistrationRequest(Long stackId) {
         super(stackId);
-        this.accountId = accountId;
-    }
-
-    public String getAccountId() {
-        return accountId;
     }
 }
