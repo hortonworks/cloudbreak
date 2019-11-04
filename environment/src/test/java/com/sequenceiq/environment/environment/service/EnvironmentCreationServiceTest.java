@@ -106,7 +106,7 @@ class EnvironmentCreationServiceTest {
         final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
                 .withCloudPlatform("AZURE")
-                .withCreator(USER)
+                .withCreator(CRN)
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
                 .withParameters(parametersDto)
@@ -122,10 +122,10 @@ class EnvironmentCreationServiceTest {
         environment.setId(1L);
         environment.setAccountId(ACCOUNT_ID);
         Credential credential = new Credential();
-        credential.setCloudPlatform("platform");
+        credential.setCloudPlatform("AZURE");
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(EnvironmentTestData.USER)))
+        when(environmentResourceService.getCredentialFromRequest(any(), any(), any()))
                 .thenReturn(credential);
         when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateNetworkCreation(any(), any(), any())).thenReturn(ValidationResult.builder());
