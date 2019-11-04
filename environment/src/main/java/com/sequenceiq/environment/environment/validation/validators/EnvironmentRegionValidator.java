@@ -23,10 +23,11 @@ public class EnvironmentRegionValidator {
         return resultBuilder;
     }
 
-    public ValidationResultBuilder validateLocation(String requestedLocation, Set<String> requestedRegions, String cloudPlatform) {
+    public ValidationResultBuilder validateLocation(String requestedLocation, Set<String> requestedRegions,
+        CloudRegions cloudRegions, String cloudPlatform) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         Set<String> requestedRegionNames = new HashSet<>(requestedRegions);
-        if (!requestedRegionNames.contains(requestedLocation)) {
+        if (!requestedRegionNames.contains(requestedLocation) && cloudRegions.areRegionsSupported()) {
             if (!cloudPlatform.equalsIgnoreCase(CloudConstants.OPENSTACK) && !cloudPlatform.equalsIgnoreCase(CloudConstants.MOCK)) {
                 resultBuilder.error(String.format("Location [%s] is not one of the regions: [%s].", requestedLocation,
                         String.join(", ", requestedRegionNames)));
