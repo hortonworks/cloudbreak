@@ -53,6 +53,9 @@ public class ClusterProxyDeregisterHandler implements EventHandler<ClusterProxyD
                 } catch (Exception ex) {
                     LOGGER.warn("Cluster proxy deregister failed", ex);
                 }
+            } else {
+                LOGGER.warn("Cluster Proxy integration is DISABLED, skipping de-registering with Cluster Proxy service. Cluster CRN: {}",
+                        stack.getResourceCrn());
             }
             stackTerminationService.deleteDnsEntry(stack);
             result = new ClusterProxyDeregisterSuccess(stack.getId());

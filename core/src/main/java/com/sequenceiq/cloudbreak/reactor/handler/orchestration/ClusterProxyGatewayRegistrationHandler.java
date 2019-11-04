@@ -45,6 +45,7 @@ public class ClusterProxyGatewayRegistrationHandler implements EventHandler<Clus
                 clusterProxyService.registerGatewayConfiguration(request.getResourceId());
                 response = new ClusterProxyGatewayRegistrationSuccess(request.getResourceId());
             } else {
+                LOGGER.warn("Cluster Proxy integration is DISABLED, skipping registering gateway configuration with Cluster Proxy service.");
                 response = new ClusterProxyGatewayRegistrationSuccess(request.getResourceId());
             }
         } catch (Exception e) {
