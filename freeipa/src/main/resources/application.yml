@@ -180,7 +180,7 @@ cb:
     salt.new.service.retry: 90
     salt.new.service.leave.retry: 10
     salt.new.service.retry.onerror: 20
-    salt.recipe.execution.retry: 90
+    salt.recipe.execution.retry: 180
 
   address.resolving.timeout: 60000
 
