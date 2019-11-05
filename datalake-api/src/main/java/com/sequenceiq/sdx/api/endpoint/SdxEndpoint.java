@@ -17,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.springframework.validation.annotation.Validated;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
@@ -106,6 +107,28 @@ public interface SdxEndpoint {
     @Path("/crn/{crn}/manual_repair")
     @ApiOperation(value = "repairs an sdxNode in the specified hostgroup by crn", nickname = "repairSdxNodeByCrn")
     void repairClusterByCrn(@PathParam("crn") String crn, SdxRepairRequest clusterRepairRequest);
+
+    @GET
+    @Path("{name}/check_for_upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "checks for upgrade options by name", nickname = "checkForUpgrade")
+    UpgradeOptionV4Response checkForUpgradeByName(@PathParam("name") String name);
+
+    @GET
+    @Path("/crn/{crn}/check_for_upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "checks for upgrade options by crn", nickname = "checkForUpgradeByCrn")
+    UpgradeOptionV4Response checkForUpgradeByCrn(@PathParam("crn") String crn);
+
+    @POST
+    @Path("{name}/upgrade")
+    @ApiOperation(value = "upgrades the datalake cluster to the latest images", nickname = "upgradeDatalakeCluster")
+    void upgradeClusterByName(@PathParam("name") String name);
+
+    @POST
+    @Path("/crn/{crn}/upgrade")
+    @ApiOperation(value = "upgrades the datalake cluster to the latest images", nickname = "upgradeDatalakeClusterByCrn")
+    void upgradeClusterByCrn(@PathParam("crn") String crn);
 
     @GET
     @Path("list")

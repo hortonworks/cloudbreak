@@ -15,13 +15,12 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -59,25 +58,16 @@ public class StackImageFilterService {
             throw new BadRequestException("To retrieve list of images for upgrade both stack and cluster have to be in AVAILABLE state");
         }
 
-        StackType stackType = stackImageUpdateService.getStackType(stack);
         String currentImageUuid = getCurrentImageUuid(stack);
 
         List<Image> filteredBaseImages =
                 filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getBaseImages(), currentImageUuid);
 
-        List<Image> filteredHdpImages = stackType.equals(StackType.HDP)
-                ? filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getHdpImages(), currentImageUuid)
-                : Collections.emptyList();
+        List<Image> filteredCdhImages =
+                filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getCdhImages(), currentImageUuid);
 
-        List<Image> filteredHdfImages = stackType.equals(StackType.HDF)
-                ? filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getHdfImages(), currentImageUuid)
-                : Collections.emptyList();
-
-        List<Image> filteredCdhImages = stackType.equals(StackType.CDH)
-                ? filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getCdhImages(), currentImageUuid)
-                : Collections.emptyList();
-
-        return new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, filteredCdhImages, statedImages.getImages().getSuppertedVersions());
+        return new Images(filteredBaseImages, Collections.emptyList(), Collections.emptyList(), filteredCdhImages,
+                statedImages.getImages().getSuppertedVersions());
     }
 
     private String getCurrentImageUuid(Stack stack) {

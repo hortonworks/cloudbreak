@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,8 +56,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 @ConfigurationProperties(prefix = "cb.instance")
 public class InstanceMetadataUpdater {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMetadataUpdater.class);
-
-    private final Pattern saltBootstrapVersionPattern = Pattern.compile("Version: (.*)");
 
     private List<Package> packages;
 
@@ -209,10 +208,10 @@ public class InstanceMetadataUpdater {
         for (Package packageWithCommand : packagesWithCommand) {
             Map<String, String> versionsByHost = hostOrchestrator.runCommandOnAllHosts(gatewayConfig, packageWithCommand.getCommand());
             for (Entry<String, String> entry : versionsByHost.entrySet()) {
-                String saltBootstrapVersion = parseSaltBootstrapVersion(entry.getValue());
-                if (!StringUtils.equalsAny(saltBootstrapVersion, "false", "null", null)) {
+                String version = parseVersion(entry.getValue(), packageWithCommand.getCommandVersionPattern());
+                if (!StringUtils.equalsAny(version, "false", "null", null)) {
                     packageVersionsByNameByHost.computeIfAbsent(entry.getKey(), s -> new HashMap<>())
-                            .put(packageWithCommand.getName(), saltBootstrapVersion);
+                            .put(packageWithCommand.getName(), version);
                 }
             }
         }
@@ -235,16 +234,18 @@ public class InstanceMetadataUpdater {
 
     private Map<String, Map<String, String>> getPackageVersionByPackageName(GatewayConfig gatewayConfig, HostOrchestrator hostOrchestrator)
             throws CloudbreakOrchestratorFailedException {
-        Map<String, String> pkgNames = mapPackageToPkgNameAndNameMap();
+        Map<PackageName, String> pkgNames = mapPackageToPkgNameAndNameMap();
+        Map<String, Optional<String>> pkgNameStringMap = pkgNames.keySet().stream()
+                .collect(Collectors.toMap(PackageName::getName, pkgName -> Optional.ofNullable(pkgName.getPattern())));
 
         // Map<host, Map<pkgName, version>
         Map<String, Map<String, String>> packageVersionsByPkgNameByHost =
-                hostOrchestrator.getPackageVersionsFromAllHosts(gatewayConfig, pkgNames.keySet().toArray(new String[pkgNames.size()]));
+                hostOrchestrator.getPackageVersionsFromAllHosts(gatewayConfig, pkgNameStringMap);
 
         return mapHostPkgNameVersionToHostNameVersionMap(pkgNames, packageVersionsByPkgNameByHost);
     }
 
-    private Map<String, Map<String, String>> mapHostPkgNameVersionToHostNameVersionMap(Map<String, String> pkgNames,
+    private Map<String, Map<String, String>> mapHostPkgNameVersionToHostNameVersionMap(Map<PackageName, String> pkgNames,
             Map<String, Map<String, String>> packageVersionsByPkgNameByHost) {
         // Map<host, Map<name, version>
         Map<String, Map<String, String>> packageVersionsByNameByHost = new HashMap<>();
@@ -252,19 +253,23 @@ public class InstanceMetadataUpdater {
             Map<String, String> versionByName =
                     entry.getValue().entrySet().stream()
                             .filter(e -> StringUtils.isNotBlank(e.getValue()) && !StringUtils.equalsAny(e.getValue(), "false", "null", null))
-                            .collect(Collectors.toMap(e -> pkgNames.get(e.getKey()), Entry::getValue));
+                            .collect(Collectors.toMap(e -> getPkgNameStringMap(pkgNames).get(e.getKey()), Entry::getValue));
             packageVersionsByNameByHost.put(entry.getKey(), versionByName);
         }
         return packageVersionsByNameByHost;
     }
 
-    private Map<String, String> mapPackageToPkgNameAndNameMap() {
+    private Map<String, String> getPkgNameStringMap(Map<PackageName, String> pkgNames) {
+        return pkgNames.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey().getName(), Entry::getValue));
+    }
+
+    private Map<PackageName, String> mapPackageToPkgNameAndNameMap() {
         /*
          * From Package { List<String> pkgName; String name; }
          * To Map<pkgName, name>
          */
-        return packages.stream().filter(pkg -> pkg.getPkgName() != null && !pkg.getPkgName().isEmpty())
-                .flatMap(pkg -> pkg.getPkgName().stream()
+        return packages.stream().filter(pkg -> pkg.getPkg() != null && !pkg.getPkg().isEmpty())
+                .flatMap(pkg -> pkg.getPkg().stream()
                         .map(pkgName -> new SimpleEntry<>(pkgName, pkg.getName())))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
@@ -319,10 +324,12 @@ public class InstanceMetadataUpdater {
         this.packages = packages;
     }
 
-    private String parseSaltBootstrapVersion(String versionCommandOutput) {
-        Matcher matcher = saltBootstrapVersionPattern.matcher(versionCommandOutput);
-        if (matcher.matches()) {
-            return matcher.group(1);
+    private String parseVersion(String versionCommandOutput, String pattern) {
+        if (pattern != null) {
+            Matcher matcher = Pattern.compile(pattern).matcher(versionCommandOutput);
+            if (matcher.matches()) {
+                return matcher.group(1);
+            }
         }
         return versionCommandOutput;
     }
@@ -360,13 +367,15 @@ public class InstanceMetadataUpdater {
     public static class Package {
         private String name;
 
-        private List<String> pkgName;
+        private List<PackageName> pkg;
 
         private String command;
 
         private boolean prewarmed;
 
         private String grain;
+
+        private String commandVersionPattern;
 
         public String getName() {
             return name;
@@ -376,12 +385,12 @@ public class InstanceMetadataUpdater {
             this.name = name;
         }
 
-        public List<String> getPkgName() {
-            return pkgName;
+        public List<PackageName> getPkg() {
+            return pkg;
         }
 
-        public void setPkgName(List<String> pkgName) {
-            this.pkgName = pkgName;
+        public void setPkg(List<PackageName> pkg) {
+            this.pkg = pkg;
         }
 
         public String getCommand() {
@@ -406,6 +415,36 @@ public class InstanceMetadataUpdater {
 
         public void setGrain(String grain) {
             this.grain = grain;
+        }
+
+        public String getCommandVersionPattern() {
+            return commandVersionPattern;
+        }
+
+        public void setCommandVersionPattern(String commandVersionPattern) {
+            this.commandVersionPattern = commandVersionPattern;
+        }
+    }
+
+    public static class PackageName {
+        private String name;
+
+        private String pattern;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getPattern() {
+            return pattern;
+        }
+
+        public void setPattern(String pattern) {
+            this.pattern = pattern;
         }
     }
 }

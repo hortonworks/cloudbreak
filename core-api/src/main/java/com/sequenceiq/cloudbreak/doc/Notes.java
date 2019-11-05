@@ -70,6 +70,9 @@ public class Notes {
             + "for the node's hostgroup is AUTO then autorecovery would be started. If recovery mode for the node's hostgroup is MANUAL, the nodes will be "
             + "marked as unhealthy.";
     public static final String CLUSTER_REPAIR_NOTES = "Removing the failed nodes and starting new nodes to substitute them.";
+    public static final String CLUSTER_UPGRADE_NOTES = "Removing all nodes and starting new nodes with the latest image. If the cluster already uses the " +
+            "the latest image then no remove/restart will happen.";
+    public static final String CHECK_FOR_CLUSTER_UPGRADE_NOTES = "Checks for upgrades for the given cluster.";
     public static final String SMARTSENSE_SUBSCRIPTION_NOTES = "SmartSense subscriptions could be configured.";
     public static final String FLEX_SUBSCRIPTION_NOTES = "Flex subscriptions could be configured.";
     public static final String IMAGE_CATALOG_NOTES = "Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.";

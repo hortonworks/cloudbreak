@@ -5,6 +5,7 @@ import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVEN
 import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_EVENT;
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
+import static com.sequenceiq.datalake.flow.upgrade.SdxUpgradeEvent.SDX_UPGRADE_EVENT;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +17,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -25,6 +27,7 @@ import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
+import com.sequenceiq.datalake.flow.upgrade.event.SdxUpgradeStartEvent;
 import com.sequenceiq.datalake.logger.ThreadBasedRequestIdProvider;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.core.Flow2Handler;
@@ -78,6 +81,13 @@ public class SdxReactorFlowManager {
         String userId = threadBasedUserCrnProvider.getUserCrn();
         String requestId = threadBasedRequestIdProvider.getRequestId();
         notify(selector, new SdxRepairStartEvent(selector, sdxId, userId, requestId, repairRequest));
+    }
+
+    public void triggerDatalakeUpgradeFlow(Long sdxId, UpgradeOptionV4Response upgradeOption) {
+        String selector = SDX_UPGRADE_EVENT.event();
+        String userId = threadBasedUserCrnProvider.getUserCrn();
+        String requestId = threadBasedRequestIdProvider.getRequestId();
+        notify(selector, new SdxUpgradeStartEvent(selector, sdxId, userId, requestId, upgradeOption));
     }
 
     public void triggerSdxStartFlow(Long sdxId) {

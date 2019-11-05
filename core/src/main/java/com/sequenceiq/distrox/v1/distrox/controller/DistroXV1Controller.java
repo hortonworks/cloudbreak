@@ -10,6 +10,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 
 import com.google.common.base.Strings;
@@ -46,6 +47,7 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4Requ
 public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Inject
+    @Lazy
     private StackOperations stackOperations;
 
     @Inject

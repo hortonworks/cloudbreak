@@ -192,7 +192,7 @@ public class ClusterServiceTest {
         when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
         when(blueprintService.isAmbariBlueprint(any())).thenReturn(Boolean.TRUE);
 
-        underTest.repairCluster(1L, List.of("hostGroup1"), false);
+        underTest.repairCluster(1L, List.of("hostGroup1"), false, false);
 
         verify(stack, never()).getInstanceMetaDataAsList();
         verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name"))), eq(false));
@@ -239,7 +239,7 @@ public class ClusterServiceTest {
         when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
         when(blueprintService.isAmbariBlueprint(any())).thenReturn(Boolean.TRUE);
 
-        underTest.repairCluster(1L, List.of("instanceId1"), false, false);
+        underTest.repairCluster(1L, List.of("instanceId1"), false, false, false);
         verify(stack).getInstanceMetaDataAsList();
         verify(stack).getDiskResources();
         @SuppressWarnings("unchecked")
@@ -256,7 +256,7 @@ public class ClusterServiceTest {
         when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(List.of(flowLog));
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            underTest.repairCluster(1L, List.of("instanceId1"), false, false);
+            underTest.repairCluster(1L, List.of("instanceId1"), false, false, false);
         });
         assertEquals("Repair cannot be performed, because there is already an active flow.", exception.getMessage());
 

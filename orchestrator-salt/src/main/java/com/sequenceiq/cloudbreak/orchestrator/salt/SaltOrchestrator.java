@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,6 +33,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.ccm.endpoint.DirectServiceEndpointFinder;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpointFinder;
@@ -592,12 +592,12 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
-    public Map<String, Map<String, String>> getPackageVersionsFromAllHosts(GatewayConfig gateway, String... packages)
+    public Map<String, Map<String, String>> getPackageVersionsFromAllHosts(GatewayConfig gateway, Map<String, Optional<String>> packages)
             throws CloudbreakOrchestratorFailedException {
         try (SaltConnector saltConnector = createSaltConnector(gateway)) {
             return SaltStates.getPackageVersions(saltConnector, packages);
         } catch (RuntimeException e) {
-            LOGGER.info("Error occurred during determine package versions: " + Arrays.deepToString(packages), e);
+            LOGGER.info("Error occurred during determine package versions: " + Joiner.on(",").join(packages.keySet()), e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }

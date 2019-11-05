@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks;
 
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.PUT_BY_STACK_ID;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_NAME;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_FOR_UPGRADE_CLUSTER_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_IMAGE_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CREATE_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_BY_NAME_IN_WORKSPACE;
@@ -21,6 +22,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.START_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.STOP_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.SYNC_BY_NAME_IN_WORKSPACE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPGRADE_CLUSTER_IN_WORKSPACE;
 
 import java.util.List;
 import java.util.Set;
@@ -52,6 +54,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RetryableFlowRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
@@ -131,6 +134,20 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = REPAIR_CLUSTER_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.CLUSTER_REPAIR_NOTES, nickname = "repairStackInWorkspaceV4")
     void repairCluster(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid ClusterRepairV4Request clusterRepairRequest);
+
+    @POST
+    @Path("{name}/upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UPGRADE_CLUSTER_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.CLUSTER_UPGRADE_NOTES,
+            nickname = "upgradeClusterInWorkspaceV4")
+    void upgradeCluster(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+
+    @GET
+    @Path("{name}/check_for_upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CHECK_FOR_UPGRADE_CLUSTER_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.CHECK_FOR_CLUSTER_UPGRADE_NOTES,
+            nickname = "checkForUpgradeInWorkspaceV4")
+    UpgradeOptionV4Response checkForUpgrade(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("{name}/blueprint")

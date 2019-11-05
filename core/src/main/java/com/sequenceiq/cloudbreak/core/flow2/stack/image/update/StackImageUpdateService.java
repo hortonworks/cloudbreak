@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
-import java.util.EnumSet;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -18,9 +16,9 @@ import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -31,7 +29,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -161,20 +158,12 @@ public class StackImageUpdateService {
         if (image.getImage().getStackDetails() != null) {
             try {
                 StackType imageStackType = imageService.determineStackType(image.getImage().getStackDetails());
-                StackType clusterStackType = getStackType(stack);
-                return imageStackType == clusterStackType;
+                return imageStackType == StackType.CDH;
             } catch (CloudbreakImageCatalogException e) {
                 throw new CloudbreakServiceException(e);
             }
         }
         return true;
-    }
-
-    public StackType getStackType(Stack stack) {
-        StackRepoDetails repoDetails = clusterComponentConfigProvider.getStackRepoDetails(stack.getCluster().getId());
-        String repoId = repoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
-        Optional<StackType> clusterStackType = EnumSet.allOf(StackType.class).stream().filter(st -> repoId.contains(st.name())).findFirst();
-        return clusterStackType.orElseThrow(() -> new CloudbreakServiceException("Could not determine stack type for cluster"));
     }
 
     public CheckResult checkPackageVersions(Stack stack, StatedImage newImage) {

@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RetryableFlowRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -95,6 +96,16 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     public void repairCluster(Long workspaceId, String name, @Valid ClusterRepairV4Request clusterRepairRequest) {
         stackOperations.repairCluster(StackAccessDto.builder().withName(name).build(), workspaceId, clusterRepairRequest);
+    }
+
+    @Override
+    public void upgradeCluster(Long workspaceId, String name) {
+        stackOperations.upgradeCluster(StackAccessDto.builder().withName(name).build(), workspaceId);
+    }
+
+    @Override
+    public UpgradeOptionV4Response checkForUpgrade(Long workspaceId, String name) {
+        return stackOperations.checkForUpgrade(StackAccessDto.builder().withName(name).build(), workspaceId);
     }
 
     @Override

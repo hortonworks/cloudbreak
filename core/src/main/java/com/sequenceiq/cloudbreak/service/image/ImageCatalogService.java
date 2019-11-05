@@ -12,6 +12,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     public static final String UNDEFINED = "";
 
     static final String CLOUDBREAK_DEFAULT_CATALOG_NAME = "cloudbreak-default";
+
+    private static final String SALT_BOOTSTRAP = "salt-bootstrap";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogService.class);
 
@@ -151,7 +154,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
         if (isNotEmpty(platform)) {
             User user = getLoggedInUser();
-            return getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, user).getImages();
+            return getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, getDefaultImageCatalog(user), Optional.empty()).getImages();
         } else if (isNotEmpty(stackName)) {
             return stackImageFilterService.getApplicableImages(workspaceId, stackName);
         } else {
@@ -159,24 +162,26 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
     }
 
-    public StatedImages getStatedImagesFilteredByOperatingSystems(String provider, Set<String> operatingSystems, User user)
+    public StatedImages getStatedImagesFilteredByOperatingSystems(String provider, Set<String> operatingSystems, ImageCatalog imageCatalog,
+            Optional<Map<String, String>> packageVersions)
             throws CloudbreakImageCatalogException {
-        StatedImages images = getImages(new ImageFilter(getDefaultImageCatalog(user), Collections.singleton(provider), cbVersion));
+        StatedImages images = getImages(new ImageFilter(imageCatalog, Collections.singleton(provider), cbVersion));
         if (!CollectionUtils.isEmpty(operatingSystems)) {
             Images rawImages = images.getImages();
-            List<Image> baseImages = filterImagesByOperatingSystems(rawImages.getBaseImages(), operatingSystems);
-            List<Image> hdpImages = filterImagesByOperatingSystems(rawImages.getHdpImages(), operatingSystems);
-            List<Image> hdfImages = filterImagesByOperatingSystems(rawImages.getHdfImages(), operatingSystems);
-            List<Image> cdhImages = filterImagesByOperatingSystems(rawImages.getCdhImages(), operatingSystems);
+            List<Image> baseImages = filterImagesByOperatingSystemsAndPackageVersion(rawImages.getBaseImages(), operatingSystems, packageVersions);
+            List<Image> hdpImages = filterImagesByOperatingSystemsAndPackageVersion(rawImages.getHdpImages(), operatingSystems, packageVersions);
+            List<Image> hdfImages = filterImagesByOperatingSystemsAndPackageVersion(rawImages.getHdfImages(), operatingSystems, packageVersions);
+            List<Image> cdhImages = filterImagesByOperatingSystemsAndPackageVersion(rawImages.getCdhImages(), operatingSystems, packageVersions);
             images = statedImages(new Images(baseImages, hdpImages, hdfImages, cdhImages, rawImages.getSuppertedVersions()),
                     images.getImageCatalogUrl(), images.getImageCatalogName());
         }
         return images;
     }
 
-    public StatedImage getLatestBaseImageDefaultPreferred(String platform, Set<String> operatingSystems, User user)
+    public StatedImage getLatestBaseImageDefaultPreferred(String platform, Set<String> operatingSystems, ImageCatalog imageCatalog,
+            Optional<Map<String, String>> packageVersions)
             throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
-        StatedImages statedImages = getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, user);
+        StatedImages statedImages = getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, imageCatalog, packageVersions);
         Optional<Image> defaultBaseImage = getLatestBaseImageDefaultPreferred(statedImages);
         if (defaultBaseImage.isPresent()) {
             return statedImage(defaultBaseImage.get(), statedImages.getImageCatalogUrl(), statedImages.getImageCatalogName());
@@ -190,9 +195,10 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return getLatestImageDefaultPreferred(baseImages);
     }
 
-    public StatedImage getPrewarmImageDefaultPreferred(String platform, String clusterType, String clusterVersion, Set<String> operatingSystems, User user)
+    public StatedImage getPrewarmImageDefaultPreferred(String platform, String clusterType, String clusterVersion, Set<String> operatingSystems,
+            ImageCatalog imageCatalog, Optional<Map<String, String>> packageVersions)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        StatedImages statedImages = getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, user);
+        StatedImages statedImages = getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, imageCatalog, packageVersions);
         List<Image> images = getImagesForClusterType(statedImages, clusterType);
         Optional<Image> selectedImage = Optional.empty();
         if (!CollectionUtils.isEmpty(images)) {
@@ -453,8 +459,22 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                 && img.getImageSetsByProvider().keySet().stream().anyMatch(p -> platforms.stream().anyMatch(platform -> platform.equalsIgnoreCase(p)));
     }
 
-    private List<Image> filterImagesByOperatingSystems(List<Image> images, Set<String> operatingSystems) {
-        Map<Boolean, List<Image>> partitionedImages = images.stream().collect(Collectors.partitioningBy(isMatchingOs(operatingSystems)));
+    private List<Image> filterImagesByOperatingSystemsAndPackageVersion(List<Image> images, Set<String> operatingSystems,
+            Optional<Map<String, String>> packageVersions) {
+        Map<Boolean, List<Image>> partitionedImages = images
+                .stream()
+                .filter(image -> {
+                    if (packageVersions.isPresent()) {
+                        Map<String, String> originalPackageVersions = new HashMap<>(packageVersions.get());
+                        originalPackageVersions.remove(SALT_BOOTSTRAP);
+                        Map<String, String> imagePackageVersions = new HashMap<>(image.getPackageVersions());
+                        imagePackageVersions.remove(SALT_BOOTSTRAP);
+                        return originalPackageVersions.equals(imagePackageVersions);
+                    } else {
+                        return true;
+                    }
+                })
+                .collect(Collectors.partitioningBy(isMatchingOs(operatingSystems)));
         if (!partitionedImages.get(false).isEmpty()) {
             LOGGER.debug("Used filter OS: | {} | Images filtered: {}", operatingSystems,
                     partitionedImages.get(false).stream().map(Image::shortOsDescriptionFormat).collect(Collectors.joining(", ")));
@@ -535,7 +555,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     @Nonnull
-    private ImageCatalog getDefaultImageCatalog(User user) {
+    public ImageCatalog getDefaultImageCatalog(User user) {
         ImageCatalog imageCatalog = getUserProfile(user).getImageCatalog();
         if (imageCatalog == null) {
             imageCatalog = new ImageCatalog();

@@ -59,6 +59,8 @@ public class StackCommonService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCommonService.class);
 
+    private static final boolean FORCE_REPAIR = false;
+
     @Inject
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
@@ -247,10 +249,10 @@ public class StackCommonService {
         checkUserPermission();
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         if (clusterRepairRequest.getHostGroups() != null) {
-            clusterService.repairCluster(stack.getId(), clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly());
+            clusterService.repairCluster(stack.getId(), clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly(), FORCE_REPAIR);
         } else {
             clusterService.repairCluster(stack.getId(), clusterRepairRequest.getNodes().getIds(),
-                    clusterRepairRequest.getNodes().isDeleteVolumes(), clusterRepairRequest.isRemoveOnly());
+                    clusterRepairRequest.getNodes().isDeleteVolumes(), clusterRepairRequest.isRemoveOnly(), FORCE_REPAIR);
         }
     }
 
@@ -258,10 +260,10 @@ public class StackCommonService {
         checkUserPermission();
         Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
         if (clusterRepairRequest.getHostGroups() != null) {
-            clusterService.repairCluster(stack.getId(), clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly());
+            clusterService.repairCluster(stack.getId(), clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly(), FORCE_REPAIR);
         } else {
             clusterService.repairCluster(stack.getId(), clusterRepairRequest.getNodes().getIds(),
-                    clusterRepairRequest.getNodes().isDeleteVolumes(), clusterRepairRequest.isRemoveOnly());
+                    clusterRepairRequest.getNodes().isDeleteVolumes(), clusterRepairRequest.isRemoveOnly(), FORCE_REPAIR);
         }
     }
 

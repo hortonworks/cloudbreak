@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +24,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
@@ -65,6 +67,9 @@ public class ImageCatalogServiceDefaultTest {
 
     @Mock
     private User user;
+
+    @Mock
+    private ImageCatalog imageCatalog;
 
     @InjectMocks
     private ImageCatalogService underTest;
@@ -114,12 +119,13 @@ public class ImageCatalogServiceDefaultTest {
         MockitoAnnotations.initMocks(this);
         String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFile);
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
-        when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
+        when(imageCatalogProvider.getImageCatalogV2(catalogFile)).thenReturn(catalog);
         when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
 
         when(userProfileService.getOrCreate(user)).thenReturn(new UserProfile());
         when(userProfileService.getOrCreate(user))
                 .thenReturn(new UserProfile());
+        when(imageCatalog.getImageCatalogUrl()).thenReturn(catalogFile);
     }
 
     @Test
@@ -132,7 +138,8 @@ public class ImageCatalogServiceDefaultTest {
         if (StringUtils.isNotEmpty(os)) {
             operatingSystems = Collections.singleton(os);
         }
-        StatedImage statedImage = underTest.getPrewarmImageDefaultPreferred(provider, clusterType, clusterVersion, operatingSystems, user);
+        StatedImage statedImage = underTest.getPrewarmImageDefaultPreferred(provider, clusterType, clusterVersion, operatingSystems, imageCatalog,
+                Optional.empty());
         // THEN
         Assert.assertEquals("Wrong default image has been selected", expectedImageId, statedImage.getImage().getUuid());
     }

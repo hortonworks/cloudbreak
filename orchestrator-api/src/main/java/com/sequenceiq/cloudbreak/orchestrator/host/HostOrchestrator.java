@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.orchestrator.host;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -56,7 +57,8 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void tearDown(List<GatewayConfig> allGatewayConfigs, Map<String, String> removeNodePrivateIPsByFQDN,
             Set<Node> remainingNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException;
 
-    Map<String, Map<String, String>> getPackageVersionsFromAllHosts(GatewayConfig gateway, String... packages) throws CloudbreakOrchestratorFailedException;
+    Map<String, Map<String, String>> getPackageVersionsFromAllHosts(GatewayConfig gateway, Map<String, Optional<String>> packages)
+            throws CloudbreakOrchestratorFailedException;
 
     Map<String, String> runCommandOnAllHosts(GatewayConfig gateway, String command) throws CloudbreakOrchestratorFailedException;
 
