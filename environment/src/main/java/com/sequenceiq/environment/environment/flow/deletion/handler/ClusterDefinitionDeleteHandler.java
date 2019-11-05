@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler;
 
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_CLUSTER_DEFINITION_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINISH_ENV_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_UMS_RESOURCE_DELETE_EVENT;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -45,7 +45,7 @@ public class ClusterDefinitionDeleteHandler extends EventSenderAwareHandler<Envi
                     .withResourceId(environmentDto.getResourceId())
                     .withResourceCrn(environmentDto.getResourceCrn())
                     .withResourceName(environmentDto.getName())
-                    .withSelector(FINISH_ENV_DELETE_EVENT.selector())
+                    .withSelector(START_UMS_RESOURCE_DELETE_EVENT.selector())
                     .build();
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {

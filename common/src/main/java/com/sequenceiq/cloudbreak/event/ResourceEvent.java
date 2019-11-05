@@ -80,6 +80,7 @@ public enum ResourceEvent {
     ENVIRONMENT_FREEIPA_DELETION_STARTED("environment.freeipa.deletion.started"),
     ENVIRONMENT_IDBROKER_MAPPINGS_DELETION_STARTED("environment.idbroker.mappings.deletion.started"),
     ENVIRONMENT_S3GUARD_TABLE_DELETION_STARTED("environment.s3guard.table.deletion.started"),
+    ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED("environment.ums.resource.deletion.started"),
     ENVIRONMENT_DELETION_FINISHED("environment.deletion.finished"),
     ENVIRONMENT_DELETION_FAILED("environment.deletion.failed"),
 
