@@ -89,7 +89,7 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private void stepToFreeIpaCreation(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environmentDto) {
-        EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
+        EnvCreationEvent envCreationEvent = EnvCreationEvent.builder()
                 .withResourceId(environmentDto.getResourceId())
                 .withSelector(START_FREEIPA_CREATION_EVENT.selector())
                 .withResourceCrn(environmentDto.getResourceCrn())

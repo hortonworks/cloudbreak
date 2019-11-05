@@ -41,7 +41,7 @@ public class ClusterDefinitionDeleteHandler extends EventSenderAwareHandler<Envi
                         resourceCrn.set(environment.getResourceCrn());
                         environmentResourceDeletionService.deleteClusterDefinitionsOnCloudbreak(environment.getResourceCrn());
                     });
-            EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
+            EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
                     .withResourceId(environmentDto.getResourceId())
                     .withResourceCrn(environmentDto.getResourceCrn())
                     .withResourceName(environmentDto.getName())

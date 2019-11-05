@@ -14,6 +14,10 @@ public class EnvDeleteEvent extends BaseNamedFlowEvent {
         super(selector, resourceId, accepted, resourceName, resourceCrn);
     }
 
+    public static EnvDeleteEventBuilder builder() {
+        return new EnvDeleteEventBuilder();
+    }
+
     public static final class EnvDeleteEventBuilder {
         private String resourceName;
 
@@ -26,10 +30,6 @@ public class EnvDeleteEvent extends BaseNamedFlowEvent {
         private Promise<Boolean> accepted;
 
         private EnvDeleteEventBuilder() {
-        }
-
-        public static EnvDeleteEventBuilder anEnvDeleteEvent() {
-            return new EnvDeleteEventBuilder();
         }
 
         public EnvDeleteEventBuilder withResourceName(String resourceName) {

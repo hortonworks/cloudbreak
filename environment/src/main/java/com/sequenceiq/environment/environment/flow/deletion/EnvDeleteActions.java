@@ -250,7 +250,7 @@ public class EnvDeleteActions {
         return envDto;
     }
 
-    private abstract class AbstractEnvDeleteAction<P extends ResourceCrnPayload>
+    private abstract static class AbstractEnvDeleteAction<P extends ResourceCrnPayload>
             extends AbstractAction<EnvDeleteState, EnvDeleteStateSelectors, CommonContext, P> {
 
         protected AbstractEnvDeleteAction(Class<P> payloadClass) {

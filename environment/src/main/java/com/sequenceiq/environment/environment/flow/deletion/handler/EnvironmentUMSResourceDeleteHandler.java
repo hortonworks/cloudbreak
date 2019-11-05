@@ -65,7 +65,7 @@ public class EnvironmentUMSResourceDeleteHandler extends EventSenderAwareHandler
         } catch (Exception e) {
             LOGGER.warn("UMS delete event failed (this event is not critical)", e);
         }
-        EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
+        EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
                 .withResourceId(environmentDto.getResourceId())
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentCrn)

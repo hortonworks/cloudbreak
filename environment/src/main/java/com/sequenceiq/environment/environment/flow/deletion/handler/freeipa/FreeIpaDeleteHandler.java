@@ -87,7 +87,7 @@ public class FreeIpaDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
     }
 
     private EnvDeleteEvent getNextStepObject(EnvironmentDto environmentDto) {
-        return EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
+        return EnvDeleteEvent.builder()
                 .withResourceId(environmentDto.getResourceId())
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentDto.getResourceCrn())

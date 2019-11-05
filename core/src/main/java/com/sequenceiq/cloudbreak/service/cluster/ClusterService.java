@@ -387,12 +387,12 @@ public class ClusterService {
         return repository.save(cluster);
     }
 
-    public void delete(Long stackId, Boolean withStackDelete) {
+    public void delete(Long stackId) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
         LOGGER.debug("Cluster delete requested.");
         markVolumesForDeletion(stack);
-        flowManager.triggerClusterTermination(stack, withStackDelete);
+        flowManager.triggerClusterTermination(stack);
     }
 
     private void markVolumesForDeletion(Stack stack) {

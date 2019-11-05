@@ -57,7 +57,7 @@ public class NetworkDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
 
             environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(environment -> deleteNetworkIfExists(environment.getId()));
 
-            EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
+            EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
                     .withResourceId(environmentDto.getResourceId())
                     .withResourceName(environmentDto.getName())
                     .withResourceCrn(environmentDto.getResourceCrn())

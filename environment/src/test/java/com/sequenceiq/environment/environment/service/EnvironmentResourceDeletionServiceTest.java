@@ -2,7 +2,6 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.CRN;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
-import static com.sequenceiq.environment.environment.service.EnvironmentTestData.USER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -95,13 +94,6 @@ class EnvironmentResourceDeletionServiceTest {
         when(distroXEndpoint.list(anyString(), any())).thenReturn(new StackViewV4Responses());
         environmentResourceDeletionServiceUnderTest.getAttachedDistroXClusterNames(environment);
         verify(distroXEndpoint, times(1)).list(eq(ENVIRONMENT_NAME), isNull());
-    }
-
-    @Test
-    void triggerDeleteFlow() {
-        when(userCrnProvider.getUserCrn()).thenReturn(USER);
-        environmentResourceDeletionServiceUnderTest.triggerDeleteFlow(environment);
-        verify(eventSender).sendEvent(any(), any());
     }
 
     @Test

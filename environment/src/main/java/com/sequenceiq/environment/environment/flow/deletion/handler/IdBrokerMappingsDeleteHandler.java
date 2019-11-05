@@ -57,7 +57,7 @@ public class IdBrokerMappingsDeleteHandler extends EventSenderAwareHandler<Envir
                 }
             });
 
-            EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
+            EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
                     .withResourceId(environmentDto.getResourceId())
                     .withResourceName(environmentDto.getName())
                     .withResourceCrn(environmentDto.getResourceCrn())
