@@ -52,11 +52,11 @@
             {% else %}
             <param>
                 <name>pac4j.callbackUrl</name>
-                <value>https://{{ salt['pillar.get']('gateway:address') }}:443/{{ salt['pillar.get']('gateway:path') }}/knoxsso/api/v1/websso</value>
+                <value>https://{{ salt['pillar.get']('gateway:address') }}/{{ salt['pillar.get']('gateway:path') }}/knoxsso/api/v1/websso</value>
             </param>
             <param>
                 <name>saml.serviceProviderEntityId</name>
-                <value>https://{{ salt['pillar.get']('gateway:address') }}:443/{{ salt['pillar.get']('gateway:path') }}/knoxsso/api/v1/websso?pac4jCallback=true&amp;client_name=SAML2Client</value>
+                <value>https://{{ salt['pillar.get']('gateway:address') }}/{{ salt['pillar.get']('gateway:path') }}/knoxsso/api/v1/websso?pac4jCallback=true&amp;client_name=SAML2Client</value>
             </param>
             {% endif %}
         </provider>
