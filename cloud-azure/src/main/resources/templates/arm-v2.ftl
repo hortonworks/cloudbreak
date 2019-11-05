@@ -262,15 +262,13 @@
                        </#if>
                    ],
                    "properties": {
-                       <#if !noFirewallRules>
                        "networkSecurityGroup":{
                            <#if securityGroups[instance.groupName]?? && securityGroups[instance.groupName]?has_content>
                            "id": "${securityGroups[instance.groupName]}"
-                           <#else>
+                           <#elseif !noFirewallRules>
                             "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('${instance.groupName?replace('_', '')}secGroupName'))]"
                            </#if>
                        },
-                       </#if>
                        "ipConfigurations": [
                            {
                                "name": "ipconfig1",
