@@ -85,7 +85,7 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
     }
 
     private void goToNetworkCreationState(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environmentDto) {
-        EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
+        EnvCreationEvent envCreationEvent = EnvCreationEvent.builder()
                 .withResourceId(environmentDto.getResourceId())
                 .withSelector(START_NETWORK_CREATION_EVENT.selector())
                 .withResourceCrn(environmentDto.getResourceCrn())

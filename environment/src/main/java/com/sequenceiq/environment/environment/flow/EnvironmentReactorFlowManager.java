@@ -40,7 +40,7 @@ public class EnvironmentReactorFlowManager {
 
     public void triggerCreationFlow(long envId, String envName, String userCrn, String envCrn) {
         LOGGER.info("Trigger flow creation");
-        EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
+        EnvCreationEvent envCreationEvent = EnvCreationEvent.builder()
                 .withSelector(START_ENVIRONMENT_VALIDATION_EVENT.selector())
                 .withResourceId(envId)
                 .withResourceName(envName)
@@ -54,7 +54,20 @@ public class EnvironmentReactorFlowManager {
     public void triggerDeleteFlow(Environment environment, String userCrn) {
         LOGGER.info("Trigger flow deletion");
         cancelRunningFlows(environment.getId(), environment.getName(), environment.getResourceCrn());
-        EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
+        EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
+                .withSelector(START_FREEIPA_DELETE_EVENT.selector())
+                .withResourceId(environment.getId())
+                .withResourceName(environment.getName())
+                .build();
+
+        Map<String, Object> flowTriggerUserCrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
+        eventSender.sendEvent(envDeleteEvent, new Event.Headers(flowTriggerUserCrn));
+    }
+
+    public void triggerForcedDeleteFlow(Environment environment, String userCrn) {
+        LOGGER.info("Trigger flow forced deletion. Work in progress.");
+        cancelRunningFlows(environment.getId(), environment.getName(), environment.getResourceCrn());
+        EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
                 .withSelector(START_FREEIPA_DELETE_EVENT.selector())
                 .withResourceId(environment.getId())
                 .withResourceName(environment.getName())

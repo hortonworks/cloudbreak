@@ -14,6 +14,10 @@ public class EnvCreationEvent extends BaseNamedFlowEvent {
         super(selector, resourceId, accepted, resourceName, resourceCrn);
     }
 
+    public static EnvCreationEventBuilder builder() {
+        return new EnvCreationEventBuilder();
+    }
+
     public static final class EnvCreationEventBuilder {
         private String resourceName;
 
@@ -26,10 +30,6 @@ public class EnvCreationEvent extends BaseNamedFlowEvent {
         private Promise<Boolean> accepted;
 
         private EnvCreationEventBuilder() {
-        }
-
-        public static EnvCreationEventBuilder anEnvCreationEvent() {
-            return new EnvCreationEventBuilder();
         }
 
         public EnvCreationEventBuilder withResourceName(String resourceName) {

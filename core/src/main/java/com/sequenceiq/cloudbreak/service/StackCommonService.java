@@ -114,11 +114,11 @@ public class StackCommonService {
         return stackCreatorService.createStack(user, workspace, stackRequest);
     }
 
-    public void deleteByNameInWorkspace(String name, Long workspaceId, Boolean forced, User user) {
+    public void deleteByNameInWorkspace(String name, Long workspaceId, boolean forced, User user) {
         stackService.deleteByName(name, workspaceId, forced, user);
     }
 
-    public void deleteByCrnInWorkspace(String crn, Long workspaceId, Boolean forced, User user) {
+    public void deleteByCrnInWorkspace(String crn, Long workspaceId, boolean forced, User user) {
         stackService.deleteByCrn(crn, workspaceId, forced, user);
     }
 
@@ -229,18 +229,18 @@ public class StackCommonService {
         }
     }
 
-    public void deleteWithKerberosByNameInWorkspace(String name, Long workspaceId, Boolean withStackDelete) {
+    public void deleteWithKerberosByNameInWorkspace(String name, Long workspaceId) {
         checkUserPermission();
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         MDCBuilder.buildMdcContext(stack);
-        clusterService.delete(stack.getId(), withStackDelete);
+        clusterService.delete(stack.getId());
     }
 
-    public void deleteWithKerberosByCrnInWorkspace(String crn, Long workspaceId, Boolean withStackDelete) {
+    public void deleteWithKerberosByCrnInWorkspace(String crn, Long workspaceId) {
         checkUserPermission();
         Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
-        clusterService.delete(stack.getId(), withStackDelete);
+        clusterService.delete(stack.getId());
     }
 
     public void repairClusterByName(Long workspaceId, String name, ClusterRepairV4Request clusterRepairRequest) {

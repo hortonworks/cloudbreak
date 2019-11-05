@@ -78,6 +78,7 @@ dependencies {
     implementation     group: "io.opentracing.contrib",    name: "opentracing-spring-jaeger-starter",        version: opentracingSpringJaegerStarterVersion
     implementation     group: "io.opentracing.contrib",    name: "opentracing-jaxrs2",                       version: opentracingJaxrs2Version
     implementation     group: "io.opentracing.contrib",    name: "opentracing-jdbc",                         version: opentracingJdbcVersion
+    implementation     group: "org.jetbrains",             name: "annotations",                              version: "17.0.0"
 
     testImplementation group: "org.junit.jupiter",         name: "junit-jupiter-api",                        version: junitJupiterVersion
     testImplementation group: "org.junit.jupiter",         name: "junit-jupiter-params",                     version: junitJupiterVersion

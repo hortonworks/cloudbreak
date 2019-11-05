@@ -1,17 +1,14 @@
 package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.environment.TempConstants.TEMP_WORKSPACE_ID;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,14 +20,10 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.exception.UnableToDeleteClusterDefinitionException;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
-import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
-
-import reactor.bus.Event;
 
 @Service
 public class EnvironmentResourceDeletionService {
@@ -123,20 +116,6 @@ public class EnvironmentResourceDeletionService {
             propagateException("Failed to get DistroX clusters from Cloudbreak service due to:", e);
         }
         return clusterNames;
-    }
-
-    void triggerDeleteFlow(Environment environment) {
-        EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
-                .withSelector(START_FREEIPA_DELETE_EVENT.selector())
-                .withResourceId(environment.getId())
-                .withResourceName(environment.getName())
-                .build();
-        String userCrn = userCrnProvider.getUserCrn();
-        if (StringUtils.isEmpty(userCrn)) {
-            LOGGER.warn("Delete flow is about to start, but user crn is not available!");
-        }
-        Map<String, Object> flowTriggerUsercrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
-        eventSender.sendEvent(envDeleteEvent, new Event.Headers(flowTriggerUsercrn));
     }
 
     private void propagateException(String messagePrefix, WebApplicationException e) {

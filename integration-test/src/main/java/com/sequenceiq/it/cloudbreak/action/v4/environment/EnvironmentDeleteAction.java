@@ -13,7 +13,7 @@ public class EnvironmentDeleteAction implements Action<EnvironmentTestDto, Envir
     public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient environmentClient) throws Exception {
         SimpleEnvironmentResponse delete = environmentClient.getEnvironmentClient()
                 .environmentV1Endpoint()
-                .deleteByCrn(testDto.getResponse().getCrn());
+                .deleteByCrn(testDto.getResponse().getCrn(), false);
         Log.logJSON("Environment delete response: ", delete);
         return testDto;
     }

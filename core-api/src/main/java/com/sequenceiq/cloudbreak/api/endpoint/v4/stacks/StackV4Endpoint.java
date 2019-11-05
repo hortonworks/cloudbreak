@@ -69,7 +69,7 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "listStackInWorkspaceV4")
     StackViewV4Responses list(@PathParam("workspaceId") Long workspaceId, @QueryParam("environment") String environment,
-            @QueryParam("onlyDatalakes") @DefaultValue("false") Boolean onlyDatalakes);
+            @QueryParam("onlyDatalakes") @DefaultValue("false") boolean onlyDatalakes);
 
     @POST
     @Path("")
@@ -87,7 +87,7 @@ public interface StackV4Endpoint {
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "deleteStackInWorkspaceV4")
-    void delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced);
+    void delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @POST
     @Path("{name}/sync")
@@ -151,8 +151,7 @@ public interface StackV4Endpoint {
     @Path("{name}/cluster")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DELETE_WITH_KERBEROS_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES)
-    void deleteWithKerberos(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("withStackDelete") @DefaultValue("false") Boolean withStackDelete);
+    void deleteWithKerberos(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @GET
     @Path("{name}/request")
@@ -174,7 +173,7 @@ public interface StackV4Endpoint {
     @ApiOperation(value = DELETE_INSTANCE_BY_ID_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstanceStackV4")
     void deleteInstance(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("forced") @DefaultValue("false") Boolean forced, @QueryParam("instanceId") String instanceId);
+            @QueryParam("forced") @DefaultValue("false") boolean forced, @QueryParam("instanceId") String instanceId);
 
     @DELETE
     @Path("{name}/instances")

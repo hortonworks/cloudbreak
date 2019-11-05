@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -102,35 +101,39 @@ public class EnvironmentService implements ResourceIdProvider {
         return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
     }
 
-    public EnvironmentDto deleteByNameAndAccountId(String environmentName, String accountId, String actualUserCrn) {
+    public EnvironmentDto deleteByNameAndAccountId(String environmentName, String accountId, String actualUserCrn, boolean forced) {
         Optional<Environment> environment = environmentRepository
                 .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId);
         MDCBuilder.buildMdcContext(environment.orElseThrow(()
                 -> new NotFoundException(String.format("No environment found with name '%s'", environmentName))));
         LOGGER.debug(String.format("Deleting environment [name: %s]", environment.get().getName()));
-        delete(environment.get(), actualUserCrn);
+        delete(environment.get(), actualUserCrn, forced);
         return environmentDtoConverter.environmentToDto(environment.get());
     }
 
-    public EnvironmentDto deleteByCrnAndAccountId(String crn, String accountId, String actualUserCrn) {
+    public EnvironmentDto deleteByCrnAndAccountId(String crn, String accountId, String actualUserCrn, boolean forced) {
         Optional<Environment> environment = environmentRepository
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId);
         MDCBuilder.buildMdcContext(environment.orElseThrow(()
                 -> new NotFoundException(String.format("No environment found with crn '%s'", crn))));
         LOGGER.debug(String.format("Deleting  environment [name: %s]", environment.get().getName()));
-        delete(environment.get(), actualUserCrn);
+        delete(environment.get(), actualUserCrn, forced);
         return environmentDtoConverter.environmentToDto(environment.get());
     }
 
-    public Environment delete(Environment environment, String userCrn) {
-        checkIsEnvironmentDeletable(environment);
+    public Environment delete(Environment environment, String userCrn, boolean forced) {
         MDCBuilder.buildMdcContext(environment);
         LOGGER.debug("Deleting environment with name: {}", environment.getName());
-        reactorFlowManager.triggerDeleteFlow(environment, userCrn);
+        if (forced) {
+            reactorFlowManager.triggerForcedDeleteFlow(environment, userCrn);
+        } else {
+            checkIsEnvironmentDeletable(environment);
+            reactorFlowManager.triggerDeleteFlow(environment, userCrn);
+        }
         return environment;
     }
 
-    public List<EnvironmentDto> deleteMultipleByNames(Set<String> environmentNames, String accountId, String actualUserCrn) {
+    public List<EnvironmentDto> deleteMultipleByNames(Set<String> environmentNames, String accountId, String actualUserCrn, boolean forced) {
         List<EnvironmentDto> environmentDtos = new ArrayList<>();
         //TODO: it can have less results than the desired - is it okay?
         Set<Environment> environments = environmentRepository
@@ -138,13 +141,13 @@ public class EnvironmentService implements ResourceIdProvider {
         for (Environment environment : environments) {
             LOGGER.debug(String.format("Starting to archive environment [name: %s]", environment.getName()));
             //TODO: it will fail with the n th element and finished - this is a bug
-            delete(environment, actualUserCrn);
+            delete(environment, actualUserCrn, forced);
             environmentDtos.add(environmentDtoConverter.environmentToDto(environment));
         }
         return environmentDtos;
     }
 
-    public List<EnvironmentDto> deleteMultipleByCrns(Set<String> crns, String accountId, String actualUserCrn) {
+    public List<EnvironmentDto> deleteMultipleByCrns(Set<String> crns, String accountId, String actualUserCrn, boolean forced) {
         List<EnvironmentDto> environmentDtos = new ArrayList<>();
         //TODO: it can have less results than the desired - is it okay?
         Set<Environment> environments = environmentRepository
@@ -152,7 +155,7 @@ public class EnvironmentService implements ResourceIdProvider {
         for (Environment environment : environments) {
             LOGGER.debug(String.format("Starting to archive environment [CRN: %s]", environment.getName()));
             //TODO: it will fail with the n th element and finished - this is a bug
-            delete(environment, actualUserCrn);
+            delete(environment, actualUserCrn, forced);
             environmentDtos.add(environmentDtoConverter.environmentToDto(environment));
         }
         return environmentDtos;
@@ -267,7 +270,7 @@ public class EnvironmentService implements ResourceIdProvider {
     }
 
     void setAdminGroupName(Environment environment, String adminGroupName) {
-        if (StringUtils.isEmpty(adminGroupName)) {
+        if (isEmpty(adminGroupName)) {
             environment.setAdminGroupName(adminGroupNamePrefix + environment.getName());
         } else {
             environment.setAdminGroupName(adminGroupName);

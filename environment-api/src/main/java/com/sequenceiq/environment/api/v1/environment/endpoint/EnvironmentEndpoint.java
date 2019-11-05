@@ -8,12 +8,14 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
@@ -50,14 +52,14 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentV1ByName")
-    SimpleEnvironmentResponse deleteByName(@PathParam("name") String environmentName);
+    SimpleEnvironmentResponse deleteByName(@PathParam("name") String environmentName, @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @DELETE
     @Path("/name")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DELETE_MULTIPLE_BY_NAME, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentsByName", httpMethod = "DELETE")
-    SimpleEnvironmentResponses deleteMultipleByNames(Set<String> names);
+    SimpleEnvironmentResponses deleteMultipleByNames(Set<String> names, @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @PUT
     @Path("/name/{name}")
@@ -91,14 +93,14 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentV1ByCrn")
-    SimpleEnvironmentResponse deleteByCrn(@PathParam("crn") String crn);
+    SimpleEnvironmentResponse deleteByCrn(@PathParam("crn") String crn, @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @DELETE
     @Path("/crn")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DELETE_MULTIPLE_BY_CRN, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentsByCrn", httpMethod = "DELETE")
-    SimpleEnvironmentResponses deleteMultipleByCrns(Set<String> crns);
+    SimpleEnvironmentResponses deleteMultipleByCrns(Set<String> crns, @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @PUT
     @Path("/crn/{crn}")

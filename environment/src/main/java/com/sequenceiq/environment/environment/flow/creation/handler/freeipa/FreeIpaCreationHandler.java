@@ -264,7 +264,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private EnvCreationEvent getNextStepObject(EnvironmentDto environmentDto) {
-        return EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
+        return EnvCreationEvent.builder()
                 .withResourceId(environmentDto.getResourceId())
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentDto.getResourceCrn())

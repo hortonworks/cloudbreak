@@ -28,7 +28,7 @@ public class RdbmsDeleteHandler extends EventSenderAwareHandler<EnvironmentDto> 
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
+            EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
                     .withResourceId(environmentDto.getResourceId())
                     .withResourceCrn(environmentDto.getResourceCrn())
                     .withResourceName(environmentDto.getName())

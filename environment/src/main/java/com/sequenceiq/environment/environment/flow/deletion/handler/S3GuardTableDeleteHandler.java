@@ -21,7 +21,6 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.LocationAwareCredential;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
-import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent.EnvDeleteEventBuilder;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
@@ -115,7 +114,7 @@ public class S3GuardTableDeleteHandler extends EventSenderAwareHandler<Environme
     }
 
     private EnvDeleteEvent getEnvDeleteEvent(EnvironmentDto environmentDto) {
-        return EnvDeleteEventBuilder.anEnvDeleteEvent()
+        return EnvDeleteEvent.builder()
                 .withResourceId(environmentDto.getResourceId())
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentDto.getResourceCrn())

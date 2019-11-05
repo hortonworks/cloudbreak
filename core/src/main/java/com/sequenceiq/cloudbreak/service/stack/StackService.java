@@ -586,14 +586,14 @@ public class StackService implements ResourceIdProvider {
         }).orElseThrow(notFound("Stack", id));
     }
 
-    public void deleteByName(String name, Long workspaceId, Boolean forced, User user) {
+    public void deleteByName(String name, Long workspaceId, boolean forced, User user) {
         stackRepository.findByNameAndWorkspaceId(name, workspaceId).map(stack -> {
             deleteByName(stack, forced, user);
             return stack;
         }).orElseThrow(notFound("Stack", name));
     }
 
-    public void deleteByCrn(String crn, Long workspaceId, Boolean forced, User user) {
+    public void deleteByCrn(String crn, Long workspaceId, boolean forced, User user) {
         stackRepository.findByCrnAndWorkspaceId(crn, workspaceId).map(stack -> {
             deleteByName(stack, forced, user);
             return stack;
@@ -988,7 +988,7 @@ public class StackService implements ResourceIdProvider {
         }
     }
 
-    private void deleteByName(Stack stack, Boolean forced, User user) {
+    private void deleteByName(Stack stack, boolean forced, User user) {
         LOGGER.info("Check permission for stack {} in environment {}.", stack.getName(), stack.getEnvironmentCrn());
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         LOGGER.info("Check stack that no cluster is attached to {} in environment.", stack.getEnvironmentCrn());
@@ -1002,7 +1002,7 @@ public class StackService implements ResourceIdProvider {
                     .findFirst();
             flowLog.ifPresent(fl -> {
                 Map<Object, Object> variables = (Map<Object, Object>) JsonReader.jsonToJava(fl.getVariables());
-                boolean runningFlowForced = variables.get("FORCEDTERMINATION") != null && Boolean.valueOf(variables.get("FORCEDTERMINATION").toString());
+                boolean runningFlowForced = variables.get("FORCEDTERMINATION") != null && Boolean.parseBoolean(variables.get("FORCEDTERMINATION").toString());
                 if (!runningFlowForced) {
                     LOGGER.info("Terminate stack {} in environment {} because the current flow is not force termination.",
                             stack.getName(), stack.getEnvironmentCrn());
