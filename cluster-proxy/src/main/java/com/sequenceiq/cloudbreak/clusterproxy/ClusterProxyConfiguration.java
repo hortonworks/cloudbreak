@@ -13,12 +13,10 @@ public class ClusterProxyConfiguration {
 
     public static final String FREEIPA_SERVICE_NAME = "freeipa";
 
-    private static final int DEFAULT_CLUSTER_PROXY_PORT = 10080;
-
-    @Value("${clusterProxy.enabled:false}")
+    @Value("${clusterProxy.enabled:}")
     private boolean clusterProxyIntegrationEnabled;
 
-    @Value("${clusterProxy.url:localhost:10080/cluster-proxy}")
+    @Value("${clusterProxy.url:}")
     private String clusterProxyUrl;
 
     @Value("${clusterProxy.registerConfigPath:/rpc/forceRegisterConfig}")
@@ -32,7 +30,7 @@ public class ClusterProxyConfiguration {
 
     private String clusterProxyHost = "localhost";
 
-    private int clusterProxyPort = DEFAULT_CLUSTER_PROXY_PORT;
+    private int clusterProxyPort;
 
     private String clusterProxyBasePath = "cluster-proxy";
 

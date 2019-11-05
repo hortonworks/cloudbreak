@@ -17,15 +17,18 @@ import com.sequenceiq.cloudbreak.client.KeyStoreUtil;
 
 @Component
 public class ClouderaManagerApiClientProvider {
-
-    public static final String API_V_31 = "/api/v31";
-
     public static final String API_ROOT = "/api";
+
+    public static final String API_V_31 = API_ROOT + "/v31";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerApiClientProvider.class);
 
     public ApiClient getDefaultClient(Integer gatewayPort, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
-        return getClouderaManagerClient(clientConfig, gatewayPort, "admin", "admin");
+        ApiClient client = getClouderaManagerClient(clientConfig, gatewayPort, "admin", "admin");
+        if (clientConfig.isClusterProxyenabled()) {
+            client.addDefaultHeader("Proxy-Ignore-Auth", "true");
+        }
+        return client;
     }
 
     public ApiClient getClient(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
@@ -48,28 +51,24 @@ public class ClouderaManagerApiClientProvider {
 
     public ApiClient getClouderaManagerClient(HttpClientConfig clientConfig, Integer port, String userName, String password)
             throws ClouderaManagerClientInitException {
-        try {
-            ApiClient cmClient = new ApiClient();
-            if (port != null) {
-                cmClient.setBasePath("https://" + clientConfig.getApiAddress() + ':' + port + API_V_31);
-            } else {
-                cmClient.setBasePath("https://" + clientConfig.getApiAddress() + API_V_31);
-            }
-            return decorateClient(clientConfig, userName, password, cmClient);
-        } catch (Exception e) {
-            LOGGER.warn("Couldn't create client", e);
-            throw new ClouderaManagerClientInitException("Couldn't create client", e);
-        }
+        return getApiClientWithContext(clientConfig, port, userName, password, API_V_31);
     }
 
     public ApiClient getClouderaManagerRootClient(HttpClientConfig clientConfig, Integer port, String userName, String password)
             throws ClouderaManagerClientInitException {
+        return getApiClientWithContext(clientConfig, port, userName, password, API_ROOT);
+    }
+
+    private ApiClient getApiClientWithContext(HttpClientConfig clientConfig, Integer port, String userName, String password, String context)
+            throws ClouderaManagerClientInitException {
         try {
             ApiClient cmClient = new ApiClient();
-            if (port != null) {
-                cmClient.setBasePath("https://" + clientConfig.getApiAddress() + ':' + port + API_ROOT);
+            if (clientConfig.isClusterProxyenabled()) {
+                cmClient.setBasePath(clientConfig.getClusterProxyUrl() + "/proxy/" + clientConfig.getClusterCrn() + "/cloudera-manager" + context);
+            } else if (port != null) {
+                cmClient.setBasePath("https://" + clientConfig.getApiAddress() + ':' + port + context);
             } else {
-                cmClient.setBasePath("https://" + clientConfig.getApiAddress() + API_ROOT);
+                cmClient.setBasePath("https://" + clientConfig.getApiAddress() + context);
             }
             return decorateClient(clientConfig, userName, password, cmClient);
         } catch (Exception e) {
@@ -84,7 +83,7 @@ public class ClouderaManagerApiClientProvider {
         cmClient.setVerifyingSsl(true);
 
         try {
-            if (isCmSslConfigValidClientConfigValid(clientConfig)) {
+            if (isCmSslConfigValidClientConfigValid(clientConfig) && !clientConfig.isClusterProxyenabled()) {
                 SSLContext sslContext = SSLContexts.custom()
                         .loadTrustMaterial(KeyStoreUtil.createTrustStore(clientConfig.getServerCert()), null)
                         .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientConfig.getClientCert(), clientConfig.getClientKey()), "consul".toCharArray())

@@ -18,19 +18,22 @@ import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.aspect.Measure;
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.FixedSizePreloadCache;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 public class TlsSecurityService {
@@ -40,6 +43,12 @@ public class TlsSecurityService {
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Inject
+    private ClusterProxyConfiguration clusterProxyConfiguration;
+
+    @Inject
+    private StackService stackService;
 
     @Value("${cb.security.keypair.cache.size:10}")
     private int keyPairCacheSize;
@@ -126,14 +135,23 @@ public class TlsSecurityService {
     public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress, InstanceMetaData gateway) {
         Optional<SecurityConfig> securityConfig = securityConfigService.findOneByStackId(stackId);
         if (securityConfig.isEmpty()) {
-            return new HttpClientConfig(apiAddress);
+            return decorateWithCLusterProxyConfig(stackId, new HttpClientConfig(apiAddress));
         } else {
             String serverCert = gateway == null ? null : gateway.getServerCert() == null ? null : new String(decodeBase64(gateway.getServerCert()));
             String clientCertB64 = securityConfig.get().getClientCert();
             String clientKeyB64 = securityConfig.get().getClientKey();
-            return new HttpClientConfig(apiAddress, serverCert,
+            HttpClientConfig httpClientConfig = new HttpClientConfig(apiAddress, serverCert,
                     new String(decodeBase64(clientCertB64)), new String(decodeBase64(clientKeyB64)));
+            return decorateWithCLusterProxyConfig(stackId, httpClientConfig);
         }
+    }
+
+    private HttpClientConfig decorateWithCLusterProxyConfig(Long stackId, HttpClientConfig httpClientConfig) {
+        if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
+            Stack stack = stackService.getById(stackId);
+            return httpClientConfig.withClusterProxy(clusterProxyConfiguration.getClusterProxyUrl(), stack.getResourceCrn());
+        }
+        return httpClientConfig;
     }
 
     public CertificateV4Response getCertificates(Long stackId) {
