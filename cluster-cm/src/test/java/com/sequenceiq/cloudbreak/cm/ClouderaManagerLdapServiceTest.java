@@ -27,14 +27,18 @@ import com.cloudera.api.swagger.model.ApiExternalUserMapping;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
-import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.environment.environment.service.EnvironmentTestConstants;
 
 public class ClouderaManagerLdapServiceTest {
     @Mock
@@ -60,6 +64,9 @@ public class ClouderaManagerLdapServiceTest {
 
     @Mock
     private ApiClient apiClient;
+
+    @Mock
+    private VirtualGroupService virtualGroupService;
 
     @InjectMocks
     private ClouderaManagerLdapService underTest = new ClouderaManagerLdapService();
@@ -94,7 +101,7 @@ public class ClouderaManagerLdapServiceTest {
         LdapView ldapConfig = getLdapConfig();
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(new ApiAuthRoleMetadataList());
         // WHEN
-        underTest.setupLdap(stack, cluster, httpClientConfig, ldapConfig);
+        underTest.setupLdap(stack, cluster, httpClientConfig, ldapConfig, null);
         // THEN
         verify(externalUserMappingsResourceApi, never()).createExternalUserMappings(any(ApiExternalUserMappingList.class));
     }
@@ -105,10 +112,12 @@ public class ClouderaManagerLdapServiceTest {
         ReflectionTestUtils.setField(underTest, "adminRole", "ROLE_CONFIGURATOR");
         ReflectionTestUtils.setField(underTest, "userRole", "ROLE_USER");
         LdapView ldapConfig = getLdapConfig();
+        VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(EnvironmentTestConstants.CRN, "");
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(new ApiAuthRoleMetadataList().addItemsItem(
                 new ApiAuthRoleMetadata().displayName("role").uuid("uuid").role("ROLE_CONFIGURATOR")));
+        when(virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.CLOUDER_MANAGER_ADMIN.getRight())).thenReturn("virtualGroup");
         // WHEN
-        underTest.setupLdap(stack, cluster, httpClientConfig, ldapConfig);
+        underTest.setupLdap(stack, cluster, httpClientConfig, ldapConfig, virtualGroupRequest);
         // THEN
         ArgumentCaptor<ApiExternalUserMappingList> apiExternalUserMappingListArgumentCaptor = ArgumentCaptor.forClass(ApiExternalUserMappingList.class);
         verify(externalUserMappingsResourceApi).createExternalUserMappings(apiExternalUserMappingListArgumentCaptor.capture());
@@ -116,7 +125,7 @@ public class ClouderaManagerLdapServiceTest {
         ApiAuthRoleRef authRole = apiExternalUserMapping.getAuthRoles().get(0);
         assertEquals("role", authRole.getDisplayName());
         assertEquals("uuid", authRole.getUuid());
-        assertEquals(ldapConfig.getAdminGroup(), apiExternalUserMapping.getName());
+        assertEquals("virtualGroup", apiExternalUserMapping.getName());
     }
 
     @Test
@@ -128,7 +137,7 @@ public class ClouderaManagerLdapServiceTest {
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(new ApiAuthRoleMetadataList().addItemsItem(
                 new ApiAuthRoleMetadata().displayName("role").uuid("uuid").role("NO_ROLE_ADMIN")));
         // WHEN
-        underTest.setupLdap(stack, cluster, httpClientConfig, ldapConfig);
+        underTest.setupLdap(stack, cluster, httpClientConfig, ldapConfig, null);
         // THEN
         verify(externalUserMappingsResourceApi, never()).createExternalUserMappings(any(ApiExternalUserMappingList.class));
     }
@@ -137,7 +146,7 @@ public class ClouderaManagerLdapServiceTest {
     public void testSetupLdapWithoutLdap() throws ApiException, ClouderaManagerClientInitException {
         // GIVEN
         // WHEN
-        underTest.setupLdap(stack, cluster, httpClientConfig, null);
+        underTest.setupLdap(stack, cluster, httpClientConfig, null, null);
         // THEN
         verify(clouderaManagerResourceApi, never()).updateConfig(anyString(), any());
         verify(authRolesResourceApi, never()).readAuthRolesMetadata(anyString());

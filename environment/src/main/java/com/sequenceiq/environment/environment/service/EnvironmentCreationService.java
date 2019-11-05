@@ -5,7 +5,6 @@ import static com.sequenceiq.environment.CloudPlatform.AZURE;
 
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -20,7 +19,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -64,7 +64,7 @@ public class EnvironmentCreationService {
 
     private final EntitlementService entitlementService;
 
-    private final GrpcUmsClient grpcUmsClient;
+    private final VirtualGroupService virtualGroupService;
 
     public EnvironmentCreationService(
             EnvironmentService environmentService,
@@ -76,7 +76,7 @@ public class EnvironmentCreationService {
             ParametersService parametersService,
             NetworkService networkService,
             EntitlementService entitlementService,
-            GrpcUmsClient grpcUmsClient) {
+            VirtualGroupService virtualGroupService) {
         this.environmentService = environmentService;
         this.validatorService = validatorService;
         this.environmentResourceService = environmentResourceService;
@@ -86,7 +86,7 @@ public class EnvironmentCreationService {
         this.parametersService = parametersService;
         this.networkService = networkService;
         this.entitlementService = entitlementService;
-        this.grpcUmsClient = grpcUmsClient;
+        this.virtualGroupService = virtualGroupService;
     }
 
     public EnvironmentDto create(EnvironmentCreationDto creationDto) {
@@ -98,8 +98,10 @@ public class EnvironmentCreationService {
         validateCloudPlatform(creationDto.getCreator(), creationDto.getCloudPlatform());
         Environment environment = initializeEnvironment(creationDto);
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
-        String workloadAdministrationGroupName = createAdminGroup(creationDto, environment.getResourceCrn());
-        environmentService.setAdminGroupName(environment, workloadAdministrationGroupName);
+        if (!createVirtualGroups(creationDto, environment.getResourceCrn())) {
+            // To keep backward compatibility, if somebody passes the group name, then we shall just use it
+            environmentService.setAdminGroupName(environment, creationDto.getAdminGroupName());
+        }
         CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
         validateCreation(creationDto, environment, cloudRegions);
         Map<String, CloudSubnet> subnetMetas = networkService.retrieveSubnetMetadata(environment, creationDto.getNetwork());
@@ -125,18 +127,14 @@ public class EnvironmentCreationService {
         }
     }
 
-    private String createAdminGroup(EnvironmentCreationDto creationDto, String envCrn) {
-        String workloadAdministrationGroupName = null;
+    private boolean createVirtualGroups(EnvironmentCreationDto creationDto, String envCrn) {
+        boolean result = false;
         if (StringUtils.isEmpty(creationDto.getAdminGroupName())) {
-            workloadAdministrationGroupName = grpcUmsClient.setWorkloadAdministrationGroupName(IAM_INTERNAL_ACTOR_CRN, creationDto.getAccountId(),
-                    Optional.empty(), "environments/adminClouderaManager", envCrn);
-            LOGGER.info("Created workloadAdministrationGroupName: {}", workloadAdministrationGroupName);
-        } else {
-            // To keep backward compatibility, if somebody passes the group name, then we shall just use it
-            workloadAdministrationGroupName = creationDto.getAdminGroupName();
-            LOGGER.info("User has defined aadmin group: {}", workloadAdministrationGroupName);
+            Map<UmsRight, String> virtualGroups = virtualGroupService.createVirtualGroups(creationDto.getAccountId(), envCrn);
+            LOGGER.info("The virtualgroups for [{}] environment are created: {}", virtualGroups);
+            result = true;
         }
-        return workloadAdministrationGroupName;
+        return result;
     }
 
     private void validateNetworkRequest(Environment environment, NetworkDto network, Map<String, CloudSubnet> subnetMetas) {

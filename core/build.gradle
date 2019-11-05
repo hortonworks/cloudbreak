@@ -253,6 +253,7 @@ dependencies {
 
   testCompile project(path: ':core-model', configuration: 'tests')
   testCompile project(path: ':cloud-common', configuration: 'tests')
+  testCompile project(":environment").sourceSets.test.output
 
   testCompile group: 'org.powermock',            name: 'powermock-module-junit4'
   testCompile group: 'org.powermock',            name: 'powermock-api-mockito2'

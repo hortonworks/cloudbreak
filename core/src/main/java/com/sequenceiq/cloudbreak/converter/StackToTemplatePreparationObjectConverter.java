@@ -15,6 +15,8 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
@@ -53,6 +55,7 @@ import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMapping
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
@@ -132,6 +135,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Inject
     private StackUtil stackUtil;
 
+    @Inject
+    private VirtualGroupService virtualGroupService;
+
     @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
@@ -160,6 +166,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             if (gateway != null) {
                 gatewaySignKey = gateway.getSignKey();
             }
+            VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(source.getEnvironmentCrn(), ldapView.map(LdapView::getAdminGroup).orElse(""));
             Builder builder = Builder.builder()
                     .withCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()))
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
@@ -181,10 +188,11 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                             new HashMap<>(),
                             source.getCloudPlatform()))
                     .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeResource))
-                    .withStackType(source.getType());
+                    .withStackType(source.getType())
+                    .withVirtualGroupView(virtualGroupRequest);
 
             decorateBuilderWithPlacement(source, builder);
-            decorateBuilderWithAccountMapping(source, environment, credential, builder);
+            decorateBuilderWithAccountMapping(source, environment, credential, builder, virtualGroupRequest);
 
             return builder.build();
         } catch (BlueprintProcessingException | IOException e) {
@@ -222,7 +230,8 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
         builder.withPlacementView(new PlacementView(region, availabilityZone));
     }
 
-    private void decorateBuilderWithAccountMapping(Stack source, DetailedEnvironmentResponse environment, Credential credential, Builder builder) {
+    private void decorateBuilderWithAccountMapping(Stack source, DetailedEnvironmentResponse environment, Credential credential, Builder builder,
+            VirtualGroupRequest virtualGroupRequest) {
         if (source.getType() == StackType.DATALAKE) {
             AccountMapping accountMapping = isCloudStorageConfigured(source) ? source.getCluster().getFileSystem().getCloudStorage().getAccountMapping() : null;
             if (accountMapping != null) {
@@ -230,16 +239,15 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             } else if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK) {
                 Map<String, String> groupMappings;
                 Map<String, String> userMappings;
+                String virtualGroup = getMockVirtualGroup(virtualGroupRequest);
                 switch (source.getCloudPlatform()) {
                     case AWS:
-                        groupMappings = awsMockAccountMappingService.getGroupMappings(source.getRegion(), credential,
-                                environment.getAdminGroupName());
+                        groupMappings = awsMockAccountMappingService.getGroupMappings(source.getRegion(), credential, virtualGroup);
                         userMappings = awsMockAccountMappingService.getUserMappings(source.getRegion(), credential);
                         break;
                     case AZURE:
                         groupMappings = azureMockAccountMappingService.getGroupMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
-                                credential,
-                                environment.getAdminGroupName());
+                                credential, virtualGroup);
                         userMappings = azureMockAccountMappingService.getUserMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
                                 credential);
                         break;
@@ -249,6 +257,10 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                 builder.withAccountMappingView(new AccountMappingView(groupMappings, userMappings));
             }
         }
+    }
+
+    private String getMockVirtualGroup(VirtualGroupRequest virtualGroupRequest) {
+        return virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.CLOUDER_MANAGER_ADMIN.getRight());
     }
 
     private boolean isCloudStorageConfigured(Stack source) {

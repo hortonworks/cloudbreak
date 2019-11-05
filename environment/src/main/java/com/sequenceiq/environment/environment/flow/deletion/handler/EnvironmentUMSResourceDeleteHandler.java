@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
@@ -35,11 +36,14 @@ public class EnvironmentUMSResourceDeleteHandler extends EventSenderAwareHandler
 
     private final EnvironmentService environmentService;
 
+    private final VirtualGroupService virtualGroupService;
+
     protected EnvironmentUMSResourceDeleteHandler(EventSender eventSender,
-            EnvironmentService environmentService, GrpcUmsClient umsClient) {
+            EnvironmentService environmentService, GrpcUmsClient umsClient, VirtualGroupService virtualGroupService) {
         super(eventSender);
         this.environmentService = environmentService;
         this.umsClient = umsClient;
+        this.virtualGroupService = virtualGroupService;
     }
 
     @Override
@@ -61,6 +65,7 @@ public class EnvironmentUMSResourceDeleteHandler extends EventSenderAwareHandler
             if (StringUtils.isBlank(environmentCrn)) {
                 environmentCrn = resourceCrn.get();
             }
+            virtualGroupService.cleanupVirtualGroups(Crn.fromString(environmentCrn).getAccountId(), environmentCrn);
             umsClient.notifyResourceDeleted(INTERNAL_ACTOR_CRN, environmentCrn, Optional.empty());
         } catch (Exception e) {
             LOGGER.warn("UMS delete event failed (this event is not critical)", e);

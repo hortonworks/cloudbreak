@@ -15,6 +15,14 @@ buildscript {
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
+bootRun {
+  systemProperty "spring.profiles.active", System.properties["spring.profiles.active"]
+  systemProperty "spring.config.location", System.properties["spring.config.location"]
+  if (project.hasProperty("jvmArgs")) {
+    jvmArgs += project.jvmArgs.split("\\s+").toList()
+  }
+}
+
 springBoot {
   mainClassName = 'com.sequenceiq.caas.MockCaasApplication'
 }

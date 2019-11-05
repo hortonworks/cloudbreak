@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 
 @Service
 @Scope("prototype")
@@ -185,9 +186,9 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     }
 
     @Override
-    public void setupLdapAndSSO(String primaryGatewayPublicAddress, LdapView ldapConfig) throws CloudbreakException {
+    public void setupLdapAndSSO(String primaryGatewayPublicAddress, LdapView ldapConfig, VirtualGroupRequest virtualGroupRequest) throws CloudbreakException {
         try {
-            ldapService.setupLdap(stack, stack.getCluster(), clientConfig, ldapConfig);
+            ldapService.setupLdap(stack, stack.getCluster(), clientConfig, ldapConfig, virtualGroupRequest);
         } catch (ApiException | ClouderaManagerClientInitException e) {
             throw new CloudbreakException(e);
         }

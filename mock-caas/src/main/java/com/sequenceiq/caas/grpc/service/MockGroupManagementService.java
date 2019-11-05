@@ -12,15 +12,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 
 import io.grpc.stub.StreamObserver;
 
 @Service
 class MockGroupManagementService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MockGroupManagementService.class);
 
     private static final String CM_ADMIN_RIGHT = "environments/adminClouderaManager";
 
@@ -101,8 +105,11 @@ class MockGroupManagementService {
 
     private Map<String, UserManagementProto.Group> createVirtualGroups(String accountId) {
         Map<String, UserManagementProto.Group> groups = new HashMap<>();
-        UserManagementProto.Group group = createGroup(accountId, generateVirtualGroupName(CM_ADMIN_RIGHT));
-        groups.put(group.getCrn(), group);
+        for (UmsRight right : UmsRight.values()) {
+            UserManagementProto.Group group = createGroup(accountId, generateVirtualGroupName(right.getRight()));
+            groups.put(group.getCrn(), group);
+        }
+        LOGGER.info("groups for user: {}", groups);
         return groups;
     }
 

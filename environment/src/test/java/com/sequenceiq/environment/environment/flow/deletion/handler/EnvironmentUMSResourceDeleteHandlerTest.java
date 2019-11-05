@@ -19,11 +19,13 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.EnvironmentTestConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 
 import reactor.bus.Event;
@@ -31,7 +33,7 @@ import reactor.bus.Event;
 @ExtendWith(MockitoExtension.class)
 public class EnvironmentUMSResourceDeleteHandlerTest {
 
-    private static final String TEST_CRN = "testEnvCrn";
+    private static final String TEST_CRN = EnvironmentTestConstants.CRN;
 
     @InjectMocks
     private EnvironmentUMSResourceDeleteHandler underTest;
@@ -51,10 +53,13 @@ public class EnvironmentUMSResourceDeleteHandlerTest {
     @Mock
     private EnvironmentDto environmentDto;
 
+    @Mock
+    private VirtualGroupService virtualGroupService;
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        underTest = new EnvironmentUMSResourceDeleteHandler(eventSender, environmentService, umsClient);
+        underTest = new EnvironmentUMSResourceDeleteHandler(eventSender, environmentService, umsClient, virtualGroupService);
     }
 
     @Test
@@ -76,7 +81,7 @@ public class EnvironmentUMSResourceDeleteHandlerTest {
     @Test
     public void testAcceptWithoutEnvDtoCrn() {
         // GIVEN
-        String crnFromQuery = "crnFromQuery";
+        String crnFromQuery = TEST_CRN;
         Environment env = new Environment();
         env.setResourceCrn(crnFromQuery);
         given(environmentDtoEvent.getData()).willReturn(environmentDto);

@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedse
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
@@ -164,6 +165,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             if (gateway != null) {
                 gatewaySignKey = gateway.getSignKey();
             }
+            VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(source.getEnvironmentCrn(), ldapConfig != null ? ldapConfig.getAdminGroup() : "");
             Builder builder = Builder.builder()
                     .withCloudPlatform(source.getCloudPlatform())
                     .withRdsConfigs(rdsConfigs)
@@ -176,7 +178,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                     .withLdapConfig(ldapConfig)
                     .withCustomInputs(source.getInputs())
                     .withKerberosConfig(getKerberosConfig(source))
-                    .withStackType(source.getType());
+                    .withStackType(source.getType())
+                    .withVirtualGroupView(virtualGroupRequest);
 
             SharedServiceV4Request sharedService = source.getSharedService();
             if (sharedService != null && StringUtils.isNotBlank(sharedService.getDatalakeName())) {

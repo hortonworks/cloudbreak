@@ -23,7 +23,6 @@ public abstract class FreeIpaServerBase {
     @ApiModelProperty(FreeIpaServerSettingsModelDescriptions.HOSTNAME)
     private String hostname;
 
-    @NotNull
     @ApiModelProperty(FreeIpaServerSettingsModelDescriptions.ADMIN_GROUP_NAME)
     private String adminGroupName;
 

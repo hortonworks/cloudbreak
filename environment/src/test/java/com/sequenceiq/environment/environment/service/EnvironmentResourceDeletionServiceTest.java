@@ -1,8 +1,8 @@
 package com.sequenceiq.environment.environment.service;
 
-import static com.sequenceiq.environment.environment.service.EnvironmentTestData.CRN;
+import static com.sequenceiq.environment.environment.service.EnvironmentTestConstants.CRN;
+import static com.sequenceiq.environment.environment.service.EnvironmentTestConstants.USER;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
-import static com.sequenceiq.environment.environment.service.EnvironmentTestData.USER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyObject;
