@@ -9,16 +9,20 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
+import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -59,6 +63,9 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String DEFAULT_TOPOLOGY = "cdp-proxy";
 
+    @Inject
+    private VirtualGroupService virtualGroupService;
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         GatewayView gateway = source.getGatewayView();
@@ -66,10 +73,8 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
         String masterSecret = gateway != null ? gateway.getMasterSecret() : generalClusterConfigs.getPassword();
         String topologyName = gateway != null && gateway.getExposedServices() != null ? gateway.getTopologyName() : DEFAULT_TOPOLOGY;
 
-        String adminGroup = "";
-        if (source.getLdapConfig().isPresent() && StringUtils.isNotEmpty(source.getLdapConfig().get().getAdminGroup())) {
-            adminGroup = source.getLdapConfig().get().getAdminGroup();
-        }
+        VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
+        String adminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.KNOX_ADMIN.getRight());
 
         switch (roleType) {
             case KnoxRoles.KNOX_GATEWAY:

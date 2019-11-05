@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.config;
 
-import static com.sequenceiq.freeipa.service.config.LdapConfigRegisterService.ADMIN_GROUP;
 import static com.sequenceiq.freeipa.service.config.LdapConfigRegisterService.BIND_DN;
 import static com.sequenceiq.freeipa.service.config.LdapConfigRegisterService.GROUP_MEMBER_ATTRIBUTE;
 import static com.sequenceiq.freeipa.service.config.LdapConfigRegisterService.GROUP_NAME_ATTRIBUTE;
@@ -83,7 +82,6 @@ class LdapConfigRegisterServiceTest {
         LdapConfig ldapConfig = ldapConfigArgumentCaptor.getValue();
         assertEquals(ldapConfig.getName(), stack.getName());
         assertEquals(ldapConfig.getEnvironmentCrn(), stack.getEnvironmentCrn());
-        assertEquals(ldapConfig.getAdminGroup(), ADMIN_GROUP);
         String domainComponent = ",dc=testdomain,dc=local";
         assertEquals(ldapConfig.getBindDn(), BIND_DN + domainComponent);
         assertEquals(ldapConfig.getUserSearchBase(), USER_SEARCH_BASE + domainComponent);

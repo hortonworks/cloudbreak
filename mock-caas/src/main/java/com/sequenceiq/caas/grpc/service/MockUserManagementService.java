@@ -235,7 +235,6 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         String actorCrn = request.getActorCrn();
         String accountId = Crn.fromString(actorCrn).getAccountId();
         List<Group> groups = List.copyOf(mockGroupManagementService.getOrCreateGroups(accountId));
-        Group group = groups.get(FIRST_GROUP);
         PolicyStatement policyStatement = PolicyStatement.newBuilder()
                 .addRight(ALL_RIGHTS_AND_RESOURCES)
                 .addResource(ALL_RIGHTS_AND_RESOURCES)
@@ -253,9 +252,9 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                 .build();
         RoleAssignment roleAssignment = RoleAssignment.newBuilder().setRole(powerUserRole).build();
         GetRightsResponse.Builder responseBuilder = GetRightsResponse.newBuilder()
-                .addGroupCrn(group.getCrn())
                 .addRoleAssignment(roleAssignment)
-                .addWorkloadAdministrationGroupName(mockGroupManagementService.generateVirtualGroupName("environment/read"));
+                .addWorkloadAdministrationGroupName(mockGroupManagementService.generateVirtualGroupName(ENV_ACCESS_RIGHT));
+        groups.stream().forEach(group -> responseBuilder.addGroupCrn(group.getCrn()));
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
     }

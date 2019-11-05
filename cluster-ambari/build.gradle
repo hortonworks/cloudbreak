@@ -37,5 +37,4 @@ dependencies {
   testCompile group: 'org.powermock',            name: 'powermock-api-mockito2',       version: powermockVersion
   testCompile group: 'org.powermock',            name: 'powermock-reflect',       version: powermockVersion
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
-  testCompile project(path: ':cloud-common' , configuration: 'tests')
 }

@@ -17,9 +17,6 @@ import com.sequenceiq.freeipa.ldap.LdapConfigService;
 
 @Service
 public class LdapConfigRegisterService extends AbstractConfigRegister {
-
-    public static final String ADMIN_GROUP = "admins";
-
     public static final String USER_GROUP = "ipausers";
 
     public static final String BIND_DN = "uid=admin,cn=users,cn=accounts";
@@ -57,7 +54,7 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
     public LdapConfig createLdapConfig(Long stackId, String bindDn, String bindPassword, String clusterName) {
         Stack stack = getStackWithInstanceMetadata(stackId);
         FreeIpa freeIpa = getFreeIpaService().findByStackId(stackId);
-        String adminGroupName = StringUtils.isNotEmpty(freeIpa.getAdminGroupName()) ? freeIpa.getAdminGroupName() : ADMIN_GROUP;
+        String adminGroupName = StringUtils.isNotEmpty(freeIpa.getAdminGroupName()) ? freeIpa.getAdminGroupName() : "";
         LdapConfig ldapConfig = new LdapConfig();
         ldapConfig.setName(stack.getName());
         ldapConfig.setEnvironmentCrn(stack.getEnvironmentCrn());

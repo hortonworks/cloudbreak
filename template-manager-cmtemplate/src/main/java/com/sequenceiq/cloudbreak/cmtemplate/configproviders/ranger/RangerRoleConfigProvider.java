@@ -7,18 +7,24 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
 public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
+    @Inject
+    private VirtualGroupService virtualGroupService;
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
@@ -35,8 +41,9 @@ public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
                 String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
                         "" : source.getBlueprintView().getProcessor().getStackVersion();
                 if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_0_1)) {
-                    String adminGroupName = source.getLdapConfig().map(LdapView::getAdminGroup).orElse("*");
-                    configList.add(config("ranger.default.policy.groups", adminGroupName));
+                    VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
+                    String adminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.RANGER_ADMIN.getRight());
+                    configList.add(config("ranger.default.policy.groups", adminGroup));
                 }
                 return configList;
             default:
