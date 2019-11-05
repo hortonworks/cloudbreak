@@ -118,7 +118,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String availabilityZone() {
-        String availabilityZone = "eu-west-1a";
+        String availabilityZone = "eu-central-1a";
         String availabilityZoneParam = getTestParameter().get("mockAvailabilityZone");
 
         return availabilityZoneParam == null ? availabilityZone : availabilityZoneParam;

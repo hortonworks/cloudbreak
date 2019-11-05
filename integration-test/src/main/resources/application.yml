@@ -95,14 +95,14 @@ integrationtest:
   aws:
     defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     blueprintCdhVersion: 7.0.1
-    region: eu-west-1
-    location: eu-west-1
-    availabilityZone: eu-west-1a
-    vpcId: vpc-071202b5656f08a83
+    region: eu-central-1
+    location: eu-central-1
+    availabilityZone: eu-central-1a
+    vpcId: vpc-0fc0a422f82ea8eec
     subnetIds:
-      - subnet-02d25e06bb8bcce9e
-      - subnet-0727c0067a06c31f7
-      - subnet-08435fb0a78dd9080
+      - subnet-025e39ebeb6efeca8
+      - subnet-0d8756068a4e78bd1
+      - subnet-065019e58cbefd9b8
     publicKeyId: api-e2e-test
     credential:
       type: key
