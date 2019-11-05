@@ -51,6 +51,10 @@
             <role>federation</role>
             <name>SSOCookieProvider</name>
             <enabled>true</enabled>
+            <param>
+                <name>sso.authentication.provider.url</name>
+                <value>/{{ salt['pillar.get']('gateway:path') }}/knoxsso/api/v1/websso</value>
+            </param>
         </provider>
         <provider>
             <role>identity-assertion</role>
