@@ -8,6 +8,9 @@ logging:
     path: ${integrationtest.outputdir}
 
 integrationtest:
+  command: suiteurls
+  outputdir: .
+  publicKeyFile:
   cdhParcels:
     "[7.0.0]":
       parcels:
@@ -56,8 +59,8 @@ integrationtest:
             - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-22.jar
 
   user:
-    accessKey:
-    secretKey:
+    accessKey: Y3JuOmFsdHVzOmlhbTp1cy13ZXN0LTE6Y2xvdWRlcmE6dXNlcjptb2NrdXNlcg==
+    secretKey: nHkdxgZR0BaNHaSYM3ooS6rIlpV5E+k1CIkr+jFId2g=
   database:
     connectionUrl: jdbc:postgresql://localhost:5432/
     username: postgres
@@ -215,10 +218,6 @@ integrationtest:
     imageId: 16ad7759-83b1-42aa-aadf-0e3a6e7b5444
 
 # ---------- old test parameters: ---------- #
-
-  outputdir: .
-
-  publicKeyFile:
 
   # uaa properties
   uaa:
