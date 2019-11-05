@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -141,7 +142,7 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
                 if (environmentNetworkConverter != null) {
                     // we don't use subnets in the validation, so we set the first availability zone
                     Network network = environmentNetworkConverter.convertToLegacyNetwork(environment.getNetwork(),
-                            environment.getNetwork().getSubnetMetas().values().stream().findFirst().get().getAvailabilityZone());
+                            getAvailabilityZoneIfAvailableOtherwiseThrowException(environment));
                     stackValidation.setNetwork(network);
                 }
             } else if (networkRequest != null) {
@@ -153,6 +154,14 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
         }
     }
 
+    private String getAvailabilityZoneIfAvailableOtherwiseThrowException(DetailedEnvironmentResponse environment) {
+        Optional<CloudSubnet> cloudSubnet = environment.getNetwork().getSubnetMetas().values().stream().findFirst();
+        if (cloudSubnet.isPresent()) {
+            return cloudSubnet.get().getAvailabilityZone();
+        }
+        throw new IllegalStateException("No cloud subnet found for environment: " + environment.getName());
+    }
+
     private Set<HostGroup> convertHostGroupsFromJson(Collection<InstanceGroup> instanceGroups, Iterable<HostGroupV4Request> hostGroupsJsons) {
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupV4Request json : hostGroupsJsons) {
@@ -162,7 +171,7 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
             if (instanceGroupName != null) {
                 Optional<InstanceGroup> instanceGroup =
                         instanceGroups.stream().filter(instanceGroup1 -> instanceGroup1.getGroupName().equals(instanceGroupName)).findFirst();
-                if (!instanceGroup.isPresent()) {
+                if (instanceGroup.isEmpty()) {
                     throw new BadRequestException(String.format("Cannot find instance group named '%s' in instance group list", instanceGroupName));
                 }
             }
