@@ -48,8 +48,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesReq
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.MountDisksOnNewHostsRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.MountDisksOnNewHostsResult;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
@@ -268,25 +266,6 @@ public class StackUpscaleActions {
         return new AbstractStackUpscaleAction<>(ExtendHostMetadataResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, ExtendHostMetadataResult payload, Map<Object, Object> variables) {
-                Stack stack = context.getStack();
-                if (gatewayPublicEndpointManagementService.isCertGenerationEnabled()) {
-                    InstanceMetaData gatewayInstanceMetadata = stack.getPrimaryGatewayInstance();
-                    String ipWrapper = gatewayInstanceMetadata.getPublicIpWrapper();
-                    LOGGER.info("Gateway's DNS entry needs to be updated because primary gateway IP has been updated to: '{}'", ipWrapper);
-                    gatewayPublicEndpointManagementService.updateDnsEntry(stack, ipWrapper);
-                }
-                Selectable request = new MountDisksOnNewHostsRequest(stack.getId(),
-                        payload.getRequest().getUpscaleCandidateAddresses());
-                sendEvent(context, request);
-            }
-        };
-    }
-
-    @Bean(name = "MOUNT_DISKS_ON_NEW_HOSTS_STATE")
-    public Action<?, ?> mountDisksOnNewHosts() {
-        return new AbstractStackUpscaleAction<>(MountDisksOnNewHostsResult.class) {
-            @Override
-            protected void doExecute(StackScalingFlowContext context, MountDisksOnNewHostsResult payload, Map<Object, Object> variables) {
                 stackUpscaleService.finishExtendHostMetadata(context.getStack());
                 getMetricService().incrementMetricCounter(MetricType.STACK_UPSCALE_SUCCESSFUL, context.getStack());
                 sendEvent(context);
