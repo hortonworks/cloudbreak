@@ -19,14 +19,14 @@ cloudera_manager_setup_knox:
 
 {{ gateway.knox_data_root }}/topologies:
   file.directory:
-    - mode: 777
+    - mode: 755
     - makedirs: True
 
 {{ gateway.knox_data_root }}/topologies/admin.xml:
   file.managed:
     - source: salt://gateway/config/cm/admin.xml.j2
     - template: jinja
-    - mode: 777
+    - mode: 644
     - context:
         ldap: {{ gateway.ldap }}
 
@@ -34,7 +34,7 @@ cloudera_manager_setup_knox:
   file.managed:
     - source: salt://gateway/config/cm/manager.xml.j2
     - template: jinja
-    - mode: 777
+    - mode: 644
     - context:
         ldap: {{ gateway.ldap }}
 
@@ -42,14 +42,14 @@ cloudera_manager_setup_knox:
   file.managed:
     - source: salt://gateway/config/cm/knoxsso.xml.j2
     - template: jinja
-    - mode: 777
+    - mode: 644
 
 {% if salt['pillar.get']('gateway:tokencert') != None %}
 {{ gateway.knox_data_root }}/topologies/cdp-token.xml:
   file.managed:
     - source: salt://gateway/config/cm/cdp-token.xml.j2
     - template: jinja
-    - mode: 777
+    - mode: 644
 {% endif %}
 
 {% for topology in salt['pillar.get']('gateway:topologies') -%}
@@ -63,7 +63,7 @@ cloudera_manager_setup_knox:
       ports: {{ salt['pillar.get']('gateway:ports') }}
       topology_name: {{ topology.name }}
       protocol: {{ salt['pillar.get']('gateway:protocol') }}
-    - mode: 777
+    - mode: 644
 
 {{ gateway.knox_data_root }}/topologies/{{ topology.name }}-api.xml:
   file.managed:
@@ -74,7 +74,7 @@ cloudera_manager_setup_knox:
       ports: {{ salt['pillar.get']('gateway:ports') }}
       topology_name: {{ topology.name }}
       protocol: {{ salt['pillar.get']('gateway:protocol') }}
-    - mode: 777
+    - mode: 644
 
 {% endfor %}
 
@@ -82,13 +82,13 @@ cloudera_manager_setup_knox:
   file.managed:
     - contents_pillar: gateway:signkey
     - makedirs: True
-    - mode: 777
+    - mode: 644
 
 {{ gateway.knox_data_root }}/security/keystores/signcert.pem:
   file.managed:
     - contents_pillar: gateway:signcert
     - makedirs: True
-    - mode: 777
+    - mode: 644
 
   # openssl pkcs12 -export -in cert.pem -inkey key.pem -out signing.p12 -name signing-identity -password pass:admin
   # keytool -importkeystore -deststorepass admin1 -destkeypass admin1 -destkeystore signing.jks -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass admin -alias signing-identity
@@ -101,7 +101,7 @@ knox-create-sign-pkcs12:
 
 {{ gateway.knox_data_root }}/security/keystores/signing.p12:
   file.managed:
-    - mode: 777
+    - mode: 644
     - replace: False
 
 knox-create-sign-jks:
@@ -112,7 +112,7 @@ knox-create-sign-jks:
 
 {{ gateway.knox_data_root }}/security/keystores/signing.jks:
   file.managed:
-    - mode: 777
+    - mode: 644
     - replace: False
 
 {% if salt['pillar.get']('gateway:saml') %}
@@ -120,7 +120,7 @@ knox-create-sign-jks:
 {{ gateway.knox_data_root }}/cdp-idp-metadata.xml:
   file.managed:
     - contents_pillar: gateway:saml
-    - mode: 777
+    - mode: 644
     - replace: False
 
 {% endif %}
