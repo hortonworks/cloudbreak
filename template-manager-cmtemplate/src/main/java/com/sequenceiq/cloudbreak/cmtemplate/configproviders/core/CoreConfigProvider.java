@@ -98,7 +98,8 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return !cmTemplateProcessor.isRoleTypePresentInService(HDFS, Lists.newArrayList(NAMENODE))
-                && source.getFileSystemConfigurationView().isPresent();
+                && source.getFileSystemConfigurationView().isPresent()
+                && ConfigUtils.getStorageLocationForServiceProperty(source, CORE_DEFAULTFS).isPresent();
     }
 
 }
