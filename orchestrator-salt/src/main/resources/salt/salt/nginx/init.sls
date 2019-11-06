@@ -34,6 +34,13 @@
 
 {% endif %}
 
+ensure_underscores_in_headers_nginx_conf:
+  file.line:
+    - name: /etc/nginx/nginx.conf
+    - mode: ensure
+    - content:     underscores_in_headers on;
+    - after: ^http {$
+
 {% if "manager_server" in grains.get('roles', []) %}
 {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
 
