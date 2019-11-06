@@ -424,6 +424,23 @@
         }
       ],
       "dependencies": ["ZOOKEEPER"]
+    },
+    {
+      "name": "DAS",
+      "displayName": "Data Analytics Studio",
+      "components": [
+        {
+          "name": "DAS_EVENT_PROCESSOR",
+          "groups": ["master"],
+          "base": true
+        },
+        {
+          "name": "DAS_WEBAPP",
+          "groups": ["master"],
+          "base": true
+        }
+      ],
+      "dependencies": ["ZOOKEEPER"]
     }
   ]
 }
