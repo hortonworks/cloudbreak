@@ -29,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.mock.MockCloudProvider;
+import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -43,6 +44,7 @@ import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
+import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
@@ -56,7 +58,7 @@ import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 @Prototype
 public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterRequest, SdxClusterDetailResponse, SdxInternalTestDto>
-        implements Purgable<SdxClusterResponse, SdxClient> {
+        implements Purgable<SdxClusterResponse, SdxClient>, Investigable {
 
     private static final String DEFAULT_SDX_NAME = "test-sdx" + '-' + UUID.randomUUID().toString().replaceAll("-", "");
 
@@ -398,5 +400,15 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
             throw new IllegalArgumentException("SDX Repair does not exist!");
         }
         return repair.getRequest();
+    }
+
+    @Override
+    public String investigate() {
+        if (getResponse() == null || getResponse().getCrn() == null) {
+            return null;
+        }
+        String crn = getResponse().getCrn();
+
+        return "SDX audit events: " + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), "stacks", null, crn);
     }
 }
