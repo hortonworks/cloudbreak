@@ -21,6 +21,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.StringUtils;
 
+import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -231,11 +232,11 @@ public abstract class TestContext implements ApplicationContextAware {
             clients.put(acting.getAccessKey(), clientMap);
             cloudbreakClient.setWorkspaceId(0L);
             redbeamsClient.setEnvironmentCrn(Crn.builder()
-                .setService(Crn.Service.ENVIRONMENTS)
-                .setAccountId("it")
-                .setResourceType(Crn.ResourceType.ENVIRONMENT)
-                .setResource("test-environment")
-                .build().toString());
+                    .setService(Crn.Service.ENVIRONMENTS)
+                    .setAccountId("it")
+                    .setResourceType(Crn.ResourceType.ENVIRONMENT)
+                    .setResource("test-environment")
+                    .build().toString());
         }
         return this;
     }
@@ -664,11 +665,17 @@ public abstract class TestContext implements ApplicationContextAware {
                 LOGGER.error(msg, ex);
                 builder.append(msg).append(": ").append(ResponseUtil.getErrorMessage(ex)).append(System.lineSeparator());
             });
+            collectStructuredEvents(builder);
             exceptionsDuringTest.clear();
             if (!silently) {
                 throw new TestFailException(builder.toString());
             }
         }
+    }
+
+    private void collectStructuredEvents(StringBuilder builder) {
+        Iterable<Investigable> investigables = Iterables.filter(resources.values(), Investigable.class);
+        investigables.forEach(dto -> builder.append(dto.investigate()).append(System.lineSeparator()));
     }
 
     private <T extends CloudbreakTestDto> T getEntityFromEntityClass(Class<T> entityClass, RunningParameter runningParameter) {
