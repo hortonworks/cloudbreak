@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -126,7 +127,8 @@ public class ImageService {
     //CHECKSTYLE:OFF
     @Measure(ImageService.class)
     public StatedImage determineImageFromCatalog(Long workspaceId, ImageSettingsV4Request imageSettins, String platformString,
-            Blueprint blueprint, boolean useBaseImage, User user, Optional<Map<String, String>> packageVersions) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+            Blueprint blueprint, boolean useBaseImage, User user, Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> imageFilter)
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         String clusterType = ImageCatalogService.UNDEFINED;
         String clusterVersion = ImageCatalogService.UNDEFINED;
         if (blueprint != null) {
@@ -157,12 +159,12 @@ public class ImageService {
         ImageCatalog imageCatalog = getImageCatalogFromRequestOrDefault(workspaceId, imageSettins, user);
         if (useBaseImage) {
             LOGGER.debug("Image id isn't specified for the stack, falling back to a base imageSettins, because repo information is provided");
-            return imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, operatingSystems, imageCatalog, packageVersions);
+            return imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, operatingSystems, imageCatalog, imageFilter);
         }
         LOGGER.debug("Image id isn't specified for the stack, falling back to a prewarmed "
                 + "imageSettins of {}-{} or to a base imageSettins if prewarmed doesn't exist", clusterType, clusterVersion);
         return imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, operatingSystems, imageCatalog,
-                packageVersions);
+                imageFilter);
     }
     //CHECKSTYLE:ON
 

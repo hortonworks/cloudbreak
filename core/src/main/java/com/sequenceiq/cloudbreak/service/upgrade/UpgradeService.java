@@ -2,11 +2,15 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFoundException;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
@@ -18,7 +22,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -47,6 +53,8 @@ public class UpgradeService {
 
     private static final boolean REMOVE_ONLY = false;
 
+    private static final String SALT_BOOTSTRAP = "salt-bootstrap";
+
     @Inject
     private StackService stackService;
 
@@ -58,6 +66,9 @@ public class UpgradeService {
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
     private ClusterService clusterService;
@@ -115,7 +126,7 @@ public class UpgradeService {
                 boolean baseImage = useBaseImage(image);
                 StatedImage latestImage = imageService
                         .determineImageFromCatalog(workspaceId, imageSettingsV4Request, stack.getCloudPlatform().toLowerCase(), blueprint, baseImage, user,
-                                Optional.of(image.getPackageVersions()));
+                                getImageFilter(image, baseImage, stack));
                 if (!Objects.equals(image.getImageId(), latestImage.getImage().getUuid())) {
                     return new UpgradeOptionV4Response(latestImage.getImage().getUuid(), image.getImageCatalogName());
                 } else {
@@ -127,6 +138,47 @@ public class UpgradeService {
         } else {
             return new UpgradeOptionV4Response();
         }
+    }
+
+    private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> getImageFilter(Image image, boolean baseImage, Stack stack) {
+        if (baseImage) {
+            return packageVersionFilter(image.getPackageVersions());
+        } else {
+            return packageVersionFilter(image.getPackageVersions())
+                    .and(parcelFilter(stack));
+        }
+    }
+
+    private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> parcelFilter(Stack stack) {
+        Set<String> parcels = clusterComponentConfigProvider.getClouderaManagerProductDetails(stack.getCluster().getId())
+                .stream()
+                .map(ClouderaManagerProduct::getParcel)
+                .collect(toSet());
+        return imageFromCatalaog -> {
+            if (imageFromCatalaog.getPreWarmParcels() == null) {
+                return false;
+            } else {
+                Set<String> imageParcels = imageFromCatalaog.getPreWarmParcels()
+                        .stream()
+                        .map(parts -> parts.get(1))
+                        .collect(toSet());
+                if (imageFromCatalaog.getStackDetails() != null) {
+                    imageParcels.add(imageFromCatalaog.getStackDetails().getRepo().getStack().get(imageFromCatalaog.getOsType()));
+                }
+                return imageParcels
+                        .equals(parcels);
+            }
+        };
+    }
+
+    private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> packageVersionFilter(Map<String, String> packageVersions) {
+        return image -> {
+            Map<String, String> catalogPackageVersions = new HashMap<>(image.getPackageVersions());
+            catalogPackageVersions.remove(SALT_BOOTSTRAP);
+            Map<String, String> originalPackageVersions = new HashMap<>(packageVersions);
+            originalPackageVersions.remove(SALT_BOOTSTRAP);
+            return originalPackageVersions.equals(catalogPackageVersions);
+        };
     }
 
     private boolean useBaseImage(Image image) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {

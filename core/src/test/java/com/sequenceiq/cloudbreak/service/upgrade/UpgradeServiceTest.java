@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -64,6 +65,9 @@ public class UpgradeServiceTest {
 
     @Mock
     private ComponentConfigProviderService componentConfigProviderService;
+
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Mock
     private ClusterService clusterService;
@@ -101,8 +105,7 @@ public class UpgradeServiceTest {
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
-                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false), eq(user),
-                        eq(Optional.of(Map.of())));
+                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false), eq(user), any());
         assertThat(result.getImageId()).isEqualTo("id-2");
     }
 
@@ -119,8 +122,7 @@ public class UpgradeServiceTest {
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
-                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(true), eq(user),
-                        eq(Optional.of(Map.of())));
+                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(true), eq(user), any());
         assertThat(result.getImageId()).isEqualTo(null);
     }
 
@@ -166,6 +168,7 @@ public class UpgradeServiceTest {
         stack.setCloudPlatform("AWS");
         Blueprint blueprint = new Blueprint();
         Cluster cluster = new Cluster();
+        cluster.setId(1L);
         cluster.setBlueprint(blueprint);
         stack.setCluster(cluster);
         return stack;
