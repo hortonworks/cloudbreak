@@ -117,8 +117,8 @@ public class ReactorFlowManagerTest {
         underTest.triggerFullSyncWithoutCheck(STACK_ID);
         underTest.triggerClusterCredentialReplace(STACK_ID, "admin", "admin1");
         underTest.triggerClusterCredentialUpdate(STACK_ID, "admin1");
-        underTest.triggerClusterTermination(stack);
-        underTest.triggerClusterTermination(stack);
+        underTest.triggerClusterTermination(stack, false);
+        underTest.triggerClusterTermination(stack, false);
         underTest.triggerClusterUpgrade(STACK_ID);
         underTest.triggerManualRepairFlow(STACK_ID);
         underTest.triggerStackRepairFlow(STACK_ID, new UnhealthyInstances());
@@ -139,7 +139,7 @@ public class ReactorFlowManagerTest {
 
     @Test
     public void testClusterTerminationOnlyNotSecuredCluster() {
-        underTest.triggerClusterTermination(stack);
+        underTest.triggerClusterTermination(stack, false);
 
         verify(reactor).notify(eq(FlowChainTriggers.TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
@@ -152,14 +152,14 @@ public class ReactorFlowManagerTest {
         when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
         when(kerberosConfigService.isKerberosConfigExistsForEnvironment("env", stack.getName())).thenReturn(true);
 
-        underTest.triggerClusterTermination(stack);
+        underTest.triggerClusterTermination(stack, false);
 
         verify(reactor).notify(eq(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
 
     @Test
     public void testClusterTerminationNotSecuredClusterAndStack() {
-        underTest.triggerClusterTermination(stack);
+        underTest.triggerClusterTermination(stack, false);
 
         verify(reactor).notify(eq(FlowChainTriggers.TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
@@ -172,7 +172,7 @@ public class ReactorFlowManagerTest {
         when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
         when(kerberosConfigService.isKerberosConfigExistsForEnvironment("env", stack.getName())).thenReturn(true);
 
-        underTest.triggerClusterTermination(stack);
+        underTest.triggerClusterTermination(stack, false);
 
         verify(reactor).notify(eq(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT), any(Event.class));
     }

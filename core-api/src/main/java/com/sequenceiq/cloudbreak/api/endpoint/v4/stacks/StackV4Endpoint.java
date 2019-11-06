@@ -168,7 +168,8 @@ public interface StackV4Endpoint {
     @Path("{name}/cluster")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DELETE_WITH_KERBEROS_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES)
-    void deleteWithKerberos(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    void deleteWithKerberos(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @GET
     @Path("{name}/request")

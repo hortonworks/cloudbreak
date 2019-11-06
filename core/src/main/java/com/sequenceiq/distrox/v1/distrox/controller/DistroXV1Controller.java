@@ -366,18 +366,20 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void deleteWithKerberosByName(String name) {
+    public void deleteWithKerberosByName(String name, boolean forced) {
         stackOperations.deleteWithKerberos(
                 StackAccessDto.builder().withName(name).build(),
-                workspaceService.getForCurrentUser().getId());
+                workspaceService.getForCurrentUser().getId(),
+                forced);
 
     }
 
     @Override
-    public void deleteWithKerberosByCrn(String crn) {
+    public void deleteWithKerberosByCrn(String crn, boolean forced) {
         stackOperations.deleteWithKerberos(
                 StackAccessDto.builder().withCrn(crn).build(),
-                workspaceService.getForCurrentUser().getId());
+                workspaceService.getForCurrentUser().getId(),
+                forced);
 
     }
 }

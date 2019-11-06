@@ -285,11 +285,11 @@ public interface DistroXV1Endpoint {
     @Path("name/{name}/cluster")
     @ApiOperation(value = DELETE_WITH_KERBEROS_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_NOTES,
             nickname = "deleteWithKerberosDistroXV1ByName")
-    void deleteWithKerberosByName(@PathParam("name") String name);
+    void deleteWithKerberosByName(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @DELETE
     @Path("crn/{crn}/cluster")
     @ApiOperation(value = DELETE_WITH_KERBEROS_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_NOTES,
             nickname = "deleteWithKerberosDistroXV1ByCrn")
-    void deleteWithKerberosByCrn(@PathParam("crn") String crn);
+    void deleteWithKerberosByCrn(@PathParam("crn") String crn, @QueryParam("forced") @DefaultValue("false") boolean forced);
 }
