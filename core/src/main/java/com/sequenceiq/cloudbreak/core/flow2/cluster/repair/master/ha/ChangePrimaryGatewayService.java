@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.gateway.GatewayPublicEndpointManagementService;
+import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -62,7 +62,7 @@ public class ChangePrimaryGatewayService {
     private TransactionService transactionService;
 
     @Inject
-    private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
+    private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
     public void changePrimaryGatewayStarted(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
@@ -94,9 +94,7 @@ public class ChangePrimaryGatewayService {
                 cluster.setClusterManagerIp(gatewayIp);
                 LOGGER.info("Primary gateway IP has been updated to: '{}'", gatewayIp);
                 clusterService.save(cluster);
-                if (gatewayPublicEndpointManagementService.isCertGenerationEnabled()) {
-                    gatewayPublicEndpointManagementService.updateDnsEntry(updatedStack, gatewayIp);
-                }
+                clusterPublicEndpointManagementService.changeGateway(updatedStack, gatewayIp);
                 return null;
             });
         } else {

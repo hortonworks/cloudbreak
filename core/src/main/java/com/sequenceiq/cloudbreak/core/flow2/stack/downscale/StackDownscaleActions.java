@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 
+import static java.util.stream.Collectors.toMap;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -12,13 +16,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackCollectResourcesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackCollectResourcesResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
@@ -29,7 +34,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 
 @Configuration
 public class StackDownscaleActions {
@@ -48,6 +53,9 @@ public class StackDownscaleActions {
     @Inject
     private StackDownscaleService stackDownscaleService;
 
+    @Inject
+    private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
+
     @Bean(name = "DOWNSCALE_COLLECT_RESOURCES_STATE")
     public Action<?, ?> stackDownscaleCollectResourcesAction() {
         return new AbstractStackDownscaleAction<>(StackDownscaleTriggerEvent.class) {
@@ -60,13 +68,20 @@ public class StackDownscaleActions {
                 variables.put(RESOURCES, resources);
                 List<CloudInstance> instances = new ArrayList<>();
                 InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(context.getInstanceGroupName());
-                for (InstanceMetaData metaData : group.getAllInstanceMetaData()) {
-                    if (context.getInstanceIds().contains(metaData.getInstanceId())) {
-                        CloudInstance cloudInstance = metadataConverter.convert(metaData);
-                        instances.add(cloudInstance);
-                    }
-                }
+                final Set<InstanceMetaData> candidatesInstanceMetadata = group.getAllInstanceMetaData()
+                        .stream()
+                        .filter(im -> context.getInstanceIds().contains(im.getInstanceId()))
+                        .collect(Collectors.toSet());
+
+                candidatesInstanceMetadata.forEach(metaData -> {
+                    CloudInstance cloudInstance = metadataConverter.convert(metaData);
+                    instances.add(cloudInstance);
+                });
                 variables.put(INSTANCES, instances);
+
+                final Map<String, String> addressesByFqdn = candidatesInstanceMetadata.stream()
+                        .collect(toMap(InstanceMetaData::getDiscoveryFQDN, InstanceMetaData::getPrivateIp));
+                clusterPublicEndpointManagementService.downscale(stack, addressesByFqdn);
                 Selectable request = new DownscaleStackCollectResourcesRequest(context.getCloudContext(),
                         context.getCloudCredential(), context.getCloudStack(), resources, instances);
                 sendEvent(context, request);

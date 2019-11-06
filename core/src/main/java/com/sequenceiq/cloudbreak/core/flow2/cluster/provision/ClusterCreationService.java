@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -21,10 +22,9 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
-import com.sequenceiq.cloudbreak.service.gateway.GatewayPublicEndpointManagementService;
+import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -51,7 +51,7 @@ public class ClusterCreationService {
     private StackUtil stackUtil;
 
     @Inject
-    private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
+    private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
     public void bootstrappingMachines(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.BOOTSTRAPPING_MACHINES);
@@ -74,7 +74,7 @@ public class ClusterCreationService {
     }
 
     public void generateCertAndDnsEntryForGateway(Stack stack) {
-        boolean success = gatewayPublicEndpointManagementService.generateCertAndSaveForStackAndUpdateDnsEntry(stack);
+        boolean success = clusterPublicEndpointManagementService.provision(stack);
         if (!success) {
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_GATEWAY_CERTIFICATE_CREATE_FAILED, UPDATE_IN_PROGRESS.name());
         }

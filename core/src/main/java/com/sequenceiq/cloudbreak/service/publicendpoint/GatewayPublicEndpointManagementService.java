@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.gateway;
+package com.sequenceiq.cloudbreak.service.publicendpoint;
 
 import java.security.KeyPair;
 import java.util.List;
@@ -9,48 +9,27 @@ import javax.inject.Inject;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
-import com.sequenceiq.cloudbreak.certificate.service.CertificateCreationService;
-import com.sequenceiq.cloudbreak.certificate.service.DnsManagementService;
-import com.sequenceiq.cloudbreak.dns.EnvironmentBasedDomainNameProvider;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
-public class GatewayPublicEndpointManagementService {
+public class GatewayPublicEndpointManagementService extends BasePublicEndpointManagementService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GatewayPublicEndpointManagementService.class);
 
-    @Value("${gateway.cert.generation.enabled:false}")
-    private boolean certGenerationEnabled;
-
     @Inject
     private EnvironmentClientService environmentClientService;
-
-    @Inject
-    private DnsManagementService dnsManagementService;
-
-    @Inject
-    private EnvironmentBasedDomainNameProvider domainNameProvider;
-
-    @Inject
-    private GrpcUmsClient grpcUmsClient;
 
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
@@ -59,14 +38,7 @@ public class GatewayPublicEndpointManagementService {
     private SecurityConfigService securityConfigService;
 
     @Inject
-    private CertificateCreationService certificateCreationService;
-
-    @Inject
     private ClusterService clusterService;
-
-    public boolean isCertGenerationEnabled() {
-        return certGenerationEnabled;
-    }
 
     public boolean generateCertAndSaveForStackAndUpdateDnsEntry(Stack stack) {
         boolean success = false;
@@ -99,10 +71,10 @@ public class GatewayPublicEndpointManagementService {
             }
         }
         String endpointName = stack.getPrimaryGatewayInstance().getShortHostname();
-        boolean success = dnsManagementService.createDnsEntryWithIp(userCrn, accountId, endpointName, environment.getName(), false, List.of(gatewayIp));
+        boolean success = getDnsManagementService().createDnsEntryWithIp(userCrn, accountId, endpointName, environment.getName(), false, List.of(gatewayIp));
         if (success) {
             try {
-                String fullQualifiedDomainName = domainNameProvider
+                String fullQualifiedDomainName = getDomainNameProvider()
                         .getFullyQualifiedEndpointName(endpointName, environment.getName(), getWorkloadSubdomain(userCrn));
                 if (fullQualifiedDomainName != null) {
                     LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", gatewayIp, fullQualifiedDomainName);
@@ -131,7 +103,7 @@ public class GatewayPublicEndpointManagementService {
         if (ip == null) {
             return null;
         }
-        dnsManagementService.deleteDnsEntryWithIp(actorCrn, accountId, stack.getName(), environmentName, false, List.of(ip));
+        getDnsManagementService().deleteDnsEntryWithIp(actorCrn, accountId, stack.getName(), environmentName, false, List.of(ip));
         return ip;
     }
 
@@ -147,12 +119,12 @@ public class GatewayPublicEndpointManagementService {
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
             String environmentName = environment.getName();
             String workloadSubdomain = getWorkloadSubdomain(userCrn);
-            String commonName = domainNameProvider.getCommonName(endpointName, environmentName, workloadSubdomain);
-            String fullyQualifiedEndpointName = domainNameProvider.getFullyQualifiedEndpointName(endpointName, environmentName, workloadSubdomain);
+            String commonName = getDomainNameProvider().getCommonName(endpointName, environmentName, workloadSubdomain);
+            String fullyQualifiedEndpointName = getDomainNameProvider().getFullyQualifiedEndpointName(endpointName, environmentName, workloadSubdomain);
             List<String> subjectAlternativeNames = List.of(commonName, fullyQualifiedEndpointName);
             LOGGER.info("Creating certificate with common name:{} and SANs: {}", commonName, String.join(",", subjectAlternativeNames));
             PKCS10CertificationRequest csr = PkiUtil.csr(keyPair, commonName, subjectAlternativeNames);
-            List<String> certs = certificateCreationService.create(userCrn, accountId, endpointName, environmentName, csr);
+            List<String> certs = getCertificateCreationService().create(userCrn, accountId, endpointName, environmentName, csr);
             securityConfig.setUserFacingCert(String.join("", certs));
             securityConfigService.save(securityConfig);
             result = true;
@@ -186,11 +158,5 @@ public class GatewayPublicEndpointManagementService {
             clusterService.save(cluster);
             LOGGER.info("The '{}' domain name has been generated, registered through PEM service and saved for the cluster.", fqdn);
         }
-    }
-
-    private String getWorkloadSubdomain(String actorCrn) {
-        Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
-        UserManagementProto.Account account = grpcUmsClient.getAccountDetails(actorCrn, Crn.safeFromString(actorCrn).getAccountId(), requestIdOptional);
-        return account.getWorkloadSubdomain();
     }
 }
