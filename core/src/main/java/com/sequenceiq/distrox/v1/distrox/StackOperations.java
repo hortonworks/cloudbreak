@@ -273,11 +273,11 @@ public class StackOperations {
         }
     }
 
-    public void deleteWithKerberos(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
+    public void deleteWithKerberos(@NotNull StackAccessDto stackAccessDto, Long workspaceId, boolean forced) {
         if (isNotEmpty(stackAccessDto.getName())) {
-            stackCommonService.deleteWithKerberosByNameInWorkspace(stackAccessDto.getName(), workspaceId);
+            stackCommonService.deleteWithKerberosByNameInWorkspace(stackAccessDto.getName(), workspaceId, forced);
         } else {
-            stackCommonService.deleteWithKerberosByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId);
+            stackCommonService.deleteWithKerberosByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, forced);
         }
     }
 

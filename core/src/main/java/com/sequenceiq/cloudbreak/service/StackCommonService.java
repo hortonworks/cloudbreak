@@ -231,18 +231,18 @@ public class StackCommonService {
         }
     }
 
-    public void deleteWithKerberosByNameInWorkspace(String name, Long workspaceId) {
+    public void deleteWithKerberosByNameInWorkspace(String name, Long workspaceId, boolean forced) {
         checkUserPermission();
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         MDCBuilder.buildMdcContext(stack);
-        clusterService.delete(stack.getId());
+        clusterService.delete(stack.getId(), forced);
     }
 
-    public void deleteWithKerberosByCrnInWorkspace(String crn, Long workspaceId) {
+    public void deleteWithKerberosByCrnInWorkspace(String crn, Long workspaceId, boolean forced) {
         checkUserPermission();
         Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
-        clusterService.delete(stack.getId());
+        clusterService.delete(stack.getId(), forced);
     }
 
     public void repairClusterByName(Long workspaceId, String name, ClusterRepairV4Request clusterRepairRequest) {

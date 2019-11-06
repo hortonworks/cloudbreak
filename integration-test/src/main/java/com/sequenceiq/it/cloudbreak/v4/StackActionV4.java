@@ -90,7 +90,7 @@ public class StackActionV4 {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" delete: " + stackTestDto.getName());
         client.getCloudbreakClient().stackV4Endpoint()
-                .deleteWithKerberos(workspaceId, stackTestDto.getName());
+                .deleteWithKerberos(workspaceId, stackTestDto.getName(), false);
     }
 
     public static void determineNetworkAwsFromDatalakeStack(IntegrationTestContext integrationTestContext, Entity entity) {

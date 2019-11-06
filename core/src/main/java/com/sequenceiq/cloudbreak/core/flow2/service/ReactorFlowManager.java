@@ -240,11 +240,11 @@ public class ReactorFlowManager {
         notifyWithoutCheck(stackId, selector, new StackEvent(selector, stackId));
     }
 
-    public void triggerClusterTermination(Stack stack) {
+    public void triggerClusterTermination(Stack stack, boolean forced) {
         Long stackId = stack.getId();
         boolean secure = kerberosConfigService.isKerberosConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName());
         String selector = secure ? FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT : FlowChainTriggers.TERMINATION_TRIGGER_EVENT;
-        notify(stackId, selector, new TerminationEvent(selector, stackId, false));
+        notify(stackId, selector, new TerminationEvent(selector, stackId, forced));
         cancelRunningFlows(stackId);
     }
 
