@@ -48,8 +48,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesReq
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
-import com.sequenceiq.cloudbreak.service.gateway.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -85,10 +85,10 @@ public class StackUpscaleActions {
     private StackService stackService;
 
     @Inject
-    private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
+    private StackScalabilityCondition stackScalabilityCondition;
 
     @Inject
-    private StackScalabilityCondition stackScalabilityCondition;
+    private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
     @Bean(name = "UPSCALE_PREVALIDATION_STATE")
     public Action<?, ?> prevalidate() {
@@ -266,8 +266,14 @@ public class StackUpscaleActions {
         return new AbstractStackUpscaleAction<>(ExtendHostMetadataResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, ExtendHostMetadataResult payload, Map<Object, Object> variables) {
-                stackUpscaleService.finishExtendHostMetadata(context.getStack());
-                getMetricService().incrementMetricCounter(MetricType.STACK_UPSCALE_SUCCESSFUL, context.getStack());
+                final Stack stack = context.getStack();
+                stackUpscaleService.finishExtendHostMetadata(stack);
+                final Set<String> newAddresses = payload.getRequest().getUpscaleCandidateAddresses();
+                final Map<String, String> newAddressesByFqdn = stack.getNotDeletedInstanceMetaDataSet().stream()
+                        .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
+                        .collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, InstanceMetaData::getPublicIpWrapper));
+                clusterPublicEndpointManagementService.upscale(stack, newAddressesByFqdn);
+                getMetricService().incrementMetricCounter(MetricType.STACK_UPSCALE_SUCCESSFUL, stack);
                 sendEvent(context);
             }
 

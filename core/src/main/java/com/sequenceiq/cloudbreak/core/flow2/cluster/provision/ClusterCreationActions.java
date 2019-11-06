@@ -97,6 +97,7 @@ public class ClusterCreationActions {
         return new AbstractClusterAction<>(HostMetadataSetupSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
+//                clusterCreationService.generateCertAndDnsEntryForGateway(context.getStack());
                 sendEvent(context);
             }
 

@@ -18,9 +18,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
-import com.sequenceiq.cloudbreak.service.gateway.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 
 @Service
@@ -46,7 +46,7 @@ public class StackTerminationService {
     private DatalakeResourcesService datalakeResourcesService;
 
     @Inject
-    private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
+    private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
     public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload, Boolean forcedTermination) {
         LOGGER.debug("Terminate stack result: {}", payload);
@@ -79,6 +79,6 @@ public class StackTerminationService {
     }
 
     public void deleteDnsEntry(Stack stack) {
-        gatewayPublicEndpointManagementService.deleteDnsEntry(stack, null);
+        clusterPublicEndpointManagementService.terminate(stack);
     }
 }
