@@ -51,7 +51,7 @@ public class StackTerminationService {
     public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload, Boolean forcedTermination) {
         LOGGER.debug("Terminate stack result: {}", payload);
         Stack stack = context.getStack();
-        terminationService.finalizeTermination(stack.getId(), true);
+        terminationService.finalizeTermination(stack.getId(), forcedTermination);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DELETE_COMPLETED, DELETE_COMPLETED.name());
         clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_SUCCESSFUL, stack);

@@ -3,19 +3,16 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -32,7 +29,6 @@ import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaOperationFailedException
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 
 @Service
 public class TerminationService {
@@ -66,20 +62,10 @@ public class TerminationService {
     private DatalakeResourcesService datalakeResourcesService;
 
     @Inject
-    @Qualifier("cloudbreakListeningScheduledExecutorService")
-    private ExecutorService executorService;
-
-    @Inject
-    private FreeIpaV1Endpoint freeIpaV1Endpoint;
-
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+    private FreeIpaCleanupService freeIpaCleanupService;
 
     @Inject
     private Clock clock;
-
-    @Inject
-    private FreeIpaCleanupService freeIpaCleanupService;
 
     public void finalizeTermination(Long stackId, boolean force) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
