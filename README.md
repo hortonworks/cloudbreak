@@ -322,6 +322,7 @@ To run the Environment service from the command line, run the following Gradle c
 
 ```
 ./gradlew :environment:bootRun -PjvmArgs="\
+-Denvironment.cloudbreak.url=http://localhost:8080 \
 -Dvault.root.token=<VAULT_ROOT_TOKEN> \
 -Dspring.config.location=$(pwd)/environment/src/main/resources/application.yml,$(pwd)/environment/build/resources/main/application.properties"
 ```
