@@ -24,7 +24,7 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r5.2xlarge",
+          "instanceType": "r5.4xlarge",
           "rootVolume": {
             "size": 50
           }
@@ -86,7 +86,7 @@
         "template": {
           "attachedVolumes": [
             {
-              "count": 1,
+              "count": 2,
               "size": 300,
               "type": "ephemeral"
             }
@@ -96,7 +96,7 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r5d.2xlarge",
+          "instanceType": "r5d.4xlarge",
           "rootVolume": {
             "size": 50
           }
