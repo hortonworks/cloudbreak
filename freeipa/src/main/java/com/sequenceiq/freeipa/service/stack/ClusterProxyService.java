@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClientCertificate;
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
@@ -38,6 +37,8 @@ public class ClusterProxyService {
     private static final Boolean USE_TUNNEL = true;
 
     private static final String GATEWAY_SERVICE_TYPE = "GATEWAY";
+
+    public static final String FREEIPA_SERVICE_NAME = "freeipa";
 
     @Inject
     private StackService stackService;
@@ -70,7 +71,7 @@ public class ClusterProxyService {
 
     private Optional<ConfigRegistrationResponse> registerFreeIpa(Stack stack) {
 
-        if (!fmsClusterProxyEnablement.isEnabled(stack)) {
+        if (!fmsClusterProxyEnablement.isEnabled()) {
             LOGGER.debug("Cluster Proxy integration disabled. Skipping registering FreeIpa [{}]", stack);
             return Optional.empty();
         }
@@ -107,7 +108,7 @@ public class ClusterProxyService {
     }
 
     private void deregisterFreeIpa(Stack stack) {
-        if (!fmsClusterProxyEnablement.isEnabled(stack)) {
+        if (!fmsClusterProxyEnablement.isEnabled()) {
             LOGGER.debug("Cluster Proxy integration disabled. Skipping deregistering FreeIpa [{}]", stack);
             return;
         }
@@ -130,7 +131,7 @@ public class ClusterProxyService {
     }
 
     private ClusterServiceConfig createServiceConfig(Stack stack, HttpClientConfig httpClientConfig, GatewaySecreVaultRef gatewaySecretVaultRef) {
-        return new ClusterServiceConfig(ClusterProxyConfiguration.FREEIPA_SERVICE_NAME,
+        return new ClusterServiceConfig(FREEIPA_SERVICE_NAME,
                 List.of(httpClientConfig.getApiAddress()),
                 List.of(),
                 new ClientCertificate(gatewaySecretVaultRef.keyRef, gatewaySecretVaultRef.secretRef),
@@ -147,7 +148,7 @@ public class ClusterProxyService {
 
         Tunnel tunnel = new Tunnel(tunnelKey, GATEWAY_SERVICE_TYPE, tunnelHost, tunnelPort);
 
-        return new ClusterServiceConfig(ClusterProxyConfiguration.FREEIPA_SERVICE_NAME,
+        return new ClusterServiceConfig(FREEIPA_SERVICE_NAME,
                 List.of(httpClientConfig.getApiAddress()),
                 List.of(),
                 new ClientCertificate(gatewaySecretVaultRef.keyRef, gatewaySecretVaultRef.secretRef),

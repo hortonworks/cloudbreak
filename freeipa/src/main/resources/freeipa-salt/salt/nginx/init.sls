@@ -2,6 +2,7 @@
   file.managed:
     - makedirs: True
     - source: salt://nginx/conf/ssl.conf
+    - template: jinja
 
 /etc/nginx/sites-enabled/ssl-locations.d/freeipa.conf:
   file.managed:

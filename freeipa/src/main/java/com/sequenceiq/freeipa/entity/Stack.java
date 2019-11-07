@@ -169,8 +169,8 @@ public class Stack {
         this.gatewayport = gatewayport;
     }
 
-    public Boolean getUseCcm() {
-        return useCcm;
+    public boolean getUseCcm() {
+        return Boolean.TRUE.equals(useCcm);
     }
 
     public void setUseCcm(Boolean useCcm) {

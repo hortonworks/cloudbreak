@@ -105,7 +105,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final String ALL_RIGHTS_AND_RESOURCES = "*";
 
-    private static final String NO_TUNNEL_PROVISIONING = "NO_TUNNEL_PROVISIONING";
+    private static final String REVERSE_SSH_TUNNEL = "CDP_REVERSE_SSH_TUNNEL";
 
     private static final String CDP_AZURE = "CDP_AZURE";
 
@@ -317,7 +317,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                         .setAccount(UserManagementProto.Account.newBuilder()
                                 .setClouderaManagerLicenseKey(cbLicense)
                                 .setWorkloadSubdomain(ACCOUNT_SUBDOMAIN)
-                                .addEntitlements(createEntitlement(NO_TUNNEL_PROVISIONING))
+                                .addEntitlements(createEntitlement(REVERSE_SSH_TUNNEL))
                                 .addEntitlements(createEntitlement(CDP_AZURE))
                                 .addEntitlements(createEntitlement(CDP_AUTOMATIC_USERSYNC_POLLER))
                                 .build())

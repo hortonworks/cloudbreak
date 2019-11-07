@@ -81,7 +81,7 @@ public class TlsSecurityService {
     }
 
     public GatewayConfig buildGatewayConfig(Long stackId, InstanceMetaData gatewayInstance, Integer gatewayPort,
-            SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled, Boolean useCcm) {
+            SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled, boolean useCcm) {
         SecurityConfig securityConfig = securityConfigRepository.findOneByStackId(stackId);
         String connectionIp = getGatewayIp(securityConfig, gatewayInstance);
         HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp, gatewayInstance);

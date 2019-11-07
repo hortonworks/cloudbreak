@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ClusterProxyConfiguration {
 
-    public static final String FREEIPA_SERVICE_NAME = "freeipa";
-
     @Value("${clusterProxy.enabled:}")
     private boolean clusterProxyIntegrationEnabled;
 

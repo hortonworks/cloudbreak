@@ -7,6 +7,7 @@ import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.ssl.SSLContexts;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
@@ -38,10 +39,15 @@ public class RestClientUtil {
     }
 
     public static Client createClient(String serverCert, String clientCert, String clientKey, boolean debug) throws Exception {
-        SSLContext sslContext = SSLContexts.custom()
-                .loadTrustMaterial(KeyStoreUtil.createTrustStore(serverCert), null)
-                .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientCert, clientKey), "consul".toCharArray())
-                .build();
+        SSLContext sslContext;
+        if (StringUtils.isNoneBlank(serverCert, clientCert, clientKey)) {
+            sslContext = SSLContexts.custom()
+                    .loadTrustMaterial(KeyStoreUtil.createTrustStore(serverCert), null)
+                    .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientCert, clientKey), "consul".toCharArray())
+                    .build();
+        } else {
+            sslContext = CertificateTrustManager.sslContext();
+        }
         return createClient(sslContext, debug);
     }
 

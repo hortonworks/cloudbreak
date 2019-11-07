@@ -1,19 +1,20 @@
 package com.sequenceiq.freeipa.service.freeipa;
 
+import static com.sequenceiq.freeipa.service.stack.ClusterProxyService.FREEIPA_SERVICE_NAME;
+
 import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.googlecode.jsonrpc4j.JsonRpcClient;
-import com.sequenceiq.freeipa.client.ClusterProxyErrorRpcListener;
-import com.sequenceiq.freeipa.service.config.FmsClusterProxyEnablement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.googlecode.jsonrpc4j.JsonRpcClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.freeipa.client.ClusterProxyErrorRpcListener;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientBuilder;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -21,6 +22,7 @@ import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
+import com.sequenceiq.freeipa.service.config.FmsClusterProxyEnablement;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -30,7 +32,7 @@ public class FreeIpaClientFactory {
 
     private static final String ADMIN_USER = "admin";
 
-    private static final Map<String, String> ADDITIONAL_CLUSTER_PROXY_HEADERS =  Map.of("Proxy-Ignore-Auth", "true");
+    private static final Map<String, String> ADDITIONAL_CLUSTER_PROXY_HEADERS = Map.of("Proxy-Ignore-Auth", "true");
 
     private static final JsonRpcClient.RequestListener CLUSTER_PROXY_ERROR_LISTENER = new ClusterProxyErrorRpcListener();
 
@@ -66,14 +68,14 @@ public class FreeIpaClientFactory {
     }
 
     private String toClusterProxyBasepath(String freeIpaClusterCrn) {
-        return String.format("/cluster-proxy/proxy/%s/%s/ipa", freeIpaClusterCrn, ClusterProxyConfiguration.FREEIPA_SERVICE_NAME);
+        return String.format("/cluster-proxy/proxy/%s/%s/ipa", freeIpaClusterCrn, FREEIPA_SERVICE_NAME);
     }
 
     public FreeIpaClient getFreeIpaClientForStack(Stack stack) throws FreeIpaClientException {
         LOGGER.debug("Creating FreeIpaClient for stack {}", stack.getResourceCrn());
 
         try {
-            if (fmsClusterProxyEnablement.isEnabled(stack) && Boolean.TRUE.equals(stack.getClusterProxyRegistered())) {
+            if (fmsClusterProxyEnablement.isEnabled() && Boolean.TRUE.equals(stack.getClusterProxyRegistered())) {
                 HttpClientConfig httpClientConfig = new HttpClientConfig(clusterProxyConfiguration.getClusterProxyHost());
                 FreeIpa freeIpa = freeIpaService.findByStack(stack);
                 String clusterProxyPath = toClusterProxyBasepath(stack.getResourceCrn());

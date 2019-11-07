@@ -333,8 +333,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         this.gatewayPort = gatewayPort;
     }
 
-    public Boolean getUseCcm() {
-        return useCcm;
+    public boolean getUseCcm() {
+        return Boolean.TRUE.equals(useCcm);
     }
 
     public void setUseCcm(Boolean useCcm) {

@@ -12,8 +12,6 @@ import java.util.Map;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
-import com.google.common.collect.ImmutableMap;
-import com.googlecode.jsonrpc4j.JsonRpcClient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.client.CookieStore;
@@ -38,7 +36,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
+import com.google.common.collect.ImmutableMap;
+import com.googlecode.jsonrpc4j.JsonRpcClient;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
+import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.freeipa.client.auth.InvalidPasswordException;
 import com.sequenceiq.freeipa.client.auth.InvalidUserOrRealmException;
@@ -56,7 +57,7 @@ public class FreeIpaClientBuilder {
 
     private static final int READ_TIMEOUT_MILLIS = 60 * 1000 * 5;
 
-    private static final String DEFAULT_BASE_PATH  = "/ipa";
+    private static final String DEFAULT_BASE_PATH = "/ipa";
 
     private final PoolingHttpClientConnectionManager connectionManager;
 
@@ -79,7 +80,7 @@ public class FreeIpaClientBuilder {
     private Map<String, String> additionalHeaders;
 
     public FreeIpaClientBuilder(String user, String pass, String realm, HttpClientConfig clientConfig, int port, String basePath,
-                                Map<String, String> additionalHeaders, JsonRpcClient.RequestListener rpcRequestListener) throws Exception {
+            Map<String, String> additionalHeaders, JsonRpcClient.RequestListener rpcRequestListener) throws Exception {
         this.user = user;
         this.pass = pass;
         this.realm = realm;
@@ -88,7 +89,7 @@ public class FreeIpaClientBuilder {
 
         if (clientConfig.hasSSLConfigs()) {
             this.sslContext =
-                setupSSLContext(clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
+                    setupSSLContext(clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
             RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.create();
             SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(sslContext, hostnameVerifier());
             registryBuilder.register("https", socketFactory);
@@ -108,7 +109,7 @@ public class FreeIpaClientBuilder {
     }
 
     public FreeIpaClientBuilder(String user, String pass, String realm,
-                                HttpClientConfig clientConfig, int port) throws Exception {
+            HttpClientConfig clientConfig, int port) throws Exception {
         this(user, pass, realm, clientConfig, port, DEFAULT_BASE_PATH, Map.of(), null);
     }
 
@@ -116,9 +117,9 @@ public class FreeIpaClientBuilder {
         String sessionCookie = connect(user, pass, clientConfig.getApiAddress(), port);
 
         Map<String, String> headers = ImmutableMap.<String, String>builder()
-            .put("Cookie", "ipa_session=" + sessionCookie)
-            .putAll(additionalHeaders)
-            .build();
+                .put("Cookie", "ipa_session=" + sessionCookie)
+                .putAll(additionalHeaders)
+                .build();
 
         JsonRpcHttpClient jsonRpcHttpClient = new JsonRpcHttpClient(ObjectMapperBuilder.getObjectMapper(),
                 getIpaUrl(clientConfig.getApiAddress(), port, basePath, "/session/json"), headers);
@@ -184,10 +185,15 @@ public class FreeIpaClientBuilder {
 
     private SSLContext setupSSLContext(String clientCert, String clientKey, String serverCert) throws Exception {
         Security.addProvider(new BouncyCastleProvider());
-        SSLContext context = SSLContexts.custom()
-                .loadTrustMaterial(KeystoreUtils.createTrustStore(serverCert), null)
-                .loadKeyMaterial(KeystoreUtils.createKeyStore(clientCert, clientKey), "consul".toCharArray())
-                .build();
+        SSLContext context;
+        if (StringUtils.isNoneBlank(clientCert, clientKey, serverCert)) {
+            context = SSLContexts.custom()
+                    .loadTrustMaterial(KeystoreUtils.createTrustStore(serverCert), null)
+                    .loadKeyMaterial(KeystoreUtils.createKeyStore(clientCert, clientKey), "consul".toCharArray())
+                    .build();
+        } else {
+            context = CertificateTrustManager.sslContext();
+        }
         return context;
     }
 

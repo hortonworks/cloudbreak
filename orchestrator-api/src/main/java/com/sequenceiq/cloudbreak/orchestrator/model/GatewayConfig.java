@@ -51,18 +51,18 @@ public class GatewayConfig {
 
     private final String userFacingKey;
 
-    private Boolean useCcm;
+    private boolean useCcm;
 
     public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress,
             Integer gatewayPort, String instanceId, Boolean knoxGatewayEnabled) {
         this(connectionAddress, publicAddress, privateAddress, null, gatewayPort,
-                instanceId, null, null, null, null, null, null, knoxGatewayEnabled, true, null, null, null, null, null);
+                instanceId, null, null, null, null, null, null, knoxGatewayEnabled, true, null, null, null, null, false);
     }
 
     public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress, String hostname,
             Integer gatewayPort, String instanceId, String serverCert, String clientCert, String clientKey, String saltPassword, String saltBootPassword,
             String signatureKey, Boolean knoxGatewayEnabled, boolean primary, String saltSignPrivateKey, String saltSignPublicKey,
-            String userFacingCert, String userFacingKey, Boolean useCcm) {
+            String userFacingCert, String userFacingKey, boolean useCcm) {
         this.connectionAddress = connectionAddress;
         this.publicAddress = publicAddress;
         this.privateAddress = privateAddress;
@@ -171,7 +171,7 @@ public class GatewayConfig {
         return userFacingKey;
     }
 
-    public Boolean getUseCcm() {
+    public boolean getUseCcm() {
         return useCcm;
     }
 
@@ -188,7 +188,7 @@ public class GatewayConfig {
      */
     public GatewayConfig getGatewayConfig(ServiceEndpointFinder serviceEndpointFinder)
             throws ServiceEndpointLookupException, InterruptedException {
-        return new GatewayConfig(this, getServiceEndpoint(serviceEndpointFinder, !Boolean.TRUE.equals(getUseCcm())));
+        return new GatewayConfig(this, getServiceEndpoint(serviceEndpointFinder, !useCcm));
     }
 
     /**

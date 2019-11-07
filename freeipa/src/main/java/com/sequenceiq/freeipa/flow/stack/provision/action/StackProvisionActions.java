@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -193,7 +194,12 @@ public class StackProvisionActions {
                 Stack stack = stackProvisionService.setupMetadata(context, payload);
                 StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(),
                         context.getCloudCredential(), context.getCloudStack());
-                sendEvent(newContext);
+                if (newContext.getStack().getUseCcm()) {
+                    GetTlsInfoResult getTlsInfoResult = new GetTlsInfoResult(context.getCloudContext().getId(), new TlsInfo(true));
+                    sendEvent(newContext, getTlsInfoResult.selector(), getTlsInfoResult);
+                } else {
+                    sendEvent(newContext);
+                }
             }
 
             @Override
@@ -220,7 +226,9 @@ public class StackProvisionActions {
         return new AbstractStackProvisionAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
-                stackProvisionService.setupTls(context);
+                if (!context.getStack().getUseCcm()) {
+                    stackProvisionService.setupTls(context);
+                }
                 sendEvent(context, new StackEvent(StackProvisionEvent.TLS_SETUP_FINISHED_EVENT.event(), context.getStack().getId()));
             }
         };

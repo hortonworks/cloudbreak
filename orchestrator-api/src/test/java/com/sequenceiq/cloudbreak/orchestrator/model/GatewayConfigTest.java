@@ -74,7 +74,7 @@ public class GatewayConfigTest {
             String saltSignPublicKey = RandomStringUtils.random(10);
             return new GatewayConfig(connectionAddress, publicAddress, privateAddress, hostname, gatewayPort, instanceId,
                     serverCert, clientCert, clientKey, saltPassword, saltBootPassword, signatureKey, knoxGatewayEnabled,
-                    primary, saltSignPrivateKey, saltSignPublicKey, null, null, null);
+                    primary, saltSignPrivateKey, saltSignPublicKey, null, null, false);
         } else {
             return new GatewayConfig(connectionAddress, publicAddress, privateAddress, gatewayPort, instanceId, knoxGatewayEnabled);
         }

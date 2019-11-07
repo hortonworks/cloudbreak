@@ -72,6 +72,7 @@ base:
     - gateway.init
     - gateway.ldap
     - gateway.settings
+    - ccm
 
   'roles:ambari_server*':
     - match: grain
@@ -83,6 +84,7 @@ base:
     - gateway.ldap
     - gateway.settings
     - jdbc.connectors
+    - ccm
 
   'roles:knox_gateway':
     - match: grain
