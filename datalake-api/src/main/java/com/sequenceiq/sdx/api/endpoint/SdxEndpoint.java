@@ -100,11 +100,13 @@ public interface SdxEndpoint {
 
     @POST
     @Path("{name}/manual_repair")
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "repairs an sdxNode in the specified hostgroup", nickname = "repairSdxNode")
     void repairCluster(@PathParam("name") String name, SdxRepairRequest clusterRepairRequest);
 
     @POST
     @Path("/crn/{crn}/manual_repair")
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "repairs an sdxNode in the specified hostgroup by crn", nickname = "repairSdxNodeByCrn")
     void repairClusterByCrn(@PathParam("crn") String crn, SdxRepairRequest clusterRepairRequest);
 
@@ -122,11 +124,13 @@ public interface SdxEndpoint {
 
     @POST
     @Path("{name}/upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "upgrades the datalake cluster to the latest images", nickname = "upgradeDatalakeCluster")
     void upgradeClusterByName(@PathParam("name") String name);
 
     @POST
     @Path("/crn/{crn}/upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "upgrades the datalake cluster to the latest images", nickname = "upgradeDatalakeClusterByCrn")
     void upgradeClusterByCrn(@PathParam("crn") String crn);
 
@@ -138,11 +142,13 @@ public interface SdxEndpoint {
 
     @POST
     @Path("{name}/sync")
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "sync SDX cluster by name", produces = MediaType.APPLICATION_JSON, nickname = "syncSdx")
     void sync(@PathParam("name") String name);
 
     @POST
     @Path("/crn/{crn}/sync")
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "sync SDX cluster by crn", produces = MediaType.APPLICATION_JSON, nickname = "syncSdxByCrn")
     void syncByCrn(@PathParam("crn") String crn);
 
