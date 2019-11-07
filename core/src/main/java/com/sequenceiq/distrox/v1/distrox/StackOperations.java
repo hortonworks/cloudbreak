@@ -229,7 +229,11 @@ public class StackOperations {
     }
 
     public void putStart(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
-        stackCommonService.putStartInWorkspace(stackAccessDto.getName(), workspaceId);
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stackCommonService.putStartInWorkspaceByName(stackAccessDto.getName(), workspaceId);
+        } else {
+            stackCommonService.putStartInWorkspaceByCrn(stackAccessDto.getCrn(), workspaceId);
+        }
     }
 
     public void putScaling(@NotNull StackAccessDto stackAccessDto, Long workspaceId, @Valid StackScaleV4Request updateRequest) {

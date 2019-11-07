@@ -2,9 +2,7 @@ package com.sequenceiq.environment.environment.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -18,12 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResult;
-import com.dyngr.core.AttemptResults;
-import com.dyngr.core.AttemptState;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 
 @Service
@@ -39,8 +32,11 @@ public class DistroxService {
 
     private final DistroXV1Endpoint distroXV1Endpoint;
 
-    public DistroxService(DistroXV1Endpoint distroXV1Endpoint) {
+    private final PollerCollection pollerCollection;
+
+    public DistroxService(DistroXV1Endpoint distroXV1Endpoint, PollerCollection pollerCollection) {
         this.distroXV1Endpoint = distroXV1Endpoint;
+        this.pollerCollection = pollerCollection;
     }
 
     public Collection<StackViewV4Response> getAttachedDistroXClusters(String environmentName, String environmentCrn) {
@@ -54,127 +50,38 @@ public class DistroxService {
         }
     }
 
-    public void stopAttachedDistrox(String envName) {
+    public void stopAttachedDistrox(Long envId, String envName) {
         Collection<StackViewV4Response> attachedDistroXClusters = getAttachedDistroXClusters(envName, null);
-        List<String> pollingCrn = new ArrayList<>();
-        attachedDistroXClusters.forEach(d -> {
-            if (!d.getStatus().isStopState()) {
-                distroXV1Endpoint.putStopByCrn(d.getCrn());
-            }
-            pollingCrn.add(d.getCrn());
-        });
-
-        List<String> remaining = new ArrayList<>();
-
+        List<String> pollingCrn = mapStackToCrn(attachedDistroXClusters);
+        distroXV1Endpoint.putStopByCrns(pollingCrn);
         Polling.stopAfterAttempt(attempt)
                 .stopIfException(true)
                 .waitPeriodly(sleeptime, TimeUnit.SECONDS)
                 .run(() -> {
-                    remaining.clear();
-                    List<AttemptResult<Void>> results = pollingCrn.stream()
-                            .map(crn -> {
-                                StackV4Response stack = distroXV1Endpoint.getByCrn(crn, Collections.emptySet());
-                                if (stackAndClusterStopped(stack, stack.getCluster())) {
-                                    return AttemptResults.<Void>finishWith(null);
-                                } else {
-                                    remaining.add(crn);
-                                    return checkStopStatus(stack);
-                                }
-                            }).collect(Collectors.toList());
-
-                    Optional<AttemptResult<Void>> error = results.stream().filter(it -> it.getState() == AttemptState.BREAK).findFirst();
-                    if (error.isPresent()) {
-                        return error.get();
-                    }
-                    long count = results.stream().filter(it -> it.getState() == AttemptState.CONTINUE).count();
-                    if (count > 0) {
-                        return AttemptResults.justContinue();
-                    }
+                    List<String> remaining = new ArrayList<>();
+                    List<AttemptResult<Void>> results = pollerCollection.stopDistroXPoller(pollingCrn, remaining, envId);
                     pollingCrn.retainAll(remaining);
-                    return AttemptResults.finishWith(null);
+                    return pollerCollection.evaluateResult(results);
                 });
-
     }
 
-    public void startAttachedDistrox(String envName) {
+    public void startAttachedDistrox(Long envId, String envName) {
         Collection<StackViewV4Response> attachedDistroXClusters = getAttachedDistroXClusters(envName, null);
-        List<String> pollingCrn = new ArrayList<>();
-        attachedDistroXClusters.forEach(d -> {
-            if (!d.getStatus().isStartState()) {
-                distroXV1Endpoint.putStartByName(d.getName());
-            }
-            pollingCrn.add(d.getCrn());
-        });
-
-        List<String> remaining = new ArrayList<>();
-
+        List<String> pollingCrn = mapStackToCrn(attachedDistroXClusters);
+        distroXV1Endpoint.putStartByCrns(pollingCrn);
         Polling.stopAfterAttempt(attempt)
                 .stopIfException(true)
                 .waitPeriodly(sleeptime, TimeUnit.SECONDS)
                 .run(() -> {
-                    remaining.clear();
-                    List<AttemptResult<Void>> results = pollingCrn.stream()
-                            .map(crn -> {
-                                StackV4Response stack = distroXV1Endpoint.getByCrn(crn, Collections.emptySet());
-                                if (stackAndClusterAvailable(stack, stack.getCluster())) {
-                                    return AttemptResults.<Void>finishWith(null);
-                                } else {
-                                    remaining.add(crn);
-                                    return checkStartStatus(stack);
-                                }
-                            }).collect(Collectors.toList());
-
-                    Optional<AttemptResult<Void>> error = results.stream().filter(it -> it.getState() == AttemptState.BREAK).findFirst();
-                    if (error.isPresent()) {
-                        return error.get();
-                    }
-                    long count = results.stream().filter(it -> it.getState() == AttemptState.CONTINUE).count();
-                    if (count > 0) {
-                        pollingCrn.retainAll(remaining);
-                        return AttemptResults.justContinue();
-                    }
-                    return AttemptResults.finishWith(null);
+                    List<String> remaining = new ArrayList<>();
+                    List<AttemptResult<Void>> results = pollerCollection.startDistroXPoller(pollingCrn, remaining, envId);
+                    pollingCrn.retainAll(remaining);
+                    return pollerCollection.evaluateResult(results);
                 });
 
     }
 
-    private AttemptResult<Void> checkStopStatus(StackV4Response stack) {
-        ClusterV4Response cluster = stack.getCluster();
-        if (Status.STOP_FAILED.equals(stack.getStatus())) {
-            LOGGER.info("Datahub stop failed for Datahub {} with status {}, reason", stack.getName(), stack.getStatus(), stack.getStatusReason());
-            return AttemptResults.breakFor("Datahub stop failed '" + stack.getName() + "', " + stack.getStatusReason());
-        } else if (cluster != null && Status.STOP_FAILED.equals(cluster.getStatus())) {
-            LOGGER.info("Cluster stop failed for Datahub {} status {}, reason", cluster.getName(), cluster.getStatus(), stack.getStatusReason());
-            return AttemptResults.breakFor("Datahub stop failed '" + stack.getName() + "', " + stack.getStatusReason());
-        } else {
-            return AttemptResults.justContinue();
-        }
-    }
-
-    private AttemptResult<Void> checkStartStatus(StackV4Response stack) {
-        ClusterV4Response cluster = stack.getCluster();
-        if (Status.START_FAILED.equals(stack.getStatus())) {
-            LOGGER.info("Stack start failed for Datahub {} with status {}, reason", stack.getName(), stack.getStatus(), stack.getStatusReason());
-            return AttemptResults.breakFor("Datahub start failed '" + stack.getName() + "', " + stack.getStatusReason());
-        } else if (cluster != null && Status.START_FAILED.equals(cluster.getStatus())) {
-            LOGGER.info("Cluster start failed for Datahub {} status {}, reason", cluster.getName(), cluster.getStatus(), stack.getStatusReason());
-            return AttemptResults.breakFor("Datahub start failed '" + stack.getName() + "', " + stack.getStatusReason());
-        } else {
-            return AttemptResults.justContinue();
-        }
-    }
-
-    private boolean stackAndClusterStopped(StackV4Response stackV4Response, ClusterV4Response cluster) {
-        return stackV4Response.getStatus().isStopped()
-                && cluster != null
-                && cluster.getStatus() != null
-                && cluster.getStatus().isStopped();
-    }
-
-    private boolean stackAndClusterAvailable(StackV4Response stackV4Response, ClusterV4Response cluster) {
-        return stackV4Response.getStatus().isAvailable()
-                && cluster != null
-                && cluster.getStatus() != null
-                && cluster.getStatus().isAvailable();
+    private ArrayList<String> mapStackToCrn(Collection<StackViewV4Response> attachedDistroXClusters) {
+        return attachedDistroXClusters.stream().map(StackViewV4Response::getCrn).collect(Collectors.toCollection(ArrayList::new));
     }
 }

@@ -1,7 +1,5 @@
 package com.sequenceiq.environment.environment.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -10,8 +8,6 @@ import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager
 
 @Service
 public class EnvironmentStopService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentStopService.class);
 
     private final EnvironmentReactorFlowManager reactorFlowManager;
 

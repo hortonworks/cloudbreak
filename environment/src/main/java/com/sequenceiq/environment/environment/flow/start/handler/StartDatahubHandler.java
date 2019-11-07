@@ -33,7 +33,7 @@ public class StartDatahubHandler extends EventSenderAwareHandler<EnvironmentDto>
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            distroxService.startAttachedDistrox(environmentDto.getName());
+            distroxService.startAttachedDistrox(environmentDto.getId(), environmentDto.getName());
             EnvStartEvent envStartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
                     .withSelector(EnvStartStateSelectors.FINISH_ENV_START_EVENT.selector())
                     .withResourceId(environmentDto.getId())

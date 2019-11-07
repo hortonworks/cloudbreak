@@ -163,6 +163,18 @@ public interface DistroXV1Endpoint {
     void putStopByCrn(@PathParam("crn") String crn);
 
     @PUT
+    @Path("name/stop")
+    @ApiOperation(value = STOP_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "stopDistroXV1ByNames")
+    void putStopByNames(@QueryParam("names") List<String> names);
+
+    @PUT
+    @Path("crn/stop")
+    @ApiOperation(value = STOP_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "stopDistroXV1ByCrns")
+    void putStopByCrns(@QueryParam("crns") List<String> crns);
+
+    @PUT
     @Path("name/{name}/start")
     @ApiOperation(value = START_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "startDistroXV1ByName")
@@ -173,6 +185,18 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = START_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "startDistroXV1ByCrn")
     void putStartByCrn(@PathParam("crn") String crn);
+
+    @PUT
+    @Path("name/start")
+    @ApiOperation(value = START_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "startDistroXV1ByNames")
+    void putStartByNames(@QueryParam("names") List<String> names);
+
+    @PUT
+    @Path("crn/start")
+    @ApiOperation(value = START_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "startDistroXV1ByCrns")
+    void putStartByCrns(@QueryParam("crns") List<String> crns);
 
     @PUT
     @Path("name/{name}/scaling")

@@ -34,6 +34,7 @@ dependencies {
   compile project(':datalake-api')
   compile project(':environment-api')
   compile project(':redbeams-api')
+  implementation     project(":freeipa-api")
 
   implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                          version: okhttpVersion
   implementation     group: 'com.google.code.gson',      name: 'gson',                            version: '2.6.2'

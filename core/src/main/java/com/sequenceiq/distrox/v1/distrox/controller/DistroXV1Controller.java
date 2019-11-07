@@ -228,6 +228,16 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
+    public void putStopByNames(List<String> names) {
+        names.forEach(this::putStopByName);
+    }
+
+    @Override
+    public void putStopByCrns(List<String> crns) {
+        crns.forEach(this::putStopByCrn);
+    }
+
+    @Override
     public void putStartByName(String name) {
         stackOperations.putStart(
                 StackAccessDto.builder().withName(name).build(),
@@ -241,6 +251,16 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
                 StackAccessDto.builder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId());
 
+    }
+
+    @Override
+    public void putStartByNames(List<String> names) {
+        names.forEach(this::putStartByName);
+    }
+
+    @Override
+    public void putStartByCrns(List<String> crns) {
+        crns.forEach(this::putStartByCrn);
     }
 
     @Override

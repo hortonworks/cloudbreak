@@ -33,7 +33,7 @@ public class StopFreeipaHandler extends EventSenderAwareHandler<EnvironmentDto> 
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            freeipaService.stopAttachedFreeipa(environmentDto.getResourceCrn());
+            freeipaService.stopAttachedFreeipa(environmentDto.getId(), environmentDto.getResourceCrn());
             EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
                     .withSelector(EnvStopStateSelectors.FINISH_ENV_STOP_EVENT.selector())
                     .withResourceId(environmentDto.getId())

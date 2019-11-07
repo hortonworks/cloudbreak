@@ -3,9 +3,7 @@ package com.sequenceiq.environment.environment.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -17,11 +15,8 @@ import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResult;
-import com.dyngr.core.AttemptResults;
-import com.dyngr.core.AttemptState;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
-import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 @Service
 public class DatalakeService {
@@ -36,8 +31,11 @@ public class DatalakeService {
 
     private final SdxEndpoint sdxEndpoint;
 
-    public DatalakeService(SdxEndpoint sdxEndpoint) {
+    private final PollerCollection pollerCollection;
+
+    public DatalakeService(SdxEndpoint sdxEndpoint, PollerCollection pollerCollection) {
         this.sdxEndpoint = sdxEndpoint;
+        this.pollerCollection = pollerCollection;
     }
 
     public Collection<SdxClusterResponse> getAttachedDatalake(String environmentName) {
@@ -51,126 +49,41 @@ public class DatalakeService {
         }
     }
 
-    public void stopAttachedDatalake(String envName) {
+    public void stopAttachedDatalake(Long envId, String envName) {
         Collection<SdxClusterResponse> attachedDatalake = getAttachedDatalake(envName);
         List<String> pollingCrn = new ArrayList<>();
         attachedDatalake.forEach(d -> {
-            if (!isStopState(d.getStatus())) {
-                sdxEndpoint.stopByCrn(d.getCrn());
-            }
+            sdxEndpoint.stopByCrn(d.getCrn());
             pollingCrn.add(d.getCrn());
         });
-
-        List<String> remaining = new ArrayList<>();
 
         Polling.stopAfterAttempt(attempt)
                 .stopIfException(true)
                 .waitPeriodly(sleeptime, TimeUnit.SECONDS)
                 .run(() -> {
-                    remaining.clear();
-                    List<AttemptResult<Void>> results = pollingCrn.stream()
-                            .map(crn -> {
-                                SdxClusterResponse sdx = sdxEndpoint.getByCrn(crn);
-                                if (sdxStopped(sdx)) {
-                                    return AttemptResults.<Void>finishWith(null);
-                                } else {
-                                    remaining.add(crn);
-                                    return checkStopStatus(sdx);
-                                }
-                            }).collect(Collectors.toList());
-
-                    Optional<AttemptResult<Void>> error = results.stream().filter(it -> it.getState() == AttemptState.BREAK).findFirst();
-                    if (error.isPresent()) {
-                        return error.get();
-                    }
-                    long count = results.stream().filter(it -> it.getState() == AttemptState.CONTINUE).count();
-                    if (count > 0) {
-                        return AttemptResults.justContinue();
-                    }
+                    List<String> remaining = new ArrayList<>();
+                    List<AttemptResult<Void>> results = pollerCollection.stopDatalakePoller(pollingCrn, remaining, envId);
                     pollingCrn.retainAll(remaining);
-                    return AttemptResults.finishWith(null);
+                    return pollerCollection.evaluateResult(results);
                 });
-
     }
 
-    public void startAttachedDatalake(String envName) {
+    public void startAttachedDatalake(Long envId, String envName) {
         Collection<SdxClusterResponse> attachedDatalake = getAttachedDatalake(envName);
         List<String> pollingCrn = new ArrayList<>();
         attachedDatalake.forEach(d -> {
-            if (!isStartState(d.getStatus())) {
-                sdxEndpoint.startByCrn(d.getCrn());
-            }
+            sdxEndpoint.startByCrn(d.getCrn());
             pollingCrn.add(d.getCrn());
         });
-
-        List<String> remaining = new ArrayList<>();
-
         Polling.stopAfterAttempt(attempt)
                 .stopIfException(true)
                 .waitPeriodly(sleeptime, TimeUnit.SECONDS)
                 .run(() -> {
-                    remaining.clear();
-                    List<AttemptResult<Void>> results = pollingCrn.stream()
-                            .map(crn -> {
-                                SdxClusterResponse sdx = sdxEndpoint.getByCrn(crn);
-                                if (sdxStarted(sdx)) {
-                                    return AttemptResults.<Void>finishWith(null);
-                                } else {
-                                    remaining.add(crn);
-                                    return checkStartStatus(sdx);
-                                }
-                            }).collect(Collectors.toList());
-
-                    Optional<AttemptResult<Void>> error = results.stream().filter(it -> it.getState() == AttemptState.BREAK).findFirst();
-                    if (error.isPresent()) {
-                        return error.get();
-                    }
-                    long count = results.stream().filter(it -> it.getState() == AttemptState.CONTINUE).count();
-                    if (count > 0) {
-                        pollingCrn.retainAll(remaining);
-                        return AttemptResults.justContinue();
-                    }
-                    return AttemptResults.finishWith(null);
+                    List<String> remaining = new ArrayList<>();
+                    List<AttemptResult<Void>> results = pollerCollection.startDatalakePoller(pollingCrn, remaining, envId);
+                    pollingCrn.retainAll(remaining);
+                    return pollerCollection.evaluateResult(results);
                 });
 
-    }
-
-    private AttemptResult<Void> checkStopStatus(SdxClusterResponse sdx) {
-        if (sdx.getStatus() == SdxClusterStatusResponse.STOP_FAILED) {
-            LOGGER.info("SDX stop failed for '{}' with status {}, reason: {}", sdx.getName(), sdx.getStatus(), sdx.getStatusReason());
-            return AttemptResults.breakFor("SDX stop failed '" + sdx.getName() + "', " + sdx.getStatusReason());
-        } else {
-            return AttemptResults.justContinue();
-        }
-    }
-
-    private AttemptResult<Void> checkStartStatus(SdxClusterResponse sdx) {
-        if (sdx.getStatus() == SdxClusterStatusResponse.START_FAILED) {
-            LOGGER.info("SDX start failed for '{}' with status {}, reason: {}", sdx.getName(), sdx.getStatus(), sdx.getStatusReason());
-            return AttemptResults.breakFor("SDX start failed '" + sdx.getName() + "', " + sdx.getStatusReason());
-        } else {
-            return AttemptResults.justContinue();
-        }
-    }
-
-    private boolean sdxStopped(SdxClusterResponse sdx) {
-        return sdx.getStatus() == SdxClusterStatusResponse.STOPPED;
-    }
-
-    private boolean sdxStarted(SdxClusterResponse sdx) {
-        return sdx.getStatus() == SdxClusterStatusResponse.RUNNING;
-    }
-
-    private boolean isStopState(SdxClusterStatusResponse status) {
-        return SdxClusterStatusResponse.STOPPED.equals(status)
-                || SdxClusterStatusResponse.STOP_IN_PROGRESS.equals(status)
-                || SdxClusterStatusResponse.STOP_REQUESTED.equals(status);
-    }
-
-    private boolean isStartState(SdxClusterStatusResponse status) {
-        return SdxClusterStatusResponse.RUNNING.equals(status)
-                || SdxClusterStatusResponse.START_IN_PROGRESS.equals(status)
-                || SdxClusterStatusResponse.START_REQUESTED.equals(status)
-                || SdxClusterStatusResponse.START_FAILED.equals(status);
     }
 }

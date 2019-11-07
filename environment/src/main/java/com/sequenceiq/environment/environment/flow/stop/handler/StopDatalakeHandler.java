@@ -33,7 +33,7 @@ public class StopDatalakeHandler extends EventSenderAwareHandler<EnvironmentDto>
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            datalakeService.stopAttachedDatalake(environmentDto.getName());
+            datalakeService.stopAttachedDatalake(environmentDto.getId(), environmentDto.getName());
             EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
                     .withSelector(EnvStopStateSelectors.ENV_STOP_FREEIPA_EVENT.selector())
                     .withResourceId(environmentDto.getId())

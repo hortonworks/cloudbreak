@@ -27,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
@@ -72,7 +73,8 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public DistroXTestDtoBase distrox(DistroXTestDtoBase distrox) {
-        return distrox;
+        MockedTestContext testContext = (MockedTestContext) distrox.getTestContext();
+        return distrox.withGatewayPort(testContext.getSparkServer().getPort());
     }
 
     @Override
@@ -153,6 +155,12 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
+        return imageSettings.withImageId("f6e778fc-7f17-4535-9021-515351df3691")
+                .withImageCatalog(imageSettings.getTestContext().given(ImageSettingsTestDto.class).getName());
+    }
+
+    @Override
+    public DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings) {
         return imageSettings.withImageId("f6e778fc-7f17-4535-9021-515351df3691")
                 .withImageCatalog(imageSettings.getTestContext().given(ImageSettingsTestDto.class).getName());
     }

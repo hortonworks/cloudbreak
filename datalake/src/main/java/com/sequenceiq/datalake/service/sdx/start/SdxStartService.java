@@ -29,9 +29,11 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
+import com.sequenceiq.datalake.service.FreeipaService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Component
 public class SdxStartService {
@@ -53,11 +55,16 @@ public class SdxStartService {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+    @Inject
+    private FreeipaService freeipaService;
+
     public void triggerStartIfClusterNotRunning(SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
         if (sdxStatusService.getActualStatusForSdx(cluster).getStatus() == DatalakeStatusEnum.RUNNING) {
-            throw new BadRequestException("SDX is in running state, ignore it.");
+            LOGGER.info("SDX is in running state, start trigger is ignored.");
+            return;
         }
+        checkFreeipaRunning(cluster.getEnvCrn());
         sdxReactorFlowManager.triggerSdxStartFlow(cluster.getId());
     }
 
@@ -139,5 +146,13 @@ public class SdxStartService {
                 && cluster != null
                 && cluster.getStatus() != null
                 && cluster.getStatus().isAvailable();
+    }
+
+    private void checkFreeipaRunning(String envCrn) {
+        DescribeFreeIpaResponse freeipa = freeipaService.describe(envCrn);
+        if (freeipa != null && !freeipa.getStatus().isAvailable()) {
+            throw new BadRequestException("Freeipa should be in Available state but currently is " + freeipa.getStatus().name());
+        }
+
     }
 }

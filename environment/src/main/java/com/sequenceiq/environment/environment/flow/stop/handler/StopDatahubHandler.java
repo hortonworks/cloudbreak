@@ -33,7 +33,7 @@ public class StopDatahubHandler extends EventSenderAwareHandler<EnvironmentDto> 
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            distroxService.stopAttachedDistrox(environmentDto.getName());
+            distroxService.stopAttachedDistrox(environmentDto.getId(), environmentDto.getName());
             EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
                     .withSelector(EnvStopStateSelectors.ENV_STOP_DATALAKE_EVENT.selector())
                     .withResourceId(environmentDto.getId())

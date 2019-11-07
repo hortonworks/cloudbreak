@@ -33,7 +33,7 @@ public class StartDatalakeHandler extends EventSenderAwareHandler<EnvironmentDto
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            datalakeService.startAttachedDatalake(environmentDto.getName());
+            datalakeService.startAttachedDatalake(environmentDto.getId(), environmentDto.getName());
             EnvStartEvent envStartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
                     .withSelector(EnvStartStateSelectors.ENV_START_DATAHUB_EVENT.selector())
                     .withResourceId(environmentDto.getId())
