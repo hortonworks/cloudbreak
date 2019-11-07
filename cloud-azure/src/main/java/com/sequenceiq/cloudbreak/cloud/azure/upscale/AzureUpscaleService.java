@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTemplateDeploymentService;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureInstanceView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -68,6 +69,7 @@ public class AzureUpscaleService {
             for (Map.Entry<String, AzureDiskType> entry : storageAccounts.entrySet()) {
                 azureStorage.createStorage(client, entry.getKey(), entry.getValue(), resourceGroupName, region, isEncryptionNeeded(stack), stack.getTags());
             }
+            purgeExistingInstances(azureStackView);
             Deployment templateDeployment = azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView);
             LOGGER.info("Created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
             List<CloudResource> newInstances = azureUtils.getInstanceCloudResources(cloudContext, templateDeployment, scaledGroups);
@@ -88,6 +90,11 @@ public class AzureUpscaleService {
         } catch (Exception e) {
             throw new CloudConnectorException(String.format("Could not upscale: %s  ", stackName), e);
         }
+    }
+
+    private void purgeExistingInstances(AzureStackView azureStackView) {
+        azureStackView.getGroups().forEach((key, value) -> value.removeIf(AzureInstanceView::hasRealInstanceId));
+        azureStackView.getGroups().entrySet().removeIf(group -> group.getValue() == null || group.getValue().size() == 0);
     }
 
     private CloudResource getArmTemplate(List<CloudResource> resources, String stackName) {
