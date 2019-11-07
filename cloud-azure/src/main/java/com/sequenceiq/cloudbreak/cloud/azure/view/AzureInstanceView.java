@@ -61,6 +61,10 @@ public class AzureInstanceView {
         this.customImageId = customImageId;
     }
 
+    public boolean hasRealInstanceId() {
+        return instance.getInstanceId() != null;
+    }
+
     /**
      * Used in freemarker template.
      */
