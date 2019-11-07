@@ -21,7 +21,15 @@ public class BasicStackTests extends AbstractE2ETest {
     @Inject
     private StackTestClient stackTestClient;
 
-    @Test(dataProvider = TEST_CONTEXT, enabled = false)
+    @Override
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
+        createDefaultCredential(testContext);
+        createEnvironmentWithNetworkAndFreeIPA(testContext);
+        initializeDefaultBlueprints(testContext);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak",
             when = "a valid stack create request is sent AND the stack is stopped AND the stack is started",
