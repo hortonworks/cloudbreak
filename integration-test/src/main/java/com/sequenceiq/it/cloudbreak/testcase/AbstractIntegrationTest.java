@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -120,6 +121,9 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
+    @Value("${integrationtest.cleanup.purge:false}")
+    private boolean purge;
+
     @Inject
     private AzureCloudBlobUtil azureCloudBlobUtil;
 
@@ -130,11 +134,15 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @BeforeClass
     public void createSharedObjects() {
-        String testClassName = getClass().getSimpleName();
-        MDC.put("testlabel", "Purge: " + testClassName);
-        // TODO: refactor this mechanism
-        testProfiles().forEach(ThreadLocalProfiles::setProfile);
-        applicationContext.getBean(PurgeGarbageService.class).purge();
+        if (purge) {
+            String testClassName = getClass().getSimpleName();
+            MDC.put("testlabel", "Purge: " + testClassName);
+            // TODO: refactor this mechanism
+            testProfiles().forEach(ThreadLocalProfiles::setProfile);
+            applicationContext.getBean(PurgeGarbageService.class).purge();
+        } else {
+            LOGGER.info("Purge disabled for {}", getClass().getSimpleName());
+        }
     }
 
     @BeforeMethod

@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.flow.stop;
 
 import static com.sequenceiq.datalake.flow.stop.SdxStopState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.stop.SdxStopState.INIT_STATE;
+import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_ALL_DATAHUBS_STATE;
 import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_FINISHED_STATE;
 import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_IN_PROGRESS_STATE;
@@ -21,7 +22,10 @@ public class SdxStopFlowConfig extends AbstractFlowConfiguration<SdxStopState, S
             .from(INIT_STATE).to(SDX_STOP_START_STATE)
             .event(SdxStopEvent.SDX_STOP_EVENT).noFailureEvent()
 
-            .from(SDX_STOP_START_STATE).to(SDX_STOP_IN_PROGRESS_STATE)
+            .from(SDX_STOP_START_STATE).to(SDX_STOP_ALL_DATAHUBS_STATE)
+            .event(SdxStopEvent.SDX_STOP_ALL_DATAHUB_EVENT).failureEvent(SdxStopEvent.SDX_STOP_FAILED_EVENT)
+
+            .from(SDX_STOP_ALL_DATAHUBS_STATE).to(SDX_STOP_IN_PROGRESS_STATE)
             .event(SdxStopEvent.SDX_STOP_IN_PROGRESS_EVENT).defaultFailureEvent()
 
             .from(SDX_STOP_IN_PROGRESS_STATE).to(SDX_STOP_FINISHED_STATE)

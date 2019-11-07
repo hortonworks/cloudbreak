@@ -32,7 +32,6 @@ public class EnvStartActions {
         this.environmentStatusUpdateService = environmentStatusUpdateService;
     }
 
-
     @Bean(name = "START_FREEIPA_STATE")
     public Action<?, ?> startFreeipa() {
         return new AbstractEnvStartAction<>(EnvStartEvent.class) {

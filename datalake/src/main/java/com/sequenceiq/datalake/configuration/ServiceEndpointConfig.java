@@ -51,6 +51,15 @@ public class ServiceEndpointConfig {
     @Value("${datalake.environmentservice.server.contextPath:/environmentservice}")
     private String environmentRootContextPath;
 
+    @Value("${datalake.freeipa.url}")
+    private String freeipaServiceUrl;
+
+    @Value("${datalake.freeipa.contextPath}")
+    private String freeipaRootContextPath;
+
+    @Value("${datalake.freeipa.serviceId:}")
+    private String freeipaServiceId;
+
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
         return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
@@ -78,5 +87,11 @@ public class ServiceEndpointConfig {
     @DependsOn("serviceAddressResolver")
     public String redbeamsServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(redbeamsServerUrl + redbeamsRootContextPath, "http", redbeamsServiceId);
+    }
+
+    @Bean
+    @DependsOn("serviceAddressResolver")
+    public String freeIpaServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
+        return serviceAddressResolver.resolveUrl(freeipaServiceUrl + freeipaRootContextPath, "http", freeipaServiceId);
     }
 }

@@ -11,6 +11,8 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteByNam
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentInternalGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentListAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStartAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStopAction;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 
 @Service
@@ -42,5 +44,13 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> getInternal() {
         return new EnvironmentInternalGetAction();
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> stop() {
+        return new EnvironmentStopAction();
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> start() {
+        return new EnvironmentStartAction();
     }
 }

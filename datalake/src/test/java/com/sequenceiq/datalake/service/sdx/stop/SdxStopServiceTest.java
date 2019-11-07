@@ -14,10 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
@@ -32,18 +29,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptState;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.service.FreeipaService;
 import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -78,13 +73,15 @@ public class SdxStopServiceTest {
     @Mock
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+    @Mock
+    private FreeipaService freeipaService;
+
     @Test
     public void testTriggerStopWhenSdxRunning() {
         SdxCluster sdxCluster = sdxCluster();
         SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
         sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
 
-        when(distroxService.getAttachedDistroXClusters(ENV_NAME, null)).thenReturn(Collections.emptyList());
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
 
         underTest.triggerStopIfClusterNotStopped(sdxCluster);
@@ -100,46 +97,8 @@ public class SdxStopServiceTest {
 
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerStopIfClusterNotStopped(sdxCluster));
-        assertEquals("SDX is in stopped state, ignore it.", exception.getMessage());
-    }
-
-    @Test
-    public void testTriggerStopWhenHasAttachedClusterWithStoppedState() {
-        SdxCluster sdxCluster = sdxCluster();
-        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
-        sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
-
-        Set<StackViewV4Response> stackViews = new HashSet<>();
-
-        stackViews.add(getStackViewV4Response(STOPPED, STOPPED));
-        stackViews.add(getStackViewV4Response(STOPPED, STOPPED));
-        stackViews.add(getStackViewV4Response(STOPPED, STOPPED));
-
-        when(distroxService.getAttachedDistroXClusters(ENV_NAME, null)).thenReturn(stackViews);
-        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
-
         underTest.triggerStopIfClusterNotStopped(sdxCluster);
-        verify(sdxReactorFlowManager).triggerSdxStopFlow(CLUSTER_ID);
-    }
-
-    @Test
-    public void testTriggerStopWhenHasAttachedClusterWithAvailableState() {
-        SdxCluster sdxCluster = sdxCluster();
-        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
-        sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
-
-        Set<StackViewV4Response> stackViews = new HashSet<>();
-
-        stackViews.add(getStackViewV4Response(STOPPED, STOPPED));
-        stackViews.add(getStackViewV4Response(AVAILABLE, STOPPED));
-        stackViews.add(getStackViewV4Response(STOPPED, STOPPED));
-
-        when(distroxService.getAttachedDistroXClusters(ENV_NAME, null)).thenReturn(stackViews);
-        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
-
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerStopIfClusterNotStopped(sdxCluster));
-        assertEquals("Please stop all Datahub for the Environment (envName) before stop the Datalake", exception.getMessage());
+        verify(sdxReactorFlowManager, times(0)).triggerSdxStopFlow(sdxCluster.getId());
     }
 
     @Test
@@ -150,8 +109,8 @@ public class SdxStopServiceTest {
 
         underTest.stop(CLUSTER_ID);
 
-        verify(sdxStatusService, times(0)).setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS, ResourceEvent.SDX_STOP_STARTED,
-                "Datalake stop in progress", sdxCluster);
+        verify(sdxStatusService, times(0)).setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS,
+                ResourceEvent.SDX_STOP_STARTED, "Datalake stop in progress", sdxCluster);
     }
 
     @Test
@@ -290,14 +249,5 @@ public class SdxStopServiceTest {
         sdxCluster.setClusterName(CLUSTER_NAME);
         sdxCluster.setEnvName(ENV_NAME);
         return sdxCluster;
-    }
-
-    private StackViewV4Response getStackViewV4Response(Status stackStatus, Status clusterStatus) {
-        StackViewV4Response stackViewV4Response = new StackViewV4Response();
-        stackViewV4Response.setStatus(stackStatus);
-        ClusterViewV4Response clusterViewV4Response = new ClusterViewV4Response();
-        clusterViewV4Response.setStatus(clusterStatus);
-        stackViewV4Response.setCluster(clusterViewV4Response);
-        return stackViewV4Response;
     }
 }

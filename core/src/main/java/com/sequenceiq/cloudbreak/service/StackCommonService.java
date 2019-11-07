@@ -194,10 +194,21 @@ public class StackCommonService {
         put(stack, updateStackJson);
     }
 
-    public void putStartInWorkspace(String name, Long workspaceId) {
+    public void putStartInWorkspaceByName(String name, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
+        putStartInWorkspace(stack);
+    }
+
+    public void putStartInWorkspaceByCrn(String crn, Long workspaceId) {
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
+        Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
+        putStartInWorkspace(stack);
+    }
+
+    private void putStartInWorkspace(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         if (!cloudParameterCache.isStartStopSupported(stack.cloudPlatform())) {
             throw new BadRequestException(String.format("Start is not supported on %s cloudplatform", stack.cloudPlatform()));

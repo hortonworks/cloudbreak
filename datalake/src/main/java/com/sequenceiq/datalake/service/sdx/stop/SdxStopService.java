@@ -1,8 +1,5 @@
 package com.sequenceiq.datalake.service.sdx.stop;
 
-import static java.lang.String.format;
-
-import java.util.Collection;
 import java.util.Collections;
 
 import javax.inject.Inject;
@@ -22,9 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -34,10 +29,12 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
+import com.sequenceiq.datalake.service.FreeipaService;
 import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Component
 public class SdxStopService {
@@ -60,14 +57,18 @@ public class SdxStopService {
     private DistroxService distroxService;
 
     @Inject
+    private FreeipaService freeipaService;
+
+    @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     public void triggerStopIfClusterNotStopped(SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
         if (sdxStatusService.getActualStatusForSdx(cluster).getStatus() == DatalakeStatusEnum.STOPPED) {
-            throw new BadRequestException("SDX is in stopped state, ignore it.");
+            LOGGER.info("SDX is in stopped state, stop trigger is ignored.");
+            return;
         }
-        checkRunningDistroxForEnv(cluster.getEnvName());
+        checkFreeipaRunning(cluster.getEnvCrn());
         sdxReactorFlowManager.triggerSdxStopFlow(cluster.getId());
     }
 
@@ -151,21 +152,15 @@ public class SdxStopService {
                 && cluster.getStatus().isStopped();
     }
 
-    private boolean stackAndClusterStopped(StackViewV4Response stackV4Response, ClusterViewV4Response cluster) {
-        return stackV4Response.getStatus().isStopped()
-                && cluster != null
-                && cluster.getStatus() != null
-                && cluster.getStatus().isStopped();
+    public void stopAllDatahub(Long sdxId) {
+        SdxCluster sdxCluster = sdxService.getById(sdxId);
+        distroxService.stopAttachedDistrox(sdxCluster.getEnvName());
     }
 
-    private void checkRunningDistroxForEnv(String envName) {
-        if (!isAllDistroxInStoppedForEnv(envName)) {
-            throw new BadRequestException(format("Please stop all Datahub for the Environment (%s) before stop the Datalake", envName));
+    private void checkFreeipaRunning(String envCrn) {
+        DescribeFreeIpaResponse freeipa = freeipaService.describe(envCrn);
+        if (freeipa != null && !freeipa.getStatus().isAvailable()) {
+            throw new BadRequestException("Freeipa should be in Available state but currently is " + freeipa.getStatus().name());
         }
-    }
-
-    private boolean isAllDistroxInStoppedForEnv(String envName) {
-        Collection<StackViewV4Response> attachedDistroXClusters = distroxService.getAttachedDistroXClusters(envName, null);
-        return attachedDistroXClusters.stream().allMatch(it -> stackAndClusterStopped(it, it.getCluster()));
     }
 }

@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.client.internal.CloudbreakApiClientParams;
 import com.sequenceiq.datalake.logger.ThreadBasedRequestIdProvider;
 import com.sequenceiq.environment.client.internal.EnvironmentApiClientParams;
+import com.sequenceiq.freeipa.api.client.internal.FreeIpaApiClientParams;
 import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
 
 @Configuration
@@ -47,6 +48,10 @@ public class AppConfig implements AsyncConfigurer {
     private boolean ignorePreValidation;
 
     @Inject
+    @Named("freeIpaServerUrl")
+    private String freeIpaServerUrl;
+
+    @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Inject
@@ -65,5 +70,10 @@ public class AppConfig implements AsyncConfigurer {
     @Bean
     public RedbeamsApiClientParams redbeamsApiClientParams() {
         return new RedbeamsApiClientParams(restDebug, certificateValidation, ignorePreValidation, redbeamsServerUrl);
+    }
+
+    @Bean
+    public FreeIpaApiClientParams freeIpaApiClientParams() {
+        return new FreeIpaApiClientParams(restDebug, certificateValidation, ignorePreValidation, freeIpaServerUrl);
     }
 }

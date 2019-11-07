@@ -33,7 +33,7 @@ public class StartFreeipaHandler extends EventSenderAwareHandler<EnvironmentDto>
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            freeipaService.startAttachedFreeipa(environmentDto.getResourceCrn());
+            freeipaService.startAttachedFreeipa(environmentDto.getId(), environmentDto.getResourceCrn());
             EnvStartEvent envStartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
                     .withSelector(EnvStartStateSelectors.ENV_START_DATALAKE_EVENT.selector())
                     .withResourceId(environmentDto.getId())

@@ -38,8 +38,11 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.service.FreeipaService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class SdxStartServiceTest {
@@ -66,17 +69,55 @@ public class SdxStartServiceTest {
     @Mock
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+    @Mock
+    private FreeipaService freeipaService;
+
     @Test
     public void testTriggerStartWhenSdxStopped() {
         SdxCluster sdxCluster = sdxCluster();
         SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
         sdxStatusEntity.setStatus(DatalakeStatusEnum.STOPPED);
+        sdxCluster.setEnvCrn("envCrn");
 
+        DescribeFreeIpaResponse freeIpaResponse = new DescribeFreeIpaResponse();
+        freeIpaResponse.setStatus(Status.AVAILABLE);
+
+        when(freeipaService.describe("envCrn")).thenReturn(freeIpaResponse);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
 
         underTest.triggerStartIfClusterNotRunning(sdxCluster);
 
         verify(sdxReactorFlowManager).triggerSdxStartFlow(CLUSTER_ID);
+    }
+
+    @Test
+    public void testTriggerStartWhenFreeipaNull() {
+        SdxCluster sdxCluster = sdxCluster();
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
+
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
+
+        underTest.triggerStartIfClusterNotRunning(sdxCluster);
+
+        verify(sdxReactorFlowManager, times(0)).triggerSdxStartFlow(CLUSTER_ID);
+    }
+
+    @Test
+    public void testTriggerStartWhenFreeipaStopped() {
+        SdxCluster sdxCluster = sdxCluster();
+        sdxCluster.setEnvCrn("envCrn");
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.STOPPED);
+
+        DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+        freeipa.setStatus(Status.STOPPED);
+
+        when(freeipaService.describe("envCrn")).thenReturn(freeipa);
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
+
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerStartIfClusterNotRunning(sdxCluster));
+        assertEquals("Freeipa should be in Available state but currently is " + freeipa.getStatus().name(), exception.getMessage());
     }
 
     @Test
@@ -87,8 +128,9 @@ public class SdxStartServiceTest {
 
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerStartIfClusterNotRunning(sdxCluster));
-        assertEquals("SDX is in running state, ignore it.", exception.getMessage());
+        underTest.triggerStartIfClusterNotRunning(sdxCluster);
+
+        verify(sdxReactorFlowManager, times(0)).triggerSdxStartFlow(sdxCluster.getId());
     }
 
     @Test

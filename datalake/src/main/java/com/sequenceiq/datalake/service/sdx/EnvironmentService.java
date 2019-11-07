@@ -88,4 +88,8 @@ public class EnvironmentService {
         return environmentEndpoint.getByCrn(environmentCrn);
     }
 
+    public DetailedEnvironmentResponse getDetailedEnvironmentResponseByName(String environmentName) {
+        return environmentEndpoint.getByName(environmentName);
+    }
+
 }

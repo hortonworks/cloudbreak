@@ -52,7 +52,7 @@ public class SdxStopWaitHandler implements EventHandler<SdxStopWaitRequest> {
         MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {
-            LOGGER.debug("Stop polling stack deletion process for id: {}", sdxId);
+            LOGGER.debug("Stop polling stack stopping process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
             sdxStopService.waitCloudbreakCluster(sdxId, pollingConfig);
             response = new SdxStopSuccessEvent(sdxId, userId, requestId);
