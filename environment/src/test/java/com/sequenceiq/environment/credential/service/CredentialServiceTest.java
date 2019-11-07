@@ -1,13 +1,16 @@
 package com.sequenceiq.environment.credential.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,11 +24,11 @@ import javax.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.TestPropertySource;
 
 import com.cloudera.cdp.environments.model.CreateAWSCredentialRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -48,8 +51,10 @@ import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.credential.verification.CredentialVerification;
 import com.sequenceiq.notification.NotificationSender;
 
-@ExtendWith(SpringExtension.class)
+@SpringBootTest
+@TestPropertySource(properties = "environment.enabledplatforms=AWS, AZURE, BLAH, BAZ")
 class CredentialServiceTest {
+
     private static final Credential CREDENTIAL = new Credential();
 
     private static final String PLATFORM = "PLATFORM";
@@ -71,6 +76,14 @@ class CredentialServiceTest {
     private static final String USER_ID = "TEST";
 
     private static final String ACCOUNT_ID = "123";
+
+    private static final String AWS = "AWS";
+
+    private static final String AZURE = "AZURE";
+
+    private static final String BLAH = "BLAH";
+
+    private static final String BAZ = "BAZ";
 
     @Inject
     private CredentialService credentialServiceUnderTest;
@@ -110,7 +123,31 @@ class CredentialServiceTest {
     @Test
     void testListAvailablesByAccountId() {
         when(repository.findAllByAccountId(any(), anyCollection())).thenReturn(Set.of(CREDENTIAL));
-        assertEquals(Set.of(CREDENTIAL), credentialServiceUnderTest.listAvailablesByAccountId(ACCOUNT_ID));
+
+        assertThat(credentialServiceUnderTest.listAvailablesByAccountId(ACCOUNT_ID)).isEqualTo(Set.of(CREDENTIAL));
+        verify(credentialValidator, times(4)).isCredentialCloudPlatformValid(anyString(), eq(ACCOUNT_ID));
+    }
+
+    @Test
+    void testGetValidPlatformsForAccountIdWhenAllEnabled() {
+        when(credentialValidator.isCredentialCloudPlatformValid(anyString(), eq(ACCOUNT_ID))).thenReturn(true);
+
+        assertThat(credentialServiceUnderTest.getValidPlatformsForAccountId(ACCOUNT_ID)).containsOnly(AWS, AZURE, BLAH, BAZ);
+    }
+
+    @Test
+    void testGetValidPlatformsForAccountIdWhenNoneEnabled() {
+        when(credentialValidator.isCredentialCloudPlatformValid(anyString(), eq(ACCOUNT_ID))).thenReturn(false);
+
+        assertThat(credentialServiceUnderTest.getValidPlatformsForAccountId(ACCOUNT_ID)).isEmpty();
+    }
+
+    @Test
+    void testGetValidPlatformsForAccountIdWhenAzureDisabled() {
+        when(credentialValidator.isCredentialCloudPlatformValid(eq(AZURE), eq(ACCOUNT_ID))).thenReturn(false);
+        when(credentialValidator.isCredentialCloudPlatformValid(not(eq(AZURE)), eq(ACCOUNT_ID))).thenReturn(true);
+
+        assertThat(credentialServiceUnderTest.getValidPlatformsForAccountId(ACCOUNT_ID)).containsOnly(AWS, BLAH, BAZ);
     }
 
     @Test

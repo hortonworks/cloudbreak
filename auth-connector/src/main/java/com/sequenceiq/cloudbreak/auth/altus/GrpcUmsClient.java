@@ -282,7 +282,7 @@ public class GrpcUmsClient {
      * @param requestId an optional request Id
      * @return the account associated with this user CRN
      */
-    @Cacheable(cacheNames = "umsAccountCache", key = "{ #actorCrn, #userCrn }")
+    @Cacheable(cacheNames = "umsAccountCache", key = "{ #actorCrn, #accountId }")
     public Account getAccountDetails(String actorCrn, String accountId, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
