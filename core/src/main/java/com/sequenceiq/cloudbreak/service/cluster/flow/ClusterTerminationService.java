@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -141,7 +140,7 @@ public class ClusterTerminationService {
         }
     }
 
-    public void finalizeClusterTermination(Long clusterId) throws TransactionExecutionException {
+    public void finalizeClusterTermination(Long clusterId, boolean force) throws TransactionExecutionException {
         Cluster cluster = clusterService.findOneWithLists(clusterId)
                 .orElseThrow(NotFoundException.notFound("cluster", clusterId));
         Set<RDSConfig> rdsConfigs = cluster.getRdsConfigs();
@@ -151,7 +150,7 @@ public class ClusterTerminationService {
         clusterService.cleanupCluster(stackId);
         FileSystem fs = cluster.getFileSystem();
         if (fs != null) {
-            deleteFileSystemResources(stackId, fs);
+            deleteFileSystemResources(stackId, fs, force);
         }
         cluster.setBlueprint(null);
         cluster.setStack(null);
@@ -182,7 +181,7 @@ public class ClusterTerminationService {
         clusterService.save(cluster);
     }
 
-    private void deleteFileSystemResources(Long stackId, FileSystem fileSystem) {
+    private void deleteFileSystemResources(Long stackId, FileSystem fileSystem, boolean force) {
         try {
             FileSystemConfigurator<BaseFileSystemConfigurationsView> fsConfigurator = fileSystemConfigurators.get(fileSystem.getType());
             ConfigQueryEntries configQueryEntries = cmCloudStorageConfigProvider.getConfigQueryEntries();
@@ -192,8 +191,12 @@ public class ClusterTerminationService {
                 fsConfiguration.setStorageContainer("cloudbreak" + stackId);
                 fsConfigurator.deleteResources(fsConfiguration);
             }
-        } catch (IOException e) {
-            throw new TerminationFailedException("File system resources could not be deleted: ", e);
+        } catch (Exception e) {
+            if (force) {
+                LOGGER.error("Error during file system deletion, moving on based on the force flag, ", e);
+            } else {
+                throw new TerminationFailedException("File system resources could not be deleted: ", e);
+            }
         }
     }
 }
