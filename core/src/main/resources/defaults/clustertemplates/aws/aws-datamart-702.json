@@ -61,7 +61,7 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r5d.2xlarge",
+          "instanceType": "r5d.4xlarge",
           "rootVolume": {
             "size": 50
           }
