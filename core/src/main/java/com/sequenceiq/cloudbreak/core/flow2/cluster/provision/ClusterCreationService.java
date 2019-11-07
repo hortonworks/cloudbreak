@@ -73,7 +73,7 @@ public class ClusterCreationService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_METADATA_SETUP, UPDATE_IN_PROGRESS.name());
     }
 
-    public void generateCertAndDnsEntryForGateway(Stack stack) {
+    public void bootstrapPublicEndpoints(Stack stack) {
         boolean success = clusterPublicEndpointManagementService.provision(stack);
         if (!success) {
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_GATEWAY_CERTIFICATE_CREATE_FAILED, UPDATE_IN_PROGRESS.name());

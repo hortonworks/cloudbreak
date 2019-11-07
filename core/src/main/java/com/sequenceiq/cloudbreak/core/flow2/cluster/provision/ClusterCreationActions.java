@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationRequ
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapPublicEndpointSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyGatewayRegistrationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyGatewayRegistrationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyRegistrationRequest;
@@ -92,12 +93,27 @@ public class ClusterCreationActions {
         };
     }
 
+    @Bean(name = "BOOTSTRAPPING_PUBLIC_ENDPOINT_STATE")
+    public Action<?, ?> bootStrappingPublicEndpointAction() {
+        return new AbstractStackCreationAction<>(HostMetadataSetupSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
+                clusterCreationService.bootstrapPublicEndpoints(context.getStack());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new BootstrapPublicEndpointSuccess(context.getStack().getId());
+            }
+        };
+    }
+
     @Bean(name = "UPLOAD_RECIPES_STATE")
     public Action<?, ?> uploadRecipesAction() {
-        return new AbstractClusterAction<>(HostMetadataSetupSuccess.class) {
+        return new AbstractClusterAction<>(BootstrapPublicEndpointSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
-//                clusterCreationService.generateCertAndDnsEntryForGateway(context.getStack());
+            protected void doExecute(ClusterViewContext context, BootstrapPublicEndpointSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
