@@ -64,6 +64,10 @@ public class AzureInstanceView {
         this.managedIdentity = managedIdentity;
     }
 
+    public boolean hasRealInstanceId() {
+        return instance.getInstanceId() != null;
+    }
+
     /**
      * Used in freemarker template.
      */
