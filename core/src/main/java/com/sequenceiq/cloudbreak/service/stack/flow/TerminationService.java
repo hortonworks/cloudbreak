@@ -80,21 +80,19 @@ public class TerminationService {
             transactionService.required(() -> {
                 if (cluster != null) {
                     try {
-                        clusterTerminationService.finalizeClusterTermination(cluster.getId());
+                        clusterTerminationService.finalizeClusterTermination(cluster.getId(), force);
                     } catch (TransactionExecutionException e) {
                         throw e.getCause();
                     }
                 }
-                stack.setName(terminatedName);
-                stack.setTerminated(clock.getCurrentTimeMillis());
                 terminateInstanceGroups(stack);
                 terminateMetaDataInstances(stack);
-                stackService.save(stack);
-                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
+                updateToDeleteCompleted(stack, terminatedName, "Stack was terminated successfully.");
                 return null;
             });
         } catch (TransactionExecutionException ex) {
             LOGGER.info("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
+            deleteOnlyIfForced(stack, force, terminatedName);
             throw new TerminationFailedException(ex);
         }
     }
@@ -108,6 +106,21 @@ public class TerminationService {
                 throw e;
             }
         }
+    }
+
+    private void deleteOnlyIfForced(Stack stack, boolean force, String terminatedName) {
+        if (force) {
+            updateToDeleteCompleted(stack, terminatedName, "Finalization of stack termination failed, stack marked as deleted based on force flag.");
+        } else {
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_FAILED, "Finalization of stack termination failed.");
+        }
+    }
+
+    private void updateToDeleteCompleted(Stack stack, String terminatedName, String statusReason) {
+        stack.setName(terminatedName);
+        stack.setTerminated(clock.getCurrentTimeMillis());
+        stackService.save(stack);
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_COMPLETED, statusReason);
     }
 
     private void terminateInstanceGroups(Stack stack) {
