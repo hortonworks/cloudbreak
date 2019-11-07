@@ -300,7 +300,7 @@ public class ClusterHostServiceRunner {
             Set<String> groupNames = blueprintTextProcessor.getHostGroupsWithComponent("RANGER_ADMIN");
             List<HostGroup> groups = dataLakeCluster.getHostGroups().stream().filter(hg -> groupNames.contains(hg.getName())).collect(Collectors.toList());
             Set<String> hostNames = new HashSet<>();
-            groups.forEach(hg -> hostNames.addAll(hostGroupService.getByClusterIdAndName(dataLakeCluster.getId(), hg.getName())
+            groups.forEach(hg -> hostNames.addAll(hostGroupService.getByClusterIdAndNameWithHostMetadata(dataLakeCluster.getId(), hg.getName())
                     .getHostMetadata().stream().map(HostMetadata::getHostName).collect(Collectors.toList())));
 
             Map<String, String> rangerAdminConfigs = blueprintTextProcessor.getConfigurationEntries().getOrDefault("ranger-admin-site", new HashMap<>());
