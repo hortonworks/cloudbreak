@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -19,6 +20,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.clusterproxy.ClientCertificate;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
@@ -29,6 +31,7 @@ import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigUpdateRequest;
 import com.sequenceiq.cloudbreak.clusterproxy.TunnelEntry;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -37,6 +40,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
+import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
@@ -56,11 +60,14 @@ public class ClusterProxyServiceTest {
     @Mock
     private ClusterProxyRegistrationClient clusterProxyRegistrationClient;
 
+    @Mock
+    private SecurityConfigService securityConfigService;
+
     private ClusterProxyService service;
 
     @Before
     public void setup() {
-        service = new ClusterProxyService(stackService, clusterProxyRegistrationClient);
+        service = new ClusterProxyService(stackService, clusterProxyRegistrationClient, securityConfigService);
     }
 
     @Test
@@ -71,6 +78,7 @@ public class ClusterProxyServiceTest {
         ConfigRegistrationRequest request = configRegistrationRequestWithTunnelEntries();
 
         when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(response);
+        when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
 
         ConfigRegistrationResponse registrationResponse = service.registerCluster(testStackUsingCCM());
         assertEquals("X509PublicKey", registrationResponse.getX509Unwrapped());
@@ -85,6 +93,7 @@ public class ClusterProxyServiceTest {
         ConfigRegistrationRequest request = configRegistrationRequest();
 
         when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(response);
+        when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
 
         ConfigRegistrationResponse registrationResponse = service.registerCluster(testStack());
         assertEquals("X509PublicKey", registrationResponse.getX509Unwrapped());
@@ -123,26 +132,42 @@ public class ClusterProxyServiceTest {
 
     private ConfigRegistrationRequest configRegistrationRequest() {
         return new ConfigRegistrationRequestBuilder(STACK_CRN)
-                .with(List.of(String.valueOf(CLUSTER_ID)), List.of(serviceConfig()), null).build();
+                .with(List.of(String.valueOf(CLUSTER_ID)), List.of(cmServiceConfig(), cmInternalServiceConfig()), null).build();
     }
 
     private ConfigRegistrationRequest configRegistrationRequestWithTunnelEntries() {
         List<TunnelEntry> tunnelEntries = List.of(new TunnelEntry("i-abc123", "GATEWAY", "10.10.10.10", 443));
         return new ConfigRegistrationRequestBuilder(STACK_CRN)
-                .with(List.of(String.valueOf(CLUSTER_ID)), List.of(serviceConfig()), null)
+                .with(List.of(String.valueOf(CLUSTER_ID)), List.of(cmServiceConfig(), cmInternalServiceConfig()), null)
                 .withAccountId(TEST_ACCOUNT_ID)
                 .withTunnelEntries(tunnelEntries).build();
     }
 
-    private ClusterServiceConfig serviceConfig() {
+    private ClusterServiceConfig cmServiceConfig() {
         ClusterServiceCredential cloudbreakUser = new ClusterServiceCredential("cloudbreak", "/cb/test-data/secret/cbpassword:secret");
         ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt", "/cb/test-data/secret/dppassword:secret", true);
         return new ClusterServiceConfig("cloudera-manager",
                 List.of("https://10.10.10.10/clouderamanager"), asList(cloudbreakUser, dpUser), null, null);
     }
 
+    private ClusterServiceConfig cmInternalServiceConfig() {
+        ClusterServiceCredential cloudbreakUser = new ClusterServiceCredential("cloudbreak", "/cb/test-data/secret/cbpassword:secret");
+        ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt", "/cb/test-data/secret/dppassword:secret", true);
+        ClientCertificate clientCertificate = new ClientCertificate("/cb/test-data/secret/clientKey:secret",
+                "/cb/test-data/secret/clientCert:secret");
+        return new ClusterServiceConfig("cloudera-manager-internal",
+                List.of("https://10.10.10.10:9443/clouderamanager"), asList(cloudbreakUser, dpUser), clientCertificate, null);
+    }
+
     private ConfigUpdateRequest configUpdateRequest(String clusterIdentifier) {
         return new ConfigUpdateRequest(clusterIdentifier, "https://10.10.10.10/test-cluster");
+    }
+
+    private SecurityConfig gatewaySecurityConfig() {
+        SecurityConfig securityConfig = new SecurityConfig();
+        ReflectionTestUtils.setField(securityConfig, "clientKey", new Secret("clientKey", vaultSecretString("clientKey")));
+        ReflectionTestUtils.setField(securityConfig, "clientCert", new Secret("clientCert", vaultSecretString("clientCert")));
+        return securityConfig;
     }
 
     private Stack testStack() {
