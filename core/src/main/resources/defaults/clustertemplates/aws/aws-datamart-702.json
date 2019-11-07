@@ -51,7 +51,7 @@
         "template": {
           "attachedVolumes": [
             {
-              "count": 1,
+              "count": 2,
               "size": 300,
               "type": "ephemeral"
             }

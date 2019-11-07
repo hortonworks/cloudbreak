@@ -243,7 +243,6 @@ dependencies {
   runtime project(':cloud-mock')
   runtime project(':cloud-azure')
   runtime project(':cloud-yarn')
-  runtime project(':cloud-cumulus-yarn')
   runtime project(':cluster-ambari')
   runtime project(':cluster-cm')
   runtime project(':auth-connector')

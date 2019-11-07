@@ -3,7 +3,6 @@ package com.sequenceiq.environment.credential.attributes;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.credential.attributes.aws.AwsCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.AzureCredentialAttributes;
-import com.sequenceiq.environment.credential.attributes.cumulus.CumulusYarnCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.gcp.GcpCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.mock.MockCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.openstack.OpenStackCredentialAttributes;
@@ -21,8 +20,6 @@ public class CredentialAttributes {
     private OpenStackCredentialAttributes openstack;
 
     private YarnCredentialAttributes yarn;
-
-    private CumulusYarnCredentialAttributes cumulus;
 
     private MockCredentialAttributes mock;
 
@@ -64,14 +61,6 @@ public class CredentialAttributes {
 
     public void setYarn(YarnCredentialAttributes yarn) {
         this.yarn = yarn;
-    }
-
-    public CumulusYarnCredentialAttributes getCumulus() {
-        return cumulus;
-    }
-
-    public void setCumulus(CumulusYarnCredentialAttributes cumulus) {
-        this.cumulus = cumulus;
     }
 
     public MockCredentialAttributes getMock() {

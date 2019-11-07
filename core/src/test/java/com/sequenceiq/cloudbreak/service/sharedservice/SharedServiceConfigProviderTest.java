@@ -8,13 +8,11 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -78,9 +76,6 @@ public class SharedServiceConfigProviderTest {
     private StackInputs stackInputs;
 
     @Mock
-    private DatalakeConfigApiConnector datalakeConfigApiConnector;
-
-    @Mock
     private RemoteDataContextWorkaroundService remoteDataContextWorkaroundService;
 
     @Mock
@@ -91,8 +86,6 @@ public class SharedServiceConfigProviderTest {
         MockitoAnnotations.initMocks(this);
         when(remoteDataContextWorkaroundService.prepareRdsConfigs(any(Cluster.class), any(DatalakeResources.class))).thenReturn(new HashSet<>());
         when(remoteDataContextWorkaroundService.prepareFilesytem(any(Cluster.class), any(DatalakeResources.class))).thenReturn(new FileSystem());
-        when(datalakeConfigApiConnector.getConnector(any(Stack.class))).thenReturn(datalakeConfigApi);
-        when(datalakeConfigApiConnector.getConnector(any(URL.class), anyString(), anyString())).thenReturn(datalakeConfigApi);
     }
 
     @Test
@@ -159,41 +152,6 @@ public class SharedServiceConfigProviderTest {
         verify(datalakeResourcesService, times(0)).findById(anyLong());
     }
 
-//    @Test
-//    public void testPrepareDLConfCumulus() throws IOException {
-//        Stack stackIn = new Stack();
-//        stackIn.setDatalakeResourceId(1L);
-//
-//        Workspace workspace = new Workspace();
-//        workspace.setId(1L);
-//        stackIn.setWorkspace(workspace);
-//        when(datalakeResourcesService.findDatalakeResourcesByWorkspaceAndEnvironment(anyLong(), anyString()))
-//                .thenReturn(Collections.emptySet());
-//
-//
-//        stackIn.setCredentialCrn("aCredentialCRN");
-//
-//        DatalakeResources datalakeResources = new DatalakeResources();
-//        datalakeResources.setDatalakeStackId(1L);
-//        when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
-//
-//        DatalakeConfigApi connector = mock(DatalakeConfigApi.class);
-//        when(ambariDatalakeConfigProvider.getAdditionalParameters(stackIn, datalakeResources)).thenReturn(Collections.singletonMap("test", "data"));
-//        when(ambariDatalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, stackIn, connector))
-//                .thenReturn(Collections.singletonMap("test", "data"));
-//        when(stackService.save(stackIn)).thenReturn(stackIn);
-//        stackIn.setInputs(new Json(stackInputs));
-//
-//        Stack stack = underTest.prepareDatalakeConfigs(stackIn);
-//
-//        verify(stackService, times(0)).getById(anyLong());
-//
-//        StackInputs stackInputs = stack.getInputs().get(StackInputs.class);
-//
-//        assertEquals(1L, stackInputs.getDatalakeInputs().size());
-//        assertEquals(1L, stackInputs.getFixInputs().size());
-//    }
-
     @Test
     public void testPrepareDLConfWithCloudDL() throws IOException {
         Stack stackIn = new Stack();
@@ -210,8 +168,6 @@ public class SharedServiceConfigProviderTest {
 
         when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
         when(ambariDatalakeConfigProvider.getAdditionalParameters(stackIn, datalakeResources)).thenReturn(Collections.singletonMap("test", "data"));
-        when(ambariDatalakeConfigProvider.getBlueprintConfigParameters(eq(datalakeResources), eq(stackIn), any(DatalakeConfigApi.class)))
-                .thenReturn(Collections.singletonMap("test", "data"));
         when(stackService.save(stackIn)).thenReturn(stackIn);
         Stack dlStack = new Stack();
         dlStack.setId(datalakeStackId);
@@ -221,10 +177,7 @@ public class SharedServiceConfigProviderTest {
 
         Stack stack = underTest.prepareDatalakeConfigs(stackIn);
 
-        verify(stackService, times(1)).getById(datalakeResources.getDatalakeStackId());
-
         StackInputs stackInputs = stack.getInputs().get(StackInputs.class);
-        assertEquals(1L, stackInputs.getDatalakeInputs().size());
         assertEquals(1L, stackInputs.getFixInputs().size());
     }
 

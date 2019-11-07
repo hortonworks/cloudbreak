@@ -47,7 +47,6 @@ public class ModelDescriptions {
         public static final String GCP_PARAMETERS = "custom parameters for GCP credential";
         public static final String AZURE_PARAMETERS = "custom parameters for Azure credential";
         public static final String OPENSTACK_PARAMETERS = "custom parameters for Openstack credential";
-        public static final String CUMULUS_YARN_PARAMETERS = "custom parameters for Cumulus Yarn credential";
         public static final String YARN_PARAMETERS = "custom parameters for Yarn credential";
         public static final String CODE_GRANT_FLOW_LOGIN_URL = "Login URL for code grant flow";
     }

@@ -428,14 +428,6 @@ public class ClusterService {
         return cluster;
     }
 
-    public Cluster updateExtendedBlueprint(Long clusterId, String blueprint) {
-        Cluster cluster = getCluster(clusterId);
-        cluster.setExtendedBlueprintText(blueprint);
-        cluster = repository.save(cluster);
-        LOGGER.info("Updated cluster: [blueprint: '{}'].", blueprint);
-        return cluster;
-    }
-
     public void updateHostMetadata(Long clusterId, Map<String, List<String>> hostsPerHostGroup, HostMetadataState hostMetadataState) {
         try {
             transactionService.required(() -> {

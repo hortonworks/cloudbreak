@@ -9,7 +9,6 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.environment.api.doc.credential.CredentialModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
-import com.sequenceiq.environment.api.v1.credential.model.parameters.cumulus.CumulusYarnParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.GcpCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.mock.MockParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.OpenstackParameters;
@@ -46,10 +45,6 @@ public abstract class CredentialBase implements Serializable {
     @Valid
     @ApiModelProperty(CredentialModelDescription.OPENSTACK_PARAMETERS)
     private OpenstackParameters openstack;
-
-    @Valid
-    @ApiModelProperty(CredentialModelDescription.CUMULUS_YARN_PARAMETERS)
-    private CumulusYarnParameters cumulus;
 
     @Valid
     @ApiModelProperty(CredentialModelDescription.YARN_PARAMETERS)
@@ -120,14 +115,6 @@ public abstract class CredentialBase implements Serializable {
 
     public void setOpenstack(OpenstackParameters openstack) {
         this.openstack = openstack;
-    }
-
-    public CumulusYarnParameters getCumulus() {
-        return cumulus;
-    }
-
-    public void setCumulus(CumulusYarnParameters cumulus) {
-        this.cumulus = cumulus;
     }
 
     public YarnParameters getYarn() {

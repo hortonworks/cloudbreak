@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -34,26 +33,22 @@ public class ClouderaManagerDatalakeConfigProvider {
     @Inject
     private RdsConfigService rdsConfigService;
 
-    @Inject
-    private DatalakeConfigApiConnector datalakeConfigApiConnector;
-
     public DatalakeResources collectAndStoreDatalakeResources(Stack datalakeStack) {
         Cluster cluster = datalakeStack.getCluster();
         try {
-            DatalakeConfigApi connector = datalakeConfigApiConnector.getConnector(datalakeStack);
-            return collectAndStoreDatalakeResources(datalakeStack, cluster, connector);
+            return collectAndStoreDatalakeResources(datalakeStack, cluster);
         } catch (RuntimeException ex) {
             LOGGER.warn("Datalake service discovery failed: ", ex);
             return null;
         }
     }
 
-    public DatalakeResources collectAndStoreDatalakeResources(Stack datalakeStack, Cluster cluster, DatalakeConfigApi connector) {
+    public DatalakeResources collectAndStoreDatalakeResources(Stack datalakeStack, Cluster cluster) {
         try {
             return transactionService.required(() -> {
                 DatalakeResources datalakeResources = datalakeResourcesService.findByDatalakeStackId(datalakeStack.getId()).orElse(null);
                 if (datalakeResources == null) {
-                    datalakeResources = collectDatalakeResources(datalakeStack, connector);
+                    datalakeResources = collectDatalakeResources(datalakeStack);
                     datalakeResources.setDatalakeStackId(datalakeStack.getId());
                     datalakeResources.setEnvironmentCrn(datalakeStack.getEnvironmentCrn());
                     Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(cluster.getId());
@@ -71,23 +66,22 @@ public class ClouderaManagerDatalakeConfigProvider {
         }
     }
 
-    public DatalakeResources collectDatalakeResources(Stack datalakeStack, DatalakeConfigApi connector) {
+    public DatalakeResources collectDatalakeResources(Stack datalakeStack) {
         String ambariIp = datalakeStack.getClusterManagerIp();
         String ambariFqdn = datalakeStack.getGatewayInstanceMetadata().isEmpty()
                 ? datalakeStack.getClusterManagerIp() : datalakeStack.getGatewayInstanceMetadata().iterator().next().getDiscoveryFQDN();
-        return collectDatalakeResources(datalakeStack.getName(), ambariFqdn, ambariIp, ambariFqdn, connector);
+        return collectDatalakeResources(datalakeStack.getName(), ambariFqdn, ambariIp, ambariFqdn);
     }
 
     //CHECKSTYLE:OFF
-    public DatalakeResources collectDatalakeResources(String datalakeName, String datalakeAmbariUrl, String datalakeAmbariIp, String datalakeAmbariFqdn,
-            DatalakeConfigApi connector) {
+    public DatalakeResources collectDatalakeResources(String datalakeName, String datalakeAmbariUrl, String datalakeAmbariIp, String datalakeAmbariFqdn) {
         DatalakeResources datalakeResources = new DatalakeResources();
         datalakeResources.setName(datalakeName);
-        setupDatalakeGlobalParams(datalakeAmbariUrl, datalakeAmbariIp, datalakeAmbariFqdn, connector, datalakeResources);
+        setupDatalakeGlobalParams(datalakeAmbariUrl, datalakeAmbariIp, datalakeAmbariFqdn, datalakeResources);
         return datalakeResources;
     }
 
-    private void setupDatalakeGlobalParams(String datalakeAmbariUrl, String datalakeAmbariIp, String datalakeAmbariFqdn, DatalakeConfigApi connector,
+    private void setupDatalakeGlobalParams(String datalakeAmbariUrl, String datalakeAmbariIp, String datalakeAmbariFqdn,
             DatalakeResources datalakeResources) {
         datalakeResources.setDatalakeAmbariUrl(datalakeAmbariUrl);
         datalakeResources.setDatalakeAmbariIp(datalakeAmbariIp);

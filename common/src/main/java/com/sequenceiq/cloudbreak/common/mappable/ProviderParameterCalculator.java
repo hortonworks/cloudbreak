@@ -34,8 +34,6 @@ public class ProviderParameterCalculator {
                 return source.createAzure();
             case OPENSTACK:
                 return source.createOpenstack();
-            case CUMULUS_YARN:
-                return source.createYarn();
             default:
                 throw new BadRequestException(format("No mappable for cloudplatform [%s] and source [%s]", cloudPlatform, source.getClass()));
         }

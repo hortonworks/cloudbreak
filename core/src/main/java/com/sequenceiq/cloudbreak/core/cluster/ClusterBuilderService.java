@@ -172,9 +172,7 @@ public class ClusterBuilderService {
             try {
                 transactionService.required(() -> {
                     Stack stackInTransaction = stackService.getByIdWithListsInTransaction(stackId);
-                    if (blueprintUtils.isAmbariBlueprint(blueprintText)) {
-                        ambariDatalakeConfigProvider.collectAndStoreDatalakeResources(stackInTransaction);
-                    } else {
+                    if (!blueprintUtils.isAmbariBlueprint(blueprintText)) {
                         clouderaManagerDatalakeConfigProvider.collectAndStoreDatalakeResources(stackInTransaction);
                     }
                     return null;

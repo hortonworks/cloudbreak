@@ -47,7 +47,6 @@ import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingSe
 import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigApiConnector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -119,9 +118,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private DatalakeConfigApiConnector datalakeConfigApiConnector;
 
     @Inject
     private BlueprintViewProvider blueprintViewProvider;
