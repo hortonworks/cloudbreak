@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static java.util.Collections.singletonMap;
 
 import java.io.IOException;
@@ -16,7 +15,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -38,7 +36,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -60,7 +57,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
@@ -261,7 +257,7 @@ public class ClusterHostServiceRunner {
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
 
-        saveSssdAdPillar(cluster, servicePillar, kerberosConfig);
+        saveSssdAdPillar(servicePillar, kerberosConfig);
         saveSssdIpaPillar(servicePillar, kerberosConfig, serviceLocations);
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);
@@ -335,7 +331,7 @@ public class ClusterHostServiceRunner {
         decoratePillarWithAmbariDatabase(cluster, servicePillar);
     }
 
-    private void saveSssdAdPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) {
+    private void saveSssdAdPillar(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) {
         if (kerberosDetailService.isAdJoinable(kerberosConfig)) {
             Map<String, Object> sssdConnfig = new HashMap<>();
             sssdConnfig.put("username", kerberosConfig.getPrincipal());
@@ -354,16 +350,6 @@ public class ClusterHostServiceRunner {
             ldapsProperties.put("keystorePath", connector.getKeystorePath());
             servicePillar.put("ldaps-ad", new SaltPillarProperties("/ambari/ldaps.sls", singletonMap("ambari", singletonMap("ldaps", ldapsProperties))));
         }
-    }
-
-    private Map<String, String> diskMountParameters(Stack stack) {
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("cloudPlatform", stack.cloudPlatform());
-
-        PlatformParameters platformParameters = connector.getPlatformParameters(stack);
-        parameters.put("platformDiskStartLabel", platformParameters.scriptParams().getStartLabel().toString());
-        parameters.put("platformDiskPrefix", platformParameters.scriptParams().getDiskPrefix());
-        return parameters;
     }
 
     private void saveSssdIpaPillar(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig,
@@ -422,8 +408,7 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private void decoratePillarWithClouderaManagerLicense(Long stackId, Map<String, SaltPillarProperties> servicePillar)
-            throws CloudbreakOrchestratorFailedException {
+    private void decoratePillarWithClouderaManagerLicense(Long stackId, Map<String, SaltPillarProperties> servicePillar) {
         String userCrn = stackService.get(stackId).getCreator().getUserCrn();
 
         UserManagementProto.Account account = umsClient.getAccountDetails(userCrn, Crn.safeFromString(userCrn).getAccountId(), Optional.empty());
@@ -475,11 +460,25 @@ public class ClusterHostServiceRunner {
             hostGrain.put("gateway-address", gatewayConfig.getPublicAddress());
             grainProperties.put(gatewayConfig.getHostname(), hostGrain);
         }
-        Map<String, List<String>> serviceLocations =
-                componentLocator.getComponentLocationByHostname(cluster, List.of(ExposedService.NAMENODE.getServiceName()));
-        serviceLocations.getOrDefault(ExposedService.NAMENODE.getServiceName(), List.of())
-                .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put("roles", "namenode"));
+        addNameNodeRoleForHosts(grainProperties, cluster);
+        addKnoxRoleForHosts(grainProperties, cluster);
         return grainProperties;
+    }
+
+    private void addNameNodeRoleForHosts(Map<String, Map<String, String>> grainProperties, Cluster cluster) {
+        Map<String, List<String>> nameNodeServiceLocations = getComponentLocationByHostname(cluster, ExposedService.NAMENODE.getServiceName());
+        nameNodeServiceLocations.getOrDefault(ExposedService.NAMENODE.getServiceName(), List.of())
+                .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put("roles", "namenode"));
+    }
+
+    private void addKnoxRoleForHosts(Map<String, Map<String, String>> grainProperties, Cluster cluster) {
+        Map<String, List<String>> knoxServiceLocations = getComponentLocationByHostname(cluster, "KNOX_GATEWAY");
+        knoxServiceLocations.getOrDefault("KNOX_GATEWAY", List.of())
+                                .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put("roles", "knox"));
+    }
+
+    private Map<String, List<String>> getComponentLocationByHostname(Cluster cluster, String componentName) {
+        return componentLocator.getComponentLocationByHostname(cluster, List.of(componentName));
     }
 
     private void saveCustomNameservers(Stack stack, KerberosConfig kerberosConfig, Map<String, SaltPillarProperties> servicePillar) {
@@ -505,10 +504,6 @@ public class ClusterHostServiceRunner {
                         singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
             }
         }
-    }
-
-    private StackView getStackView(Long datalakeId) {
-        return stackViewService.findById(datalakeId).orElseThrow(notFound("Stack view", datalakeId));
     }
 
     private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar,
@@ -692,17 +687,5 @@ public class ClusterHostServiceRunner {
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-    }
-
-    private <T> Function<Json, T> toAttributeClass(Class<T> attributeClass) {
-        return attribute -> {
-            try {
-                return Optional.ofNullable(attribute)
-                        .orElseThrow(() -> new CloudbreakServiceException("Cluster component attribute json cannot be null."))
-                        .get(attributeClass);
-            } catch (IOException e) {
-                throw new CloudbreakServiceException("Cannot deserialize the compnent: " + attributeClass, e);
-            }
-        };
     }
 }

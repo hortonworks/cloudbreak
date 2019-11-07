@@ -33,8 +33,8 @@ base:
     - match: compound
     - sssd.ipa
 
-  'roles:gateway':
-    - match: grain
+  'G@roles:gateway or G@roles:knox':
+    - match: compound
     - gateway.init
     - gateway.ldap
     - gateway.settings

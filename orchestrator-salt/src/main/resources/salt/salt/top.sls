@@ -75,7 +75,7 @@ base:
     - match: compound
     - gateway.ambari
 
-  'G@roles:gateway and G@roles:manager*':
+  'G@roles:gateway or G@roles:knox':
     - match: compound
     - gateway.cm
 
