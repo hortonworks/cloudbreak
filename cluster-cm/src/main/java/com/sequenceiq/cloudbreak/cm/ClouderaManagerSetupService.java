@@ -36,6 +36,7 @@ import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiRemoteDataContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -163,6 +164,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
 
             removeRemoteParcelRepos(clouderaManagerResourceApi);
+            setHeader(clouderaManagerResourceApi, stack.getType());
             boolean prewarmed = isPrewarmed(clusterId);
             if (prewarmed) {
                 refreshParcelRepos(clouderaManagerResourceApi);
@@ -268,6 +270,19 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             clouderaManagerResourceApi.updateConfig("Updated configurations.", apiConfigList);
         } catch (ApiException e) {
             LOGGER.info("Error while updating remote parcel repos. Message {}, throwable: {}", e.getMessage(), e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    private void setHeader(ClouderaManagerResourceApi clouderaManagerResourceApi,
+        com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType stackType) {
+        try {
+            ApiConfigList apiConfigList = new ApiConfigList()
+                    .addItemsItem(new ApiConfig().name("custom_header_color")
+                            .value(StackType.DATALAKE.equals(stackType) ? "RED" : "BLUE"));
+            clouderaManagerResourceApi.updateConfig("Updated Header.", apiConfigList);
+        } catch (ApiException e) {
+            LOGGER.info("Error while updating header. Message {}, throwable: {}", e.getMessage(), e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
     }
