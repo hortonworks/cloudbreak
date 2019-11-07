@@ -57,6 +57,10 @@ public class AzureInstanceView {
         this.rootVolumeSize = rootVolumeSize;
     }
 
+    public boolean hasRealInstanceId() {
+        return instance.getInstanceId() != null;
+    }
+
     /**
      * Used in freemarker template.
      */
