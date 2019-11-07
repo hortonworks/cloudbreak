@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.credential.validation;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static com.sequenceiq.environment.credential.validation.CredentialValidator.IAM_INTERNAL_ACTOR_CRN;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -13,10 +14,11 @@ import java.util.UUID;
 
 import javax.ws.rs.BadRequestException;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -36,6 +38,16 @@ class CredentialValidatorTest {
 
     private static final String USER_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
 
+    private static final String AWS = "AWS";
+
+    private static final String AZURE = "AZURE";
+
+    private static final String FOO = "FOO";
+
+    private static final String AZURE_DISABLED = " & Azure disabled";
+
+    private static final String AZURE_ENABLED = " & Azure enabled";
+
     @Mock
     private CredentialDefinitionService credentialDefinitionService;
 
@@ -46,24 +58,45 @@ class CredentialValidatorTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new CredentialValidator(Set.of("AWS", "AZURE"), credentialDefinitionService, Collections.emptyList(), entitlementService);
+        underTest = new CredentialValidator(Set.of(AWS, AZURE), credentialDefinitionService, Collections.emptyList(), entitlementService);
     }
 
-    @Test
-    void testValidateCredentialCloudPlatformWhenBadPlatform() {
-        assertThrows(BadRequestException.class, () -> underTest.validateCredentialCloudPlatform("FOO", USER_CRN));
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    static Object[][] validateCredentialCloudPlatformDataProvider() {
+        return new Object[][] {
+                // testCaseName             cloudPlatform   azureEnabled    validExpected
+                { AWS + AZURE_DISABLED,     AWS,            false,          true },
+                { AZURE + AZURE_DISABLED,   AZURE,          false,          false },
+                { FOO + AZURE_DISABLED,     FOO,            false,          false },
+                { AWS + AZURE_ENABLED,      AWS,            true,           true },
+                { AZURE + AZURE_ENABLED,    AZURE,          true,           true },
+                { FOO + AZURE_ENABLED,      FOO,            true,           false },
+        };
+    }
+    // CHECKSTYLE:ON
+    // @formatter:on
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("validateCredentialCloudPlatformDataProvider")
+    void testValidateCredentialCloudPlatform(String testCaseName, String cloudPlatform, boolean azureEnabled, boolean validExpected) {
+        if (AZURE.equalsIgnoreCase(cloudPlatform)) {
+            when(entitlementService.azureEnabled(USER_CRN, ACCOUNT_ID)).thenReturn(azureEnabled);
+        }
+        if (validExpected) {
+            underTest.validateCredentialCloudPlatform(cloudPlatform, USER_CRN);
+        } else {
+            assertThrows(BadRequestException.class, () -> underTest.validateCredentialCloudPlatform(cloudPlatform, USER_CRN));
+        }
     }
 
-    @Test
-    void testValidateCredentialCloudPlatformWhenAzureDisabled() {
-        when(entitlementService.azureEnabled(USER_CRN, ACCOUNT_ID)).thenReturn(false);
-        assertThrows(BadRequestException.class, () -> underTest.validateCredentialCloudPlatform("AZURE", USER_CRN));
-    }
-
-    @Test
-    void testValidateCredentialCloudPlatformWhenAzureSuccess() {
-        when(entitlementService.azureEnabled(USER_CRN, ACCOUNT_ID)).thenReturn(true);
-        underTest.validateCredentialCloudPlatform("AZURE", USER_CRN);
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("validateCredentialCloudPlatformDataProvider")
+    void testIsCredentialCloudPlatformValid(String testCaseName, String cloudPlatform, boolean azureEnabled, boolean validExpected) {
+        if (AZURE.equalsIgnoreCase(cloudPlatform)) {
+            when(entitlementService.azureEnabled(IAM_INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(azureEnabled);
+        }
+        assertThat(underTest.isCredentialCloudPlatformValid(cloudPlatform, ACCOUNT_ID)).isEqualTo(validExpected);
     }
 
     @Test
@@ -86,8 +119,7 @@ class CredentialValidatorTest {
 
         ValidationResult result = underTest.validateCredentialUpdate(original, newCred);
         assertEquals(1, result.getErrors().size());
-        assertThat(result.getErrors().get(0),
-                CoreMatchers.containsString("CloudPlatform of the credential cannot be changed! Original: 'AWS' New: 'AZURE'."));
+        assertThat(result.getErrors().get(0)).contains("CloudPlatform of the credential cannot be changed! Original: 'AWS' New: 'AZURE'.");
     }
 
     @Test
@@ -142,4 +174,5 @@ class CredentialValidatorTest {
         ValidationResult result = underTest.validateAwsCredentialRequest(request);
         assertFalse(result.hasError());
     }
+
 }
