@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -18,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -70,7 +72,15 @@ public class CredentialService extends AbstractCredentialService {
     }
 
     public Set<Credential> listAvailablesByAccountId(String accountId) {
-        return repository.findAllByAccountId(accountId, getEnabledPlatforms());
+        return repository.findAllByAccountId(accountId, getValidPlatformsForAccountId(accountId));
+    }
+
+    @Cacheable(cacheNames = "credentialCloudPlatformCache")
+    public Set<String> getValidPlatformsForAccountId(String accountId) {
+        return getEnabledPlatforms()
+                .stream()
+                .filter(cloudPlatform -> credentialValidator.isCredentialCloudPlatformValid(cloudPlatform, accountId))
+                .collect(Collectors.toSet());
     }
 
     public Credential getByNameForAccountId(String name, String accountId) {

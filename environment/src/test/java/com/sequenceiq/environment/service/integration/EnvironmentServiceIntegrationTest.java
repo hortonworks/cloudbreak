@@ -27,6 +27,7 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.sequenceiq.authorization.service.UmsAuthorizationService;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
@@ -101,6 +102,9 @@ public class EnvironmentServiceIntegrationTest {
     private UmsAuthorizationService umsAuthorizationService;
 
     @MockBean
+    private EntitlementService entitlementService;
+
+    @MockBean
     private NetworkService networkService;
 
     @Inject
@@ -130,13 +134,14 @@ public class EnvironmentServiceIntegrationTest {
         credential.setResourceCrn("credential_resourcecrn");
         credential.setAccountId(TEST_ACCOUNT_ID);
         credential.setCloudPlatform("AWS");
-        credential.setCreator("user");
+        credential.setCreator(TEST_CRN);
         credential.setDescription("description");
         credential.setGovCloud(false);
         credential.setArchived(false);
         credentialRequest = new CredentialRequest();
 
         doNothing().when(umsAuthorizationService).checkRightOfUserForResource(any(), any(), any(), any());
+        when(entitlementService.azureEnabled(any(), any())).thenReturn(true);
     }
 
     @AfterEach
@@ -208,16 +213,16 @@ public class EnvironmentServiceIntegrationTest {
     @Test
     public void testCredentialList() {
         credentialRepository.save(credential);
-        CredentialResponses resuls = client.credentialV1Endpoint().list();
-        assertTrue(resuls.getResponses().stream().anyMatch(credentialResponse -> credentialResponse.getName().equals(credential.getName())),
+        CredentialResponses results = client.credentialV1Endpoint().list();
+        assertTrue(results.getResponses().stream().anyMatch(credentialResponse -> credentialResponse.getName().equals(credential.getName())),
                 String.format("Result set should have credential with name: %s", credential.getName()));
     }
 
     @Test
     public void testCredentialGetByName() {
         credentialRepository.save(credential);
-        CredentialResponse resuls = client.credentialV1Endpoint().getByName(credential.getName());
-        assertTrue(resuls.getName().equals(credential.getName()),
+        CredentialResponse results = client.credentialV1Endpoint().getByName(credential.getName());
+        assertTrue(results.getName().equals(credential.getName()),
                 String.format("Result should have credential with name: %s", credential.getName()));
     }
 
@@ -229,8 +234,8 @@ public class EnvironmentServiceIntegrationTest {
     @Test
     public void testCredentialGetByCrn() {
         credentialRepository.save(credential);
-        CredentialResponse resuls = client.credentialV1Endpoint().getByResourceCrn(credential.getResourceCrn());
-        assertTrue(resuls.getName().equals(credential.getName()),
+        CredentialResponse results = client.credentialV1Endpoint().getByResourceCrn(credential.getResourceCrn());
+        assertTrue(results.getName().equals(credential.getName()),
                 String.format("Result should have credential with name: %s", credential.getName()));
     }
 
@@ -242,8 +247,8 @@ public class EnvironmentServiceIntegrationTest {
     @Test
     public void testCredentialDeleteByName() {
         credentialRepository.save(credential);
-        CredentialResponse resuls = client.credentialV1Endpoint().deleteByName(credential.getName());
-        assertTrue(resuls.getName().startsWith(credential.getName()),
+        CredentialResponse results = client.credentialV1Endpoint().deleteByName(credential.getName());
+        assertTrue(results.getName().startsWith(credential.getName()),
                 String.format("Result should have credential with name: %s", credential.getName()));
     }
 
@@ -255,8 +260,8 @@ public class EnvironmentServiceIntegrationTest {
     @Test
     public void testCredentialDeleteByCrn() {
         credentialRepository.save(credential);
-        CredentialResponse resuls = client.credentialV1Endpoint().deleteByResourceCrn(credential.getResourceCrn());
-        assertTrue(resuls.getName().startsWith(credential.getName()),
+        CredentialResponse results = client.credentialV1Endpoint().deleteByResourceCrn(credential.getResourceCrn());
+        assertTrue(results.getName().startsWith(credential.getName()),
                 String.format("Result should have credential with name: %s", credential.getName()));
     }
 
@@ -268,16 +273,16 @@ public class EnvironmentServiceIntegrationTest {
     @Test
     public void testProxyList() {
         proxyConfigRepository.save(getProxyConfig());
-        ProxyResponses resuls = client.proxyV1Endpoint().list();
-        assertTrue(resuls.getResponses().stream().anyMatch(proxyResponse -> proxyResponse.getName().equals(getProxyConfig().getName())),
+        ProxyResponses results = client.proxyV1Endpoint().list();
+        assertTrue(results.getResponses().stream().anyMatch(proxyResponse -> proxyResponse.getName().equals(getProxyConfig().getName())),
                 String.format("Result set should have proxy with name: %s", getProxyConfig().getName()));
     }
 
     @Test
     public void testProxyGetByName() {
         proxyConfigRepository.save(getProxyConfig());
-        ProxyResponse resuls = client.proxyV1Endpoint().getByName(getProxyRequest().getName());
-        assertTrue(resuls.getName().equals(getProxyConfig().getName()),
+        ProxyResponse results = client.proxyV1Endpoint().getByName(getProxyRequest().getName());
+        assertTrue(results.getName().equals(getProxyConfig().getName()),
                 String.format("Result should have proxy with name: %s", getProxyConfig().getName()));
     }
 
@@ -289,8 +294,8 @@ public class EnvironmentServiceIntegrationTest {
     @Test
     public void testProxyGetByCrnName() {
         proxyConfigRepository.save(getProxyConfig());
-        ProxyResponse resuls = client.proxyV1Endpoint().getByResourceCrn(getProxyConfig().getResourceCrn());
-        assertTrue(resuls.getCrn().equals(getProxyConfig().getResourceCrn()),
+        ProxyResponse results = client.proxyV1Endpoint().getByResourceCrn(getProxyConfig().getResourceCrn());
+        assertTrue(results.getCrn().equals(getProxyConfig().getResourceCrn()),
                 String.format("Result should have proxy with resource crn: %s", getProxyConfig().getResourceCrn()));
     }
 
@@ -302,8 +307,8 @@ public class EnvironmentServiceIntegrationTest {
     @Test
     public void testProxyDeleteByName() {
         proxyConfigRepository.save(getProxyConfig());
-        ProxyResponse resuls = client.proxyV1Endpoint().deleteByName(getProxyRequest().getName());
-        assertTrue(resuls.getName().equals(getProxyConfig().getName()),
+        ProxyResponse results = client.proxyV1Endpoint().deleteByName(getProxyRequest().getName());
+        assertTrue(results.getName().equals(getProxyConfig().getName()),
                 String.format("Result should have proxy with name: %s", getProxyConfig().getName()));
     }
 
@@ -315,8 +320,8 @@ public class EnvironmentServiceIntegrationTest {
     @Test
     public void testProxyDeleteByCrnName() {
         proxyConfigRepository.save(getProxyConfig());
-        ProxyResponse resuls = client.proxyV1Endpoint().deleteByCrn(getProxyConfig().getResourceCrn());
-        assertTrue(resuls.getCrn().equals(getProxyConfig().getResourceCrn()),
+        ProxyResponse results = client.proxyV1Endpoint().deleteByCrn(getProxyConfig().getResourceCrn());
+        assertTrue(results.getCrn().equals(getProxyConfig().getResourceCrn()),
                 String.format("Result should have proxy with resource crn: %s", getProxyConfig().getResourceCrn()));
     }
 
