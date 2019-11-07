@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -19,8 +18,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
-import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaCleanupService;
-import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaOperationFailedException;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
@@ -51,31 +48,13 @@ public class StackTerminationService {
     @Inject
     private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
 
-    @Inject
-    private FreeIpaCleanupService freeIpaCleanupService;
-
     public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload, Boolean forcedTermination) {
         LOGGER.debug("Terminate stack result: {}", payload);
         Stack stack = context.getStack();
-        cleanupFreeIpa(forcedTermination, stack);
-        terminationService.finalizeTermination(stack.getId(), true);
+        terminationService.finalizeTermination(stack.getId(), forcedTermination);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DELETE_COMPLETED, DELETE_COMPLETED.name());
         clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
-        if (stack.getType() == StackType.DATALAKE) {
-            datalakeResourcesService.deleteWithDependenciesByStackId(stack.getId());
-        }
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_SUCCESSFUL, stack);
-    }
-
-    private void cleanupFreeIpa(Boolean forcedTermination, Stack stack) {
-        try {
-            freeIpaCleanupService.cleanup(stack, false, null);
-        } catch (FreeIpaOperationFailedException e) {
-            LOGGER.error("Failed to cleanup", e);
-            if (!forcedTermination) {
-                throw e;
-            }
-        }
     }
 
     public void handleStackTerminationError(StackView stackView, StackFailureEvent payload, boolean forced) {
