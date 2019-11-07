@@ -73,26 +73,28 @@ public class AzureInstanceConnector implements InstanceConnector {
         String stackName = armTemplateUtils.getStackName(ac.getCloudContext());
 
         for (CloudInstance vm : vms) {
-            try {
-                AzureClient azureClient = ac.getParameter(AzureClient.class);
-                boolean virtualMachineExists = azureClient.isVirtualMachineExists(stackName, vm.getInstanceId());
-                if (virtualMachineExists) {
-                    VirtualMachine virtualMachine = azureClient.getVirtualMachine(stackName, vm.getInstanceId());
-                    PowerState virtualMachinePowerState = virtualMachine.powerState();
-                    String computerName = virtualMachine.computerName();
-                    vm.putParameter(INSTANCE_NAME, computerName);
-                    statuses.add(new CloudVmInstanceStatus(vm, AzureInstanceStatus.get(virtualMachinePowerState)));
-                } else {
-                    statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED));
-                }
-            } catch (CloudException e) {
-                if (e.body() != null && "ResourceNotFound".equals(e.body().code())) {
-                    statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED));
-                } else {
+            if (vm.getInstanceId() != null) {
+                try {
+                    AzureClient azureClient = ac.getParameter(AzureClient.class);
+                    boolean virtualMachineExists = azureClient.isVirtualMachineExists(stackName, vm.getInstanceId());
+                    if (virtualMachineExists) {
+                        VirtualMachine virtualMachine = azureClient.getVirtualMachine(stackName, vm.getInstanceId());
+                        PowerState virtualMachinePowerState = virtualMachine.powerState();
+                        String computerName = virtualMachine.computerName();
+                        vm.putParameter(INSTANCE_NAME, computerName);
+                        statuses.add(new CloudVmInstanceStatus(vm, AzureInstanceStatus.get(virtualMachinePowerState)));
+                    } else {
+                        statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED));
+                    }
+                } catch (CloudException e) {
+                    if (e.body() != null && "ResourceNotFound".equals(e.body().code())) {
+                        statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED));
+                    } else {
+                        statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.UNKNOWN));
+                    }
+                } catch (RuntimeException ignored) {
                     statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.UNKNOWN));
                 }
-            } catch (RuntimeException ignored) {
-                statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.UNKNOWN));
             }
         }
         return statuses;

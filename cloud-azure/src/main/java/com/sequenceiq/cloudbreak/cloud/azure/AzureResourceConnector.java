@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureInstanceView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStorageView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -232,6 +233,8 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         AzureStackView azureStackView = getAzureStack(azureCredentialView, authenticatedContext.getCloudContext(), stack,
                 getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()));
 
+        purgeExistingInstances(azureStackView);
+
         String customImageId = azureStorage.getCustomImageId(client, authenticatedContext, stack);
         String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
                 authenticatedContext.getCloudContext(), stack);
@@ -263,6 +266,11 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         } catch (Exception e) {
             throw new CloudConnectorException(String.format("Could not upscale: %s  ", stackName), e);
         }
+    }
+
+    private void purgeExistingInstances(AzureStackView azureStackView) {
+        azureStackView.getGroups().forEach((key, value) -> value.removeIf(AzureInstanceView::hasRealInstanceId));
+        azureStackView.getGroups().entrySet().removeIf(group -> group.getValue() == null || group.getValue().size() == 0);
     }
 
     private Map<String, Integer> getNumberOfAvailableIPsInSubnets(AzureClient client, Network network) {
