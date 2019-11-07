@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 @Service
 public class AwsDefaultZoneProvider {
 
-    @Value("${cb.aws.zone.parameter.default:eu-west-1}")
+    @Value("${cb.aws.zone.parameter.default:eu-central-1}")
     private String awsZoneParameterDefault;
 
     @Value("${cb.aws.gov.zone.parameter.default:us-gov-west-1}")
