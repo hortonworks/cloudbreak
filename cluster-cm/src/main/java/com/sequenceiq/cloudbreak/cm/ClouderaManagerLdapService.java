@@ -21,6 +21,8 @@ import com.cloudera.api.swagger.model.ApiAuthRoleRef;
 import com.cloudera.api.swagger.model.ApiExternalUserMapping;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingList;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingType;
+import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 
 @Service
 public class ClouderaManagerLdapService {
@@ -45,7 +48,10 @@ public class ClouderaManagerLdapService {
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
-    public void setupLdap(Stack stack, Cluster cluster, HttpClientConfig clientConfig, LdapView ldapView)
+    @Inject
+    private VirtualGroupService virtualGroupService;
+
+    public void setupLdap(Stack stack, Cluster cluster, HttpClientConfig clientConfig, LdapView ldapView, VirtualGroupRequest virtualGroupRequest)
             throws ApiException, ClouderaManagerClientInitException {
         if (ldapView != null) {
             String user = cluster.getCloudbreakAmbariUser();
@@ -59,15 +65,15 @@ public class ClouderaManagerLdapService {
             ApiAuthRoleMetadataList roleMetadataList = authRolesResourceApi.readAuthRolesMetadata(null);
             if (roleMetadataList.getItems() != null) {
                 Optional<ApiAuthRoleMetadata> adminMetadata = roleMetadataList.getItems().stream().filter(toRole(adminRole)).findFirst();
-                if (adminMetadata.isPresent() && StringUtils.isNotBlank(ldapView.getAdminGroup())) {
-                    addGroupMapping(ldapView, externalUserMappingsResourceApi, adminMetadata.get(), ldapView.getAdminGroup());
+                if (adminMetadata.isPresent()) {
+                    String virtualGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.CLOUDER_MANAGER_ADMIN.getRight());
+                    addGroupMapping(externalUserMappingsResourceApi, adminMetadata.get(), virtualGroup);
                 } else {
-                    LOGGER.info("Cannot setup admin group mapping. Admin metadata present: [{}] Admin group: [{}]",
-                            adminMetadata.isPresent(), ldapView.getAdminGroup());
+                    LOGGER.info("Cannot setup admin group mapping. Admin metadata is not present");
                 }
                 Optional<ApiAuthRoleMetadata> userMetadata = roleMetadataList.getItems().stream().filter(toRole(userRole)).findFirst();
                 if (userMetadata.isPresent() && StringUtils.isNotBlank(ldapView.getUserGroup())) {
-                    addGroupMapping(ldapView, externalUserMappingsResourceApi, userMetadata.get(), ldapView.getUserGroup());
+                    addGroupMapping(externalUserMappingsResourceApi, userMetadata.get(), ldapView.getUserGroup());
                 } else {
                     LOGGER.info("Cannot setup user group mapping. User metadata present: [{}] User group: [{}]",
                             userMetadata.isPresent(), ldapView.getUserGroup());
@@ -80,7 +86,7 @@ public class ClouderaManagerLdapService {
         return rm -> role.equals(rm.getRole());
     }
 
-    private void addGroupMapping(LdapView ldapView, ExternalUserMappingsResourceApi cmApi, ApiAuthRoleMetadata role, String ldapGroup) throws ApiException {
+    private void addGroupMapping(ExternalUserMappingsResourceApi cmApi, ApiAuthRoleMetadata role, String ldapGroup) throws ApiException {
         ApiExternalUserMappingList apiExternalUserMappingList = new ApiExternalUserMappingList()
                 .addItemsItem(new ApiExternalUserMapping()
                         .name(ldapGroup)

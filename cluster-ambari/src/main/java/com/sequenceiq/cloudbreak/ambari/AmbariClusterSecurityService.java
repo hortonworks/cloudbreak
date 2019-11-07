@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -206,7 +207,7 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     }
 
     @Override
-    public void setupLdapAndSSO(String primaryGatewayPublicAddress, LdapView ldapConfig) {
+    public void setupLdapAndSSO(String primaryGatewayPublicAddress, LdapView ldapConfig, VirtualGroupRequest virtualGroupRequest) {
         AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(stack.getCluster().getId());
         if (ambariRepo != null && ambariRepositoryVersionService.setupLdapAndSsoOnApi(ambariRepo)) {
             LOGGER.debug("Setup LDAP and SSO on API");

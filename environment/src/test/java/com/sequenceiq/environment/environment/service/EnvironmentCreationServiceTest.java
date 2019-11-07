@@ -1,10 +1,10 @@
 package com.sequenceiq.environment.environment.service;
 
 
-import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ACCOUNT_ID;
-import static com.sequenceiq.environment.environment.service.EnvironmentTestData.CRN;
+import static com.sequenceiq.environment.environment.service.EnvironmentTestConstants.ACCOUNT_ID;
+import static com.sequenceiq.environment.environment.service.EnvironmentTestConstants.CRN;
+import static com.sequenceiq.environment.environment.service.EnvironmentTestConstants.USER;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
-import static com.sequenceiq.environment.environment.service.EnvironmentTestData.USER;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.getCloudRegions;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,6 +29,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -81,6 +82,9 @@ class EnvironmentCreationServiceTest {
 
     @MockBean
     private GrpcUmsClient grpcUmsClient;
+
+    @MockBean
+    private VirtualGroupService virtualGroupService;
 
     @Inject
     private EnvironmentCreationService environmentCreationServiceUnderTest;

@@ -9,29 +9,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
-import com.sequenceiq.cloudbreak.dto.LdapView;
-import com.sequenceiq.cloudbreak.dto.LdapView.LdapViewBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
+import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
+import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.dto.LdapView.LdapViewBuilder;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.environment.environment.service.EnvironmentTestConstants;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KnoxGatewayConfigProviderTest {
+    @Mock
+    private VirtualGroupService virtualGroupService;
 
+    @InjectMocks
     private final KnoxGatewayConfigProvider underTest = new KnoxGatewayConfigProvider();
 
     @Test
@@ -124,7 +134,8 @@ public class KnoxGatewayConfigProviderTest {
         TemplatePreparationObject source = Builder.builder()
                 .withGateway(gateway, "key")
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
-                .build();
+                .withVirtualGroupView(new VirtualGroupRequest(EnvironmentTestConstants.CRN, "")).build();
+        Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
 
         assertEquals(
                 List.of(
@@ -154,8 +165,10 @@ public class KnoxGatewayConfigProviderTest {
     public void roleConfigsWithoutGateway() {
         GeneralClusterConfigs gcc = new GeneralClusterConfigs();
         gcc.setPassword("secret");
-        TemplatePreparationObject source = Builder.builder().withGeneralClusterConfigs(gcc).build();
-
+        TemplatePreparationObject source = Builder.builder()
+                .withGeneralClusterConfigs(gcc)
+                .withVirtualGroupView(new VirtualGroupRequest(EnvironmentTestConstants.CRN, "")).build();
+        Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
         assertEquals(
                 List.of(
                         config("idbroker_master_secret", gcc.getPassword()),
@@ -179,18 +192,19 @@ public class KnoxGatewayConfigProviderTest {
         Gateway gateway = new Gateway();
         gateway.setKnoxMasterSecret("admin");
         gateway.setPath("/a/b/c");
-        LdapView ldapConfig = LdapViewBuilder.aLdapView().withAdminGroup("knox_admins").build();
+        LdapView ldapConfig = LdapViewBuilder.aLdapView().build();
 
         TemplatePreparationObject source = Builder.builder()
                 .withGateway(gateway, "key")
                 .withLdapConfig(ldapConfig)
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
-                .build();
+                .withVirtualGroupView(new VirtualGroupRequest(EnvironmentTestConstants.CRN, "")).build();
+        Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("knox_admins");
 
         assertEquals(
             List.of(
                 config("idbroker_master_secret", gateway.getKnoxMasterSecret()),
-                config("idbroker_gateway_knox_admin_groups", ldapConfig.getAdminGroup())
+                config("idbroker_gateway_knox_admin_groups", "knox_admins")
             ),
             underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
         );
@@ -198,7 +212,7 @@ public class KnoxGatewayConfigProviderTest {
             List.of(
                 config("gateway_master_secret", gateway.getKnoxMasterSecret()),
                 config("gateway_default_topology_name", "cdp-proxy"),
-                config("gateway_knox_admin_groups", ldapConfig.getAdminGroup()),
+                config("gateway_knox_admin_groups", "knox_admins"),
                 config("gateway_path", gateway.getPath()),
                 config("gateway_signing_keystore_name", "signing.jks"),
                 config("gateway_signing_keystore_type", "JKS"),

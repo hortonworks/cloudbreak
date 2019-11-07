@@ -32,6 +32,8 @@ dependencies {
   compile project(':client-cm')
   compile project(':template-manager-cmtemplate')
 
+  testCompile project(":environment").sourceSets.test.output
+
   testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cluster.api;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 
 public interface ClusterSecurityService {
 
@@ -16,7 +17,7 @@ public interface ClusterSecurityService {
 
     void changeOriginalCredentialsAndCreateCloudbreakUser(boolean ldapConfigured) throws CloudbreakException;
 
-    void setupLdapAndSSO(String primaryGatewayPublicAddress, LdapView ldapConfig) throws CloudbreakException;
+    void setupLdapAndSSO(String primaryGatewayPublicAddress, LdapView ldapConfig, VirtualGroupRequest virtualGroupRequest) throws CloudbreakException;
 
     boolean isLdapAndSSOReady(AmbariRepo ambariRepo);
 

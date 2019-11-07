@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationRequest;
@@ -56,7 +57,9 @@ public class LdapSSOConfigurationHandler implements EventHandler<LdapSSOConfigur
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             LdapView ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
-            clusterApiConnectors.getConnector(stack).clusterSecurityService().setupLdapAndSSO(primaryGatewayConfig.getPublicAddress(), ldapView);
+            VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(stack.getEnvironmentCrn(), ldapView != null ? ldapView.getAdminGroup() : "");
+            clusterApiConnectors.getConnector(stack).clusterSecurityService().setupLdapAndSSO(primaryGatewayConfig.getPublicAddress(), ldapView,
+                    virtualGroupRequest);
             response = new LdapSSOConfigurationSuccess(stackId);
         } catch (Exception e) {
             LOGGER.info("Error during LDAP configuration, stackId: " + stackId, e);

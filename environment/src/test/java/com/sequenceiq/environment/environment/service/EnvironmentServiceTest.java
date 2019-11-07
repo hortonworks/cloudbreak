@@ -79,48 +79,48 @@ class EnvironmentServiceTest {
     @Test
     public void getByNameAndAccountIdNotFound() {
         when(environmentRepository
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(EnvironmentTestData.ACCOUNT_ID)))
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(EnvironmentTestConstants.ACCOUNT_ID)))
                 .thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> environmentServiceUnderTest
-                .getByNameAndAccountId(EnvironmentTestData.ENVIRONMENT_NAME, EnvironmentTestData.ACCOUNT_ID));
+                .getByNameAndAccountId(EnvironmentTestData.ENVIRONMENT_NAME, EnvironmentTestConstants.ACCOUNT_ID));
     }
 
     @Test
     public void getByNameAndAccountIdFound() {
         when(environmentRepository
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(EnvironmentTestData.ACCOUNT_ID)))
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(EnvironmentTestConstants.ACCOUNT_ID)))
                 .thenReturn(Optional.of(environment));
         when(environmentDtoConverter.environmentToDto(any())).thenReturn(environmentDto);
         assertEquals(environmentDto, environmentServiceUnderTest
-                .getByNameAndAccountId(EnvironmentTestData.ENVIRONMENT_NAME, EnvironmentTestData.ACCOUNT_ID));
+                .getByNameAndAccountId(EnvironmentTestData.ENVIRONMENT_NAME, EnvironmentTestConstants.ACCOUNT_ID));
     }
 
     @Test
     public void getByCrnAndAccountIdNotFound() {
         when(environmentRepository
-                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.CRN), eq(EnvironmentTestData.ACCOUNT_ID)))
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestConstants.CRN), eq(EnvironmentTestConstants.ACCOUNT_ID)))
                 .thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> environmentServiceUnderTest
-                .getByCrnAndAccountId(EnvironmentTestData.CRN, EnvironmentTestData.ACCOUNT_ID));
+                .getByCrnAndAccountId(EnvironmentTestConstants.CRN, EnvironmentTestConstants.ACCOUNT_ID));
     }
 
     @Test
     public void getByCrnAndAccountId() {
         when(environmentRepository
-                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.CRN), eq(EnvironmentTestData.ACCOUNT_ID)))
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestConstants.CRN), eq(EnvironmentTestConstants.ACCOUNT_ID)))
                 .thenReturn(Optional.of(environment));
         when(environmentDtoConverter.environmentToDto(any())).thenReturn(environmentDto);
         assertEquals(environmentDto, environmentServiceUnderTest
-                .getByCrnAndAccountId(EnvironmentTestData.CRN, EnvironmentTestData.ACCOUNT_ID));
+                .getByCrnAndAccountId(EnvironmentTestConstants.CRN, EnvironmentTestConstants.ACCOUNT_ID));
     }
 
     @Test
     public void listByAccountId() {
         Set<Environment> twoEnvironment = Set.of(new Environment(), new Environment());
         final int twoInvocations = 2;
-        when(environmentRepository.findByAccountId(eq(EnvironmentTestData.ACCOUNT_ID))).thenReturn(twoEnvironment);
-        environmentServiceUnderTest.listByAccountId(EnvironmentTestData.ACCOUNT_ID);
-        verify(environmentRepository).findByAccountId(eq(EnvironmentTestData.ACCOUNT_ID));
+        when(environmentRepository.findByAccountId(eq(EnvironmentTestConstants.ACCOUNT_ID))).thenReturn(twoEnvironment);
+        environmentServiceUnderTest.listByAccountId(EnvironmentTestConstants.ACCOUNT_ID);
+        verify(environmentRepository).findByAccountId(eq(EnvironmentTestConstants.ACCOUNT_ID));
         verify(environmentDtoConverter, times(twoInvocations)).environmentToDto(any());
     }
 
@@ -131,12 +131,13 @@ class EnvironmentServiceTest {
 
         EnvironmentService environmentServiceWired = spy(environmentServiceUnderTest);
         when(environmentRepository
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(EnvironmentTestData.ACCOUNT_ID)))
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(EnvironmentTestConstants.ACCOUNT_ID)))
                 .thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
                 () -> environmentServiceWired
-                        .deleteByNameAndAccountId(EnvironmentTestData.ENVIRONMENT_NAME, EnvironmentTestData.ACCOUNT_ID, EnvironmentTestData.USER, forced));
-        verify(environmentServiceWired, never()).delete(eq(environment), eq(EnvironmentTestData.USER), anyBoolean());
+                        .deleteByNameAndAccountId(EnvironmentTestData.ENVIRONMENT_NAME, EnvironmentTestConstants.ACCOUNT_ID, EnvironmentTestConstants.USER,
+                                forced));
+        verify(environmentServiceWired, never()).delete(eq(environment), eq(EnvironmentTestConstants.USER), anyBoolean());
         verify(reactorFlowManager, never()).triggerDeleteFlow(any(), any());
         verify(reactorFlowManager, never()).triggerForcedDeleteFlow(any(), any());
     }
@@ -148,17 +149,17 @@ class EnvironmentServiceTest {
 
         EnvironmentService environmentServiceWired = spy(environmentServiceUnderTest);
         when(environmentRepository
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(EnvironmentTestData.ACCOUNT_ID)))
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(EnvironmentTestConstants.ACCOUNT_ID)))
                 .thenReturn(Optional.of(environment));
         when(environmentDtoConverter.environmentToDto(any())).thenReturn(environmentDto);
         assertEquals(environmentDto, environmentServiceWired
-                .deleteByNameAndAccountId(EnvironmentTestData.ENVIRONMENT_NAME, EnvironmentTestData.ACCOUNT_ID, EnvironmentTestData.USER, forced));
-        verify(environmentServiceWired).delete(eq(environment), eq(EnvironmentTestData.USER), anyBoolean());
+                .deleteByNameAndAccountId(EnvironmentTestData.ENVIRONMENT_NAME, EnvironmentTestConstants.ACCOUNT_ID, EnvironmentTestConstants.USER, forced));
+        verify(environmentServiceWired).delete(eq(environment), eq(EnvironmentTestConstants.USER), anyBoolean());
         if (forced) {
-            verify(reactorFlowManager).triggerForcedDeleteFlow(eq(environment), eq(EnvironmentTestData.USER));
+            verify(reactorFlowManager).triggerForcedDeleteFlow(eq(environment), eq(EnvironmentTestConstants.USER));
             verify(reactorFlowManager, never()).triggerDeleteFlow(any(), any());
         } else {
-            verify(reactorFlowManager).triggerDeleteFlow(eq(environment), eq(EnvironmentTestData.USER));
+            verify(reactorFlowManager).triggerDeleteFlow(eq(environment), eq(EnvironmentTestConstants.USER));
             verify(reactorFlowManager, never()).triggerForcedDeleteFlow(any(), any());
         }
     }
@@ -170,12 +171,12 @@ class EnvironmentServiceTest {
 
         EnvironmentService environmentServiceWired = spy(environmentServiceUnderTest);
         when(environmentRepository
-                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.CRN), eq(EnvironmentTestData.ACCOUNT_ID)))
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestConstants.CRN), eq(EnvironmentTestConstants.ACCOUNT_ID)))
                 .thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
                 () -> environmentServiceWired.deleteByCrnAndAccountId(
-                        EnvironmentTestData.CRN, EnvironmentTestData.ACCOUNT_ID, EnvironmentTestData.USER, forced));
-        verify(environmentServiceWired, never()).delete(eq(environment), eq(EnvironmentTestData.USER), anyBoolean());
+                EnvironmentTestConstants.CRN, EnvironmentTestConstants.ACCOUNT_ID, EnvironmentTestConstants.USER, forced));
+        verify(environmentServiceWired, never()).delete(eq(environment), eq(EnvironmentTestConstants.USER), anyBoolean());
         verify(reactorFlowManager, never()).triggerDeleteFlow(any(), any());
         verify(reactorFlowManager, never()).triggerForcedDeleteFlow(any(), any());
     }
@@ -187,46 +188,46 @@ class EnvironmentServiceTest {
 
         EnvironmentService environmentServiceWired = spy(environmentServiceUnderTest);
         when(environmentRepository
-                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.CRN), eq(EnvironmentTestData.ACCOUNT_ID)))
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestConstants.CRN), eq(EnvironmentTestConstants.ACCOUNT_ID)))
                 .thenReturn(Optional.of(environment));
         when(environmentDtoConverter.environmentToDto(any())).thenReturn(environmentDto);
         assertEquals(environmentDto, environmentServiceWired
-                .deleteByCrnAndAccountId(EnvironmentTestData.CRN, EnvironmentTestData.ACCOUNT_ID, EnvironmentTestData.USER, forced));
-        verify(environmentServiceWired).delete(eq(environment), eq(EnvironmentTestData.USER), anyBoolean());
+                .deleteByCrnAndAccountId(EnvironmentTestConstants.CRN, EnvironmentTestConstants.ACCOUNT_ID, EnvironmentTestConstants.USER, forced));
+        verify(environmentServiceWired).delete(eq(environment), eq(EnvironmentTestConstants.USER), anyBoolean());
         if (forced) {
-            verify(reactorFlowManager).triggerForcedDeleteFlow(eq(environment), eq(EnvironmentTestData.USER));
+            verify(reactorFlowManager).triggerForcedDeleteFlow(eq(environment), eq(EnvironmentTestConstants.USER));
             verify(reactorFlowManager, never()).triggerDeleteFlow(any(), any());
         } else {
-            verify(reactorFlowManager).triggerDeleteFlow(eq(environment), eq(EnvironmentTestData.USER));
+            verify(reactorFlowManager).triggerDeleteFlow(eq(environment), eq(EnvironmentTestConstants.USER));
             verify(reactorFlowManager, never()).triggerForcedDeleteFlow(any(), any());
         }
     }
 
     @Test
     public void delete() {
-        assertEquals(environment, environmentServiceUnderTest.delete(environment, EnvironmentTestData.USER, false));
-        verify(reactorFlowManager).triggerDeleteFlow(eq(environment), eq(EnvironmentTestData.USER));
+        assertEquals(environment, environmentServiceUnderTest.delete(environment, EnvironmentTestConstants.USER, false));
+        verify(reactorFlowManager).triggerDeleteFlow(eq(environment), eq(EnvironmentTestConstants.USER));
     }
 
     @Test
     public void deleteFailedDistroXesAreAttached() {
         when(environmentResourceDeletionService.getAttachedDistroXClusterNames(eq(environment))).thenReturn(Set.of("notempty"));
-        assertThrows(BadRequestException.class, () -> environmentServiceUnderTest.delete(environment, EnvironmentTestData.USER, false));
-        verify(reactorFlowManager, never()).triggerDeleteFlow(eq(environment), eq(EnvironmentTestData.USER));
+        assertThrows(BadRequestException.class, () -> environmentServiceUnderTest.delete(environment, EnvironmentTestConstants.USER, false));
+        verify(reactorFlowManager, never()).triggerDeleteFlow(eq(environment), eq(EnvironmentTestConstants.USER));
     }
 
     @Test
     public void deleteFailedSdxesAreAttached() {
         when(environmentResourceDeletionService.getAttachedSdxClusterNames(eq(environment))).thenReturn(Set.of("notempty"));
-        assertThrows(BadRequestException.class, () -> environmentServiceUnderTest.delete(environment, EnvironmentTestData.USER, false));
-        verify(reactorFlowManager, never()).triggerDeleteFlow(eq(environment), eq(EnvironmentTestData.USER));
+        assertThrows(BadRequestException.class, () -> environmentServiceUnderTest.delete(environment, EnvironmentTestConstants.USER, false));
+        verify(reactorFlowManager, never()).triggerDeleteFlow(eq(environment), eq(EnvironmentTestConstants.USER));
     }
 
     @Test
     public void deleteFailedDataLakesAreAttached() {
         when(environmentResourceDeletionService.getDatalakeClusterNames(eq(environment))).thenReturn(Set.of("notempty"));
-        assertThrows(BadRequestException.class, () -> environmentServiceUnderTest.delete(environment, EnvironmentTestData.USER, false));
-        verify(reactorFlowManager, never()).triggerDeleteFlow(eq(environment), eq(EnvironmentTestData.USER));
+        assertThrows(BadRequestException.class, () -> environmentServiceUnderTest.delete(environment, EnvironmentTestConstants.USER, false));
+        verify(reactorFlowManager, never()).triggerDeleteFlow(eq(environment), eq(EnvironmentTestConstants.USER));
     }
 
     @Test
@@ -237,10 +238,10 @@ class EnvironmentServiceTest {
         EnvironmentService environmentServiceWired = spy(environmentServiceUnderTest);
 
         when(environmentRepository
-                .findByNameInAndAccountIdAndArchivedIsFalse(eq(names), eq(EnvironmentTestData.ACCOUNT_ID))).thenReturn(envs);
+                .findByNameInAndAccountIdAndArchivedIsFalse(eq(names), eq(EnvironmentTestConstants.ACCOUNT_ID))).thenReturn(envs);
         assertEquals(expected, environmentServiceWired
-                .deleteMultipleByNames(names, EnvironmentTestData.ACCOUNT_ID, EnvironmentTestData.USER, false).size());
-        verify(environmentServiceWired, times(expected)).delete(any(), eq(EnvironmentTestData.USER), anyBoolean());
+                .deleteMultipleByNames(names, EnvironmentTestConstants.ACCOUNT_ID, EnvironmentTestConstants.USER, false).size());
+        verify(environmentServiceWired, times(expected)).delete(any(), eq(EnvironmentTestConstants.USER), anyBoolean());
     }
 
 /*  TODO: fix deleteMultipleByNames
@@ -265,7 +266,7 @@ class EnvironmentServiceTest {
     @Test
     public void deleteMultipleByCrns() {
         environmentServiceUnderTest
-                .deleteMultipleByCrns(Set.of("crn1", "crn2"), EnvironmentTestData.ACCOUNT_ID, EnvironmentTestData.USER, false);
+                .deleteMultipleByCrns(Set.of("crn1", "crn2"), EnvironmentTestConstants.ACCOUNT_ID, EnvironmentTestConstants.USER, false);
 
         Set<String> names = Set.of("crn1", "crn2");
         Set<Environment> envs = Set.of(new Environment(), new Environment());
@@ -273,9 +274,10 @@ class EnvironmentServiceTest {
         EnvironmentService environmentServiceWired = spy(environmentServiceUnderTest);
 
         when(environmentRepository
-                .findByResourceCrnInAndAccountIdAndArchivedIsFalse(eq(names), eq(EnvironmentTestData.ACCOUNT_ID))).thenReturn(envs);
-        assertEquals(expected, environmentServiceWired.deleteMultipleByCrns(names, EnvironmentTestData.ACCOUNT_ID, EnvironmentTestData.USER, false).size());
-        verify(environmentServiceWired, times(expected)).delete(any(), eq(EnvironmentTestData.USER), anyBoolean());
+                .findByResourceCrnInAndAccountIdAndArchivedIsFalse(eq(names), eq(EnvironmentTestConstants.ACCOUNT_ID))).thenReturn(envs);
+        assertEquals(expected, environmentServiceWired.deleteMultipleByCrns(names, EnvironmentTestConstants.ACCOUNT_ID, EnvironmentTestConstants.USER,
+                false).size());
+        verify(environmentServiceWired, times(expected)).delete(any(), eq(EnvironmentTestConstants.USER), anyBoolean());
     }
 
     /*  TODO: fix deleteMultipleByCrns

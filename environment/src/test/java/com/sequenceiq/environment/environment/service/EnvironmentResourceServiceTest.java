@@ -1,8 +1,8 @@
 package com.sequenceiq.environment.environment.service;
 
-import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ACCOUNT_ID;
+import static com.sequenceiq.environment.environment.service.EnvironmentTestConstants.ACCOUNT_ID;
+import static com.sequenceiq.environment.environment.service.EnvironmentTestConstants.USER;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
-import static com.sequenceiq.environment.environment.service.EnvironmentTestData.USER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;

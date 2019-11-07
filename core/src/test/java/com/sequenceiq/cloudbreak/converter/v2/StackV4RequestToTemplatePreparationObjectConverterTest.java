@@ -83,6 +83,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.environment.service.EnvironmentTestConstants;
 
 public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
@@ -96,7 +97,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     private static final String TEST_VERSION = "2.6";
 
-    private static final String TEST_ENVIRONMENT_CRN = "envCrn";
+    private static final String TEST_ENVIRONMENT_CRN = EnvironmentTestConstants.CRN;
 
     private static final String TEST_CLUSTER_NAME = "clustername";
 

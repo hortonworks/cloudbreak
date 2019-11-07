@@ -1,8 +1,8 @@
 package com.sequenceiq.environment.environment.v1;
 
-import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ACCOUNT_ID;
+import static com.sequenceiq.environment.environment.service.EnvironmentTestConstants.ACCOUNT_ID;
+import static com.sequenceiq.environment.environment.service.EnvironmentTestConstants.CRN;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.CLOUD_PLATFORM;
-import static com.sequenceiq.environment.environment.service.EnvironmentTestData.CRN;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.DESCRIPTION;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.LATITUDE;

@@ -5,13 +5,15 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.zeppelin.Zepp
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
-import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Component
@@ -19,11 +21,13 @@ public class ZeppelinRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String ZEPPELIN_ADMIN_GROUP = "zeppelin.admin.group";
 
+    @Inject
+    private VirtualGroupService virtualGroupService;
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject templatePreparationObject) {
-        String adminGroup = templatePreparationObject.getLdapConfig().map(LdapView::getAdminGroup).get();
-        return List.of(
-                config(ZEPPELIN_ADMIN_GROUP, adminGroup));
+        String adminGroup = virtualGroupService.getVirtualGroup(templatePreparationObject.getVirtualGroupRequest(), UmsRight.ZEPPELIN_ADMIN.getRight());
+        return List.of(config(ZEPPELIN_ADMIN_GROUP, adminGroup));
     }
 
     @Override
@@ -38,7 +42,6 @@ public class ZeppelinRoleConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes()) &&
-                source.getLdapConfig().isPresent() && StringUtils.isNotEmpty(source.getLdapConfig().get().getAdminGroup());
+        return cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
     }
 }

@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,6 +33,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
@@ -85,6 +89,7 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse.Builder;
+import com.sequenceiq.environment.environment.service.EnvironmentTestConstants;
 
 public class StackToTemplatePreparationObjectConverterTest {
 
@@ -201,6 +206,9 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Mock
     private StackUtil stackUtil;
 
+    @Mock
+    private VirtualGroupService virtualGroupService;
+
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
@@ -224,6 +232,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(stackMock.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
+        when(stackMock.getEnvironmentCrn()).thenReturn(EnvironmentTestConstants.CRN);
         Credential credential = Credential.builder()
                 .crn("aCredentialCRN")
                 .attributes(new Json(""))
@@ -266,7 +275,6 @@ public class StackToTemplatePreparationObjectConverterTest {
         BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
         when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
         when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
-        when(stackMock.getEnvironmentCrn()).thenReturn("envCredentialCRN");
         when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""),
                 configQueryEntries)).thenReturn(expected);
         when(cmCloudStorageConfigProvider.getConfigQueryEntries()).thenReturn(configQueryEntries);
@@ -455,6 +463,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Test
     public void testMockAccountMappings() {
+        when(virtualGroupService.getVirtualGroup(any(VirtualGroupRequest.class), eq(UmsRight.CLOUDER_MANAGER_ADMIN.getRight()))).thenReturn("mockAdmins");
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         AccountMappingView accountMappingView = result.getAccountMappingView();

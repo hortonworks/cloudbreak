@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -81,6 +82,8 @@ public class TemplatePreparationObject {
 
     private final StackType stackType;
 
+    private final VirtualGroupRequest virtualGroupRequest;
+
     private TemplatePreparationObject(Builder builder) {
         cloudPlatform = builder.cloudPlatform;
         rdsConfigs = builder.rdsConfigs.stream().collect(Collectors.toMap(
@@ -105,6 +108,7 @@ public class TemplatePreparationObject {
         productDetailsView = builder.productDetailsView;
         exposedServices = builder.exposedServices;
         stackType = builder.stackType;
+        virtualGroupRequest = builder.virtualGroupRequest;
     }
 
     public Stream<HostgroupView> getHostGroupsWithComponent(String component) {
@@ -198,6 +202,10 @@ public class TemplatePreparationObject {
         return stackType;
     }
 
+    public VirtualGroupRequest getVirtualGroupRequest() {
+        return virtualGroupRequest;
+    }
+
     public static class Builder {
 
         private CloudPlatform cloudPlatform;
@@ -239,6 +247,8 @@ public class TemplatePreparationObject {
         private StackType stackType;
 
         private Map<String, Collection<ClusterExposedServiceView>> exposedServices = new HashMap<>();
+
+        private VirtualGroupRequest virtualGroupRequest;
 
         public static Builder builder() {
             return new Builder();
@@ -364,6 +374,11 @@ public class TemplatePreparationObject {
 
         public Builder withStackType(StackType stackType) {
             this.stackType = stackType;
+            return this;
+        }
+
+        public Builder withVirtualGroupView(VirtualGroupRequest virtualGroupRequest) {
+            this.virtualGroupRequest = virtualGroupRequest;
             return this;
         }
 
