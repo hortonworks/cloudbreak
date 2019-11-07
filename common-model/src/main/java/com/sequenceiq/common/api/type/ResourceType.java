@@ -59,9 +59,6 @@ public enum ResourceType {
     // YARN
     YARN_APPLICATION(CommonResourceType.TEMPLATE),
 
-    // CUMULUS_YARN
-    CUMULUS_YARN_SERVICE(CommonResourceType.TEMPLATE),
-
     // MOCK
     MOCK_INSTANCE;
 

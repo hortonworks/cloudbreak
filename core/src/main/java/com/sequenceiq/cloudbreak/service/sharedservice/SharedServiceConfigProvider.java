@@ -43,9 +43,6 @@ public class SharedServiceConfigProvider {
     private DatalakeResourcesService datalakeResourcesService;
 
     @Inject
-    private DatalakeConfigApiConnector datalakeConfigApiConnector;
-
-    @Inject
     private RemoteDataContextWorkaroundService remoteDataContextWorkaroundService;
 
     public Cluster configureCluster(@Nonnull Cluster requestedCluster, User user, Workspace workspace) {
@@ -73,16 +70,7 @@ public class SharedServiceConfigProvider {
                 Long datalakeResourceId = getDatalakeResourceIdFromEnvOrStack(publicStack, datalakeResources);
                 datalakeResource = datalakeResourcesService.findById(datalakeResourceId);
             }
-            Long datalakeStackId = getDatalakeStackId(publicStack, datalakeResource);
-            if (datalakeStackId != null) {
-                Stack datalakeStack = stackService.getById(datalakeStackId);
-                connector = datalakeConfigApiConnector.getConnector(datalakeStack);
-                if (!datalakeResource.isPresent()) {
-                    datalakeResource = Optional.of(
-                            ambariDatalakeConfigProvider.collectAndStoreDatalakeResources(datalakeStack, datalakeStack.getCluster(), connector));
-                }
-            }
-            if (connector != null && decorateStackWithConfigs(publicStack, connector, datalakeResource)) {
+            if (decorateStackWithConfigs(publicStack, datalakeResource)) {
                 return stackService.save(publicStack);
             }
             return publicStack;
@@ -92,15 +80,13 @@ public class SharedServiceConfigProvider {
         }
     }
 
-    private boolean decorateStackWithConfigs(Stack publicStack, DatalakeConfigApi connector, Optional<DatalakeResources> datalakeResource) throws IOException {
-        if (datalakeResource.isPresent() && connector != null) {
+    private boolean decorateStackWithConfigs(Stack publicStack, Optional<DatalakeResources> datalakeResource) throws IOException {
+        if (datalakeResource.isPresent()) {
             DatalakeResources datalakeResources = datalakeResource.get();
             publicStack.setDatalakeResourceId(datalakeResources.getId());
             Map<String, String> additionalParams = ambariDatalakeConfigProvider.getAdditionalParameters(publicStack, datalakeResources);
-            Map<String, String> blueprintConfigParams =
-                    ambariDatalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, publicStack, connector);
             StackInputs stackInputs = publicStack.getInputs().get(StackInputs.class);
-            stackInputs.setDatalakeInputs((Map) blueprintConfigParams);
+            stackInputs.setDatalakeInputs(new HashMap<>());
             stackInputs.setFixInputs((Map) additionalParams);
             try {
                 publicStack.setInputs(new Json(stackInputs));

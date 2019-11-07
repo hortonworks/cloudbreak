@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
-import com.sequenceiq.environment.api.v1.credential.model.parameters.cumulus.CumulusYarnParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.GcpCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.mock.MockParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.OpenstackParameters;
@@ -83,11 +82,6 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
 
     public CredentialTestDto withYarnParameters(YarnParameters yarnParameters) {
         getRequest().setYarn(yarnParameters);
-        return this;
-    }
-
-    public CredentialTestDto withCumulusParameters(CumulusYarnParameters cumulusParameters) {
-        getRequest().setCumulus(cumulusParameters);
         return this;
     }
 

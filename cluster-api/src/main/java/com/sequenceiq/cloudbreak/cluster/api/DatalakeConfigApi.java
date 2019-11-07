@@ -5,7 +5,7 @@ import java.util.Map;
 
 public interface DatalakeConfigApi {
 
-    String CUMULUS = "CUMULUS";
+    String YARN = "YARN";
 
     Map<String, String> getConfigValuesByConfigIds(List<String> configIds);
 

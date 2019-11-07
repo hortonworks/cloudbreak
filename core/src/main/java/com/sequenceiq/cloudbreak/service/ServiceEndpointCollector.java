@@ -222,6 +222,7 @@ public class ServiceEndpointCollector {
         return Stream.empty();
     }
 
+    //CHECKSTYLE:OFF
     private List<String> getServiceUrlsForService(ExposedService exposedService, String managerIp, Gateway gateway,
             String topologyName, Map<String, List<String>> privateIps, boolean api, boolean autoTlsEnabled) {
         List<String> urls = new ArrayList<>();
@@ -252,6 +253,7 @@ public class ServiceEndpointCollector {
         }
         return urls;
     }
+    //CHECKSTYLE:ON
 
     private List<String> getJdbcUrlsForService(ExposedService exposedService, String managerIp, Gateway gateway, SecurityConfig securityConfig) {
         List<String> urls = new ArrayList<>();

@@ -242,7 +242,7 @@ cb:
 
   platform.default:
     variants: OPENSTACK:HEAT
-    regions: AWS:eu-west-1,AZURE:North Europe,GCP:europe-west1,YARN:default,CUMULUS_YARN:default,MOCK:USA
+    regions: AWS:eu-west-1,AZURE:North Europe,GCP:europe-west1,YARN:default,MOCK:USA
 
   gcp:
     hostkey.verify: false

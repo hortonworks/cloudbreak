@@ -21,9 +21,6 @@ public class CredentialV1RequestToCredentialConverter {
     private AzureCredentialV1ParametersToAzureCredentialAttributesConverter azureConverter;
 
     @Inject
-    private CumulusCredentialV1ParametersToCumulusCredentialAttributesConverter cumulusConverter;
-
-    @Inject
     private GcpCredentialV1ParametersToGcpCredentialAttributesConverter gcpConverter;
 
     @Inject
@@ -53,7 +50,6 @@ public class CredentialV1RequestToCredentialConverter {
         doIfNotNull(source.getAws(), param -> credentialAttributes.setAws(awsConverter.convert(param)));
         doIfNotNull(source.getAzure(), param -> credentialAttributes.setAzure(azureConverter.convert(param)));
         doIfNotNull(source.getGcp(), param -> credentialAttributes.setGcp(gcpConverter.convert(param)));
-        doIfNotNull(source.getCumulus(), param -> credentialAttributes.setCumulus(cumulusConverter.convert(param)));
         doIfNotNull(source.getMock(), param -> credentialAttributes.setMock(mockConverter.convert(param)));
         doIfNotNull(source.getOpenstack(), param -> credentialAttributes.setOpenstack(openstackConverter.convert(param)));
         doIfNotNull(source.getYarn(), param -> credentialAttributes.setYarn(yarnConverter.convert(param)));

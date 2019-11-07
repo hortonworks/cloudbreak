@@ -43,9 +43,6 @@ public class CredentialToCredentialV1ResponseConverter {
     private AzureCredentialV1ParametersToAzureCredentialAttributesConverter azureConverter;
 
     @Inject
-    private CumulusCredentialV1ParametersToCumulusCredentialAttributesConverter cumulusConverter;
-
-    @Inject
     private GcpCredentialV1ParametersToGcpCredentialAttributesConverter gcpConverter;
 
     @Inject
@@ -90,7 +87,6 @@ public class CredentialToCredentialV1ResponseConverter {
             doIfNotNull(credentialAttributes.getAzure(), param -> response.setAzure(azureConverter.convert(param)));
             doIfNotNull(credentialAttributes.getGcp(), param -> response.setGcp(gcpConverter.convert(param)));
             doIfNotNull(credentialAttributes.getOpenstack(), param -> response.setOpenstack(openstackConverter.convert(param)));
-            doIfNotNull(credentialAttributes.getCumulus(), param -> response.setCumulus(cumulusConverter.convert(param)));
             doIfNotNull(credentialAttributes.getMock(), param -> response.setMock(mockConverter.convert(param)));
             doIfNotNull(credentialAttributes.getYarn(), param -> response.setYarn(yarnConverter.convert(param)));
         } catch (IOException e) {
@@ -135,7 +131,6 @@ public class CredentialToCredentialV1ResponseConverter {
         doIfNotNull(source.getAws(), params -> credentialAttributes.setAws(awsConverter.convert(params)));
         doIfNotNull(source.getAzure(), params -> credentialAttributes.setAzure(azureConverter.convert(params)));
         doIfNotNull(source.getGcp(), params -> credentialAttributes.setGcp(gcpConverter.convert(params)));
-        doIfNotNull(source.getCumulus(), params -> credentialAttributes.setCumulus(cumulusConverter.convert(params)));
         doIfNotNull(source.getMock(), params -> credentialAttributes.setMock(mockConverter.convert(params)));
         doIfNotNull(source.getOpenstack(), params -> credentialAttributes.setOpenstack(openstackConverter.convert(params)));
         doIfNotNull(source.getYarn(), params -> credentialAttributes.setYarn(yarnConverter.convert(params)));

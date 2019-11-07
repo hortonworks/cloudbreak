@@ -163,8 +163,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             LOGGER.info("Generated Cloudera cluster template: {}", AnonymizerUtil.anonymize(cluster.getExtendedBlueprintText()));
             ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
 
-            removeRemoteParcelRepos(clouderaManagerResourceApi);
-            setHeader(clouderaManagerResourceApi, stack.getType());
+            updateConfig(clouderaManagerResourceApi, stack.getType());
             boolean prewarmed = isPrewarmed(clusterId);
             if (prewarmed) {
                 refreshParcelRepos(clouderaManagerResourceApi);
@@ -263,26 +262,23 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         clusterInstallCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(stack, apiClient, cmd.getId()));
     }
 
-    private void removeRemoteParcelRepos(ClouderaManagerResourceApi clouderaManagerResourceApi) {
-        try {
-            ApiConfigList apiConfigList = new ApiConfigList()
-                    .addItemsItem(new ApiConfig().name("remote_parcel_repo_urls").value(""));
-            clouderaManagerResourceApi.updateConfig("Updated configurations.", apiConfigList);
-        } catch (ApiException e) {
-            LOGGER.info("Error while updating remote parcel repos. Message {}, throwable: {}", e.getMessage(), e);
-            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
-        }
+    private ApiConfig removeRemoteParcelRepos() {
+        return new ApiConfig().name("remote_parcel_repo_urls").value("");
     }
 
-    private void setHeader(ClouderaManagerResourceApi clouderaManagerResourceApi,
+    private ApiConfig setHeader(com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType stackType) {
+        return new ApiConfig().name("custom_header_color").value(StackType.DATALAKE.equals(stackType) ? "RED" : "BLUE");
+    }
+
+    private void updateConfig(ClouderaManagerResourceApi clouderaManagerResourceApi,
         com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType stackType) {
         try {
             ApiConfigList apiConfigList = new ApiConfigList()
-                    .addItemsItem(new ApiConfig().name("custom_header_color")
-                            .value(StackType.DATALAKE.equals(stackType) ? "RED" : "BLUE"));
-            clouderaManagerResourceApi.updateConfig("Updated Header.", apiConfigList);
+                    .addItemsItem(removeRemoteParcelRepos())
+                    .addItemsItem(setHeader(stackType));
+            clouderaManagerResourceApi.updateConfig("Updated configurations.", apiConfigList);
         } catch (ApiException e) {
-            LOGGER.info("Error while updating header. Message {}, throwable: {}", e.getMessage(), e);
+            LOGGER.info("Error while updating configurations. Message {}, throwable: {}", e.getMessage(), e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
     }

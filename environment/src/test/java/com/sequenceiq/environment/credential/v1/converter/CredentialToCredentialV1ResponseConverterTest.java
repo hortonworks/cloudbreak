@@ -38,9 +38,6 @@ public class CredentialToCredentialV1ResponseConverterTest {
     private AzureCredentialV1ParametersToAzureCredentialAttributesConverter azureConverter;
 
     @MockBean
-    private CumulusCredentialV1ParametersToCumulusCredentialAttributesConverter cumulusConverter;
-
-    @MockBean
     private GcpCredentialV1ParametersToGcpCredentialAttributesConverter gcpConverter;
 
     @MockBean
