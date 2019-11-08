@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
@@ -44,19 +45,23 @@ public class AwsSessionCredentialClient {
     }
 
     public BasicSessionCredentials retrieveSessionCredentials(AwsCredentialView awsCredential) {
-        LOGGER.debug("retrieving session credential");
-
         String externalId = awsCredential.getExternalId();
         AssumeRoleRequest assumeRoleRequest = new AssumeRoleRequest()
                 .withDurationSeconds(DEFAULT_SESSION_CREDENTIALS_DURATION)
                 .withExternalId(StringUtils.isEmpty(externalId) ? deprecatedExternalId : externalId)
                 .withRoleArn(awsCredential.getRoleArn())
                 .withRoleSessionName(roleSessionName);
-        AssumeRoleResult result = awsSecurityTokenServiceClient(awsCredential).assumeRole(assumeRoleRequest);
-        return new BasicSessionCredentials(
-                result.getCredentials().getAccessKeyId(),
-                result.getCredentials().getSecretAccessKey(),
-                result.getCredentials().getSessionToken());
+        LOGGER.debug("Trying to assume role with role arn {}", awsCredential.getRoleArn());
+        try {
+            AssumeRoleResult result = awsSecurityTokenServiceClient(awsCredential).assumeRole(assumeRoleRequest);
+            return new BasicSessionCredentials(
+                    result.getCredentials().getAccessKeyId(),
+                    result.getCredentials().getSecretAccessKey(),
+                    result.getCredentials().getSessionToken());
+        } catch (SdkClientException e) {
+            LOGGER.error("Unable to assume role. Check exception for details.", e);
+            throw e;
+        }
     }
 
     private AWSSecurityTokenService awsSecurityTokenServiceClient(AwsCredentialView awsCredential) {
