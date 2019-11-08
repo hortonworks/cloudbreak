@@ -52,7 +52,7 @@ public class StackPreTerminationHandler implements EventHandler<StackPreTerminat
             Cluster cluster = stack.getCluster();
             if (cluster != null) {
                 Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(cluster.getId());
-                recipeEngine.executePreTerminationRecipes(stack, hostGroups);
+                recipeEngine.executePreTerminationRecipes(stack, hostGroups, request.getForced());
                 preTerminationStateExecutor.runPreteraminationTasks(stack);
             }
         } catch (Exception ex) {
