@@ -142,42 +142,46 @@ public class UpgradeService {
 
     private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> getImageFilter(Image image, boolean baseImage, Stack stack) {
         if (baseImage) {
-            return packageVersionFilter(image.getPackageVersions());
+            return packageVersionFilter(image.getPackageVersions(), baseImage);
         } else {
-            return packageVersionFilter(image.getPackageVersions())
+            return packageVersionFilter(image.getPackageVersions(), baseImage)
                     .and(parcelFilter(stack));
         }
     }
 
     private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> parcelFilter(Stack stack) {
-        Set<String> parcels = clusterComponentConfigProvider.getClouderaManagerProductDetails(stack.getCluster().getId())
+        Set<String> originalClusterComponentUrls = clusterComponentConfigProvider.getClouderaManagerProductDetails(stack.getCluster().getId())
                 .stream()
                 .map(ClouderaManagerProduct::getParcel)
                 .collect(toSet());
+        originalClusterComponentUrls.add(clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId()).getBaseUrl());
         return imageFromCatalaog -> {
             if (imageFromCatalaog.getPreWarmParcels() == null) {
                 return false;
             } else {
-                Set<String> imageParcels = imageFromCatalaog.getPreWarmParcels()
+                Set<String> newClusterComponentUrls = imageFromCatalaog.getPreWarmParcels()
                         .stream()
                         .map(parts -> parts.get(1))
                         .collect(toSet());
-                if (imageFromCatalaog.getStackDetails() != null) {
-                    imageParcels.add(imageFromCatalaog.getStackDetails().getRepo().getStack().get(imageFromCatalaog.getOsType()));
-                }
-                return imageParcels
-                        .equals(parcels);
+                newClusterComponentUrls.add(imageFromCatalaog.getStackDetails().getRepo().getStack().get(imageFromCatalaog.getOsType()));
+                newClusterComponentUrls.add(imageFromCatalaog.getRepo().get(imageFromCatalaog.getOsType()));
+                return newClusterComponentUrls
+                        .equals(originalClusterComponentUrls);
             }
         };
     }
 
-    private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> packageVersionFilter(Map<String, String> packageVersions) {
+    private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> packageVersionFilter(Map<String, String> packageVersions, boolean baseImage) {
         return image -> {
             Map<String, String> catalogPackageVersions = new HashMap<>(image.getPackageVersions());
             catalogPackageVersions.remove(SALT_BOOTSTRAP);
             Map<String, String> originalPackageVersions = new HashMap<>(packageVersions);
             originalPackageVersions.remove(SALT_BOOTSTRAP);
-            return originalPackageVersions.equals(catalogPackageVersions);
+            if (baseImage) {
+                return originalPackageVersions.entrySet().containsAll(catalogPackageVersions.entrySet());
+            } else {
+                return originalPackageVersions.equals(catalogPackageVersions);
+            }
         };
     }
 
