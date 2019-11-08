@@ -13,6 +13,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
 import com.google.common.collect.ImmutableMap;
+import com.googlecode.jsonrpc4j.JsonRpcClient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.client.CookieStore;
@@ -73,10 +74,12 @@ public class FreeIpaClientBuilder {
 
     private final HttpClientConfig clientConfig;
 
+    private final JsonRpcClient.RequestListener rpcRequestListener;
+
     private Map<String, String> additionalHeaders;
 
     public FreeIpaClientBuilder(String user, String pass, String realm, HttpClientConfig clientConfig, int port, String basePath,
-                                Map<String, String> additionalHeaders) throws Exception {
+                                Map<String, String> additionalHeaders, JsonRpcClient.RequestListener rpcRequestListener) throws Exception {
         this.user = user;
         this.pass = pass;
         this.realm = realm;
@@ -101,11 +104,12 @@ public class FreeIpaClientBuilder {
 
         this.basePath = basePath;
         this.additionalHeaders = Map.copyOf(additionalHeaders);
+        this.rpcRequestListener = rpcRequestListener;
     }
 
     public FreeIpaClientBuilder(String user, String pass, String realm,
                                 HttpClientConfig clientConfig, int port) throws Exception {
-        this(user, pass, realm, clientConfig, port, DEFAULT_BASE_PATH, Map.of());
+        this(user, pass, realm, clientConfig, port, DEFAULT_BASE_PATH, Map.of(), null);
     }
 
     public FreeIpaClient build() throws URISyntaxException, FreeIpaClientException, IOException {
@@ -125,6 +129,7 @@ public class FreeIpaClientBuilder {
 
         jsonRpcHttpClient.setHostNameVerifier(hostnameVerifier());
         jsonRpcHttpClient.setReadTimeoutMillis(READ_TIMEOUT_MILLIS);
+        jsonRpcHttpClient.setRequestListener(rpcRequestListener);
         return new FreeIpaClient(jsonRpcHttpClient);
     }
 

@@ -4,6 +4,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.googlecode.jsonrpc4j.JsonRpcClient;
+import com.sequenceiq.freeipa.client.ClusterProxyErrorRpcListener;
 import com.sequenceiq.freeipa.service.config.FmsClusterProxyEnablement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,8 @@ public class FreeIpaClientFactory {
     private static final String ADMIN_USER = "admin";
 
     private static final Map<String, String> ADDITIONAL_CLUSTER_PROXY_HEADERS =  Map.of("Proxy-Ignore-Auth", "true");
+
+    private static final JsonRpcClient.RequestListener CLUSTER_PROXY_ERROR_LISTENER = new ClusterProxyErrorRpcListener();
 
     @Inject
     private ClusterProxyConfiguration clusterProxyConfiguration;
@@ -75,12 +79,13 @@ public class FreeIpaClientFactory {
                 String clusterProxyPath = toClusterProxyBasepath(stack.getResourceCrn());
 
                 return new FreeIpaClientBuilder(ADMIN_USER,
-                    freeIpa.getAdminPassword(),
-                    freeIpa.getDomain().toUpperCase(),
-                    httpClientConfig,
-                    clusterProxyConfiguration.getClusterProxyPort(),
-                    clusterProxyPath,
-                    ADDITIONAL_CLUSTER_PROXY_HEADERS).build();
+                        freeIpa.getAdminPassword(),
+                        freeIpa.getDomain().toUpperCase(),
+                        httpClientConfig,
+                        clusterProxyConfiguration.getClusterProxyPort(),
+                        clusterProxyPath,
+                        ADDITIONAL_CLUSTER_PROXY_HEADERS,
+                        CLUSTER_PROXY_ERROR_LISTENER).build();
             } else {
                 GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
                 HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(
