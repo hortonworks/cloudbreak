@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
@@ -127,10 +128,23 @@ public class UpgradeService {
                 StatedImage latestImage = imageService
                         .determineImageFromCatalog(workspaceId, imageSettingsV4Request, stack.getCloudPlatform().toLowerCase(), blueprint, baseImage, user,
                                 getImageFilter(image, baseImage, stack));
+                ImageInfoV4Response currentImageInfo = new ImageInfoV4Response(
+                        image.getImageName(),
+                        image.getImageId(),
+                        image.getImageCatalogName(),
+                        imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId()).getImage().getCreated());
                 if (!Objects.equals(image.getImageId(), latestImage.getImage().getUuid())) {
-                    return new UpgradeOptionV4Response(latestImage.getImage().getUuid(), image.getImageCatalogName());
+                    ImageInfoV4Response upgradeImageInfo = new ImageInfoV4Response(
+                            latestImage.getImage().getImageSetsByProvider().get(stack.getPlatformVariant().toLowerCase()).get(stack.getRegion()),
+                            latestImage.getImage().getUuid(),
+                            latestImage.getImageCatalogName(),
+                            latestImage.getImage().getCreated()
+                    );
+                    return new UpgradeOptionV4Response(currentImageInfo, upgradeImageInfo);
                 } else {
-                    return new UpgradeOptionV4Response();
+                    UpgradeOptionV4Response upgradeOptionV4Response = new UpgradeOptionV4Response();
+                    upgradeOptionV4Response.setCurrent(currentImageInfo);
+                    return upgradeOptionV4Response;
                 }
             } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                 throw new BadRequestException(e.getMessage());

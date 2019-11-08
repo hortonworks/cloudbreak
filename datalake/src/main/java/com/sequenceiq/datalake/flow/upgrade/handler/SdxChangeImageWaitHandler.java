@@ -57,7 +57,7 @@ public class SdxChangeImageWaitHandler implements EventHandler<SdxChangeImageWai
             PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
             upgradeService.waitCloudbreakFlow(sdxId, pollingConfig, "Change image");
             String imageId = upgradeService.getImageId(sdxId);
-            String expectedImageId = request.getUpgradeOption().getImageId();
+            String expectedImageId = request.getUpgradeOption().getUpgrade().getImageId();
             if (Objects.equals(imageId, expectedImageId)) {
                 response = new SdxImageChangedEvent(sdxId, userId, requestId);
             } else {

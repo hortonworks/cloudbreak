@@ -111,7 +111,7 @@ public class UpgradeServiceTest {
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
                 .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false), eq(user), any());
-        assertThat(result.getImageId()).isEqualTo("id-2");
+        assertThat(result.getUpgrade().getImageId()).isEqualTo("id-2");
     }
 
     @Test
@@ -128,7 +128,7 @@ public class UpgradeServiceTest {
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
                 .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(true), eq(user), any());
-        assertThat(result.getImageId()).isEqualTo(null);
+        assertThat(result.getUpgrade()).isEqualTo(null);
     }
 
     private void setUpMocks(Stack stack, Image image, boolean prewarmedImage, String oldImage, String newImage)
@@ -162,6 +162,7 @@ public class UpgradeServiceTest {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         lenient().when(image.isPrewarmed()).thenReturn(prewarmed);
         lenient().when(image.getUuid()).thenReturn(imageId);
+        lenient().when(image.getImageSetsByProvider()).thenReturn(Map.of("aws", Map.of("eu-central-1", "ami-1234")));
         StatedImage statedImage = StatedImage.statedImage(image, null, null);
         return statedImage;
     }
@@ -171,6 +172,7 @@ public class UpgradeServiceTest {
         stack.setId(1L);
         stack.setEnvironmentCrn("env-crn");
         stack.setCloudPlatform("AWS");
+        stack.setPlatformVariant("AWS");
         Blueprint blueprint = new Blueprint();
         Cluster cluster = new Cluster();
         cluster.setId(1L);

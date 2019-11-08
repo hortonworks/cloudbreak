@@ -85,8 +85,8 @@ public class SdxUpgradeService {
         Optional<SdxCluster> cluster = sdxClusterRepository.findById(id);
         if (cluster.isPresent()) {
             StackImageChangeV4Request stackImageChangeRequest = new StackImageChangeV4Request();
-            stackImageChangeRequest.setImageId(upgradeOption.getImageId());
-            stackImageChangeRequest.setImageCatalogName(upgradeOption.getImageCatalogName());
+            stackImageChangeRequest.setImageId(upgradeOption.getUpgrade().getImageId());
+            stackImageChangeRequest.setImageCatalogName(upgradeOption.getUpgrade().getImageCatalogName());
             sdxStatusService.setStatusForDatalakeAndNotify(
                     DatalakeStatusEnum.CHANGE_IMAGE_IN_PROGRESS,
                     ResourceEvent.SDX_CHANGE_IMAGE_STARTED,
