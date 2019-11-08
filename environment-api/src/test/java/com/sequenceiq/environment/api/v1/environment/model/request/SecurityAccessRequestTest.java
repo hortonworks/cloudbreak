@@ -25,7 +25,7 @@ class SecurityAccessRequestTest {
 
     static Object[][] cidrDataProvider() {
         return new Object[][] {
-            { null, true },
+            { null, false },
             { "", false },
             { "asdf", false },
             { "0.0.0.0", false },

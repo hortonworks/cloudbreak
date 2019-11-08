@@ -25,6 +25,7 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
+import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
@@ -114,13 +115,29 @@ public class AzureEnvironmentSecurityGroupValidatorTest {
         EnvironmentDto environmentDto = EnvironmentDto.builder()
                 .withRegions(Set.of(region))
                 .withSecurityAccess(getNewSecurityAccessDto())
-                .withNetwork(getNewNetworkDto())
+                .withNetwork(getNewNetworkDto(false, false))
                 .withCredential(getCredential())
                 .build();
 
         ValidationResult.ValidationResultBuilder builder = ValidationResult.builder();
         underTest.validate(environmentDto, builder);
         requestIsValid(builder);
+    }
+
+    @Test
+    public void testValidationWhenBothCidrAndNoFirewallRulesAreDefinedReturnInvalid() {
+        Region region = getRegion();
+
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withRegions(Set.of(region))
+                .withSecurityAccess(getNewSecurityAccessDto())
+                .withNetwork(getNewNetworkDto(true, true))
+                .withCredential(getCredential())
+                .build();
+
+        ValidationResult.ValidationResultBuilder builder = ValidationResult.builder();
+        underTest.validate(environmentDto, builder);
+        requestIsInvalid(builder);
     }
 
     private void requestIsValid(ValidationResult.ValidationResultBuilder builder) {
@@ -144,9 +161,20 @@ public class AzureEnvironmentSecurityGroupValidatorTest {
                 .build();
     }
 
-    private NetworkDto getNewNetworkDto() {
+    private NetworkDto getNewNetworkDto(boolean noFirewallRules, boolean noPublicIp) {
         return NetworkDto.builder()
                 .withNetworkCidr("0.0.0.0/0")
+                .withAzure(getAzureParams(noFirewallRules, noPublicIp))
+                .build();
+    }
+
+    private AzureParams getAzureParams(boolean noFirewallRules, boolean noPublicIp) {
+        return AzureParams.AzureParamsBuilder
+                .anAzureParams()
+                .withNetworkId("aNetworkId")
+                .withResourceGroupName("aResourceGroupId")
+                .withNoFirewallRules(noFirewallRules)
+                .withNoPublicIp(noPublicIp)
                 .build();
     }
 

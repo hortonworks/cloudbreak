@@ -5,10 +5,13 @@ import java.lang.reflect.InvocationTargetException;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@MutuallyExclusiveNotNull(fieldGroups = {"securityGroupIdForKnox,defaultSecurityGroupId", "cidr"},
+        message = "Please set either only the CIDR field or both security group id fields")
 public abstract class SecurityAccessBase {
 
     @Size(max = 255, message = "The length of the security group ID can be maximum 255 characters.")
