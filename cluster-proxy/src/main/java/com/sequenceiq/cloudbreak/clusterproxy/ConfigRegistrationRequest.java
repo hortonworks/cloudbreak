@@ -55,6 +55,7 @@ public class ConfigRegistrationRequest {
         return services;
     }
 
+    //CHECKSTYLE:OFF: CyclomaticComplexity
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -65,6 +66,7 @@ public class ConfigRegistrationRequest {
         }
         ConfigRegistrationRequest that = (ConfigRegistrationRequest) o;
         return useTunnel == that.useTunnel &&
+                Objects.equals(accountId, that.accountId) &&
                 Objects.equals(clusterCrn, that.clusterCrn) &&
                 Objects.equals(uriOfKnox, that.uriOfKnox) &&
                 Objects.equals(aliases, that.aliases) &&
@@ -72,16 +74,18 @@ public class ConfigRegistrationRequest {
                 Objects.equals(certificates, that.certificates) &&
                 Objects.equals(tunnels, that.tunnels);
     }
+    //CHECKSTYLE:ON
 
     @Override
     public int hashCode() {
-        return Objects.hash(clusterCrn, uriOfKnox, aliases, services, certificates, useTunnel, tunnels);
+        return Objects.hash(accountId, clusterCrn, uriOfKnox, aliases, services, certificates, useTunnel, tunnels);
     }
 
     @Override
     public String toString() {
         return "ConfigRegistrationRequest{" +
-                "clusterCrn='" + clusterCrn + '\'' +
+                "accountId='" + accountId + '\'' +
+                ", clusterCrn='" + clusterCrn + '\'' +
                 ", uriOfKnox='" + uriOfKnox + '\'' +
                 ", aliases=" + aliases +
                 ", services=" + services +
