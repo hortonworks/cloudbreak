@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import com.cedarsoftware.util.io.JsonReader;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
@@ -551,8 +552,20 @@ public class StackService implements ResourceIdProvider {
 
         CcmParameters ccmParameters = null;
         if ((ccmParameterSupplier != null) && Boolean.TRUE.equals(stack.getUseCcm())) {
+            ImmutableMap.Builder<KnownServiceIdentifier, Integer> builder = ImmutableMap.builder();
+
+            // Configure a tunnel for nginx
             int gatewayPort = Optional.ofNullable(stack.getGatewayPort()).orElse(ServiceFamilies.GATEWAY.getDefaultPort());
-            Map<KnownServiceIdentifier, Integer> tunneledServicePorts = Collections.singletonMap(KnownServiceIdentifier.GATEWAY, gatewayPort);
+            builder.put(KnownServiceIdentifier.GATEWAY, gatewayPort);
+
+            // Optionally configure a tunnel for (nginx fronting) Knox
+            if (stack.getCluster().getGateway() != null) {
+                // JSA TODO Do we support a non-default port for the nginx that fronts Knox?
+                builder.put(KnownServiceIdentifier.KNOX, ServiceFamilies.KNOX.getDefaultPort());
+            }
+
+            Map<KnownServiceIdentifier, Integer> tunneledServicePorts = builder.build();
+
             // JSA TODO Use stack ID or something else instead?
             String keyId = StringUtils.right(stack.getResourceCrn(), CCM_KEY_ID_LENGTH);
             String actorCrn = Objects.requireNonNull(userCrn, "userCrn is null");
