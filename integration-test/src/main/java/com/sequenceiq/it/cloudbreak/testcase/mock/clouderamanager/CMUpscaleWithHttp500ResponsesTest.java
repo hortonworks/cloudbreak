@@ -161,7 +161,7 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
                 .withName(clusterName)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .when(StackScalePostAction.valid().withDesiredCount(desiredWorkerCount))
+                .when(StackScalePostAction.valid().withDesiredCount(desiredWorkerCount).withForced(Boolean.FALSE))
                 .await(StackTestDto.class, STACK_AVAILABLE)
                 .then(MockVerification.verify(POST, ITResponse.MOCK_ROOT + "/cloud_instance_statuses").exactTimes(1))
                 .then(MockVerification.verify(POST, ITResponse.MOCK_ROOT + "/cloud_metadata_statuses")
@@ -172,7 +172,6 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
                 .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=saltutil.sync_all").atLeast(1))
                 .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=mine.update").atLeast(1))
                 .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=state.highstate").atLeast(2))
-                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=grains.remove").exactTimes(4))
                 .then(MockVerification.verify(GET,
                         new ClouderaManagerPathResolver(LIST_HOSTS)
                                 .pathVariableMapping(":clusterName", clusterName)

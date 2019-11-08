@@ -83,10 +83,10 @@ public class RecipeEngine {
         }
     }
 
-    public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups, boolean forced) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (shouldExecuteRecipeOnStack(hostGroups, orchestrator, PRE_TERMINATION)) {
-            orchestratorRecipeExecutor.preTerminationRecipes(stack);
+            orchestratorRecipeExecutor.preTerminationRecipes(stack, forced);
         }
     }
 
