@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +62,11 @@ public class EC2ClientActions extends EC2Client {
                 .map(InstanceBlockDeviceMapping::getEbs)
                 .map(EbsInstanceBlockDevice::getVolumeId)
                 .collect(Collectors.toList());
-        volumeIds.forEach(volumeId -> Log.log(LOGGER, format(" Attached volume ID is [%s] for [%s] EC2 instance ", volumeId), instance));
+
+        Map<String, String> map = IntStream.range(0, instanceIds.size()).boxed()
+                .collect(Collectors.toMap(instanceIds::get, volumeIds::get));
+
+        map.forEach((instanceId, volumeId) -> Log.log(LOGGER, format(" Attached volume ID is [%s] for [%s] EC2 instance ", volumeId, instanceId)));
         return volumeIds;
     }
 
