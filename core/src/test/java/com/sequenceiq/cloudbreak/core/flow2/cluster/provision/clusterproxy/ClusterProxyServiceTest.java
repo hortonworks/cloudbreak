@@ -132,13 +132,13 @@ public class ClusterProxyServiceTest {
 
     private ConfigRegistrationRequest configRegistrationRequest() {
         return new ConfigRegistrationRequestBuilder(STACK_CRN)
-                .with(List.of(String.valueOf(CLUSTER_ID)), List.of(cmServiceConfig(), cmInternalServiceConfig()), null).build();
+                .withAliases(List.of(String.valueOf(CLUSTER_ID))).withServices(List.of(cmServiceConfig(), cmInternalServiceConfig())).build();
     }
 
     private ConfigRegistrationRequest configRegistrationRequestWithTunnelEntries() {
         List<TunnelEntry> tunnelEntries = List.of(new TunnelEntry("i-abc123", "GATEWAY", "10.10.10.10", 443));
         return new ConfigRegistrationRequestBuilder(STACK_CRN)
-                .with(List.of(String.valueOf(CLUSTER_ID)), List.of(cmServiceConfig(), cmInternalServiceConfig()), null)
+                .withAliases(List.of(String.valueOf(CLUSTER_ID))).withServices(List.of(cmServiceConfig(), cmInternalServiceConfig()))
                 .withAccountId(TEST_ACCOUNT_ID)
                 .withTunnelEntries(tunnelEntries).build();
     }

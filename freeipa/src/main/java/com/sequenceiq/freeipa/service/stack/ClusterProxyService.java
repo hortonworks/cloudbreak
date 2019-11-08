@@ -90,7 +90,7 @@ public class ClusterProxyService {
         List<ClusterServiceConfig> serviceConfigs = List.of(serviceConfig);
         LOGGER.debug("Registering service configs [{}]", serviceConfigs);
         ConfigRegistrationRequest request = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
-                .with(List.of(), serviceConfigs, null).build();
+                .withServices(serviceConfigs).build();
         ConfigRegistrationResponse response = clusterProxyRegistrationClient.registerConfig(request);
 
         stackUpdater.updateClusterProxyRegisteredFlag(stack, true);
