@@ -37,11 +37,10 @@ dependencies {
   testImplementation "net.javacrumbs.json-unit:json-unit:1.28.2"
   testImplementation project(path: ":template-manager-core", configuration: "tests")
   testImplementation project(path: ":core-model", configuration: "tests")
+  testImplementation project(path: ':common', configuration: 'tests')
   testImplementation group: "org.junit.jupiter",         name: "junit-jupiter-api",              version: junitJupiterVersion
   testImplementation group: "org.mockito",               name: "mockito-junit-jupiter",          version: mockitoVersion
   testImplementation group: 'org.assertj',               name: 'assertj-core',                   version: assertjVersion
-
-  testImplementation project(":environment").sourceSets.test.output
 
   testRuntimeOnly    group: "org.junit.jupiter",         name: "junit-jupiter-engine",           version: junitJupiterVersion
   testRuntimeOnly    group: 'org.junit.vintage',         name: 'junit-vintage-engine',           version: junitJupiterVersion

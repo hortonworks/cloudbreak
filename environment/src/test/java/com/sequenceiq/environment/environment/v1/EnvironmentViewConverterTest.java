@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.v1;
 
-import static com.sequenceiq.environment.environment.service.EnvironmentTestConstants.ACCOUNT_ID;
-import static com.sequenceiq.environment.environment.service.EnvironmentTestConstants.CRN;
+import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
+import static com.sequenceiq.cloudbreak.util.TestConstants.CRN;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.CLOUD_PLATFORM;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.DESCRIPTION;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;

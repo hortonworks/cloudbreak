@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.environment.environment.service.EnvironmentTestConstants;
+import com.sequenceiq.cloudbreak.util.TestConstants;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RangerRoleConfigProviderTest {
@@ -96,7 +96,7 @@ public class RangerRoleConfigProviderTest {
                 .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
                 .withRdsConfigs(Set.of(rdsConfig(DatabaseType.RANGER)))
                 .withLdapConfig(ldapView)
-                .withVirtualGroupView(new VirtualGroupRequest(EnvironmentTestConstants.CRN, "")).build();
+                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, "")).build();
         Mockito.when(virtualGroupService.getVirtualGroup(preparationObject.getVirtualGroupRequest(), UmsRight.RANGER_ADMIN.getRight())).thenReturn("cdh_test");
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);

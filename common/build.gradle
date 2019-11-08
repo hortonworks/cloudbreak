@@ -74,6 +74,21 @@ dependencies {
   testRuntimeOnly    group: "org.junit.vintage",         name: "junit-vintage-engine",                     version: junitJupiterVersion
 }
 
+task testJar(type: Jar, dependsOn: testClasses) {
+  baseName = "test-${project.archivesBaseName}"
+  classifier 'test'
+  from sourceSets.test.output
+  from sourceSets.main.output
+}
+
+configurations {
+  tests
+}
+
+artifacts {
+  tests testJar
+}
+
 test{
   useJUnitPlatform {
     excludeTags "outofscope"
