@@ -25,7 +25,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
-import com.sequenceiq.environment.environment.service.EnvironmentTestConstants;
+import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 
 import reactor.bus.Event;
@@ -33,7 +33,7 @@ import reactor.bus.Event;
 @ExtendWith(MockitoExtension.class)
 public class EnvironmentUMSResourceDeleteHandlerTest {
 
-    private static final String TEST_CRN = EnvironmentTestConstants.CRN;
+    private static final String TEST_CRN = TestConstants.CRN;
 
     @InjectMocks
     private EnvironmentUMSResourceDeleteHandler underTest;

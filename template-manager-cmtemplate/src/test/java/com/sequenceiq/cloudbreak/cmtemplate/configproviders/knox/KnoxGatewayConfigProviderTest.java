@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.environment.environment.service.EnvironmentTestConstants;
+import com.sequenceiq.cloudbreak.util.TestConstants;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KnoxGatewayConfigProviderTest {
@@ -134,7 +134,7 @@ public class KnoxGatewayConfigProviderTest {
         TemplatePreparationObject source = Builder.builder()
                 .withGateway(gateway, "key")
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
-                .withVirtualGroupView(new VirtualGroupRequest(EnvironmentTestConstants.CRN, "")).build();
+                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, "")).build();
         Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
 
         assertEquals(
@@ -167,7 +167,7 @@ public class KnoxGatewayConfigProviderTest {
         gcc.setPassword("secret");
         TemplatePreparationObject source = Builder.builder()
                 .withGeneralClusterConfigs(gcc)
-                .withVirtualGroupView(new VirtualGroupRequest(EnvironmentTestConstants.CRN, "")).build();
+                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, "")).build();
         Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
         assertEquals(
                 List.of(
@@ -198,7 +198,7 @@ public class KnoxGatewayConfigProviderTest {
                 .withGateway(gateway, "key")
                 .withLdapConfig(ldapConfig)
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
-                .withVirtualGroupView(new VirtualGroupRequest(EnvironmentTestConstants.CRN, "")).build();
+                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, "")).build();
         Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("knox_admins");
 
         assertEquals(

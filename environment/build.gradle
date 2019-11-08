@@ -81,6 +81,7 @@ dependencies {
     implementation     group: 'com.cloudera.cdp',          name: 'cdp-sdk-java',                             version: cdpSdkVersion
     implementation     group: "org.jetbrains",             name: "annotations",                              version: "17.0.0"
 
+    testImplementation project(path: ':common', configuration: 'tests')
     testImplementation group: "org.junit.jupiter",         name: "junit-jupiter-api",                        version: junitJupiterVersion
     testImplementation group: "org.junit.jupiter",         name: "junit-jupiter-params",                     version: junitJupiterVersion
     testImplementation group: "org.mockito",               name: "mockito-core",                             version: mockitoVersion

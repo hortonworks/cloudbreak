@@ -89,7 +89,7 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse.Builder;
-import com.sequenceiq.environment.environment.service.EnvironmentTestConstants;
+import com.sequenceiq.cloudbreak.util.TestConstants;
 
 public class StackToTemplatePreparationObjectConverterTest {
 
@@ -232,7 +232,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(stackMock.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
-        when(stackMock.getEnvironmentCrn()).thenReturn(EnvironmentTestConstants.CRN);
+        when(stackMock.getEnvironmentCrn()).thenReturn(TestConstants.CRN);
         Credential credential = Credential.builder()
                 .crn("aCredentialCRN")
                 .attributes(new Json(""))
