@@ -40,6 +40,11 @@ public class AzureEnvironmentSecurityGroupValidator implements EnvironmentSecuri
                     validateSecurityGroup(environmentDto, resultBuilder, environmentDto.getSecurityAccess().getSecurityGroupIdForKnox());
                 }
             }
+            if (Objects.nonNull(environmentDto.getNetwork())
+                    && environmentDto.getNetwork().getAzure().isNoFirewallRules()
+                    && !Strings.isNullOrEmpty(securityAccessDto.getCidr())) {
+                resultBuilder.error(cidrAndNoFirewallRulesBothPresent());
+            }
         }
     }
 

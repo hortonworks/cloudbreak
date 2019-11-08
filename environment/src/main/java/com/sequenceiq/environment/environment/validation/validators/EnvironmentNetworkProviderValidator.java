@@ -109,12 +109,12 @@ public class EnvironmentNetworkProviderValidator {
     private void validateSecurityGroup(EnvironmentDto request, String cloudPlatform, ValidationResultBuilder resultBuilder) {
         SecurityAccessDto securityAccess = request.getSecurityAccess();
         NetworkDto networkDto = request.getNetwork();
-        if (securityAccess != null && networkDto != null && Strings.isNullOrEmpty(securityAccess.getCidr())) {
+        if (securityAccess != null && networkDto != null) {
             EnvironmentSecurityGroupValidator environmentSecurityGroupValidator =
                     environmentSecurityGroupValidatorsByCloudPlatform.get(valueOf(cloudPlatform));
             if (environmentSecurityGroupValidator != null) {
                 environmentSecurityGroupValidator.validate(request, resultBuilder);
-            } else {
+            } else if (!cloudPlatform.equals(MOCK.name())) {
                 resultBuilder.error(String.format("Environment specific security group is not supported for cloud platform: '%s'!", cloudPlatform));
             }
         }
