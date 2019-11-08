@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
-import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.resources.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceConnector;
@@ -27,7 +26,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -65,19 +63,17 @@ public class AzureUpscaleService {
         try {
             List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
             CloudResource armTemplate = getArmTemplate(resources, stackName);
-            if (newInstanceRequired(client, scaledGroups.get(0), resourceGroupName)) {
-                Map<String, AzureDiskType> storageAccounts = azureStackView.getStorageAccounts();
-                String region = cloudContext.getLocation().getRegion().value();
-                for (Map.Entry<String, AzureDiskType> entry : storageAccounts.entrySet()) {
-                    azureStorage.createStorage(client, entry.getKey(), entry.getValue(), resourceGroupName, region, isEncryptionNeeded(stack), stack.getTags());
-                }
-                Deployment templateDeployment = azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView);
-                LOGGER.info("Created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
-                List<CloudResource> newInstances = azureUtils.getInstanceCloudResources(cloudContext, templateDeployment, scaledGroups);
-                List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(resources);
-                List<CloudResource> networkResources = cloudResourceHelper.getNetworkResources(resources);
-                azureComputeResourceService.buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, reattachableVolumeSets, networkResources);
+            Map<String, AzureDiskType> storageAccounts = azureStackView.getStorageAccounts();
+            String region = cloudContext.getLocation().getRegion().value();
+            for (Map.Entry<String, AzureDiskType> entry : storageAccounts.entrySet()) {
+                azureStorage.createStorage(client, entry.getKey(), entry.getValue(), resourceGroupName, region, isEncryptionNeeded(stack), stack.getTags());
             }
+            Deployment templateDeployment = azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView);
+            LOGGER.info("Created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
+            List<CloudResource> newInstances = azureUtils.getInstanceCloudResources(cloudContext, templateDeployment, scaledGroups);
+            List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(resources);
+            List<CloudResource> networkResources = cloudResourceHelper.getNetworkResources(resources);
+            azureComputeResourceService.buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, reattachableVolumeSets, networkResources);
 
             return Collections.singletonList(new CloudResourceStatus(armTemplate, ResourceStatus.IN_PROGRESS));
         } catch (CloudException e) {
@@ -108,15 +104,5 @@ public class AzureUpscaleService {
                 .filter(cloudResource -> ResourceType.AZURE_VOLUMESET.equals(cloudResource.getType()))
                 .filter(cloudResource -> Objects.isNull(cloudResource.getInstanceId()))
                 .collect(Collectors.toList());
-    }
-
-    private boolean newInstanceRequired(AzureClient client, Group scaledGroup, String resourceGroupName) {
-        List<VirtualMachine> virtualMachines = client.getVirtualMachines(resourceGroupName);
-        return virtualMachines.stream()
-                .filter(virtualMachine -> scaledGroup.getInstances().stream()
-                        .map(CloudInstance::getInstanceId)
-                        .noneMatch(instanceId -> virtualMachine.name().equals(instanceId)))
-                .count() < scaledGroup.getInstancesSize();
-
     }
 }
