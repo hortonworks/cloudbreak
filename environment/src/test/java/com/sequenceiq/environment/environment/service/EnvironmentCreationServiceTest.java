@@ -1,9 +1,9 @@
 package com.sequenceiq.environment.environment.service;
 
 
-import static com.sequenceiq.environment.environment.service.EnvironmentTestConstants.ACCOUNT_ID;
-import static com.sequenceiq.environment.environment.service.EnvironmentTestConstants.CRN;
-import static com.sequenceiq.environment.environment.service.EnvironmentTestConstants.USER;
+import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
+import static com.sequenceiq.cloudbreak.util.TestConstants.CRN;
+import static com.sequenceiq.cloudbreak.util.TestConstants.USER;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.getCloudRegions;
 import static org.junit.jupiter.api.Assertions.assertThrows;
