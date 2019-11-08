@@ -169,16 +169,16 @@ public class UpgradeService {
                 .map(ClouderaManagerProduct::getParcel)
                 .collect(toSet());
         originalClusterComponentUrls.add(clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId()).getBaseUrl());
-        return imageFromCatalaog -> {
-            if (imageFromCatalaog.getPreWarmParcels() == null) {
+        return imageFromCatalog -> {
+            if (imageFromCatalog.getPreWarmParcels() == null) {
                 return false;
             } else {
-                Set<String> newClusterComponentUrls = imageFromCatalaog.getPreWarmParcels()
+                Set<String> newClusterComponentUrls = imageFromCatalog.getPreWarmParcels()
                         .stream()
                         .map(parts -> parts.get(1))
                         .collect(toSet());
-                newClusterComponentUrls.add(imageFromCatalaog.getStackDetails().getRepo().getStack().get(imageFromCatalaog.getOsType()));
-                newClusterComponentUrls.add(imageFromCatalaog.getRepo().get(imageFromCatalaog.getOsType()));
+                newClusterComponentUrls.add(imageFromCatalog.getStackDetails().getRepo().getStack().get(imageFromCatalog.getOsType()));
+                newClusterComponentUrls.add(imageFromCatalog.getRepo().get(imageFromCatalog.getOsType()));
                 return newClusterComponentUrls
                         .equals(originalClusterComponentUrls);
             }
