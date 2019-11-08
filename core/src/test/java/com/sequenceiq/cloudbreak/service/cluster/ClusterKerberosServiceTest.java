@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -79,9 +80,10 @@ public class ClusterKerberosServiceTest {
         when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.isAdJoinable(any())).thenReturn(Boolean.TRUE);
 
-        underTest.leaveDomains(stack);
+        underTest.leaveDomains(stack, false);
 
-        verify(hostOrchestrator, times(1)).leaveDomain(any(GatewayConfig.class), any(), eq("ad_member"), eq("ad_leave"), any(ExitCriteriaModel.class));
+        verify(hostOrchestrator, times(1))
+                .leaveDomain(any(GatewayConfig.class), any(), eq("ad_member"), eq("ad_leave"), any(ExitCriteriaModel.class), anyBoolean());
     }
 
     @Test
@@ -89,9 +91,10 @@ public class ClusterKerberosServiceTest {
         when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.isIpaJoinable(any())).thenReturn(Boolean.TRUE);
 
-        underTest.leaveDomains(stack);
+        underTest.leaveDomains(stack, false);
 
-        verify(hostOrchestrator, times(1)).leaveDomain(any(GatewayConfig.class), any(), eq("ipa_member"), eq("ipa_leave"), any(ExitCriteriaModel.class));
+        verify(hostOrchestrator, times(1))
+                .leaveDomain(any(GatewayConfig.class), any(), eq("ipa_member"), eq("ipa_leave"), any(ExitCriteriaModel.class), anyBoolean());
     }
 
     @Test(expected = CloudbreakException.class)
@@ -100,9 +103,9 @@ public class ClusterKerberosServiceTest {
         when(kerberosDetailService.isAdJoinable(any())).thenReturn(Boolean.TRUE);
 
         doThrow(new CloudbreakOrchestratorFailedException("error")).when(hostOrchestrator)
-                .leaveDomain(any(GatewayConfig.class), any(), eq("ad_member"), eq("ad_leave"), any(ExitCriteriaModel.class));
+                .leaveDomain(any(GatewayConfig.class), any(), eq("ad_member"), eq("ad_leave"), any(ExitCriteriaModel.class), anyBoolean());
 
-        underTest.leaveDomains(stack);
+        underTest.leaveDomains(stack, false);
     }
 
 }

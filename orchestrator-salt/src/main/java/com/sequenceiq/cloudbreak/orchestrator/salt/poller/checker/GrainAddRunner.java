@@ -13,4 +13,8 @@ public class GrainAddRunner extends ModifyGrainBase {
     public GrainAddRunner(Set<String> targetHostnames, Set<Node> allNode, String key, String value) {
         super(targetHostnames, allNode, key, value, true);
     }
+
+    public GrainAddRunner(Set<String> targetHostnames, Set<Node> allNode, String key, String value, boolean filterForAvailabe) {
+        super(targetHostnames, allNode, key, value, true);
+    }
 }

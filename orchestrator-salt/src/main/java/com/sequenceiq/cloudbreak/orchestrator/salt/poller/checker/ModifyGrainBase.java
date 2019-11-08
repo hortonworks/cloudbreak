@@ -31,15 +31,29 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
 
     private final boolean addGrain;
 
+    private final boolean filterForAvailableNodes;
+
     protected ModifyGrainBase(Set<String> target, Set<Node> allNode, String key, String value, boolean addGrain) {
         super(target, allNode);
         this.key = key;
         this.value = value;
         this.addGrain = addGrain;
+        filterForAvailableNodes = false;
+    }
+
+    protected ModifyGrainBase(Set<String> target, Set<Node> allNode, String key, String value, boolean addGrain, boolean filterForAvailableNodes) {
+        super(target, allNode);
+        this.key = key;
+        this.value = value;
+        this.addGrain = addGrain;
+        this.filterForAvailableNodes = filterForAvailableNodes;
     }
 
     @Override
     public String submit(SaltConnector saltConnector) throws SaltJobFailedException {
+        if (filterForAvailableNodes) {
+            filterForAvailableHosts(saltConnector);
+        }
         Target<String> target = new HostList(getTargetHostnames());
         LOGGER.info("Starting salt modify grain process. {}", this);
         ApplyResponse response = modifyGrain(saltConnector, target);

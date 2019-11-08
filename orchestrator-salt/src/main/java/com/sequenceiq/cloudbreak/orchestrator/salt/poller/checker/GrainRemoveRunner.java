@@ -13,4 +13,8 @@ public class GrainRemoveRunner extends ModifyGrainBase {
     public GrainRemoveRunner(Set<String> target, Set<Node> allNode, String key, String value) {
         super(target, allNode, key, value, false);
     }
+
+    public GrainRemoveRunner(Set<String> targetHostnames, Set<Node> allNode, String key, String value, boolean filterForAvailableNodes) {
+        super(targetHostnames, allNode, key, value, true, filterForAvailableNodes);
+    }
 }

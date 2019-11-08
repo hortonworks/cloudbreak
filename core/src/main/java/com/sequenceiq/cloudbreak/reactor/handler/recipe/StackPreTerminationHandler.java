@@ -52,8 +52,8 @@ public class StackPreTerminationHandler implements EventHandler<StackPreTerminat
             Cluster cluster = stack.getCluster();
             if (cluster != null) {
                 Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(cluster.getId());
-                recipeEngine.executePreTerminationRecipes(stack, hostGroups);
-                preTerminationStateExecutor.runPreteraminationTasks(stack);
+                recipeEngine.executePreTerminationRecipes(stack, hostGroups, request.getForced());
+                preTerminationStateExecutor.runPreteraminationTasks(stack, request.getForced());
             }
         } catch (Exception ex) {
             LOGGER.info("Pre-termination failed: {}", ex.getMessage(), ex);

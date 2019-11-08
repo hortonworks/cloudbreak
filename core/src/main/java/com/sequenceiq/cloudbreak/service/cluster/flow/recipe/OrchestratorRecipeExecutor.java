@@ -136,22 +136,22 @@ class OrchestratorRecipeExecutor {
         }
     }
 
-    public void preTerminationRecipes(Stack stack) throws CloudbreakException {
-        preTerminationRecipesOnNodes(stack, stackUtil.collectNodes(stack));
+    public void preTerminationRecipes(Stack stack, boolean forced) throws CloudbreakException {
+        preTerminationRecipesOnNodes(stack, stackUtil.collectNodes(stack), forced);
     }
 
     public void preTerminationRecipes(Stack stack, Set<String> hostNames) throws CloudbreakException {
-        preTerminationRecipesOnNodes(stack, collectNodes(stack, hostNames));
+        preTerminationRecipesOnNodes(stack, collectNodes(stack, hostNames), false);
     }
 
-    public void preTerminationRecipesOnNodes(Stack stack, Set<Node> nodes) throws CloudbreakException {
+    public void preTerminationRecipesOnNodes(Stack stack, Set<Node> nodes, boolean forced) throws CloudbreakException {
         if (stack.getCluster() == null) {
             throw new NotFoundException("Cluster does not found, pre-termination will not be run.");
         }
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
-            hostOrchestrator.preTerminationRecipes(gatewayConfig, nodes, ClusterDeletionBasedExitCriteriaModel.nonCancellableModel());
+            hostOrchestrator.preTerminationRecipes(gatewayConfig, nodes, ClusterDeletionBasedExitCriteriaModel.nonCancellableModel(), forced);
         } catch (CloudbreakOrchestratorFailedException e) {
             String message = getRecipeExecutionFaiureMessage(stack, e);
             throw new CloudbreakException(message, e);

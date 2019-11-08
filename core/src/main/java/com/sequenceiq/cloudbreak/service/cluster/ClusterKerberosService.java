@@ -41,11 +41,11 @@ public class ClusterKerberosService {
     @Inject
     private KerberosDetailService kerberosDetailService;
 
-    public void leaveDomains(Stack stack) throws CloudbreakException {
-        leaveDomains(stack, stackUtil.collectNodes(stack));
+    public void leaveDomains(Stack stack, boolean forced) throws CloudbreakException {
+        leaveDomains(stack, stackUtil.collectNodes(stack), forced);
     }
 
-    public void leaveDomains(Stack stack, Set<Node> nodes) throws CloudbreakException {
+    public void leaveDomains(Stack stack, Set<Node> nodes, boolean forced) throws CloudbreakException {
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
         if (kerberosDetailService.isAdJoinable(kerberosConfig) || kerberosDetailService.isIpaJoinable(kerberosConfig)) {
             try {
@@ -53,9 +53,9 @@ public class ClusterKerberosService {
                 GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
                 ExitCriteriaModel noExitModel = ClusterDeletionBasedExitCriteriaModel.nonCancellableModel();
                 if (kerberosDetailService.isAdJoinable(kerberosConfig)) {
-                    hostOrchestrator.leaveDomain(gatewayConfig, nodes, "ad_member", "ad_leave", noExitModel);
+                    hostOrchestrator.leaveDomain(gatewayConfig, nodes, "ad_member", "ad_leave", noExitModel, forced);
                 } else if (kerberosDetailService.isIpaJoinable(kerberosConfig)) {
-                    hostOrchestrator.leaveDomain(gatewayConfig, nodes, "ipa_member", "ipa_leave", noExitModel);
+                    hostOrchestrator.leaveDomain(gatewayConfig, nodes, "ipa_member", "ipa_leave", noExitModel, forced);
                 }
             } catch (CloudbreakOrchestratorFailedException e) {
                 Set<Map.Entry<String, Collection<String>>> entries = e.getNodesWithErrors().asMap().entrySet();

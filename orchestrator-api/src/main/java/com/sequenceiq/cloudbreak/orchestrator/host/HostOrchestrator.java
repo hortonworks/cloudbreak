@@ -69,7 +69,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void changePrimaryGateway(GatewayConfig formerGateway, GatewayConfig newPrimaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
-    void leaveDomain(GatewayConfig gatewayConfig, Set<Node> allNodes, String roleToRemove, String roleToAdd, ExitCriteriaModel exitCriteriaModel)
+    void leaveDomain(GatewayConfig gatewayConfig, Set<Node> allNodes, String roleToRemove, String roleToAdd, ExitCriteriaModel exitCriteriaModel, boolean forced)
             throws CloudbreakOrchestratorFailedException;
 
     byte[] getStateConfigZip() throws IOException;

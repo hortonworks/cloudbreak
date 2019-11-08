@@ -83,6 +83,8 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private static final int SLEEP_TIME_IN_SEC = SLEEP_TIME / 1000;
 
+    private static final int RECIPE_MAX_RETRY_FORCE = 2;
+
     private static final String DISK_INITIALIZE = "format-and-mount-initialize.sh";
 
     private static final String DISK_COMMON = "format-and-mount-common.sh";
@@ -720,28 +722,28 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void preAmbariStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
         LOGGER.debug("Executing pre-cloudera-manager-start recipes.");
-        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_CLOUDERA_MANAGER_START);
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_CLOUDERA_MANAGER_START, false);
     }
 
     @Override
     public void postAmbariStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
         LOGGER.debug("Executing post-cloudera-manager-start recipes.");
-        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_CLOUDERA_MANAGER_START);
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_CLOUDERA_MANAGER_START, false);
     }
 
     @Override
     public void postInstallRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
         LOGGER.debug("Executing post-cluster-install recipes.");
-        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_CLUSTER_INSTALL);
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_CLUSTER_INSTALL, false);
     }
 
     @Override
-    public void preTerminationRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+    public void preTerminationRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, boolean forced)
             throws CloudbreakOrchestratorFailedException {
         LOGGER.debug("Executing pre-termination recipes.");
-        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_TERMINATION);
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_TERMINATION, forced);
     }
 
     @Override
@@ -778,12 +780,12 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
-    public void leaveDomain(GatewayConfig gatewayConfig, Set<Node> allNodes, String roleToRemove, String roleToAdd, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorFailedException {
+    public void leaveDomain(GatewayConfig gatewayConfig, Set<Node> allNodes, String roleToRemove, String roleToAdd,
+            ExitCriteriaModel exitCriteriaModel, boolean forced) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = createSaltConnector(gatewayConfig)) {
             Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "roles", roleToAdd), exitCriteriaModel, maxRetryLeave);
-            runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "roles", roleToRemove), exitCriteriaModel, maxRetryLeave);
+            runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "roles", roleToAdd, forced), exitCriteriaModel, maxRetryLeave);
+            runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "roles", roleToRemove, forced), exitCriteriaModel, maxRetryLeave);
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
             runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryLeave);
             runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryLeave, true);
@@ -869,23 +871,29 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
-    private void executeRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, RecipeExecutionPhase phase)
+    private void executeRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, RecipeExecutionPhase phase, boolean forced)
             throws CloudbreakOrchestratorFailedException {
         boolean postRecipe = phase.isPostRecipe();
+        int maxRetry = maxRetryRecipe;
         try (SaltConnector sc = createSaltConnector(gatewayConfig)) {
+            if (forced) {
+                maxRetry = RECIPE_MAX_RETRY_FORCE;
+            }
             // add 'recipe' grain to all nodes
             Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", phase.value()), exitCriteriaModel);
+            runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", phase.value(), forced), exitCriteriaModel, maxRetry);
 
             // Add Deprecated 'PRE/POST' recipe execution for backward compatibility (since version 2.2.0)
             if (postRecipe) {
-                runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", RecipeExecutionPhase.POST.value()), exitCriteriaModel);
+                GrainAddRunner grainAddRecipes = new GrainAddRunner(targetHostnames, allNodes, "recipes", RecipeExecutionPhase.POST.value(), forced);
+                runSaltCommand(sc, grainAddRecipes, exitCriteriaModel, maxRetry);
             } else {
-                runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", RecipeExecutionPhase.PRE.value()), exitCriteriaModel);
+                GrainAddRunner grainAddRecipes = new GrainAddRunner(targetHostnames, allNodes, "recipes", RecipeExecutionPhase.PRE.value(), forced);
+                runSaltCommand(sc, grainAddRecipes, exitCriteriaModel, maxRetry);
             }
 
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel);
+            runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry);
             runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryRecipe, true);
         } catch (Exception e) {
             LOGGER.info("Error occurred during executing highstate (for recipes).", e);
@@ -894,15 +902,15 @@ public class SaltOrchestrator implements HostOrchestrator {
             try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
                 // remove 'recipe' grain from all nodes
                 Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-                runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "recipes", phase.value()), exitCriteriaModel);
+                runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "recipes", phase.value(), forced), exitCriteriaModel, maxRetry);
 
                 // Remove Deprecated 'PRE/POST' recipe execution for backward compatibility (since version 2.2.0)
                 if (postRecipe) {
                     runSaltCommand(sc, new GrainRemoveRunner(
-                            targetHostnames, allNodes, "recipes", RecipeExecutionPhase.POST.value()), exitCriteriaModel);
+                            targetHostnames, allNodes, "recipes", RecipeExecutionPhase.POST.value(), forced), exitCriteriaModel, maxRetry);
                 } else {
                     runSaltCommand(sc, new GrainRemoveRunner(
-                            targetHostnames, allNodes, "recipes", RecipeExecutionPhase.PRE.value()), exitCriteriaModel);
+                            targetHostnames, allNodes, "recipes", RecipeExecutionPhase.PRE.value(), forced), exitCriteriaModel, maxRetry);
                 }
             } catch (Exception e) {
                 LOGGER.info("Error occurred during removing recipe roles.", e);
