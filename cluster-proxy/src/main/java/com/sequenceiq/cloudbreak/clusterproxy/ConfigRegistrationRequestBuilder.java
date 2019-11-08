@@ -23,9 +23,17 @@ public class ConfigRegistrationRequestBuilder {
         this.clusterCrn = clusterCrn;
     }
 
-    public ConfigRegistrationRequestBuilder with(List<String> aliases, List<ClusterServiceConfig> services, List<String> certificates) {
+    public ConfigRegistrationRequestBuilder withAliases(List<String> aliases) {
         this.aliases = aliases;
+        return this;
+    }
+
+    public ConfigRegistrationRequestBuilder withServices(List<ClusterServiceConfig> services) {
         this.services = services;
+        return this;
+    }
+
+    public ConfigRegistrationRequestBuilder withCertificates(List<String> certificates) {
         this.certificates = certificates;
         return this;
     }

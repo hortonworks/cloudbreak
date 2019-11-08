@@ -82,19 +82,18 @@ public class ClusterProxyService {
 
     private ConfigRegistrationRequest createProxyConfigRequest(Stack stack) {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
-                .with(singletonList(clusterId(stack.getCluster())), serviceConfigs(stack), null);
+            .withAliases(singletonList(clusterId(stack.getCluster()))).withServices(serviceConfigs(stack));
         if (Boolean.TRUE.equals(stack.getUseCcm())) {
-            return requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack)).build();
+            requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack));
         }
         return requestBuilder.build();
     }
 
     private ConfigRegistrationRequest createProxyConfigReRegisterRequest(Stack stack) {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
-                .with(singletonList(clusterId(stack.getCluster())), serviceConfigs(stack), null)
-                .withKnoxUrl(knoxUrl(stack));
+                .withAliases(singletonList(clusterId(stack.getCluster()))).withServices(serviceConfigs(stack)).withKnoxUrl(knoxUrl(stack));
         if (Boolean.TRUE.equals(stack.getUseCcm())) {
-            return requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack)).build();
+            requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack));
         }
         return requestBuilder.build();
     }

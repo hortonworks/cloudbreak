@@ -114,7 +114,8 @@ public class ClusterProxyRegistrationClientTest {
 
     private ConfigRegistrationRequest configRegistrationRequest(String stackCrn, String clusterId,
                                                                 ClusterServiceConfig serviceConfig, List<String> certificates) {
-        return new ConfigRegistrationRequestBuilder(stackCrn).with(List.of(clusterId), List.of(serviceConfig), certificates).build();
+        return new ConfigRegistrationRequestBuilder(stackCrn).withAliases(List.of(clusterId)).withServices(List.of(serviceConfig))
+                .withCertificates(certificates).build();
     }
 
     private ConfigUpdateRequest configUpdateRequest(String stackCrn, String knoxUri) {
