@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.service;
 
-import static com.sequenceiq.environment.environment.service.EnvironmentTestConstants.CRN;
-import static com.sequenceiq.environment.environment.service.EnvironmentTestConstants.USER;
+import static com.sequenceiq.cloudbreak.util.TestConstants.CRN;
+import static com.sequenceiq.cloudbreak.util.TestConstants.USER;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
