@@ -1,0 +1,23 @@
+apply plugin: 'java'
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+  maven { url = "$repoUrl" }
+}
+
+jar {
+  baseName = 'telemetry-reporter'
+  archiveName = 'telemetry-reporter.jar'
+}
+
+dependencies {
+  compile group: 'org.elasticsearch.client', name: 'elasticsearch-rest-client', version: '6.8.4'
+  compile group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: '6.8.4'
+  compile group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.0'
+  compile group: 'com.amazonaws', name: 'aws-java-sdk-core', version: "${awsSdkVersion}"
+
+  compile project(':telemetry-reporter-api')
+  compile project(':common')
+  compile project(':auth-connector')
+}

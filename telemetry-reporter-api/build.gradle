@@ -1,0 +1,17 @@
+apply plugin: 'java'
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+  maven { url = "$repoUrl" }
+}
+
+jar {
+  baseName = 'telemetry-reporter-api'
+  archiveName = 'telemetry-reporter-api.jar'
+}
+
+dependencies {
+  implementation project(':common')
+  implementation project(':auth-connector')
+}
