@@ -11,6 +11,7 @@ public enum Msg {
     STACK_INFRASTRUCTURE_STOPPING("stack.infrastructure.stopping"),
     STACK_INFRASTRUCTURE_STOPPED("stack.infrastructure.stopped"),
     STACK_DELETE_IN_PROGRESS("stack.delete.in.progress"),
+    STACK_FORCE_DELETE_IN_PROGRESS("stack.forced.delete.in.progress"),
     STACK_PRE_DELETE_IN_PROGRESS("stack.pre.delete.in.progress"),
     STACK_DELETE_COMPLETED("stack.delete.completed"),
     STACK_FORCED_DELETE_COMPLETED("stack.forced.delete.completed"),

@@ -59,8 +59,13 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
         } else {
             putClusterToDeleteInProgressState(stack);
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_IN_PROGRESS, "Terminating the cluster and its infrastructure.");
-            cloudbreakEventService.fireCloudbreakEvent(context.getStack().getId(), DELETE_IN_PROGRESS.name(),
-                    messagesService.getMessage(Msg.STACK_DELETE_IN_PROGRESS.code()));
+            if (payload.getForced()) {
+                cloudbreakEventService.fireCloudbreakEvent(context.getStack().getId(), DELETE_IN_PROGRESS.name(),
+                        messagesService.getMessage(Msg.STACK_FORCE_DELETE_IN_PROGRESS.code()));
+            } else {
+                cloudbreakEventService.fireCloudbreakEvent(context.getStack().getId(), DELETE_IN_PROGRESS.name(),
+                        messagesService.getMessage(Msg.STACK_DELETE_IN_PROGRESS.code()));
+            }
             sendEvent(context);
             LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
             LOGGER.debug("Triggering terminate stack event: {}", payload);
