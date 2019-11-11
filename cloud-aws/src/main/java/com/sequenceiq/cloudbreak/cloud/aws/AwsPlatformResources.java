@@ -30,6 +30,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.model.ListTablesRequest;
@@ -287,22 +288,29 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(cloudCredential), region.value());
-        DescribeRouteTablesResult describeRouteTablesResult = ec2Client.describeRouteTables();
-        DescribeVpcsRequest describeVpcsRequest = getDescribeVpcsRequestWIthFilters(filters);
-        Set<CloudNetwork> cloudNetworks = new HashSet<>();
+        try {
+            LOGGER.debug("Describing route tables in region {}", region.getRegionName());
+            DescribeRouteTablesResult describeRouteTablesResult = ec2Client.describeRouteTables();
+            DescribeVpcsRequest describeVpcsRequest = getDescribeVpcsRequestWIthFilters(filters);
+            Set<CloudNetwork> cloudNetworks = new HashSet<>();
 
-        DescribeVpcsResult describeVpcsResult = null;
-        boolean first = true;
-        while (first || !StringUtils.isNullOrEmpty(describeVpcsResult.getNextToken())) {
-            first = false;
-            describeVpcsRequest.setNextToken(describeVpcsResult == null ? null : describeVpcsResult.getNextToken());
-            describeVpcsResult = ec2Client.describeVpcs(describeVpcsRequest);
-            Set<CloudNetwork> partialNetworks = getCloudNetworks(ec2Client, describeRouteTablesResult, describeVpcsResult);
-            cloudNetworks.addAll(partialNetworks);
+            DescribeVpcsResult describeVpcsResult = null;
+            boolean first = true;
+            while (first || !StringUtils.isNullOrEmpty(describeVpcsResult.getNextToken())) {
+                LOGGER.debug("Getting VPC list in region {}{}", region.getRegionName(), first ? "" : " (continuation)");
+                first = false;
+                describeVpcsRequest.setNextToken(describeVpcsResult == null ? null : describeVpcsResult.getNextToken());
+                describeVpcsResult = ec2Client.describeVpcs(describeVpcsRequest);
+                Set<CloudNetwork> partialNetworks = getCloudNetworks(ec2Client, describeRouteTablesResult, describeVpcsResult);
+                cloudNetworks.addAll(partialNetworks);
+            }
+            Map<String, Set<CloudNetwork>> result = new HashMap<>();
+            result.put(region.value(), cloudNetworks);
+            return new CloudNetworks(result);
+        } catch (SdkClientException e) {
+            LOGGER.error(String.format("Unable to enumerate networks in region '%s'. Check exception for details.", region.getRegionName()), e);
+            throw e;
         }
-        Map<String, Set<CloudNetwork>> result = new HashMap<>();
-        result.put(region.value(), cloudNetworks);
-        return new CloudNetworks(result);
     }
 
     private DescribeVpcsRequest getDescribeVpcsRequestWIthFilters(Map<String, String> filters) {
@@ -320,6 +328,7 @@ public class AwsPlatformResources implements PlatformResources {
             DescribeRouteTablesResult describeRouteTablesResult, DescribeVpcsResult describeVpcsResult) {
 
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
+        LOGGER.debug("Processing VPCs");
         for (Vpc vpc : describeVpcsResult.getVpcs()) {
             List<Subnet> awsSubnets = getSubnets(ec2Client, vpc);
             Set<CloudSubnet> subnets = convertAwsSubnetsToCloudSubnets(describeRouteTablesResult, awsSubnets);
@@ -340,6 +349,7 @@ public class AwsPlatformResources implements PlatformResources {
         DescribeSubnetsResult describeSubnetsResult = null;
         boolean first = true;
         while (first || !StringUtils.isNullOrEmpty(describeSubnetsResult.getNextToken())) {
+            LOGGER.debug("Describing subnets for VPC {}{}", vpc.getVpcId(), first ? "" : " (continuation)");
             first = false;
             DescribeSubnetsRequest describeSubnetsRequest = createSubnetsDescribeRequest(vpc, describeSubnetsResult == null
                     ? null
@@ -482,6 +492,7 @@ public class AwsPlatformResources implements PlatformResources {
                 describeAvailabilityZonesRequest.withFilters(filter);
 
                 try {
+                    LOGGER.debug("Describing AZs in region {}", awsRegion.getRegionName());
                     DescribeAvailabilityZonesResult describeAvailabilityZonesResult = ec2Client.describeAvailabilityZones(describeAvailabilityZonesRequest);
 
                     List<AvailabilityZone> tmpAz = new ArrayList<>();
@@ -544,6 +555,7 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     private DescribeRegionsResult describeRegionsResult(AmazonEC2Client ec2Client) {
+        LOGGER.debug("Getting regions");
         try {
             DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
             return ec2Client.describeRegions(describeRegionsRequest);

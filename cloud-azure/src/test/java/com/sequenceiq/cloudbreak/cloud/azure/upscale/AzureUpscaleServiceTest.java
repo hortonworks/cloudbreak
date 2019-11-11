@@ -6,7 +6,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -20,12 +19,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.microsoft.azure.Page;
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentExportResult;
-import com.microsoft.rest.RestException;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
@@ -111,14 +106,12 @@ public class AzureUpscaleServiceTest {
         CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
         List<CloudResource> resources = List.of(createCloudResource("volumes", ResourceType.AZURE_VOLUMESET), template);
         List<Group> scaledGroups = createScaledGroups();
-        PagedList<VirtualMachine> virtualMachines = createVirtualMachinesWithOneInstance();
 
         when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
         when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView)).thenReturn(templateDeployment);
         when(templateDeployment.exportTemplate()).thenReturn(mock(DeploymentExportResult.class));
         when(azureUtils.getInstanceCloudResources(cloudContext, templateDeployment, scaledGroups)).thenReturn(NEW_INSTANCES);
         when(cloudResourceHelper.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
-        when(client.getVirtualMachines(RESOURCE_GROUP)).thenReturn(virtualMachines);
 
         List<CloudResourceStatus> actual = underTest.upscale(ac, stack, resources, azureStackView, client);
 
@@ -131,7 +124,6 @@ public class AzureUpscaleServiceTest {
         verify(templateDeployment).exportTemplate();
         verify(azureUtils).getInstanceCloudResources(cloudContext, templateDeployment, scaledGroups);
         verify(cloudResourceHelper).getNetworkResources(resources);
-        verify(client).getVirtualMachines(RESOURCE_GROUP);
         verify(azureStackView).getStorageAccounts();
         verify(azureUtils).getStackName(any(CloudContext.class));
         verify(azureUtils).getResourceGroupName(any(CloudContext.class), eq(stack));
@@ -139,38 +131,8 @@ public class AzureUpscaleServiceTest {
         verify(azureStorage).isEncrytionNeeded(any());
     }
 
-    @Test
-    public void testUpscaleThenThereAreNoNewInstancesRequired() {
-        CloudContext cloudContext = createCloudContext();
-        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, null);
-        CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
-        List<CloudResource> resources = List.of(createCloudResource("volumes", ResourceType.AZURE_VOLUMESET), template);
-        List<Group> scaledGroups = createScaledGroups();
-        PagedList<VirtualMachine> virtualMachines = createVirtualMachinesWithTwoInstance();
-
-        when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
-        when(client.getVirtualMachines(RESOURCE_GROUP)).thenReturn(virtualMachines);
-
-        List<CloudResourceStatus> actual = underTest.upscale(ac, stack, resources, azureStackView, client);
-
-        assertFalse(actual.isEmpty());
-        assertEquals(template, actual.get(0).getCloudResource());
-        assertEquals(ResourceStatus.IN_PROGRESS, actual.get(0).getStatus());
-
-        verify(azureUtils).getStackName(any(CloudContext.class));
-        verify(azureUtils).getResourceGroupName(any(CloudContext.class), eq(stack));
-        verify(cloudResourceHelper).getScaledGroups(stack);
-        verifyZeroInteractions(azureStackView);
-        verifyZeroInteractions(azureStorage);
-        verifyZeroInteractions(azureTemplateDeploymentService);
-        verifyZeroInteractions(templateDeployment);
-        verifyZeroInteractions(azureComputeResourceService);
-    }
-
     private List<Group> createScaledGroups() {
         Group group = mock(Group.class);
-        when(group.getInstances()).thenReturn(List.of(createCloudInstance()));
-        when(group.getInstancesSize()).thenReturn(1);
         return Collections.singletonList(group);
     }
 
@@ -181,35 +143,6 @@ public class AzureUpscaleServiceTest {
     private CloudContext createCloudContext() {
         Location location = Location.location(Region.region("us-west-1"), AvailabilityZone.availabilityZone("us-west-1"));
         return new CloudContext(null, STACK_NAME, null, null, location, null, null, "");
-    }
-
-    private PagedList<VirtualMachine> createVirtualMachinesWithOneInstance() {
-        VirtualMachine virtualMachine = mock(VirtualMachine.class);
-        when(virtualMachine.name()).thenReturn(INSTANCE_ID);
-        PagedList pagedList = new PagedList() {
-            @Override
-            public Page nextPage(String nextPageLink) throws RestException {
-                return null;
-            }
-        };
-        pagedList.add(virtualMachine);
-        return pagedList;
-    }
-
-    private PagedList<VirtualMachine> createVirtualMachinesWithTwoInstance() {
-        VirtualMachine virtualMachine1 = mock(VirtualMachine.class);
-        VirtualMachine virtualMachine2 = mock(VirtualMachine.class);
-        when(virtualMachine1.name()).thenReturn(INSTANCE_ID);
-        when(virtualMachine2.name()).thenReturn("instanceId1");
-        PagedList pagedList = new PagedList() {
-            @Override
-            public Page nextPage(String nextPageLink) throws RestException {
-                return null;
-            }
-        };
-        pagedList.add(virtualMachine1);
-        pagedList.add(virtualMachine2);
-        return pagedList;
     }
 
     private CloudResource createCloudResource(String name, ResourceType resourceType) {

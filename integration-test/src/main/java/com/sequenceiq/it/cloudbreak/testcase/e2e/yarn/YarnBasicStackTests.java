@@ -19,6 +19,14 @@ public class YarnBasicStackTests extends AbstractE2ETest {
     @Inject
     private StackTestClient stackTestClient;
 
+    @Override
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
+        createDefaultCredential(testContext);
+        createEnvironmentWithNetworkAndFreeIPA(testContext);
+        initializeDefaultBlueprints(testContext);
+    }
+
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak",
