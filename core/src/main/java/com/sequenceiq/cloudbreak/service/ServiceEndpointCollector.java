@@ -246,6 +246,12 @@ public class ServiceEndpointCollector {
                 case IMPALA_DEBUG_UI:
                     addImplaDebugUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls);
                     break;
+                case KUDU:
+                    addKuduUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls);
+                    break;
+                case KUDU_TABLET_SERVER:
+                    // skipping kudu tablet server url because this is not required
+                    break;
                 default:
                     urls.add(getExposedServiceUrl(managerIp, gateway, topologyName, exposedService, api));
                     break;
@@ -305,6 +311,17 @@ public class ServiceEndpointCollector {
         Optional<String> coordinatorUrl = privateIps.get(ExposedService.IMPALA_DEBUG_UI.getServiceName())
                 .stream()
                 .map(coordinator -> getImpalaCoordinatorUrl(gateway, managerIp, coordinator, autoTlsEnabled))
+                .flatMap(Optional::stream)
+                .findFirst();
+        if (coordinatorUrl.isPresent()) {
+            urls.add(coordinatorUrl.get());
+        }
+    }
+
+    private void addKuduUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, boolean autoTlsEnabled, List<String> urls) {
+        Optional<String> coordinatorUrl = privateIps.get(ExposedService.KUDU.getServiceName())
+                .stream()
+                .map(coordinator -> getKuduUrl(gateway, managerIp, coordinator, autoTlsEnabled))
                 .flatMap(Optional::stream)
                 .findFirst();
         if (coordinatorUrl.isPresent()) {
@@ -375,6 +392,11 @@ public class ServiceEndpointCollector {
     private Optional<String> getImpalaCoordinatorUrl(Gateway gateway, String managerIp, String coordinatorPrivateIps, boolean autoTlsEnabled) {
         return getGatewayTopologyWithExposedService(gateway, ExposedService.IMPALA_DEBUG_UI)
                 .map(gt -> getImpalaCoordinatorUrlWithHostFromGatewayTopology(managerIp, gt, coordinatorPrivateIps, autoTlsEnabled));
+    }
+
+    private Optional<String> getKuduUrl(Gateway gateway, String managerIp, String coordinatorPrivateIps, boolean autoTlsEnabled) {
+        return getGatewayTopologyWithExposedService(gateway, ExposedService.KUDU)
+                .map(gt -> getKuduUrlWithHostFromGatewayTopology(managerIp, gt, coordinatorPrivateIps, autoTlsEnabled));
     }
 
     private Optional<String> getHBaseServiceUrl(Gateway gateway, String managerIp, String hbaseMasterPrivateIp) {
@@ -449,6 +471,18 @@ public class ServiceEndpointCollector {
         } else {
             return String.format("https://%s:%s/%s/%s%s?scheme=%s&host=%s&port=%s", managerIp, gateway.getGatewayPort(), gateway.getPath(),
                     gt.getTopologyName(), ExposedService.IMPALA_DEBUG_UI.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), impalaPrivateIp, port);
+        }
+    }
+
+    private String getKuduUrlWithHostFromGatewayTopology(String managerIp, GatewayTopology gt, String kuduPrivateIp, boolean autoTlsEnabled) {
+        Gateway gateway = gt.getGateway();
+        Integer port = autoTlsEnabled ? ExposedService.KUDU.getTlsPort() : ExposedService.KUDU.getPort();
+        if (gatewayListeningOnHttpsPort(gateway)) {
+            return String.format("https://%s/%s/%s%s?scheme=%s&host=%s&port=%s", managerIp, gateway.getPath(), gt.getTopologyName(),
+                    ExposedService.KUDU.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), kuduPrivateIp, port);
+        } else {
+            return String.format("https://%s:%s/%s/%s%s?scheme=%s&host=%s&port=%s", managerIp, gateway.getGatewayPort(), gateway.getPath(),
+                    gt.getTopologyName(), ExposedService.KUDU.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), kuduPrivateIp, port);
         }
     }
 
