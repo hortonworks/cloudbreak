@@ -29,7 +29,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -66,6 +68,9 @@ public class UpgradeServiceTest {
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Mock
     private ClusterService clusterService;
 
     @Mock
@@ -94,6 +99,10 @@ public class UpgradeServiceTest {
         Image image = getImage("id-1");
         setUpMocks(stack, image, true, "id-1", "id-2");
 
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setBaseUrl("cm-base-url");
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(1L)).thenReturn(clouderaManagerRepo);
+
         UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackName(WORKSPACE_ID, CLUSTER_NAME, user);
 
         verify(stackService).findStackByNameAndWorkspaceId(eq(CLUSTER_NAME), eq(WORKSPACE_ID));
@@ -101,9 +110,8 @@ public class UpgradeServiceTest {
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
-                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false), eq(user),
-                        eq(Optional.of(Map.of())));
-        assertThat(result.getImageId()).isEqualTo("id-2");
+                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false), eq(user), any());
+        assertThat(result.getUpgrade().getImageId()).isEqualTo("id-2");
     }
 
     @Test
@@ -119,9 +127,8 @@ public class UpgradeServiceTest {
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
-                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(true), eq(user),
-                        eq(Optional.of(Map.of())));
-        assertThat(result.getImageId()).isEqualTo(null);
+                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(true), eq(user), any());
+        assertThat(result.getUpgrade()).isEqualTo(null);
     }
 
     private void setUpMocks(Stack stack, Image image, boolean prewarmedImage, String oldImage, String newImage)
@@ -155,6 +162,7 @@ public class UpgradeServiceTest {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         lenient().when(image.isPrewarmed()).thenReturn(prewarmed);
         lenient().when(image.getUuid()).thenReturn(imageId);
+        lenient().when(image.getImageSetsByProvider()).thenReturn(Map.of("aws", Map.of("eu-central-1", "ami-1234")));
         StatedImage statedImage = StatedImage.statedImage(image, null, null);
         return statedImage;
     }
@@ -164,8 +172,10 @@ public class UpgradeServiceTest {
         stack.setId(1L);
         stack.setEnvironmentCrn("env-crn");
         stack.setCloudPlatform("AWS");
+        stack.setPlatformVariant("AWS");
         Blueprint blueprint = new Blueprint();
         Cluster cluster = new Cluster();
+        cluster.setId(1L);
         cluster.setBlueprint(blueprint);
         stack.setCluster(cluster);
         return stack;

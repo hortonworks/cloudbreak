@@ -2,31 +2,31 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
 
 public class UpgradeOptionV4Response {
 
-    private String imageId;
+    private ImageInfoV4Response current;
 
-    private String imageCatalogName;
+    private ImageInfoV4Response upgrade;
 
     public UpgradeOptionV4Response() {
     }
 
-    public UpgradeOptionV4Response(String imageId, String imageCatalogName) {
-        this.imageId = imageId;
-        this.imageCatalogName = imageCatalogName;
+    public UpgradeOptionV4Response(ImageInfoV4Response current, ImageInfoV4Response upgrade) {
+        this.current = current;
+        this.upgrade = upgrade;
     }
 
-    public String getImageId() {
-        return imageId;
+    public ImageInfoV4Response getCurrent() {
+        return current;
     }
 
-    public void setImageId(String imageId) {
-        this.imageId = imageId;
+    public void setCurrent(ImageInfoV4Response current) {
+        this.current = current;
     }
 
-    public String getImageCatalogName() {
-        return imageCatalogName;
+    public ImageInfoV4Response getUpgrade() {
+        return upgrade;
     }
 
-    public void setImageCatalogName(String imageCatalogName) {
-        this.imageCatalogName = imageCatalogName;
+    public void setUpgrade(ImageInfoV4Response upgrade) {
+        this.upgrade = upgrade;
     }
 }

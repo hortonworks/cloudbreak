@@ -2,11 +2,15 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFoundException;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
@@ -15,10 +19,13 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -47,6 +54,8 @@ public class UpgradeService {
 
     private static final boolean REMOVE_ONLY = false;
 
+    private static final String SALT_BOOTSTRAP = "salt-bootstrap";
+
     @Inject
     private StackService stackService;
 
@@ -58,6 +67,9 @@ public class UpgradeService {
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
     private ClusterService clusterService;
@@ -115,11 +127,24 @@ public class UpgradeService {
                 boolean baseImage = useBaseImage(image);
                 StatedImage latestImage = imageService
                         .determineImageFromCatalog(workspaceId, imageSettingsV4Request, stack.getCloudPlatform().toLowerCase(), blueprint, baseImage, user,
-                                Optional.of(image.getPackageVersions()));
+                                getImageFilter(image, baseImage, stack));
+                ImageInfoV4Response currentImageInfo = new ImageInfoV4Response(
+                        image.getImageName(),
+                        image.getImageId(),
+                        image.getImageCatalogName(),
+                        imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId()).getImage().getCreated());
                 if (!Objects.equals(image.getImageId(), latestImage.getImage().getUuid())) {
-                    return new UpgradeOptionV4Response(latestImage.getImage().getUuid(), image.getImageCatalogName());
+                    ImageInfoV4Response upgradeImageInfo = new ImageInfoV4Response(
+                            latestImage.getImage().getImageSetsByProvider().get(stack.getPlatformVariant().toLowerCase()).get(stack.getRegion()),
+                            latestImage.getImage().getUuid(),
+                            latestImage.getImageCatalogName(),
+                            latestImage.getImage().getCreated()
+                    );
+                    return new UpgradeOptionV4Response(currentImageInfo, upgradeImageInfo);
                 } else {
-                    return new UpgradeOptionV4Response();
+                    UpgradeOptionV4Response upgradeOptionV4Response = new UpgradeOptionV4Response();
+                    upgradeOptionV4Response.setCurrent(currentImageInfo);
+                    return upgradeOptionV4Response;
                 }
             } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                 throw new BadRequestException(e.getMessage());
@@ -127,6 +152,51 @@ public class UpgradeService {
         } else {
             return new UpgradeOptionV4Response();
         }
+    }
+
+    private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> getImageFilter(Image image, boolean baseImage, Stack stack) {
+        if (baseImage) {
+            return packageVersionFilter(image.getPackageVersions(), baseImage);
+        } else {
+            return packageVersionFilter(image.getPackageVersions(), baseImage)
+                    .and(parcelFilter(stack));
+        }
+    }
+
+    private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> parcelFilter(Stack stack) {
+        Set<String> originalClusterComponentUrls = clusterComponentConfigProvider.getClouderaManagerProductDetails(stack.getCluster().getId())
+                .stream()
+                .map(ClouderaManagerProduct::getParcel)
+                .collect(toSet());
+        originalClusterComponentUrls.add(clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId()).getBaseUrl());
+        return imageFromCatalog -> {
+            if (imageFromCatalog.getPreWarmParcels() == null) {
+                return false;
+            } else {
+                Set<String> newClusterComponentUrls = imageFromCatalog.getPreWarmParcels()
+                        .stream()
+                        .map(parts -> parts.get(1))
+                        .collect(toSet());
+                newClusterComponentUrls.add(imageFromCatalog.getStackDetails().getRepo().getStack().get(imageFromCatalog.getOsType()));
+                newClusterComponentUrls.add(imageFromCatalog.getRepo().get(imageFromCatalog.getOsType()));
+                return newClusterComponentUrls
+                        .equals(originalClusterComponentUrls);
+            }
+        };
+    }
+
+    private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> packageVersionFilter(Map<String, String> packageVersions, boolean baseImage) {
+        return image -> {
+            Map<String, String> catalogPackageVersions = new HashMap<>(image.getPackageVersions());
+            catalogPackageVersions.remove(SALT_BOOTSTRAP);
+            Map<String, String> originalPackageVersions = new HashMap<>(packageVersions);
+            originalPackageVersions.remove(SALT_BOOTSTRAP);
+            if (baseImage) {
+                return originalPackageVersions.entrySet().containsAll(catalogPackageVersions.entrySet());
+            } else {
+                return originalPackageVersions.equals(catalogPackageVersions);
+            }
+        };
     }
 
     private boolean useBaseImage(Image image) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
