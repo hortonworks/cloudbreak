@@ -189,6 +189,13 @@
              </param>
              {%- endif %}
 
+             {% if 'KUDUUI' in exposed and ('KUDU_MASTER' in salt['pillar.get']('gateway:location') and 'KUDU_TSERVER' in salt['pillar.get']('gateway:location')) -%}
+             <param>
+                <name>KUDUUI</name>
+                    <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+                </param>
+             {%- endif %}
+
              {% if 'DAS' in exposed and 'DAS_WEBAPP' in salt['pillar.get']('gateway:location') -%}
              <param>
                  <name>DAS</name>
@@ -517,6 +524,27 @@
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['IMPALA_DEBUG_UI'] }}</url>
         {%- endfor %}
     </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'KUDU_MASTER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'KUDUUI' in exposed -%}
+    <service>
+        <role>KUDUUI</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['KUDU_MASTER'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['KUDUUI'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+    {% if 'KUDU_TSERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'KUDUUI' in exposed -%}
+        <service>
+            <role>KUDUUI</role>
+            {% for hostloc in salt['pillar.get']('gateway:location')['KUDU_TSERVER'] -%}
+            <url>{{ protocol }}://{{ hostloc }}:{{ ports['KUDUUIT'] }}</url>
+            {%- endfor %}
+        </service>
     {%- endif %}
     {%- endif %}
 
