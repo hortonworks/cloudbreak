@@ -10,7 +10,9 @@ public enum EnvDeleteHandlerSelectors implements FlowEvent {
     DELETE_FREEIPA_EVENT,
     DELETE_IDBROKER_MAPPINGS_EVENT,
     DELETE_S3GUARD_TABLE_EVENT,
-    DELETE_UMS_RESOURCE_EVENT;
+    DELETE_UMS_RESOURCE_EVENT,
+    DELETE_DATAHUB_CLUSTERS_EVENT,
+    DELETE_DATALAKE_CLUSTERS_EVENT;
 
     @Override
     public String event() {

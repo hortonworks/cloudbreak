@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.flow;
 
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_VALIDATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.chain.FlowChainTriggers.ENV_DELETE_CLUSTERS_TRIGGER_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
 
 import java.util.Map;
@@ -52,7 +53,7 @@ public class EnvironmentReactorFlowManager {
     }
 
     public void triggerDeleteFlow(Environment environment, String userCrn) {
-        LOGGER.info("Trigger flow deletion");
+        LOGGER.info("Trigger flow deletion: {}", environment.getName());
         cancelRunningFlows(environment.getId(), environment.getName(), environment.getResourceCrn());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
                 .withSelector(START_FREEIPA_DELETE_EVENT.selector())
@@ -65,10 +66,10 @@ public class EnvironmentReactorFlowManager {
     }
 
     public void triggerForcedDeleteFlow(Environment environment, String userCrn) {
-        LOGGER.info("Trigger flow forced deletion. Work in progress.");
+        LOGGER.info("Trigger forced deletion flow: {}", environment.getName());
         cancelRunningFlows(environment.getId(), environment.getName(), environment.getResourceCrn());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
-                .withSelector(START_FREEIPA_DELETE_EVENT.selector())
+                .withSelector(ENV_DELETE_CLUSTERS_TRIGGER_EVENT)
                 .withResourceId(environment.getId())
                 .withResourceName(environment.getName())
                 .build();
