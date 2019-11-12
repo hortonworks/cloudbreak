@@ -1,13 +1,11 @@
 # Cloudbreak
 
-[![CircleCI](https://circleci.com/gh/hortonworks/cloudbreak.svg?style=svg)](https://circleci.com/gh/hortonworks/cloudbreak)
 [![Maintainability](https://api.codeclimate.com/v1/badges/566493a63aaaf0c61bd4/maintainability)](https://codeclimate.com/github/hortonworks/cloudbreak/maintainability)
 [![Build Automated](https://img.shields.io/docker/automated/hortonworks/cloudbreak.svg)](https://hub.docker.com/r/hortonworks/cloudbreak/)
 [![Build Pulls](https://img.shields.io/docker/pulls/hortonworks/cloudbreak.svg)](https://hub.docker.com/r/hortonworks/cloudbreak/)
 [![Licence](https://img.shields.io/github/license/hortonworks/cloudbreak.svg)](https://github.com/hortonworks/cloudbreak/blob/fix-readme/LICENSE)
 
-* Website: https://hortonworks.com/open-source/cloudbreak/
-* Documentation: https://docs.hortonworks.com/HDPDocuments/Cloudbreak/Cloudbreak-2.7.0/index.html
+* Documentation: https://docs.cloudera.com/management-console/cloud/index.html
 
 # Local Development Setup
 As of now this document focuses on setting up your development environment on macOS. You'll need Homebrew to install certain components in case you don't have them already. To get Homebrew please follow the install instructions on the Homebrew homepage: https://brew.sh
@@ -35,13 +33,16 @@ Add the following to the file named `Profile` under the `cbd-local` directory yo
 Please note that the full path needs to be configured and env variables like `$USER` cannot be used. You also have to set a password for your local Cloudbreak in `UAA_DEFAULT_USER_PW`:
 
 ```
+export CB_LOCAL_DEV_LIST=cloudbreak,redbeams,environment,environmentservice,datalake,freeipa
+export UAA_DEFAULT_SECRET=cbsecret2015
+export CB_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/core/src/main/resources/schema
+export ENVIRONMENT_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/environment/src/main/resources/schema
 export ULU_SUBSCRIBE_TO_NOTIFICATIONS=true
 export CB_INSTANCE_UUID=$(uuidgen | tr '[:upper:]' '[:lower:]')
-export CB_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/core/src/main/resources/schema
-export ENVIRONMENT_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/environment/src/main/resources/schema
-export REDBEAMS_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/redbeams/src/main/resources/schema
-export UAA_DEFAULT_USER_PW=YOUR_PASSWORD
+export CB_INSTANCE_NODE_ID=5743e6ed-3409-420b-b08b-f688f2fc5db1
+export PUBLIC_IP=localhost
 export VAULT_AUTO_UNSEAL=true
+export DPS_VERSION=2.0.0.0-142
 ```
 
 In order to run Cloudbreak, Periscope, Datalake, FreeIPA, Redbeams, Environment, Auth Mock, IDBroker Mapping Management, and Environments2 API services locally (from IDEA or the command line), put this into your `Profile`:
@@ -51,6 +52,12 @@ export CB_LOCAL_DEV_LIST=cloudbreak,periscope,datalake,freeipa,redbeams,environm
 
 Containers for these applications won't be started and Uluwatu (or the `cdp` & `dp` CLI tools) will connect to Java processes running on your host.
 You don't have to put all of the applications into local-dev mode; the value of the variable could be any combination.
+
+You need to login to DockerHub:
+```
+docker login
+```
+And then provide your username and password.
 
 Then run these commands:
 ```
@@ -90,7 +97,7 @@ If everything went well then Cloudbreak will be available on https://localhost. 
 
 The deployer has generated a `certs` directory under `cbd-local` directory which will be needed later on to set up IDEA properly.
 
-If not already present, you shall create an `etc` directory under `cbd-local` directory and place your Cloudera Manager license file `license.txt` there. This is essential for Auth Mock to start successfully.
+If not already present, you shall create an `etc` directory under `cbd-local` directory and place your Cloudera Manager license file `license.txt` there. This is essential for Auth Mock to start successfully. (Request a licence from us)
 
 ### Linux difference
 
@@ -151,7 +158,9 @@ To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.Clou
 -Dcb.db.port.5432.tcp.port=5432
 -Dserver.port=9091
 -Daltus.ums.host=localhost
+-Dvault.addr=localhost
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
+-Dcb.enabledplatforms=""
 ```
 
 Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
@@ -191,7 +200,9 @@ After importing the `cloudbreak` repo root, launch the Datalake application by e
 
 ````
 -Dserver.port=8086
+-Dcb.enabledplatforms=AWS,AZURE,MOCK
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
+-Dvault.addr=localhost
 ````
 
 Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
@@ -219,6 +230,7 @@ After importing the `cloudbreak` repo root, launch the Redbeams application by e
 -Dserver.port=8087
 -Daltus.ums.host=localhost
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
+-Dcb.enabledplatforms=AWS,AZURE,MOCK
 ```
 
 Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
@@ -229,9 +241,17 @@ After importing the `cloudbreak` repo root, launch the Environment application b
 
 ```
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
+-Denvironment.enabledplatforms="YARN,YCLOUD,AWS,AZURE,MOCK"
 ```
 
 Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
+
+then add these field to the environment variables:
+```
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+CB_AWS_ACCOUNT_ID=
+```
 
 ### Running Auth Mock in IDEA
 
