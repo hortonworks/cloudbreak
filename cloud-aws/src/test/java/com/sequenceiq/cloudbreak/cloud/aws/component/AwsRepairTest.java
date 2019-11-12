@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -165,7 +166,7 @@ public class AwsRepairTest extends AwsComponentTest {
 
         verify(amazonAutoScalingRetryClient, times(stack.getGroups().size()))
                 .suspendProcesses(argThat(argument -> AUTOSCALING_GROUP_NAME.equals(argument.getAutoScalingGroupName())
-                        && SUSPENDED_PROCESSES.equals(argument.getScalingProcesses())));
+                    && SUSPENDED_PROCESSES.equals(argument.getScalingProcesses())));
 
         ArgumentCaptor<CloudResource> updatedCloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(resourceNotifier, times(4)).notifyUpdate(updatedCloudResourceArgumentCaptor.capture(), any());
@@ -227,13 +228,13 @@ public class AwsRepairTest extends AwsComponentTest {
 
         verify(persistenceNotifier).notifyUpdate(argThat(cloudResource -> ResourceType.AWS_VOLUMESET.equals(cloudResource.getType())
                         && VOLUME_ID_1.equals(cloudResource.getName())
-                        && INSTANCE_ID_1.equals(cloudResource.getInstanceId())
+                        && Objects.isNull(cloudResource.getInstanceId())
                         && cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).getDeleteOnTermination()),
                 eq(authenticatedContext.getCloudContext()));
 
         verify(persistenceNotifier).notifyUpdate(argThat(cloudResource -> ResourceType.AWS_VOLUMESET.equals(cloudResource.getType())
                         && VOLUME_ID_2.equals(cloudResource.getName())
-                        && INSTANCE_ID_2.equals(cloudResource.getInstanceId())
+                        && Objects.isNull(cloudResource.getInstanceId())
                         && cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).getDeleteOnTermination()),
                 eq(authenticatedContext.getCloudContext()));
 
