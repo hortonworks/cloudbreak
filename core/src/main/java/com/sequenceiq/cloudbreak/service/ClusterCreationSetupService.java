@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -36,14 +35,13 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaService;
 import com.sequenceiq.cloudbreak.util.Benchmark.MultiCheckedSupplier;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -93,13 +91,13 @@ public class ClusterCreationSetupService {
     private ClusterCreationEnvironmentValidator environmentValidator;
 
     @Inject
-    private KerberosConfigService kerberosConfigService;
-
-    @Inject
     private StackUtil stackUtil;
 
     @Inject
     private CloudStorageConverter cloudStorageConverter;
+
+    @Inject
+    private FreeIpaService freeIpaService;
 
     public void validate(ClusterV4Request request, Stack stack, User user, Workspace workspace, DetailedEnvironmentResponse environment) {
         validate(request, null, stack, user, workspace, environment);
@@ -140,7 +138,7 @@ public class ClusterCreationSetupService {
 
         Cluster cluster = clusterDecorator.decorate(clusterStub, request, blueprint, user, stack.getWorkspace(), stack);
 
-        decorateStackWithCustomDomainIfAdOrIpaJoinable(stack);
+        stack.setCustomDomain(freeIpaService.getFreeIpaDomain(stack.getEnvironmentCrn()));
 
         List<ClusterComponent> components = checkedMeasure((MultiCheckedSupplier<List<ClusterComponent>, IOException, CloudbreakImageNotFoundException>) () -> {
             if (blueprint != null) {
@@ -172,12 +170,5 @@ public class ClusterCreationSetupService {
         }, LOGGER, "Cluster components saved in {} ms for stack {}", stackName);
 
         return clusterService.create(stack, cluster, components, user);
-    }
-
-    private void decorateStackWithCustomDomainIfAdOrIpaJoinable(Stack stack) {
-        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
-        if (kerberosConfig != null && StringUtils.isNotBlank(kerberosConfig.getDomain())) {
-            stack.setCustomDomain(kerberosConfig.getDomain());
-        }
     }
 }

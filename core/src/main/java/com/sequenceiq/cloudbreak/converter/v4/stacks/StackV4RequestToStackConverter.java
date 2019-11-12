@@ -52,16 +52,13 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -100,9 +97,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
 
     @Inject
     private TelemetryConverter telemetryConverter;
-
-    @Inject
-    private KerberosConfigService kerberosConfigService;
 
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
@@ -179,17 +173,8 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             stack.setCustomHostname(source.getCustomDomain().getHostname());
             stack.setClusterNameAsSubdomain(source.getCustomDomain().isClusterNameAsSubdomain());
             stack.setHostgroupNameAsHostname(source.getCustomDomain().isHostgroupNameAsHostname());
-        } else if (!isTemplate(source)) {
-            Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
-            kerberosConfig.ifPresent(kb -> {
-                if (kb.getType() == KerberosType.ACTIVE_DIRECTORY) {
-                    if (isEmpty(kb.getRealm())) {
-                        throw new BadRequestException("Realm cannot be null in case of ACTIVE_DIRECTORY");
-                    }
-                    stack.setCustomDomain(kb.getRealm().toLowerCase());
-                }
-            });
         }
+
         // Host names shall be prefixed with stack name if not configured otherwise
         if (StringUtils.isEmpty(stack.getCustomHostname())) {
             stack.setCustomHostname(stack.getName());

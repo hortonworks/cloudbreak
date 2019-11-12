@@ -22,11 +22,9 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
-import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -40,7 +38,7 @@ public class ClusterCreationEnvironmentValidator {
     private RdsConfigService rdsConfigService;
 
     @Inject
-    private KerberosConfigService kerberosConfigService;
+    private FreeIpaService freeIpaService;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -99,7 +97,7 @@ public class ClusterCreationEnvironmentValidator {
             }
         }
         if (effectiveAutoTls) {
-            validateKerberosConfig(stack, resultBuilder);
+            validateKerberosConfig(stack.getEnvironmentCrn(), resultBuilder);
         }
     }
 
@@ -109,10 +107,8 @@ public class ClusterCreationEnvironmentValidator {
         return platformParameters.isAutoTlsSupported();
     }
 
-    private void validateKerberosConfig(Stack stack, ValidationResultBuilder resultBuilder) {
-        Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
-        boolean freeipa = kerberosConfig.map(kc -> KerberosType.FREEIPA == kc.getType()).orElse(Boolean.FALSE);
-        if (!freeipa) {
+    private void validateKerberosConfig(String environmentCrn, ValidationResultBuilder resultBuilder) {
+        if (!freeIpaService.isFreeIpaEnabled(environmentCrn)) {
             resultBuilder.error("AutoTls is only enabled for clusters with FreeIpa!");
         }
     }

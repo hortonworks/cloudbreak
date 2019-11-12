@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,19 +38,18 @@ import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
-import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public class ClusterCreationSetupServiceTest {
 
@@ -98,7 +96,7 @@ public class ClusterCreationSetupServiceTest {
     private DefaultClouderaManagerRepoService defaultClouderaManagerRepoService;
 
     @Mock
-    private KerberosConfigService kerberosConfigService;
+    private FreeIpaService freeIpaService;
 
     @InjectMocks
     private ClusterCreationSetupService underTest;
@@ -165,9 +163,7 @@ public class ClusterCreationSetupServiceTest {
 
     @Test
     public void testDomainIsSet() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
-        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
-                .withDomain("domain").build();
-        when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.of(kerberosConfig));
+        when(freeIpaService.getFreeIpaDomain(anyString())).thenReturn("domain");
         underTest.prepare(clusterRequest, stack, blueprint, user);
         assertEquals("domain", stack.getCustomDomain());
     }
@@ -180,8 +176,7 @@ public class ClusterCreationSetupServiceTest {
 
     @Test
     public void testMissingDomain() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
-        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().build();
-        when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.of(kerberosConfig));
+        when(freeIpaService.getFreeIpaDomain(anyString())).thenReturn(null);
         underTest.prepare(clusterRequest, stack, blueprint, user);
         assertNull(stack.getCustomDomain());
     }

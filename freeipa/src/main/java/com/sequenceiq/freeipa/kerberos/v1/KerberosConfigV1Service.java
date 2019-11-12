@@ -98,6 +98,7 @@ public class KerberosConfigV1Service {
             if (existingKerberosConfig.isPresent()) {
                 kerberosConfig = existingKerberosConfig.get();
             } else {
+                // This is not the right place we shall not slow lazy init here
                 FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack.get());
                 String bindUser = "kerberosbind-" + clusterName;
                 Optional<User> existinguser = freeIpaClient.userFind(bindUser);

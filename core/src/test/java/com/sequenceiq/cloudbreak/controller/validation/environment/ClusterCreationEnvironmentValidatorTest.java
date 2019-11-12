@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -31,14 +30,11 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig.KerberosConfigBuilder;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig.ProxyConfigBuilder;
-import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -60,7 +56,7 @@ class ClusterCreationEnvironmentValidatorTest {
     private User user;
 
     @Mock
-    private KerberosConfigService kerberosConfigService;
+    private FreeIpaService freeIpaService;
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -76,8 +72,7 @@ class ClusterCreationEnvironmentValidatorTest {
 
     @BeforeEach
     void setUp() {
-        KerberosConfig kerberosConfig = KerberosConfigBuilder.aKerberosConfig().withType(KerberosType.FREEIPA).build();
-        when(kerberosConfigService.get(any(), any())).thenReturn(Optional.of(kerberosConfig));
+        when(freeIpaService.isFreeIpaEnabled(any())).thenReturn(Boolean.TRUE);
         when(cloudPlatformConnectors.get(any(), any())).thenReturn(connector);
         when(connector.parameters()).thenReturn(platformParameters);
         when(platformParameters.isAutoTlsSupported()).thenReturn(true);
@@ -266,8 +261,7 @@ class ClusterCreationEnvironmentValidatorTest {
         clusterRequest.setCm(cmRequest);
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         when(platformParameters.isAutoTlsSupported()).thenReturn(true);
-        KerberosConfig kerberosConfig = KerberosConfigBuilder.aKerberosConfig().withType(KerberosType.ACTIVE_DIRECTORY).build();
-        when(kerberosConfigService.get(any(), any())).thenReturn(Optional.of(kerberosConfig));
+        when(freeIpaService.isFreeIpaEnabled(any())).thenReturn(Boolean.FALSE);
         // WHEN
         ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
         // THEN
