@@ -130,7 +130,7 @@
         <param>
            <name>knoxsso.redirect.whitelist.regex</name>
            {% if salt['pillar.get']('gateway:userfacingdomain') is defined and salt['pillar.get']('gateway:userfacingdomain')|length > 1 %}
-           <value>^\/.*$;^https?:\/\/(.+\.{{ salt['pillar.get']('gateway:userfacingdomain') }}):[0-9]+\/?.*$</value>
+           <value>^\/.*$;^https?:\/\/(.+\.{{ salt['pillar.get']('gateway:userfacingdomain') }})(?::[0-9]+)?(?:\/.*)?$</value>
            {% else %}
            <value>^.*$</value>
            {% endif %}
