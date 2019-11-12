@@ -34,7 +34,6 @@ import com.microsoft.azure.management.network.Subnet;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
-import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
@@ -238,15 +237,17 @@ public class AzurePlatformResources implements PlatformResources {
     @Override
     public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         CloudAccessConfigs cloudAccessConfigs = new CloudAccessConfigs(new HashSet<>());
-        AzureCredentialView credentialView = new AzureCredentialView(cloudCredential);
-        String subscriptionId = credentialView.getSubscriptionId();
-
         AzureClient client = azureClientService.getClient(cloudCredential);
-        List<Identity> identities = client.listIdentitiesByRoleAssignement(subscriptionId);
-        Set<CloudAccessConfig> configs = identities.stream().map(identity -> new CloudAccessConfig(
-                identity.name(),
-                identity.principalId(),
-                null)).collect(Collectors.toSet());
+        List<Identity> identities = client.listIdentitiesByRegion(region.getRegionName());
+        Set<CloudAccessConfig> configs = identities.stream().map(identity -> {
+            Map<String, Object> properties = new HashMap<>();
+            properties.put("resourceId", identity.id());
+            properties.put("resourceGroupName", identity.resourceGroupName());
+            return new CloudAccessConfig(
+                    identity.name(),
+                    identity.principalId(),
+                    properties);
+        }).collect(Collectors.toSet());
 
         cloudAccessConfigs.getCloudAccessConfigs().addAll(configs);
         return cloudAccessConfigs;
