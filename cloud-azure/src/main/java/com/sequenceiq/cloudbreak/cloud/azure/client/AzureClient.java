@@ -662,13 +662,19 @@ public class AzureClient {
         return handleAuthException(() -> azure.identities().list());
     }
 
-    public List<Identity> listIdentitiesByRoleAssignement(String roleAssignmentScopeId) {
-        PagedList<Identity> identityList = listIdentities();
-        PagedList<RoleAssignment> roleAssignments = listIdentityRoleAssignmentsByScopeId(roleAssignmentScopeId);
+    public List<Identity> listIdentitiesByRegion(String region) {
+        return listIdentities()
+                .stream()
+                .filter(identity -> identity.region().label().equalsIgnoreCase(region))
+                .collect(Collectors.toList());
+    }
+
+    public List<Identity> filterIdentitiesByRoleAssignement(List<Identity> identityList, String roleAssignmentScope) {
+        PagedList<RoleAssignment> roleAssignments = listIdentityRoleAssignmentsByScope(roleAssignmentScope);
         return identityList.stream().filter(
                 identity -> roleAssignments.stream()
-                        .anyMatch(roleAssignment -> roleAssignment.principalId() != null &&
-                                roleAssignment.principalId().equalsIgnoreCase(identity.principalId())))
+                        .anyMatch(roleAssignment -> roleAssignment.principalId() != null
+                                && roleAssignment.principalId().equalsIgnoreCase(identity.principalId())))
                 .collect(Collectors.toList());
     }
 
@@ -676,13 +682,13 @@ public class AzureClient {
         return handleAuthException(() -> azure.identities().getById(id));
     }
 
-    public PagedList<RoleAssignment> listIdentityRoleAssignmentsByScopeId(String scopeId) {
-        return handleAuthException(() -> azure.identities().manager()).graphRbacManager().roleAssignments().listByScope(scopeId);
+    public PagedList<RoleAssignment> listIdentityRoleAssignmentsByScope(String scope) {
+        return handleAuthException(() -> azure.identities().manager()).graphRbacManager().roleAssignments().listByScope(scope);
     }
 
     public boolean checkIdentityRoleAssignement(String identityId, String scopeId) {
         Identity identity = getIdentityById(identityId);
-        PagedList<RoleAssignment> roleAssignments = listIdentityRoleAssignmentsByScopeId(scopeId);
+        PagedList<RoleAssignment> roleAssignments = listIdentityRoleAssignmentsByScope(scopeId);
         return roleAssignments.stream().anyMatch(roleAssignment -> roleAssignment.principalId() != null &&
                 roleAssignment.principalId().equalsIgnoreCase(identity.principalId()));
     }
