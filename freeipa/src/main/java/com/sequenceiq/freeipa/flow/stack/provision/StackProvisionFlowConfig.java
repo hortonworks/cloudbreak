@@ -5,6 +5,8 @@ import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.CO
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.COLLECT_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.CREATE_CREDENTIAL_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.CREATE_CREDENTIAL_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.CREATE_USER_DATA_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.CREATE_USER_DATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.GET_TLS_INFO_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.GET_TLS_INFO_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_COPY_CHECK_EVENT;
@@ -27,6 +29,7 @@ import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.VA
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.CLUSTERPROXY_REGISTRATION_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.COLLECTMETADATA_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.CREATE_CREDENTIAL_STATE;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.CREATE_USER_DATA_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.GET_TLS_INFO_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.IMAGESETUP_STATE;
@@ -54,7 +57,8 @@ public class StackProvisionFlowConfig extends AbstractFlowConfiguration<StackPro
     private static final List<Transition<StackProvisionState, StackProvisionEvent>> TRANSITIONS = new Builder<StackProvisionState, StackProvisionEvent>()
             .defaultFailureEvent(STACK_CREATION_FAILED_EVENT)
             .from(INIT_STATE).to(VALIDATION_STATE).event(START_CREATION_EVENT).noFailureEvent()
-            .from(VALIDATION_STATE).to(SETUP_STATE).event(VALIDATION_FINISHED_EVENT).failureEvent(VALIDATION_FAILED_EVENT)
+            .from(VALIDATION_STATE).to(CREATE_USER_DATA_STATE).event(VALIDATION_FINISHED_EVENT).failureEvent(VALIDATION_FAILED_EVENT)
+            .from(CREATE_USER_DATA_STATE).to(SETUP_STATE).event(CREATE_USER_DATA_FINISHED_EVENT).failureEvent(CREATE_USER_DATA_FAILED_EVENT)
             .from(SETUP_STATE).to(IMAGESETUP_STATE).event(SETUP_FINISHED_EVENT).failureEvent(SETUP_FAILED_EVENT)
             .from(IMAGESETUP_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_PREPARATION_FINISHED_EVENT).failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
             .from(IMAGE_CHECK_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_COPY_CHECK_EVENT).failureEvent(IMAGE_COPY_FAILED_EVENT)

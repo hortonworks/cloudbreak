@@ -50,6 +50,8 @@ import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationRequest;
+import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataRequest;
+import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataSuccess;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -96,11 +98,26 @@ public class StackProvisionActions {
         };
     }
 
-    @Bean(name = "SETUP_STATE")
-    public Action<?, ?> provisioningSetupAction() {
+    @Bean(name = "CREATE_USER_DATA_STATE")
+    public Action<?, ?> createUserDataAction() {
         return new AbstractStackProvisionAction<>(ValidationResult.class) {
             @Override
             protected void doExecute(StackContext context, ValidationResult payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new CreateUserDataRequest(context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "SETUP_STATE")
+    public Action<?, ?> provisioningSetupAction() {
+        return new AbstractStackProvisionAction<>(CreateUserDataSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, CreateUserDataSuccess payload, Map<Object, Object> variables) {
                 stackProvisionService.setupProvision(context.getStack());
                 sendEvent(context);
             }

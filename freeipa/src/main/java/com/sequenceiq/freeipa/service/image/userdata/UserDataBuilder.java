@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.image;
+package com.sequenceiq.freeipa.service.image.userdata;
 
 import java.io.IOException;
 import java.util.HashMap;

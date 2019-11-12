@@ -28,6 +28,8 @@ import com.sequenceiq.freeipa.vault.FreeIpaCertVaultComponent;
 @Service
 public class ClusterProxyService {
 
+    public static final String FREEIPA_SERVICE_NAME = "freeipa";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyService.class);
 
     private static final String VAULT_KEY_SUFFIX = ":secret";
@@ -37,8 +39,6 @@ public class ClusterProxyService {
     private static final Boolean USE_TUNNEL = true;
 
     private static final String GATEWAY_SERVICE_TYPE = "GATEWAY";
-
-    public static final String FREEIPA_SERVICE_NAME = "freeipa";
 
     @Inject
     private StackService stackService;

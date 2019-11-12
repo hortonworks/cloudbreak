@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.image;
+package com.sequenceiq.freeipa.service.image.userdata;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
