@@ -1,0 +1,5 @@
+name: "azure-sdx-cloudstorage-tests"
+tests:
+  - name: "azure sdx cloudstorage e2e tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.azure.AzureSdxCloudStorageTests

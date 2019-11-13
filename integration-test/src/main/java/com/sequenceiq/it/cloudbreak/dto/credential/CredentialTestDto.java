@@ -1,11 +1,9 @@
 package com.sequenceiq.it.cloudbreak.dto.credential;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.GcpCredentialParameters;
@@ -20,6 +18,7 @@ import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.DeletableEnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
 public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialRequest, CredentialResponse, CredentialTestDto, CredentialResponse> {
@@ -92,20 +91,28 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Cleaning up resource with name: {}", getName());
-        when(credentialTestClient.delete());
+        LOGGER.info("CLEAN UP :: Deleting credential with name: [{}]", getName());
+        when(credentialTestClient.delete()).withName(getName());
     }
 
     @Override
     public Collection<CredentialResponse> getAll(EnvironmentClient client) {
-        CredentialEndpoint credentialEndpoint = client.getEnvironmentClient().credentialV1Endpoint();
-        return new ArrayList<>(credentialEndpoint.list().getResponses());
+        return client.getEnvironmentClient().credentialV1Endpoint().list().getResponses();
+    }
+
+    @Override
+    public boolean deletable(CredentialResponse entity) {
+        return entity.getName().startsWith(getResourcePropertyProvider().prefix());
     }
 
     @Override
     public void delete(TestContext testContext, CredentialResponse entity, EnvironmentClient client) {
-        CredentialEndpoint credentialEndpoint = client.getEnvironmentClient().credentialV1Endpoint();
-        credentialEndpoint.deleteByName(entity.getName());
+        try {
+            client.getEnvironmentClient().credentialV1Endpoint().deleteByName(entity.getName());
+            LOGGER.info("DELETE :: Credential with name: [{}] has been deleted successfully.", entity.getName());
+        } catch (Exception e) {
+            LOGGER.warn("DELETE :: Something went wrong during [{}] credential delete: {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);
+        }
     }
 
     @Override

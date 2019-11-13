@@ -18,6 +18,10 @@ public class AmazonS3Util {
     }
 
     public SdxTestDto delete(TestContext testContext, SdxTestDto sdxTestDto, SdxClient sdxClient) {
-        return s3ClientActions.nonVersionedBucketActions(testContext, sdxTestDto, sdxClient);
+        return s3ClientActions.deleteNonVersionedBucket(testContext, sdxTestDto, sdxClient);
+    }
+
+    public SdxTestDto list(TestContext testContext, SdxTestDto sdxTestDto, SdxClient sdxClient) {
+        return s3ClientActions.listBucket(testContext, sdxTestDto, sdxClient);
     }
 }

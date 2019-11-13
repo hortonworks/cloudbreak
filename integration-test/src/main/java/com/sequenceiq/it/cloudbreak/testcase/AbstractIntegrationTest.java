@@ -66,6 +66,7 @@ import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestCaseDescriptionMissingException;
 import com.sequenceiq.it.cloudbreak.mock.ThreadLocalProfiles;
+import com.sequenceiq.it.cloudbreak.util.azurecloudblob.AzureCloudBlobUtil;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
@@ -118,6 +119,9 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
+
+    @Inject
+    private AzureCloudBlobUtil azureCloudBlobUtil;
 
     @BeforeSuite
     public void beforeSuite(ITestContext testngContext) {
@@ -344,6 +348,10 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         testContext
                 .init(BlueprintTestDto.class)
                 .when(blueprintTestClient.listV4());
+    }
+
+    protected void initializeAzureCloudStorage(TestContext testContext) {
+        azureCloudBlobUtil.createContainerIfNotExist(testContext);
     }
 
     /**

@@ -190,7 +190,6 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         return null;
     }
 
-    @Override
     public String getInstanceProfile() {
         return null;
     }

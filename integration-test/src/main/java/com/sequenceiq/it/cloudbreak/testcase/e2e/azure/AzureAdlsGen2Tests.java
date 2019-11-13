@@ -92,7 +92,7 @@ public class AzureAdlsGen2Tests extends AbstractE2ETest {
     private CloudStorageRequest adlsGen2CloudStorageV4RequestWithStorageLocations(String clusterName) {
         CloudStorageRequest request = adlsGen2CloudStorageV4RequestWithoutStorageLocations();
         String accountName = azureProperties.getCloudstorage().getAccountName();
-        String storageLocation = azureProperties.getCloudstorage().getLocationName();
+        String storageLocation = azureProperties.getCloudstorage().getBaseLocation();
         AzureTestStorageLocation azureStorageLocation = new AzureTestStorageLocation(accountName, clusterName, storageLocation);
         request.setLocations(azureStorageLocation.getAdlsGen2(LOCATION_STORAGE_COMPONENTS));
         return request;

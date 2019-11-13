@@ -168,15 +168,18 @@ public class AzureProperties {
     }
 
     public static class Cloudstorage {
+
+        private final AdlsGen2 adlsGen2 = new AdlsGen2();
+
         private String accountKey;
 
         private String accountName;
 
-        private String locationName;
-
         private String baseLocation;
 
         private String fileSystemType;
+
+        private Boolean secure;
 
         public String getAccountKey() {
             return accountKey;
@@ -194,14 +197,6 @@ public class AzureProperties {
             this.accountName = accountName;
         }
 
-        public String getLocationName() {
-            return locationName;
-        }
-
-        public void setLocationName(String locationName) {
-            this.locationName = locationName;
-        }
-
         public String getBaseLocation() {
             return baseLocation;
         }
@@ -216,6 +211,41 @@ public class AzureProperties {
 
         public void setFileSystemType(String fileSystemType) {
             this.fileSystemType = fileSystemType;
+        }
+
+        public AdlsGen2 getAdlsGen2() {
+            return adlsGen2;
+        }
+
+        public Boolean getSecure() {
+            return secure;
+        }
+
+        public void setSecure(Boolean secure) {
+            this.secure = secure;
+        }
+
+        public static class AdlsGen2 {
+
+            private String assumerIdentity;
+
+            private String loggerIdentity;
+
+            public String getAssumerIdentity() {
+                return assumerIdentity;
+            }
+
+            public void setAssumerIdentity(String assumerIdentity) {
+                this.assumerIdentity = assumerIdentity;
+            }
+
+            public String getLoggerIdentity() {
+                return loggerIdentity;
+            }
+
+            public void setLoggerIdentity(String loggerIdentity) {
+                this.loggerIdentity = loggerIdentity;
+            }
         }
     }
 

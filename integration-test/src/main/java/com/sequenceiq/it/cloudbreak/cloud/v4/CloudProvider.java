@@ -81,8 +81,6 @@ public interface CloudProvider {
 
     String getBaseLocation();
 
-    String getInstanceProfile();
-
     String getSubnetCIDR();
 
     String getAccessCIDR();
