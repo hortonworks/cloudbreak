@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
@@ -60,9 +61,6 @@ class IdBrokerMappingsDeleteHandlerTest {
     private GrpcIdbmmsClient idbmmsClient;
 
     @Mock
-    private Event<EnvironmentDto> environmentDtoEvent;
-
-    @Mock
     private Event.Headers headers;
 
     @InjectMocks
@@ -72,10 +70,14 @@ class IdBrokerMappingsDeleteHandlerTest {
 
     private ArgumentCaptor<Event.Headers> headersArgumentCaptor;
 
+    private EnvironmentDto environmentDto;
+
+    private Event<EnvironmentDto> environmentDtoEvent;
+
     @BeforeEach
     void setUp() {
-        when(environmentDtoEvent.getData()).thenReturn(createEnvironmentDto());
-        when(environmentDtoEvent.getHeaders()).thenReturn(headers);
+        environmentDto = createEnvironmentDto();
+        environmentDtoEvent = new Event<>(headers, environmentDto);
         eventArgumentCaptor = ArgumentCaptor.forClass(BaseNamedFlowEvent.class);
         headersArgumentCaptor = ArgumentCaptor.forClass(Event.Headers.class);
     }
@@ -186,7 +188,9 @@ class IdBrokerMappingsDeleteHandlerTest {
         Environment env = new Environment();
         env.setId(ENVIRONMENT_ID);
         env.setResourceCrn(ENVIRONMENT_CRN);
-        env.getExperimentalFeatures().setIdBrokerMappingSource(mappingSource);
+        ExperimentalFeatures experimentalFeaturesJson = env.getExperimentalFeaturesJson();
+        experimentalFeaturesJson.setIdBrokerMappingSource(mappingSource);
+        env.setExperimentalFeaturesJson(experimentalFeaturesJson);
         return env;
     }
 

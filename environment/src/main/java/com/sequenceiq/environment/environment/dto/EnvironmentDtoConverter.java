@@ -58,7 +58,7 @@ public class EnvironmentDtoConverter {
                 .withCreateFreeIpa(environment.isCreateFreeIpa())
                 .withCreated(environment.getCreated())
                 .withStatusReason(environment.getStatusReason())
-                .withExperimentalFeatures(environment.getExperimentalFeatures())
+                .withExperimentalFeatures(environment.getExperimentalFeaturesJson())
                 .withSecurityAccess(environmentToSecurityAccessDto(environment))
                 .withAdminGroupName(environment.getAdminGroupName());
 
@@ -86,7 +86,7 @@ public class EnvironmentDtoConverter {
         environment.setCreateFreeIpa(creationDto.isCreateFreeIpa());
         environment.setAdminGroupName(creationDto.getAdminGroupName());
         environment.setCreated(System.currentTimeMillis());
-        environment.setExperimentalFeatures(creationDto.getExperimentalFeatures());
+        environment.setExperimentalFeaturesJson(creationDto.getExperimentalFeatures());
         return environment;
     }
 

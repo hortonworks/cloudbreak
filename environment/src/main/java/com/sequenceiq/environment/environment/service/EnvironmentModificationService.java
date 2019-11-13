@@ -21,6 +21,7 @@ import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingS
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
@@ -109,6 +110,7 @@ public class EnvironmentModificationService {
         editAuthenticationIfChanged(editDto, env);
         editSecurityAccessIfChanged(editDto, env);
         editIdBrokerMappingSource(editDto, env);
+        editTunnelIfChanged(editDto, env);
         editEnvironmentParameters(editDto, env);
         Environment saved = environmentService.save(env);
         return environmentDtoConverter.environmentToDto(saved);
@@ -211,7 +213,9 @@ public class EnvironmentModificationService {
 
     private void editTunnelIfChanged(EnvironmentEditDto editDto, Environment environment) {
         if (editDto.getTunnel() != null) {
-            environment.getExperimentalFeatures().setTunnel(editDto.getTunnel());
+            ExperimentalFeatures experimentalFeaturesJson = environment.getExperimentalFeaturesJson();
+            experimentalFeaturesJson.setTunnel(editDto.getTunnel());
+            environment.setExperimentalFeaturesJson(experimentalFeaturesJson);
         }
     }
 
@@ -235,7 +239,9 @@ public class EnvironmentModificationService {
     private void editIdBrokerMappingSource(EnvironmentEditDto editDto, Environment environment) {
         IdBrokerMappingSource idBrokerMappingSource = editDto.getIdBrokerMappingSource();
         if (idBrokerMappingSource != null) {
-            environment.getExperimentalFeatures().setIdBrokerMappingSource(idBrokerMappingSource);
+            ExperimentalFeatures experimentalFeaturesJson = environment.getExperimentalFeaturesJson();
+            experimentalFeaturesJson.setIdBrokerMappingSource(idBrokerMappingSource);
+            environment.setExperimentalFeaturesJson(experimentalFeaturesJson);
         }
     }
 

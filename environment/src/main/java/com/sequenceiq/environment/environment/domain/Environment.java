@@ -117,11 +117,21 @@ public class Environment implements AuthResource {
     @OneToOne(mappedBy = "environment", cascade = CascadeType.ALL, orphanRemoval = true)
     private BaseParameters parameters;
 
+    /**
+     * @deprecated
+     * The new experimentalFeaturesJson field is the primary source of truth.
+     */
+    @Deprecated
     @Embedded
     private ExperimentalFeatures experimentalFeatures;
 
+    @Convert(converter = JsonToString.class)
+    @Column(name = "experimentalfeatures", columnDefinition = "TEXT")
+    private Json experimentalFeaturesJson;
+
     public Environment() {
         regions = new Json(new HashSet<Region>());
+        experimentalFeaturesJson = new Json(new ExperimentalFeatures());
         experimentalFeatures = new ExperimentalFeatures();
     }
 
@@ -345,12 +355,40 @@ public class Environment implements AuthResource {
         this.cidr = cidr;
     }
 
+    /**
+     * @deprecated
+     * The new getExperimentalFeaturesJson() method should be used.
+     */
+    @Deprecated
     public ExperimentalFeatures getExperimentalFeatures() {
+        return getExperimentalFeaturesJson();
+    }
+
+    /**
+     * @deprecated
+     * The new setExperimentalFeaturesJson() method should be used.
+     */
+    @Deprecated
+    public void setExperimentalFeatures(ExperimentalFeatures experimentalFeatures) {
+        setExperimentalFeaturesJson(experimentalFeatures);
+    }
+
+    public ExperimentalFeatures getExperimentalFeaturesJson() {
+        if (experimentalFeaturesJson != null && experimentalFeaturesJson.getValue() != null) {
+            return JsonUtil.readValueOpt(experimentalFeaturesJson.getValue(), ExperimentalFeatures.class).orElse(new ExperimentalFeatures());
+        }
         return experimentalFeatures;
     }
 
-    public void setExperimentalFeatures(ExperimentalFeatures experimentalFeatures) {
-        this.experimentalFeatures = experimentalFeatures;
+    public void setExperimentalFeaturesJson(ExperimentalFeatures experimentalFeaturesJson) {
+        if (experimentalFeaturesJson != null) {
+            this.experimentalFeaturesJson = new Json(experimentalFeaturesJson);
+            this.experimentalFeatures = experimentalFeaturesJson;
+        }
+    }
+
+    public void setTelemetry(Json telemetry) {
+        this.telemetry = telemetry;
     }
 
     public String getAdminGroupName() {

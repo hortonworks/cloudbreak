@@ -1,15 +1,20 @@
 package com.sequenceiq.environment.environment.domain;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 
 @Embeddable
-public class ExperimentalFeatures {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ExperimentalFeatures implements Serializable {
 
     @Enumerated(EnumType.STRING)
     private Tunnel tunnel;
@@ -32,6 +37,11 @@ public class ExperimentalFeatures {
 
     public void setIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
         this.idBrokerMappingSource = idBrokerMappingSource;
+    }
+
+    @JsonIgnore
+    public boolean isEmpty() {
+        return tunnel == null && idBrokerMappingSource == null;
     }
 
     public static Builder builder() {
