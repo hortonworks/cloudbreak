@@ -12,7 +12,7 @@ public enum StorageComponent {
         public List<StorageLocationBase> getLocations(TestStorageLocation tsl) {
             return List.of(
                     createStorageLocationRequest(name(),
-                            String.format("%s//%s/warehouse/tablespace/managed/hive", tsl.getStorageTypePrefix(), tsl.getPathInfix())
+                            String.format("%s/warehouse/tablespace/managed/hive", tsl.getPathInfix())
                     )
             );
         }
@@ -23,7 +23,7 @@ public enum StorageComponent {
         public List<StorageLocationBase> getLocations(TestStorageLocation tsl) {
             return List.of(
                     createStorageLocationRequest(name(),
-                            String.format("%s//%s/warehouse/tablespace/external/hive", tsl.getStorageTypePrefix(), tsl.getPathInfix())
+                            String.format("%s/warehouse/tablespace/external/hive", tsl.getPathInfix())
                     )
             );
         }
@@ -34,11 +34,11 @@ public enum StorageComponent {
         public List<StorageLocationBase> getLocations(TestStorageLocation tsl) {
             return List.of(
                     createStorageLocationRequest(name(),
-                            String.format("%s//%s/%s/oplogs/spark2-history", tsl.getStorageTypePrefix(), tsl.getPathInfix(), tsl.getClusterName())),
+                            String.format("%s/%s/oplogs/spark2-history", tsl.getPathInfix(), tsl.getClusterName())),
                     createStorageLocationRequest(name(),
-                            String.format("%s//%s/%s/oplogs/spark2-history", tsl.getStorageTypePrefix(), tsl.getPathInfix(), tsl.getClusterName())),
+                            String.format("%s/%s/oplogs/spark2-history", tsl.getPathInfix(), tsl.getClusterName())),
                     createStorageLocationRequest(name(),
-                            String.format("%s//%s/warehouse/spark", tsl.getStorageTypePrefix(), tsl.getPathInfix()))
+                            String.format("%s/warehouse/spark", tsl.getPathInfix()))
             );
         }
     },
@@ -48,8 +48,7 @@ public enum StorageComponent {
         public List<StorageLocationBase> getLocations(TestStorageLocation tsl) {
             return List.of(
                     createStorageLocationRequest(name(),
-                            String.format("%s//%s/warehouse/tablespace/external/hive/sys.db/query_data",
-                                    tsl.getStorageTypePrefix(), tsl.getPathInfix()))
+                            String.format("%s/warehouse/tablespace/external/hive/sys.db/query_data", tsl.getPathInfix()))
             );
         }
     },
@@ -59,7 +58,7 @@ public enum StorageComponent {
         public List<StorageLocationBase> getLocations(TestStorageLocation tsl) {
             return List.of(
                     createStorageLocationRequest(name(),
-                            String.format("%s//%s/ranger/audit", tsl.getStorageTypePrefix(), tsl.getPathInfix()))
+                            String.format("%s/ranger/audit", tsl.getPathInfix()))
             );
         }
     },
@@ -69,7 +68,7 @@ public enum StorageComponent {
         public List<StorageLocationBase> getLocations(TestStorageLocation tsl) {
             return List.of(
                     createStorageLocationRequest(name(),
-                            String.format("%s//%s/%s/oplogs/yarn-app-logs", tsl.getStorageTypePrefix(), tsl.getPathInfix(), tsl.getClusterName()))
+                            String.format("%s/%s/oplogs/yarn-app-logs", tsl.getPathInfix(), tsl.getClusterName()))
             );
         }
     },
@@ -78,7 +77,7 @@ public enum StorageComponent {
         @Override
         public List<StorageLocationBase> getLocations(TestStorageLocation tsl) {
             return List.of(createStorageLocationRequest(name(),
-                    String.format("%s//%s/zeppelin/notebook", tsl.getStorageTypePrefix(), tsl.getPathInfix())));
+                    String.format("%s/zeppelin/notebook", tsl.getPathInfix())));
         }
     };
 

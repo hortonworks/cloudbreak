@@ -151,11 +151,6 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public String getInstanceProfile() {
-        return delegate.getInstanceProfile();
-    }
-
-    @Override
     public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
         return delegate.attachedVolume(volume);
     }

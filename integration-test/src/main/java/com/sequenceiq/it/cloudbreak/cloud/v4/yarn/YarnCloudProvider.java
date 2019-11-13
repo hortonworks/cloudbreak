@@ -236,7 +236,6 @@ public class YarnCloudProvider extends AbstractCloudProvider {
         return null;
     }
 
-    @Override
     public String getInstanceProfile() {
         return null;
     }

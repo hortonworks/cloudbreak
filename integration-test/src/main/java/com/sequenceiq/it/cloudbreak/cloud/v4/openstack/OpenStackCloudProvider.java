@@ -178,7 +178,6 @@ public class OpenStackCloudProvider extends AbstractCloudProvider {
         return null;
     }
 
-    @Override
     public String getInstanceProfile() {
         return null;
     }

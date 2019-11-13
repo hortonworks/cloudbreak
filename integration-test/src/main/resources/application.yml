@@ -156,7 +156,7 @@ integrationtest:
     location: West Europe
     network:
       networkId:
-      firewallRules:
+      noFirewallRules:
       noPublicIp:
       resourceGroupName:
       subnetIds:
@@ -173,9 +173,12 @@ integrationtest:
     cloudstorage:
       accountKey:
       accountName:
-      locationName:
       baseLocation:
-      fileSystemType:
+      fileSystemType: ADLS_GEN_2
+      adlsGen2:
+        assumerIdentity:
+        loggerIdentity:
+      secure: false
 
   # gcp parameters
   gcp:

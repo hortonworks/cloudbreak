@@ -2,17 +2,17 @@ package com.sequenceiq.it.cloudbreak.util.storagelocation;
 
 abstract class TestStorageLocation {
 
-    private final String baseStorageLocationName;
+    private final String baseStorageLocation;
 
     private final String clusterName;
 
-    TestStorageLocation(String baseStorageLocationName, String clusterName) {
-        this.baseStorageLocationName = baseStorageLocationName;
+    TestStorageLocation(String baseStorageLocation, String clusterName) {
+        this.baseStorageLocation = baseStorageLocation;
         this.clusterName = clusterName;
     }
 
-    String getBaseStorageLocationName() {
-        return baseStorageLocationName;
+    String getBaseStorageLocation() {
+        return baseStorageLocation;
     }
 
     String getClusterName() {

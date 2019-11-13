@@ -257,7 +257,6 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         return String.join("/", awsProperties.getCloudstorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
     }
 
-    @Override
     public String getInstanceProfile() {
         return awsProperties.getCloudstorage().getS3().getInstanceProfile();
     }

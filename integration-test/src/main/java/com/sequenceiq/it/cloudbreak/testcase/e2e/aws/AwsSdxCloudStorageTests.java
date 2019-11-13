@@ -31,7 +31,7 @@ public class AwsSdxCloudStorageTests extends BasicSdxTests {
     @Description(
             given = "there is a running Cloudbreak",
             when = "a basic SDX create request with S3 Cloud Storage has been sent",
-            then = "SDX should be available AND deletable along with created S3 objects"
+            then = "SDX should be available AND deletable along with the created S3 objects"
     )
     public void testSDXWithCloudStorageCanBeCreatedThenDeletedSuccessfully(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
@@ -44,9 +44,8 @@ public class AwsSdxCloudStorageTests extends BasicSdxTests {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesRegisteredState());
                 })
                 .then((tc, testDto, client) -> {
-                    return sdxTestClient.delete().action(tc, testDto, client);
+                    return amazonS3Util.list(tc, testDto, client);
                 })
-                .await(SDX_DELETED)
                 .then((tc, testDto, client) -> {
                     return amazonS3Util.delete(tc, testDto, client);
                 })

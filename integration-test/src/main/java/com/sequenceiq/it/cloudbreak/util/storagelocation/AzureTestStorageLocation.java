@@ -28,7 +28,7 @@ public class AzureTestStorageLocation extends TestStorageLocation {
 
     @Override
     public String getPathInfix() {
-        return super.getBaseStorageLocationName() + "@" + storageAccountName + ".blob.core.windows.net";
+        return super.getBaseStorageLocation();
     }
 
 }

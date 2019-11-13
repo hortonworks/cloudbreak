@@ -282,7 +282,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
         return null;
     }
 
-    @Override
     public String getInstanceProfile() {
         return null;
     }

@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
@@ -38,6 +40,8 @@ import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 
 @Component
 public class AzureCloudProvider extends AbstractCloudProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureCloudProvider.class);
 
     private static final String DEFAULT_STORAGE_NAME = "testsdx" + UUID.randomUUID().toString().replaceAll("-", "");
 
@@ -175,11 +179,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         return stackAuthenticationEntity.withPublicKey(sshPublicKey);
     }
 
-    @Override
-    public TelemetryTestDto telemetry(TelemetryTestDto telemetry) {
-        return telemetry;
-    }
-
     public String getNetworkId() {
         return azureProperties.getNetwork().getNetworkId();
     }
@@ -211,10 +210,23 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public TelemetryTestDto telemetry(TelemetryTestDto telemetry) {
+        return telemetry;
+    }
+
+    @Override
     public SdxCloudStorageTestDto cloudStorage(SdxCloudStorageTestDto cloudStorage) {
         return cloudStorage
                 .withFileSystemType(getFileSystemType())
-                .withBaseLocation(getBaseLocation());
+                .withBaseLocation(getBaseLocation())
+                .withAdlsGen2(adlsGen2CloudStorageParameters());
+    }
+
+    public AdlsGen2CloudStorageV1Parameters adlsGen2CloudStorageParameters() {
+        AdlsGen2CloudStorageV1Parameters adlsGen2CloudStorageV1Parameters = new AdlsGen2CloudStorageV1Parameters();
+        adlsGen2CloudStorageV1Parameters.setSecure(getSecure());
+        adlsGen2CloudStorageV1Parameters.setManagedIdentity(getAssumerIdentity());
+        return adlsGen2CloudStorageV1Parameters;
     }
 
     @Override
@@ -225,6 +237,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         FileSystemType fileSystemType;
 
         switch (azureProperties.getCloudstorage().getFileSystemType()) {
+            case "WASB_INTEGRATED":
             case "WASB":
                 fileSystemType = wasbCloudStorageV1Parameters.getType();
                 break;
@@ -235,7 +248,9 @@ public class AzureCloudProvider extends AbstractCloudProvider {
                 fileSystemType = adlsGen2CloudStorageV1Parameters.getType();
                 break;
             default:
-                fileSystemType = wasbCloudStorageV1Parameters.getType();
+                LOGGER.warn("The given {} File System Type is not in the list of Azure file system types. So we use the default one; {}",
+                        azureProperties.getCloudstorage().getFileSystemType(), "ADLS_GEN_2");
+                fileSystemType = adlsGen2CloudStorageV1Parameters.getType();
                 break;
         }
 
@@ -244,11 +259,26 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBaseLocation() {
-        return String.join("/", azureProperties.getCloudstorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
+        return azureProperties.getCloudstorage().getBaseLocation();
     }
 
-    @Override
-    public String getInstanceProfile() {
-        return null;
+    public String getAssumerIdentity() {
+        return azureProperties.getCloudstorage().getAdlsGen2().getAssumerIdentity();
+    }
+
+    public String getLoggerIdentity() {
+        return azureProperties.getCloudstorage().getAdlsGen2().getLoggerIdentity();
+    }
+
+    public Boolean getSecure() {
+        return azureProperties.getCloudstorage().getSecure();
+    }
+
+    public String getAccountName() {
+        return azureProperties.getCloudstorage().getAccountName();
+    }
+
+    public String getAccountKey() {
+        return azureProperties.getCloudstorage().getAccountKey();
     }
 }
