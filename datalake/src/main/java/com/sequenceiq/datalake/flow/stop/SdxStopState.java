@@ -8,6 +8,7 @@ import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 public enum SdxStopState implements FlowState {
 
     INIT_STATE,
+    SDX_STOP_SYNC_STATE,
     SDX_STOP_START_STATE,
     SDX_STOP_IN_PROGRESS_STATE,
     SDX_STOP_ALL_DATAHUBS_STATE,

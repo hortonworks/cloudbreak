@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessage
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.FreeipaService;
 import com.sequenceiq.datalake.service.sdx.DistroxService;
@@ -77,28 +76,12 @@ public class SdxStopServiceTest {
     private FreeipaService freeipaService;
 
     @Test
-    public void testTriggerStopWhenSdxRunning() {
+    public void testTriggerStop() {
         SdxCluster sdxCluster = sdxCluster();
-        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
-        sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
-
-        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
 
         underTest.triggerStopIfClusterNotStopped(sdxCluster);
 
         verify(sdxReactorFlowManager).triggerSdxStopFlow(CLUSTER_ID);
-    }
-
-    @Test
-    public void testTriggerStopWhenSdxStopped() {
-        SdxCluster sdxCluster = sdxCluster();
-        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
-        sdxStatusEntity.setStatus(DatalakeStatusEnum.STOPPED);
-
-        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
-
-        underTest.triggerStopIfClusterNotStopped(sdxCluster);
-        verify(sdxReactorFlowManager, times(0)).triggerSdxStopFlow(sdxCluster.getId());
     }
 
     @Test

@@ -64,10 +64,6 @@ public class SdxStopService {
 
     public void triggerStopIfClusterNotStopped(SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
-        if (sdxStatusService.getActualStatusForSdx(cluster).getStatus() == DatalakeStatusEnum.STOPPED) {
-            LOGGER.info("SDX is in stopped state, stop trigger is ignored.");
-            return;
-        }
         checkFreeipaRunning(cluster.getEnvCrn());
         sdxReactorFlowManager.triggerSdxStopFlow(cluster.getId());
     }
