@@ -114,7 +114,7 @@ public class EnvironmentNetworkProviderValidator {
                     environmentSecurityGroupValidatorsByCloudPlatform.get(valueOf(cloudPlatform));
             if (environmentSecurityGroupValidator != null) {
                 environmentSecurityGroupValidator.validate(request, resultBuilder);
-            } else if (!cloudPlatform.equals(MOCK.name())) {
+            } else if (!cloudPlatform.equals(MOCK.name()) && !cloudPlatform.equals(YARN.name())) {
                 resultBuilder.error(String.format("Environment specific security group is not supported for cloud platform: '%s'!", cloudPlatform));
             }
         }
