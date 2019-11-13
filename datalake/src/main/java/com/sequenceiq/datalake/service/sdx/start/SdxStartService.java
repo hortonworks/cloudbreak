@@ -60,10 +60,6 @@ public class SdxStartService {
 
     public void triggerStartIfClusterNotRunning(SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
-        if (sdxStatusService.getActualStatusForSdx(cluster).getStatus() == DatalakeStatusEnum.RUNNING) {
-            LOGGER.info("SDX is in running state, start trigger is ignored.");
-            return;
-        }
         checkFreeipaRunning(cluster.getEnvCrn());
         sdxReactorFlowManager.triggerSdxStartFlow(cluster.getId());
     }

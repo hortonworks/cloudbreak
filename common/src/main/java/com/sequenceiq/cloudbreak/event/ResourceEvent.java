@@ -30,6 +30,7 @@ public enum ResourceEvent {
     SDX_UPGRADE_STARTED("resource.sdx.upgrade.started"),
     SDX_UPGRADE_FINISHED("resource.sdx.upgrade.finished"),
     SDX_UPGRADE_FAILED("resource.sdx.upgrade.failed"),
+    SDX_SYNC_FAILED("resource.sdx.sync.failed"),
     WORKSPACE_CREATED("resource.workspace.created"),
     WORKSPACE_DELETED("resource.workspace.deleted"),
     BLUEPRINT_CREATED("resource.blueprint.created"),

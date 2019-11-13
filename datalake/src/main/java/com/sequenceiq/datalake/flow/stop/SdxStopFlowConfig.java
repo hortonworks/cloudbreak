@@ -7,6 +7,7 @@ import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_FAILED_STA
 import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_FINISHED_STATE;
 import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_IN_PROGRESS_STATE;
 import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_START_STATE;
+import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_SYNC_STATE;
 
 import java.util.List;
 
@@ -19,8 +20,12 @@ public class SdxStopFlowConfig extends AbstractFlowConfiguration<SdxStopState, S
 
     private static final List<Transition<SdxStopState, SdxStopEvent>> TRANSITIONS = new Transition.Builder<SdxStopState, SdxStopEvent>()
             .defaultFailureEvent(SdxStopEvent.SDX_STOP_FAILED_EVENT)
-            .from(INIT_STATE).to(SDX_STOP_START_STATE)
+
+            .from(INIT_STATE).to(SDX_STOP_SYNC_STATE)
             .event(SdxStopEvent.SDX_STOP_EVENT).noFailureEvent()
+
+            .from(SDX_STOP_SYNC_STATE).to(SDX_STOP_START_STATE)
+            .event(SdxStopEvent.SDX_SYNC_STOP_FINISHED_EVENT).noFailureEvent()
 
             .from(SDX_STOP_START_STATE).to(SDX_STOP_ALL_DATAHUBS_STATE)
             .event(SdxStopEvent.SDX_STOP_ALL_DATAHUB_EVENT).failureEvent(SdxStopEvent.SDX_STOP_FAILED_EVENT)
