@@ -1,6 +1,6 @@
 <#setting number_format="computer">
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters" : {
         "userImageStorageAccountName": {
@@ -97,7 +97,7 @@
             {
                 "type": "Microsoft.Compute/availabilitySets",
                 "name": "[variables('${group.compressedName}AsName')]",
-                "apiVersion": "2017-03-30",
+                "apiVersion": "2018-04-01",
                 "location": "[resourceGroup().location]",
                 <#if group.managedDisk == true>
                 "sku": {
@@ -296,7 +296,7 @@
                    }
                  },
                  {
-                   "apiVersion": "2017-12-01",
+                   "apiVersion": "2018-04-01",
                    "type": "Microsoft.Compute/virtualMachines",
                    "name": "[concat(parameters('vmNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
