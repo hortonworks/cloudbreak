@@ -14,17 +14,17 @@ public enum FileSystemType {
      * @deprecated Wasb integrated is no longer supported
      */
     @Deprecated
-    WASB_INTEGRATED(WasbIntegratedFileSystem.class, "wasb", "{{{ storageName }}}@{{{ accountName }}}.blob.core.windows.net"),
+    WASB_INTEGRATED(WasbIntegratedFileSystem.class, "wasb", "{{{ storageName }}}@{{{ accountName }}}.blob.core.windows.net", ".blob.core.windows.net"),
 
-    GCS(GcsFileSystem.class, "gs", "{{{ storageName }}}"),
+    GCS(GcsFileSystem.class, "gs", "{{{ storageName }}}", ""),
 
-    WASB(WasbFileSystem.class, "wasb", "{{{ storageName }}}@{{{ accountName }}}.blob.core.windows.net"),
+    WASB(WasbFileSystem.class, "wasb", "{{{ storageName }}}@{{{ accountName }}}.blob.core.windows.net", ".blob.core.windows.net"),
 
-    ADLS(AdlsFileSystem.class, "adl", "{{{ accountName }}}.azuredatalakestore.net/{{{ storageName }}}"),
+    ADLS(AdlsFileSystem.class, "adl", "{{{ accountName }}}.azuredatalakestore.net/{{{ storageName }}}", ""),
 
-    ADLS_GEN_2(AdlsGen2FileSystem.class, "abfs", "{{{ storageName }}}.dfs.core.windows.net"),
+    ADLS_GEN_2(AdlsGen2FileSystem.class, "abfs", "{{{ storageName }}}.dfs.core.windows.net", ".dfs.core.windows.net"),
 
-    S3(S3FileSystem.class, "s3a", "{{{ storageName }}}");
+    S3(S3FileSystem.class, "s3a", "{{{ storageName }}}", "");
 
     private final Class<? extends BaseFileSystem> clazz;
 
@@ -32,10 +32,13 @@ public enum FileSystemType {
 
     private final String defaultPath;
 
-    FileSystemType(Class<? extends BaseFileSystem> clazz, String protocol, String defaultPath) {
+    private final String postFix;
+
+    FileSystemType(Class<? extends BaseFileSystem> clazz, String protocol, String defaultPath, String postFix) {
         this.clazz = clazz;
         this.protocol = protocol;
         this.defaultPath = defaultPath;
+        this.postFix = postFix;
     }
 
     public Class<? extends BaseFileSystem> getClazz() {
@@ -48,6 +51,10 @@ public enum FileSystemType {
 
     public String getDefaultPath() {
         return defaultPath;
+    }
+
+    public String getPostFix() {
+        return postFix;
     }
 
     public static FileSystemType fromClass(Class<?> clazz) {

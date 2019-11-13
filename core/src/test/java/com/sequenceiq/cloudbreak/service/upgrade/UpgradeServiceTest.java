@@ -173,6 +173,7 @@ public class UpgradeServiceTest {
         stack.setEnvironmentCrn("env-crn");
         stack.setCloudPlatform("AWS");
         stack.setPlatformVariant("AWS");
+        stack.setRegion("eu-central-1");
         Blueprint blueprint = new Blueprint();
         Cluster cluster = new Cluster();
         cluster.setId(1L);
