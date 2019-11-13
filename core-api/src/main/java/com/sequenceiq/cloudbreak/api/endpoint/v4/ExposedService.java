@@ -39,7 +39,7 @@ public enum ExposedService {
     NIFI_REST("NiFi Rest", "NIFI_NODE", "NIFI_REST", "/nifi-app/nifi-api/", true, 8080, 8443, true, true),
     SMM_UI("Streams Messaging Manager", "STREAMS_MESSAGING_MANAGER_UI", "SMM-UI", "/smm-ui/", true, 9991, 9991, false, false),
     SMM_API("Streams Messaging Manager Rest", "STREAMS_MESSAGING_MANAGER_SERVER", "SMM-API", "/smm-api/", true, 8585, 8587, true, true),
-    SCHEMA_REGISTRY("Schema Registry", "SCHEMA_REGISTRY_SERVER", "SCHEMA-REGISTRY", "/schema-registry/", true, 7788, 7790, false, false),
+    SCHEMA_REGISTRY("Schema Registry", "SCHEMA_REGISTRY_SERVER", "SCHEMA-REGISTRY", "/schema-registry/", true, 7788, 7790, false, true),
     IMPALA("Impala", "IMPALAD", "IMPALA", "/impala/", true, 28000, 28000, true, true),
     IMPALA_DEBUG_UI("Impala Debug UI", "IMPALA_DEBUG_UI", "IMPALA_DEBUG_UI", "/impalaui", true, 25000, 25000, false, false),
     NAMENODE_HDFS("NameNode HDFS", "NAMENODE", "NAMENODE", "/", true, 8020, 8020, true, true, false),
