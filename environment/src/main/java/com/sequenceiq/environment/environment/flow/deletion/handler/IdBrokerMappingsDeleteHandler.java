@@ -49,7 +49,7 @@ public class IdBrokerMappingsDeleteHandler extends EventSenderAwareHandler<Envir
         try {
             environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(environment -> {
                 String environmentCrn = environment.getResourceCrn();
-                if (environment.getExperimentalFeatures().getIdBrokerMappingSource() == IdBrokerMappingSource.IDBMMS) {
+                if (environment.getExperimentalFeaturesJson().getIdBrokerMappingSource() == IdBrokerMappingSource.IDBMMS) {
                     LOGGER.info("Deleting IDBroker mappings in IDBMMS associated with environment {}.", environmentCrn);
                     deleteIdBrokerMappings(environmentCrn);
                 } else {
