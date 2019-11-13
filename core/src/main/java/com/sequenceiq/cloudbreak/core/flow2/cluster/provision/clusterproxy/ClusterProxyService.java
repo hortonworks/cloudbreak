@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +84,7 @@ public class ClusterProxyService {
     private ConfigRegistrationRequest createProxyConfigRequest(Stack stack) {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
             .withAliases(singletonList(clusterId(stack.getCluster()))).withServices(serviceConfigs(stack));
-        if (Boolean.TRUE.equals(stack.getUseCcm())) {
+        if (stack.getUseCcm()) {
             requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack));
         }
         return requestBuilder.build();
@@ -92,7 +93,7 @@ public class ClusterProxyService {
     private ConfigRegistrationRequest createProxyConfigReRegisterRequest(Stack stack) {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withAliases(singletonList(clusterId(stack.getCluster()))).withServices(serviceConfigs(stack)).withKnoxUrl(knoxUrl(stack));
-        if (Boolean.TRUE.equals(stack.getUseCcm())) {
+        if (stack.getUseCcm()) {
             requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack));
         }
         return requestBuilder.build();
@@ -136,7 +137,8 @@ public class ClusterProxyService {
     private ClientCertificate clientCertificates(Stack stack) {
         Optional<SecurityConfig> securityConfigOptional = securityConfigService.findOneByStackId(stack.getId());
         ClientCertificate clientCertificate = null;
-        if (securityConfigOptional.isPresent()) {
+        if (securityConfigOptional.isPresent()
+                && StringUtils.isNoneBlank(securityConfigOptional.get().getClientCert(), securityConfigOptional.get().getClientCertSecret())) {
             SecurityConfig securityConfig = securityConfigOptional.get();
             String clientCertRef = vaultPath(securityConfig.getClientCertSecret());
             String clientKeyRef =  vaultPath(securityConfig.getClientKeySecret());

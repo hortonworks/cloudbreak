@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -33,7 +32,6 @@ import org.springframework.stereotype.Service;
 
 import com.cedarsoftware.util.io.JsonReader;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
@@ -51,9 +49,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
-import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
-import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
-import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
@@ -549,28 +544,8 @@ public class StackService implements ResourceIdProvider {
         }, LOGGER, "Security config save took {} ms for stack {}", stackName);
         savedStack.setSecurityConfig(securityConfig);
 
-        CcmParameters ccmParameters = null;
-        if ((ccmParameterSupplier != null) && stack.getUseCcm()) {
-            ImmutableMap.Builder<KnownServiceIdentifier, Integer> builder = ImmutableMap.builder();
-            int gatewayPort = Optional.ofNullable(stack.getGatewayPort()).orElse(ServiceFamilies.GATEWAY.getDefaultPort());
-            builder.put(KnownServiceIdentifier.GATEWAY, gatewayPort);
-
-            // Optionally configure a tunnel for (nginx fronting) Knox
-            if (stack.getCluster().getGateway() != null) {
-                // JSA TODO Do we support a non-default port for the nginx that fronts Knox?
-                builder.put(KnownServiceIdentifier.KNOX, ServiceFamilies.KNOX.getDefaultPort());
-            }
-
-            Map<KnownServiceIdentifier, Integer> tunneledServicePorts = builder.build();
-
-            // JSA TODO Use stack ID or something else instead?
-            String keyId = StringUtils.right(stack.getResourceCrn(), CCM_KEY_ID_LENGTH);
-            String actorCrn = Objects.requireNonNull(userCrn, "userCrn is null");
-            ccmParameters = ccmParameterSupplier.getCcmParameters(actorCrn, accountId, keyId, tunneledServicePorts).orElse(null);
-        }
-
         try {
-            imageService.create(savedStack, platformString, connector.getPlatformParameters(savedStack), imgFromCatalog, ccmParameters);
+            imageService.create(savedStack, platformString, imgFromCatalog);
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Cloudbreak Image not found", e);
             throw new CloudbreakApiException(e.getMessage(), e);

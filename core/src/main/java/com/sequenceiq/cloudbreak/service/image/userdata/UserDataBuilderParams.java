@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.image;
+package com.sequenceiq.cloudbreak.service.image.userdata;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
