@@ -109,11 +109,17 @@ public class CloudStorageConfigDetails {
         templateObject.put("clusterName", fileSystemConfigQueryObject.getClusterName());
         templateObject.put("attachedCluster", fileSystemConfigQueryObject.isAttachedCluster());
         templateObject.put("datalakeCluster", fileSystemConfigQueryObject.isDatalakeCluster());
-        templateObject.put("storageName", fileSystemConfigQueryObject.getStorageName());
+        templateObject.put("storageName", trimStoragePostfixIfNeeded(fileSystemConfigQueryObject.getStorageName(),
+                fileSystemConfigQueryObject.getFileSystemType()));
         templateObject.put("blueprintText", fileSystemConfigQueryObject.getBlueprintText());
         templateObject.put("accountName", fileSystemConfigQueryObject.getAccountName().orElse("default-account-name"));
         templateObject.put("protocol", fileSystemConfigQueryObject.isSecure() ? protocol + "s" : protocol);
         return templateObject;
     }
 
+    private String trimStoragePostfixIfNeeded(String storageName, String fileSystemTypeNm) {
+        FileSystemType fileSystemType = FileSystemType.valueOf(fileSystemTypeNm);
+        String postfix = fileSystemType.getPostFix();
+        return storageName.replaceAll(postfix, "");
+    }
 }
