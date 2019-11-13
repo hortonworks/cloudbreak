@@ -28,7 +28,7 @@
             {
               "count": 1,
               "size": 100,
-              "type": "Standard_LRS"
+              "type": "StandardSSD_LRS"
             }
           ],
           "azure": {
@@ -68,7 +68,7 @@
             {
               "count": 1,
               "size": 100,
-              "type": "Standard_LRS"
+              "type": "StandardSSD_LRS"
             }
           ],
           "azure": {
@@ -106,7 +106,7 @@
             {
               "count": 1,
               "size": 100,
-              "type": "Standard_LRS"
+              "type": "StandardSSD_LRS"
             }
           ],
           "azure": {
@@ -144,7 +144,7 @@
             {
               "count": 1,
               "size": 100,
-              "type": "Standard_LRS"
+              "type": "StandardSSD_LRS"
             }
           ],
           "azure": {

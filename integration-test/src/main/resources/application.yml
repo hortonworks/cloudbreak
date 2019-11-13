@@ -169,7 +169,7 @@ integrationtest:
       type: Standard_D12_v2
       volumeSize: 100
       volumeCount: 1
-      volumeType: Standard_LRS
+      volumeType: StandardSSD_LRS
     cloudstorage:
       accountKey:
       accountName:
