@@ -47,7 +47,7 @@ public enum ExposedService {
     PROFILER_ADMIN("Profiler Admin", "PROFILER_ADMIN_AGENT", "PROFILER-ADMIN-API", "/profiler-admin/", false, 21700, 21700, true, true),
     PROFILER_METRICS("Profiler Metrics", "PROFILER_METRICS_AGENT", "PROFILER-METRICS-API", "/profiler-metrics/", false, 21800, 21800, true, true),
     PROFILER_SCHEDULER("Profiler Scheduler", "PROFILER_SCHEDULER_AGENT", "PROFILER-SCHEDULER-API", "/profiler-scheduler/", false, 21900, 21900, true, true),
-    DAS("Data Analytics Studio", "DAS_WEBAPP", "DAS", "/das/", true, 30800, 30800, false, true),
+    DAS("Data Analytics Studio", "DAS_WEBAPP", "DAS", "/das/", true, 30800, 30800, false, false),
     KUDU("Kudu Master", "KUDU_MASTER", "KUDUUI", "/kuduui/", true, 8051, 8051, false, true),
     KUDU_TABLET_SERVER("Kudu Tablet Server", "KUDU_TSERVER", "KUDUUIT", "/kuduui/", true, 8050, 8050, false, true);
 
