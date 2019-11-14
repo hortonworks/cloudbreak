@@ -1,5 +1,6 @@
 package com.sequenceiq.sdx.api.model;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.validation.constraints.NotNull;
@@ -38,8 +39,15 @@ public class SdxClusterRequest {
         return tags;
     }
 
-    public void setTags(Map<String, String> tags) {
-        this.tags = tags;
+    public Map<String, String> initAndGetTags() {
+        if (tags == null) {
+            tags = new HashMap<>();
+        }
+        return tags;
+    }
+
+    public void addTags(Map<String, String> tags) {
+        initAndGetTags().putAll(tags);
     }
 
     public SdxCloudStorageRequest getCloudStorage() {

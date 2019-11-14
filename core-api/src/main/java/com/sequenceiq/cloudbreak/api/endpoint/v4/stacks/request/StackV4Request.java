@@ -109,6 +109,13 @@ public class StackV4Request extends StackV4Base {
         return tags;
     }
 
+    public TagsV4Request initAndGetTags() {
+        if (tags == null) {
+            tags = new TagsV4Request();
+        }
+        return tags;
+    }
+
     public void setTags(TagsV4Request tags) {
         this.tags = tags;
     }

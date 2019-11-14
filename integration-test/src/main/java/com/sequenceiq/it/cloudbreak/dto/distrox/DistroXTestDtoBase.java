@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.inject.Inject;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.AwsDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
@@ -21,9 +23,17 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGro
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.util.TagAdderUtil;
+import com.sequenceiq.it.util.TestNameExtractorUtil;
 import com.sequenceiq.sdx.api.model.SdxInternalClusterRequest;
 
 public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCloudbreakTestDto<DistroXV1Request, StackV4Response, T> {
+
+    @Inject
+    private TestNameExtractorUtil testNameExtractorUtil;
+
+    @Inject
+    private TagAdderUtil tagAdderUtil;
 
     protected DistroXTestDtoBase(DistroXV1Request request, TestContext testContext) {
         super(request, testContext);
@@ -32,6 +42,7 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
     public DistroXTestDtoBase<T> valid() {
         String name = getResourcePropertyProvider().getName();
         withName(name)
+                .withTestNameAsTag()
                 .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.defaultHostGroup(getTestContext()))
                 .withCluster(getTestContext().given(DistroXClusterTestDto.class));
         return getCloudProvider().distrox(this);
@@ -157,6 +168,12 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
                     }
 
                 });
+        return this;
+    }
+
+    private DistroXTestDtoBase<T> withTestNameAsTag() {
+        String callingMethodName = testNameExtractorUtil.getExecutingTestName();
+        tagAdderUtil.addTestNameTag(getRequest().initAndGetTags().getUserDefined(), callingMethodName);
         return this;
     }
 

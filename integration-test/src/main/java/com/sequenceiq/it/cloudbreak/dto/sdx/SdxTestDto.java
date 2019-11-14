@@ -25,6 +25,8 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
+import com.sequenceiq.it.util.TagAdderUtil;
+import com.sequenceiq.it.util.TestNameExtractorUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
@@ -45,6 +47,12 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     @Inject
     private SdxTestClient sdxTestClient;
 
+    @Inject
+    private TestNameExtractorUtil testNameExtractorUtil;
+
+    @Inject
+    private TagAdderUtil tagAdderUtil;
+
     public SdxTestDto(TestContext testContex) {
         super(new SdxClusterRequest(), testContex);
     }
@@ -54,6 +62,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         withName(getResourcePropertyProvider().getName())
                 .withEnvironment(getTestContext().get(EnvironmentTestDto.class).getName())
                 .withClusterShape(getCloudProvider().getClusterShape())
+                .withTestNameAsTag()
                 .withTags(getCloudProvider().getTags());
         return getCloudProvider().sdx(this);
     }
@@ -131,7 +140,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     }
 
     public SdxTestDto withTags(Map<String, String> tags) {
-        getRequest().setTags(tags);
+        getRequest().addTags(tags);
         return this;
     }
 
@@ -191,5 +200,11 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
             throw new IllegalArgumentException("SDX Repair does not exist!");
         }
         return repair.getRequest();
+    }
+
+    private SdxTestDto withTestNameAsTag() {
+        String callingMethodName = testNameExtractorUtil.getExecutingTestName();
+        tagAdderUtil.addTestNameTag(getRequest().getTags(), callingMethodName);
+        return this;
     }
 }

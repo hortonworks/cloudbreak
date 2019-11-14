@@ -149,7 +149,7 @@ class SdxServiceTest {
         sdxClusterRequest.setEnvironment("envir");
         Map<String, String> tags = new HashMap<>();
         tags.put("mytag", "tagecske");
-        sdxClusterRequest.setTags(tags);
+        sdxClusterRequest.addTags(tags);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Collections.singletonList(new SdxCluster()));
         Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null), "SDX cluster exists for environment name");
@@ -161,7 +161,7 @@ class SdxServiceTest {
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         Map<String, String> tags = new HashMap<>();
         tags.put("mytag", "tagecske");
-        sdxClusterRequest.setTags(tags);
+        sdxClusterRequest.addTags(tags);
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         long id = 10L;
@@ -200,7 +200,7 @@ class SdxServiceTest {
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         Map<String, String> tags = new HashMap<>();
         tags.put("mytag", "tagecske");
-        sdxClusterRequest.setTags(tags);
+        sdxClusterRequest.addTags(tags);
         sdxClusterRequest.setEnvironment("envir");
         SdxDatabaseRequest externalDatabase = new SdxDatabaseRequest();
         externalDatabase.setCreate(true);
@@ -221,7 +221,7 @@ class SdxServiceTest {
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         Map<String, String> tags = new HashMap<>();
         tags.put("mytag", "tagecske");
-        sdxClusterRequest.setTags(tags);
+        sdxClusterRequest.addTags(tags);
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         when(sdxPLatformConfig.isExternalDatabaseSupportedOrExperimental("AWS")).thenReturn(true);
