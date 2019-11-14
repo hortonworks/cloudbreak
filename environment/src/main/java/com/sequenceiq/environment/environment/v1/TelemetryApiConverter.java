@@ -54,7 +54,7 @@ public class TelemetryApiConverter {
         if (telemetry != null) {
             LoggingResponse loggingResponse = createLoggingResponseFromSource(telemetry);
             WorkloadAnalyticsResponse waResponse = createWorkloadAnalyticsResponseFromSource(telemetry);
-            FeaturesResponse featuresResponse = createFeaturesResponseFromSource(telemetry, response);
+            FeaturesResponse featuresResponse = createFeaturesResponseFromSource(telemetry);
 
             response = new TelemetryResponse();
             response.setLogging(loggingResponse);
@@ -66,13 +66,12 @@ public class TelemetryApiConverter {
         return response;
     }
 
-    private FeaturesResponse createFeaturesResponseFromSource(EnvironmentTelemetry telemetry, TelemetryResponse response) {
+    private FeaturesResponse createFeaturesResponseFromSource(EnvironmentTelemetry telemetry) {
         FeaturesResponse featuresResponse = null;
         if (telemetry.getFeatures() != null) {
             featuresResponse = new FeaturesResponse();
             featuresResponse.setReportDeploymentLogs(telemetry.getFeatures().getReportDeploymentLogs());
             featuresResponse.setWorkloadAnalytics(telemetry.getFeatures().getWorkloadAnalytics());
-            response.setFeatures(featuresResponse);
         }
         return featuresResponse;
     }

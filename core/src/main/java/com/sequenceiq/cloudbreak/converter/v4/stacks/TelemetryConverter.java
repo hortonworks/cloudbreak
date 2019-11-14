@@ -123,7 +123,7 @@ public class TelemetryConverter {
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         if (telemetry != null) {
             LoggingRequest loggingRequest = createLoggingRequestFromSource(telemetry);
-            WorkloadAnalyticsRequest waRequest = createWorkloadAnalyticsRequestFromSource(telemetry, telemetryRequest);
+            WorkloadAnalyticsRequest waRequest = createWorkloadAnalyticsRequestFromSource(telemetry);
             FeaturesRequest featuresRequest = createFeaturesRequestFromSource(telemetry);
 
             telemetryRequest.setWorkloadAnalytics(waRequest);
@@ -202,13 +202,12 @@ public class TelemetryConverter {
         return featuresRequest;
     }
 
-    private WorkloadAnalyticsRequest createWorkloadAnalyticsRequestFromSource(Telemetry telemetry, TelemetryRequest telemetryRequest) {
+    private WorkloadAnalyticsRequest createWorkloadAnalyticsRequestFromSource(Telemetry telemetry) {
         WorkloadAnalyticsRequest waRequest = null;
         WorkloadAnalytics workloadAnalytics = telemetry.getWorkloadAnalytics();
         if (workloadAnalytics != null) {
             waRequest = new WorkloadAnalyticsRequest();
             waRequest.setAttributes(workloadAnalytics.getAttributes());
-            telemetryRequest.setWorkloadAnalytics(waRequest);
         }
         return waRequest;
     }
