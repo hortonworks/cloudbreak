@@ -7,14 +7,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -22,14 +24,14 @@ import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.FeatureSetting;
 
-public class AltusIAMServiceTest {
+public class AltusMachineUserServiceTest {
 
     private static final String TEST_CRN = "crn:cdp:iam:us-west-1:accountId:user:name";
 
-    private AltusIAMService underTest;
+    private AltusMachineUserService underTest;
 
     @Mock
-    private GrpcUmsClient umsClient;
+    private AltusIAMService altusIAMService;
 
     private Stack stack;
 
@@ -53,32 +55,31 @@ public class AltusIAMServiceTest {
         Features features = new Features();
         features.setReportDeploymentLogs(reportDeploymentLogs);
         telemetry.setFeatures(features);
-        underTest = new AltusIAMService(umsClient);
+        underTest = new AltusMachineUserService(altusIAMService);
     }
 
     @Test
     public void testCreateMachineUserAndGenerateKeys() {
         // GIVEN
-        AltusCredential altusCredential = new AltusCredential("accessKey", "secretKey".toCharArray());
-        when(umsClient.getBuiltInDatabusRoleCrn()).thenReturn(TEST_CRN);
-        when(umsClient.createMachineUserAndGenerateKeys(any(), any(), any(), any())).thenReturn(altusCredential);
+        Optional<AltusCredential> altusCredential = Optional.of(new AltusCredential("accessKey", "secretKey".toCharArray()));
+        when(altusIAMService.generateMachineUserWithAccessKey(any(), any())).thenReturn(altusCredential);
 
         // WHEN
         underTest.generateDatabusMachineUserForFluent(stack, telemetry);
 
         // THEN
-        assertEquals("secretKey", new String(altusCredential.getPrivateKey()));
-        verify(umsClient, times(1)).createMachineUserAndGenerateKeys(any(), any(), any(), any());
+        assertEquals("secretKey", new String(altusCredential.get().getPrivateKey()));
+        verify(altusIAMService, times(1)).generateMachineUserWithAccessKey(any(), any());
     }
 
     @Test
     public void testCleanupMachineUser() {
         // GIVEN
-        doNothing().when(umsClient).clearMachineUserWithAccessKeysAndRole(any(), any(), any());
+        doNothing().when(altusIAMService).clearMachineUser(any(), any());
         // WHEN
         underTest.clearFluentMachineUser(stack, telemetry);
 
         // THEN
-        verify(umsClient, times(1)).clearMachineUserWithAccessKeysAndRole(any(), any(), any());
+        verify(altusIAMService, times(1)).clearMachineUser(any(), any());
     }
 }

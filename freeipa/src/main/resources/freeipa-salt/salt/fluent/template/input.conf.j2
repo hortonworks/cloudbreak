@@ -1,0 +1,94 @@
+{%- from 'fluent/settings.sls' import fluent with context %}
+# CONFIGURED BY SALT - do not edit
+{% if providerPrefix != "databus" or fluent.dbusReportDeploymentLogs %}
+<source>
+  @type tail
+  format none
+  path /var/log/messages
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-messages.log.pos
+  tag {{providerPrefix}}.syslog
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/cloud-init.log
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cloud-init.log.pos
+  tag {{providerPrefix}}.cloud-init
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/salt/master
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-salt_master.log.pos
+  tag {{providerPrefix}}.salt_master
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/salt/minion
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-salt_minion.log.pos
+  tag {{providerPrefix}}.salt_minion
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/salt/api
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-salt_api.log.pos
+  tag {{providerPrefix}}.salt_api
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/saltboot.log
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-saltboot.log.pos
+  tag {{providerPrefix}}.saltboot
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/httpd/error_log
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-httpd_error.log.pos
+  tag {{providerPrefix}}.httpd_error_log
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/krb5kdc.log
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-krb5kdc.log.pos
+  tag {{providerPrefix}}.krb5kdc
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/dirsrv/slapd-**/access
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-slapd_access.log.pos
+  tag {{providerPrefix}}.slapd_access
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/dirsrv/slapd-**/errors
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-slapd_errors.log.pos
+  tag {{providerPrefix}}.slapd_errors
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/pki/pki-tomcat/ca/transactions
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-pki_transactions.log.pos
+  tag {{providerPrefix}}.pki_transactions
+  read_from_head true
+</source>
+{% else %}
+# DATABUS inputs are disabled
+{% endif %}

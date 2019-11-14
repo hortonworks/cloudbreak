@@ -1,3 +1,5 @@
 base:
   '*':
+    - databus
+    - fluent
     - freeipa

@@ -28,6 +28,9 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
@@ -101,6 +104,9 @@ public class FreeIpaCreationService {
     @Inject
     private TransactionService transactionService;
 
+    @Inject
+    private CloudStorageFolderResolverService cloudStorageFolderResolverService;
+
     @Autowired(required = false)
     private CcmParameterSupplier ccmParameterSupplier;
 
@@ -118,6 +124,10 @@ public class FreeIpaCreationService {
 
         SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys();
         stack.setSecurityConfig(securityConfig);
+        Telemetry telemetry = stack.getTelemetry();
+        cloudStorageFolderResolverService.updateStorageLocation(telemetry,
+                FluentClusterType.FREEIPA.value(), stack.getName(), stack.getResourceCrn());
+        stack.setTelemetry(telemetry);
 
         fillInstanceMetadata(stack);
 

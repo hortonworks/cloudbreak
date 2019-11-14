@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.v1;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -16,6 +17,7 @@ import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.FeatureSetting;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentLogging;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParameters;
@@ -124,6 +126,44 @@ public class TelemetryApiConverterTest {
         // THEN
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
         assertNull(result.getWorkloadAnalytics());
+    }
+
+    @Test
+    public void testConvertToRequest() {
+        // GIVEN
+        EnvironmentLogging logging = new EnvironmentLogging();
+        S3CloudStorageParameters s3Params = new S3CloudStorageParameters();
+        s3Params.setInstanceProfile(INSTANCE_PROFILE_VALUE);
+        logging.setS3(s3Params);
+        EnvironmentTelemetry telemetry = new EnvironmentTelemetry();
+        telemetry.setLogging(logging);
+        // WHEN
+        TelemetryRequest result = underTest.convertToRequest(telemetry);
+        // THEN
+        assertNull(result.getFeatures());
+        assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
+    }
+
+    @Test
+    public void testConvertToRequestWithFeatures() {
+        // GIVEN
+        EnvironmentLogging logging = new EnvironmentLogging();
+        S3CloudStorageParameters s3Params = new S3CloudStorageParameters();
+        s3Params.setInstanceProfile(INSTANCE_PROFILE_VALUE);
+        logging.setS3(s3Params);
+        EnvironmentFeatures features = new EnvironmentFeatures();
+        FeatureSetting reportDeploymentLogs = new FeatureSetting();
+        reportDeploymentLogs.setEnabled(false);
+        features.setReportDeploymentLogs(reportDeploymentLogs);
+        EnvironmentTelemetry telemetry = new EnvironmentTelemetry();
+        telemetry.setLogging(logging);
+        telemetry.setFeatures(features);
+        // WHEN
+        TelemetryRequest result = underTest.convertToRequest(telemetry);
+        // THEN
+        assertNotNull(result.getFeatures());
+        assertFalse(result.getFeatures().getReportDeploymentLogs().isEnabled());
+        assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
     }
 
 }

@@ -35,6 +35,7 @@ import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.converter.authentication.StackAuthenticationRequestToStackAuthenticationConverter;
 import com.sequenceiq.freeipa.converter.instance.InstanceGroupRequestToInstanceGroupConverter;
 import com.sequenceiq.freeipa.converter.network.NetworkRequestToNetworkConverter;
+import com.sequenceiq.freeipa.converter.telemetry.TelemetryConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
@@ -60,6 +61,9 @@ public class CreateFreeIpaRequestToStackConverter {
 
     @Inject
     private DefaultInstanceGroupProvider defaultInstanceGroupProvider;
+
+    @Inject
+    private TelemetryConverter telemetryConverter;
 
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
@@ -87,6 +91,7 @@ public class CreateFreeIpaRequestToStackConverter {
             source.getNetwork().setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
             stack.setNetwork(networkConverter.convert(source.getNetwork()));
         }
+        stack.setTelemetry(telemetryConverter.convert(source.getTelemetry()));
         updateOwnerRelatedFields(accountId, userFuture, cloudPlatform, stack);
         return stack;
     }

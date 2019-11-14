@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.service.altus.AltusIAMService;
+import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
@@ -57,23 +57,23 @@ public class TelemetryDecorator {
 
     private final MeteringConfigService meteringConfigService;
 
-    private final AltusIAMService altusIAMService;
+    private final AltusMachineUserService altusMachineUserService;
 
     public TelemetryDecorator(DatabusConfigService databusConfigService,
             FluentConfigService fluentConfigService,
             MeteringConfigService meteringConfigService,
-            AltusIAMService altusIAMService,
+            AltusMachineUserService altusMachineUserService,
             @Value("${info.app.version:}") String version) {
         this.databusConfigService = databusConfigService;
         this.fluentConfigService = fluentConfigService;
         this.meteringConfigService = meteringConfigService;
-        this.altusIAMService = altusIAMService;
+        this.altusMachineUserService = altusMachineUserService;
         this.version = version;
     }
 
     public Map<String, SaltPillarProperties> decoratePillar(Map<String, SaltPillarProperties> servicePillar,
             Stack stack, Telemetry telemetry) {
-        Optional<AltusCredential> altusCredential = altusIAMService.generateDatabusMachineUserForFluent(stack, telemetry);
+        Optional<AltusCredential> altusCredential = altusMachineUserService.generateDatabusMachineUserForFluent(stack, telemetry);
         String clusterType = StackType.DATALAKE.equals(stack.getType())
                 ? FluentClusterType.DATALAKE.value() : FluentClusterType.DATAHUB.value();
         String serviceType = StackType.WORKLOAD.equals(stack.getType()) ? FluentClusterType.DATAHUB.value() : "";

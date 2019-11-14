@@ -2,29 +2,24 @@ package com.sequenceiq.cloudbreak.service.altus;
 
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
-@Service
-public class AltusIAMService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AltusIAMService.class);
+@Component
+public class AltusMachineUserService {
 
     private static final String FLUENT_DATABUS_MACHINE_USER_NAME_PATTERN = "%s-fluent-databus-uploader-%s";
 
-    private final GrpcUmsClient umsClient;
+    private final AltusIAMService altusIAMService;
 
-    public AltusIAMService(GrpcUmsClient umsClient) {
-        this.umsClient = umsClient;
+    public AltusMachineUserService(AltusIAMService altusIAMService) {
+        this.altusIAMService = altusIAMService;
     }
 
     /**
@@ -32,11 +27,8 @@ public class AltusIAMService {
      */
     public Optional<AltusCredential> generateDatabusMachineUserForFluent(Stack stack, Telemetry telemetry) {
         if (isMeteringOrDeploymentReportingSupported(stack, telemetry)) {
-            return Optional.of(umsClient.createMachineUserAndGenerateKeys(
-                    getFluentDatabusMachineUserName(stack),
-                    stack.getCreator().getUserCrn(),
-                    umsClient.getBuiltInDatabusRoleCrn(),
-                    UserManagementProto.AccessKeyType.Value.ED25519));
+            return altusIAMService.generateMachineUserWithAccessKey(
+                    getFluentDatabusMachineUserName(stack), stack.getCreator().getUserCrn());
         }
         return Optional.empty();
     }
@@ -46,14 +38,9 @@ public class AltusIAMService {
      */
     public void clearFluentMachineUser(Stack stack, Telemetry telemetry) {
         if (isMeteringOrDeploymentReportingSupported(stack, telemetry)) {
-            try {
-                String machineUserName = getFluentDatabusMachineUserName(stack);
-                String userCrn = stack.getCreator().getUserCrn();
-                umsClient.clearMachineUserWithAccessKeysAndRole(machineUserName, userCrn, umsClient.getBuiltInDatabusRoleCrn());
-            } catch (Exception e) {
-                LOGGER.warn("Cluster Databus resource cleanup failed (fluent - databus user). It is not a fatal issue, "
-                        + "but note that you could have remaining UMS resources for your account", e);
-            }
+            String machineUserName = getFluentDatabusMachineUserName(stack);
+            String userCrn = stack.getCreator().getUserCrn();
+            altusIAMService.clearMachineUser(machineUserName, userCrn);
         }
     }
 

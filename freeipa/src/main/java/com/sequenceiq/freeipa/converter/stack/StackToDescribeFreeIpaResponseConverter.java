@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.converter.stack;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -10,6 +11,10 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
+import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
+import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
@@ -20,6 +25,7 @@ import com.sequenceiq.freeipa.converter.freeipa.FreeIpaToFreeIpaServerResponseCo
 import com.sequenceiq.freeipa.converter.image.ImageToImageSettingsResponseConverter;
 import com.sequenceiq.freeipa.converter.instance.InstanceGroupToInstanceGroupResponseConverter;
 import com.sequenceiq.freeipa.converter.network.NetworkToNetworkResponseConverter;
+import com.sequenceiq.freeipa.converter.telemetry.TelemetryConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Image;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -42,6 +48,9 @@ public class StackToDescribeFreeIpaResponseConverter {
     @Inject
     private InstanceGroupToInstanceGroupResponseConverter instanceGroupConverter;
 
+    @Inject
+    private TelemetryConverter telemetryConverter;
+
     public DescribeFreeIpaResponse convert(Stack stack, Image image, FreeIpa freeIpa) {
         DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
         describeFreeIpaResponse.setName(stack.getName());
@@ -57,6 +66,7 @@ public class StackToDescribeFreeIpaResponseConverter {
         describeFreeIpaResponse.setStatusReason(stack.getStackStatus().getStatusReason());
         decorateFreeIpaServerResponseWithIps(describeFreeIpaResponse.getFreeIpa(), describeFreeIpaResponse.getInstanceGroups());
         describeFreeIpaResponse.setAppVersion(stack.getAppVersion());
+        decorateWithCloudStorgeAndTelemetry(stack, describeFreeIpaResponse);
         return describeFreeIpaResponse;
     }
 
@@ -67,6 +77,22 @@ public class StackToDescribeFreeIpaResponseConverter {
                     .map(InstanceMetaDataResponse::getPrivateIp)
                     .collect(Collectors.toSet());
             freeIpa.setServerIp(privateIps);
+        }
+    }
+
+    private void decorateWithCloudStorgeAndTelemetry(Stack stack, DescribeFreeIpaResponse response) {
+        TelemetryResponse telemetryResponse = telemetryConverter.convert(stack.getTelemetry());
+        if (telemetryResponse != null) {
+            response.setTelemetry(telemetryResponse);
+            if (telemetryResponse.getLogging() != null) {
+                CloudStorageResponse cloudStorageResponse = new CloudStorageResponse();
+                List<StorageIdentityBase> identities = new ArrayList<>();
+                StorageIdentityBase logIdentity = new StorageIdentityBase();
+                logIdentity.setType(CloudIdentityType.LOG);
+                identities.add(logIdentity);
+                cloudStorageResponse.setIdentities(identities);
+                response.setCloudStorage(cloudStorageResponse);
+            }
         }
     }
 

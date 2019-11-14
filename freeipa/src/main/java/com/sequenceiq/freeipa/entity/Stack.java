@@ -28,6 +28,8 @@ import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "environmentcrn", "terminated"}))
@@ -78,6 +80,10 @@ public class Stack {
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json tags;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json telemetry;
 
     @OneToOne(cascade = {CascadeType.ALL}, optional = false)
     private Network network;
@@ -217,6 +223,19 @@ public class Stack {
 
     public void setTags(Json tags) {
         this.tags = tags;
+    }
+
+    public Telemetry getTelemetry() {
+        if (telemetry != null && telemetry.getValue() != null) {
+            return JsonUtil.readValueOpt(telemetry.getValue(), Telemetry.class).orElse(null);
+        }
+        return null;
+    }
+
+    public void setTelemetry(Telemetry telemetry) {
+        if (telemetry != null) {
+            this.telemetry = new Json(telemetry);
+        }
     }
 
     public Network getNetwork() {

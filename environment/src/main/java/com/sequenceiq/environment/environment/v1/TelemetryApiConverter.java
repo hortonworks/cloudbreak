@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.environment.v1;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -38,13 +37,10 @@ public class TelemetryApiConverter {
     public EnvironmentTelemetry convert(TelemetryRequest request) {
         EnvironmentTelemetry telemetry = null;
         if (request != null) {
-            EnvironmentLogging logging = createLoggingFromRequest(request);
-            Map<String, Object> fluentAttributes = request.getFluentAttributes();
-            EnvironmentFeatures features = createEnvironmentFeaturesFromRequest(request);
             telemetry = new EnvironmentTelemetry();
-            telemetry.setLogging(logging);
-            telemetry.setFeatures(features);
-            telemetry.setFluentAttributes(new HashMap<>(fluentAttributes));
+            telemetry.setLogging(createLoggingFromRequest(request.getLogging()));
+            telemetry.setFeatures(createEnvironmentFeaturesFromRequest(request.getFeatures()));
+            telemetry.setFluentAttributes(new HashMap<>(request.getFluentAttributes()));
         }
         return telemetry;
     }
@@ -52,34 +48,66 @@ public class TelemetryApiConverter {
     public TelemetryResponse convert(EnvironmentTelemetry telemetry) {
         TelemetryResponse response = null;
         if (telemetry != null) {
-            LoggingResponse loggingResponse = createLoggingResponseFromSource(telemetry);
-            WorkloadAnalyticsResponse waResponse = createWorkloadAnalyticsResponseFromSource(telemetry);
-            FeaturesResponse featuresResponse = createFeaturesResponseFromSource(telemetry);
-
             response = new TelemetryResponse();
-            response.setLogging(loggingResponse);
-            response.setWorkloadAnalytics(waResponse);
+            response.setLogging(createLoggingResponseFromSource(telemetry.getLogging()));
+            response.setWorkloadAnalytics(createWorkloadAnalyticsResponseFromSource(telemetry.getWorkloadAnalytics()));
             response.setFluentAttributes(telemetry.getFluentAttributes());
-            response.setFeatures(featuresResponse);
+            response.setFeatures(createFeaturesResponseFromSource(telemetry.getFeatures()));
             response.setFluentAttributes(telemetry.getFluentAttributes());
         }
         return response;
     }
 
-    private FeaturesResponse createFeaturesResponseFromSource(EnvironmentTelemetry telemetry) {
+    public TelemetryRequest convertToRequest(EnvironmentTelemetry telemetry) {
+        TelemetryRequest telemetryRequest = null;
+        if (telemetry != null) {
+            telemetryRequest = new TelemetryRequest();
+            telemetryRequest.setFluentAttributes(telemetry.getFluentAttributes());
+            telemetryRequest.setLogging(createLoggingRequestFromEnvSource(telemetry.getLogging()));
+            telemetryRequest.setFeatures(createFeaturesRequestEnvSource(telemetry.getFeatures()));
+        }
+        return telemetryRequest;
+    }
+
+    private LoggingRequest createLoggingRequestFromEnvSource(EnvironmentLogging logging) {
+        LoggingRequest loggingRequest = null;
+        if (logging != null) {
+            loggingRequest = new LoggingRequest();
+            loggingRequest.setStorageLocation(logging.getStorageLocation());
+            if (logging.getS3() != null) {
+                S3CloudStorageV1Parameters s3Params = convertS3(logging.getS3());
+                loggingRequest.setS3(s3Params);
+            }
+            if (logging.getAdlsGen2() != null) {
+                AdlsGen2CloudStorageV1Parameters adlsGen2Params = convertAdlsV2(logging.getAdlsGen2());
+                loggingRequest.setAdlsGen2(adlsGen2Params);
+            }
+        }
+        return loggingRequest;
+    }
+
+    private FeaturesRequest createFeaturesRequestEnvSource(EnvironmentFeatures features) {
+        FeaturesRequest featuresRequest = null;
+        if (features != null) {
+            featuresRequest = new FeaturesRequest();
+            featuresRequest.setReportDeploymentLogs(features.getReportDeploymentLogs());
+        }
+        return featuresRequest;
+    }
+
+    private FeaturesResponse createFeaturesResponseFromSource(EnvironmentFeatures features) {
         FeaturesResponse featuresResponse = null;
-        if (telemetry.getFeatures() != null) {
+        if (features != null) {
             featuresResponse = new FeaturesResponse();
-            featuresResponse.setReportDeploymentLogs(telemetry.getFeatures().getReportDeploymentLogs());
-            featuresResponse.setWorkloadAnalytics(telemetry.getFeatures().getWorkloadAnalytics());
+            featuresResponse.setReportDeploymentLogs(features.getReportDeploymentLogs());
+            featuresResponse.setWorkloadAnalytics(features.getWorkloadAnalytics());
         }
         return featuresResponse;
     }
 
-    private EnvironmentLogging createLoggingFromRequest(TelemetryRequest request) {
+    private EnvironmentLogging createLoggingFromRequest(LoggingRequest loggingRequest) {
         EnvironmentLogging logging = null;
-        if (request.getLogging() != null) {
-            LoggingRequest loggingRequest = request.getLogging();
+        if (loggingRequest != null) {
             logging = new EnvironmentLogging();
             logging.setStorageLocation(loggingRequest.getStorageLocation());
             logging.setS3(convertS3(loggingRequest.getS3()));
@@ -88,11 +116,10 @@ public class TelemetryApiConverter {
         return logging;
     }
 
-    private EnvironmentFeatures createEnvironmentFeaturesFromRequest(TelemetryRequest request) {
+    private EnvironmentFeatures createEnvironmentFeaturesFromRequest(FeaturesRequest featuresRequest) {
         EnvironmentFeatures features = null;
-        if (request.getFeatures() != null) {
+        if (featuresRequest != null) {
             features = new EnvironmentFeatures();
-            FeaturesRequest featuresRequest = request.getFeatures();
             if (reportDeploymentLogs) {
                 final FeatureSetting reportDeploymentLogs;
                 if (featuresRequest.getReportDeploymentLogs() != null) {
@@ -120,20 +147,18 @@ public class TelemetryApiConverter {
         return s3CloudStorageParameters;
     }
 
-    private WorkloadAnalyticsResponse createWorkloadAnalyticsResponseFromSource(EnvironmentTelemetry telemetry) {
+    private WorkloadAnalyticsResponse createWorkloadAnalyticsResponseFromSource(EnvironmentWorkloadAnalytics workloadAnalytics) {
         WorkloadAnalyticsResponse waResponse = null;
-        if (telemetry.getWorkloadAnalytics() != null) {
-            EnvironmentWorkloadAnalytics workloadAnalytics = telemetry.getWorkloadAnalytics();
+        if (workloadAnalytics != null) {
             waResponse = new WorkloadAnalyticsResponse();
             waResponse.setAttributes(workloadAnalytics.getAttributes());
         }
         return waResponse;
     }
 
-    private LoggingResponse createLoggingResponseFromSource(EnvironmentTelemetry telemetry) {
+    private LoggingResponse createLoggingResponseFromSource(EnvironmentLogging logging) {
         LoggingResponse loggingResponse = null;
-        if (telemetry.getLogging() != null) {
-            EnvironmentLogging logging = telemetry.getLogging();
+        if (logging != null) {
             loggingResponse = new LoggingResponse();
             loggingResponse.setStorageLocation(logging.getStorageLocation());
             loggingResponse.setS3(convertS3(logging.getS3()));
