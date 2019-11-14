@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.telemetry.fluent;
 
 public enum FluentClusterType {
-    DATAHUB("datahub"), DATALAKE("datalake");
+    DATAHUB("datahub"), DATALAKE("datalake"), FREEIPA("freeipa");
 
     private String value;
 

@@ -38,8 +38,15 @@ import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.model.Logging;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -82,8 +89,9 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
 
     public CloudStack convert(Stack stack, Collection<String> deleteRequestedInstances) {
         Image image = imageConverter.convert(imageService.getByStack(stack));
+        Optional<CloudFileSystemView> fileSystemView = buildFileSystemView(stack);
         List<Group> instanceGroups = buildInstanceGroups(Lists.newArrayList(stack.getInstanceGroups()), stack.getStackAuthentication(),
-                deleteRequestedInstances, stack.getCloudPlatform(), image.getImageName());
+                deleteRequestedInstances, stack.getCloudPlatform(), image.getImageName(), fileSystemView);
         Network network = buildNetwork(stack);
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stack.getStackAuthentication());
 
@@ -115,8 +123,9 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
 
     public List<CloudInstance> buildInstances(Stack stack) {
         com.sequenceiq.freeipa.entity.Image image = imageService.getByStack(stack);
+        Optional<CloudFileSystemView> fileSystemView = buildFileSystemView(stack);
         List<Group> groups = buildInstanceGroups(Lists.newArrayList(stack.getInstanceGroups()), stack.getStackAuthentication(), Collections.emptySet(),
-                stack.getCloudPlatform(), image.getImageName());
+                stack.getCloudPlatform(), image.getImageName(), fileSystemView);
         List<CloudInstance> cloudInstances = new ArrayList<>();
         for (Group group : groups) {
             cloudInstances.addAll(group.getInstances());
@@ -164,7 +173,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     }
 
     private List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, StackAuthentication stackAuthentication, Collection<String> deleteRequests,
-            String cloudPlatform, String imageName) {
+            String cloudPlatform, String imageName, Optional<CloudFileSystemView> fileSystemView) {
         // sort by name to avoid shuffling the different instance groups
         Collections.sort(instanceGroups);
         List<Group> groups = new ArrayList<>();
@@ -202,7 +211,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                                 instanceAuthentication,
                                 instanceAuthentication.getLoginUserName(),
                                 instanceAuthentication.getPublicKey(),
-                                rootVolumeSize, Optional.empty())
+                                rootVolumeSize, fileSystemView)
                 );
             }
         }
@@ -237,6 +246,29 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                     securityRule.getProtocol()));
         }
         return new Security(rules, ig.getSecurityGroup().getSecurityGroupIds(), true);
+    }
+
+    private Optional<CloudFileSystemView> buildFileSystemView(Stack stack) {
+        Telemetry telemetry = stack.getTelemetry();
+        if (telemetry != null && telemetry.getLogging() != null) {
+            Logging logging = telemetry.getLogging();
+            if (logging.getStorageLocation() != null) {
+                if (logging.getS3() != null) {
+                    CloudS3View s3View = new CloudS3View(CloudIdentityType.LOG);
+                    s3View.setInstanceProfile(logging.getS3().getInstanceProfile());
+                    return Optional.of(s3View);
+                } else if (logging.getAdlsGen2() != null) {
+                    CloudAdlsGen2View adlsGen2View = new CloudAdlsGen2View(CloudIdentityType.LOG);
+                    AdlsGen2CloudStorageV1Parameters adlsGen2Params = logging.getAdlsGen2();
+                    adlsGen2View.setAccountKey(adlsGen2Params.getAccountKey());
+                    adlsGen2View.setAccountName(adlsGen2Params.getAccountName());
+                    adlsGen2View.setSecure(adlsGen2Params.isSecure());
+                    adlsGen2View.setManagedIdentity(adlsGen2Params.getManagedIdentity());
+                    return Optional.of(adlsGen2View);
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     private Network buildNetwork(Stack stack) {

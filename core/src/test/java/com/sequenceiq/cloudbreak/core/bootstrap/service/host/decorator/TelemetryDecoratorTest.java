@@ -24,14 +24,14 @@ import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfigService;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfigView;
-import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.service.altus.AltusIAMService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public class TelemetryDecoratorTest {
@@ -48,16 +48,16 @@ public class TelemetryDecoratorTest {
     private MeteringConfigService meteringConfigService;
 
     @Mock
-    private AltusIAMService altusIAMService;
+    private AltusMachineUserService altusMachineUserService;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         AltusCredential altusCredential = new AltusCredential("myAccessKey", "mySecretKey".toCharArray());
-        given(altusIAMService.generateDatabusMachineUserForFluent(any(Stack.class), any(Telemetry.class)))
+        given(altusMachineUserService.generateDatabusMachineUserForFluent(any(Stack.class), any(Telemetry.class)))
                 .willReturn(Optional.of(altusCredential));
         underTest = new TelemetryDecorator(databusConfigService, fluentConfigService,
-                meteringConfigService, altusIAMService, "1.0.0");
+                meteringConfigService, altusMachineUserService, "1.0.0");
     }
 
     @Test

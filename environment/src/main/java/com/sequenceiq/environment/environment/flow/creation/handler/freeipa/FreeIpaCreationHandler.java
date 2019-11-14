@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.configuration.SupportedPlatforms;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -37,6 +38,7 @@ import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.v1.TelemetryApiConverter;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
@@ -85,6 +87,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+    private final TelemetryApiConverter telemetryApiConverter;
+
     public FreeIpaCreationHandler(
             EventSender eventSender,
             EnvironmentService environmentService,
@@ -94,7 +98,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             Map<CloudPlatform, FreeIpaNetworkProvider> freeIpaNetworkProviderMapByCloudPlatform,
             PollingService<FreeIpaPollerObject> freeIpaPollingService,
             FreeIpaServerRequestProvider freeIpaServerRequestProvider,
-            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
+            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor,
+            TelemetryApiConverter telemetryApiConverter) {
         super(eventSender);
         this.environmentService = environmentService;
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
@@ -104,6 +109,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         this.freeIpaPollingService = freeIpaPollingService;
         this.freeIpaServerRequestProvider = freeIpaServerRequestProvider;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
+        this.telemetryApiConverter = telemetryApiConverter;
     }
 
     @Override
@@ -174,6 +180,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
         setPlacementAndNetwork(environment, createFreeIpaRequest);
         setAuthentication(environment.getAuthentication(), createFreeIpaRequest);
+        setTelemetry(environment, createFreeIpaRequest);
         doIfNotNull(environment.getSecurityAccess(), securityAccess -> setSecurityAccess(securityAccess, createFreeIpaRequest));
         setUseCcm(environment.getExperimentalFeatures().getTunnel(), createFreeIpaRequest);
         return createFreeIpaRequest;
@@ -184,6 +191,11 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         createFreeIpaRequest.setEnvironmentCrn(environment.getResourceCrn());
         createFreeIpaRequest.setName(environment.getName() + "-freeipa");
         return createFreeIpaRequest;
+    }
+
+    private void setTelemetry(EnvironmentDto environmentDto, CreateFreeIpaRequest createFreeIpaRequest) {
+        TelemetryRequest telemetryRequest = telemetryApiConverter.convertToRequest(environmentDto.getTelemetry());
+        createFreeIpaRequest.setTelemetry(telemetryRequest);
     }
 
     private void setPlacementAndNetwork(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest) {

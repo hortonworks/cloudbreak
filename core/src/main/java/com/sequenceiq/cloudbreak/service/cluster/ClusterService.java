@@ -106,7 +106,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.altus.AltusIAMService;
+import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
@@ -222,7 +222,7 @@ public class ClusterService {
     private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
-    private AltusIAMService altusIAMService;
+    private AltusMachineUserService altusMachineUserService;
 
     @Inject
     private UsageLoggingUtil usageLoggingUtil;
@@ -635,7 +635,7 @@ public class ClusterService {
                     Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
                     try {
                         clusterApiConnectors.getConnector(stack).clusterModificationService().cleanupCluster(telemetry);
-                        altusIAMService.clearFluentMachineUser(stack, telemetry);
+                        altusMachineUserService.clearFluentMachineUser(stack, telemetry);
                     } catch (CloudbreakException e) {
                         LOGGER.error("Cluster specific cleanup failed.", e);
                     }

@@ -7,6 +7,8 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
+import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -65,6 +67,12 @@ public class DescribeFreeIpaResponse {
 
     @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_APPLICATION_VERSION)
     private String appVersion;
+
+    @ApiModelProperty(value = FreeIpaModelDescriptions.TELEMETRY)
+    private TelemetryResponse telemetry;
+
+    @ApiModelProperty(value = FreeIpaModelDescriptions.CLOUD_STORAGE)
+    private CloudStorageResponse cloudStorage;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -136,6 +144,22 @@ public class DescribeFreeIpaResponse {
 
     public void setFreeIpa(FreeIpaServerResponse freeIpa) {
         this.freeIpa = freeIpa;
+    }
+
+    public TelemetryResponse getTelemetry() {
+        return telemetry;
+    }
+
+    public void setTelemetry(TelemetryResponse telemetry) {
+        this.telemetry = telemetry;
+    }
+
+    public CloudStorageResponse getCloudStorage() {
+        return cloudStorage;
+    }
+
+    public void setCloudStorage(CloudStorageResponse cloudStorage) {
+        this.cloudStorage = cloudStorage;
     }
 
     public Status getStatus() {
