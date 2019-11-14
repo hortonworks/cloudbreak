@@ -238,7 +238,12 @@ public class AzurePlatformResources implements PlatformResources {
     public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         CloudAccessConfigs cloudAccessConfigs = new CloudAccessConfigs(new HashSet<>());
         AzureClient client = azureClientService.getClient(cloudCredential);
-        List<Identity> identities = client.listIdentitiesByRegion(region.getRegionName());
+        List<Identity> identities;
+        if (!"null".equals(region.getRegionName())) {
+            identities = client.listIdentitiesByRegion(region.getRegionName());
+        } else {
+            identities = client.listIdentities();
+        }
         Set<CloudAccessConfig> configs = identities.stream().map(identity -> {
             Map<String, Object> properties = new HashMap<>();
             properties.put("resourceId", identity.id());
