@@ -8,11 +8,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -50,17 +50,33 @@ public class NetworkCreationValidator {
                     .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone, Collectors.counting()));
             if (zones.size() < 2) {
                 message = "Cannot create environment, the subnets in the vpc should be present at least in two different availability zones";
-                LOGGER.debug(message);
+                LOGGER.info(message);
                 resultBuilder.error(message);
             }
         }
-        if (Objects.nonNull(environment.getNetwork())
-                && !Strings.isNullOrEmpty(environment.getNetwork().getNetworkCidr())
-                && Strings.isNullOrEmpty(environment.getNetwork().getNetworkId())) {
-            String message = String.format("The '%s' network id has to be defined if cidr is defined!", environment.getCloudPlatform());
+            validateNetworkAndCidr(environment, network, resultBuilder);
+            validateCidrAndNoFirewallRules(environment, network, resultBuilder);
+        return resultBuilder;
+    }
+
+    private void validateCidrAndNoFirewallRules(Environment environment, NetworkDto network, ValidationResultBuilder resultBuilder) {
+        if (StringUtils.isNotEmpty(environment.getCidr())
+                && Objects.nonNull(network)
+                && Objects.nonNull(network.getAzure())
+                && network.getAzure().isNoFirewallRules()) {
+            String message = String.format("You must not set both the security access cidr (%s) and noFirewallRules simultaneously!", environment.getCidr());
+            LOGGER.info(message);
             resultBuilder.error(message);
         }
-        return resultBuilder;
+    }
+
+    private void validateNetworkAndCidr(Environment environment, NetworkDto network, ValidationResultBuilder resultBuilder) {
+        if (Objects.nonNull(network) && StringUtils.isNotEmpty(network.getNetworkCidr())
+                && StringUtils.isNotEmpty(network.getNetworkId())) {
+            String message = String.format("The '%s' network id must not be defined if cidr is defined!", environment.getCloudPlatform());
+            LOGGER.info(message);
+            resultBuilder.error(message);
+            }
     }
 
     private Set<String> getSubnetDiff(Set<String> envSubnets, Set<String> vpcSubnets) {

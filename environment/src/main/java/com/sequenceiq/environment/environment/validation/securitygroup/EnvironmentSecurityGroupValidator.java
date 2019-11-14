@@ -20,10 +20,6 @@ public interface EnvironmentSecurityGroupValidator {
         return String.format("You must define two security group id-s, one for Knox and a default one!");
     }
 
-    default String cidrAndNoFirewallRulesBothPresent() {
-        return String.format("You must not set both the security access cidr and noFirewallRules simultaneously!");
-    }
-
     default String securityGroupNotInTheSameVpc(String securityGroupId) {
         return String.format("The '%s' security group must be in the same vpc that you defined in the request!", securityGroupId);
     }
