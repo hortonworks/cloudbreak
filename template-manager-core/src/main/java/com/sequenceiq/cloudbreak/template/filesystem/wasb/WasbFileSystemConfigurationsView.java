@@ -19,8 +19,8 @@ public class WasbFileSystemConfigurationsView extends BaseFileSystemConfiguratio
 
     private String storageContainerName;
 
-    public WasbFileSystemConfigurationsView(WasbFileSystem wasbFileSystem, Collection<StorageLocationView> locations, boolean deafultFs) {
-        super(FileSystemType.WASB.name(), wasbFileSystem.getStorageContainer(), deafultFs, locations);
+    public WasbFileSystemConfigurationsView(WasbFileSystem wasbFileSystem, Collection<StorageLocationView> locations, boolean defaultFs) {
+        super(FileSystemType.WASB.name(), wasbFileSystem.getStorageContainer(), defaultFs, locations, null);
         accountName = wasbFileSystem.getAccountName();
         accountKey = wasbFileSystem.getAccountKey();
         secure = wasbFileSystem.isSecure();

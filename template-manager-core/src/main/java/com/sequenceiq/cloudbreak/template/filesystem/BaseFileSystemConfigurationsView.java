@@ -14,17 +14,21 @@ public class BaseFileSystemConfigurationsView implements ProvisionEntity {
 
     private final Collection<StorageLocationView> locations;
 
+    private String idBrokerIdentityId;
+
     protected BaseFileSystemConfigurationsView(String type, Collection<StorageLocationView> locations) {
         this.type = type;
         this.defaultFs = false;
         this.locations = locations;
     }
 
-    protected BaseFileSystemConfigurationsView(String type, String storageContainer, boolean defaultFs, Collection<StorageLocationView> locations) {
+    protected BaseFileSystemConfigurationsView(String type, String storageContainer, boolean defaultFs, Collection<StorageLocationView> locations,
+            String idBrokerIdentityId) {
         this.type = type;
         this.storageContainer = storageContainer;
         this.defaultFs = defaultFs;
         this.locations = locations;
+        this.idBrokerIdentityId = idBrokerIdentityId;
     }
 
     public String getBaseLocation() {
@@ -54,5 +58,10 @@ public class BaseFileSystemConfigurationsView implements ProvisionEntity {
     public String getProtocol() {
         return "";
     }
+
+    public String getIdBrokerIdentityId() {
+        return idBrokerIdentityId;
+    }
+
 }
 

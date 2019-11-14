@@ -23,8 +23,8 @@ public class AdlsFileSystemConfigurationsView extends BaseFileSystemConfiguratio
 
     private String adlsTrackingClusterTypeKey;
 
-    public AdlsFileSystemConfigurationsView(AdlsFileSystem adlsFileSystem, Collection<StorageLocationView> locations, boolean deafultFs) {
-        super(FileSystemType.ADLS.name(), adlsFileSystem.getStorageContainer(), deafultFs, locations);
+    public AdlsFileSystemConfigurationsView(AdlsFileSystem adlsFileSystem, Collection<StorageLocationView> locations, boolean defaultFs) {
+        super(FileSystemType.ADLS.name(), adlsFileSystem.getStorageContainer(), defaultFs, locations, null);
         accountName = adlsFileSystem.getAccountName();
         clientId = adlsFileSystem.getClientId();
         credential = adlsFileSystem.getCredential();
