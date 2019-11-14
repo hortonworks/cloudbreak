@@ -181,6 +181,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     @Enumerated(EnumType.STRING)
     private StackType type;
 
+    private boolean clusterProxyRegistered;
+
     public String getResourceCrn() {
         return resourceCrn;
     }
@@ -704,5 +706,13 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public boolean hasCustomHostname() {
         return !StringUtils.isEmpty(customHostname) || hostgroupNameAsHostname;
+    }
+
+    public boolean isClusterProxyRegistered() {
+        return clusterProxyRegistered;
+    }
+
+    public void setClusterProxyRegistered(boolean clusterProxyRegistered) {
+        this.clusterProxyRegistered = clusterProxyRegistered;
     }
 }

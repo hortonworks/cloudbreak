@@ -267,15 +267,8 @@ public class ClusterHostServiceRunner {
         proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
 
         decoratePillarWithJdbcConnectors(cluster, servicePillar);
-        decoratePillarWithCcm(stack, servicePillar);
 
         return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs, cluster));
-    }
-
-    private void decoratePillarWithCcm(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
-        if (stack.getUseCcm()) {
-            servicePillar.put("ccm", new SaltPillarProperties("/ccm/init.sls", singletonMap("ccm", singletonMap("enabled", stack.getUseCcm()))));
-        }
     }
 
     private void addKerberosConfig(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) throws IOException {

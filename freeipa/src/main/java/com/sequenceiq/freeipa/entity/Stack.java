@@ -177,8 +177,8 @@ public class Stack {
         this.useCcm = useCcm;
     }
 
-    public Boolean getClusterProxyRegistered() {
-        return clusterProxyRegistered;
+    public boolean getClusterProxyRegistered() {
+        return Boolean.TRUE.equals(clusterProxyRegistered);
     }
 
     public void setClusterProxyRegistered(Boolean clusterProxyRegistered) {

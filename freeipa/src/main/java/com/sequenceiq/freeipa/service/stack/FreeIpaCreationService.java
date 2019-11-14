@@ -41,6 +41,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
@@ -97,6 +98,9 @@ public class FreeIpaCreationService {
     @Inject
     private CloudStorageFolderResolverService cloudStorageFolderResolverService;
 
+    @Inject
+    private SecurityConfigService securityConfigService;
+
     @Value("${info.app.version:}")
     private String appVersion;
 
@@ -109,8 +113,7 @@ public class FreeIpaCreationService {
         stack.setAppVersion(appVersion);
         GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack, credential);
 
-        SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys();
-        stack.setSecurityConfig(securityConfig);
+
         Telemetry telemetry = stack.getTelemetry();
         cloudStorageFolderResolverService.updateStorageLocation(telemetry,
                 FluentClusterType.FREEIPA.value(), stack.getName(), stack.getResourceCrn());
@@ -120,8 +123,11 @@ public class FreeIpaCreationService {
 
         String template = templateService.waitGetTemplate(stack, getPlatformTemplateRequest);
         stack.setTemplate(template);
+        SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys(accountId);
         try {
             Triple<Stack, Image, FreeIpa> stackImageFreeIpaTuple = transactionService.required(() -> {
+                SecurityConfig savedSecurityConfig = securityConfigService.save(securityConfig);
+                stack.setSecurityConfig(savedSecurityConfig);
                 Stack savedStack = stackService.save(stack);
                 ImageSettingsRequest imageSettingsRequest = request.getImage();
 

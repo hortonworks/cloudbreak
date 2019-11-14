@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -63,12 +63,8 @@ public class ClusterProxyServiceTest {
     @Mock
     private SecurityConfigService securityConfigService;
 
+    @InjectMocks
     private ClusterProxyService service;
-
-    @Before
-    public void setup() {
-        service = new ClusterProxyService(stackService, clusterProxyRegistrationClient, securityConfigService);
-    }
 
     @Test
     public void shouldRegisterProxyConfigurationWithClusterProxy() throws ClusterProxyException {

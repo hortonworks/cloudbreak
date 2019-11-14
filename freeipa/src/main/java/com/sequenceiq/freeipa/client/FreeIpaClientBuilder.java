@@ -47,6 +47,8 @@ import com.sequenceiq.freeipa.client.auth.PasswordExpiredException;
 
 public class FreeIpaClientBuilder {
 
+    public static final String DEFAULT_BASE_PATH = "/ipa";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaClientBuilder.class);
 
     private static final int CONNECTION_POOL_MAX = 100;
@@ -56,8 +58,6 @@ public class FreeIpaClientBuilder {
     private static final int SO_TIMEOUT = 30 * 1000;
 
     private static final int READ_TIMEOUT_MILLIS = 60 * 1000 * 5;
-
-    private static final String DEFAULT_BASE_PATH = "/ipa";
 
     private final PoolingHttpClientConnectionManager connectionManager;
 

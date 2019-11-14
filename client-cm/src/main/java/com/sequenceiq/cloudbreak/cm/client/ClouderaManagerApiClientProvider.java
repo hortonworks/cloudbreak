@@ -65,6 +65,7 @@ public class ClouderaManagerApiClientProvider {
             ApiClient cmClient = new ApiClient();
             if (clientConfig.isClusterProxyenabled()) {
                 cmClient.setBasePath(clientConfig.getClusterProxyUrl() + "/proxy/" + clientConfig.getClusterCrn() + "/cloudera-manager" + context);
+                cmClient.addDefaultHeader("Proxy-Ignore-Auth", "true");
             } else if (port != null) {
                 cmClient.setBasePath("https://" + clientConfig.getApiAddress() + ':' + port + context);
             } else {

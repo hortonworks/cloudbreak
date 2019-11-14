@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa;
 
-import static com.sequenceiq.freeipa.service.stack.ClusterProxyService.FREEIPA_SERVICE_NAME;
-
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -22,7 +20,7 @@ import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
-import com.sequenceiq.freeipa.service.config.FmsClusterProxyEnablement;
+import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -40,7 +38,7 @@ public class FreeIpaClientFactory {
     private ClusterProxyConfiguration clusterProxyConfiguration;
 
     @Inject
-    private FmsClusterProxyEnablement fmsClusterProxyEnablement;
+    private ClusterProxyService clusterProxyService;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -68,14 +66,14 @@ public class FreeIpaClientFactory {
     }
 
     private String toClusterProxyBasepath(String freeIpaClusterCrn) {
-        return String.format("/cluster-proxy/proxy/%s/%s/ipa", freeIpaClusterCrn, FREEIPA_SERVICE_NAME);
+        return String.format("%s%s", clusterProxyService.getProxyPath(freeIpaClusterCrn), FreeIpaClientBuilder.DEFAULT_BASE_PATH);
     }
 
     public FreeIpaClient getFreeIpaClientForStack(Stack stack) throws FreeIpaClientException {
         LOGGER.debug("Creating FreeIpaClient for stack {}", stack.getResourceCrn());
 
         try {
-            if (fmsClusterProxyEnablement.isEnabled() && Boolean.TRUE.equals(stack.getClusterProxyRegistered())) {
+            if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled() && stack.getClusterProxyRegistered()) {
                 HttpClientConfig httpClientConfig = new HttpClientConfig(clusterProxyConfiguration.getClusterProxyHost());
                 FreeIpa freeIpa = freeIpaService.findByStack(stack);
                 String clusterProxyPath = toClusterProxyBasepath(stack.getResourceCrn());
@@ -91,7 +89,7 @@ public class FreeIpaClientFactory {
             } else {
                 GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
                 HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(
-                        stack.getId(), gatewayConfig.getPublicAddress());
+                        stack, gatewayConfig.getPublicAddress());
                 FreeIpa freeIpa = freeIpaService.findByStack(stack);
                 return new FreeIpaClientBuilder(ADMIN_USER, freeIpa.getAdminPassword(), freeIpa.getDomain().toUpperCase(),
                         httpClientConfig, stack.getGatewayport()).build();

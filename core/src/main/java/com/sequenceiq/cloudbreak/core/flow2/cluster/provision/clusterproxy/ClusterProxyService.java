@@ -7,16 +7,18 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 import com.sequenceiq.cloudbreak.clusterproxy.ClientCertificate;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceCredential;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
@@ -37,24 +40,30 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class ClusterProxyService {
+    public static final String CB_INTERNAL = "cb-internal";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyService.class);
 
+    @Inject
     private StackService stackService;
 
+    @Inject
     private ClusterProxyRegistrationClient clusterProxyRegistrationClient;
 
+    @Inject
     private SecurityConfigService securityConfigService;
 
-    @Autowired
-    ClusterProxyService(StackService stackService, ClusterProxyRegistrationClient clusterProxyRegistrationClient, SecurityConfigService securityConfigService) {
-        this.stackService = stackService;
-        this.clusterProxyRegistrationClient = clusterProxyRegistrationClient;
-        this.securityConfigService = securityConfigService;
-    }
+    @Inject
+    private StackUpdater stackUpdater;
+
+    @Inject
+    private ClusterProxyConfiguration clusterProxyConfiguration;
 
     public ConfigRegistrationResponse registerCluster(Stack stack) {
             ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack);
-            return clusterProxyRegistrationClient.registerConfig(proxyConfigRequest);
+        ConfigRegistrationResponse configRegistrationResponse = clusterProxyRegistrationClient.registerConfig(proxyConfigRequest);
+        stackUpdater.updateClusterProxyRegisteredFlag(stack, true);
+        return configRegistrationResponse;
     }
 
     public ConfigRegistrationResponse reRegisterCluster(Stack stack) {
@@ -78,6 +87,7 @@ public class ClusterProxyService {
     }
 
     public void deregisterCluster(Stack stack) {
+        stackUpdater.updateClusterProxyRegisteredFlag(stack, false);
         clusterProxyRegistrationClient.deregisterConfig(stack.getResourceCrn());
     }
 
@@ -103,7 +113,7 @@ public class ClusterProxyService {
         String internalAdminUrl = internalAdminUrl(stack, ServiceFamilies.GATEWAY.getDefaultPort());
         return asList(
                 cmServiceConfig(stack, null, "cloudera-manager", clusterManagerUrl(stack)),
-                cmServiceConfig(stack, clientCertificates(stack), "cb-internal", internalAdminUrl));
+                cmServiceConfig(stack, clientCertificates(stack), CB_INTERNAL, internalAdminUrl));
     }
 
     private String getAccountId(Stack stack) {
@@ -167,9 +177,13 @@ public class ClusterProxyService {
         return String.format("https://%s:%d", gatewayIp, port);
     }
 
+    public String getProxyPath(String crn) {
+        return String.format("%s/proxy/%s/%s", clusterProxyConfiguration.getClusterProxyBasePath(), crn, CB_INTERNAL);
+    }
+
     private String vaultPath(String vaultSecretJsonString) {
         try {
-            return JsonUtil.readValue(vaultSecretJsonString, VaultSecret.class).getPath() + ":secret";
+            return JsonUtil.readValue(vaultSecretJsonString, VaultSecret.class).getPath() + ":secret:base64";
         } catch (IOException e) {
             throw new VaultConfigException(String.format("Could not parse vault secret string '%s'", vaultSecretJsonString), e);
         }

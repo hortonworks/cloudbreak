@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -49,6 +50,9 @@ public class TlsSecurityService {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private ClusterProxyService clusterProxyService;
 
     @Value("${cb.security.keypair.cache.size:10}")
     private int keyPairCacheSize;
@@ -105,26 +109,43 @@ public class TlsSecurityService {
     }
 
     public GatewayConfig buildGatewayConfig(Long stackId, InstanceMetaData gatewayInstance, Integer gatewayPort,
-            SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled, boolean useCcm) {
+            SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) {
         SecurityConfig securityConfig = getSecurityConfigByStackIdOrThrowNotFound(stackId);
-        String connectionIp = getGatewayIp(securityConfig, gatewayInstance);
+        Stack stack = stackService.getById(stackId);
+        String connectionIp = getGatewayIp(securityConfig, gatewayInstance, stack.isClusterProxyRegistered());
         HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp, gatewayInstance);
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
         String saltSignPrivateKeyB64 = saltSecurityConfig.getSaltSignPrivateKey();
-        return new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
-                gatewayPort, gatewayInstance.getInstanceId(), conf.getServerCert(), conf.getClientCert(), conf.getClientKey(),
-                saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem(),
-                knoxGatewayEnabled, InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()),
-                new String(decodeBase64(saltSignPrivateKeyB64)), new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())),
-                securityConfig.getUserFacingCert(), securityConfig.getUserFacingKey(), useCcm);
+        GatewayConfig gatewayConfig = new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(),
+                gatewayInstance.getDiscoveryFQDN(), getGatewayPort(gatewayPort, stack.isClusterProxyRegistered()), gatewayInstance.getInstanceId(),
+                conf.getServerCert(), conf.getClientCert(), conf.getClientKey(), saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(),
+                saltClientConfig.getSignatureKeyPem(), knoxGatewayEnabled,
+                InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()), new String(decodeBase64(saltSignPrivateKeyB64)),
+                new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())), securityConfig.getUserFacingCert(), securityConfig.getUserFacingKey());
+        if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled() && stack.isClusterProxyRegistered()) {
+            gatewayConfig
+                    .withPath(clusterProxyService.getProxyPath(stack.getResourceCrn()))
+                    .withProtocol(clusterProxyConfiguration.getClusterProxyProtocol());
+        }
+        return gatewayConfig;
     }
 
-    public String getGatewayIp(SecurityConfig securityConfig, InstanceMetaData gatewayInstance) {
+    public String getGatewayIp(SecurityConfig securityConfig, InstanceMetaData gatewayInstance, boolean clusterProxyRegistered) {
         String gatewayIP = gatewayInstance.getPublicIpWrapper();
-        if (securityConfig.isUsePrivateIpToTls()) {
+        if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled() && clusterProxyRegistered) {
+            gatewayIP = clusterProxyConfiguration.getClusterProxyHost();
+        } else if (securityConfig.isUsePrivateIpToTls()) {
             gatewayIP = gatewayInstance.getPrivateIp();
         }
         return gatewayIP;
+    }
+
+    private Integer getGatewayPort(Integer stackPort, boolean clusterProxyRegistered) {
+        if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled() && clusterProxyRegistered) {
+            return clusterProxyConfiguration.getClusterProxyPort();
+        } else {
+            return stackPort;
+        }
     }
 
     public HttpClientConfig buildTLSClientConfigForPrimaryGateway(Long stackId, String apiAddress) {
