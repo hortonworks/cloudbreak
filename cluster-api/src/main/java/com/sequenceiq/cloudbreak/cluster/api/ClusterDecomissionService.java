@@ -1,31 +1,29 @@
 package com.sequenceiq.cloudbreak.cluster.api;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
 
-import com.google.common.collect.Multimap;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 public interface ClusterDecomissionService {
-    void verifyNodesAreRemovable(Multimap<Long, HostMetadata> hostGroupWithInstances, Set<HostGroup> hostGroups, int defaultRootVolumeSize,
-            List<InstanceMetaData> notDeletedNodes);
+    void verifyNodesAreRemovable(Stack stack, Collection<InstanceMetaData> removableInstances);
 
-    Set<String> collectDownscaleCandidates(@Nonnull HostGroup hostGroup, Integer scalingAdjustment, int defaultRootVolumeSize,
+    Set<InstanceMetaData> collectDownscaleCandidates(@Nonnull HostGroup hostGroup, Integer scalingAdjustment, int defaultRootVolumeSize,
             Set<InstanceMetaData> instanceMetaDatasInStack) throws CloudbreakException;
 
-    Map<String, HostMetadata> collectHostsToRemove(@Nonnull HostGroup hostGroup, Set<String> hostNames);
+    Map<String, InstanceMetaData> collectHostsToRemove(@Nonnull HostGroup hostGroup, Set<String> hostNames);
 
-    Set<HostMetadata> decommissionClusterNodes(Map<String, HostMetadata> hostsToRemove);
+    Set<String> decommissionClusterNodes(Map<String, InstanceMetaData> hostsToRemove);
 
     void removeManagementServices();
 
-    void deleteHostFromCluster(HostMetadata data);
+    void deleteHostFromCluster(InstanceMetaData data);
 
     void restartStaleServices() throws CloudbreakException;
 

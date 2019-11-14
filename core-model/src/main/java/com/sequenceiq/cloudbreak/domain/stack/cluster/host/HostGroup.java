@@ -15,6 +15,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedEntityGraphs;
 import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -26,12 +27,14 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 
-@NamedEntityGraph(name = "HostGroup.instanceGroup.instanceMetaData",
-        attributeNodes = @NamedAttributeNode(value = "instanceGroup", subgraph = "instanceMetaData"),
-        subgraphs = {
-                @NamedSubgraph(name = "instanceMetaData", attributeNodes = @NamedAttributeNode("instanceMetaData"))
-        }
-)
+@NamedEntityGraphs({
+        @NamedEntityGraph(name = "HostGroup.instanceGroup.instanceMetaData",
+                attributeNodes = @NamedAttributeNode(value = "instanceGroup", subgraph = "instanceMetaData"),
+                subgraphs = {
+                        @NamedSubgraph(name = "instanceMetaData", attributeNodes = @NamedAttributeNode("instanceMetaData"))
+                }
+        ),
+})
 @Entity
 public class HostGroup implements ProvisionEntity {
 
@@ -48,9 +51,6 @@ public class HostGroup implements ProvisionEntity {
 
     @OneToOne
     private InstanceGroup instanceGroup;
-
-    @OneToMany(mappedBy = "hostGroup", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<HostMetadata> hostMetadata = new HashSet<>();
 
     @OneToMany(mappedBy = "hostGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<GeneratedRecipe> generatedRecipes = new HashSet<>();
@@ -94,14 +94,6 @@ public class HostGroup implements ProvisionEntity {
         this.instanceGroup = instanceGroup;
     }
 
-    public Set<HostMetadata> getHostMetadata() {
-        return hostMetadata;
-    }
-
-    public void setHostMetadata(Set<HostMetadata> hostMetadata) {
-        this.hostMetadata = hostMetadata;
-    }
-
     public Set<Recipe> getRecipes() {
         return recipes;
     }
@@ -128,14 +120,6 @@ public class HostGroup implements ProvisionEntity {
 
     public void setGeneratedRecipes(Set<GeneratedRecipe> generatedRecipes) {
         this.generatedRecipes = generatedRecipes;
-    }
-
-    public Set<String> getHostNames() {
-        Set<String> hostNames = new HashSet<>(hostMetadata.size());
-        for (HostMetadata metadata : hostMetadata) {
-            hostNames.add(metadata.getHostName());
-        }
-        return hostNames;
     }
 
 }

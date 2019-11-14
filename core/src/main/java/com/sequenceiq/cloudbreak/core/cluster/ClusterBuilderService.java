@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -27,7 +29,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
@@ -41,7 +42,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
@@ -94,9 +94,6 @@ public class ClusterBuilderService {
     private RecipeEngine recipeEngine;
 
     @Inject
-    private HostMetadataService hostMetadataService;
-
-    @Inject
     private BlueprintUtils blueprintUtils;
 
     @Inject
@@ -126,13 +123,12 @@ public class ClusterBuilderService {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipesAndHostmetadata(stack.getCluster().getId());
+        Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
         Cluster cluster = stack.getCluster();
         clusterService.updateCreationDateOnCluster(cluster);
         TemplatePreparationObject templatePreparationObject = conversionService.convert(stack, TemplatePreparationObject.class);
-        Set<HostMetadata> hostsInCluster = hostMetadataService.findHostsInCluster(cluster.getId());
         Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup = loadInstanceMetadataForHostGroups(hostGroups);
-        recipeEngine.executePostAmbariStartRecipes(stack, instanceMetaDataByHostGroup.keySet());
+        recipeEngine.executePostAmbariStartRecipes(stack, hostGroupService.getRecipesByCluster(cluster.getId()));
         String blueprintText = cluster.getBlueprint().getBlueprintText();
         cluster.setExtendedBlueprintText(blueprintText);
         clusterService.updateCluster(cluster);
@@ -164,10 +160,11 @@ public class ClusterBuilderService {
                 .orElse(null);
 
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
-        clusterService.save(connector.clusterSetupService().buildCluster(
-                instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster, sdxContext, sdxStackCrn, telemetry, kerberosConfig));
-        recipeEngine.executePostInstallRecipes(stack, instanceMetaDataByHostGroup.keySet());
-        clusterCreationSuccessHandler.handleClusterCreationSuccess(stack);
+        clusterService.save(connector.clusterSetupService().buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, sdxContext,
+                sdxStackCrn, telemetry, kerberosConfig));
+        recipeEngine.executePostInstallRecipes(stack);
+        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataByHostGroup.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+        clusterCreationSuccessHandler.handleClusterCreationSuccess(instanceMetaDatas, stack.getCluster());
         if (StackType.DATALAKE == stack.getType()) {
             try {
                 transactionService.required(() -> {

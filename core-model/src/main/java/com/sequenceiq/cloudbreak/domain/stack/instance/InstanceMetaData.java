@@ -42,8 +42,6 @@ public class InstanceMetaData implements ProvisionEntity {
 
     private Boolean ambariServer;
 
-    private Boolean consulServer;
-
     private String discoveryFQDN;
 
     @Column(columnDefinition = "TEXT")
@@ -67,6 +65,9 @@ public class InstanceMetaData implements ProvisionEntity {
     private String subnetId;
 
     private String instanceName;
+
+    @Column(columnDefinition = "TEXT")
+    private String statusReason;
 
     public InstanceGroup getInstanceGroup() {
         return instanceGroup;
@@ -168,45 +169,36 @@ public class InstanceMetaData implements ProvisionEntity {
         this.terminationDate = terminationDate;
     }
 
-    public Boolean getConsulServer() {
-        return consulServer;
-    }
-
-    public void setConsulServer(Boolean consulServer) {
-        this.consulServer = consulServer;
-    }
-
     public boolean isCreated() {
         return InstanceStatus.CREATED.equals(instanceStatus);
     }
 
     public boolean isFailed() {
-        return instanceStatus == InstanceStatus.FAILED || instanceStatus == InstanceStatus.DECOMMISSION_FAILED
-                || instanceStatus == InstanceStatus.ORCHESTRATION_FAILED;
-    }
-
-    public boolean isDecommissioned() {
-        return InstanceStatus.DECOMMISSIONED.equals(instanceStatus);
-    }
-
-    public boolean isUnRegistered() {
-        return InstanceStatus.UNREGISTERED.equals(instanceStatus);
+        return instanceStatus == InstanceStatus.FAILED || instanceStatus == InstanceStatus.ORCHESTRATION_FAILED
+                || instanceStatus == InstanceStatus.DECOMMISSION_FAILED;
     }
 
     public boolean isTerminated() {
-        return InstanceStatus.TERMINATED.equals(instanceStatus);
+        return terminationDate != null || InstanceStatus.TERMINATED.equals(instanceStatus);
     }
 
     public boolean isDeletedOnProvider() {
         return InstanceStatus.DELETED_ON_PROVIDER_SIDE.equals(instanceStatus);
     }
 
-    public boolean isRegistered() {
-        return InstanceStatus.REGISTERED.equals(instanceStatus);
+    public boolean isUnhealthy() {
+        return InstanceStatus.SERVICES_UNHEALTHY.equals(instanceStatus);
     }
 
     public boolean isRunning() {
-        return InstanceStatus.REGISTERED.equals(instanceStatus) || InstanceStatus.UNREGISTERED.equals(instanceStatus);
+        return !isTerminated() && (InstanceStatus.CREATED.equals(instanceStatus) || InstanceStatus.SERVICES_RUNNING.equals(instanceStatus)
+                || InstanceStatus.DECOMMISSIONED.equals(instanceStatus) || InstanceStatus.DECOMMISSION_FAILED.equals(instanceStatus)
+                || InstanceStatus.SERVICES_HEALTHY.equals(instanceStatus) || InstanceStatus.SERVICES_UNHEALTHY.equals(instanceStatus));
+    }
+
+    public boolean isAttached() {
+        return InstanceStatus.SERVICES_HEALTHY.equals(instanceStatus) || InstanceStatus.SERVICES_UNHEALTHY.equals(instanceStatus)
+                || InstanceStatus.DECOMMISSION_FAILED.equals(instanceStatus);
     }
 
     public String getLocalityIndicator() {
@@ -278,6 +270,14 @@ public class InstanceMetaData implements ProvisionEntity {
         this.image = image;
     }
 
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", InstanceMetaData.class.getSimpleName() + "[", "]")
@@ -288,6 +288,8 @@ public class InstanceMetaData implements ProvisionEntity {
                 .add("instanceId='" + instanceId + "'")
                 .add("discoveryFQDN='" + discoveryFQDN + "'")
                 .add("instanceName='" + instanceName + "'")
+                .add("instanceStatus='" + instanceStatus + "'")
+                .add("statusReason='" + statusReason + "'")
                 .toString();
     }
 }

@@ -192,7 +192,7 @@ public class ClusterHostServiceRunner {
             } else {
                 mountDisks.mountDisksOnNewNodes(stack.getId(), new HashSet<>(candidateAddresses));
             }
-            recipeEngine.executePreClusterManagerRecipes(stack, hostGroupService.getByClusterWithRecipes(cluster.getId()));
+            recipeEngine.executePreClusterManagerRecipes(stack, hostGroupService.getRecipesByCluster(cluster.getId()));
             hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());

@@ -2,10 +2,8 @@ package com.sequenceiq.cloudbreak.core.cluster;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
@@ -15,19 +13,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
@@ -37,7 +32,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -73,9 +67,6 @@ public class ClusterUpscaleService {
     private ClusterServiceRunner clusterServiceRunner;
 
     @Inject
-    private HostMetadataService hostMetadataService;
-
-    @Inject
     private KerberosConfigService kerberosConfigService;
 
     public void upscaleClusterManager(Long stackId, String hostGroupName, Integer scalingAdjustment, boolean primaryGatewayChanged)
@@ -91,24 +82,18 @@ public class ClusterUpscaleService {
                 clusterServiceRunner.updateAmbariClientConfig(stack, stack.getCluster());
             }
             for (String hostName : hosts.keySet()) {
-                if (!hostsPerHostGroup.keySet().contains(hostGroupName)) {
+                if (!hostsPerHostGroup.containsKey(hostGroupName)) {
                     hostsPerHostGroup.put(hostGroupName, new ArrayList<>());
                 }
                 hostsPerHostGroup.get(hostGroupName).add(hostName);
             }
-            clusterService.updateHostMetadata(stack.getCluster().getId(), hostsPerHostGroup, HostMetadataState.SERVICES_RUNNING);
+            clusterService.updateInstancesToRunning(stack.getCluster().getId(), hostsPerHostGroup);
         } else {
             LOGGER.info("Please implement {} orchestrator because it is not on classpath.", orchestrator.getType());
             throw new CloudbreakException(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
         }
-        Set<String> allHosts = new HashSet<>();
-        for (Entry<String, List<String>> hostsPerHostGroupEntry : hostsPerHostGroup.entrySet()) {
-            allHosts.addAll(hostsPerHostGroupEntry.getValue());
-        }
-        instanceMetaDataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, allHosts);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        Set<HostMetadata> hostsInCluster = hostMetadataService.findHostsInCluster(stack.getCluster().getId());
-        connector.waitForHosts(stackService.getByIdWithListsInTransaction(stackId), hostsInCluster);
+        connector.waitForHosts(stackService.getByIdWithListsInTransaction(stackId).getRunningInstanceMetaDataSet());
     }
 
     public void uploadRecipesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
@@ -125,18 +110,22 @@ public class ClusterUpscaleService {
         LOGGER.debug("Start installing Ambari services");
         HostGroup hostGroup = Optional.ofNullable(hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName))
                 .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
-        Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
-        Long instanceGroupId = hostGroup.getInstanceGroup().getId();
-        List<InstanceMetaData> metas = instanceMetaDataService.findAliveInstancesInInstanceGroup(instanceGroupId);
-        recipeEngine.executePostAmbariStartRecipes(stack, Sets.newHashSet(hostGroup));
+        Set<InstanceMetaData> runningInstanceMetaDataSet = hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet();
+        recipeEngine.executePostAmbariStartRecipes(stack, hostGroup.getRecipes());
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        connector.upscaleCluster(hostGroup, hostMetadata, metas);
+        List<String> upscaledHosts = connector.upscaleCluster(hostGroup, runningInstanceMetaDataSet);
+        runningInstanceMetaDataSet.stream()
+                .filter(instanceMetaData -> upscaledHosts.contains(instanceMetaData.getDiscoveryFQDN()))
+                .forEach(instanceMetaData -> {
+                    instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
+                    instanceMetaDataService.save(instanceMetaData);
+                });
     }
 
     public void executePostRecipesOnNewHosts(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.debug("Start executing post recipes");
-        recipeEngine.executePostInstallRecipes(stack, hostGroupService.getByCluster(stack.getCluster().getId()));
+        recipeEngine.executePostInstallRecipes(stack);
     }
 
     public Map<String, String> gatherInstalledComponents(Long stackId, String hostname) {

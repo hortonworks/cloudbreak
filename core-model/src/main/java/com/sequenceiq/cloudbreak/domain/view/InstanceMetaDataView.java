@@ -25,6 +25,12 @@ public class InstanceMetaDataView implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private InstanceStatus instanceStatus;
 
+    @Column
+    private String instanceName;
+
+    @Column(columnDefinition = "TEXT")
+    private String statusReason;
+
     public boolean isTerminated() {
         return InstanceStatus.TERMINATED.equals(instanceStatus);
     }
@@ -43,5 +49,13 @@ public class InstanceMetaDataView implements ProvisionEntity {
 
     public void setInstanceStatus(InstanceStatus instanceStatus) {
         this.instanceStatus = instanceStatus;
+    }
+
+    public String getInstanceName() {
+        return instanceName;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
     }
 }

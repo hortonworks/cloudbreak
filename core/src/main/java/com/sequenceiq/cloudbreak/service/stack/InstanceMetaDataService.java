@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,7 +20,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Service
 public class InstanceMetaDataService {
@@ -32,31 +29,15 @@ public class InstanceMetaDataService {
     @Inject
     private InstanceMetaDataRepository repository;
 
-    public void updateInstanceStatus(Iterable<InstanceGroup> instanceGroup,
-            Map<InstanceGroupType, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus> newStatusByGroupType) {
-        for (InstanceGroup group : instanceGroup) {
-            com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus newStatus = newStatusByGroupType.get(group.getInstanceGroupType());
-            if (newStatus != null) {
-                for (InstanceMetaData instanceMetaData : group.getNotDeletedInstanceMetaDataSet()) {
-                    instanceMetaData.setInstanceStatus(newStatus);
-                    repository.save(instanceMetaData);
-                }
-            }
-        }
+    public void updateInstanceStatus(InstanceMetaData instanceMetaData, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus newStatus) {
+        updateInstanceStatus(instanceMetaData, newStatus, null);
     }
 
-    public void updateInstanceStatus(Iterable<InstanceGroup> instanceGroup, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus newStatus,
-            Collection<String> candidateAddresses) {
-        for (InstanceGroup group : instanceGroup) {
-            LOGGER.debug("Update instancematadatas [{}] for instangroup [{}] to state [{}], filtered by addresses: [{}]",
-                    group.getNotDeletedInstanceMetaDataSet(), group.getGroupName(), newStatus, candidateAddresses);
-            for (InstanceMetaData instanceMetaData : group.getNotDeletedInstanceMetaDataSet()) {
-                if (candidateAddresses.contains(instanceMetaData.getDiscoveryFQDN())) {
-                    instanceMetaData.setInstanceStatus(newStatus);
-                    repository.save(instanceMetaData);
-                }
-            }
-        }
+    public void updateInstanceStatus(InstanceMetaData instanceMetaData, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus newStatus,
+            String statusReason) {
+        instanceMetaData.setInstanceStatus(newStatus);
+        instanceMetaData.setStatusReason(statusReason);
+        repository.save(instanceMetaData);
     }
 
     public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances, boolean save) {
@@ -188,16 +169,6 @@ public class InstanceMetaDataService {
         return repository.findRemovableInstances(stackId, groupName);
     }
 
-    public void updateUnregisteredInstanceStatusByInstanceGroupForStack(Long stackId, InstanceGroupType instanceGroupType,
-            com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus instanceStatus) {
-        repository.findNotTerminatedForStack(stackId).stream().filter(im -> instanceGroupType.equals(im.getInstanceGroup().getInstanceGroupType()))
-                .filter(im -> com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.UNREGISTERED.equals(im.getInstanceStatus()))
-                .forEach(instanceMetaData -> {
-                    instanceMetaData.setInstanceStatus(instanceStatus);
-                    repository.save(instanceMetaData);
-                });
-    }
-
     public Set<StackInstanceCount> countByWorkspaceId(Long workspaceId) {
         return repository.countByWorkspaceId(workspaceId);
     }
@@ -209,5 +180,9 @@ public class InstanceMetaDataService {
     public List<InstanceMetaData> findAllByInstanceGroupAndInstanceStatus(InstanceGroup instanceGroup,
             com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus status) {
         return repository.findAllByInstanceGroupAndInstanceStatus(instanceGroup, status);
+    }
+
+    public Optional<InstanceMetaData> findByHostname(Long stackId, String hostName) {
+        return repository.findHostInStack(stackId, hostName);
     }
 }

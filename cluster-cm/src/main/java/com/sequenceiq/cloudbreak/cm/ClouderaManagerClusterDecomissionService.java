@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
-import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
@@ -26,7 +25,6 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
@@ -72,25 +70,24 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
     }
 
     @Override
-    public void verifyNodesAreRemovable(Multimap<Long, HostMetadata> hostGroupWithInstances, Set<HostGroup> hostGroups, int defaultRootVolumeSize,
-            List<InstanceMetaData> notDeletedNodes) {
-        clouderaManagerDecomissioner.verifyNodesAreRemovable(stack, hostGroupWithInstances, hostGroups, client);
+    public void verifyNodesAreRemovable(Stack stack, Collection<InstanceMetaData> removableInstances) {
+        clouderaManagerDecomissioner.verifyNodesAreRemovable(stack, removableInstances, client);
     }
 
     @Override
-    public Set<String> collectDownscaleCandidates(@Nonnull HostGroup hostGroup, Integer scalingAdjustment, int defaultRootVolumeSize,
+    public Set<InstanceMetaData> collectDownscaleCandidates(@Nonnull HostGroup hostGroup, Integer scalingAdjustment, int defaultRootVolumeSize,
             Set<InstanceMetaData> instanceMetaDatasInStack) {
         return clouderaManagerDecomissioner.collectDownscaleCandidates(client, stack, hostGroup, scalingAdjustment, defaultRootVolumeSize,
                 instanceMetaDatasInStack);
     }
 
     @Override
-    public Map<String, HostMetadata> collectHostsToRemove(@Nonnull HostGroup hostGroup, Set<String> hostNames) {
+    public Map<String, InstanceMetaData> collectHostsToRemove(@Nonnull HostGroup hostGroup, Set<String> hostNames) {
         return clouderaManagerDecomissioner.collectHostsToRemove(stack, hostGroup, hostNames, client);
     }
 
     @Override
-    public Set<HostMetadata> decommissionClusterNodes(Map<String, HostMetadata> hostsToRemove) {
+    public Set<String> decommissionClusterNodes(Map<String, InstanceMetaData> hostsToRemove) {
         return clouderaManagerDecomissioner.decommissionNodes(stack, hostsToRemove, client);
     }
 
@@ -100,7 +97,7 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
     }
 
     @Override
-    public void deleteHostFromCluster(HostMetadata data) {
+    public void deleteHostFromCluster(InstanceMetaData data) {
         clouderaManagerDecomissioner.deleteHost(stack, data, client);
     }
 

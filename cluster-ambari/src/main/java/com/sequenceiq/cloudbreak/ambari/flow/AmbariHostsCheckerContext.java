@@ -5,19 +5,19 @@ import java.util.Set;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.cluster.service.StackAware;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 public class AmbariHostsCheckerContext implements StackAware {
 
     private final AmbariClient ambariClient;
 
-    private final Set<HostMetadata> hostsInCluster;
+    private final Set<InstanceMetaData> hostsInCluster;
 
     private final int hostCount;
 
     private final Stack stack;
 
-    public AmbariHostsCheckerContext(Stack stack, AmbariClient ambariClient, Set<HostMetadata> hostsInCluster, int hostCount) {
+    public AmbariHostsCheckerContext(Stack stack, AmbariClient ambariClient, Set<InstanceMetaData> hostsInCluster, int hostCount) {
         this.stack = stack;
         this.ambariClient = ambariClient;
         this.hostsInCluster = hostsInCluster;
@@ -28,7 +28,7 @@ public class AmbariHostsCheckerContext implements StackAware {
         return ambariClient;
     }
 
-    public Set<HostMetadata> getHostsInCluster() {
+    public Set<InstanceMetaData> getHostsInCluster() {
         return hostsInCluster;
     }
 

@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.HostGroupViewV4Res
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.HostMetadataViewV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
-import com.sequenceiq.cloudbreak.domain.view.HostMetadataView;
+import com.sequenceiq.cloudbreak.domain.view.InstanceMetaDataView;
 
 @Component
 public class HostGroupViewToHostGroupViewV4ResponseConverter extends AbstractConversionServiceAwareConverter<HostGroupView, HostGroupViewV4Response> {
@@ -19,15 +19,26 @@ public class HostGroupViewToHostGroupViewV4ResponseConverter extends AbstractCon
         HostGroupViewV4Response hostGroupViewResponse = new HostGroupViewV4Response();
         hostGroupViewResponse.setId(source.getId());
         hostGroupViewResponse.setName(source.getName());
-        hostGroupViewResponse.setMetadata(getHostMetadata(source.getHostMetadata()));
+        hostGroupViewResponse.setMetadata(getHostMetadata(source));
         return hostGroupViewResponse;
     }
 
-    private Set<HostMetadataViewV4Response> getHostMetadata(Iterable<HostMetadataView> hostMetadataCollection) {
+    private Set<HostMetadataViewV4Response> getHostMetadata(HostGroupView hostGroupView) {
         Set<HostMetadataViewV4Response> hostMetadataResponses = new HashSet<>();
-        for (HostMetadataView hostMetadata : hostMetadataCollection) {
-            hostMetadataResponses.add(getConversionService().convert(hostMetadata, HostMetadataViewV4Response.class));
-        }
+        hostGroupView.getCluster().getStack().getInstanceGroups()
+                .stream()
+                .filter(instanceGroupView -> instanceGroupView.getGroupName().equals(hostGroupView.getName()))
+                .findFirst()
+                .ifPresent(instanceGroupView -> {
+                    for (InstanceMetaDataView instanceMetaData : instanceGroupView.getNotTerminatedInstanceMetaDataSet()) {
+                        HostMetadataViewV4Response hostMetadataViewV4Response = new HostMetadataViewV4Response();
+                        hostMetadataViewV4Response.setId(instanceMetaData.getId());
+                        hostMetadataViewV4Response.setName(instanceMetaData.getInstanceName());
+                        hostMetadataViewV4Response.setState(instanceMetaData.getInstanceStatus().getAsHostState());
+                        hostMetadataViewV4Response.setStatusReason(instanceMetaData.getStatusReason());
+                        hostMetadataResponses.add(hostMetadataViewV4Response);
+                    }
+                });
         return hostMetadataResponses;
     }
 }

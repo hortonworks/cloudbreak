@@ -1,7 +1,14 @@
 package com.sequenceiq.redbeams.converter.spi;
 
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
-// import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
@@ -14,14 +21,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
 import com.sequenceiq.redbeams.exception.BadRequestException;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 @Component
 public class DBStackToDatabaseStackConverter {

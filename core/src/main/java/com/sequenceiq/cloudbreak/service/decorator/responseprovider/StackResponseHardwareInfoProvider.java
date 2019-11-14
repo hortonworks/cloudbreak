@@ -21,19 +21,14 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 
 @Component
 public class StackResponseHardwareInfoProvider implements ResponseProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackResponseHardwareInfoProvider.class);
-
-    @Inject
-    private HostMetadataService hostMetadataService;
 
     @Inject
     private HostGroupService hostGroupService;
@@ -58,7 +53,7 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
     private HardwareInfoGroupV4Response hardwareInfoGroupResponse(Stack stack, InstanceGroup instanceGroup) {
 
         Template template = instanceGroup.getTemplate();
-        Set<InstanceMetaData> allInstanceMetaData = instanceGroup.getAllInstanceMetaData();
+        Set<InstanceMetaData> allInstanceMetaData = instanceGroup.getNotTerminatedInstanceMetaDataSet();
         Optional<HostGroup> hostGroup = Optional.empty();
         if (stack.getCluster() != null) {
             hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), instanceGroup.getGroupName());
@@ -67,7 +62,6 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
         HardwareInfoGroupV4Response hardwareInfoGroupResponse = new HardwareInfoGroupV4Response();
         hostGroup.ifPresent(group -> hardwareInfoGroupResponse.setRecoveryMode(group.getRecoveryMode()));
         hardwareInfoGroupResponse.setName(instanceGroup.getGroupName());
-
 
         for (InstanceMetaData instanceMetaData : allInstanceMetaData) {
 
@@ -81,19 +75,14 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
             hardwareInfoResponse.setPrivateIp(instanceMetaData.getPrivateIp());
             hardwareInfoResponse.setPublicIp(instanceMetaData.getPublicIp());
             hardwareInfoResponse.setSshPort(instanceMetaData.getSshPort());
+            hardwareInfoResponse.setGroupName(instanceMetaData.getInstanceGroupName());
+            hardwareInfoResponse.setName(instanceMetaData.getInstanceName());
+            hardwareInfoResponse.setState(instanceMetaData.getInstanceStatus().getAsHostState());
 
-            Optional<HostMetadata> hostMetadata = Optional.empty();
             if (stack.getCluster() != null) {
-                hostMetadata = hostMetadataService.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
                 if (template != null) {
                     hardwareInfoResponse.setTemplate(converterUtil.convert(template, InstanceTemplateV4Response.class));
                 }
-            }
-
-            if (hostMetadata.isPresent()) {
-                hardwareInfoResponse.setGroupName(hostMetadata.get().getHostGroup().getName());
-                hardwareInfoResponse.setName(hostMetadata.get().getHostName());
-                hardwareInfoResponse.setState(hostMetadata.get().getHostMetadataState().name());
             }
 
             try {

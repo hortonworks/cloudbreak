@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.POST_CLOU
 import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_TERMINATION;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
@@ -13,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Component
 public class RecipeEngine {
@@ -60,45 +61,45 @@ public class RecipeEngine {
         }
     }
 
-    public void executePreClusterManagerRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void executePreClusterManagerRecipes(Stack stack, Collection<Recipe> recipes) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if (shouldExecuteRecipeOnStack(hostGroups, orchestrator, PRE_CLOUDERA_MANAGER_START)) {
+        if (shouldExecuteRecipeOnStack(recipes, orchestrator, PRE_CLOUDERA_MANAGER_START)) {
             orchestratorRecipeExecutor.preClusterManagerStartRecipes(stack);
         }
     }
 
     // note: executed when LDAP config is present, because later the LDAP sync is hooked for this salt state in the top.sls.
-    public void executePostAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void executePostAmbariStartRecipes(Stack stack, Collection<Recipe> recipes) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if ((stack.getCluster() != null && ldapConfigService.isLdapConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName()))
-                || recipesFound(hostGroups, POST_CLOUDERA_MANAGER_START) && recipesSupportedOnOrchestrator(orchestrator)) {
+                || recipesFound(recipes, POST_CLOUDERA_MANAGER_START) && recipesSupportedOnOrchestrator(orchestrator)) {
             orchestratorRecipeExecutor.postClusterManagerStartRecipes(stack);
         }
     }
 
-    public void executePostInstallRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void executePostInstallRecipes(Stack stack) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (shouldRunConfiguredAndDefaultRecipes(orchestrator)) {
             orchestratorRecipeExecutor.postClusterInstall(stack);
         }
     }
 
-    public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups, boolean forced) throws CloudbreakException {
+    public void executePreTerminationRecipes(Stack stack, Collection<Recipe> recipes, boolean forced) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if (shouldExecuteRecipeOnStack(hostGroups, orchestrator, PRE_TERMINATION)) {
+        if (shouldExecuteRecipeOnStack(recipes, orchestrator, PRE_TERMINATION)) {
             orchestratorRecipeExecutor.preTerminationRecipes(stack, forced);
         }
     }
 
-    public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups, Set<String> hostNames) throws CloudbreakException {
+    public void executePreTerminationRecipes(Stack stack, Collection<Recipe> recipes, Set<String> hostNames) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if (shouldExecuteRecipeOnStack(hostGroups, orchestrator, PRE_TERMINATION)) {
+        if (shouldExecuteRecipeOnStack(recipes, orchestrator, PRE_TERMINATION)) {
             orchestratorRecipeExecutor.preTerminationRecipes(stack, hostNames);
         }
     }
 
-    private boolean shouldExecuteRecipeOnStack(Set<HostGroup> hostGroups, Orchestrator orchestrator, RecipeType recipeType) throws CloudbreakException {
-        return (recipesFound(hostGroups, recipeType)) && recipesSupportedOnOrchestrator(orchestrator);
+    private boolean shouldExecuteRecipeOnStack(Collection<Recipe> recipes, Orchestrator orchestrator, RecipeType recipeType) throws CloudbreakException {
+        return (recipesFound(recipes, recipeType)) && recipesSupportedOnOrchestrator(orchestrator);
     }
 
     private boolean recipesFound(Iterable<HostGroup> hostGroups) {
@@ -110,15 +111,8 @@ public class RecipeEngine {
         return false;
     }
 
-    private boolean recipesFound(Iterable<HostGroup> hostGroups, RecipeType recipeType) {
-        for (HostGroup hostGroup : hostGroups) {
-            for (Recipe recipe : hostGroup.getRecipes()) {
-                if (recipe.getRecipeType() == recipeType) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    private boolean recipesFound(Collection<Recipe> recipes, RecipeType recipeType) {
+        return recipes.stream().anyMatch(recipe -> recipeType.equals(recipe.getRecipeType()));
     }
 
     private boolean shouldRunConfiguredAndDefaultRecipes(Orchestrator orchestrator) throws CloudbreakException {

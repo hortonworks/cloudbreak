@@ -6,6 +6,7 @@ import static org.apache.commons.lang3.StringUtils.substringBefore;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -104,16 +105,18 @@ public class MountDisks {
             }
 
             mountInfo.forEach((hostname, value) -> {
-                String instanceId = stack.getInstanceMetaDataAsList().stream()
+                Optional<String> instanceIdOptional = stack.getInstanceMetaDataAsList().stream()
                         .filter(instanceMetaData -> hostname.equals(instanceMetaData.getDiscoveryFQDN()))
                         .filter(instanceMetaData -> InstanceStatus.CREATED.equals(instanceMetaData.getInstanceStatus()))
                         .map(InstanceMetaData::getInstanceId)
-                        .findFirst().get();
+                        .findFirst();
 
-                String uuids = value.getOrDefault("uuids", "");
-                String fstab = value.getOrDefault("fstab", "");
-                if (!StringUtils.isEmpty(uuids) && !StringUtils.isEmpty(fstab)) {
-                    persistUuidAndFstab(stack, instanceId, uuids, fstab);
+                if (instanceIdOptional.isPresent()) {
+                    String uuids = value.getOrDefault("uuids", "");
+                    String fstab = value.getOrDefault("fstab", "");
+                    if (!StringUtils.isEmpty(uuids) && !StringUtils.isEmpty(fstab)) {
+                        persistUuidAndFstab(stack, instanceIdOptional.get(), uuids, fstab);
+                    }
                 }
             });
         } catch (Exception e) {

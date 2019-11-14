@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,29 +19,19 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Component
 class ClusterUpscaleFlowService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpscaleFlowService.class);
-
-    private static final String STATUS_REASON_REPAIR_SINGLE_MASTER = "Repairing single master of cluster.";
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private ClusterService clusterService;
@@ -53,9 +44,6 @@ class ClusterUpscaleFlowService {
 
     @Inject
     private HostGroupService hostGroupService;
-
-    @Inject
-    private HostMetadataService hostMetadataService;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
@@ -113,8 +101,8 @@ class ClusterUpscaleFlowService {
         flowMessageService.fireEventAndLog(stackId, ambariMessage, UPDATE_IN_PROGRESS.name());
     }
 
-    void clusterUpscaleFinished(StackView stackView, String hostgroupName, Boolean singlePrimaryGateway) {
-        int numOfFailedHosts = updateMetadata(stackView, hostgroupName, singlePrimaryGateway);
+    void clusterUpscaleFinished(StackView stackView, String hostgroupName) {
+        int numOfFailedHosts = updateMetadata(stackView, hostgroupName);
         boolean success = numOfFailedHosts == 0;
         if (success) {
             LOGGER.debug("Cluster upscaled successfully");
@@ -136,46 +124,36 @@ class ClusterUpscaleFlowService {
         flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to", errorDetails);
     }
 
-    private int updateMetadata(StackView stackView, String hostGroupName, Boolean singlePrimaryGateway) {
-        LOGGER.debug("Start update metadata");
-        HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stackView.getClusterView().getId(), hostGroupName)
-                .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
-        Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
-        updateFailedHostMetaData(hostMetadata);
+    private int updateMetadata(StackView stackView, String hostGroupName) {
+        LOGGER.info("Start update metadata");
+        Optional<HostGroup> hostGroupOptional = hostGroupService.getByClusterIdAndName(stackView.getClusterView().getId(), hostGroupName);
+        if (hostGroupOptional.isPresent()) {
+            Set<InstanceMetaData> notDeletedInstanceMetaDataSet = hostGroupOptional.get().getInstanceGroup().getNotDeletedInstanceMetaDataSet();
+            return updateFailedHostMetaData(notDeletedInstanceMetaDataSet);
+        } else {
+            return 0;
+        }
+    }
+
+    private int updateFailedHostMetaData(Collection<InstanceMetaData> instanceMetaData) {
+        List<String> upscaleHostNames = getHostNames(instanceMetaData);
+        Collection<String> successHosts = new HashSet<>(upscaleHostNames);
+        return updateFailedHostMetaData(successHosts, instanceMetaData);
+    }
+
+    private int updateFailedHostMetaData(Collection<String> successHosts, Iterable<InstanceMetaData> instanceMetaDatas) {
         int failedHosts = 0;
-        for (HostMetadata hostMeta : hostMetadata) {
-            if (hostGroup.getInstanceGroup() != null) {
-                stackService.updateMetaDataStatusIfFound(stackView.getId(), hostMeta.getHostName(), InstanceStatus.REGISTERED);
-            }
-            hostGroupService.updateHostMetaDataStatus(hostMeta.getId(), HostMetadataState.HEALTHY);
-            if (hostMeta.getHostMetadataState() == HostMetadataState.UNHEALTHY) {
+        for (InstanceMetaData metaData : instanceMetaDatas) {
+            if (!successHosts.contains(metaData.getDiscoveryFQDN())) {
+                instanceMetaDataService.updateInstanceStatus(metaData, InstanceStatus.ORCHESTRATION_FAILED,
+                        "Cluster upscale failed. Host does not have fqdn.");
                 failedHosts++;
             }
-        }
-        if (singlePrimaryGateway) {
-            instanceMetaDataService
-                    .updateUnregisteredInstanceStatusByInstanceGroupForStack(stackView.getId(), InstanceGroupType.CORE, InstanceStatus.REGISTERED);
         }
         return failedHosts;
     }
 
-    private void updateFailedHostMetaData(Collection<HostMetadata> hostMetadata) {
-        List<String> upscaleHostNames = getHostNames(hostMetadata);
-        Collection<String> successHosts = new HashSet<>(upscaleHostNames);
-        updateFailedHostMetaData(successHosts, hostMetadata);
-    }
-
-    private void updateFailedHostMetaData(Collection<String> successHosts, Iterable<HostMetadata> hostMetadata) {
-        for (HostMetadata metaData : hostMetadata) {
-            if (!successHosts.contains(metaData.getHostName())) {
-                metaData.setHostMetadataState(HostMetadataState.UNHEALTHY);
-                metaData.setStatusReason("Cluster upscale failed. Host failed to upscale.");
-                hostMetadataService.save(metaData);
-            }
-        }
-    }
-
-    private List<String> getHostNames(Collection<HostMetadata> hostMetadata) {
-        return hostMetadata.stream().map(HostMetadata::getHostName).collect(Collectors.toList());
+    private List<String> getHostNames(Collection<InstanceMetaData> instanceMetaData) {
+        return instanceMetaData.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
     }
 }

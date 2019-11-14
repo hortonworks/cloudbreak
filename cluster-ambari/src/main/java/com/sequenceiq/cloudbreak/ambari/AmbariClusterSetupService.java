@@ -30,28 +30,27 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.ambari.flow.AmbariOperationService;
+import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
-import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterConnectorPollingResultChecker;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
-import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -129,16 +128,18 @@ public class AmbariClusterSetupService implements ClusterSetupService {
 
     @Override
     public Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            Set<HostMetadata> hostsInCluster, String sdxContext, String sdxStackCrn, Telemetry telemetry, KerberosConfig kerberosConfig) {
+            String sdxContext, String sdxStackCrn, Telemetry telemetry, KerberosConfig kerberosConfig) {
         Cluster cluster = stack.getCluster();
         try {
+            Set<InstanceMetaData> runningInstanceMetaDataSet = stack.getRunningInstanceMetaDataSet();
             ambariRepositoryVersionService.setBaseRepoURL(stack.getName(), cluster.getId(), ambariClient);
             String blueprintText = centralBlueprintUpdater.getBlueprintText(templatePreparationObject);
             addBlueprint(stack.getId(), ambariClient, blueprintText, cluster.getTopologyValidation());
-            PollingResult waitForHostsResult = ambariPollingServiceProvider.hostsPollingService(stack, ambariClient, hostsInCluster);
+            PollingResult waitForHostsResult = ambariPollingServiceProvider.hostsPollingService(stack, ambariClient, runningInstanceMetaDataSet);
             clusterConnectorPollingResultChecker
                     .checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
-            Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(instanceMetaDataByHostGroup);
+            Map<String, List<Map<String, String>>> hostGroupMappings =
+                    hostGroupAssociationBuilder.buildHostGroupAssociations(instanceMetaDataByHostGroup.keySet());
             ambariClusterTemplateSubmitter.addClusterTemplate(cluster, hostGroupMappings, ambariClient, kerberosConfig);
             Pair<PollingResult, Exception> pollingResult =
                     ambariOperationService.waitForOperationsToStart(stack, ambariClient, singletonMap("INSTALL_START", 1), START_OPERATION_STATE);
@@ -169,7 +170,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
     }
 
     @Override
-    public void waitForHosts(Set<HostMetadata> hostsInCluster) {
+    public void waitForHosts(Set<InstanceMetaData> hostsInCluster) {
         ambariPollingServiceProvider
                 .hostsPollingService(
                         stack,

@@ -5,10 +5,12 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -56,7 +58,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
@@ -145,15 +146,16 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Override
     public Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            Set<HostMetadata> hostsInCluster, String sdxContext, String sdxCrn, Telemetry telemetry, KerberosConfig kerberosConfig) {
+            String sdxContext, String sdxStackCrn, Telemetry telemetry, KerberosConfig kerberosConfig) {
         Cluster cluster = stack.getCluster();
         Long clusterId = cluster.getId();
         try {
-            waitForHosts(hostsInCluster);
+            Set<InstanceMetaData> instances = instanceMetaDataByHostGroup.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+            waitForHosts(instances);
             clouderaManagerLicenseService.validateClouderaManagerLicense(stack.getCreator());
             String sdxContextName = Optional.ofNullable(sdxContext).map(this::createDataContext).orElse(null);
 
-            startCmMgmtServices(templatePreparationObject, sdxCrn, telemetry, sdxContextName);
+            startCmMgmtServices(templatePreparationObject, sdxStackCrn, telemetry, sdxContextName);
 
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
             ApiClusterTemplate apiClusterTemplate = getCmTemplate(templatePreparationObject, sdxContextName, instanceMetaDataByHostGroup,
@@ -307,11 +309,11 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     @Override
-    public void waitForHosts(Set<HostMetadata> hostsInCluster) throws ClusterClientInitException {
+    public void waitForHosts(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException {
         Cluster cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
-        ApiClient client = null;
+        ApiClient client;
         try {
             client = clouderaManagerApiClientProvider.getClient(stack.getGatewayPort(), user, password, clientConfig);
         } catch (ClouderaManagerClientInitException e) {

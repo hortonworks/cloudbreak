@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -103,11 +104,15 @@ public class OperationRetryService {
     }
 
     private List<RetryableFlow> getRetryableFlows(List<FlowLog> flowLogs) {
-        return Optional.ofNullable(flowLogs.get(INDEX_BEFORE_FINISHED_STATE))
-                .filter(log -> failHandledEvents.contains(log.getNextEvent()))
-                .map(toRetryableFlow())
-                .map(List::of)
-                .orElse(List.of());
+        if (flowLogs.size() > 2) {
+            return Optional.ofNullable(flowLogs.get(INDEX_BEFORE_FINISHED_STATE))
+                    .filter(log -> failHandledEvents.contains(log.getNextEvent()))
+                    .map(toRetryableFlow())
+                    .map(List::of)
+                    .orElse(List.of());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private Function<FlowLog, RetryableFlow> toRetryableFlow() {

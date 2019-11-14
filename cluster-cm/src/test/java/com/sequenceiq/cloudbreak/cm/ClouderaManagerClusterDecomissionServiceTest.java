@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,17 +24,14 @@ import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
-import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
@@ -93,12 +91,9 @@ public class ClouderaManagerClusterDecomissionServiceTest {
 
     @Test
     public void testVerifyNodesAreRemovable() {
-        Multimap<Long, HostMetadata> hostGroupWithInstances = ArrayListMultimap.create();
-        Set<HostGroup> hostGroups = Collections.emptySet();
+        underTest.verifyNodesAreRemovable(stack, Collections.emptyList());
 
-        underTest.verifyNodesAreRemovable(hostGroupWithInstances, hostGroups, 0, Collections.emptyList());
-
-        verify(clouderaManagerDecomissioner).verifyNodesAreRemovable(stack, hostGroupWithInstances, hostGroups, apiClient);
+        verify(clouderaManagerDecomissioner).verifyNodesAreRemovable(stack, Collections.emptyList(), apiClient);
     }
 
     @Test
@@ -106,26 +101,34 @@ public class ClouderaManagerClusterDecomissionServiceTest {
         HostGroup hostGroup = new HostGroup();
         Integer scalingAdjustment = 1;
         int defaultRootVolumeSize = 2;
-        Set<InstanceMetaData> instanceMetaDatasInStack = Collections.emptySet();
-        Set<String> candidates = Set.of("host1", "host2");
+        Set<InstanceMetaData> instanceMetadatas = new HashSet<>();
+        InstanceMetaData instanceMetaData1 = new InstanceMetaData();
+        instanceMetaData1.setDiscoveryFQDN("host1");
+        instanceMetaData1.setPrivateId(1L);
+        instanceMetadatas.add(instanceMetaData1);
+        InstanceMetaData instanceMetaData2 = new InstanceMetaData();
+        instanceMetaData2.setDiscoveryFQDN("host2");
+        instanceMetaData2.setPrivateId(2L);
+        instanceMetadatas.add(instanceMetaData2);
+
         when(clouderaManagerDecomissioner.collectDownscaleCandidates(apiClient, stack, hostGroup, scalingAdjustment, defaultRootVolumeSize,
-                instanceMetaDatasInStack)).thenReturn(candidates);
+                instanceMetadatas)).thenReturn(instanceMetadatas);
 
-        Set<String> actual = underTest.collectDownscaleCandidates(hostGroup, scalingAdjustment, defaultRootVolumeSize, instanceMetaDatasInStack);
+        Set<InstanceMetaData> actual = underTest.collectDownscaleCandidates(hostGroup, scalingAdjustment, defaultRootVolumeSize, instanceMetadatas);
 
-        assertEquals(candidates, actual);
+        assertEquals(instanceMetadatas, actual);
         verify(clouderaManagerDecomissioner).collectDownscaleCandidates(apiClient, stack, hostGroup, scalingAdjustment, defaultRootVolumeSize,
-                instanceMetaDatasInStack);
+                instanceMetadatas);
     }
 
     @Test
     public void testCollectHostsToRemove() {
         HostGroup hostGroup = new HostGroup();
         Set<String> hostNames = Collections.emptySet();
-        Map<String, HostMetadata> hosts = new HashMap<>();
+        Map<String, InstanceMetaData> hosts = new HashMap<>();
         when(clouderaManagerDecomissioner.collectHostsToRemove(stack, hostGroup, hostNames, apiClient)).thenReturn(hosts);
 
-        Map<String, HostMetadata> actual = underTest.collectHostsToRemove(hostGroup, hostNames);
+        Map<String, InstanceMetaData> actual = underTest.collectHostsToRemove(hostGroup, hostNames);
 
         assertEquals(hosts, actual);
         verify(clouderaManagerDecomissioner).collectHostsToRemove(stack, hostGroup, hostNames, apiClient);
@@ -133,11 +136,11 @@ public class ClouderaManagerClusterDecomissionServiceTest {
 
     @Test
     public void testDecommissionClusterNodes() {
-        Map<String, HostMetadata> hostsToRemove = new HashMap<>();
-        Set<HostMetadata> hosts = Set.of(new HostMetadata());
+        Map<String, InstanceMetaData> hostsToRemove = new HashMap<>();
+        Set<String> hosts = Set.of("host");
         when(clouderaManagerDecomissioner.decommissionNodes(stack, hostsToRemove, apiClient)).thenReturn(hosts);
 
-        Set<HostMetadata> actual = underTest.decommissionClusterNodes(hostsToRemove);
+        Set<String> actual = underTest.decommissionClusterNodes(hostsToRemove);
 
         assertEquals(hosts, actual);
         verify(clouderaManagerDecomissioner).decommissionNodes(stack, hostsToRemove, apiClient);
@@ -152,7 +155,7 @@ public class ClouderaManagerClusterDecomissionServiceTest {
 
     @Test
     public void testDeleteHostFromCluster() {
-        HostMetadata hostMetadata = new HostMetadata();
+        InstanceMetaData hostMetadata = new InstanceMetaData();
 
         underTest.deleteHostFromCluster(hostMetadata);
 

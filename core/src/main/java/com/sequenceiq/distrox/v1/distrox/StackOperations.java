@@ -351,7 +351,7 @@ public class StackOperations {
     public String getClusterHostsInventory(Long workspaceId, String name) {
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         String loginUser = stack.getStackAuthentication().getLoginUserName();
-        return clusterCommonService.getHostNamesAsIniString(stack.getCluster(), loginUser);
+        return clusterCommonService.getHostNamesAsIniString(stack, loginUser);
     }
 
     public Stack getStackByName(String name) {

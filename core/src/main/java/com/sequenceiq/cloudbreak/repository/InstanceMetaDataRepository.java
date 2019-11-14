@@ -17,13 +17,17 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
 import com.sequenceiq.cloudbreak.workspace.repository.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspaceId;
 
 @EntityType(entityClass = InstanceMetaData.class)
 @Transactional(TxType.REQUIRED)
 @DisableHasPermission
 public interface InstanceMetaDataRepository extends DisabledBaseRepository<InstanceMetaData, Long> {
 
-    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceStatus <> 'TERMINATED'")
+    @Query("SELECT i FROM InstanceMetaData i " +
+            "WHERE i.instanceGroup.stack.id= :stackId " +
+            "AND i.instanceStatus <> 'TERMINATED' " +
+            "AND i.instanceStatus <> 'DELETED_ON_PROVIDER_SIDE'")
     Set<InstanceMetaData> findNotTerminatedForStack(@Param("stackId") Long stackId);
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId")
@@ -35,18 +39,18 @@ public interface InstanceMetaDataRepository extends DisabledBaseRepository<Insta
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.discoveryFQDN= :hostName AND i.instanceStatus <> 'TERMINATED'")
     Optional<InstanceMetaData> findHostInStack(@Param("stackId") Long stackId, @Param("hostName") String hostName);
 
-    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.id= :instanceGroupId AND i.instanceStatus in ('CREATED', 'UNREGISTERED')")
+    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.id= :instanceGroupId AND i.instanceStatus in ('CREATED')")
     Set<InstanceMetaData> findUnusedHostsInInstanceGroup(@Param("instanceGroupId") Long instanceGroupId);
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.groupName= :instanceGroupName "
-            + "AND i.instanceStatus in ('CREATED', 'UNREGISTERED') AND i.instanceGroup.stack.id= :stackId")
+            + "AND i.instanceStatus in ('CREATED') AND i.instanceGroup.stack.id= :stackId")
     Set<InstanceMetaData> findUnusedHostsInInstanceGroup(@Param("stackId") Long stackId, @Param("instanceGroupName") String instanceGroupName);
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.id = :instanceGroupId AND i.instanceStatus <> 'TERMINATED'")
     List<InstanceMetaData> findAliveInstancesInInstanceGroup(@Param("instanceGroupId") Long instanceGroupId);
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceGroup.groupName= :groupName "
-            + "AND i.instanceStatus in ('CREATED', 'UNREGISTERED', 'DECOMMISSIONED', 'FAILED', 'STOPPED')")
+            + "AND i.instanceStatus in ('CREATED', 'SERVICES_RUNNING', 'DECOMMISSIONED', 'FAILED', 'STOPPED')")
     Set<InstanceMetaData> findRemovableInstances(@Param("stackId") Long stackId, @Param("groupName") String groupName);
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.privateIp= :privateAddress AND i.instanceStatus <> 'TERMINATED'")
@@ -76,4 +80,11 @@ public interface InstanceMetaDataRepository extends DisabledBaseRepository<Insta
 
     @Query("SELECT i FROM InstanceMetaData i ")
     Set<InstanceMetaData> findAllRequestedByStackId(@Param("id") Long stackId);
+
+    @CheckPermissionsByWorkspaceId
+    @Query("SELECT s.id as stackId, COUNT(i) as instanceCount "
+            + "FROM InstanceMetaData i JOIN i.instanceGroup ig JOIN ig.stack s WHERE s.workspace.id= :id AND i.instanceStatus = 'SERVICES_UNHEALTHY' "
+            + "GROUP BY s.id")
+    Set<StackInstanceCount> countUnhealthyByWorkspaceId(@Param("id")Long workspaceId);
+
 }

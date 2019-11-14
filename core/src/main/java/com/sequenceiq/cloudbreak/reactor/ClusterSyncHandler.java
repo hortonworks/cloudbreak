@@ -53,7 +53,7 @@ public class ClusterSyncHandler implements EventHandler<ClusterSyncRequest> {
             Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(request.getResourceId()).orElse(null);
             clusterStatusUpdater.updateClusterStatus(stack, cluster);
             if (cluster != null && (cluster.isAvailable() || cluster.isMaintenanceModeEnabled())) {
-                instanceMetadataUpdater.updatePackageVersionsOnAllInstances(stack);
+                instanceMetadataUpdater.updatePackageVersionsOnAllInstances(stack.getId());
                 if (stack.isDatalake()) {
                     ambariDatalakeConfigProvider.collectAndStoreDatalakeResources(stack, cluster);
                 }

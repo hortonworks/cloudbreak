@@ -20,6 +20,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
@@ -109,9 +110,21 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
                 .collect(Collectors.toSet());
     }
 
+    public Set<InstanceMetaData> getUnattachedInstanceMetaDataSet() {
+        return instanceMetaData.stream()
+                .filter(metaData -> metaData.getInstanceStatus() == InstanceStatus.CREATED)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<InstanceMetaData> getAttachedInstanceMetaDataSet() {
+        return instanceMetaData.stream()
+                .filter(InstanceMetaData::isAttached)
+                .collect(Collectors.toSet());
+    }
+
     public Set<InstanceMetaData> getRunningInstanceMetaDataSet() {
         return instanceMetaData.stream()
-                .filter(metaData -> metaData.isRunning())
+                .filter(InstanceMetaData::isRunning)
                 .collect(Collectors.toSet());
     }
 

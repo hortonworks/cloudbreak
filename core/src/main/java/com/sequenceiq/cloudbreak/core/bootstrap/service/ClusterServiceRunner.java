@@ -1,10 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -15,7 +11,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -29,7 +24,6 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Component
 public class ClusterServiceRunner {
@@ -65,15 +59,9 @@ public class ClusterServiceRunner {
         if (orchestratorType.hostOrchestrator()) {
             hostRunner.runClusterServices(stack, cluster, List.of());
             updateAmbariClientConfig(stack, cluster);
-            Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
-            for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
-                String groupName = instanceMetaData.getInstanceGroup().getGroupName();
-                if (!hostsPerHostGroup.keySet().contains(groupName)) {
-                    hostsPerHostGroup.put(groupName, new ArrayList<>());
-                }
-                hostsPerHostGroup.get(groupName).add(instanceMetaData.getDiscoveryFQDN());
+            for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaDataSet()) {
+                instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.SERVICES_RUNNING);
             }
-            clusterService.updateHostMetadata(cluster.getId(), hostsPerHostGroup, HostMetadataState.SERVICES_RUNNING);
         } else {
             LOGGER.info("Please implement {} orchestrator because it is not on classpath.", orchestrator.getType());
             throw new CloudbreakException(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
@@ -110,10 +98,6 @@ public class ClusterServiceRunner {
     }
 
     private HttpClientConfig buildAmbariClientConfig(Stack stack, String gatewayPublicIp) {
-        Map<InstanceGroupType, InstanceStatus> newStatusByGroupType = new EnumMap<>(InstanceGroupType.class);
-        newStatusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);
-        newStatusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
-        instanceMetaDataService.updateInstanceStatus(stack.getInstanceGroups(), newStatusByGroupType);
         return tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), gatewayPublicIp);
     }
 }

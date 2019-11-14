@@ -35,7 +35,6 @@ import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
-import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -45,7 +44,6 @@ import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvide
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -110,10 +108,6 @@ class ClouderaManagerModificationServiceTest {
 
     private HostGroup hostGroup;
 
-    private List<InstanceMetaData> instaneMetadata;
-
-    private List<HostMetadata> hostMetadataList;
-
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -122,43 +116,42 @@ class ClouderaManagerModificationServiceTest {
         cluster = new Cluster();
         cluster.setId(CLUSTER_ID);
         stack.setCluster(cluster);
-        hostMetadataList = createHmListWithUpscaledHost();
         hostGroup = new HostGroup();
         hostGroup.setName(HOST_GROUP_NAME);
-        instaneMetadata = List.of(new InstanceMetaData());
     }
 
     @Test
     void upscaleClusterListHostsException() throws Exception {
-        HostMetadata hostMetadata = new HostMetadata();
-
         when(clustersResourceApi.listHosts(eq(STACK_NAME))).thenThrow(new ApiException("Failed to get hosts"));
         when(clouderaManagerApiFactory.getClustersResourceApi(eq(apiClientMock))).thenReturn(clustersResourceApi);
 
-        Exception exception = assertThrows(CloudbreakException.class, () -> underTest.upscaleCluster(hostGroup, List.of(hostMetadata), instaneMetadata));
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("upscaled");
+        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
+
+        Exception exception = assertThrows(CloudbreakException.class, () -> underTest.upscaleCluster(hostGroup, instanceMetaDataList));
         assertEquals("Failed to upscale", exception.getMessage());
     }
 
     @Test
     void upscaleClusterNoHostToUpscale() throws Exception {
-        HostMetadata originalHm = new HostMetadata();
-        originalHm.setHostName("original");
         setUpDeployClientConfigPolling(PollingResult.SUCCESS);
 
         when(clouderaManagerRepo.getPredefined()).thenReturn(Boolean.TRUE);
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
         setUpListClusterHosts();
 
-        underTest.upscaleCluster(hostGroup, List.of(originalHm), instaneMetadata);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("original");
+        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
+
+        underTest.upscaleCluster(hostGroup, instanceMetaDataList);
         verify(clouderaManagerApiFactory, never()).getHostsResourceApi(any());
         verify(clouderaManagerRoleRefreshService).refreshClusterRoles(apiClientMock, stack);
     }
 
     @Test
     void upscaleClusterRecovery() throws Exception {
-        HostMetadata originalHm = new HostMetadata();
-        originalHm.setHostName("original");
-
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(REFRESH_PARCEL_REPOS_ID));
         when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClientMock, REFRESH_PARCEL_REPOS_ID))
@@ -169,7 +162,11 @@ class ClouderaManagerModificationServiceTest {
         setUpListClusterHosts();
         setUpDeployClientConfigPolling(PollingResult.SUCCESS);
 
-        underTest.upscaleCluster(hostGroup, List.of(originalHm), instaneMetadata);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("original");
+        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
+
+        underTest.upscaleCluster(hostGroup, instanceMetaDataList);
         verify(clouderaManagerApiFactory, never()).getHostsResourceApi(any());
         verify(clouderaManagerRoleRefreshService).refreshClusterRoles(apiClientMock, stack);
     }
@@ -180,7 +177,11 @@ class ClouderaManagerModificationServiceTest {
         setUpReadHosts();
         setUpDeployClientConfigPolling(PollingResult.EXIT);
 
-        Exception exception = assertThrows(CancellationException.class, () -> underTest.upscaleCluster(hostGroup, hostMetadataList, instaneMetadata));
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("upscaled");
+        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
+
+        Exception exception = assertThrows(CancellationException.class, () -> underTest.upscaleCluster(hostGroup, instanceMetaDataList));
         String exceptionMessage = "Cluster was terminated while waiting for client configurations to deploy";
         assertEquals(exceptionMessage, exception.getMessage());
 
@@ -197,21 +198,17 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerApiFactory.getClustersResourceApi(eq(apiClientMock))).thenReturn(clustersResourceApi);
     }
 
-    private List<HostMetadata> createHmListWithUpscaledHost() {
-        HostMetadata originalHm = new HostMetadata();
-        originalHm.setHostName("original");
-        HostMetadata upscaledHm = new HostMetadata();
-        upscaledHm.setHostName("upscaled");
-        return List.of(originalHm, upscaledHm);
-    }
-
     @Test
     void upscaleClusterTimeoutOnDeployConfig() throws Exception {
         setUpListClusterHosts();
         setUpReadHosts();
         setUpDeployClientConfigPolling(PollingResult.TIMEOUT);
 
-        Exception exception = assertThrows(CloudbreakException.class, () -> underTest.upscaleCluster(hostGroup, hostMetadataList, instaneMetadata));
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("upscaled");
+        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
+
+        Exception exception = assertThrows(CloudbreakException.class, () -> underTest.upscaleCluster(hostGroup, instanceMetaDataList));
         String exceptionMessage = "Timeout while Cloudera Manager deployed client configurations.";
         assertEquals(exceptionMessage, exception.getMessage());
 
@@ -237,7 +234,11 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(apiClientMock), eq(applyHostTemplateCommandId)))
                 .thenReturn(applyTemplatePollingResult);
 
-        underTest.upscaleCluster(hostGroup, hostMetadataList, instaneMetadata);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("upscaled");
+        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
+
+        underTest.upscaleCluster(hostGroup, instanceMetaDataList);
 
         ArgumentCaptor<ApiHostRefList> bodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
         verify(clustersResourceApi, times(1)).addHosts(eq(STACK_NAME), bodyCatcher.capture());
@@ -251,23 +252,6 @@ class ClouderaManagerModificationServiceTest {
 
         assertEquals(1, applyTemplateBodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", applyTemplateBodyCatcher.getValue().getItems().get(0).getHostname());
-    }
-
-    private ArgumentCaptor<ApiRestartClusterArgs> setUpRestartServices() throws ApiException {
-        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(eq(apiClientMock))).thenReturn(mgmtServiceResourceApi);
-        BigDecimal restartMgmtCommandId = new BigDecimal(300);
-        when(mgmtServiceResourceApi.restartCommand()).thenReturn(new ApiCommand().id(restartMgmtCommandId));
-        PollingResult restartMgmtCommandResult = PollingResult.SUCCESS;
-        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(eq(stack), eq(apiClientMock), eq(restartMgmtCommandId)))
-                .thenReturn(restartMgmtCommandResult);
-
-        ArgumentCaptor<ApiRestartClusterArgs> apiRestartClusterArgs = ArgumentCaptor.forClass(ApiRestartClusterArgs.class);
-        BigDecimal restartClusterCommandId = new BigDecimal(400);
-        when(clustersResourceApi.restartCommand(eq(STACK_NAME), apiRestartClusterArgs.capture())).thenReturn(new ApiCommand().id(restartClusterCommandId));
-        PollingResult restartClusterCommandResult = PollingResult.SUCCESS;
-        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(eq(stack), eq(apiClientMock), eq(restartClusterCommandId)))
-                .thenReturn(restartClusterCommandResult);
-        return apiRestartClusterArgs;
     }
 
     private void setUpReadHosts() throws ApiException {

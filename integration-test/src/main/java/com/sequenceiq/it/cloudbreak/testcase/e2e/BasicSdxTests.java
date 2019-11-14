@@ -18,19 +18,17 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class BasicSdxTests extends AbstractE2ETest {
+public class  BasicSdxTests extends AbstractE2ETest {
 
     protected static final SdxClusterStatusResponse SDX_RUNNING = SdxClusterStatusResponse.RUNNING;
-
-    protected static final InstanceStatus REGISTERED = InstanceStatus.REGISTERED;
 
     protected static final String IDBROKER_HOSTGROUP = HostGroupType.IDBROKER.getName();
 
     protected static final String MASTER_HOSTGROUP = HostGroupType.MASTER.getName();
 
-    private Map<String, InstanceStatus> instancesRegistered = new HashMap<String, InstanceStatus>() {{
-        put(MASTER_HOSTGROUP, REGISTERED);
-        put(IDBROKER_HOSTGROUP, REGISTERED);
+    private Map<String, InstanceStatus> instancesRegistered = new HashMap<>() {{
+        put(MASTER_HOSTGROUP, InstanceStatus.SERVICES_HEALTHY);
+        put(IDBROKER_HOSTGROUP, InstanceStatus.SERVICES_HEALTHY);
     }};
 
     @Inject

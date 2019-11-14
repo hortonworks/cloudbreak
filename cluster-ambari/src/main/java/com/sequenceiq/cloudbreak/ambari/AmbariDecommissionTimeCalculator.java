@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.message.Msg;
 
@@ -26,11 +26,11 @@ public class AmbariDecommissionTimeCalculator {
     @Inject
     private FlowMessageService flowMessageService;
 
-    public void calculateDecommissioningTime(Stack stack, Collection<HostMetadata> filteredHostList, Map<String, Map<Long, Long>> dfsSpace, long usedSpace,
+    public void calculateDecommissioningTime(Stack stack, Collection<InstanceMetaData> filteredHostList, Map<String, Map<Long, Long>> dfsSpace, long usedSpace,
             int defaultRootVolumeSize) {
-        Optional<HostMetadata> aHostMetadata = filteredHostList.stream().findFirst();
-        if (aHostMetadata.isPresent()) {
-            Template template = aHostMetadata.get().getHostGroup().getInstanceGroup().getTemplate();
+        Optional<InstanceMetaData> instanceMetaData = filteredHostList.stream().findFirst();
+        if (instanceMetaData.isPresent()) {
+            Template template = instanceMetaData.get().getInstanceGroup().getTemplate();
             int rootVolumeSize = template.getRootVolumeSize() == null
                     ? defaultRootVolumeSize
                     : template.getRootVolumeSize();

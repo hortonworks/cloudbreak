@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.HostGroupDecorator;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -81,9 +80,6 @@ public class ClusterCommonService {
 
     @Inject
     private BlueprintService blueprintService;
-
-    @Inject
-    private HostMetadataService hostMetadataService;
 
     public void put(String crn, UpdateClusterV4Request updateJson, User user, Workspace workspace) {
         Stack stack = stackService.getByCrn(crn);
@@ -225,29 +221,29 @@ public class ClusterCommonService {
 
     /**
      * Get cluster host details (ips + cluster name) - ini format
-     * @param cluster cluster object that is used to fill the cluster details ini
+     * @param stack stack object that is used to fill the cluster details ini
      * @param loginUser ssh username that will be used as a default user in the inventory
      * @return Ini file content in string
      */
-    public String getHostNamesAsIniString(Cluster cluster, String loginUser) {
-        Long clusterId = cluster.getId();
+    public String getHostNamesAsIniString(Stack stack, String loginUser) {
+        Cluster cluster = stack.getCluster();
         String clusterName = cluster.getName();
         String serverHost = cluster.getClusterManagerIp();
 
-        Set<HostMetadata> agentHostsSet = hostMetadataService.findHostsInCluster(clusterId);
+        Set<InstanceMetaData> agentHostsSet = stack.getRunningInstanceMetaDataSet();
         if (agentHostsSet.isEmpty()) {
             throw new NotFoundException(String.format("Not found any agent hosts (yet) for cluster '%s'", cluster.getId()));
         }
         String agentHosts = agentHostsSet.stream()
-                .map(HostMetadata::getHostName)
+                .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(Collectors.joining("\n"));
 
         List<String> hostGroupHostsStrings = agentHostsSet.stream()
-                .collect(Collectors.groupingBy(p -> p.getHostGroup().getName()))
+                .collect(Collectors.groupingBy(InstanceMetaData::getInstanceGroupName))
                 .entrySet().stream()
                 .map(s -> addSectionWithBody(
                         s.getKey(),
-                        s.getValue().stream().map(HostMetadata::getHostName).collect(Collectors.joining("\n"))))
+                        s.getValue().stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.joining("\n"))))
                 .collect(Collectors.toList());
 
         return String.join(

@@ -64,7 +64,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
@@ -298,7 +297,6 @@ public class TestUtil {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceStatus(instanceStatus);
         instanceMetaData.setAmbariServer(ambariServer);
-        instanceMetaData.setConsulServer(true);
         instanceMetaData.setSshPort(22);
         instanceMetaData.setDiscoveryFQDN("test-" + instanceGroupId + '-' + serverNumber);
         instanceMetaData.setInstanceId("test-" + instanceGroupId + '-' + serverNumber);
@@ -319,7 +317,7 @@ public class TestUtil {
     public static Set<InstanceMetaData> generateInstanceMetaDatas(int count, Long instanceGroupId, InstanceGroup instanceGroup) {
         Set<InstanceMetaData> instanceMetaDatas = new HashSet<>();
         for (int i = 1; i <= count; i++) {
-            instanceMetaDatas.add(instanceMetaData(Integer.toUnsignedLong(i), instanceGroupId, InstanceStatus.REGISTERED,
+            instanceMetaDatas.add(instanceMetaData(Integer.toUnsignedLong(i), instanceGroupId, InstanceStatus.SERVICES_RUNNING,
                     instanceGroup.getInstanceGroupType().equals(InstanceGroupType.GATEWAY), instanceGroup));
         }
         return instanceMetaDatas;
@@ -443,7 +441,6 @@ public class TestUtil {
         hostGroup.setId(1L);
         hostGroup.setName(name);
         hostGroup.setRecipes(recipes(1));
-        hostGroup.setHostMetadata(hostMetadata(hostGroup, count));
         InstanceGroup instanceGroup = instanceGroup(1L, name, InstanceGroupType.CORE, gcpTemplate(1L), count);
         hostGroup.setInstanceGroup(instanceGroup);
         hostGroup.setCluster(cluster(blueprint(), stack(), 1L));
@@ -471,17 +468,6 @@ public class TestUtil {
         hg.setName("slave_1");
         hostGroups.add(hg);
         return hostGroups;
-    }
-
-    public static Set<HostMetadata> hostMetadata(HostGroup hostGroup, int count) {
-        Set<HostMetadata> hostMetadataSet = new HashSet<>();
-        for (int i = 1; i <= count; i++) {
-            HostMetadata hostMetadata = new HostMetadata();
-            hostMetadata.setHostName("hostname-" + (i + 1));
-            hostMetadata.setHostGroup(hostGroup);
-            hostMetadataSet.add(hostMetadata);
-        }
-        return hostMetadataSet;
     }
 
     public static Set<Recipe> recipes(int count) {

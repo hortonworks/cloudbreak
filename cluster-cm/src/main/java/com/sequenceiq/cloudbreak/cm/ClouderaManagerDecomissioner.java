@@ -43,7 +43,6 @@ import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -54,7 +53,6 @@ import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvide
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 
@@ -64,15 +62,6 @@ public class ClouderaManagerDecomissioner {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerDecomissioner.class);
 
     private static final String SUMMARY_REQUEST_VIEW = "SUMMARY";
-
-    @Inject
-    private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
-
-    @Inject
-    private ResourceAttributeUtil resourceAttributeUtil;
-
-    @Inject
-    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     private final Comparator<? super ApiHost> hostHealthComparator = (host1, host2) -> {
         boolean host1Healthy = ApiHealthSummary.GOOD.equals(host1.getHealthSummary());
@@ -87,17 +76,29 @@ public class ClouderaManagerDecomissioner {
         }
     };
 
-    public void verifyNodesAreRemovable(Stack stack, Multimap<Long, HostMetadata> hostGroupWithInstances, Set<HostGroup> hostGroups, ApiClient client) {
+    @Inject
+    private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
+
+    @Inject
+    private ResourceAttributeUtil resourceAttributeUtil;
+
+    @Inject
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
+
+    public void verifyNodesAreRemovable(Stack stack, Collection<InstanceMetaData> removableInstances, ApiClient client) {
         try {
             HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(client);
             ApiHostTemplateList hostTemplates = hostTemplatesResourceApi.readHostTemplates(stack.getName());
 
-            for (HostGroup hostGroup : hostGroups) {
-                Collection<HostMetadata> removableHostsInHostGroup = hostGroupWithInstances.get(hostGroup.getId());
-                if (removableHostsInHostGroup != null && !removableHostsInHostGroup.isEmpty()) {
+            for (HostGroup hostGroup : stack.getCluster().getHostGroups()) {
+                Set<InstanceMetaData> removableHostsInHostGroup = removableInstances.stream()
+                        .filter(instanceMetaData -> instanceMetaData.getInstanceGroup().getGroupName().equals(hostGroup.getName()))
+                        .collect(Collectors.toSet());
+                if (!removableHostsInHostGroup.isEmpty()) {
                     String hostGroupName = hostGroup.getName();
                     int replication = hostGroupNodesAreDataNodes(hostTemplates, hostGroupName) ? getReplicationFactor(client, stack.getName()) : 0;
-                    verifyNodeCount(replication, removableHostsInHostGroup.size(), hostGroup.getHostMetadata().size(), 0, stack);
+                    verifyNodeCount(replication, removableHostsInHostGroup.size(), hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet().size(),
+                            0, stack);
                 }
             }
         } catch (ApiException ex) {
@@ -105,21 +106,30 @@ public class ClouderaManagerDecomissioner {
         }
     }
 
-    public Set<String> collectDownscaleCandidates(ApiClient client, Stack stack, HostGroup hostGroup, Integer scalingAdjustment, int defaultRootVolumeSize,
-            Set<InstanceMetaData> instanceMetaDatasInStack) {
+    public Set<InstanceMetaData> collectDownscaleCandidates(ApiClient client, Stack stack, HostGroup hostGroup, Integer scalingAdjustment,
+            int defaultRootVolumeSize, Set<InstanceMetaData> instanceMetaDatasInStack) {
         LOGGER.debug("Collecting downscale candidates");
-        List<String> hostsInHostGroup = hostGroup.getHostMetadata().stream().map(HostMetadata::getHostName).collect(Collectors.toList());
+        Set<InstanceMetaData> instancesForHostGroup = instanceMetaDatasInStack.stream()
+                .filter(instanceMetaData -> instanceMetaData.getInstanceGroup().getGroupName().equals(hostGroup.getName()))
+                .collect(Collectors.toSet());
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
         HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
             HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(client);
             ApiHostTemplateList hostTemplates = hostTemplatesResourceApi.readHostTemplates(stack.getName());
             int replication = hostGroupNodesAreDataNodes(hostTemplates, hostGroup.getName()) ? getReplicationFactor(client, stack.getName()) : 0;
-            verifyNodeCount(replication, scalingAdjustment, hostGroup.getHostMetadata().size(), 0, stack);
+            verifyNodeCount(replication, scalingAdjustment, instancesForHostGroup.size(), 0, stack);
 
             ApiHostRefList hostRefList = clustersResourceApi.listHosts(stack.getName());
+
+            Set<InstanceMetaData> instancesToRemove = instancesForHostGroup.stream()
+                    .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() == null)
+                    .collect(Collectors.toSet());
+
             List<ApiHost> apiHosts = hostRefList.getItems().stream()
-                    .filter(host -> hostsInHostGroup.contains(host.getHostname()))
+                    .filter(host -> instancesForHostGroup.stream()
+                            .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                            .anyMatch(instanceMetaData -> instanceMetaData.getDiscoveryFQDN().equals(host.getHostname())))
                     .map(ApiHostRef::getHostId)
                     .parallel()
                     .map(readHostSummary(hostsResourceApi))
@@ -127,22 +137,28 @@ public class ClouderaManagerDecomissioner {
 
             Set<String> hostsToRemove = apiHosts.stream()
                     .sorted(hostHealthComparator)
-                    .limit(Math.abs(scalingAdjustment))
+                    .limit(Math.abs(scalingAdjustment - instancesToRemove.size()))
                     .map(ApiHost::getHostname)
                     .collect(Collectors.toSet());
 
-            LOGGER.debug("Downscale candidates: [{}]", hostsToRemove);
-            return hostsToRemove;
+            Set<InstanceMetaData> clouderaManagerNodesToRemove = instancesForHostGroup.stream()
+                    .filter(instanceMetaData -> hostsToRemove.contains(instanceMetaData.getDiscoveryFQDN()))
+                    .collect(Collectors.toSet());
+            instancesToRemove.addAll(clouderaManagerNodesToRemove);
+
+            LOGGER.debug("Downscale candidates: [{}]", instancesToRemove);
+            return instancesToRemove;
         } catch (ApiException e) {
             LOGGER.error("Failed to get host list for cluster: {}", stack.getName(), e);
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
 
-    public Map<String, HostMetadata> collectHostsToRemove(Stack stack, HostGroup hostGroup, Set<String> hostNames, ApiClient client) {
-        Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
-        Map<String, HostMetadata> hostsToRemove = hostsInHostGroup.stream().filter(hostMetadata -> hostNames.contains(hostMetadata.getHostName())).collect(
-                Collectors.toMap(HostMetadata::getHostName, hostMetadata -> hostMetadata));
+    public Map<String, InstanceMetaData> collectHostsToRemove(Stack stack, HostGroup hostGroup, Set<String> hostNames, ApiClient client) {
+        Set<InstanceMetaData> hostsInHostGroup = hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet();
+        Map<String, InstanceMetaData> hostsToRemove = hostsInHostGroup.stream()
+                .filter(hostMetadata -> hostNames.contains(hostMetadata.getDiscoveryFQDN()))
+                .collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, hostMetadata -> hostMetadata));
         if (hostsToRemove.size() != hostNames.size()) {
             LOGGER.debug("Not all hosts found in the given host group. [{}, {}]", hostGroup.getName(), hostNames);
         }
@@ -152,6 +168,7 @@ public class ClouderaManagerDecomissioner {
             List<String> runningHosts = hostRefList.getItems().stream()
                     .map(ApiHostRef::getHostname)
                     .collect(Collectors.toList());
+            // TODO: what if i remove a node from CM manually?
             Sets.newHashSet(hostsToRemove.keySet()).stream()
                     .filter(hostName -> !runningHosts.contains(hostName))
                     .forEach(hostsToRemove::remove);
@@ -163,12 +180,12 @@ public class ClouderaManagerDecomissioner {
         }
     }
 
-    public Set<HostMetadata> decommissionNodes(Stack stack, Map<String, HostMetadata> hostsToRemove, ApiClient client) {
+    public Set<String> decommissionNodes(Stack stack, Map<String, InstanceMetaData> hostsToRemove, ApiClient client) {
         ClustersResourceApi clustersResourceApi = new ClustersResourceApi(client);
         try {
             ApiHostRefList hostRefList = clustersResourceApi.listHosts(stack.getName());
             List<String> stillAvailableRemovableHosts = hostRefList.getItems().stream()
-                    .filter(apiHostRef -> hostsToRemove.keySet().contains(apiHostRef.getHostname()))
+                    .filter(apiHostRef -> hostsToRemove.containsKey(apiHostRef.getHostname()))
                     .parallel()
                     .map(ApiHostRef::getHostname)
                     .collect(Collectors.toList());
@@ -184,11 +201,10 @@ public class ClouderaManagerDecomissioner {
                 throw new CloudbreakServiceException("Timeout while Cloudera Manager decommissioned host.");
             }
 
-            Set<HostMetadata> decommissionedHosts = stillAvailableRemovableHosts.stream()
+            return stillAvailableRemovableHosts.stream()
                     .map(hostsToRemove::get)
+                    .map(InstanceMetaData::getDiscoveryFQDN)
                     .collect(Collectors.toSet());
-
-            return decommissionedHosts;
         } catch (ApiException e) {
             LOGGER.error("Failed to decommission hosts: {}", hostsToRemove.keySet(), e);
             throw new CloudbreakServiceException(e.getMessage(), e);
@@ -209,12 +225,8 @@ public class ClouderaManagerDecomissioner {
 
     private boolean hostGroupNodesAreDataNodes(ApiHostTemplateList hostTemplates, String hostGroupName) {
         Optional<ApiHostTemplate> hostTemplate = hostTemplates.getItems().stream().filter(ht -> ht.getName().equals(hostGroupName)).findFirst();
-        if (hostTemplate.isPresent()) {
-            return hostTemplate.get().getRoleConfigGroupRefs().stream()
-                    .filter(rcg -> rcg.getRoleConfigGroupName().contains("DATANODE")).findFirst().isPresent();
-        } else {
-            return false;
-        }
+        return hostTemplate.map(apiHostTemplate -> apiHostTemplate.getRoleConfigGroupRefs().stream()
+                .anyMatch(rcg -> rcg.getRoleConfigGroupName().contains("DATANODE"))).orElse(false);
     }
 
     private void verifyNodeCount(int replication, int scalingAdjustment, int hostSize, int reservedInstances, Stack stack) {
@@ -230,41 +242,6 @@ public class ClouderaManagerDecomissioner {
         }
     }
 
-    private Consumer<ApiHost> sortHostsByHealth(Map<String, HostMetadata> hostsToRemove, Map<String, HostMetadata> unhealthyHosts,
-            Map<String, HostMetadata> healthyHosts) {
-        return host -> {
-            String hostHealthSummary = host.getHealthSummary().getValue();
-            HostMetadata hostMetadata = hostsToRemove.get(host.getHostname());
-            if (ApiHealthSummary.GOOD.getValue().equals(hostHealthSummary)) {
-                healthyHosts.put(host.getHostname(), hostMetadata);
-            } else {
-                unhealthyHosts.put(host.getHostname(), hostMetadata);
-            }
-        };
-    }
-
-    private Consumer<? super HostMetadata> decommissionNode(Stack stack, ApiClient client, Map<String, HostMetadata> deletedHosts) {
-        return hostMetadata -> {
-            LOGGER.debug("Decommissioning node: [{}]", hostMetadata.getHostName());
-            ClouderaManagerResourceApi apiInstance = new ClouderaManagerResourceApi(client);
-            ApiHostNameList body = new ApiHostNameList().addItemsItem(hostMetadata.getHostName());
-            try {
-                ApiCommand apiCommand = apiInstance.hostsDecommissionCommand(body);
-                PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmHostDecommissioning(stack, client, apiCommand.getId());
-                if (isExited(pollingResult)) {
-                    throw new CancellationException("Cluster was terminated while waiting for host decommission");
-                } else if (isTimeout(pollingResult)) {
-                    throw new CloudbreakServiceException("Timeout while Cloudera Manager decommissioned host.");
-                }
-                deleteHost(stack, hostMetadata, client);
-                deletedHosts.put(hostMetadata.getHostName(), hostMetadata);
-            } catch (ApiException e) {
-                LOGGER.error("Failed to decommission host: {}", hostMetadata.getHostName(), e);
-                throw new CloudbreakServiceException(e.getMessage(), e);
-            }
-        };
-    }
-
     private Function<String, ApiHost> readHostSummary(HostsResourceApi hostsResourceApi) {
         return hostId -> {
             try {
@@ -276,31 +253,31 @@ public class ClouderaManagerDecomissioner {
         };
     }
 
-    public void deleteHost(Stack stack, HostMetadata data, ApiClient client) {
-        LOGGER.debug("Deleting host: [{}]", data.getHostName());
+    public void deleteHost(Stack stack, InstanceMetaData data, ApiClient client) {
+        LOGGER.debug("Deleting host: [{}]", data.getDiscoveryFQDN());
         deleteRolesFromHost(stack, data, client);
         deleteHostFromClouderaManager(stack, data, client);
         deleteUnusedCredentialsFromCluster(stack, data, client);
     }
 
-    private void deleteUnusedCredentialsFromCluster(Stack stack, HostMetadata data, ApiClient client) {
+    private void deleteUnusedCredentialsFromCluster(Stack stack, InstanceMetaData data, ApiClient client) {
         LOGGER.debug("Deleting unused credentials");
         ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
         try {
             ApiCommand command = clouderaManagerResourceApi.deleteCredentialsCommand("unused");
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, command.getId());
         } catch (ApiException e) {
-            LOGGER.error("Failed to delete credentials of host: {}", data.getHostName(), e);
+            LOGGER.error("Failed to delete credentials of host: {}", data.getDiscoveryFQDN(), e);
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
 
-    private void deleteHostFromClouderaManager(Stack stack, HostMetadata data, ApiClient client) {
+    private void deleteHostFromClouderaManager(Stack stack, InstanceMetaData data, ApiClient client) {
         ClustersResourceApi clustersResourceApi = new ClustersResourceApi(client);
         try {
             ApiHostRefList hostRefList = clustersResourceApi.listHosts(stack.getName());
             Optional<ApiHostRef> hostRefOptional = hostRefList.getItems().stream()
-                    .filter(host -> data.getHostName().equals(host.getHostname()))
+                    .filter(host -> data.getDiscoveryFQDN().equals(host.getHostname()))
                     .findFirst();
             if (hostRefOptional.isPresent()) {
                 ApiHostRef hostRef = hostRefOptional.get();
@@ -312,17 +289,17 @@ public class ClouderaManagerDecomissioner {
                 LOGGER.debug("Host already deleted.");
             }
         } catch (ApiException e) {
-            LOGGER.error("Failed to delete host: {}", data.getHostName(), e);
+            LOGGER.error("Failed to delete host: {}", data.getDiscoveryFQDN(), e);
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
 
-    private void deleteRolesFromHost(Stack stack, HostMetadata data, ApiClient client) {
-        LOGGER.debug("Deleting roles from host: [{}]", data.getHostName());
+    private void deleteRolesFromHost(Stack stack, InstanceMetaData data, ApiClient client) {
+        LOGGER.debug("Deleting roles from host: [{}]", data.getDiscoveryFQDN());
         ServicesResourceApi servicesResourceApi = new ServicesResourceApi(client);
         RolesResourceApi rolesResourceApi = new RolesResourceApi(client);
 
-        String filter = "hostname==" + data.getHostName();
+        String filter = "hostname==" + data.getDiscoveryFQDN();
 
         try {
             ApiServiceList serviceList = servicesResourceApi.readServices(stack.getName(), SUMMARY_REQUEST_VIEW);

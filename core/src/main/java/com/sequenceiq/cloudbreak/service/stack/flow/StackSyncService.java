@@ -26,16 +26,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -59,9 +55,6 @@ public class StackSyncService {
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
-    private HostMetadataService hostMetadataService;
 
     @Inject
     private ServiceProviderMetadataAdapter metadata;
@@ -103,6 +96,7 @@ public class StackSyncService {
 
     public void sync(Long stackId, boolean stackStatusUpdateEnabled) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        // TODO: is it a good condition?
         if (stack.isStackInDeletionPhase() || stack.isModificationInProgress()) {
             LOGGER.debug("Stack could not be synchronized in {} state!", stack.getStatus());
         } else {
@@ -167,9 +161,9 @@ public class StackSyncService {
                     instance.getInstanceId());
             instance.setInstanceStatus(InstanceStatus.FAILED);
             instanceMetaDataService.save(instance);
-        } else if (!instance.isRunning() && !instance.isDecommissioned() && !instance.isCreated() && !instance.isFailed()) {
-            LOGGER.debug("Instance '{}' is reported as running on the cloud provider, updating metadata.", instance.getInstanceId());
-            updateMetaDataToRunning(stack.getId(), stack.getCluster(), instance);
+        } else if (!instance.isRunning()) {
+            LOGGER.info("Instance '{}' is reported as running on the cloud provider, updating metadata.", instance.getInstanceId());
+            updateMetaDataToRunning(instance);
         }
     }
 
@@ -242,26 +236,15 @@ public class StackSyncService {
         String name;
         name = instanceMetaData.getDiscoveryFQDN() == null ? instanceMetaData.getInstanceId() : String.format("%s (%s)", instanceMetaData.getInstanceId(),
                 instanceMetaData.getDiscoveryFQDN());
-        hostMetadataService.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN())
-                .ifPresent(hm -> {
-                    hm.setHostMetadataState(HostMetadataState.UNHEALTHY);
-                    hm.setStatusReason("Host is reported as deleted on the cloud provider.");
-                    hostMetadataService.save(hm);
-                });
+
         eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                 cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_DELETED_CBMETADATA.code(),
                         Collections.singletonList(name)));
     }
 
-    private void updateMetaDataToRunning(Long stackId, Cluster cluster, InstanceMetaData instanceMetaData) {
-        Optional<HostMetadata> hostMetadata = hostMetadataService.findHostInClusterByName(cluster.getId(), instanceMetaData.getDiscoveryFQDN());
-        if (hostMetadata.isPresent()) {
-            LOGGER.debug("Instance '{}' was found in the cluster metadata, setting it's state to REGISTERED.", instanceMetaData.getInstanceId());
-            instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
-        } else {
-            LOGGER.debug("Instance '{}' was not found in the cluster metadata, setting it's state to UNREGISTERED.", instanceMetaData.getInstanceId());
-            instanceMetaData.setInstanceStatus(InstanceStatus.UNREGISTERED);
-        }
+    private void updateMetaDataToRunning(InstanceMetaData instanceMetaData) {
+        LOGGER.info("Instance '{}' state to RUNNING.", instanceMetaData.getInstanceId());
+        instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
         instanceMetaDataService.save(instanceMetaData);
     }
 
