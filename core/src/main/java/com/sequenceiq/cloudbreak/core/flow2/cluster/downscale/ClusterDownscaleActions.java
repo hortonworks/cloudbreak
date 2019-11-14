@@ -100,7 +100,7 @@ public class ClusterDownscaleActions {
         return new AbstractClusterAction<>(RemoveHostsSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, RemoveHostsSuccess payload, Map<Object, Object> variables) {
-                clusterDownscaleService.updateMetadata(context.getStackId(), payload.getHostNames(), payload.getHostGroupName());
+                clusterDownscaleService.finalizeClusterScaleDown(context.getStackId());
                 sendEvent(context);
             }
 
@@ -117,7 +117,7 @@ public class ClusterDownscaleActions {
             @Override
             protected void doExecute(ClusterViewContext context, DecommissionResult payload, Map<Object, Object> variables) {
                 if (payload.getErrorDetails() != null) {
-                    clusterDownscaleService.updateMetadataStatus(payload);
+                    clusterDownscaleService.updateMetadataStatusToFailed(payload);
                     sendEvent(context, FAILURE_EVENT.event(), new StackFailureEvent(payload.getResourceId(), payload.getErrorDetails()));
                 }
             }

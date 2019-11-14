@@ -49,7 +49,6 @@ import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvide
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -116,12 +115,12 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void upscaleCluster(HostGroup hostGroup, Collection<HostMetadata> hostMetadata, List<InstanceMetaData> instanceMetaDatas)
+    public List<String> upscaleCluster(HostGroup hostGroup, Collection<InstanceMetaData> instanceMetaDatas)
             throws CloudbreakException {
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
         try {
             String clusterName = stack.getName();
-            List<String> upscaleHostNames = getUpscaleHosts(clustersResourceApi, clusterName, hostMetadata);
+            List<String> upscaleHostNames = getUpscaleHosts(clustersResourceApi, clusterName, instanceMetaDatas);
             if (!upscaleHostNames.isEmpty()) {
                 List<ApiHost> hosts = clouderaManagerApiFactory.getHostsResourceApi(apiClient).readHosts(SUMMARY).getItems();
                 ApiHostRefList body = createUpscaledHostRefList(upscaleHostNames, hosts);
@@ -136,17 +135,19 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 activateParcel(clustersResourceApi);
                 clouderaManagerRoleRefreshService.refreshClusterRoles(apiClient, stack);
             }
+            return upscaleHostNames;
         } catch (ApiException e) {
             LOGGER.warn("Failed to upscale: {}", e.getResponseBody(), e);
             throw new CloudbreakException("Failed to upscale", e);
         }
     }
 
-    private List<String> getUpscaleHosts(ClustersResourceApi clustersResourceApi, String clusterName, Collection<HostMetadata> hostMetadata)
+    private List<String> getUpscaleHosts(ClustersResourceApi clustersResourceApi, String clusterName, Collection<InstanceMetaData> instanceMetaDatas)
             throws ApiException {
         List<String> clusterHosts = getHostNamesFromCM(clustersResourceApi, clusterName);
-        return hostMetadata.stream()
-                .map(HostMetadata::getHostName)
+        return instanceMetaDatas.stream()
+                .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                .map(InstanceMetaData::getDiscoveryFQDN)
                 .filter(hostname -> !clusterHosts.contains(hostname))
                 .collect(Collectors.toList());
     }
@@ -276,12 +277,13 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         LOGGER.debug("Creating ApiHostRefList from upscaled hosts.");
         ApiHostRefList body = new ApiHostRefList();
         upscaleHostNames.forEach(hostname -> {
-            String hostId = hosts.stream()
+            hosts.stream()
                     .filter(host -> hostname.equalsIgnoreCase(host.getHostname()))
-                    .findFirst().get()
-                    .getHostId();
-            body.addItemsItem(
-                    new ApiHostRef().hostname(hostname).hostId(hostId));
+                    .findFirst().ifPresent(apiHost -> {
+                        String hostId = apiHost.getHostId();
+                        body.addItemsItem(
+                                new ApiHostRef().hostname(hostname).hostId(hostId));
+                    });
         });
         LOGGER.debug("Created ApiHostRefList from upscaled hosts. Host count: [{}]", body.getItems().size());
         return body;
@@ -324,7 +326,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public int startCluster(Set<HostMetadata> hostsInCluster) throws CloudbreakException {
+    public int startCluster(Set<InstanceMetaData> hostsInCluster) throws CloudbreakException {
         try {
             startClouderaManager(stack, apiClient);
             startAgents(stack, apiClient);

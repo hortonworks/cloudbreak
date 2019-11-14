@@ -285,27 +285,29 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         Map<String, Object> resourcesToRemove = new HashMap<>();
         resourcesToRemove.put(ATTACHED_DISK_STORAGE_NAME, attachedDiskStorageName);
         try {
-            VirtualMachine virtualMachine = client.getVirtualMachine(resourceGroupName, instanceId);
-            if (virtualMachine != null) {
-                List<String> networkInterfaceIds = virtualMachine.networkInterfaceIds();
-                List<String> networkInterfacesNames = new ArrayList<>();
-                List<String> publicIpAddressNames = new ArrayList<>();
-                for (String interfaceId : networkInterfaceIds) {
-                    NetworkInterface networkInterface = client.getNetworkInterfaceById(interfaceId);
-                    String interfaceName = networkInterface.name();
-                    networkInterfacesNames.add(interfaceName);
-                    Collection<String> ipNames = new HashSet<>();
-                    for (NicIPConfiguration ipConfiguration : networkInterface.ipConfigurations().values()) {
-                        if (ipConfiguration.publicIPAddressId() != null && ipConfiguration.getPublicIPAddress().name() != null) {
-                            ipNames.add(ipConfiguration.getPublicIPAddress().name());
+            if (instanceId != null) {
+                VirtualMachine virtualMachine = client.getVirtualMachine(resourceGroupName, instanceId);
+                if (virtualMachine != null) {
+                    List<String> networkInterfaceIds = virtualMachine.networkInterfaceIds();
+                    List<String> networkInterfacesNames = new ArrayList<>();
+                    List<String> publicIpAddressNames = new ArrayList<>();
+                    for (String interfaceId : networkInterfaceIds) {
+                        NetworkInterface networkInterface = client.getNetworkInterfaceById(interfaceId);
+                        String interfaceName = networkInterface.name();
+                        networkInterfacesNames.add(interfaceName);
+                        Collection<String> ipNames = new HashSet<>();
+                        for (NicIPConfiguration ipConfiguration : networkInterface.ipConfigurations().values()) {
+                            if (ipConfiguration.publicIPAddressId() != null && ipConfiguration.getPublicIPAddress().name() != null) {
+                                ipNames.add(ipConfiguration.getPublicIPAddress().name());
+                            }
                         }
+                        publicIpAddressNames.addAll(ipNames);
                     }
-                    publicIpAddressNames.addAll(ipNames);
-                }
-                resourcesToRemove.put(NETWORK_INTERFACES_NAMES, networkInterfacesNames);
-                resourcesToRemove.put(PUBLIC_ADDRESS_NAME, publicIpAddressNames);
+                    resourcesToRemove.put(NETWORK_INTERFACES_NAMES, networkInterfacesNames);
+                    resourcesToRemove.put(PUBLIC_ADDRESS_NAME, publicIpAddressNames);
 
-                collectRemovableDisks(resourcesToRemove, virtualMachine);
+                    collectRemovableDisks(resourcesToRemove, virtualMachine);
+                }
             }
         } catch (CloudException e) {
             if (e.response().code() != AzureConstants.NOT_FOUND) {
@@ -389,6 +391,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
     private List<String> getResourcesByResourceType(Map<String, Map<String, Object>> resourcesToRemove, String resourceType) {
         return resourcesToRemove.entrySet().stream()
+                .filter(instanceResources -> instanceResources.getValue().get(resourceType) != null)
                 .flatMap(instanceResources -> ((Collection<String>) instanceResources.getValue().get(resourceType)).stream())
                 .collect(Collectors.toList());
     }

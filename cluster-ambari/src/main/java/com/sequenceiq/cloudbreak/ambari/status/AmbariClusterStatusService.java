@@ -18,8 +18,7 @@ import com.sequenceiq.cloudbreak.ambari.AmbariClusterStatusFactory;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataExtendedState;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Service
@@ -54,21 +53,21 @@ public class AmbariClusterStatusService implements ClusterStatusService {
     }
 
     @Override
-    public Map<String, HostMetadataState> getHostStatuses() {
+    public Map<String, ClusterManagerState.ClusterManagerStatus> getHostStatuses() {
         Map<String, String> hostStatuses = ambariClient.getHostStatuses();
-        Map<String, HostMetadataState> hostMetadataStateMap = new HashMap<>();
+        Map<String, ClusterManagerState.ClusterManagerStatus> hostMetadataStateMap = new HashMap<>();
         for (Entry<String, String> entry : hostStatuses.entrySet()) {
-            HostMetadataState state = HostMetadataState.HEALTHY.name().equals(entry.getValue())
-                    ? HostMetadataState.HEALTHY : HostMetadataState.UNHEALTHY;
+            ClusterManagerState.ClusterManagerStatus state = ClusterManagerState.ClusterManagerStatus.HEALTHY.name().equals(entry.getValue())
+                    ? ClusterManagerState.ClusterManagerStatus.HEALTHY : ClusterManagerState.ClusterManagerStatus.UNHEALTHY;
             hostMetadataStateMap.put(entry.getKey(), state);
         }
         return hostMetadataStateMap;
     }
 
     @Override
-    public Map<String, HostMetadataExtendedState> getExtendedHostStatuses() {
+    public Map<String, ClusterManagerState> getExtendedHostStatuses() {
         return getHostStatuses().entrySet().stream()
-                .map(entry -> Pair.of(entry.getKey(), new HostMetadataExtendedState(entry.getValue(), null)))
+                .map(entry -> Pair.of(entry.getKey(), new ClusterManagerState(entry.getValue(), null)))
                 .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
     }
 

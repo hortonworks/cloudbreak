@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -23,6 +24,9 @@ public class InstanceGroupView implements ProvisionEntity {
     @ManyToOne
     private StackApiView stack;
 
+    @Column
+    private String groupName;
+
     @OneToMany(mappedBy = "instanceGroup", fetch = FetchType.EAGER)
     private Set<InstanceMetaDataView> instanceMetaData = new HashSet<>();
 
@@ -34,6 +38,10 @@ public class InstanceGroupView implements ProvisionEntity {
         return instanceMetaData.stream()
                 .filter(metaData -> !metaData.isTerminated())
                 .collect(Collectors.toSet());
+    }
+
+    public String getGroupName() {
+        return groupName;
     }
 
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.start;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static java.lang.String.format;
 
 import java.util.List;
@@ -64,7 +65,7 @@ public class StackStartStopService {
             LOGGER.debug("Size of the collected metadata set does not equal the node count of the stack. [metadata size={}] [nodecount={}]",
                     coreInstanceMetaData.size(), stack.getFullNodeCount());
         }
-        metadatSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, null);
+        metadatSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, SERVICES_RUNNING);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTED, "Cluster infrastructure started successfully.");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STARTED, AVAILABLE.name());
     }

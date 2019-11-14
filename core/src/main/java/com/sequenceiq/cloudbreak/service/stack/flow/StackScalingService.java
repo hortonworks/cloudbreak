@@ -2,11 +2,10 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -14,19 +13,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Service
@@ -34,16 +26,7 @@ public class StackScalingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackScalingService.class);
 
     @Inject
-    private CloudbreakEventService eventService;
-
-    @Inject
     private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
-    private HostMetadataService hostMetadataService;
-
-    @Inject
-    private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Inject
     private TransactionService transactionService;
@@ -51,53 +34,7 @@ public class StackScalingService {
     @Inject
     private Clock clock;
 
-    @Inject
-    private ClusterApiConnectors clusterApiConnectors;
-
-    private enum Msg {
-        STACK_SCALING_HOST_DELETED("stack.scaling.host.deleted"),
-        STACK_SCALING_HOST_DELETE_FAILED("stack.scaling.host.delete.failed"),
-        STACK_SCALING_HOST_NOT_FOUND("stack.scaling.host.not.found");
-
-        private final String code;
-
-        Msg(String msgCode) {
-            code = msgCode;
-        }
-
-        public String code() {
-            return code;
-        }
-    }
-
-    public void removeHostmetadataIfExists(Stack stack, InstanceMetaData instanceMetaData, HostMetadata hostMetadata) {
-        if (hostMetadata != null) {
-            try {
-                clusterApiConnectors.getConnector(stack).clusterDecomissionService().deleteHostFromCluster(hostMetadata);
-                // Deleting by entity will not work because HostMetadata has a reference pointed
-                // from HostGroup and per JPA, we would need to clear that up.
-                // Reference: http://stackoverflow.com/a/22315188
-                hostMetadataService.delete(hostMetadata);
-                eventService.fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
-                        cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETED.code(),
-                                Collections.singletonList(instanceMetaData.getInstanceId())));
-            } catch (Exception e) {
-                LOGGER.info("Host cannot be deleted from cluster: ", e);
-                eventService.fireCloudbreakEvent(stack.getId(), Status.DELETE_FAILED.name(),
-                        cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETE_FAILED.code(),
-                                Collections.singletonList(instanceMetaData.getInstanceId())));
-
-            }
-        } else {
-            LOGGER.debug("Host cannot be deleted because it does not exist: {}", instanceMetaData.getInstanceId());
-            eventService.fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
-                    cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_NOT_FOUND.code(),
-                            Collections.singletonList(instanceMetaData.getInstanceId())));
-
-        }
-    }
-
-    public int updateRemovedResourcesState(Stack stack, Collection<String> instanceIds, InstanceGroup instanceGroup) throws TransactionExecutionException {
+    public int updateRemovedResourcesState(Collection<String> instanceIds, InstanceGroup instanceGroup) throws TransactionService.TransactionExecutionException {
         return transactionService.required(() -> {
             int nodesRemoved = 0;
             for (InstanceMetaData instanceMetaData : instanceGroup.getNotTerminatedInstanceMetaDataSet()) {
@@ -115,21 +52,14 @@ public class StackScalingService {
     }
 
     public Map<String, String> getUnusedInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
-        Map<String, String> instanceIds = new HashMap<>();
-        int i = 0;
-        List<InstanceMetaData> instanceMetaDatas = new ArrayList<>(stack.getInstanceGroupByInstanceGroupName(instanceGroupName)
-                .getNotDeletedInstanceMetaDataSet());
-        instanceMetaDatas.sort(Comparator.comparing(InstanceMetaData::getStartDate));
-        for (InstanceMetaData metaData : instanceMetaDatas) {
-            if (!metaData.getAmbariServer()
-                    && (metaData.isDecommissioned() || metaData.isUnRegistered() || metaData.isCreated() || metaData.isFailed())) {
-                instanceIds.put(metaData.getInstanceId(), metaData.getDiscoveryFQDN());
-                if (++i >= scalingAdjustment * -1) {
-                    break;
-                }
-            }
-        }
-        return instanceIds;
+        InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
+        List<InstanceMetaData> unattachedInstanceMetaDatas = new ArrayList<>(instanceGroup.getUnattachedInstanceMetaDataSet());
+
+        return unattachedInstanceMetaDatas.stream()
+                .filter(instanceMetaData -> instanceMetaData.getInstanceId() != null && instanceMetaData.getDiscoveryFQDN() != null)
+                .sorted(Comparator.comparing(InstanceMetaData::getStartDate))
+                .limit(scalingAdjustment)
+                .collect(Collectors.toMap(InstanceMetaData::getInstanceId, InstanceMetaData::getDiscoveryFQDN));
     }
 
 }

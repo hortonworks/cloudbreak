@@ -42,10 +42,9 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
-import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataExtendedState;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
@@ -82,15 +81,15 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
             ApiHealthSummary.HISTORY_NOT_AVAILABLE
     );
 
+    private final Stack stack;
+
+    private final HttpClientConfig clientConfig;
+
     @Inject
     private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
 
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
-
-    private final Stack stack;
-
-    private final HttpClientConfig clientConfig;
 
     private ApiClient client;
 
@@ -99,120 +98,11 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         this.clientConfig = clientConfig;
     }
 
-    @PostConstruct
-    public void initApiClient() throws ClusterClientInitException {
-        Cluster cluster = stack.getCluster();
-        String cloudbreakAmbariUser = cluster.getCloudbreakAmbariUser();
-        String cloudbreakAmbariPassword = cluster.getCloudbreakAmbariPassword();
-        try {
-            client = clouderaManagerApiClientProvider
-                    .getClient(stack.getGatewayPort(), cloudbreakAmbariUser, cloudbreakAmbariPassword, clientConfig);
-        } catch (ClouderaManagerClientInitException e) {
-            throw new ClusterClientInitException(e);
-        }
-    }
-
-    @Override
-    public ClusterStatusResult getStatus(boolean blueprintPresent) {
-        if (!isCMRunning()) {
-            return ClusterStatusResult.of(ClusterStatus.AMBARISERVER_NOT_RUNNING);
-        } else if (blueprintPresent) {
-            return determineClusterStatus(stack);
-        } else {
-            return ClusterStatusResult.of(ClusterStatus.AMBARISERVER_RUNNING);
-        }
-    }
-
-    @Override
-    public Map<String, HostMetadataExtendedState> getExtendedHostStatuses() {
-        Map<String, HostMetadataExtendedState> result = new HashMap<>();
-        getHostHealth().forEach((hostname, health) ->
-                result.put(hostname, new HostMetadataExtendedState(healthSummaryToState(health.getSummary()),
-                        getHostHealthMessage(health.getSummary(), health.getExplanation()))));
-        return result;
-    }
-
-    private String getHostHealthMessage(ApiHealthSummary healthSummary, String explanation) {
-        if (healthSummaryToState(healthSummary) == HostMetadataState.UNHEALTHY) {
-            return String.format("%s: %s. Reason: %s", HOST_SCM_HEALTH, healthSummary.name(), ofNullable(explanation).orElse(""));
-        }
-        return null;
-    }
-
-    @Override
-    public Map<String, HostMetadataState> getHostStatuses() {
-        return convertHealthSummary(getHostHealthSummary(), ClouderaManagerClusterStatusService::healthSummaryToState);
-    }
-
-    @Override
-    public Map<String, String> getHostStatusesRaw() {
-        return convertHealthSummary(getHostHealthSummary(), ApiHealthSummary::getValue);
-    }
-
-    private ClusterStatusResult determineClusterStatus(Stack stack) {
-        try {
-            Collection<ApiService> services = readServices(stack);
-            Map<ClusterStatus, List<String>> servicesByStatus = groupServicesByState(services);
-            Set<ClusterStatus> statuses = servicesByStatus.keySet();
-            if (hasPendingOperation(statuses)) {
-                return ClusterStatusResult.of(ClusterStatus.PENDING);
-            }
-            // service INSTALLED => all its roles are INSTALLED
-            if (isUniformStatus(statuses, ClusterStatus.INSTALLED)) {
-                return ClusterStatusResult.of(ClusterStatus.INSTALLED);
-            }
-            // service STARTED => at least one of its roles are STARTED, have to check role statuses
-            if (isUniformStatus(statuses, ClusterStatus.STARTED)) {
-                return determineClusterStatusFromRoles(stack, servicesByStatus.get(ClusterStatus.STARTED));
-            }
-            if (areStatesAmbiguous(statuses)) {
-                return new ClusterStatusResult(ClusterStatus.AMBIGUOUS, constructStatusMessage(servicesByStatus));
-            }
-
-            LOGGER.info("Failed to determine cluster status: {}", statuses);
-            return ClusterStatusResult.of(ClusterStatus.UNKNOWN);
-        } catch (RuntimeException | ApiException e) {
-            LOGGER.info("Failed to determine cluster status: {}", e.getMessage(), e);
-            return ClusterStatusResult.of(ClusterStatus.UNKNOWN);
-        }
-    }
-
-    private ClusterStatusResult determineClusterStatusFromRoles(Stack stack, Collection<String> apiServices) {
-        Map<ClusterStatus, List<String>> rolesByStatus = groupRolesByState(stack, apiServices);
-        Set<ClusterStatus> statuses = rolesByStatus.keySet();
-        if (hasPendingOperation(statuses)) {
-            return ClusterStatusResult.of(ClusterStatus.PENDING);
-        }
-        if (areStatesAmbiguous(statuses)) {
-            return new ClusterStatusResult(ClusterStatus.AMBIGUOUS, constructStatusMessage(rolesByStatus));
-        }
-        if (statuses.size() == 1) {
-            return ClusterStatusResult.of(statuses.iterator().next());
-        }
-
-        LOGGER.info("Failed to determine cluster status: {}", statuses);
-        return ClusterStatusResult.of(ClusterStatus.UNKNOWN);
-    }
-
-    private Collection<ApiService> readServices(Stack stack) throws ApiException {
-        ServicesResourceApi api = clouderaManagerApiFactory.getServicesResourceApi(client);
-        return api.readServices(stack.getCluster().getName(), FULL_VIEW).getItems();
-    }
-
     private static Map<ClusterStatus, List<String>> groupServicesByState(Collection<ApiService> services) {
         return services.stream()
                 .filter(service -> !IGNORED_SERVICE_STATES.contains(service.getServiceState()))
                 .collect(groupingBy(service -> toClusterStatus(service.getServiceState()),
                         mapping(ApiService::getName, toList())));
-    }
-
-    private Map<ClusterStatus, List<String>> groupRolesByState(Stack stack, Collection<String> services) {
-        RolesResourceApi api = clouderaManagerApiFactory.getRolesResourceApi(client);
-        return services.stream()
-                .flatMap(service -> readRoles(api, stack, service))
-                .filter(role -> !IGNORED_ROLE_STATES.contains(role.getRoleState()))
-                .collect(groupingBy(role -> toClusterStatus(role.getRoleState()),
-                        mapping(ApiRole::getName, toList())));
     }
 
     // need to translate checked exception for usage in stream
@@ -223,54 +113,6 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
             String message = String.format("Failed to read roles of service %s %s", stack.getCluster().getName(), service);
             LOGGER.warn(message, e);
             throw new RuntimeException(message, e);
-        }
-    }
-
-    private boolean isCMRunning() {
-        try {
-            clouderaManagerApiFactory.getClouderaManagerResourceApi(client).getVersion();
-            return true;
-        } catch (ApiException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Collects summary of HOST_SCM_HEALTH check for each host.
-     * Currently this is the best indicator of host availability.
-     */
-    private Map<String, ApiHealthSummary> getHostHealthSummary() {
-        HostsResourceApi api = clouderaManagerApiFactory.getHostsResourceApi(client);
-        try {
-            return api.readHosts(FULL_VIEW).getItems().stream()
-                    .filter(host -> host.getHealthChecks() != null)
-                    .flatMap(host -> host.getHealthChecks().stream()
-                            .filter(check -> HOST_SCM_HEALTH.equals(check.getName()))
-                            .map(ApiHealthCheck::getSummary)
-                            .filter(healthSummary -> !IGNORED_HEALTH_SUMMARIES.contains(healthSummary))
-                            .map(healthSummary -> Pair.of(host.getHostname(), healthSummary))
-                    )
-                    .collect(toMap(Pair::getLeft, Pair::getRight));
-        } catch (ApiException e) {
-            LOGGER.info("Failed to get hosts from CM", e);
-            throw new RuntimeException("Failed to get hosts from CM due to: " + e.getMessage(), e);
-        }
-    }
-
-    private Map<String, ApiHealthCheck> getHostHealth() {
-        HostsResourceApi api = clouderaManagerApiFactory.getHostsResourceApi(client);
-        try {
-            return api.readHosts(FULL_WITH_EXPLANATION_VIEW).getItems().stream()
-                    .filter(host -> host.getHealthChecks() != null)
-                    .flatMap(host -> host.getHealthChecks().stream()
-                            .filter(check -> HOST_SCM_HEALTH.equals(check.getName()))
-                            .filter(check -> !IGNORED_HEALTH_SUMMARIES.contains(check.getSummary()))
-                            .map(check -> Pair.of(host.getHostname(), check))
-                    )
-                    .collect(toMap(Pair::getLeft, Pair::getRight));
-        } catch (ApiException e) {
-            LOGGER.info("Failed to get hosts from CM", e);
-            throw new RuntimeException("Failed to get hosts from CM due to: " + e.getMessage(), e);
         }
     }
 
@@ -329,14 +171,14 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         }
     }
 
-    private static HostMetadataState healthSummaryToState(ApiHealthSummary healthSummary) {
+    private static ClusterManagerState.ClusterManagerStatus healthSummaryToState(ApiHealthSummary healthSummary) {
         switch (healthSummary) {
             case GOOD:
             case CONCERNING:
-                return HostMetadataState.HEALTHY;
+                return ClusterManagerState.ClusterManagerStatus.HEALTHY;
             default:
-                LOGGER.debug("Translated health summary {} to state {}", healthSummary, HostMetadataState.UNHEALTHY);
-                return HostMetadataState.UNHEALTHY;
+                LOGGER.debug("Translated health summary {} to state {}", healthSummary, ClusterManagerState.ClusterManagerStatus.UNHEALTHY);
+                return ClusterManagerState.ClusterManagerStatus.UNHEALTHY;
         }
     }
 
@@ -344,5 +186,162 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         Map<String, T> result = new HashMap<>();
         hostHealth.forEach((hostname, healthSummary) -> result.put(hostname, converter.apply(healthSummary)));
         return result;
+    }
+
+    @PostConstruct
+    public void initApiClient() throws ClusterClientInitException {
+        Cluster cluster = stack.getCluster();
+        String cloudbreakAmbariUser = cluster.getCloudbreakAmbariUser();
+        String cloudbreakAmbariPassword = cluster.getCloudbreakAmbariPassword();
+        try {
+            client = clouderaManagerApiClientProvider
+                    .getClient(stack.getGatewayPort(), cloudbreakAmbariUser, cloudbreakAmbariPassword, clientConfig);
+        } catch (ClouderaManagerClientInitException e) {
+            throw new ClusterClientInitException(e);
+        }
+    }
+
+    @Override
+    public ClusterStatusResult getStatus(boolean blueprintPresent) {
+        if (!isCMRunning()) {
+            return ClusterStatusResult.of(ClusterStatus.AMBARISERVER_NOT_RUNNING);
+        } else if (blueprintPresent) {
+            return determineClusterStatus(stack);
+        } else {
+            return ClusterStatusResult.of(ClusterStatus.AMBARISERVER_RUNNING);
+        }
+    }
+
+    @Override
+    public Map<String, ClusterManagerState> getExtendedHostStatuses() {
+        Map<String, ClusterManagerState> result = new HashMap<>();
+        getHostHealth().forEach((hostname, health) ->
+                result.put(hostname, new ClusterManagerState(healthSummaryToState(health.getSummary()),
+                        getHostHealthMessage(health.getSummary(), health.getExplanation()))));
+        return result;
+    }
+
+    private String getHostHealthMessage(ApiHealthSummary healthSummary, String explanation) {
+        if (healthSummaryToState(healthSummary) == ClusterManagerState.ClusterManagerStatus.UNHEALTHY) {
+            return String.format("%s: %s. Reason: %s", HOST_SCM_HEALTH, healthSummary.name(), ofNullable(explanation).orElse(""));
+        }
+        return null;
+    }
+
+    @Override
+    public Map<String, ClusterManagerState.ClusterManagerStatus> getHostStatuses() {
+        return convertHealthSummary(getHostHealthSummary(), ClouderaManagerClusterStatusService::healthSummaryToState);
+    }
+
+    @Override
+    public Map<String, String> getHostStatusesRaw() {
+        return convertHealthSummary(getHostHealthSummary(), ApiHealthSummary::getValue);
+    }
+
+    private ClusterStatusResult determineClusterStatus(Stack stack) {
+        try {
+            Collection<ApiService> services = readServices(stack);
+            Map<ClusterStatus, List<String>> servicesByStatus = groupServicesByState(services);
+            Set<ClusterStatus> statuses = servicesByStatus.keySet();
+            if (hasPendingOperation(statuses)) {
+                return ClusterStatusResult.of(ClusterStatus.PENDING);
+            }
+            // service INSTALLED => all its roles are INSTALLED
+            if (isUniformStatus(statuses, ClusterStatus.INSTALLED)) {
+                return ClusterStatusResult.of(ClusterStatus.INSTALLED);
+            }
+            // service STARTED => at least one of its roles are STARTED, have to check role statuses
+            if (isUniformStatus(statuses, ClusterStatus.STARTED)) {
+                return determineClusterStatusFromRoles(stack, servicesByStatus.get(ClusterStatus.STARTED));
+            }
+            if (areStatesAmbiguous(statuses)) {
+                return new ClusterStatusResult(ClusterStatus.AMBIGUOUS, constructStatusMessage(servicesByStatus));
+            }
+
+            LOGGER.info("Failed to determine cluster status: {}", statuses);
+            return ClusterStatusResult.of(ClusterStatus.UNKNOWN);
+        } catch (RuntimeException | ApiException e) {
+            LOGGER.info("Failed to determine cluster status: {}", e.getMessage(), e);
+            return ClusterStatusResult.of(ClusterStatus.UNKNOWN);
+        }
+    }
+
+    private ClusterStatusResult determineClusterStatusFromRoles(Stack stack, Collection<String> apiServices) {
+        Map<ClusterStatus, List<String>> rolesByStatus = groupRolesByState(stack, apiServices);
+        Set<ClusterStatus> statuses = rolesByStatus.keySet();
+        if (hasPendingOperation(statuses)) {
+            return ClusterStatusResult.of(ClusterStatus.PENDING);
+        }
+        if (areStatesAmbiguous(statuses)) {
+            return new ClusterStatusResult(ClusterStatus.AMBIGUOUS, constructStatusMessage(rolesByStatus));
+        }
+        if (statuses.size() == 1) {
+            return ClusterStatusResult.of(statuses.iterator().next());
+        }
+
+        LOGGER.info("Failed to determine cluster status: {}", statuses);
+        return ClusterStatusResult.of(ClusterStatus.UNKNOWN);
+    }
+
+    private Collection<ApiService> readServices(Stack stack) throws ApiException {
+        ServicesResourceApi api = clouderaManagerApiFactory.getServicesResourceApi(client);
+        return api.readServices(stack.getCluster().getName(), FULL_VIEW).getItems();
+    }
+
+    private Map<ClusterStatus, List<String>> groupRolesByState(Stack stack, Collection<String> services) {
+        RolesResourceApi api = clouderaManagerApiFactory.getRolesResourceApi(client);
+        return services.stream()
+                .flatMap(service -> readRoles(api, stack, service))
+                .filter(role -> !IGNORED_ROLE_STATES.contains(role.getRoleState()))
+                .collect(groupingBy(role -> toClusterStatus(role.getRoleState()),
+                        mapping(ApiRole::getName, toList())));
+    }
+
+    private boolean isCMRunning() {
+        try {
+            clouderaManagerApiFactory.getClouderaManagerResourceApi(client).getVersion();
+            return true;
+        } catch (ApiException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Collects summary of HOST_SCM_HEALTH check for each host.
+     * Currently this is the best indicator of host availability.
+     */
+    private Map<String, ApiHealthSummary> getHostHealthSummary() {
+        HostsResourceApi api = clouderaManagerApiFactory.getHostsResourceApi(client);
+        try {
+            return api.readHosts(FULL_VIEW).getItems().stream()
+                    .filter(host -> host.getHealthChecks() != null)
+                    .flatMap(host -> host.getHealthChecks().stream()
+                            .filter(check -> HOST_SCM_HEALTH.equals(check.getName()))
+                            .map(ApiHealthCheck::getSummary)
+                            .filter(healthSummary -> !IGNORED_HEALTH_SUMMARIES.contains(healthSummary))
+                            .map(healthSummary -> Pair.of(host.getHostname(), healthSummary))
+                    )
+                    .collect(toMap(Pair::getLeft, Pair::getRight));
+        } catch (ApiException e) {
+            LOGGER.info("Failed to get hosts from CM", e);
+            throw new RuntimeException("Failed to get hosts from CM due to: " + e.getMessage(), e);
+        }
+    }
+
+    private Map<String, ApiHealthCheck> getHostHealth() {
+        HostsResourceApi api = clouderaManagerApiFactory.getHostsResourceApi(client);
+        try {
+            return api.readHosts(FULL_WITH_EXPLANATION_VIEW).getItems().stream()
+                    .filter(host -> host.getHealthChecks() != null)
+                    .flatMap(host -> host.getHealthChecks().stream()
+                            .filter(check -> HOST_SCM_HEALTH.equals(check.getName()))
+                            .filter(check -> !IGNORED_HEALTH_SUMMARIES.contains(check.getSummary()))
+                            .map(check -> Pair.of(host.getHostname(), check))
+                    )
+                    .collect(toMap(Pair::getLeft, Pair::getRight));
+        } catch (ApiException e) {
+            LOGGER.info("Failed to get hosts from CM", e);
+            throw new RuntimeException("Failed to get hosts from CM due to: " + e.getMessage(), e);
+        }
     }
 }

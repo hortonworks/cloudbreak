@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
@@ -55,7 +56,7 @@ public class HostMetadataSetup {
     }
 
     public void setupNewHostMetadata(Long stackId, Collection<String> newAddresses) throws CloudbreakException {
-        LOGGER.debug("Extending host metadata.");
+        LOGGER.info("Extending host metadata: {}", newAddresses);
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
             Set<InstanceMetaData> newInstanceMetadata = stack.getNotDeletedInstanceMetaDataSet().stream()
@@ -68,17 +69,23 @@ public class HostMetadataSetup {
 
     private void updateWithHostData(Stack stack, Collection<InstanceMetaData> metadataToUpdate) throws CloudbreakSecuritySetupException {
         try {
-            List<String> privateIps = metadataToUpdate.stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
-            GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-            HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-            Map<String, String> members = hostOrchestrator.getMembers(gatewayConfig, privateIps);
-            LOGGER.debug("Received host names from hosts: {}, original targets: {}", members.values(), privateIps);
-            for (InstanceMetaData instanceMetaData : metadataToUpdate) {
-                instanceMetaData.setConsulServer(false);
-                String address = members.get(instanceMetaData.getPrivateIp());
-                instanceMetaData.setDiscoveryFQDN(address);
-                LOGGER.debug("Domain used for instance: {} original: {}, fqdn: {}", instanceMetaData.getInstanceId(), address,
-                        instanceMetaData.getDiscoveryFQDN());
+            List<String> privateIps = metadataToUpdate.stream()
+                    .filter(instanceMetaData -> InstanceStatus.CREATED.equals(instanceMetaData.getInstanceStatus()))
+                    .map(InstanceMetaData::getPrivateIp)
+                    .collect(Collectors.toList());
+            if (!privateIps.isEmpty()) {
+                GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+                HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+                Map<String, String> members = hostOrchestrator.getMembers(gatewayConfig, privateIps);
+                LOGGER.info("Received host names from hosts: {}, original targets: {}", members.values(), privateIps);
+                for (InstanceMetaData instanceMetaData : metadataToUpdate) {
+                    String address = members.get(instanceMetaData.getPrivateIp());
+                    instanceMetaData.setDiscoveryFQDN(address);
+                    LOGGER.info("Domain used for instance: {} original: {}, fqdn: {}", instanceMetaData.getInstanceId(), address,
+                            instanceMetaData.getDiscoveryFQDN());
+                }
+            } else {
+                LOGGER.info("There is no hosts to update");
             }
         } catch (Exception e) {
             throw new CloudbreakSecuritySetupException(e);

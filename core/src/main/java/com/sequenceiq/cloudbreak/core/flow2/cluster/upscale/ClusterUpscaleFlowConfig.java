@@ -68,9 +68,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterUpscaleState, ClusterUpscaleEvent> {
+public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterUpscaleState, ClusterUpscaleEvent>
+        implements RetryableFlowConfiguration<ClusterUpscaleEvent> {
     private static final List<Transition<ClusterUpscaleState, ClusterUpscaleEvent>> TRANSITIONS =
             new Builder<ClusterUpscaleState, ClusterUpscaleEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
@@ -151,5 +153,10 @@ public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterU
     @Override
     public String getDisplayName() {
         return "Upscale cluster";
+    }
+
+    @Override
+    public ClusterUpscaleEvent getFailHandledEvent() {
+        return FAIL_HANDLED_EVENT;
     }
 }

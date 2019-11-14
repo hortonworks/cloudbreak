@@ -5,21 +5,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public interface ClusterModificationService {
 
-    void upscaleCluster(HostGroup hostGroup, Collection<HostMetadata> hostMetadata, List<InstanceMetaData> metas) throws CloudbreakException;
+    List<String> upscaleCluster(HostGroup hostGroup, Collection<InstanceMetaData> metas) throws CloudbreakException;
 
     void stopCluster() throws CloudbreakException;
 
-    int startCluster(Set<HostMetadata> hostsInCluster) throws CloudbreakException;
+    int startCluster(Set<InstanceMetaData> hostsInCluster) throws CloudbreakException;
 
     Map<String, String> getComponentsByCategory(String blueprintName, String hostGroupName);
 

@@ -64,27 +64,29 @@ public class AzureMetadataCollector implements MetadataCollector {
             for (Entry<String, InstanceTemplate> instance : templateMap.entrySet()) {
                 VirtualMachine vm = virtualMachinesByName.get(instance.getKey());
                 //TODO: network interface is lazy, so we will fetch it for every instances
-                NetworkInterface networkInterface = vm.getPrimaryNetworkInterface();
-                String subnetId = networkInterface.primaryIPConfiguration().subnetName();
+                if (vm != null) {
+                    NetworkInterface networkInterface = vm.getPrimaryNetworkInterface();
+                    String subnetId = networkInterface.primaryIPConfiguration().subnetName();
 
-                Integer faultDomainCount = azureClient.getFaultDomainNumber(resourceGroup, vm.name());
+                    Integer faultDomainCount = azureClient.getFaultDomainNumber(resourceGroup, vm.name());
 
-                String publicIp = azureVmPublicIpProvider.getPublicIp(azureClient, azureUtils, networkInterface, resourceGroup);
+                    String publicIp = azureVmPublicIpProvider.getPublicIp(azureClient, azureUtils, networkInterface, resourceGroup);
 
-                String instanceId = instance.getKey();
-                String localityIndicator = Optional.ofNullable(faultDomainCount)
-                        .map(domainCount -> getLocalityIndicator(domainCount, authenticatedContext.getCloudContext(), instance.getValue(), resourceGroup))
-                        .orElse(null);
-                CloudInstanceMetaData md = new CloudInstanceMetaData(networkInterface.primaryPrivateIP(), publicIp, localityIndicator);
+                    String instanceId = instance.getKey();
+                    String localityIndicator = Optional.ofNullable(faultDomainCount)
+                            .map(domainCount -> getLocalityIndicator(domainCount, authenticatedContext.getCloudContext(), instance.getValue(), resourceGroup))
+                            .orElse(null);
+                    CloudInstanceMetaData md = new CloudInstanceMetaData(networkInterface.primaryPrivateIP(), publicIp, localityIndicator);
 
-                InstanceTemplate template = templateMap.get(instanceId);
-                if (template != null) {
-                    Map<String, Object> params = new HashMap<>(1);
-                    params.put(CloudInstance.SUBNET_ID, subnetId);
-                    params.put(CloudInstance.INSTANCE_NAME, vm.computerName());
-                    CloudInstance cloudInstance = new CloudInstance(instanceId, template, null, params);
-                    CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
-                    results.add(new CloudVmMetaDataStatus(status, md));
+                    InstanceTemplate template = templateMap.get(instanceId);
+                    if (template != null) {
+                        Map<String, Object> params = new HashMap<>(1);
+                        params.put(CloudInstance.SUBNET_ID, subnetId);
+                        params.put(CloudInstance.INSTANCE_NAME, vm.computerName());
+                        CloudInstance cloudInstance = new CloudInstance(instanceId, template, null, params);
+                        CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
+                        results.add(new CloudVmMetaDataStatus(status, md));
+                    }
                 }
             }
         } catch (RuntimeException e) {

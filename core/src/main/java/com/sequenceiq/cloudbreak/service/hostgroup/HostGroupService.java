@@ -1,53 +1,41 @@
 package com.sequenceiq.cloudbreak.service.hostgroup;
 
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
-
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
-import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 
 @Service
 public class HostGroupService {
+
     @Inject
     private HostGroupRepository hostGroupRepository;
 
     @Inject
-    private HostMetadataService hostMetadataService;
+    private TransactionService transactionService;
 
     public Set<HostGroup> getByCluster(Long clusterId) {
         return hostGroupRepository.findHostGroupsInCluster(clusterId);
     }
 
     public Optional<HostGroup> findHostGroupInClusterByName(Long clusterId, String hostGroupName) {
-        return hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupName);
+        return hostGroupRepository.findHostGroupInClusterByNameWithInstanceMetadas(clusterId, hostGroupName);
     }
 
     public HostGroup save(HostGroup hostGroup) {
         return hostGroupRepository.save(hostGroup);
     }
 
-    public Set<HostMetadata> findEmptyHostMetadataInHostGroup(Long hostGroupId) {
-        return hostMetadataService.findEmptyHostsInHostGroup(hostGroupId);
-    }
-
-    public Optional<HostGroup> getByClusterIdAndInstanceGroupName(Long clusterId, String instanceGroupName) {
-        return hostGroupRepository.findHostGroupsByInstanceGroupName(clusterId, instanceGroupName);
-    }
-
-    public void updateHostMetaDataStatus(Long id, HostMetadataState status) {
-        HostMetadata hostMetadata = hostMetadataService.findById(id)
-                .orElseThrow(notFound("HostMetadata", id));
-        hostMetadata.setHostMetadataState(status);
-        hostMetadataService.save(hostMetadata);
+    public Optional<HostGroup> getByClusterIdAndName(Long clusterId, String instanceGroupName) {
+        return hostGroupRepository.findHostGroupInClusterByNameWithInstanceMetadas(clusterId, instanceGroupName);
     }
 
     public Set<HostGroup> findHostGroupsInCluster(Long clusterId) {
@@ -62,6 +50,10 @@ public class HostGroupService {
         return hostGroupRepository.findAllHostGroupsByRecipe(recipeId);
     }
 
+    public Set<Recipe> getRecipesByCluster(Long clusterId) {
+        return getByClusterWithRecipes(clusterId).stream().flatMap(hostGroup -> hostGroup.getRecipes().stream()).collect(Collectors.toSet());
+    }
+
     public Set<HostGroup> getByClusterWithRecipes(Long clusterId) {
         return hostGroupRepository.findHostGroupsInClusterWithRecipes(clusterId);
     }
@@ -70,15 +62,4 @@ public class HostGroupService {
         return hostGroupRepository.findHostGroupInClusterByNameWithRecipes(clusterId, hostGroupName);
     }
 
-    public Long countByClusterIdAndName(Long id, String hostGroupName) {
-        return hostMetadataService.countByClusterIdAndHostGroupName(id, hostGroupName);
-    }
-
-    public HostGroup getByClusterIdAndNameWithHostMetadata(Long clusterId, String hostGroupName) {
-        return hostGroupRepository.findHostGroupInClusterByNameWithHostMetadata(clusterId, hostGroupName);
-    }
-
-    public Set<HostGroup> getByClusterWithRecipesAndHostmetadata(Long clusterId) {
-        return hostGroupRepository.findHostGroupsInClusterWithRecipesAndHostmetadata(clusterId);
-    }
 }

@@ -55,7 +55,7 @@ public class InstanceGroupToInstanceGroupResponseConverterTest extends AbstractE
     @Override
     public InstanceGroup createSource() {
         var instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, TestUtil.gcpTemplate(1L));
-        var metaData = TestUtil.instanceMetaData(1L, 1L, InstanceStatus.REGISTERED, false, instanceGroup);
+        var metaData = TestUtil.instanceMetaData(1L, 1L, InstanceStatus.SERVICES_RUNNING, false, instanceGroup);
         instanceGroup.setInstanceMetaData(Set.of(metaData));
         return instanceGroup;
     }

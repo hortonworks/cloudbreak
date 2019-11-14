@@ -68,7 +68,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
 import com.sequenceiq.cloudbreak.converter.stack.StackIdViewToStackResponseConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -92,7 +91,6 @@ import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -654,16 +652,6 @@ public class StackService implements ResourceIdProvider {
         }
     }
 
-    public void updateMetaDataStatusIfFound(Long id, String hostName, InstanceStatus status) {
-        Optional<InstanceMetaData> metaData = instanceMetaDataService.findHostInStack(id, hostName);
-        if (metaData.isEmpty()) {
-            LOGGER.debug("Metadata not found on stack:'{}' with hostname: '{}'.", id, hostName);
-        } else {
-            metaData.get().setInstanceStatus(status);
-            instanceMetaDataService.save(metaData.get());
-        }
-    }
-
     Optional<Stack> findTemplateWithLists(Long id) {
         return stackRepository.findTemplateWithLists(id);
     }
@@ -784,6 +772,7 @@ public class StackService implements ResourceIdProvider {
 
     private void sync(Stack stack, boolean full, User user) {
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
+        // TODO: is it a good condition?
         if (!stack.isDeleteInProgress() && !stack.isStackInDeletionPhase() && !stack.isModificationInProgress()) {
             if (full) {
                 flowManager.triggerFullSync(stack.getId());
@@ -875,7 +864,7 @@ public class StackService implements ResourceIdProvider {
                 validateStackStatus(stackWithLists);
                 validateInstanceGroup(stackWithLists, instanceGroupAdjustmentJson.getInstanceGroup());
                 validateScalingAdjustment(instanceGroupAdjustmentJson, stackWithLists);
-                validataInstanceStatuses(stackWithLists, instanceGroupAdjustmentJson);
+                validateInstanceStatuses(stackWithLists, instanceGroupAdjustmentJson);
                 if (withClusterEvent) {
                     validateClusterStatus(stackWithLists);
                     validateHostGroupAdjustment(instanceGroupAdjustmentJson, stackWithLists, instanceGroupAdjustmentJson.getScalingAdjustment());
@@ -898,10 +887,30 @@ public class StackService implements ResourceIdProvider {
         }
     }
 
+    public void updateMetaDataStatusIfFound(Long id, String hostName, InstanceStatus status, String statusReason) {
+        instanceMetaDataService.findHostInStack(id, hostName).ifPresentOrElse(instanceMetaData -> {
+            instanceMetaData.setStatusReason(statusReason);
+            instanceMetaData.setInstanceStatus(status);
+            instanceMetaDataService.save(instanceMetaData);
+        }, () -> {
+            LOGGER.warn("Metadata not found on stack:'{}' with hostname: '{}'.", id, hostName);
+        });
+    }
+
+    public void updateMetaDataStatusIfFound(Long id, String hostName, InstanceStatus status) {
+        updateMetaDataStatusIfFound(id, hostName, status, null);
+    }
+
     public List<String> getHostNamesForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
         return getInstanceMetaDataForPrivateIds(instanceMetaDataList, privateIds).stream()
                 .map(InstanceMetaData::getInstanceId)
                 .collect(Collectors.toList());
+    }
+
+    public Optional<InstanceMetaData> getInstanceMetadataByPrivateIp(List<InstanceMetaData> instanceMetaDataList, String privateIp) {
+        return instanceMetaDataList.stream()
+                .filter(instanceMetaData -> privateIp.equals(instanceMetaData.getPrivateIp()))
+                .findFirst();
     }
 
     public List<String> getInstanceIdsForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
@@ -942,10 +951,11 @@ public class StackService implements ResourceIdProvider {
         }
     }
 
-    private void validataInstanceStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
+    private void validateInstanceStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
         if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
             List<InstanceMetaData> instanceMetaDataList =
-                    stack.getInstanceMetaDataAsList().stream().filter(im -> !im.isTerminated() && !im.isRunning()).collect(Collectors.toList());
+                    stack.getInstanceMetaDataAsList().stream().filter(im -> !im.isTerminated() && !im.isRunning() && !im.isCreated())
+                            .collect(Collectors.toList());
             if (!instanceMetaDataList.isEmpty()) {
                 String ims = instanceMetaDataList.stream().map(im -> im.getInstanceId() + ": " + im.getInstanceStatus()).collect(Collectors.joining(","));
                 throw new BadRequestException(
@@ -956,12 +966,16 @@ public class StackService implements ResourceIdProvider {
 
     private void validataHostMetadataStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
         if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
-            List<HostMetadata> hostMetadataList = stack.getCluster().getHostGroups().stream().flatMap(hg -> hg.getHostMetadata().stream())
-                    .filter(hm -> hm.getHostMetadataState() != HostMetadataState.HEALTHY).collect(Collectors.toList());
-            if (!hostMetadataList.isEmpty()) {
-                String hms = hostMetadataList.stream().map(hm -> hm.getHostName() + ": " + hm.getHostMetadataState()).collect(Collectors.joining(","));
+            List<InstanceMetaData> instanceMetaDataAsList = stack.getInstanceMetaDataAsList();
+            List<InstanceMetaData> unhealthyInstanceMetadataList = instanceMetaDataAsList.stream()
+                    .filter(instanceMetaData -> InstanceStatus.SERVICES_UNHEALTHY.equals(instanceMetaData.getInstanceStatus()))
+                    .collect(Collectors.toList());
+            if (!unhealthyInstanceMetadataList.isEmpty()) {
+                String notHealthyInstances = unhealthyInstanceMetadataList.stream()
+                        .map(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() + ": " + instanceMetaData.getInstanceStatus())
+                        .collect(Collectors.joining(","));
                 throw new BadRequestException(
-                        String.format("Upscale is not allowed because the following hosts are not healthy: %s. Please remove them first!", hms));
+                        String.format("Upscale is not allowed because the following hosts are not healthy: %s. Please remove them first!", notHealthyInstances));
             }
         }
     }

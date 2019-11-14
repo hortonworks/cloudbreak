@@ -12,7 +12,7 @@ import org.mockito.Mockito;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 public class AmbariHostsJoinStatusCheckerTaskTest {
 
@@ -22,7 +22,7 @@ public class AmbariHostsJoinStatusCheckerTaskTest {
 
     @Test
     public void testWithAllJoined() {
-        Set<HostMetadata> hostsInCluster = AmbariHostCheckerTestUtils.getHostMetadataSet(3);
+        Set<InstanceMetaData> hostsInCluster = AmbariHostCheckerTestUtils.getMetadataSet(3);
         AmbariHostsCheckerContext ambariHostsCheckerContext = new AmbariHostsCheckerContext(new Stack(), ambariClient, hostsInCluster, 0);
         Map<String, String> hostStates = AmbariHostCheckerTestUtils.getHostStatuses("UNHEALTHY", "HEALTHY", "HEALTHY");
         when(ambariClient.getHostStatuses()).thenReturn(hostStates);
@@ -32,7 +32,7 @@ public class AmbariHostsJoinStatusCheckerTaskTest {
 
     @Test
     public void testWithOneUnknown() {
-        Set<HostMetadata> hostsInCluster = AmbariHostCheckerTestUtils.getHostMetadataSet(3);
+        Set<InstanceMetaData> hostsInCluster = AmbariHostCheckerTestUtils.getMetadataSet(3);
         AmbariHostsCheckerContext ambariHostsCheckerContext = new AmbariHostsCheckerContext(new Stack(), ambariClient, hostsInCluster, 0);
         Map<String, String> hostStates = AmbariHostCheckerTestUtils.getHostStatuses("UNKNOWN", "HEALTHY", "HEALTHY");
         when(ambariClient.getHostStatuses()).thenReturn(hostStates);
@@ -42,7 +42,7 @@ public class AmbariHostsJoinStatusCheckerTaskTest {
 
     @Test
     public void testWithTwoUnknowns() {
-        Set<HostMetadata> hostsInCluster = AmbariHostCheckerTestUtils.getHostMetadataSet(4);
+        Set<InstanceMetaData> hostsInCluster = AmbariHostCheckerTestUtils.getMetadataSet(4);
         AmbariHostsCheckerContext ambariHostsCheckerContext = new AmbariHostsCheckerContext(new Stack(), ambariClient, hostsInCluster, 0);
         Map<String, String> hostStates = AmbariHostCheckerTestUtils.getHostStatuses("UNKNOWN", "HEALTHY", "HEALTHY", "UNKNOWN");
         when(ambariClient.getHostStatuses()).thenReturn(hostStates);
@@ -52,7 +52,7 @@ public class AmbariHostsJoinStatusCheckerTaskTest {
 
     @Test
     public void testWithMissingUnknownHostMetadata() {
-        Set<HostMetadata> hostsInCluster = AmbariHostCheckerTestUtils.getHostMetadataSet(2);
+        Set<InstanceMetaData> hostsInCluster = AmbariHostCheckerTestUtils.getMetadataSet(2);
         AmbariHostsCheckerContext ambariHostsCheckerContext = new AmbariHostsCheckerContext(new Stack(), ambariClient, hostsInCluster, 0);
         Map<String, String> hostStates = AmbariHostCheckerTestUtils.getHostStatuses("HEALTHY", "HEALTHY", "UNKNOWN");
         when(ambariClient.getHostStatuses()).thenReturn(hostStates);
@@ -62,7 +62,7 @@ public class AmbariHostsJoinStatusCheckerTaskTest {
 
     @Test
     public void testWithMissingHostStatus() {
-        Set<HostMetadata> hostsInCluster = AmbariHostCheckerTestUtils.getHostMetadataSet(3);
+        Set<InstanceMetaData> hostsInCluster = AmbariHostCheckerTestUtils.getMetadataSet(3);
         AmbariHostsCheckerContext ambariHostsCheckerContext = new AmbariHostsCheckerContext(new Stack(), ambariClient, hostsInCluster, 0);
         Map<String, String> hostStates = AmbariHostCheckerTestUtils.getHostStatuses("HEALTHY", "HEALTHY");
         when(ambariClient.getHostStatuses()).thenReturn(hostStates);

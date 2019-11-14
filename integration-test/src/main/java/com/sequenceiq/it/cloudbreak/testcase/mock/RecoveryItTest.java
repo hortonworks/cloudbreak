@@ -1,13 +1,10 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import static com.sequenceiq.cloudbreak.common.type.HostMetadataState.HEALTHY;
-import static com.sequenceiq.cloudbreak.common.type.HostMetadataState.UNHEALTHY;
-
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -51,17 +48,17 @@ public class RecoveryItTest extends AbstractIntegrationTest {
 
     private void mockAmbari(MockedTestContext testContext) {
         testContext.getModel().getAmbariMock().getDynamicRouteStack().clearPost(HOSTS);
-        modifyStatusResponses(testContext, UNHEALTHY, 2);
-        modifyStatusResponses(testContext, HEALTHY, 1);
+        modifyStatusResponses(testContext, InstanceStatus.SERVICES_UNHEALTHY, 2);
+        modifyStatusResponses(testContext, InstanceStatus.SERVICES_HEALTHY, 1);
     }
 
-    private void modifyStatusResponses(MockedTestContext testContext, HostMetadataState state, int quantity) {
+    private void modifyStatusResponses(MockedTestContext testContext, InstanceStatus state, int quantity) {
         for (int i = 0; i < quantity; i++) {
             testContext.getModel().getAmbariMock().getDynamicRouteStack().post(HOSTS, createHostResponseForAmbariWithStatus(state));
         }
     }
 
-    private StatefulRoute createHostResponseForAmbariWithStatus(HostMetadataState overridedStatus) {
+    private StatefulRoute createHostResponseForAmbariWithStatus(InstanceStatus overridedStatus) {
         return (request, response, model) -> {
             response.type("text/plain");
             response.status(200);

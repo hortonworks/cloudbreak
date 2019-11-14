@@ -9,17 +9,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationSuccess;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.flow.PreTerminationStateExecutor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -51,8 +51,8 @@ public class StackPreTerminationHandler implements EventHandler<StackPreTerminat
         try {
             Cluster cluster = stack.getCluster();
             if (cluster != null) {
-                Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(cluster.getId());
-                recipeEngine.executePreTerminationRecipes(stack, hostGroups, request.getForced());
+                Set<Recipe> recipesByCluster = hostGroupService.getRecipesByCluster(cluster.getId());
+                recipeEngine.executePreTerminationRecipes(stack, recipesByCluster, request.getForced());
                 preTerminationStateExecutor.runPreteraminationTasks(stack);
             }
         } catch (Exception ex) {

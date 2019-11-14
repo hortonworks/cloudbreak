@@ -56,16 +56,16 @@ public class StackScalabilityConditionTest {
 
     private Set<InstanceMetaData> createInstanceMetadataWithPendingInstance() {
         return Set.of(
-                createInstanceMetaData(InstanceStatus.REGISTERED),
-                createInstanceMetaData(InstanceStatus.REGISTERED),
+                createInstanceMetaData(InstanceStatus.SERVICES_HEALTHY),
+                createInstanceMetaData(InstanceStatus.SERVICES_HEALTHY),
                 createInstanceMetaData(InstanceStatus.REQUESTED));
     }
 
     private Set<InstanceMetaData> createInstanceMetadataWithRegisteredInstances() {
         return Set.of(
-                createInstanceMetaData(InstanceStatus.REGISTERED),
-                createInstanceMetaData(InstanceStatus.REGISTERED),
-                createInstanceMetaData(InstanceStatus.REGISTERED));
+                createInstanceMetaData(InstanceStatus.SERVICES_HEALTHY),
+                createInstanceMetaData(InstanceStatus.SERVICES_HEALTHY),
+                createInstanceMetaData(InstanceStatus.SERVICES_HEALTHY));
     }
 
     private InstanceMetaData createInstanceMetaData(InstanceStatus instanceStatus) {

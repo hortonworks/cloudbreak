@@ -67,7 +67,7 @@ public class StackDownscaleService {
             throws TransactionExecutionException {
         Stack stack = context.getStack();
         InstanceGroup g = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
-        stackScalingService.updateRemovedResourcesState(stack, instanceIds, g);
+        stackScalingService.updateRemovedResourcesState(instanceIds, g);
         List<InstanceMetaData> instanceMetaDatas = stack.getInstanceGroups()
                 .stream().filter(ig -> ig.getGroupName().equals(instanceGroupName))
                 .flatMap(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream())

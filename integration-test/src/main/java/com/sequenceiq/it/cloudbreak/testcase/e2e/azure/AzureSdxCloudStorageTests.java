@@ -30,15 +30,15 @@ public class AzureSdxCloudStorageTests extends AbstractE2ETest {
 
     private static final SdxClusterStatusResponse SDX_DELETED = SdxClusterStatusResponse.DELETED;
 
-    private static final InstanceStatus REGISTERED = InstanceStatus.REGISTERED;
+    private static final InstanceStatus SERVICES_RUNNING = InstanceStatus.SERVICES_RUNNING;
 
     private static final String IDBROKER_HOSTGROUP = HostGroupType.IDBROKER.getName();
 
     private static final String MASTER_HOSTGROUP = HostGroupType.MASTER.getName();
 
     private Map<String, InstanceStatus> instancesRegistered = new HashMap<String, InstanceStatus>() {{
-        put(MASTER_HOSTGROUP, REGISTERED);
-        put(IDBROKER_HOSTGROUP, REGISTERED);
+        put(MASTER_HOSTGROUP, SERVICES_RUNNING);
+        put(IDBROKER_HOSTGROUP, SERVICES_RUNNING);
     }};
 
     @Inject

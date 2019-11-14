@@ -5,15 +5,14 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
-import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public interface ClusterSetupService {
 
@@ -22,9 +21,9 @@ public interface ClusterSetupService {
     void waitForServer() throws CloudbreakException, ClusterClientInitException;
 
     Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            Set<HostMetadata> hostsInCluster, String sdxContext, String sdxStackCrn, Telemetry telemetry, KerberosConfig kerberosConfig);
+            String sdxContext, String sdxStackCrn, Telemetry telemetry, KerberosConfig kerberosConfig);
 
-    void waitForHosts(Set<HostMetadata> hostsInCluster) throws ClusterClientInitException;
+    void waitForHosts(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException;
 
     void waitForServices(int requestId) throws CloudbreakException;
 

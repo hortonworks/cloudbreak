@@ -58,7 +58,7 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
                 event.getHostNames())
         );
         if (ScalingType.isClusterUpScale(event.getScalingType()) && clusterView != null) {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(clusterView.getId(), event.getInstanceGroup())
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterView.getId(), event.getInstanceGroup())
                     .orElseThrow(NotFoundException.notFound("hostgroup", event.getInstanceGroup()));
             flowEventChain.add(
                     new ClusterScaleTriggerEvent(CLUSTER_UPSCALE_TRIGGER_EVENT.event(),

@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataTyp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -48,8 +47,8 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @Component
@@ -75,9 +74,10 @@ public class InstanceMetadataUpdater {
     private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Inject
-    private HostMetadataService hostMetadataService;
+    private StackService stackService;
 
-    public void updatePackageVersionsOnAllInstances(Stack stack) throws Exception {
+    public void updatePackageVersionsOnAllInstances(Long stackId) throws Exception {
+        Stack stack = getStackForFreshInstanceStatuses(stackId);
         Boolean enableKnox = stack.getCluster().getGateway() != null;
         GatewayConfig gatewayConfig = getGatewayConfig(stack, enableKnox);
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
@@ -99,6 +99,10 @@ public class InstanceMetadataUpdater {
 
         Map<String, List<String>> instancesWithMissingPackageVersions = collectInstancesWithMissingPackageVersions(instanceMetaDataSet);
         notifyIfInstancesMissingPackageVersion(stack, instancesWithMissingPackageVersions);
+    }
+
+    private Stack getStackForFreshInstanceStatuses(Long stackId) {
+        return stackService.getByIdWithListsInTransaction(stackId);
     }
 
     private GatewayConfig getGatewayConfig(Stack stack, Boolean enableKnox) {
@@ -123,10 +127,9 @@ public class InstanceMetadataUpdater {
                 Image image = im.getImage().get(Image.class);
                 image.getPackageVersions().clear();
                 im.setImage(new Json(image));
-                im.setInstanceStatus(InstanceStatus.ORCHESTRATION_FAILED);
+                im.setInstanceStatus(InstanceStatus.SERVICES_UNHEALTHY);
+                im.setStatusReason("Version query is failed on host");
                 instanceMetaDataService.save(im);
-                hostMetadataService.updateHostMetaDataStatus(stack.getCluster(), im.getDiscoveryFQDN(),
-                        HostMetadataState.UNHEALTHY, "Version query is failed on host");
             }
         }
         return failedVersionQueriesByHost;

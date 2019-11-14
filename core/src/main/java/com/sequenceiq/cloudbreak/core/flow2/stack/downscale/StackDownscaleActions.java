@@ -68,7 +68,7 @@ public class StackDownscaleActions {
                 variables.put(RESOURCES, resources);
                 List<CloudInstance> instances = new ArrayList<>();
                 InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(context.getInstanceGroupName());
-                final Set<InstanceMetaData> candidatesInstanceMetadata = group.getAllInstanceMetaData()
+                final Set<InstanceMetaData> candidatesInstanceMetadata = group.getNotTerminatedInstanceMetaDataSet()
                         .stream()
                         .filter(im -> context.getInstanceIds().contains(im.getInstanceId()))
                         .collect(Collectors.toSet());
@@ -80,6 +80,7 @@ public class StackDownscaleActions {
                 variables.put(INSTANCES, instances);
 
                 final Map<String, String> addressesByFqdn = candidatesInstanceMetadata.stream()
+                        .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                         .collect(toMap(InstanceMetaData::getDiscoveryFQDN, InstanceMetaData::getPrivateIp));
                 clusterPublicEndpointManagementService.downscale(stack, addressesByFqdn);
                 Selectable request = new DownscaleStackCollectResourcesRequest(context.getCloudContext(),

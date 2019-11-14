@@ -6,17 +6,16 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
-import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public interface ClusterApi {
 
@@ -33,12 +32,12 @@ public interface ClusterApi {
     }
 
     default Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            Set<HostMetadata> hostsInCluster, String sdxContext, String sdxCrn, Telemetry telemetry, KerberosConfig kerberosConfig) {
-        return clusterSetupService().buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster, sdxContext, sdxCrn, telemetry,
+            String sdxContext, String sdxCrn, Telemetry telemetry, KerberosConfig kerberosConfig) {
+        return clusterSetupService().buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, sdxContext, sdxCrn, telemetry,
                 kerberosConfig);
     }
 
-    default void waitForHosts(Stack stack, Set<HostMetadata> hostsInCluster) throws ClusterClientInitException {
+    default void waitForHosts(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException {
         clusterSetupService().waitForHosts(hostsInCluster);
     }
 
@@ -66,15 +65,15 @@ public interface ClusterApi {
         clusterSecurityService().changeOriginalCredentialsAndCreateCloudbreakUser(ldapConfigured);
     }
 
-    default void upscaleCluster(HostGroup hostGroup, Collection<HostMetadata> hostMetadata, List<InstanceMetaData> metas) throws CloudbreakException {
-        clusterModificationService().upscaleCluster(hostGroup, hostMetadata, metas);
+    default List<String> upscaleCluster(HostGroup hostGroup, Collection<InstanceMetaData> metas) throws CloudbreakException {
+        return clusterModificationService().upscaleCluster(hostGroup, metas);
     }
 
     default void stopCluster() throws CloudbreakException {
         clusterModificationService().stopCluster();
     }
 
-    default int startCluster(Set<HostMetadata> hostsInCluster) throws CloudbreakException {
+    default int startCluster(Set<InstanceMetaData> hostsInCluster) throws CloudbreakException {
         return clusterModificationService().startCluster(hostsInCluster);
     }
 
@@ -114,7 +113,7 @@ public interface ClusterApi {
         return clusterStatusService().getStatus(blueprintPresent).getClusterStatus();
     }
 
-    default Map<String, HostMetadataState> getHostStatuses() {
+    default Map<String, ClusterManagerState.ClusterManagerStatus> getHostStatuses() {
         return clusterStatusService().getHostStatuses();
     }
 

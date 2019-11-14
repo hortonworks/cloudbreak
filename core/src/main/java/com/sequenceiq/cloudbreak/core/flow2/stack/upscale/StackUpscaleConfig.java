@@ -30,9 +30,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleState, StackUpscaleEvent> {
+public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleState, StackUpscaleEvent>
+        implements RetryableFlowConfiguration<StackUpscaleEvent> {
     private static final List<Transition<StackUpscaleState, StackUpscaleEvent>> TRANSITIONS =
             new Builder<StackUpscaleState, StackUpscaleEvent>()
                     .from(INIT_STATE).to(UPSCALE_PREVALIDATION_STATE).event(ADD_INSTANCES_EVENT).noFailureEvent()
@@ -89,5 +91,10 @@ public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleSt
     @Override
     public String getDisplayName() {
         return "Upscale stack";
+    }
+
+    @Override
+    public StackUpscaleEvent getFailHandledEvent() {
+        return UPSCALE_FAIL_HANDLED_EVENT;
     }
 }

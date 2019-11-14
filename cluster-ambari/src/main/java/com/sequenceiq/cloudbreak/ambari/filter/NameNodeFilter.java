@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.filter.ConfigParam;
 
@@ -16,17 +14,16 @@ import com.sequenceiq.cloudbreak.filter.ConfigParam;
 public class NameNodeFilter implements HostFilter {
 
     @Override
-    public List<HostMetadata> filter(long clusterId, Map<String, String> config, List<HostMetadata> hosts, Set<InstanceMetaData> instanceMetaDatasInStack)
-            throws HostFilterException {
-        List<HostMetadata> result = new ArrayList<>(hosts);
+    public List<InstanceMetaData> filter(long clusterId, Map<String, String> config, List<InstanceMetaData> hosts) throws HostFilterException {
+        List<InstanceMetaData> result = new ArrayList<>(hosts);
         try {
             String nameNode = config.get(ConfigParam.NAMENODE_HTTP_ADDRESS.key());
             String secondaryNameNode = config.get(ConfigParam.SECONDARY_NAMENODE_HTTP_ADDRESS.key());
             String nameNodeHost = nameNode.substring(0, nameNode.lastIndexOf(':'));
             String secondaryNameNodeHost = secondaryNameNode.substring(0, secondaryNameNode.lastIndexOf(':'));
-            Iterator<HostMetadata> iterator = result.iterator();
+            Iterator<InstanceMetaData> iterator = result.iterator();
             while (iterator.hasNext()) {
-                String hostName = iterator.next().getHostName();
+                String hostName = iterator.next().getDiscoveryFQDN();
                 if (hostName.equals(nameNodeHost) || hostName.equals(secondaryNameNodeHost)) {
                     iterator.remove();
                 }

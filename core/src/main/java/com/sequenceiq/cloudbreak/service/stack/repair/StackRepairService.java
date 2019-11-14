@@ -14,13 +14,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.Msg;
-import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Component
@@ -32,9 +30,6 @@ public class StackRepairService {
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
-    private HostMetadataService hostMetadataService;
 
     @Inject
     private ReactorFlowManager reactorFlowManager;
@@ -60,10 +55,8 @@ public class StackRepairService {
         for (String instanceId : unhealthyInstanceIds) {
             InstanceMetaData instanceMetaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId)
                     .orElseThrow(NotFoundException.notFound("instanceMetaData", instanceId));
-            HostMetadata hostMetadata = hostMetadataService.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN())
-                    .orElseThrow(NotFoundException.notFound("hostMetadata", instanceMetaData.getDiscoveryFQDN()));
-            String hostGroupName = hostMetadata.getHostGroup().getName();
-            unhealthyInstances.addInstance(instanceId, hostGroupName);
+            String instanceGroupName = instanceMetaData.getInstanceGroup().getGroupName();
+            unhealthyInstances.addInstance(instanceId, instanceGroupName);
         }
         return unhealthyInstances;
     }

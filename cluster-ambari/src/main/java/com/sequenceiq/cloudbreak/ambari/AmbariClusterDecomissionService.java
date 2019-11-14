@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.ambari;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,13 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Multimap;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
@@ -54,25 +52,23 @@ public class AmbariClusterDecomissionService implements ClusterDecomissionServic
     }
 
     @Override
-    public void verifyNodesAreRemovable(Multimap<Long, HostMetadata> hostGroupWithInstances, Set<HostGroup> hostGroups, int defaultRootVolumeSize,
-            List<InstanceMetaData> notDeletedNodes) {
-        ambariDecommissioner.verifyNodesAreRemovable(stack, hostGroupWithInstances, hostGroups, defaultRootVolumeSize, ambariClient, notDeletedNodes);
+    public void verifyNodesAreRemovable(Stack stack, Collection<InstanceMetaData> removableInstances) {
+        ambariDecommissioner.verifyNodesAreRemovable(stack, removableInstances, ambariClient);
     }
 
     @Override
-    public Set<String> collectDownscaleCandidates(@Nonnull HostGroup hostGroup, Integer scalingAdjustment, int defaultRootVolumeSize,
+    public Set<InstanceMetaData> collectDownscaleCandidates(@Nonnull HostGroup hostGroup, Integer scalingAdjustment, int defaultRootVolumeSize,
             Set<InstanceMetaData> instanceMetaDatasInStack) throws CloudbreakException {
-        return ambariDecommissioner.collectDownscaleCandidates(ambariClient, stack, hostGroup, scalingAdjustment, defaultRootVolumeSize,
-                instanceMetaDatasInStack);
+        return ambariDecommissioner.collectDownscaleCandidates(ambariClient, stack, hostGroup, scalingAdjustment);
     }
 
     @Override
-    public Map<String, HostMetadata> collectHostsToRemove(@Nonnull HostGroup hostGroup, Set<String> hostNames) {
-        return ambariDecommissioner.collectHostsToRemove(stack, hostGroup, hostNames, ambariClient);
+    public Map<String, InstanceMetaData> collectHostsToRemove(@Nonnull HostGroup hostGroup, Set<String> hostNames) {
+        return ambariDecommissioner.collectHostsToRemove(stack, hostGroup.getName(), hostNames, ambariClient);
     }
 
     @Override
-    public Set<HostMetadata> decommissionClusterNodes(Map<String, HostMetadata> hostsToRemove) {
+    public Set<String> decommissionClusterNodes(Map<String, InstanceMetaData> hostsToRemove) {
         try {
             return ambariDecommissioner.decommissionAmbariNodes(stack, hostsToRemove, ambariClient);
         } catch (IOException | URISyntaxException e) {
@@ -86,9 +82,9 @@ public class AmbariClusterDecomissionService implements ClusterDecomissionServic
     }
 
     @Override
-    public void deleteHostFromCluster(HostMetadata data) {
+    public void deleteHostFromCluster(InstanceMetaData data) {
         try {
-            ambariDecommissioner.deleteHostFromAmbari(stack, data, ambariClient);
+            ambariDecommissioner.deleteHostFromAmbariIfInUnknownState(data, ambariClient);
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
