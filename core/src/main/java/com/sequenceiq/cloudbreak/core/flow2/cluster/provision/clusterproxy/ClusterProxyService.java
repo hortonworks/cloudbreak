@@ -159,7 +159,7 @@ public class ClusterProxyService {
 
     private String clusterManagerUrl(Stack stack, int port) {
         String gatewayIp = stack.getPrimaryGatewayInstance().getPublicIpWrapper();
-        return String.format("https://%s:%d/clouderamanager", gatewayIp, port);
+        return String.format("https://%s:%d/", gatewayIp, port);
     }
 
     private String vaultPath(String vaultSecretJsonString) {
