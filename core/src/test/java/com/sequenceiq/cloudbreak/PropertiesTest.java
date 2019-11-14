@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak;
 
-import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
 import static org.junit.Assert.assertThat;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +26,7 @@ public class PropertiesTest {
     public void testEnabledPlatforms() {
         String[] platforms = enabledPlatforms.split(",");
 
-        assertThat(platforms, arrayContainingInAnyOrder("AWS", "GCP", "OPENSTACK", "AZURE"));
+        assertThat(platforms, Matchers.arrayContainingInAnyOrder("AWS", "GCP", "OPENSTACK", "AZURE"));
     }
 
     @Configuration
