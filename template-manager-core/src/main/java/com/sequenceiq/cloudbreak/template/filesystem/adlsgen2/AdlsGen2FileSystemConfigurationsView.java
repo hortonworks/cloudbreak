@@ -19,13 +19,18 @@ public class AdlsGen2FileSystemConfigurationsView extends BaseFileSystemConfigur
 
     private String storageContainer;
 
-    public AdlsGen2FileSystemConfigurationsView(AdlsGen2FileSystem adlsGen2FileSystem, Collection<StorageLocationView> locations, boolean deafultFs) {
-        super(FileSystemType.ADLS_GEN_2.name(), adlsGen2FileSystem.getStorageContainer(), deafultFs, locations);
+    public AdlsGen2FileSystemConfigurationsView(AdlsGen2FileSystem adlsGen2FileSystem, Collection<StorageLocationView> locations, boolean defaultFs,
+            String managedIdentity) {
+        super(FileSystemType.ADLS_GEN_2.name(), adlsGen2FileSystem.getStorageContainer(), defaultFs, locations, managedIdentity);
         accountName = adlsGen2FileSystem.getAccountName();
         accountKey = adlsGen2FileSystem.getAccountKey();
         storageContainerName = adlsGen2FileSystem.getStorageContainerName();
         storageContainer = adlsGen2FileSystem.getStorageContainer();
         secure = adlsGen2FileSystem.isSecure();
+    }
+
+    public AdlsGen2FileSystemConfigurationsView(AdlsGen2FileSystem adlsGen2FileSystem, Collection<StorageLocationView> locations, boolean defaultFs) {
+        this(adlsGen2FileSystem, locations, defaultFs, null);
     }
 
     public String getAccountName() {
