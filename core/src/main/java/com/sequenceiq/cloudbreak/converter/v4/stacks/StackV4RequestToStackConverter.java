@@ -46,6 +46,8 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.domain.SecurityGroup;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -64,12 +66,15 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class StackV4RequestToStackConverter extends AbstractConversionServiceAwareConverter<StackV4Request, Stack> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackV4RequestToStackConverter.class);
+
+    private static final String TCP_PROTOCOL = "tcp";
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -106,6 +111,12 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
 
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
+
+    @Value("#{'${cb.default.gateway.cidr}'.split(',')}")
+    private Set<String> defaultGatewayCidr;
+
+    @Value("${cb.nginx.port}")
+    private Integer nginxPort;
 
     @Override
     public Stack convert(StackV4Request source) {
@@ -152,7 +163,32 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         if (source.getImage() != null) {
             stack.getComponents().add(getImageComponent(source, stack));
         }
+        extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack);
         return stack;
+    }
+
+    private void extendGatewaySecurityGroupWithDefaultGatewayCidrs(Stack stack) {
+        Set<InstanceGroup> gateways =
+                stack.getInstanceGroups().stream().filter(ig -> InstanceGroupType.isGateway(ig.getInstanceGroupType())).collect(Collectors.toSet());
+        Set<String> defaultGatewayCidrs = defaultGatewayCidr.stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
+        if (!defaultGatewayCidrs.isEmpty()) {
+            for (InstanceGroup gateway : gateways) {
+                Set<SecurityRule> rules = gateway.getSecurityGroup().getSecurityRules();
+                defaultGatewayCidrs.forEach(cloudbreakCidr -> rules.add(createSecurityRule(gateway.getSecurityGroup(), cloudbreakCidr,
+                        stack.getGatewayPort())));
+                LOGGER.info("The control plane cidrs {} are added to the {} gateway group for the {} port.", defaultGatewayCidrs, gateway.getGroupName(),
+                        stack.getGatewayPort());
+            }
+        }
+    }
+
+    private SecurityRule createSecurityRule(SecurityGroup securityGroup, String cidr, Integer port) {
+        SecurityRule securityRule = new SecurityRule();
+        securityRule.setPorts(port == null ? nginxPort.toString() : port.toString());
+        securityRule.setProtocol(TCP_PROTOCOL);
+        securityRule.setCidr(cidr);
+        securityRule.setSecurityGroup(securityGroup);
+        return securityRule;
     }
 
     private void setTimeToLive(StackV4Request source, Stack stack) {

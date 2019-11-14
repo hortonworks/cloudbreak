@@ -32,7 +32,7 @@ public class SecurityRuleService {
     @Value("${cb.https.port}")
     private String httpsPort;
 
-    @Value("#{'${cb.default.gateway.cidr:0.0.0.0/0}'.split(',')}")
+    @Value("#{'${cb.default.gateway.cidr}'.split(',')}")
     private Set<String> defaultGatewayCidr;
 
     @Inject

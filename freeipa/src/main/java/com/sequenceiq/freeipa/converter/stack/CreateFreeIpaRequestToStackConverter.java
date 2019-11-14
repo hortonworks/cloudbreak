@@ -13,13 +13,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.google.common.collect.Maps;
@@ -29,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
@@ -37,15 +41,17 @@ import com.sequenceiq.freeipa.converter.instance.InstanceGroupRequestToInstanceG
 import com.sequenceiq.freeipa.converter.network.NetworkRequestToNetworkConverter;
 import com.sequenceiq.freeipa.converter.telemetry.TelemetryConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
+import com.sequenceiq.freeipa.entity.SecurityGroup;
+import com.sequenceiq.freeipa.entity.SecurityRule;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.service.CostTaggingService;
-import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceGroupProvider;
 
 @Component
 public class CreateFreeIpaRequestToStackConverter {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateFreeIpaRequestToStackConverter.class);
+
+    private static final String TCP_PROTOCOL = "tcp";
 
     @Inject
     private CostTaggingService costTaggingService;
@@ -60,19 +66,19 @@ public class CreateFreeIpaRequestToStackConverter {
     private NetworkRequestToNetworkConverter networkConverter;
 
     @Inject
-    private DefaultInstanceGroupProvider defaultInstanceGroupProvider;
-
-    @Inject
     private TelemetryConverter telemetryConverter;
 
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
 
-    @Value("${cb.nginx.port:9443}")
+    @Value("${cb.nginx.port}")
     private Integer nginxPort;
 
     @Value("${freeipa.ums.user.get.timeout:10}")
     private Long userGetTimeout;
+
+    @Value("#{'${freeipa.default.gateway.cidr}'.split(',')}")
+    private Set<String> defaultGatewayCidr;
 
     public Stack convert(CreateFreeIpaRequest source, String accountId, Future<User> userFuture, String cloudPlatform) {
         Stack stack = new Stack();
@@ -93,7 +99,32 @@ public class CreateFreeIpaRequestToStackConverter {
         }
         stack.setTelemetry(telemetryConverter.convert(source.getTelemetry()));
         updateOwnerRelatedFields(accountId, userFuture, cloudPlatform, stack);
+        extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack);
         return stack;
+    }
+
+    private void extendGatewaySecurityGroupWithDefaultGatewayCidrs(Stack stack) {
+        Set<InstanceGroup> gateways =
+                stack.getInstanceGroups().stream().filter(ig -> InstanceGroupType.MASTER == ig.getInstanceGroupType()).collect(Collectors.toSet());
+        Set<String> defaultGatewayCidrs = defaultGatewayCidr.stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
+        if (!defaultGatewayCidrs.isEmpty()) {
+            for (InstanceGroup gateway : gateways) {
+                Set<SecurityRule> rules = gateway.getSecurityGroup().getSecurityRules();
+                defaultGatewayCidrs.forEach(cloudbreakCidr -> rules.add(createSecurityRule(gateway.getSecurityGroup(), cloudbreakCidr,
+                        stack.getGatewayport().toString())));
+                LOGGER.info("The control plane cidrs {} are added to the {} gateway group for the {} port.", defaultGatewayCidrs, gateway.getGroupName(),
+                        stack.getGatewayport());
+            }
+        }
+    }
+
+    private SecurityRule createSecurityRule(SecurityGroup securityGroup, String cidr, String port) {
+        SecurityRule securityRule = new SecurityRule();
+        securityRule.setPorts(port);
+        securityRule.setProtocol(TCP_PROTOCOL);
+        securityRule.setCidr(cidr);
+        securityRule.setSecurityGroup(securityGroup);
+        return securityRule;
     }
 
     private void updateOwnerRelatedFields(String accountId, Future<User> userFuture, String cloudPlatform, Stack stack) {
@@ -158,10 +189,8 @@ public class CreateFreeIpaRequestToStackConverter {
     }
 
     private Set<InstanceGroup> convertInstanceGroups(CreateFreeIpaRequest source, Stack stack, String accountId) {
-        if (source.getInstanceGroups() == null) {
-            Set<InstanceGroup> defaultInstanceGroups = defaultInstanceGroupProvider.createDefaultInstanceGroups(stack.getCloudPlatform(), accountId);
-            defaultInstanceGroups.forEach(instanceGroup -> instanceGroup.setStack(stack));
-            return defaultInstanceGroups;
+        if (CollectionUtils.isEmpty(source.getInstanceGroups())) {
+            throw new BadRequestException(String.format("No instancegroups are specified. Instancegroups field cannot be empty."));
         }
         Set<InstanceGroup> convertedSet = new HashSet<>();
         validateNullInstanceTemplateCount(source);

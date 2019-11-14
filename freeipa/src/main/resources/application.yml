@@ -31,6 +31,7 @@ management:
 freeipa:
   cert.dir: /certs/
   client.id: freeipa
+  default.gateway.cidr: 0.0.0.0/0
   structuredevent:
     rest:
       enabled: false
@@ -50,9 +51,6 @@ freeipa:
   platform.default.instanceType:
     AWS: m5.large
     AZURE: Standard_D3_v2
-  security.default:
-    ports: 22,443,9443
-    cidr: 0.0.0.0/0
   environment:
     url: http://localhost:8088
     contextPath: /environmentservice
