@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -48,6 +50,7 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.AwsEnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
+import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -156,6 +159,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         credential = Credential.builder()
                 .cloudPlatform("AWS")
                 .build();
+        ReflectionTestUtils.setField(underTest, "defaultGatewayCidr", Set.of(""));
     }
 
     @Test
@@ -284,6 +288,44 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         assertEquals(expectedDataLakeId, result.getDatalakeResourceId());
     }
 
+    @Test
+    public void testConvertExtendsGatewaySecurityGroupsWithDefaultGatewayCidrs() {
+        initMocks();
+        ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
+        ReflectionTestUtils.setField(underTest, "defaultGatewayCidr", Set.of("0.0.0.0/0", "1.1.1.1/1"));
+        ReflectionTestUtils.setField(underTest, "nginxPort", 9443);
+        StackV4Request request = getRequest("stack-with-instancegroups.json");
+
+        given(providerParameterCalculator.get(request)).willReturn(getMappable());
+        // WHEN
+        Stack stack = underTest.convert(request);
+        // THEN
+        Set<InstanceGroup> gateways =
+                stack.getInstanceGroups().stream().filter(ig -> InstanceGroupType.isGateway(ig.getInstanceGroupType())).collect(Collectors.toSet());
+        for (InstanceGroup ig : gateways) {
+            assertEquals(2, ig.getSecurityGroup().getSecurityRules().stream()
+                    .filter(rule -> rule.getCidr().equals("0.0.0.0/0")
+                            || rule.getCidr().equals("1.1.1.1/1")
+                            && Arrays.stream(rule.getPorts()).anyMatch(port -> port.equals("9443"))).count());
+        }
+    }
+
+    @Test
+    public void testConvertDoesntExtendGatewaySecurityGroupsWithDefaultGatewayCidrsIfItsEmpty() {
+        initMocks();
+        ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
+        StackV4Request request = getRequest("stack-with-instancegroups.json");
+        given(providerParameterCalculator.get(request)).willReturn(getMappable());
+        // WHEN
+        Stack stack = underTest.convert(request);
+        // THEN
+        Set<InstanceGroup> gateways =
+                stack.getInstanceGroups().stream().filter(ig -> InstanceGroupType.isGateway(ig.getInstanceGroupType())).collect(Collectors.toSet());
+        for (InstanceGroup ig : gateways) {
+            assertEquals(0, ig.getSecurityGroup().getSecurityRules().size());
+        }
+    }
+
     @Override
     public Class<StackV4Request> getRequestClass() {
         return StackV4Request.class;
@@ -291,8 +333,10 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
 
     private void initMocks() {
         // GIVEN
-        InstanceGroup instanceGroup = mock(InstanceGroup.class);
-        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        SecurityGroup securityGroup = new SecurityGroup();
+        instanceGroup.setSecurityGroup(securityGroup);
+        instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))

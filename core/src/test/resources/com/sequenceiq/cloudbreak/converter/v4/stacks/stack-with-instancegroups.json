@@ -1,0 +1,24 @@
+{
+  "name": "mystack",
+  "image": {
+    "catalog": "aws-catalog",
+    "id": "aws-image"
+  },
+  "placement": {
+    "availabilityZone": "avZone",
+    "region": "eu-west-1"
+  },
+  "environmentCrn": "cred",
+  "authentication": {
+    "publicKey": "ssh-key dsfsdfsdfsdf"
+  },
+  "instanceGroups": [{
+    "instanceGroupType": "GATEWAY",
+    "securityGroup": {
+      "securityRules": []
+    }
+  }],
+  "tags": {
+
+  }
+}

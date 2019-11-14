@@ -69,7 +69,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private static final String TCP = "tcp";
 
-    private static final List<String> DEFAULT_SECURITY_GROUP_PORTS = List.of("22", "443", "9443");
+    private static final List<String> DEFAULT_SECURITY_GROUP_PORTS = List.of("22", "443");
 
     private final EnvironmentService environmentService;
 
