@@ -10,12 +10,11 @@ import java.util.List;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementGrpc;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementGrpc.PublicEndpointManagementBlockingStub;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest;
-import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateRequest;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryRequest;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryRequest;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryResponse;
-import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationRequest;
-import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse;
+import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest;
+import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse;
 import com.google.protobuf.ByteString;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 
@@ -32,19 +31,6 @@ public class ClusterDnsClient {
         this.actorCrn = actorCrn;
     }
 
-    public String createCertificate(String requestId, String accountId, String endpoint, String environment, boolean wildcard, byte[] csr) {
-        checkNotNull(requestId);
-        checkNotNull(accountId);
-        CreateCertificateRequest.Builder requestBuilder = CreateCertificateRequest.newBuilder()
-                .setAccountId(accountId)
-                .setEnvironment(environment)
-                .setEndpoint(endpoint)
-                .setAddWildcard(wildcard)
-                .setCsr(ByteString.copyFrom(csr));
-
-        return newStub(requestId).createCertificate(requestBuilder.build()).getRequestId();
-    }
-
     public String signCertificate(String requestId, String accountId, String environment, byte[] csr) {
         checkNotNull(requestId);
         checkNotNull(accountId);
@@ -56,13 +42,13 @@ public class ClusterDnsClient {
         return newStub(requestId).signCertificate(requestBuilder.build()).getWorkflowId();
     }
 
-    public PollCertificateCreationResponse pollCertificateCreation(String requestId, String pollRequestId) {
+    public PollCertificateSigningResponse pollCertificateSigning(String requestId, String workflowId) {
         checkNotNull(requestId);
+        final PollCertificateSigningRequest.Builder builder = PollCertificateSigningRequest
+                .newBuilder()
+                .setWorkflowId(workflowId);
 
-        PollCertificateCreationRequest.Builder requestBuilder = PollCertificateCreationRequest.newBuilder()
-                .setRequestId(pollRequestId);
-
-        return newStub(requestId).pollCertificateCreation(requestBuilder.build());
+        return newStub(requestId).pollCertificateSigning(builder.build());
     }
 
     public CreateDnsEntryResponse createDnsEntryWithIp(String requestId, String accountId, String endpoint, String environment, boolean wildcard,

@@ -6,7 +6,8 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse;
+import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse;
+import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus;
 import com.dyngr.core.AttemptMaker;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
@@ -20,29 +21,32 @@ public class CreateCertificationPoller implements AttemptMaker<List<String>> {
 
     private String actorCrn;
 
-    private String pollerRequestId;
+    private String workflowId;
 
     private Optional<String> requestId;
 
     private int attempt;
 
-    public CreateCertificationPoller(GrpcClusterDnsClient grpcClusterDnsClient, String actorCrn, String pollerRequestId, Optional<String> requestId) {
+    public CreateCertificationPoller(GrpcClusterDnsClient grpcClusterDnsClient, String actorCrn, String workflowId, Optional<String> requestId) {
         this.grpcClusterDnsClient = grpcClusterDnsClient;
         this.actorCrn = actorCrn;
-        this.pollerRequestId = pollerRequestId;
+        this.workflowId = workflowId;
         this.requestId = requestId;
     }
 
     @Override
     public AttemptResult<List<String>> process() throws Exception {
         attempt++;
-        PollCertificateCreationResponse response = grpcClusterDnsClient.pollCreateCertificate(actorCrn, pollerRequestId, requestId);
-        LOGGER.debug("Polling attempt result: {}", response.getStatus());
-        if (response.getStatus().equalsIgnoreCase("succeeded")) {
+        PollCertificateSigningResponse response = grpcClusterDnsClient.pollCertificateSigning(actorCrn, workflowId, requestId);
+        final SigningStatus actualStatus = response.getStatus();
+        LOGGER.debug("Polling attempt result: {}", actualStatus);
+        if (SigningStatus.SUCCEEDED.equals(actualStatus)) {
             return AttemptResults.finishWith(response.getCertificatesList());
         }
-        if (response.getStatus().equalsIgnoreCase("FAILED")) {
-            return AttemptResults.breakFor(String.format("Certificate creation is failed for %s with message: %s ", pollerRequestId, response.getError()));
+        if (SigningStatus.FAILED.equals(actualStatus)) {
+            //TODO integrate the message for detailed cause when it will be implemented on PEM side.
+            //return AttemptResults.breakFor(String.format("Certificate creation is failed for %s with message: %s ", workflowId));
+            return AttemptResults.breakFor(String.format("Certificate creation is failed for %s.", workflowId));
         }
         LOGGER.info("The certificate polls continued, attempt: {}", attempt);
         return AttemptResults.justContinue();

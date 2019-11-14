@@ -14,126 +14,6 @@ public final class PublicEndpointManagementProto {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
-  /**
-   * <pre>
-   * Status of SignCertificate
-   * </pre>
-   *
-   * Protobuf enum {@code publicendpointmanagement.SigningStatus}
-   */
-  public enum SigningStatus
-      implements com.google.protobuf.ProtocolMessageEnum {
-    /**
-     * <code>UNKNOWN = 0;</code>
-     */
-    UNKNOWN(0),
-    /**
-     * <code>IN_PROGRESS = 1;</code>
-     */
-    IN_PROGRESS(1),
-    /**
-     * <code>SUCCEEDED = 2;</code>
-     */
-    SUCCEEDED(2),
-    /**
-     * <code>FAILED = 3;</code>
-     */
-    FAILED(3),
-    UNRECOGNIZED(-1),
-    ;
-
-    /**
-     * <code>UNKNOWN = 0;</code>
-     */
-    public static final int UNKNOWN_VALUE = 0;
-    /**
-     * <code>IN_PROGRESS = 1;</code>
-     */
-    public static final int IN_PROGRESS_VALUE = 1;
-    /**
-     * <code>SUCCEEDED = 2;</code>
-     */
-    public static final int SUCCEEDED_VALUE = 2;
-    /**
-     * <code>FAILED = 3;</code>
-     */
-    public static final int FAILED_VALUE = 3;
-
-
-    public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
-            "Can't get the number of an unknown enum value.");
-      }
-      return value;
-    }
-
-    /**
-     * @deprecated Use {@link #forNumber(int)} instead.
-     */
-    @java.lang.Deprecated
-    public static SigningStatus valueOf(int value) {
-      return forNumber(value);
-    }
-
-    public static SigningStatus forNumber(int value) {
-      switch (value) {
-        case 0: return UNKNOWN;
-        case 1: return IN_PROGRESS;
-        case 2: return SUCCEEDED;
-        case 3: return FAILED;
-        default: return null;
-      }
-    }
-
-    public static com.google.protobuf.Internal.EnumLiteMap<SigningStatus>
-        internalGetValueMap() {
-      return internalValueMap;
-    }
-    private static final com.google.protobuf.Internal.EnumLiteMap<
-        SigningStatus> internalValueMap =
-          new com.google.protobuf.Internal.EnumLiteMap<SigningStatus>() {
-            public SigningStatus findValueByNumber(int number) {
-              return SigningStatus.forNumber(number);
-            }
-          };
-
-    public final com.google.protobuf.Descriptors.EnumValueDescriptor
-        getValueDescriptor() {
-      return getDescriptor().getValues().get(ordinal());
-    }
-    public final com.google.protobuf.Descriptors.EnumDescriptor
-        getDescriptorForType() {
-      return getDescriptor();
-    }
-    public static final com.google.protobuf.Descriptors.EnumDescriptor
-        getDescriptor() {
-      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.getDescriptor().getEnumTypes().get(0);
-    }
-
-    private static final SigningStatus[] VALUES = values();
-
-    public static SigningStatus valueOf(
-        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
-          "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
-      return VALUES[desc.getIndex()];
-    }
-
-    private final int value;
-
-    private SigningStatus(int value) {
-      this.value = value;
-    }
-
-    // @@protoc_insertion_point(enum_scope:publicendpointmanagement.SigningStatus)
-  }
-
   public interface AWSElbDnsTargetOrBuilder extends
       // @@protoc_insertion_point(interface_extends:publicendpointmanagement.AWSElbDnsTarget)
       com.google.protobuf.MessageOrBuilder {
@@ -13169,22 +13049,20 @@ public final class PublicEndpointManagementProto {
 
     /**
      * <pre>
-     * Enumeration indicating the status of workflow
-     * which can be in-progress, failed or successful
+     * Status of SignCertificate
      * </pre>
      *
-     * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+     * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
      */
     int getStatusValue();
     /**
      * <pre>
-     * Enumeration indicating the status of workflow
-     * which can be in-progress, failed or successful
+     * Status of SignCertificate
      * </pre>
      *
-     * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+     * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
      */
-    com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus getStatus();
+    com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus getStatus();
 
     /**
      * <pre>
@@ -13332,32 +13210,151 @@ public final class PublicEndpointManagementProto {
               com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.Builder.class);
     }
 
-    private int bitField0_;
-    public static final int STATUS_FIELD_NUMBER = 1;
-    private int status_;
     /**
      * <pre>
      * Enumeration indicating the status of workflow
      * which can be in-progress, failed or successful
      * </pre>
      *
-     * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+     * Protobuf enum {@code publicendpointmanagement.PollCertificateSigningResponse.SigningStatus}
+     */
+    public enum SigningStatus
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <code>UNSET = 0;</code>
+       */
+      UNSET(0),
+      /**
+       * <code>IN_PROGRESS = 1;</code>
+       */
+      IN_PROGRESS(1),
+      /**
+       * <code>SUCCEEDED = 2;</code>
+       */
+      SUCCEEDED(2),
+      /**
+       * <code>FAILED = 3;</code>
+       */
+      FAILED(3),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <code>UNSET = 0;</code>
+       */
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <code>IN_PROGRESS = 1;</code>
+       */
+      public static final int IN_PROGRESS_VALUE = 1;
+      /**
+       * <code>SUCCEEDED = 2;</code>
+       */
+      public static final int SUCCEEDED_VALUE = 2;
+      /**
+       * <code>FAILED = 3;</code>
+       */
+      public static final int FAILED_VALUE = 3;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static SigningStatus valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static SigningStatus forNumber(int value) {
+        switch (value) {
+          case 0: return UNSET;
+          case 1: return IN_PROGRESS;
+          case 2: return SUCCEEDED;
+          case 3: return FAILED;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<SigningStatus>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          SigningStatus> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<SigningStatus>() {
+              public SigningStatus findValueByNumber(int number) {
+                return SigningStatus.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final SigningStatus[] VALUES = values();
+
+      public static SigningStatus valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private SigningStatus(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:publicendpointmanagement.PollCertificateSigningResponse.SigningStatus)
+    }
+
+    private int bitField0_;
+    public static final int STATUS_FIELD_NUMBER = 1;
+    private int status_;
+    /**
+     * <pre>
+     * Status of SignCertificate
+     * </pre>
+     *
+     * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
      */
     public int getStatusValue() {
       return status_;
     }
     /**
      * <pre>
-     * Enumeration indicating the status of workflow
-     * which can be in-progress, failed or successful
+     * Status of SignCertificate
      * </pre>
      *
-     * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+     * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
      */
-    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus getStatus() {
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus getStatus() {
       @SuppressWarnings("deprecation")
-      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus result = com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus.valueOf(status_);
-      return result == null ? com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus.UNRECOGNIZED : result;
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus result = com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus.valueOf(status_);
+      return result == null ? com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus.UNRECOGNIZED : result;
     }
 
     public static final int CERTIFICATES_FIELD_NUMBER = 2;
@@ -13435,7 +13432,7 @@ public final class PublicEndpointManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (status_ != com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus.UNKNOWN.getNumber()) {
+      if (status_ != com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus.UNSET.getNumber()) {
         output.writeEnum(1, status_);
       }
       for (int i = 0; i < certificates_.size(); i++) {
@@ -13450,7 +13447,7 @@ public final class PublicEndpointManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (status_ != com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus.UNKNOWN.getNumber()) {
+      if (status_ != com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, status_);
       }
@@ -13768,22 +13765,20 @@ public final class PublicEndpointManagementProto {
       private int status_ = 0;
       /**
        * <pre>
-       * Enumeration indicating the status of workflow
-       * which can be in-progress, failed or successful
+       * Status of SignCertificate
        * </pre>
        *
-       * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+       * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
        */
       public int getStatusValue() {
         return status_;
       }
       /**
        * <pre>
-       * Enumeration indicating the status of workflow
-       * which can be in-progress, failed or successful
+       * Status of SignCertificate
        * </pre>
        *
-       * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+       * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
        */
       public Builder setStatusValue(int value) {
         status_ = value;
@@ -13792,26 +13787,24 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <pre>
-       * Enumeration indicating the status of workflow
-       * which can be in-progress, failed or successful
+       * Status of SignCertificate
        * </pre>
        *
-       * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+       * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
        */
-      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus getStatus() {
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus getStatus() {
         @SuppressWarnings("deprecation")
-        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus result = com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus.valueOf(status_);
-        return result == null ? com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus.UNRECOGNIZED : result;
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus result = com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus.valueOf(status_);
+        return result == null ? com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus.UNRECOGNIZED : result;
       }
       /**
        * <pre>
-       * Enumeration indicating the status of workflow
-       * which can be in-progress, failed or successful
+       * Status of SignCertificate
        * </pre>
        *
-       * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+       * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
        */
-      public Builder setStatus(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.SigningStatus value) {
+      public Builder setStatus(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -13822,11 +13815,10 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <pre>
-       * Enumeration indicating the status of workflow
-       * which can be in-progress, failed or successful
+       * Status of SignCertificate
        * </pre>
        *
-       * <code>.publicendpointmanagement.SigningStatus status = 1;</code>
+       * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
        */
       public Builder clearStatus() {
         
@@ -14189,41 +14181,42 @@ public final class PublicEndpointManagementProto {
       "\022\027\n\017environmentName\030\002 \001(\t\022\021\n\003csr\030\003 \001(\014B\004" +
       "\210\265\030\001\"0\n\032CertificateSigningResponse\022\022\n\nwo" +
       "rkflowId\030\001 \001(\t\"3\n\035PollCertificateSigning" +
-      "Request\022\022\n\nworkflowId\030\001 \001(\t\"u\n\036PollCerti" +
-      "ficateSigningResponse\0227\n\006status\030\001 \001(\0162\'." +
-      "publicendpointmanagement.SigningStatus\022\032" +
-      "\n\014certificates\030\002 \003(\tB\004\210\265\030\001*H\n\rSigningSta" +
-      "tus\022\013\n\007UNKNOWN\020\000\022\017\n\013IN_PROGRESS\020\001\022\r\n\tSUC" +
-      "CEEDED\020\002\022\n\n\006FAILED\020\0032\212\010\n\030PublicEndpointM" +
-      "anagement\022A\n\nGetVersion\022\027.version.Versio" +
-      "nRequest\032\030.version.VersionResponse\"\000\022u\n\016" +
-      "CreateDnsEntry\022/.publicendpointmanagemen" +
-      "t.CreateDnsEntryRequest\0320.publicendpoint" +
-      "management.CreateDnsEntryResponse\"\000\022u\n\016D" +
-      "eleteDnsEntry\022/.publicendpointmanagement" +
-      ".DeleteDnsEntryRequest\0320.publicendpointm" +
-      "anagement.DeleteDnsEntryResponse\"\000\022~\n\021Cr" +
-      "eateCertificate\0222.publicendpointmanageme" +
-      "nt.CreateCertificateRequest\0323.publicendp" +
-      "ointmanagement.CreateCertificateResponse" +
-      "\"\000\022\220\001\n\027PollCertificateCreation\0228.publice" +
-      "ndpointmanagement.PollCertificateCreatio" +
-      "nRequest\0329.publicendpointmanagement.Poll" +
-      "CertificateCreationResponse\"\000\022\231\001\n\032Genera" +
-      "teManagedDomainNames\022;.publicendpointman" +
-      "agement.GenerateManagedDomainNamesReques" +
-      "t\032<.publicendpointmanagement.GenerateMan" +
-      "agedDomainNamesResponse\"\000\022~\n\017SignCertifi" +
-      "cate\0223.publicendpointmanagement.Certific" +
-      "ateSigningRequest\0324.publicendpointmanage" +
-      "ment.CertificateSigningResponse\"\000\022\215\001\n\026Po" +
-      "llCertificateSigning\0227.publicendpointman" +
-      "agement.PollCertificateSigningRequest\0328." +
-      "publicendpointmanagement.PollCertificate" +
-      "SigningResponse\"\000Bu\n9com.cloudera.thunde" +
-      "rhead.service.publicendpointmanagementB\035" +
-      "PublicEndpointManagementProtoZ\031com/cloud" +
-      "era/cdp/protobufb\006proto3"
+      "Request\022\022\n\nworkflowId\030\001 \001(\t\"\334\001\n\036PollCert" +
+      "ificateSigningResponse\022V\n\006status\030\001 \001(\0162F" +
+      ".publicendpointmanagement.PollCertificat" +
+      "eSigningResponse.SigningStatus\022\032\n\014certif" +
+      "icates\030\002 \003(\tB\004\210\265\030\001\"F\n\rSigningStatus\022\t\n\005U" +
+      "NSET\020\000\022\017\n\013IN_PROGRESS\020\001\022\r\n\tSUCCEEDED\020\002\022\n" +
+      "\n\006FAILED\020\0032\212\010\n\030PublicEndpointManagement\022" +
+      "A\n\nGetVersion\022\027.version.VersionRequest\032\030" +
+      ".version.VersionResponse\"\000\022u\n\016CreateDnsE" +
+      "ntry\022/.publicendpointmanagement.CreateDn" +
+      "sEntryRequest\0320.publicendpointmanagement" +
+      ".CreateDnsEntryResponse\"\000\022u\n\016DeleteDnsEn" +
+      "try\022/.publicendpointmanagement.DeleteDns" +
+      "EntryRequest\0320.publicendpointmanagement." +
+      "DeleteDnsEntryResponse\"\000\022~\n\021CreateCertif" +
+      "icate\0222.publicendpointmanagement.CreateC" +
+      "ertificateRequest\0323.publicendpointmanage" +
+      "ment.CreateCertificateResponse\"\000\022\220\001\n\027Pol" +
+      "lCertificateCreation\0228.publicendpointman" +
+      "agement.PollCertificateCreationRequest\0329" +
+      ".publicendpointmanagement.PollCertificat" +
+      "eCreationResponse\"\000\022\231\001\n\032GenerateManagedD" +
+      "omainNames\022;.publicendpointmanagement.Ge" +
+      "nerateManagedDomainNamesRequest\032<.public" +
+      "endpointmanagement.GenerateManagedDomain" +
+      "NamesResponse\"\000\022~\n\017SignCertificate\0223.pub" +
+      "licendpointmanagement.CertificateSigning" +
+      "Request\0324.publicendpointmanagement.Certi" +
+      "ficateSigningResponse\"\000\022\215\001\n\026PollCertific" +
+      "ateSigning\0227.publicendpointmanagement.Po" +
+      "llCertificateSigningRequest\0328.publicendp" +
+      "ointmanagement.PollCertificateSigningRes" +
+      "ponse\"\000Bu\n9com.cloudera.thunderhead.serv" +
+      "ice.publicendpointmanagementB\035PublicEndp" +
+      "ointManagementProtoZ\031com/cloudera/cdp/pr" +
+      "otobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
