@@ -125,22 +125,6 @@ public class AzureEnvironmentSecurityGroupValidatorTest {
         requestIsValid(builder);
     }
 
-    @Test
-    public void testValidationWhenBothCidrAndNoFirewallRulesAreDefinedReturnInvalid() {
-        Region region = getRegion();
-
-        EnvironmentDto environmentDto = EnvironmentDto.builder()
-                .withRegions(Set.of(region))
-                .withSecurityAccess(getNewSecurityAccessDto())
-                .withNetwork(getNewNetworkDto(true, true))
-                .withCredential(getCredential())
-                .build();
-
-        ValidationResultBuilder builder = ValidationResult.builder();
-        underTest.validate(environmentDto, builder);
-        requestIsInvalid(builder);
-    }
-
     private void requestIsValid(ValidationResultBuilder builder) {
         assertFalse(builder.build().hasError());
     }
