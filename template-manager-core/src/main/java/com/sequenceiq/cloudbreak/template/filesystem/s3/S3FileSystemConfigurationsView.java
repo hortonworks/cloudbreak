@@ -11,8 +11,8 @@ public class S3FileSystemConfigurationsView extends BaseFileSystemConfigurations
 
     private String s3GuardDynamoTableName;
 
-    public S3FileSystemConfigurationsView(S3FileSystem s3FileSystem, Collection<StorageLocationView> locations, boolean deafultFs) {
-        super(FileSystemType.S3.name(), s3FileSystem.getStorageContainer(), deafultFs, locations);
+    public S3FileSystemConfigurationsView(S3FileSystem s3FileSystem, Collection<StorageLocationView> locations, boolean defaultFs) {
+        super(FileSystemType.S3.name(), s3FileSystem.getStorageContainer(), defaultFs, locations, null);
         s3GuardDynamoTableName = s3FileSystem.getS3GuardDynamoTableName();
     }
 

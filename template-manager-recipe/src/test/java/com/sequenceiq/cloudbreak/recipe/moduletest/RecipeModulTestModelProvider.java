@@ -224,6 +224,7 @@ class RecipeModulTestModelProvider {
         fs.setAccountName("nameOfAccount");
         fs.setStorageContainerName("ContainerName");
         fs.setStorageContainer("StorageContainer");
+        fs.setManagedIdentity("managedIdentity");
         return new AdlsGen2FileSystemConfigurationsView(fs, locationViews, false);
     }
 
