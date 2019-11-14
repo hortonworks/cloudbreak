@@ -17,7 +17,7 @@ public class AmbariSecurityConfigProviderTest {
     @Test
     public void testGetAmbariUserNameWhenCloudbreakAmbariUserNameIsExistThenShouldReturnAmbariUserName() {
         Cluster cluster = TestUtil.cluster();
-        cluster.setCloudbreakAmbariUser("ambariUserName");
+        cluster.setCloudbreakUser("ambariUserName");
         cluster.setUserName("admin");
 
         String ambariUserName = underTest.getCloudbreakClusterUserName(cluster);
@@ -28,7 +28,7 @@ public class AmbariSecurityConfigProviderTest {
     @Test
     public void testGetAmbariPasswordWhenCloudbreakAmbariPasswordIsExistThenShouldReturnAmbariPassword() {
         Cluster cluster = TestUtil.cluster();
-        cluster.setCloudbreakAmbariPassword("ambariPassword");
+        cluster.setCloudbreakPassword("ambariPassword");
         cluster.setPassword("admin");
 
         String ambariPassword = underTest.getCloudbreakClusterPassword(cluster);
@@ -39,7 +39,7 @@ public class AmbariSecurityConfigProviderTest {
     @Test
     public void testGetAmbariSecurityMasterKeyWhenAmbariSecurityMasterKeyIsNullThenShouldReturnBigData() {
         Cluster cluster = TestUtil.cluster();
-        cluster.setAmbariSecurityMasterKey(null);
+        cluster.setSecurityMasterKey(null);
 
         String ambariSecurityMasterKey = underTest.getMasterKey(cluster);
 
@@ -49,7 +49,7 @@ public class AmbariSecurityConfigProviderTest {
     @Test
     public void testGetAmbariSecurityMasterKeyWhenAmbariSecurityMasterKeyIsExistThenShouldReturnAmbariSecurityMasterKey() {
         Cluster cluster = TestUtil.cluster();
-        cluster.setAmbariSecurityMasterKey("masterkey");
+        cluster.setSecurityMasterKey("masterkey");
 
         String ambariSecurityMasterKey = underTest.getMasterKey(cluster);
 

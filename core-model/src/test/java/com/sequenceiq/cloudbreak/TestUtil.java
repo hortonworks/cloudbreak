@@ -313,7 +313,7 @@ public class TestUtil {
             InstanceGroup instanceGroup, InstanceMetadataType instanceMetadataType) {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceStatus(instanceStatus);
-        instanceMetaData.setAmbariServer(ambariServer);
+        instanceMetaData.setServer(ambariServer);
         instanceMetaData.setSshPort(22);
         instanceMetaData.setDiscoveryFQDN("test-" + instanceGroup.getGroupName() + "-" + instanceGroupId + '-' + serverNumber);
         instanceMetaData.setInstanceId("test-" + instanceGroupId + '-' + serverNumber);

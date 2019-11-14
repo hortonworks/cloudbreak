@@ -80,12 +80,12 @@ public class ChangePrimaryGatewayService {
         if (newPrimaryGateway.isPresent() && formerPrimaryGateway.isPresent()) {
             InstanceMetaData fpg = formerPrimaryGateway.get();
             fpg.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
-            fpg.setAmbariServer(Boolean.FALSE);
+            fpg.setServer(Boolean.FALSE);
             transactionService.required(() -> {
                 instanceMetaDataService.save(fpg);
                 InstanceMetaData npg = newPrimaryGateway.get();
                 npg.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
-                npg.setAmbariServer(Boolean.TRUE);
+                npg.setServer(Boolean.TRUE);
                 instanceMetaDataService.save(npg);
                 Stack updatedStack = stackService.getByIdWithListsInTransaction(stackId);
                 String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(updatedStack);

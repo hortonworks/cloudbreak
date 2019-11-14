@@ -84,8 +84,8 @@ public class ClouderaManagerKerberosServiceTest {
         stack.setGatewayPort(1);
         cluster = new Cluster();
         cluster.setName("clusterName");
-        cluster.setCloudbreakAmbariUser("user");
-        cluster.setCloudbreakAmbariPassword("password");
+        cluster.setCloudbreakUser("user");
+        cluster.setCloudbreakPassword("password");
         stack.setCluster(cluster);
         clientConfig = new HttpClientConfig("1.2.3.4", null, null, null);
         when(clouderaManagerApiClientProvider.getClient(anyInt(), anyString(), anyString(), any())).thenReturn(client);

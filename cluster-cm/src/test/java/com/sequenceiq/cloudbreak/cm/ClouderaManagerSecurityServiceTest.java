@@ -193,10 +193,10 @@ public class ClouderaManagerSecurityServiceTest {
 
     private Cluster createCluster(String userName) {
         Cluster cluster = new Cluster();
-        cluster.setCloudbreakAmbariUser("cloudbereak");
-        cluster.setCloudbreakAmbariPassword("cloudbereak123");
-        cluster.setDpAmbariUser("dp");
-        cluster.setDpAmbariPassword("dp123");
+        cluster.setCloudbreakUser("cloudbereak");
+        cluster.setCloudbreakPassword("cloudbereak123");
+        cluster.setDpUser("dp");
+        cluster.setDpPassword("dp123");
         cluster.setUserName(userName);
         cluster.setPassword("admin123");
         return cluster;

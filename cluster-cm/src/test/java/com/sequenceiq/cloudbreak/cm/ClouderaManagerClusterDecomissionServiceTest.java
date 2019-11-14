@@ -188,8 +188,8 @@ public class ClouderaManagerClusterDecomissionServiceTest {
 
     private Cluster createCluster() {
         Cluster cluster = new Cluster();
-        cluster.setCloudbreakAmbariUser(USER);
-        cluster.setCloudbreakAmbariPassword(PASSWORD);
+        cluster.setCloudbreakUser(USER);
+        cluster.setCloudbreakPassword(PASSWORD);
         return cluster;
     }
 }

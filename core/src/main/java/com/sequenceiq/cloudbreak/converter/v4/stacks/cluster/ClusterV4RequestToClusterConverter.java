@@ -87,10 +87,10 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setUserName(source.getUserName());
         cluster.setPassword(source.getPassword());
         cluster.setExecutorType(source.getExecutorType());
-        cluster.setCloudbreakAmbariUser(ambariUserName);
-        cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());
-        cluster.setDpAmbariUser(cmMgmtUsername);
-        cluster.setDpAmbariPassword(PasswordUtil.generatePassword());
+        cluster.setCloudbreakUser(ambariUserName);
+        cluster.setCloudbreakPassword(PasswordUtil.generatePassword());
+        cluster.setDpUser(cmMgmtUsername);
+        cluster.setDpPassword(PasswordUtil.generatePassword());
         cluster.setDatabaseServerCrn(source.getDatabaseServerCrn());
         cluster.setBlueprint(getBlueprint(source.getBlueprintName(), workspace));
         convertGateway(source, cluster);
@@ -115,7 +115,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     private void convertVendorSpecificPart(ClusterV4Request source, Cluster cluster) {
         if (Objects.nonNull(source.getAmbari())) {
             cluster.setConfigStrategy(source.getAmbari().getConfigStrategy());
-            cluster.setAmbariSecurityMasterKey(source.getAmbari().getSecurityMasterKey());
+            cluster.setSecurityMasterKey(source.getAmbari().getSecurityMasterKey());
         }
     }
 

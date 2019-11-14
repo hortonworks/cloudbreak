@@ -213,9 +213,9 @@ public class ClusterProxyServiceTest {
     private Cluster testCluster() {
         Cluster cluster = new Cluster();
         cluster.setId(CLUSTER_ID);
-        cluster.setCloudbreakAmbariUser("cloudbreak");
+        cluster.setCloudbreakUser("cloudbreak");
         ReflectionTestUtils.setField(cluster, "cloudbreakAmbariPassword", new Secret("cbpassword", vaultSecretString("cbpassword")));
-        cluster.setDpAmbariUser("cmmgmt");
+        cluster.setDpUser("cmmgmt");
         ReflectionTestUtils.setField(cluster, "dpAmbariPassword", new Secret("dppassword", vaultSecretString("dppassword")));
         return cluster;
     }
