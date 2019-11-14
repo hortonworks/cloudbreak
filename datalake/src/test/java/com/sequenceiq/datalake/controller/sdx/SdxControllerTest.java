@@ -72,7 +72,7 @@ class SdxControllerTest {
         createSdxClusterRequest.setEnvironment("test-env");
         Map<String, String> tags = new HashMap<>();
         tags.put("tag1", "value1");
-        createSdxClusterRequest.setTags(tags);
+        createSdxClusterRequest.addTags(tags);
         SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
         sdxStatusEntity.setStatus(DatalakeStatusEnum.REQUESTED);
         sdxStatusEntity.setStatusReason("statusreason");

@@ -104,6 +104,13 @@ public class DistroXV1Request extends DistroXV1Base {
         return tags;
     }
 
+    public TagsV1Request initAndGetTags() {
+        if (tags == null) {
+            tags = new TagsV1Request();
+        }
+        return tags;
+    }
+
     public void setTags(TagsV1Request tags) {
         this.tags = tags;
     }
