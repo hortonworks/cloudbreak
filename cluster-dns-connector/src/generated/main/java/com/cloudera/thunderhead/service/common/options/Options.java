@@ -17,6 +17,12 @@ public final class Options {
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.hidden);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.hiddenReason);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.hiddenRetention);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.required);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.minimum);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.maximum);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.minimumLength);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.maximumLength);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.deprecated);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.right);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.entitlement);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.paginates);
@@ -24,9 +30,11 @@ public final class Options {
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.hidden);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.hiddenReason);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.hiddenRetention);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.deprecated);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hidden);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hiddenReason);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hiddenRetention);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.deprecated);
   }
 
   public static void registerAllExtensions(
@@ -616,6 +624,108 @@ public final class Options {
           9,
           java.lang.String.class,
           null);
+    public static final int REQUIRED_FIELD_NUMBER = 50010;
+    /**
+     * <pre>
+     * This field is required.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.FieldOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.FieldOptions,
+        java.lang.Boolean> required = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.FieldExtension.getDefaultInstance(),
+          10,
+          java.lang.Boolean.class,
+          null);
+    public static final int MINIMUM_FIELD_NUMBER = 50011;
+    /**
+     * <pre>
+     * The minimum value for this field.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.FieldOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.FieldOptions,
+        java.lang.Integer> minimum = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.FieldExtension.getDefaultInstance(),
+          11,
+          java.lang.Integer.class,
+          null);
+    public static final int MAXIMUM_FIELD_NUMBER = 50012;
+    /**
+     * <pre>
+     * The minimum value for this field.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.FieldOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.FieldOptions,
+        java.lang.Integer> maximum = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.FieldExtension.getDefaultInstance(),
+          12,
+          java.lang.Integer.class,
+          null);
+    public static final int MINIMUMLENGTH_FIELD_NUMBER = 50013;
+    /**
+     * <pre>
+     * The minimum length for this field.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.FieldOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.FieldOptions,
+        java.lang.Integer> minimumLength = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.FieldExtension.getDefaultInstance(),
+          13,
+          java.lang.Integer.class,
+          null);
+    public static final int MAXIMUMLENGTH_FIELD_NUMBER = 50014;
+    /**
+     * <pre>
+     * The minimum length for this field.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.FieldOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.FieldOptions,
+        java.lang.Integer> maximumLength = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.FieldExtension.getDefaultInstance(),
+          14,
+          java.lang.Integer.class,
+          null);
+    public static final int DEPRECATED_FIELD_NUMBER = 50015;
+    /**
+     * <pre>
+     * This field has been deprecated.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.FieldOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.FieldOptions,
+        java.lang.Boolean> deprecated = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.FieldExtension.getDefaultInstance(),
+          15,
+          java.lang.Boolean.class,
+          null);
   }
 
   public interface MethodExtensionOrBuilder extends
@@ -1147,6 +1257,23 @@ public final class Options {
           6,
           java.lang.String.class,
           null);
+    public static final int DEPRECATED_FIELD_NUMBER = 60007;
+    /**
+     * <pre>
+     * This method has been deprecated.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.MethodOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.MethodOptions,
+        java.lang.Boolean> deprecated = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.MethodExtension.getDefaultInstance(),
+          7,
+          java.lang.Boolean.class,
+          null);
   }
 
   public interface MessageExtensionOrBuilder extends
@@ -1610,6 +1737,23 @@ public final class Options {
           2,
           java.lang.String.class,
           null);
+    public static final int DEPRECATED_FIELD_NUMBER = 70003;
+    /**
+     * <pre>
+     * This message has been deprecated.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.MessageOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.MessageOptions,
+        java.lang.Boolean> deprecated = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.MessageExtension.getDefaultInstance(),
+          3,
+          java.lang.Boolean.class,
+          null);
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
@@ -1637,7 +1781,7 @@ public final class Options {
   static {
     java.lang.String[] descriptorData = {
       "\n\roptions.proto\022\007options\032 google/protobu" +
-      "f/descriptor.proto\"\266\004\n\016FieldExtension22\n" +
+      "f/descriptor.proto\"\362\006\n\016FieldExtension22\n" +
       "\tsensitive\022\035.google.protobuf.FieldOption" +
       "s\030\320\206\003 \001(\01024\n\013skipLogging\022\035.google.protob" +
       "uf.FieldOptions\030\321\206\003 \001(\01027\n\016pagingPageSiz" +
@@ -1651,24 +1795,35 @@ public final class Options {
       "ogle.protobuf.FieldOptions\030\327\206\003 \001(\01025\n\014hi" +
       "ddenReason\022\035.google.protobuf.FieldOption" +
       "s\030\330\206\003 \001(\t28\n\017hiddenRetention\022\035.google.pr" +
-      "otobuf.FieldOptions\030\331\206\003 \001(\t\"\224\003\n\017MethodEx" +
-      "tension2/\n\005right\022\036.google.protobuf.Metho" +
-      "dOptions\030\340\324\003 \001(\t25\n\013entitlement\022\036.google" +
-      ".protobuf.MethodOptions\030\341\324\003 \001(\t23\n\tpagin" +
-      "ates\022\036.google.protobuf.MethodOptions\030\342\324\003" +
-      " \001(\0102?\n\025pagingDefaultMaxItems\022\036.google.p" +
-      "rotobuf.MethodOptions\030\343\324\003 \001(\00520\n\006hidden\022" +
-      "\036.google.protobuf.MethodOptions\030\344\324\003 \001(\0102" +
-      "6\n\014hiddenReason\022\036.google.protobuf.Method" +
-      "Options\030\345\324\003 \001(\t29\n\017hiddenRetention\022\036.goo" +
-      "gle.protobuf.MethodOptions\030\346\324\003 \001(\t\"\272\001\n\020M" +
-      "essageExtension21\n\006hidden\022\037.google.proto" +
-      "buf.MessageOptions\030\360\242\004 \001(\01027\n\014hiddenReas" +
-      "on\022\037.google.protobuf.MessageOptions\030\361\242\004 " +
-      "\001(\t2:\n\017hiddenRetention\022\037.google.protobuf" +
-      ".MessageOptions\030\362\242\004 \001(\tBU\n/com.cloudera." +
-      "thunderhead.service.common.optionsB\007Opti" +
-      "onsZ\031com/cloudera/cdp/protobufb\006proto3"
+      "otobuf.FieldOptions\030\331\206\003 \001(\t21\n\010required\022" +
+      "\035.google.protobuf.FieldOptions\030\332\206\003 \001(\01020" +
+      "\n\007minimum\022\035.google.protobuf.FieldOptions" +
+      "\030\333\206\003 \001(\00520\n\007maximum\022\035.google.protobuf.Fi" +
+      "eldOptions\030\334\206\003 \001(\00526\n\rminimumLength\022\035.go" +
+      "ogle.protobuf.FieldOptions\030\335\206\003 \001(\00526\n\rma" +
+      "ximumLength\022\035.google.protobuf.FieldOptio" +
+      "ns\030\336\206\003 \001(\00523\n\ndeprecated\022\035.google.protob" +
+      "uf.FieldOptions\030\337\206\003 \001(\010\"\312\003\n\017MethodExtens" +
+      "ion2/\n\005right\022\036.google.protobuf.MethodOpt" +
+      "ions\030\340\324\003 \001(\t25\n\013entitlement\022\036.google.pro" +
+      "tobuf.MethodOptions\030\341\324\003 \001(\t23\n\tpaginates" +
+      "\022\036.google.protobuf.MethodOptions\030\342\324\003 \001(\010" +
+      "2?\n\025pagingDefaultMaxItems\022\036.google.proto" +
+      "buf.MethodOptions\030\343\324\003 \001(\00520\n\006hidden\022\036.go" +
+      "ogle.protobuf.MethodOptions\030\344\324\003 \001(\01026\n\014h" +
+      "iddenReason\022\036.google.protobuf.MethodOpti" +
+      "ons\030\345\324\003 \001(\t29\n\017hiddenRetention\022\036.google." +
+      "protobuf.MethodOptions\030\346\324\003 \001(\t24\n\ndeprec" +
+      "ated\022\036.google.protobuf.MethodOptions\030\347\324\003" +
+      " \001(\010\"\361\001\n\020MessageExtension21\n\006hidden\022\037.go" +
+      "ogle.protobuf.MessageOptions\030\360\242\004 \001(\01027\n\014" +
+      "hiddenReason\022\037.google.protobuf.MessageOp" +
+      "tions\030\361\242\004 \001(\t2:\n\017hiddenRetention\022\037.googl" +
+      "e.protobuf.MessageOptions\030\362\242\004 \001(\t25\n\ndep" +
+      "recated\022\037.google.protobuf.MessageOptions" +
+      "\030\363\242\004 \001(\010BU\n/com.cloudera.thunderhead.ser" +
+      "vice.common.optionsB\007OptionsZ\031com/cloude" +
+      "ra/cdp/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

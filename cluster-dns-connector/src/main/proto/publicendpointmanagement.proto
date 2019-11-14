@@ -204,8 +204,17 @@ message PollCertificateSigningRequest {
 
 // Response object for the PollCertificateSigning method.
 message PollCertificateSigningResponse {
+
   // Enumeration indicating the status of workflow
   // which can be in-progress, failed or successful
+  enum SigningStatus {
+    UNSET = 0;
+    IN_PROGRESS = 1;
+    SUCCEEDED = 2;
+    FAILED = 3;
+  }
+
+  // Status of SignCertificate
   SigningStatus status = 1;
 
   // List of certificates in the trust chain of the signed CSR
@@ -214,12 +223,4 @@ message PollCertificateSigningResponse {
   // Each item in the list following this certificate belongs to the authority
   // which signed the preceding certificate.
   repeated string certificates = 2 [(options.FieldExtension.skipLogging) = true];
-}
-
-// Status of SignCertificate
-enum SigningStatus {
-  UNKNOWN = 0;
-  IN_PROGRESS = 1;
-  SUCCEEDED = 2;
-  FAILED = 3;
 }
