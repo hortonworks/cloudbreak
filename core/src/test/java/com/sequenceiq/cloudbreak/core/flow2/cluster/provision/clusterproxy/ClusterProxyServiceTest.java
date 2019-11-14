@@ -156,7 +156,7 @@ public class ClusterProxyServiceTest {
         ClientCertificate clientCertificate = new ClientCertificate("/cb/test-data/secret/clientKey:secret",
                 "/cb/test-data/secret/clientCert:secret");
         return new ClusterServiceConfig("cloudera-manager-internal",
-                List.of("https://10.10.10.10:9443/clouderamanager"), asList(cloudbreakUser, dpUser), clientCertificate, null);
+                List.of("https://10.10.10.10:9443/"), asList(cloudbreakUser, dpUser), clientCertificate, null);
     }
 
     private ConfigUpdateRequest configUpdateRequest(String clusterIdentifier) {
