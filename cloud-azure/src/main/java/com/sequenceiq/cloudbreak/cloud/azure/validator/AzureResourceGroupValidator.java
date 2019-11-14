@@ -1,10 +1,11 @@
-package com.sequenceiq.cloudbreak.cloud.azure;
+package com.sequenceiq.cloudbreak.cloud.azure.validator;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.Validator;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;

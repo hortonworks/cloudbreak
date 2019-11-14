@@ -230,7 +230,7 @@
                  },
                  </#if>
                  {
-                   "apiVersion": "2015-05-01-preview",
+                   "apiVersion": "2016-09-01",
                    "type": "Microsoft.Network/networkInterfaces",
                    "name": "[concat(parameters('nicNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
@@ -262,6 +262,9 @@
                        </#if>
                    ],
                    "properties": {
+                   <#if acceleratedNetworkEnabled[instance.flavor]>
+                       "enableAcceleratedNetworking": "true",
+                   </#if>
                     <#if securityGroups[instance.groupName]?? && securityGroups[instance.groupName]?has_content>
                        "networkSecurityGroup":{
                            "id": "${securityGroups[instance.groupName]}"

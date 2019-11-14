@@ -32,6 +32,7 @@ import com.microsoft.azure.management.resources.DeploymentOperations;
 import com.microsoft.azure.management.resources.TargetResource;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStackStatus;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePremiumValidatorService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;

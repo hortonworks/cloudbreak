@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.azure;
+package com.sequenceiq.cloudbreak.cloud.azure.validator;
 
 import java.util.regex.Pattern;
 
@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CommonTagValidator;
+import com.sequenceiq.cloudbreak.cloud.azure.AzurePlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 

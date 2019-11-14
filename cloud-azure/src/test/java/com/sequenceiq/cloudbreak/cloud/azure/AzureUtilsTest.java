@@ -26,6 +26,7 @@ import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentOperation;
 import com.microsoft.azure.management.resources.DeploymentOperations;
 import com.microsoft.azure.management.resources.TargetResource;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePremiumValidatorService;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;

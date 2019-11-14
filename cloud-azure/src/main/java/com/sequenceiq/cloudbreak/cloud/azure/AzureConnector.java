@@ -23,6 +23,10 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureResourceGroupValidator;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureStorageValidator;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureSubnetValidator;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureTagValidator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 

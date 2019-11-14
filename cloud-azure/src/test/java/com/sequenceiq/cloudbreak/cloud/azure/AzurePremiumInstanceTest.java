@@ -9,6 +9,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.mockito.InjectMocks;
 
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePremiumValidatorService;
+
 @RunWith(Parameterized.class)
 public class AzurePremiumInstanceTest {
 

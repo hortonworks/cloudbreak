@@ -43,6 +43,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureAcceleratedNetworkValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStorageView;
@@ -92,6 +93,8 @@ public class AzureTemplateBuilderTest {
 
     private static final int ROOT_VOLUME_SIZE = 50;
 
+    private static final Map<String, Boolean> ACCELERATED_NETWORK_SUPPORT = Map.of("m1.medium", false);
+
     @Mock
     private AzureUtils azureUtils;
 
@@ -103,6 +106,9 @@ public class AzureTemplateBuilderTest {
 
     @Mock
     private DefaultCostTaggingService defaultCostTaggingService;
+
+    @Mock
+    private AzureAcceleratedNetworkValidator azureAcceleratedNetworkValidator;
 
     @Spy
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
@@ -225,6 +231,7 @@ public class AzureTemplateBuilderTest {
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -238,6 +245,7 @@ public class AzureTemplateBuilderTest {
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
         when(azureUtils.isNoSecurityGroups(any())).then(invocation -> true);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -280,6 +288,7 @@ public class AzureTemplateBuilderTest {
         when(azureUtils.getCustomResourceGroupName(any())).thenReturn("existingResourceGroup");
         when(azureUtils.getCustomSubnetIds(any())).thenReturn(Collections.singletonList("existingSubnet"));
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
@@ -312,6 +321,7 @@ public class AzureTemplateBuilderTest {
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
         when(azureUtils.isNoSecurityGroups(any())).then(invocation -> false);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -341,6 +351,7 @@ public class AzureTemplateBuilderTest {
         when(azureUtils.isPrivateIp(any())).then(invocation -> false);
         when(azureUtils.isNoSecurityGroups(any())).then(invocation -> false);
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -390,6 +401,7 @@ public class AzureTemplateBuilderTest {
 
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
@@ -416,6 +428,7 @@ public class AzureTemplateBuilderTest {
 
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
@@ -442,6 +455,7 @@ public class AzureTemplateBuilderTest {
 
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
@@ -468,6 +482,7 @@ public class AzureTemplateBuilderTest {
 
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
@@ -499,6 +514,7 @@ public class AzureTemplateBuilderTest {
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -525,6 +541,7 @@ public class AzureTemplateBuilderTest {
 
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
@@ -557,6 +574,7 @@ public class AzureTemplateBuilderTest {
 
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
@@ -587,6 +605,7 @@ public class AzureTemplateBuilderTest {
 
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
@@ -615,6 +634,7 @@ public class AzureTemplateBuilderTest {
 
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
@@ -643,6 +663,7 @@ public class AzureTemplateBuilderTest {
 
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
@@ -672,6 +693,7 @@ public class AzureTemplateBuilderTest {
 
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(Collections.emptyMap());
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
@@ -701,6 +723,7 @@ public class AzureTemplateBuilderTest {
 
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
@@ -730,6 +753,7 @@ public class AzureTemplateBuilderTest {
 
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
@@ -770,6 +794,7 @@ public class AzureTemplateBuilderTest {
 
         //WHEN
         when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");

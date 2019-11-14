@@ -60,7 +60,7 @@ public class AzureDatabaseResourceService {
 
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureUtils.getResourceGroupName(cloudContext, stack);
-        String template = azureTemplateBuilder.build(stackName, cloudContext, stack);
+        String template = azureTemplateBuilder.build(cloudContext, stack);
         String region = ac.getCloudContext().getLocation().getRegion().value();
 
         try {
