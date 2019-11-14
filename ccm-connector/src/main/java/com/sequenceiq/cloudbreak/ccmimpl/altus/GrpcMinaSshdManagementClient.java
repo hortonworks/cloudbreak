@@ -35,6 +35,11 @@ public class GrpcMinaSshdManagementClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcMinaSshdManagementClient.class);
 
+    /**
+     * Dummy minasshd service ID for key deregistration calls.
+     */
+    private static final String DUMMY_MINASSHD_SERVICE_ID = "any";
+
     @VisibleForTesting
     @Autowired(required = false)
     Clock clock = Clock.systemUTC();
@@ -194,6 +199,36 @@ public class GrpcMinaSshdManagementClient {
 
             return RetryUtil.performWithRetries(
                     () -> client.generateAndRegisterSshTunnelingKeyPair(requestId, accountId, minaSshdServiceId, keyId), actionDescription,
+                    waitUntilTime, pollingIntervalMillis,
+                    CcmException.class, timeoutExceptionSupplier,
+                    LOGGER);
+        }
+    }
+
+    /**
+     * Wraps call to unregisterSshTunnelingKey, with retries to tolerate transient failures.
+     *
+     * @param requestId the request ID for the request
+     * @param actorCrn  the actor CRN
+     * @param accountId the account ID
+     * @param keyId     the key ID
+     * @return the response
+     * @throws CcmException         if an exception occurs
+     * @throws InterruptedException if the action is interrupted
+     */
+    public MinaSshdManagementProto.UnregisterSshTunnelingKeyResponse unregisterSshTunnelingKey(
+            String requestId, String actorCrn, String accountId, String keyId) throws CcmException, InterruptedException {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            MinaSshdManagementClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+
+            ZonedDateTime waitUntilTime = ZonedDateTime.now(clock).plus(minaSshdManagementClientConfig.getTimeoutMs(), ChronoUnit.MILLIS);
+            int pollingIntervalMillis = minaSshdManagementClientConfig.getPollingIntervalMs();
+
+            String actionDescription = "deregister tunneling key " + keyId;
+            Supplier<CcmException> timeoutExceptionSupplier = () -> new CcmException(String.format("Timed out while trying to %s", actionDescription), true);
+
+            return RetryUtil.performWithRetries(
+                    () -> client.unregisterSshTunnelingKey(requestId, DUMMY_MINASSHD_SERVICE_ID, keyId), actionDescription,
                     waitUntilTime, pollingIntervalMillis,
                     CcmException.class, timeoutExceptionSupplier,
                     LOGGER);
