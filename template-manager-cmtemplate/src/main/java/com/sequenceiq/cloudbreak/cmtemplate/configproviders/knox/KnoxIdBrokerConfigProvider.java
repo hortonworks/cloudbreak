@@ -4,16 +4,22 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles.IDBROKER;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles.KNOX;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.common.model.FileSystemType;
 
@@ -44,8 +50,15 @@ public class KnoxIdBrokerConfigProvider extends AbstractRoleConfigProvider {
                                 config("idbroker_aws_group_mapping", groupMappings));
                         break;
                     case AZURE:
-                        config = List.of(config("idbroker_azure_user_mapping", userMappings),
-                                config("idbroker_azure_group_mapping", groupMappings));
+                        config = new ArrayList<>(List.of(config("idbroker_azure_user_mapping", userMappings),
+                                        config("idbroker_azure_group_mapping", groupMappings)));
+                        ClouderaManagerRepo cmRepo = source.getProductDetailsView().getCm();
+                        if (CMRepositoryVersionUtil.isIdBrokerManagedIdentitySupported(cmRepo)) {
+                            String idBrokerManagedIdentity = getIdBrokerManagedIdentity(source.getFileSystemConfigurationView());
+                            if (Objects.nonNull(idBrokerManagedIdentity)) {
+                                config.add(config("idbroker_azure_vm_assumer_identity", idBrokerManagedIdentity));
+                            }
+                        }
                         break;
                     case GCP:
                         config = List.of(config("idbroker_gcp_user_mapping", userMappings),
@@ -79,6 +92,10 @@ public class KnoxIdBrokerConfigProvider extends AbstractRoleConfigProvider {
             cloudPlatform = source.getCloudPlatform();
         }
         return cloudPlatform;
+    }
+
+    private String getIdBrokerManagedIdentity(Optional<BaseFileSystemConfigurationsView> fileSystemConfigurationsView) {
+        return fileSystemConfigurationsView.map(BaseFileSystemConfigurationsView::getIdBrokerIdentityId).orElse(null);
     }
 
     @Override

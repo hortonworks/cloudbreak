@@ -34,6 +34,12 @@ public class CMRepositoryVersionUtil {
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_6_4_0);
     }
 
+    // TODO: Finalize if new version is released
+    public static boolean isIdBrokerManagedIdentitySupported(ClouderaManagerRepo clouderaManagerRepoDetails) {
+        return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_1_0);
+
+    }
+
     public static boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {
         Comparator<Versioned> versionComparator = new VersionComparator();
         return versionComparator.compare(currentVersion, limitedAPIVersion) > -1;

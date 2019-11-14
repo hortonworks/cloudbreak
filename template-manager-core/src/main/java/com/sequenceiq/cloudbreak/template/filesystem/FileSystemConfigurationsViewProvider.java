@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.template.filesystem;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.adlsgen2.AdlsGen2FileSystemConfigurationsView;
@@ -23,6 +25,7 @@ import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.filesystem.WasbFileSystem;
+import com.sequenceiq.common.model.CloudIdentityType;
 
 @Service
 public class FileSystemConfigurationsViewProvider {
@@ -85,6 +88,8 @@ public class FileSystemConfigurationsViewProvider {
                 return s3IdentityToConfigView(locations, cloudStorage);
             } else if (source.getType().isWasb()) {
                 return wasbIdentityToConfigView(locations);
+            } else if (source.getType().isAdlsGen2()) {
+                return adlsGen2IdentityToConfigView(locations, cloudStorage);
             }
         }
         return new BaseFileSystemConfigurationsView(source.getType().name(), locations);
@@ -114,5 +119,19 @@ public class FileSystemConfigurationsViewProvider {
     private BaseFileSystemConfigurationsView wasbIdentityToConfigView(Set<StorageLocationView> locations) {
         WasbFileSystem wasbFileSystem = new WasbFileSystem();
         return new WasbFileSystemConfigurationsView(wasbFileSystem, locations, false);
+    }
+
+    private BaseFileSystemConfigurationsView adlsGen2IdentityToConfigView(Set<StorageLocationView> locations, CloudStorage cloudStorage) {
+        AdlsGen2FileSystem adlsGen2FileSystem = new AdlsGen2FileSystem();
+        if (Objects.nonNull(cloudStorage) && Objects.nonNull(cloudStorage.getCloudIdentities()) && cloudStorage.getCloudIdentities().size() > 0) {
+            Optional<CloudIdentity> idBrokerIdentity = cloudStorage.getCloudIdentities().stream()
+                    .filter(cloudIdentity -> cloudIdentity.getIdentityType().equals(CloudIdentityType.ID_BROKER))
+                    .findFirst();
+            if (idBrokerIdentity.isPresent()) {
+                return new AdlsGen2FileSystemConfigurationsView(adlsGen2FileSystem, locations, false,
+                        idBrokerIdentity.get().getAdlsGen2Identity().getManagedIdentity());
+            }
+        }
+        return new AdlsGen2FileSystemConfigurationsView(adlsGen2FileSystem, locations, false);
     }
 }
