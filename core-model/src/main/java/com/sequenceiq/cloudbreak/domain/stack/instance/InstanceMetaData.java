@@ -42,6 +42,8 @@ public class InstanceMetaData implements ProvisionEntity {
 
     private Boolean ambariServer;
 
+    private Boolean clusterManagerServer;
+
     private String discoveryFQDN;
 
     @Column(columnDefinition = "TEXT")
@@ -130,11 +132,21 @@ public class InstanceMetaData implements ProvisionEntity {
     }
 
     public Boolean getAmbariServer() {
-        return ambariServer;
+        return getClusterManagerServer() != null ? getClusterManagerServer() : ambariServer;
+    }
+
+    public Boolean getClusterManagerServer() {
+        return clusterManagerServer;
     }
 
     public void setAmbariServer(Boolean ambariServer) {
         this.ambariServer = ambariServer;
+        clusterManagerServer = ambariServer;
+    }
+
+    public void setClusterManagerServer(Boolean clusterManagerServer) {
+        this.clusterManagerServer = clusterManagerServer;
+        ambariServer = clusterManagerServer;
     }
 
     public String getDiscoveryFQDN() {
