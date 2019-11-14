@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.stack.cluster;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -42,9 +44,15 @@ public class DatalakeResources implements ProvisionEntity, WorkspaceAwareResourc
 
     private String datalakeAmbariUrl;
 
+    private String datalakeClusterManagerUrl;
+
     private String datalakeAmbariIp;
 
+    private String datalakeClusterManagerIp;
+
     private String datalakeAmbariFqdn;
+
+    private String datalakeClusterManagerFqdn;
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT", nullable = false)
@@ -96,27 +104,57 @@ public class DatalakeResources implements ProvisionEntity, WorkspaceAwareResourc
     }
 
     public String getDatalakeAmbariUrl() {
-        return datalakeAmbariUrl;
+        return isNotEmpty(getDatalakeClusterManagerUrl()) ? getDatalakeClusterManagerUrl() : datalakeAmbariUrl;
+    }
+
+    public String getDatalakeClusterManagerUrl() {
+        return datalakeClusterManagerUrl;
     }
 
     public void setDatalakeAmbariUrl(String datalakeAmbariUrl) {
         this.datalakeAmbariUrl = datalakeAmbariUrl;
+        this.datalakeClusterManagerUrl = datalakeAmbariUrl;
+    }
+
+    public void setDatalakeClusterManagerUrl(String datalakeClusterManagerUrl) {
+        this.datalakeAmbariUrl = datalakeClusterManagerUrl;
+        this.datalakeClusterManagerUrl = datalakeClusterManagerUrl;
     }
 
     public String getDatalakeAmbariIp() {
-        return datalakeAmbariIp;
+        return isNotEmpty(getDatalakeClusterManagerIp()) ? getDatalakeClusterManagerIp() : datalakeAmbariIp;
+    }
+
+    public String getDatalakeClusterManagerIp() {
+        return datalakeClusterManagerIp;
     }
 
     public void setDatalakeAmbariIp(String datalakeAmbariIp) {
         this.datalakeAmbariIp = datalakeAmbariIp;
+        this.datalakeClusterManagerIp = datalakeAmbariIp;
+    }
+
+    public void setDatalakeClusterManagerIp(String datalakeClusterManagerIp) {
+        this.datalakeClusterManagerIp = datalakeClusterManagerIp;
+        this.datalakeAmbariIp = datalakeClusterManagerIp;
     }
 
     public String getDatalakeAmbariFqdn() {
-        return datalakeAmbariFqdn;
+        return isNotEmpty(getDatalakeClusterManagerFqdn()) ? getDatalakeClusterManagerFqdn() : datalakeAmbariFqdn;
+    }
+
+    public String getDatalakeClusterManagerFqdn() {
+        return datalakeClusterManagerFqdn;
     }
 
     public void setDatalakeAmbariFqdn(String datalakeAnbariFqdn) {
         datalakeAmbariFqdn = datalakeAnbariFqdn;
+        datalakeClusterManagerFqdn = datalakeAnbariFqdn;
+    }
+
+    public void setDatalakeClusterManagerFqdn(String datalakeClusterManagerFqdn) {
+        this.datalakeClusterManagerFqdn = datalakeClusterManagerFqdn;
+        this.datalakeAmbariFqdn = datalakeClusterManagerFqdn;
     }
 
     public Json getDatalakeComponents() {
@@ -158,4 +196,5 @@ public class DatalakeResources implements ProvisionEntity, WorkspaceAwareResourc
     public void setEnvironmentCrn(String environmentCrn) {
         this.environmentCrn = environmentCrn;
     }
+
 }
