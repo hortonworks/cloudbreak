@@ -99,10 +99,10 @@ public class ClusterProxyService {
     }
 
     private List<ClusterServiceConfig> serviceConfigs(Stack stack) {
-        String internalClusterManagerUrl = clusterManagerUrl(stack, ServiceFamilies.GATEWAY.getDefaultPort());
+        String internalAdminUrl = internalAdminUrl(stack, ServiceFamilies.GATEWAY.getDefaultPort());
         return asList(
                 cmServiceConfig(stack, null, "cloudera-manager", clusterManagerUrl(stack)),
-                cmServiceConfig(stack, clientCertificates(stack), "cloudera-manager-internal", internalClusterManagerUrl));
+                cmServiceConfig(stack, clientCertificates(stack), "cb-internal", internalAdminUrl));
     }
 
     private String getAccountId(Stack stack) {
@@ -157,9 +157,9 @@ public class ClusterProxyService {
         return String.format("https://%s/clouderamanager", gatewayIp);
     }
 
-    private String clusterManagerUrl(Stack stack, int port) {
+    private String internalAdminUrl(Stack stack, int port) {
         String gatewayIp = stack.getPrimaryGatewayInstance().getPublicIpWrapper();
-        return String.format("https://%s:%d/", gatewayIp, port);
+        return String.format("https://%s:%d", gatewayIp, port);
     }
 
     private String vaultPath(String vaultSecretJsonString) {
