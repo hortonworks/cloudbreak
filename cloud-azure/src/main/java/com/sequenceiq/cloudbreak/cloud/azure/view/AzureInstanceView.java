@@ -64,6 +64,10 @@ public class AzureInstanceView {
         this.managedIdentity = managedIdentity;
     }
 
+    public CloudInstance getInstance() {
+        return instance;
+    }
+
     public boolean hasRealInstanceId() {
         return instance.getInstanceId() != null;
     }

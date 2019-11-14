@@ -1,8 +1,10 @@
-package com.sequenceiq.cloudbreak.cloud.azure;
+package com.sequenceiq.cloudbreak.cloud.azure.validator;
 
 import java.util.Arrays;
 
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 
 @Service
 public class AzurePremiumValidatorService {
