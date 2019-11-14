@@ -84,14 +84,14 @@ public class MetadataSetupService {
                 instanceMetaDataEntry.setStartDate(clock.getCurrentTimeMillis());
                 instanceMetaDataEntry.setSubnetId(cloudInstance.getStringParameter(CloudInstance.SUBNET_ID));
                 instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
-                instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
+                instanceMetaDataEntry.setServer(Boolean.FALSE);
                 if (instanceMetaDataEntry.getInstanceMetadataType() == null) {
                     if (ig != null) {
                         if (InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())) {
                             if (!primaryIgSelected) {
                                 primaryIgSelected = true;
                                 instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
-                                instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);
+                                instanceMetaDataEntry.setServer(Boolean.TRUE);
                             } else {
                                 instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
                             }

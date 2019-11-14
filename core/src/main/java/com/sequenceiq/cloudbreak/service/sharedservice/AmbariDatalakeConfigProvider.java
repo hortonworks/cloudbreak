@@ -163,9 +163,9 @@ public class AmbariDatalakeConfigProvider {
 
     private void setupDatalakeGlobalParams(String datalakeAmbariUrl, String datalakeAmbariIp, String datalakeAmbariFqdn,
             DatalakeResources datalakeResources) {
-        datalakeResources.setDatalakeAmbariUrl(datalakeAmbariUrl);
-        datalakeResources.setDatalakeAmbariIp(datalakeAmbariIp);
-        datalakeResources.setDatalakeAmbariFqdn(StringUtils.isEmpty(datalakeAmbariFqdn) ? datalakeAmbariIp : datalakeAmbariFqdn);
+        datalakeResources.setDatalakeUrl(datalakeAmbariUrl);
+        datalakeResources.setDatalakeIp(datalakeAmbariIp);
+        datalakeResources.setDatalakeFqdn(StringUtils.isEmpty(datalakeAmbariFqdn) ? datalakeAmbariIp : datalakeAmbariFqdn);
         Set<String> components = new HashSet<>();
         datalakeResources.setDatalakeComponentSet(components);
     }
