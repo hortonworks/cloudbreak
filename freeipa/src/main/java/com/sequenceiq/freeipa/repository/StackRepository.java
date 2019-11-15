@@ -15,6 +15,7 @@ import com.sequenceiq.authorization.repository.CheckPermission;
 import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.ResourceAction;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 
@@ -70,4 +71,19 @@ public interface StackRepository extends BaseJpaRepository<Stack, Long> {
     @Override
     @Query("SELECT s FROM Stack s WHERE s.id = :id")
     Optional<Stack> findById(@Param("id") Long id);
+
+    @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT s FROM Stack s WHERE s.stackStatus.status IN :stackStatuses AND s.terminated = -1 ")
+    List<Stack> findAllWithStatuses(@Param("stackStatuses") Collection<Status> stackStatuses);
+
+    @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.stackStatus.status IN :stackStatuses AND s.terminated = -1 ")
+    List<Stack> findByAccountIdWithStatuses(@Param("accountId") String accountId, @Param("stackStatuses") Collection<Status> stackStatuses);
+
+    @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn IN :environmentCrns " +
+            "AND s.stackStatus.status IN :stackStatuses AND s.terminated = -1 ")
+    List<Stack> findMultipleByEnvironmentCrnAndAccountIdWithStatuses(
+            @Param("environmentCrns") Collection<String> environmentCrns, @Param("accountId") String accountId,
+            @Param("stackStatuses") Collection<Status> stackStatuses);
 }

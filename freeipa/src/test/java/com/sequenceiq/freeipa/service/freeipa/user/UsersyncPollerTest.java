@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
@@ -107,7 +108,7 @@ class UsersyncPollerTest {
         Stack stack = new Stack();
         stack.setAccountId(ACCOUNT_ID);
         stack.setEnvironmentCrn(ENVIRONMENT_CRN);
-        when(stackService.findAllRunning()).thenReturn(List.of(stack));
+        when(stackService.findAllWithStatuses(Status.AVAILABLE_STATUSES)).thenReturn(List.of(stack));
         return stack;
     }
 

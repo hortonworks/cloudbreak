@@ -65,16 +65,20 @@ freeipa:
     max-failures-before-lock: 10
     failure-reset-interval: 3
     lockout-duration: 10
-  syncoperation:
-    max-subjects-per-request: 10
+  operation:
     cleanup:
       timeout-millis: 1800000
       initial-delay-millis: 60000
       fixed-delay-millis: 60000
+  usersync:
+    max-subjects-per-request: 10
     poller:
       enabled: true
       initial-delay-millis: 60000
       fixed-delay-millis: 300000
+    threadpool:
+      core.size: 100
+      capacity.size: 4000
 
 info:
   app:
