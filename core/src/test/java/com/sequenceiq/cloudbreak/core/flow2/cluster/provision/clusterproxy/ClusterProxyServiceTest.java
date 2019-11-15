@@ -136,7 +136,8 @@ public class ClusterProxyServiceTest {
     }
 
     private ConfigRegistrationRequest configRegistrationRequestWithTunnelEntries() {
-        List<TunnelEntry> tunnelEntries = List.of(new TunnelEntry("i-abc123", "GATEWAY", "10.10.10.10", 443));
+        List<TunnelEntry> tunnelEntries = List.of(new TunnelEntry("i-abc123", "GATEWAY", "10.10.10.10", 9443),
+                new TunnelEntry("i-abc123", "KNOX", "10.10.10.10", 443));
         return new ConfigRegistrationRequestBuilder(STACK_CRN)
                 .withAliases(List.of(String.valueOf(CLUSTER_ID))).withServices(List.of(cmServiceConfig(), cmInternalServiceConfig()))
                 .withAccountId(TEST_ACCOUNT_ID)
