@@ -27,14 +27,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
@@ -45,6 +42,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -73,6 +71,9 @@ class SdxServiceTest {
     private static final String CLUSTER_NAME = "test-sdx-cluster";
 
     private static final Set<String> SUPPORTED_PLATFORMS = Set.of("AWS");
+
+    @Mock
+    private PlatformConfig sdxPLatformConfig;
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
@@ -113,7 +114,6 @@ class SdxServiceTest {
     @BeforeEach
     void initMocks() {
         MockitoAnnotations.initMocks(this);
-        ReflectionTestUtils.setField(underTest, "dbServiceSupportedPlatforms", SUPPORTED_PLATFORMS);
     }
 
     @Test
@@ -195,6 +195,8 @@ class SdxServiceTest {
     @Test
     void createSdxForAzureWithEnabledDB() {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        when(sdxPLatformConfig.isExternalDatabaseSupportedFor("AZURE")).thenReturn(false);
+        when(sdxPLatformConfig.getSupportedExternalDatabasePlatforms()).thenReturn(Set.of(CloudPlatform.AWS));
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         Map<String, String> tags = new HashMap<>();
         tags.put("mytag", "tagecske");
@@ -222,6 +224,8 @@ class SdxServiceTest {
         sdxClusterRequest.setTags(tags);
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        when(sdxPLatformConfig.isExternalDatabaseSupportedOrExperimental("AWS")).thenReturn(true);
+        when(sdxPLatformConfig.isExternalDatabaseSupportedFor("AWS")).thenReturn(true);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -248,20 +252,21 @@ class SdxServiceTest {
         verify(sdxReactorFlowManager).triggerSdxCreation(id);
     }
 
-    @ParameterizedTest
-    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE"})
-    public void testSetPlatformDefaultForCreateDatabaseIfNeededWhenExternalDatabaseNull(CloudPlatform cloudPlatform) {
-        SdxClusterRequest sdxClusterRequest  = new SdxClusterRequest();
+    public void testSetPlatformDefaultForAzureCreateDatabaseIfNeededWhenCreateIsNull() {
+        CloudPlatform cloudPlatform = CloudPlatform.AZURE;
+        when(sdxPLatformConfig.isExternalDatabaseSupportedFor("AZURE")).thenReturn(false);
+        SdxClusterRequest sdxClusterRequestWithExternalDatabase = new SdxClusterRequest();
+        sdxClusterRequestWithExternalDatabase.setExternalDatabase(new SdxDatabaseRequest());
         SdxCluster sdxCluster = new SdxCluster();
 
-        underTest.setPlatformDefaultForCreateDatabaseIfNeeded(sdxClusterRequest, sdxCluster, cloudPlatform.name());
+        underTest.setPlatformDefaultForCreateDatabaseIfNeeded(sdxClusterRequestWithExternalDatabase, sdxCluster, cloudPlatform.name());
 
         assertEquals(CloudPlatform.AWS.equals(cloudPlatform), sdxCluster.isCreateDatabase());
     }
 
-    @ParameterizedTest
-    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE"})
-    public void testSetPlatformDefaultForCreateDatabaseIfNeededWhenCreateIsNull(CloudPlatform cloudPlatform) {
+    public void testSetPlatformDefaultForAwsCreateDatabaseIfNeededWhenCreateIsNull() {
+        CloudPlatform cloudPlatform = CloudPlatform.AWS;
+        when(sdxPLatformConfig.isExternalDatabaseSupportedFor("AWS")).thenReturn(true);
         SdxClusterRequest sdxClusterRequestWithExternalDatabase = new SdxClusterRequest();
         sdxClusterRequestWithExternalDatabase.setExternalDatabase(new SdxDatabaseRequest());
         SdxCluster sdxCluster = new SdxCluster();

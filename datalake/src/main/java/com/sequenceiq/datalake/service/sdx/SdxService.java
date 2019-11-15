@@ -14,13 +14,11 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -36,7 +34,6 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -49,6 +46,7 @@ import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -69,8 +67,8 @@ public class SdxService implements ResourceIdProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
 
-    @Value("${cb.enabledplatforms:}")
-    private Set<String> dbServiceSupportedPlatforms;
+    @Inject
+    private PlatformConfig platformConfig;
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
@@ -101,13 +99,6 @@ public class SdxService implements ResourceIdProvider {
 
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @PostConstruct
-    public void initSupportedPlatforms() {
-        if (dbServiceSupportedPlatforms.isEmpty()) {
-            dbServiceSupportedPlatforms = Set.of("AWS");
-        }
-    }
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
         LOGGER.info("Searching for SDX cluster by ids and statuses.");
@@ -172,6 +163,7 @@ public class SdxService implements ResourceIdProvider {
         sdxCluster.setCreated(clock.getCurrentTimeMillis());
         sdxCluster.setCreateDatabase(sdxClusterRequest.getExternalDatabase() != null && sdxClusterRequest.getExternalDatabase().getCreate());
         setPlatformDefaultForCreateDatabaseIfNeeded(sdxClusterRequest, sdxCluster, environment.getCloudPlatform());
+        setExperimentalForCreateDatabaseIfNeeded(sdxClusterRequest, sdxCluster, environment.getCloudPlatform());
         validateDatabaseRequest(sdxCluster, environment);
         sdxCluster.setEnvName(environment.getName());
         sdxCluster.setEnvCrn(environment.getCrn());
@@ -225,12 +217,15 @@ public class SdxService implements ResourceIdProvider {
 
     @VisibleForTesting
     void setPlatformDefaultForCreateDatabaseIfNeeded(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster, String cloudPlatform) {
-        if (dbServiceSupportedPlatforms.contains(cloudPlatform) &&
-                (sdxClusterRequest.getExternalDatabase() == null ||
-                        sdxClusterRequest.getExternalDatabase().getCreate() == null)) {
-            // Azure external db temporarily not supported: Azure needs username@short-hostname, but CM did not support it so far (7.0.1).
-            // Once supported by CM, please delete restrictions for azure.
-            sdxCluster.setCreateDatabase(!CloudPlatform.AZURE.name().equals(cloudPlatform));
+        if (platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)) {
+            sdxCluster.setCreateDatabase(true);
+        }
+    }
+
+    @VisibleForTesting
+    void setExperimentalForCreateDatabaseIfNeeded(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster, String cloudPlatform) {
+        if (sdxClusterRequest.getExternalDatabase() != null && sdxClusterRequest.getExternalDatabase().getCreate()) {
+            sdxCluster.setCreateDatabase(true);
         }
     }
 
@@ -279,9 +274,9 @@ public class SdxService implements ResourceIdProvider {
     }
 
     private void validateDatabaseRequest(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
-        if (sdxCluster.isCreateDatabase() && !dbServiceSupportedPlatforms.contains(environment.getCloudPlatform())) {
+        if (sdxCluster.isCreateDatabase() && !platformConfig.isExternalDatabaseSupportedOrExperimental(environment.getCloudPlatform())) {
             String message = String.format("Cannot create external database for sdx: %s, for now only %s is/are supported", sdxCluster.getClusterName(),
-                    dbServiceSupportedPlatforms.toString());
+                    platformConfig.getSupportedExternalDatabasePlatforms());
             LOGGER.debug(message);
             throw new BadRequestException(message);
         }
