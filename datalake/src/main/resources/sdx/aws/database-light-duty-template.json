@@ -1,5 +1,5 @@
 {
-  "instanceType": "db.m5.large",
+  "instanceType": "${sdx.rdb.aws.lightduty.instance.type:db.m5.large}",
   "vendor": "postgres",
   "volumeSize": 100
 }
