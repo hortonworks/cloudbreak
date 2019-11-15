@@ -51,12 +51,16 @@ public class ProvisionerService {
     private StackV4Endpoint stackV4Endpoint;
 
     @Inject
+    private CloudbreakFlowService cloudbreakFlowService;
+
+    @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     public void startStackDeletion(Long id, boolean forced) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             try {
                 stackV4Endpoint.delete(0L, sdxCluster.getClusterName(), forced);
+                cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(sdxCluster);
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETION_IN_PROGRESS,
                         ResourceEvent.SDX_CLUSTER_DELETION_STARTED, "Datalake stack deletion in progress", sdxCluster);
             } catch (NotFoundException e) {
@@ -83,6 +87,10 @@ public class ProvisionerService {
                         LOGGER.info("Deletion polling cloudbreak for stack status: '{}' in '{}' env", sdxCluster.getClusterName(), sdxCluster.getEnvName());
                         try {
                             MDCBuilder.addRequestId(requestId);
+                            if (cloudbreakFlowService.isLastKnownFlowRunning(sdxCluster)) {
+                                LOGGER.info("Deletion polling will continue, cluster has an active flow in Cloudbreak, id: {}", sdxCluster.getId());
+                                return AttemptResults.justContinue();
+                            }
                             StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet());
                             LOGGER.info("Stack status of SDX {} by response from cloudbreak: {}", sdxCluster.getClusterName(),
                                     stackV4Response.getStatus().name());

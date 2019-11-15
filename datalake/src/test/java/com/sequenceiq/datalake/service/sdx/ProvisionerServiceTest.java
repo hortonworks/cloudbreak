@@ -72,6 +72,9 @@ class ProvisionerServiceTest {
     private Clock clock;
 
     @Mock
+    private CloudbreakFlowService cloudbreakFlowService;
+
+    @Mock
     private StackV4Endpoint stackV4Endpoint;
 
     @Mock

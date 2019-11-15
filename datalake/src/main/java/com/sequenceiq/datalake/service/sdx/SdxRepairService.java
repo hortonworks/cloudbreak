@@ -87,7 +87,7 @@ public class SdxRepairService {
         try {
             LOGGER.info("Triggering repair flow for cluster {} with hostgroups {}", sdxCluster.getClusterName(), repairRequest.getHostGroupName());
             stackV4Endpoint.repairCluster(0L, sdxCluster.getClusterName(), createRepairRequest(repairRequest));
-            cloudbreakFlowService.setCloudbreakFlowChainId(sdxCluster);
+            cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(sdxCluster);
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, ResourceEvent.SDX_REPAIR_STARTED,
                     "Datalake repair in progress", sdxCluster);
         } catch (NotFoundException e) {
@@ -133,7 +133,7 @@ public class SdxRepairService {
                 LOGGER.info("Repair polling cancelled in inmemory store, id: " + sdxCluster.getId());
                 return AttemptResults.breakFor("Repair polling cancelled in inmemory store, id: " + sdxCluster.getId());
             }
-            if (cloudbreakFlowService.hasActiveFlow(sdxCluster)) {
+            if (cloudbreakFlowService.isLastKnownFlowRunning(sdxCluster)) {
                 LOGGER.info("Repair polling will continue, cluster has an active flow in Cloudbreak, id: " + sdxCluster.getId());
                 return AttemptResults.justContinue();
             } else {

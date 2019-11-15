@@ -25,13 +25,19 @@ public class CloudbreakFlowService {
     @Inject
     private SdxClusterRepository sdxClusterRepository;
 
-    public void setCloudbreakFlowChainId(SdxCluster sdxCluster) {
+    public void getAndSaveLastCloudbreakFlowChainId(SdxCluster sdxCluster) {
         FlowLogResponse lastFlowByResourceName = flowEndpoint.getLastFlowByResourceName(sdxCluster.getClusterName());
+        LOGGER.info("Found last flow from Cloudbreak, flowId: {} created: {} nextEvent:{} resourceId: {} stateStatus: {}",
+                lastFlowByResourceName.getFlowId(),
+                lastFlowByResourceName.getCreated(),
+                lastFlowByResourceName.getNextEvent(),
+                lastFlowByResourceName.getResourceId(),
+                lastFlowByResourceName.getStateStatus());
         sdxCluster.setLastCbFlowChainId(lastFlowByResourceName.getFlowChainId());
         sdxClusterRepository.save(sdxCluster);
     }
 
-    public boolean hasActiveFlow(SdxCluster sdxCluster) {
+    public boolean isLastKnownFlowRunning(SdxCluster sdxCluster) {
         try {
             String actualCbFlowChainId = sdxCluster.getLastCbFlowChainId();
             if (actualCbFlowChainId != null) {
