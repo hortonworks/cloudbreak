@@ -4,8 +4,14 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class StackPreTerminationRequest extends StackEvent {
 
-    public StackPreTerminationRequest(Long stackId) {
+    private final boolean forced;
+
+    public StackPreTerminationRequest(Long stackId, boolean forced) {
         super(stackId);
+        this.forced = forced;
     }
 
+    public boolean getForced() {
+        return forced;
+    }
 }

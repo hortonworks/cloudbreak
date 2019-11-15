@@ -81,7 +81,8 @@ public class ClusterKerberosServiceTest {
 
         underTest.leaveDomains(stack);
 
-        verify(hostOrchestrator, times(1)).leaveDomain(any(GatewayConfig.class), any(), eq("ad_member"), eq("ad_leave"), any(ExitCriteriaModel.class));
+        verify(hostOrchestrator, times(1))
+                .leaveDomain(any(GatewayConfig.class), any(), eq("ad_member"), eq("ad_leave"), any(ExitCriteriaModel.class));
     }
 
     @Test
@@ -91,7 +92,8 @@ public class ClusterKerberosServiceTest {
 
         underTest.leaveDomains(stack);
 
-        verify(hostOrchestrator, times(1)).leaveDomain(any(GatewayConfig.class), any(), eq("ipa_member"), eq("ipa_leave"), any(ExitCriteriaModel.class));
+        verify(hostOrchestrator, times(1))
+                .leaveDomain(any(GatewayConfig.class), any(), eq("ipa_member"), eq("ipa_leave"), any(ExitCriteriaModel.class));
     }
 
     @Test(expected = CloudbreakException.class)

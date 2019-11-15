@@ -62,7 +62,12 @@ abstract class AbstractStackTerminationAction<P extends Payload>
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
-        return new StackTerminationContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, resources);
+        return createStackTerminationContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, resources, payload);
+    }
+
+    protected StackTerminationContext createStackTerminationContext(FlowParameters flowParameters, Stack stack, CloudContext cloudContext,
+            CloudCredential cloudCredential, CloudStack cloudStack, List<CloudResource> resources, P payload) {
+        return new StackTerminationContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, resources, false);
     }
 
     @Override
