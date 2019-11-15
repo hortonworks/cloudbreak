@@ -93,7 +93,7 @@ public class SdxUpgradeService {
                     "Changing image",
                     cluster.get());
             stackV4Endpoint.changeImage(0L, cluster.get().getClusterName(), stackImageChangeRequest);
-            cloudbreakFlowService.setCloudbreakFlowChainId(cluster.get());
+            cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(cluster.get());
         } else {
             throw new NotFoundException("Not found cluster with id" + id);
         }
@@ -118,7 +118,7 @@ public class SdxUpgradeService {
                     "Upgrade started",
                     cluster.get());
             stackV4Endpoint.upgradeCluster(0L, cluster.get().getClusterName());
-            cloudbreakFlowService.setCloudbreakFlowChainId(cluster.get());
+            cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(cluster.get());
         } else {
             throw new NotFoundException("Not found cluster with id" + id);
         }
@@ -141,7 +141,7 @@ public class SdxUpgradeService {
             if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
                 LOGGER.info("{} polling cancelled in inmemory store, id: {}", pollingMessage, sdxCluster.getId());
                 return AttemptResults.breakFor(pollingMessage + " polling cancelled in inmemory store, id: " + sdxCluster.getId());
-            } else if (cloudbreakFlowService.hasActiveFlow(sdxCluster)) {
+            } else if (cloudbreakFlowService.isLastKnownFlowRunning(sdxCluster)) {
                 LOGGER.info("{} polling will continue, cluster has an active flow in Cloudbreak, id: {}", pollingMessage, sdxCluster.getId());
                 return AttemptResults.justContinue();
             } else {

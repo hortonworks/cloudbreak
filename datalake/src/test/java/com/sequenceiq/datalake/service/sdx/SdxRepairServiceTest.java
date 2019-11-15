@@ -66,7 +66,7 @@ public class SdxRepairServiceTest {
         cluster.setClusterName(CLUSTER_NAME);
         SdxRepairRequest sdxRepairRequest = new SdxRepairRequest();
         sdxRepairRequest.setHostGroupName("master");
-        doNothing().when(cloudbreakFlowService).setCloudbreakFlowChainId(any());
+        doNothing().when(cloudbreakFlowService).getAndSaveLastCloudbreakFlowChainId(any());
         underTest.startRepairInCb(cluster, sdxRepairRequest);
         verify(stackV4Endpoint).repairCluster(eq(0L), eq(CLUSTER_NAME), captor.capture());
         assertEquals("master", captor.getValue().getHostGroups().get(0));
@@ -82,7 +82,7 @@ public class SdxRepairServiceTest {
         cluster.setClusterName(CLUSTER_NAME);
         StackV4Response resp = new StackV4Response();
         resp.setStatus(Status.UPDATE_FAILED);
-        when(cloudbreakFlowService.hasActiveFlow(any())).thenReturn(Boolean.FALSE);
+        when(cloudbreakFlowService.isLastKnownFlowRunning(any())).thenReturn(Boolean.FALSE);
         when(stackV4Endpoint.get(eq(0L), eq("dummyCluster"), any())).thenReturn(resp);
         AttemptResult<StackV4Response> attempt = underTest.checkClusterStatusDuringRepair(cluster);
         assertEquals(AttemptState.BREAK, attempt.getState());
@@ -94,7 +94,7 @@ public class SdxRepairServiceTest {
         cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
-        when(cloudbreakFlowService.hasActiveFlow(any())).thenReturn(Boolean.TRUE);
+        when(cloudbreakFlowService.isLastKnownFlowRunning(any())).thenReturn(Boolean.TRUE);
         AttemptResult<StackV4Response> attempt = underTest.checkClusterStatusDuringRepair(cluster);
         assertEquals(AttemptState.CONTINUE, attempt.getState());
 

@@ -80,7 +80,7 @@ public class SdxSyncHandler implements EventHandler<SdxSyncWaitRequest> {
             LOGGER.debug("Polling stack sync process for id: {}", sdxId);
             SdxCluster sdxCluster = sdxService.getById(sdxId);
             sdxService.sync(sdxCluster.getClusterName());
-            cloudbreakFlowService.setCloudbreakFlowChainId(sdxCluster);
+            cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(sdxCluster);
             StackV4Response stackV4Response = pollingSync(sdxCluster);
             updateSdxStatus(sdxCluster, stackV4Response);
             response = new SdxSyncSuccessEvent(sdxId, userId, requestId);
@@ -112,7 +112,7 @@ public class SdxSyncHandler implements EventHandler<SdxSyncWaitRequest> {
                 LOGGER.info("Sync polling cancelled in inmemory store, id: " + sdxCluster.getId());
                 return AttemptResults.breakFor("Sync polling cancelled in inmemory store, id: " + sdxCluster.getId());
             }
-            if (cloudbreakFlowService.hasActiveFlow(sdxCluster)) {
+            if (cloudbreakFlowService.isLastKnownFlowRunning(sdxCluster)) {
                 LOGGER.info("Sync polling will continue, cluster has an active flow in Cloudbreak, id: " + sdxCluster.getId());
                 return AttemptResults.justContinue();
             } else {

@@ -54,11 +54,11 @@ public class CloudbreakFlowServiceTest {
 
         when(flowEndpoint.getFlowLogsByResourceNameAndChainId(anyString(), eq(FLOW_CHAIN_ID)))
                 .thenReturn(Lists.newArrayList(createFlowLogResponse(StateStatus.PENDING, true, null)));
-        assertTrue(underTest.hasActiveFlow(cluster));
+        assertTrue(underTest.isLastKnownFlowRunning(cluster));
 
         when(flowEndpoint.getFlowLogsByResourceNameAndChainId(anyString(), eq(FLOW_CHAIN_ID)))
                 .thenReturn(Lists.newArrayList(createFlowLogResponse(StateStatus.SUCCESSFUL, false, null)));
-        assertTrue(underTest.hasActiveFlow(cluster));
+        assertTrue(underTest.isLastKnownFlowRunning(cluster));
 
         verify(flowEndpoint, times(2)).getFlowLogsByResourceNameAndChainId(eq(CLUSTER_NAME), eq(FLOW_CHAIN_ID));
     }
@@ -72,10 +72,10 @@ public class CloudbreakFlowServiceTest {
 
         when(flowEndpoint.getFlowLogsByResourceNameAndChainId(anyString(), eq(FLOW_CHAIN_ID)))
                 .thenReturn(Lists.newArrayList(createFlowLogResponse(StateStatus.SUCCESSFUL, true, null)));
-        assertFalse(underTest.hasActiveFlow(cluster));
+        assertFalse(underTest.isLastKnownFlowRunning(cluster));
 
         cluster.setLastCbFlowChainId(null);
-        assertFalse(underTest.hasActiveFlow(cluster));
+        assertFalse(underTest.isLastKnownFlowRunning(cluster));
 
         verify(flowEndpoint, times(1)).getFlowLogsByResourceNameAndChainId(eq(CLUSTER_NAME), eq(FLOW_CHAIN_ID));
     }
@@ -89,7 +89,7 @@ public class CloudbreakFlowServiceTest {
 
         when(flowEndpoint.getFlowLogsByResourceNameAndChainId(anyString(), eq(FLOW_CHAIN_ID))).thenThrow(new RuntimeException("something"));
 
-        assertFalse(underTest.hasActiveFlow(cluster));
+        assertFalse(underTest.isLastKnownFlowRunning(cluster));
     }
 
     @Test
@@ -103,7 +103,7 @@ public class CloudbreakFlowServiceTest {
                 .thenReturn(createFlowLogResponse(StateStatus.SUCCESSFUL, true, null));
         when(sdxClusterRepository.save(any())).thenReturn(cluster);
 
-        underTest.setCloudbreakFlowChainId(cluster);
+        underTest.getAndSaveLastCloudbreakFlowChainId(cluster);
 
         verify(flowEndpoint).getLastFlowByResourceName(anyString());
 
@@ -122,7 +122,7 @@ public class CloudbreakFlowServiceTest {
         when(flowEndpoint.getLastFlowByResourceName(anyString())).thenThrow(new NotFoundException("something"));
 
         Assertions.assertThrows(NotFoundException.class,
-                () -> underTest.setCloudbreakFlowChainId(cluster));
+                () -> underTest.getAndSaveLastCloudbreakFlowChainId(cluster));
 
         verify(flowEndpoint).getLastFlowByResourceName(anyString());
         verifyZeroInteractions(sdxClusterRepository);
