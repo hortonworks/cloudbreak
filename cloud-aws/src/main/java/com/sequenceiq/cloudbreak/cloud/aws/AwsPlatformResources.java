@@ -147,19 +147,19 @@ public class AwsPlatformResources implements PlatformResources {
     @Value("#{'${cb.aws.disabled.instance.types:}'.split(',')}")
     private List<String> disabledInstanceTypes;
 
-    @Value("#{'${cb.aws.distrox.disabled.instance.types:}'.split(',')}")
-    private List<String> disabledDistroxInstanceTypes;
+    @Value("#{'${cb.aws.distrox.enabled.instance.types:}'.split(',')}")
+    private List<String> enabledDistroxInstanceTypes;
 
     private final Predicate<VmType> enabledInstanceTypeFilter = vmt -> disabledInstanceTypes.stream()
             .filter(it -> !it.isEmpty())
             .noneMatch(di -> vmt.value().startsWith(di));
 
-    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> disabledDistroxInstanceTypes.stream()
+    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> enabledDistroxInstanceTypes.stream()
             .filter(it -> !it.isEmpty())
             .map(it -> getMachineType(it))
             .collect(Collectors.toList())
             .stream()
-            .noneMatch(di -> vmt.value().startsWith(di));
+            .anyMatch(di -> vmt.value().startsWith(di));
 
     private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
 

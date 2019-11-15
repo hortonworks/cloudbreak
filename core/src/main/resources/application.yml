@@ -130,20 +130,25 @@ cb:
     spotinstances.enabled: true
     disabled.instance.types:
     distrox:
-      disabled.instance.types: >
-                              a1,
-                              cr1,cc2,c3,c5d,c5n,c5.x,c5.24x,c1,c4,c5.m,c5.l,c5.12,c5.18,
-                              d2,
-                              f1,
-                              g2,g3,
-                              hs1,h1.16,
-                              i3en,i3.l,i3.m,i3.x,i3.16,i2,
-                              m1,m2,m3,m5d,m5ad,m4,m5a,m5.x,m5.m,m5.l,m5.12,m5.16,m5.24,
-                              p3dn,p2.x,p3.16,
-                              r3,r4,r5d.l,r5d.m,r5d.x,r5d.2x,r5d.12,r5d.24,r5d.8,r5d.16,r5a,r5.l,r5.x,r5.m,r5.24,r5.12,r5.16,
-                              t1,t2,t3,
-                              x1,
-                              z1d
+      enabled.instance.types: >
+                              m5.2xlarge,
+                              m5.4xlarge,
+                              m5.8xlarge,
+                              r5.2xlarge,
+                              r5.4xlarge,
+                              r5.8xlarge,
+                              c5.2xlarge,
+                              c5.4xlarge,
+                              c5.9xlarge,
+                              i3.2xlarge,
+                              i3.4xlarge,
+                              i3.8xlarge,
+                              h1.2xlarge,
+                              h1.4xlarge,
+                              h1.8xlarge,
+                              p3.2xlarge,
+                              p3.8xlarge,
+                              r5d.4xlarge
     hostkey.verify: false
     external.id: provision-ambari
     role.session.name: hadoop-provisioning
