@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.environment.validation.validators;
 
-import static com.sequenceiq.environment.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
-import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dto.NetworkDto;

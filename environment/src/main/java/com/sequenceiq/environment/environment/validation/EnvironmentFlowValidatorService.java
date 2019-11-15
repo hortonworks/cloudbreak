@@ -2,7 +2,7 @@ package com.sequenceiq.environment.environment.validation;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.util.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentLogStorageLocationValidator;

@@ -65,7 +65,12 @@ public class IdBrokerMappingsDeleteHandler extends EventSenderAwareHandler<Envir
                     .build();
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
-            EnvDeleteFailedEvent failedEvent = new EnvDeleteFailedEvent(environmentDto.getId(), environmentDto.getName(), e, environmentDto.getResourceCrn());
+            EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
+                    .withEnvironmentID(environmentDto.getId())
+                    .withException(e)
+                    .withResourceCrn(environmentDto.getResourceCrn())
+                    .withResourceName(environmentDto.getName())
+                    .build();
             eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         }
     }

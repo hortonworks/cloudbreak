@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
-import com.sequenceiq.environment.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.MockNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -62,9 +62,10 @@ public class MockEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
     NetworkDto setProviderSpecificFields(NetworkDto.Builder builder, BaseNetwork network) {
         MockNetwork mockNetwork = (MockNetwork) network;
         return builder.withMock(
-                MockParams.MockParamsBuilder.aMockParams()
-                        .withVpcId(mockNetwork.getVpcId())
-                        .build())
+                MockParams.MockParamsBuilder
+                    .aMockParams()
+                    .withVpcId(mockNetwork.getVpcId())
+                    .build())
                 .build();
     }
 

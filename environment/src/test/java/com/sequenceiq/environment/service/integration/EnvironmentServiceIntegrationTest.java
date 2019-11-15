@@ -188,28 +188,6 @@ public class EnvironmentServiceIntegrationTest {
         assertEquals(result.getVerificationUrl(), VERIFICATION_URL);
     }
 
-/*
-    TODO: finish grant code tests
-    @Test
-    public void testCredentialInitCodeGrantFlow() throws InterruptedException {
-        credentialRequest.setName("testcredential");
-        credentialRequest.setCloudPlatform("AZURE");
-        AzureCredentialRequestParameters azureCredentialRequestParameters = new AzureCredentialRequestParameters();
-        azureCredentialRequestParameters.setSubscriptionId("subid");
-        azureCredentialRequestParameters.setTenantId("tenant");
-        RoleBasedRequest roleBasedRequest = new RoleBasedRequest();
-        roleBasedRequest.setDeploymentAddress("alma");
-        roleBasedRequest.setRoleName("role");
-        azureCredentialRequestParameters.setRoleBased(roleBasedRequest);
-        credentialRequest.setAzure(azureCredentialRequestParameters);
-
-        InitCodeGrantFlowResponse initCodeGrantFlowResponse = new InitCodeGrantFlowResponse(1L, Map.of());
-
-        when(requestProvider.getInitCodeGrantFlowRequest(any(), any())).thenReturn(initCodeGrantFlowRequest);
-        when(initCodeGrantFlowRequest.await()).thenReturn(initCodeGrantFlowResponse);
-        Response result = client.credentialV1Endpoint().initCodeGrantFlow(credentialRequest);
-    }*/
-
     @Test
     public void testCredentialList() {
         credentialRepository.save(credential);

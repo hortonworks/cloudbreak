@@ -35,9 +35,11 @@ public class UserPreferencesService {
         if (userPreferencesOptional.isPresent()) {
             userPreferences = userPreferencesOptional.get();
             if (StringUtils.isEmpty(userPreferences.getExternalId())) {
+                LOGGER.debug("External id exist for current user with crn '{}'", userCrn);
                 userPreferences.setExternalId(generateExternalId());
             }
         } else {
+            LOGGER.debug("User preferences does not exist, creating it with crn '{}'", userCrn);
             userPreferences = new UserPreferences(generateExternalId(), userCrn);
         }
         return userPreferencesRepository.save(userPreferences).getExternalId();

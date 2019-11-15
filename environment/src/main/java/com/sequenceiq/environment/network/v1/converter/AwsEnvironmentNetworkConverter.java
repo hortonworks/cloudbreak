@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
-import com.sequenceiq.environment.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -57,9 +57,10 @@ public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
     NetworkDto setProviderSpecificFields(NetworkDto.Builder builder, BaseNetwork network) {
         AwsNetwork awsNetwork = (AwsNetwork) network;
         return builder.withAws(
-                AwsParams.AwsParamsBuilder.anAwsParams()
-                        .withVpcId(awsNetwork.getVpcId())
-                        .build())
+                AwsParams.AwsParamsBuilder
+                    .anAwsParams()
+                    .withVpcId(awsNetwork.getVpcId())
+                    .build())
                 .build();
     }
 

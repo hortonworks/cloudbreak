@@ -1,12 +1,13 @@
 package com.sequenceiq.environment.environment.validation.network;
 
-import static com.sequenceiq.environment.CloudPlatform.AWS;
+
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.util.ValidationResult;
-import com.sequenceiq.environment.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Component

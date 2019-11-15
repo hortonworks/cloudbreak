@@ -1,11 +1,11 @@
 package com.sequenceiq.environment.environment.validation.validators;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.YARN;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.valueOf;
 import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.doIfFalse;
-import static com.sequenceiq.environment.CloudPlatform.AWS;
-import static com.sequenceiq.environment.CloudPlatform.AZURE;
-import static com.sequenceiq.environment.CloudPlatform.MOCK;
-import static com.sequenceiq.environment.CloudPlatform.YARN;
-import static com.sequenceiq.environment.CloudPlatform.valueOf;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -18,10 +18,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.util.ValidationResult;
-import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.SubnetValidator;
-import com.sequenceiq.environment.CloudPlatform;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
@@ -114,7 +114,7 @@ public class EnvironmentNetworkProviderValidator {
                     environmentSecurityGroupValidatorsByCloudPlatform.get(valueOf(cloudPlatform));
             if (environmentSecurityGroupValidator != null) {
                 environmentSecurityGroupValidator.validate(request, resultBuilder);
-            } else if (!cloudPlatform.equals(MOCK.name()) && !cloudPlatform.equals(YARN.name())) {
+            } else if (!MOCK.name().equals(cloudPlatform) && !YARN.name().equals(cloudPlatform)) {
                 resultBuilder.error(String.format("Environment specific security group is not supported for cloud platform: '%s'!", cloudPlatform));
             }
         }

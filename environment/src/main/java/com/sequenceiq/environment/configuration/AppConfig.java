@@ -16,8 +16,8 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
-import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
@@ -114,9 +114,7 @@ public class AppConfig {
 
     @Bean
     public SupportedPlatforms supportedFreeIpaPlatforms() {
-        return new SupportedPlatforms(
-                supportedFreeIpaPlatforms.split(","),
-                supportedRedbeamsPlatforms.split(","));
+        return new SupportedPlatforms(supportedFreeIpaPlatforms.split(","));
     }
 
 }
