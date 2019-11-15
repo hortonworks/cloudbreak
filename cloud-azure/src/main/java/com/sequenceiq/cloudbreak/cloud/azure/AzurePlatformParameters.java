@@ -114,7 +114,7 @@ public class AzurePlatformParameters implements PlatformParameters {
     }
 
     public static DiskType defaultDiskType() {
-        return diskType(LOCALLY_REDUNDANT.value());
+        return diskType(STANDARD_SSD_LRS.value());
     }
 
     @Override
