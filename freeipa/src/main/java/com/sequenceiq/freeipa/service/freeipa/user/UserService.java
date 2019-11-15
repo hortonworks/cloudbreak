@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,7 @@ import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Config;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
+import com.sequenceiq.freeipa.configuration.UsersyncConfig;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationStatus;
@@ -69,7 +71,7 @@ public class UserService {
     private static final int DEFAULT_MAX_SUBJECTS_PER_REQUEST = 10;
 
     @VisibleForTesting
-    @Value("${freeipa.syncoperation.max-subjects-per-request:10}")
+    @Value("${freeipa.usersync.max-subjects-per-request}")
     int maxSubjectsPerRequest = DEFAULT_MAX_SUBJECTS_PER_REQUEST;
 
     @Inject
@@ -85,6 +87,7 @@ public class UserService {
     private FreeIpaUsersStateProvider freeIpaUsersStateProvider;
 
     @Inject
+    @Qualifier(UsersyncConfig.USERSYNC_TASK_EXECUTOR)
     private AsyncTaskExecutor asyncTaskExecutor;
 
     @Inject

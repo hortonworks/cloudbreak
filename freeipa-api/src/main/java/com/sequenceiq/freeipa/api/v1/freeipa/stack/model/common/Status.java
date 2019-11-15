@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common;
 
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public enum Status {
     REQUESTED,
@@ -26,18 +27,24 @@ public enum Status {
     MAINTENANCE_MODE_ENABLED,
     UNKNOWN;
 
+    public static final Collection<Status> AVAILABLE_STATUSES = List.of(AVAILABLE, MAINTENANCE_MODE_ENABLED);
+
+    public static final Collection<Status> REMOVABLE_STATUSES = List.of(AVAILABLE, UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
+            DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED);
+
+    public static final Collection<Status> FAILED_STATUSES = List.of(UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED, START_FAILED,
+            STOP_FAILED);
+
     public boolean isRemovableStatus() {
-        return Arrays.asList(AVAILABLE, UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
-                DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED).contains(this);
+        return REMOVABLE_STATUSES.contains(this);
     }
 
     public boolean isFailed() {
-        return Arrays.asList(UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED, START_FAILED, STOP_FAILED)
-                .contains(this);
+        return FAILED_STATUSES.contains(this);
     }
 
     public boolean isAvailable() {
-        return Arrays.asList(AVAILABLE, MAINTENANCE_MODE_ENABLED).contains(this);
+        return AVAILABLE_STATUSES.contains(this);
     }
 
     public boolean isSuccessfullyDeleted() {

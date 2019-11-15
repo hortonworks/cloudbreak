@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -47,7 +48,11 @@ public class StackService {
     }
 
     public List<Stack> getMultipleByEnvironmentCrnAndAccountId(Collection<String> environmentCrns, String accountId) {
-        return stackRepository.findMultipleByEnvironmentCrnAndAccountId(environmentCrns, accountId);
+        if (environmentCrns.isEmpty()) {
+            return getAllByAccountId(accountId);
+        } else {
+            return stackRepository.findMultipleByEnvironmentCrnAndAccountId(environmentCrns, accountId);
+        }
     }
 
     public Optional<Stack> findByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
@@ -73,5 +78,21 @@ public class StackService {
 
     public List<StackIdWithStatus> getStatuses(Set<Long> stackIds) {
         return stackRepository.findStackStatusesWithoutAuth(stackIds);
+    }
+
+    public List<Stack> findAllWithStatuses(Collection<Status> statuses) {
+        return stackRepository.findAllWithStatuses(statuses);
+    }
+
+    public List<Stack> findAllByAccountIdWithStatuses(String accountId, Collection<Status> statuses) {
+        return stackRepository.findByAccountIdWithStatuses(accountId, statuses);
+    }
+
+    public List<Stack> findMultipleByEnvironmentCrnAndAccountIdWithStatuses(Collection<String> environmentCrns, String accountId, Collection<Status> statuses) {
+        if (environmentCrns.isEmpty()) {
+            return findAllByAccountIdWithStatuses(accountId, statuses);
+        } else {
+            return stackRepository.findMultipleByEnvironmentCrnAndAccountIdWithStatuses(environmentCrns, accountId, statuses);
+        }
     }
 }

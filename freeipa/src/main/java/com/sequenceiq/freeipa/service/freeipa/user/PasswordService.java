@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
+import com.sequenceiq.freeipa.configuration.UsersyncConfig;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationStatus;
 import com.sequenceiq.freeipa.entity.Operation;
@@ -53,6 +55,7 @@ public class PasswordService {
     private GrpcUmsClient umsClient;
 
     @Inject
+    @Qualifier(UsersyncConfig.USERSYNC_TASK_EXECUTOR)
     private AsyncTaskExecutor asyncTaskExecutor;
 
     @Inject
