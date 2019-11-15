@@ -25,7 +25,7 @@ public class YarnEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
     }
 
     @Override
-    public BaseNetwork setProviderSpecificNetwork(BaseNetwork baseNetwork, CreatedCloudNetwork createdCloudNetwork) {
+    public BaseNetwork setCreatedCloudNetwork(BaseNetwork baseNetwork, CreatedCloudNetwork createdCloudNetwork) {
         YarnNetwork yarnNetwork = (YarnNetwork) baseNetwork;
         Map<String, Object> properties = createdCloudNetwork.getProperties();
         yarnNetwork.setQueue((String) properties.getOrDefault("queue", null));
@@ -52,8 +52,4 @@ public class YarnEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
         return CloudPlatform.YARN;
     }
 
-    @Override
-    public boolean hasExistingNetwork(BaseNetwork baseNetwork) {
-        return false;
-    }
 }

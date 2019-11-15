@@ -95,16 +95,16 @@ class EnvironmentNetworkServiceTest {
         when(networkCreationRequestFactory.create(environmentDto)).thenReturn(networkCreationRequest);
         when(networkConnector.createNetworkWithSubnets(networkCreationRequest, USER_NAME)).thenReturn(createdCloudNetwork);
         when(environmentNetworkConverterMap.get(CloudPlatform.valueOf(CLOUD_PLATFORM))).thenReturn(networkConverter);
-        when(networkConverter.setProviderSpecificNetwork(baseNetwork, createdCloudNetwork)).thenReturn(baseNetwork);
+        when(networkConverter.setCreatedCloudNetwork(baseNetwork, createdCloudNetwork)).thenReturn(baseNetwork);
 
-        BaseNetwork actual = underTest.createNetwork(environmentDto, baseNetwork);
+        BaseNetwork actual = underTest.createCloudNetwork(environmentDto, baseNetwork);
 
         verify(cloudConnector).networkConnector();
         verify(cloudPlatformConnectors).get(any(CloudPlatformVariant.class));
         verify(networkCreationRequestFactory).create(environmentDto);
         verify(networkConnector).createNetworkWithSubnets(networkCreationRequest, USER_NAME);
         verify(environmentNetworkConverterMap).get(CloudPlatform.valueOf(CLOUD_PLATFORM));
-        verify(networkConverter).setProviderSpecificNetwork(baseNetwork, createdCloudNetwork);
+        verify(networkConverter).setCreatedCloudNetwork(baseNetwork, createdCloudNetwork);
         assertEquals(baseNetwork, actual);
     }
 
@@ -117,7 +117,7 @@ class EnvironmentNetworkServiceTest {
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
         when(cloudConnector.networkConnector()).thenReturn(null);
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.createNetwork(environmentDto, new AzureNetwork()));
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.createCloudNetwork(environmentDto, new AzureNetwork()));
 
         verify(cloudPlatformConnectors, times(1)).get(any());
     }
