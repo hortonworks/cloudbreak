@@ -18,11 +18,11 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         if (networkDto != null) {
             AzureParams azureParams = networkDto.getAzure();
             if (azureParams != null) {
-                if (StringUtils.isEmpty(azureParams.getNetworkId())) {
-                    resultBuilder.error(missingParamErrorMessage("network identifier(networkId)", getCloudPlatform().name()));
+                if (StringUtils.isNotEmpty(azureParams.getNetworkId()) && StringUtils.isEmpty(azureParams.getResourceGroupName())) {
+                    resultBuilder.error("If networkId is specified, resourceGroupName must be specified too.");
                 }
-                if (StringUtils.isEmpty(azureParams.getResourceGroupName())) {
-                    resultBuilder.error(missingParamErrorMessage("resource group's name(resourceGroupName)", getCloudPlatform().name()));
+                if (StringUtils.isEmpty(azureParams.getNetworkId()) && StringUtils.isNotEmpty(azureParams.getResourceGroupName())) {
+                    resultBuilder.error("If resourceGroupName is specified, networkId must be specified too.");
                 }
             } else {
                 resultBuilder.error(missingParamsErrorMsg(AZURE));

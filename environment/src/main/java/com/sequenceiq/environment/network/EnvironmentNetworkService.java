@@ -24,6 +24,7 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.service.NetworkCreationRequestFactory;
@@ -53,13 +54,13 @@ public class EnvironmentNetworkService {
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
     }
 
-    public BaseNetwork createNetwork(EnvironmentDto environment, BaseNetwork baseNetwork) {
+    public BaseNetwork createCloudNetwork(EnvironmentDto environment, BaseNetwork baseNetwork) {
         NetworkConnector networkConnector = getNetworkConnector(environment.getCloudPlatform())
                 .orElseThrow(() -> new BadRequestException("No network connector for cloud platform: " + environment.getCloudPlatform()));
         NetworkCreationRequest networkCreationRequest = networkCreationRequestFactory.create(environment);
         EnvironmentNetworkConverter converter = environmentNetworkConverterMap.get(getCloudPlatform(environment));
         CreatedCloudNetwork createdCloudNetwork = networkConnector.createNetworkWithSubnets(networkCreationRequest, getUserFromCrn(environment.getCreator()));
-        return converter.setProviderSpecificNetwork(baseNetwork, createdCloudNetwork);
+        return converter.setCreatedCloudNetwork(baseNetwork, createdCloudNetwork);
     }
 
     public String getNetworkCidr(Network network, String cloudPlatform, Credential credential) {
@@ -86,6 +87,7 @@ public class EnvironmentNetworkService {
                 .withCloudCredential(cloudCredential)
                 .withRegion(environment.getLocation().getName());
         getNoPublicIp(environment.getNetwork()).ifPresent(builder::withResourceGroup);
+        builder.withExisting(environment.getNetwork().getRegistrationType() == RegistrationType.EXISTING);
         return builder.build();
     }
 

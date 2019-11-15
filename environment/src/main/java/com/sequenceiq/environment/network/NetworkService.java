@@ -75,10 +75,6 @@ public class NetworkService {
         return CloudPlatform.valueOf(environment.getCloudPlatform());
     }
 
-    public boolean hasExistingNetwork(BaseNetwork baseNetwork, CloudPlatform cloudPlatform) {
-        return environmentNetworkConverterMap.get(cloudPlatform).hasExistingNetwork(baseNetwork);
-    }
-
     public Map<String, CloudSubnet> retrieveSubnetMetadata(Environment environment, NetworkDto network) {
         if (network == null || network.getSubnetIds().isEmpty()) {
             return Map.of();

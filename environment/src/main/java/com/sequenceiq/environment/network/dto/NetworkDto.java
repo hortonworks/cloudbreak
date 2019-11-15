@@ -7,6 +7,7 @@ import java.util.Set;
 import org.apache.commons.collections4.MapUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 
@@ -36,6 +37,8 @@ public class NetworkDto {
 
     private final RegistrationType registrationType;
 
+    private final CloudPlatform cloudPlatform;
+
     public NetworkDto(Builder builder) {
         this.id = builder.id;
         this.resourceCrn = builder.resourceCrn;
@@ -49,6 +52,7 @@ public class NetworkDto {
         this.networkId = builder.networkId;
         this.privateSubnetCreation = builder.privateSubnetCreation;
         this.registrationType = builder.registrationType;
+        this.cloudPlatform = builder.cloudPlatform;
     }
 
     public Long getId() {
@@ -111,7 +115,12 @@ public class NetworkDto {
         return registrationType;
     }
 
+    public CloudPlatform getCloudPlatform() {
+        return cloudPlatform;
+    }
+
     public static final class Builder {
+
         private Long id;
 
         private String name;
@@ -136,6 +145,8 @@ public class NetworkDto {
 
         private RegistrationType registrationType;
 
+        private CloudPlatform cloudPlatform;
+
         private Builder() {
         }
 
@@ -155,21 +166,25 @@ public class NetworkDto {
 
         public Builder withAws(AwsParams aws) {
             this.aws = aws;
+            cloudPlatform = CloudPlatform.AWS;
             return this;
         }
 
         public Builder withAzure(AzureParams azure) {
             this.azure = azure;
+            cloudPlatform = CloudPlatform.AZURE;
             return this;
         }
 
         public Builder withYarn(YarnParams yarn) {
             this.yarn = yarn;
+            cloudPlatform = CloudPlatform.YARN;
             return this;
         }
 
         public Builder withMock(MockParams mock) {
             this.mock = mock;
+            cloudPlatform = CloudPlatform.MOCK;
             return this;
         }
 

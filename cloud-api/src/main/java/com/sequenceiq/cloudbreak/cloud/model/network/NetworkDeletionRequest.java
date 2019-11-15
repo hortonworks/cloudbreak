@@ -12,11 +12,14 @@ public class NetworkDeletionRequest {
 
     private final String resourceGroup;
 
+    private final boolean existing;
+
     private NetworkDeletionRequest(Builder builder) {
         this.stackName = builder.stackName;
         this.cloudCredential = builder.cloudCredential;
         this.region = builder.region;
         this.resourceGroup = builder.resourceGroup;
+        this.existing = builder.existing;
     }
 
     public String getStackName() {
@@ -35,6 +38,10 @@ public class NetworkDeletionRequest {
         return resourceGroup;
     }
 
+    public boolean isExisting() {
+        return existing;
+    }
+
     public static final class Builder {
 
         private String stackName;
@@ -44,6 +51,8 @@ public class NetworkDeletionRequest {
         private String region;
 
         private String resourceGroup;
+
+        private boolean existing;
 
         public Builder() {
         }
@@ -65,6 +74,11 @@ public class NetworkDeletionRequest {
 
         public Builder withResourceGroup(String resourceGroup) {
             this.resourceGroup = resourceGroup;
+            return this;
+        }
+
+        public Builder withExisting(boolean existing) {
+            this.existing = existing;
             return this;
         }
 

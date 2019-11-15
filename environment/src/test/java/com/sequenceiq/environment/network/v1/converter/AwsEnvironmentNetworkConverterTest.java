@@ -24,8 +24,8 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
-import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
+import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -132,10 +132,9 @@ class AwsEnvironmentNetworkConverterTest {
         Set<CreatedSubnet> createdSubnets = createCreatedSubnets();
         CreatedCloudNetwork createdCloudNetwork = new CreatedCloudNetwork("network-1", VPC_ID, createdSubnets);
 
-        AwsNetwork actual = (AwsNetwork) underTest.setProviderSpecificNetwork(awsNetwork, createdCloudNetwork);
+        AwsNetwork actual = (AwsNetwork) underTest.setCreatedCloudNetwork(awsNetwork, createdCloudNetwork);
 
         assertEquals(createdCloudNetwork.getStackName(), actual.getName());
-        assertEquals(RegistrationType.CREATE_NEW, actual.getRegistrationType());
         assertEquals(VPC_ID, actual.getVpcId());
         assertTrue(SUBNET_IDS.containsAll(actual.getSubnetMetas().keySet()));
 
