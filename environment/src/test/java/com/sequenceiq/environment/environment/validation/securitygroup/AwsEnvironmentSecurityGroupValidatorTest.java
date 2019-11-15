@@ -20,7 +20,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
-import com.sequenceiq.cloudbreak.util.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -62,7 +63,7 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
                 .withCredential(getCredential())
                 .build();
 
-        ValidationResult.ValidationResultBuilder builder = ValidationResult.builder();
+        ValidationResultBuilder builder = ValidationResult.builder();
         underTest.validate(environmentDto, builder);
         requestIsValid(builder);
     }
@@ -84,7 +85,7 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
                 .withCredential(getCredential())
                 .build();
 
-        ValidationResult.ValidationResultBuilder builder = ValidationResult.builder();
+        ValidationResultBuilder builder = ValidationResult.builder();
         underTest.validate(environmentDto, builder);
         requestIsInvalid(builder);
     }
@@ -104,7 +105,7 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
                 .withNetwork(getNetworkDto(requestVpcId))
                 .withCredential(getCredential())
                 .build();
-        ValidationResult.ValidationResultBuilder builder = ValidationResult.builder();
+        ValidationResultBuilder builder = ValidationResult.builder();
 
         underTest.validate(environmentDto, builder);
 
@@ -128,7 +129,7 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
                 .withCredential(getCredential())
                 .build();
 
-        ValidationResult.ValidationResultBuilder builder = ValidationResult.builder();
+        ValidationResultBuilder builder = ValidationResult.builder();
         underTest.validate(environmentDto, builder);
         requestIsInvalid(builder);
     }
@@ -142,12 +143,12 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
                 .withCredential(getCredential())
                 .build();
 
-        ValidationResult.ValidationResultBuilder builder = ValidationResult.builder();
+        ValidationResultBuilder builder = ValidationResult.builder();
         underTest.validate(environmentDto, builder);
         requestIsValid(builder);
     }
 
-    private void requestIsValid(ValidationResult.ValidationResultBuilder builder) {
+    private void requestIsValid(ValidationResultBuilder builder) {
         assertFalse(builder.build().hasError());
     }
 
@@ -158,7 +159,7 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
         return region;
     }
 
-    private void requestIsInvalid(ValidationResult.ValidationResultBuilder builder) {
+    private void requestIsInvalid(ValidationResultBuilder builder) {
         assertTrue(builder.build().hasError());
     }
 

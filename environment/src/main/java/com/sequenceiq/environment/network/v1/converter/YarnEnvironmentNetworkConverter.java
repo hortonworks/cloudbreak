@@ -5,7 +5,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
-import com.sequenceiq.environment.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dao.domain.YarnNetwork;
@@ -36,9 +36,10 @@ public class YarnEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
     NetworkDto setProviderSpecificFields(NetworkDto.Builder builder, BaseNetwork network) {
         YarnNetwork yarnNetwork = (YarnNetwork) network;
         return builder.withYarn(
-                YarnParams.YarnParamsBuilder.anYarnParams()
-                        .withQueue(yarnNetwork.getQueue())
-                        .build())
+                YarnParams.YarnParamsBuilder
+                    .anYarnParams()
+                    .withQueue(yarnNetwork.getQueue())
+                    .build())
                 .build();
     }
 

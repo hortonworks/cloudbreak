@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.validation.network;
 
-import com.sequenceiq.cloudbreak.util.ValidationResult;
-import com.sequenceiq.environment.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 public interface EnvironmentNetworkValidator {

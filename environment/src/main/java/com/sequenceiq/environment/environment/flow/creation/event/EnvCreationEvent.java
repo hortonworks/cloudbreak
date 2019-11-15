@@ -6,10 +6,6 @@ import reactor.rx.Promise;
 
 public class EnvCreationEvent extends BaseNamedFlowEvent {
 
-    public EnvCreationEvent(String selector, Long resourceId, String resourceName, String resourceCrn) {
-        super(selector, resourceId, resourceName, resourceCrn);
-    }
-
     public EnvCreationEvent(String selector, Long resourceId, Promise<Boolean> accepted, String resourceName, String resourceCrn) {
         super(selector, resourceId, accepted, resourceName, resourceCrn);
     }

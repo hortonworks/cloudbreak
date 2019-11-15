@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
-import com.sequenceiq.environment.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -61,12 +61,15 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     @Override
     NetworkDto setProviderSpecificFields(NetworkDto.Builder builder, BaseNetwork network) {
         AzureNetwork azureNetwork = (AzureNetwork) network;
-        AzureParams.AzureParamsBuilder azureParamsBuilder = AzureParams.AzureParamsBuilder.anAzureParams();
-        Optional.ofNullable(azureNetwork.getNetworkId()).ifPresent(azureParamsBuilder::withNetworkId);
-        Optional.ofNullable(azureNetwork.getResourceGroupName()).ifPresent(azureParamsBuilder::withResourceGroupName);
-        Optional.ofNullable(azureNetwork.getNoFirewallRules()).ifPresent(azureParamsBuilder::withNoFirewallRules);
-        Optional.ofNullable(azureNetwork.getNoPublicIp()).ifPresent(azureParamsBuilder::withNoPublicIp);
-        return builder.withAzure(azureParamsBuilder.build()).build();
+        return builder.withAzure(
+                AzureParams.AzureParamsBuilder
+                    .anAzureParams()
+                    .withNetworkId(azureNetwork.getNetworkId())
+                    .withResourceGroupName(azureNetwork.getResourceGroupName())
+                    .withNoFirewallRules(azureNetwork.getNoFirewallRules())
+                    .withNoPublicIp(azureNetwork.getNoPublicIp())
+                    .build())
+                .build();
     }
 
     @Override

@@ -14,12 +14,15 @@ public class EnvironmentStatusUpdater {
     }
 
     public static void update(Long id, EnvironmentStatus newStatus) {
-        LOGGER.info("Update environment flow state in the memory state by new status: {}", newStatus);
+        LOGGER.info("Update environment flow state in the memory by new status: {}", newStatus);
         if (newStatus.isSuccessfullyDeleted()) {
+            LOGGER.debug("Delete environment from in the memory store.");
             EnvironmentInMemoryStateStore.delete(id);
         } else if (newStatus.isDeleteInProgress()) {
+            LOGGER.debug("Cancel environment flow state in the memory store deletion in progress");
             EnvironmentInMemoryStateStore.put(id, PollGroup.CANCELLED);
         } else {
+            LOGGER.debug("Environment flow state added to in memory store.");
             EnvironmentInMemoryStateStore.put(id, PollGroup.POLLABLE);
         }
     }

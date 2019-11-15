@@ -22,4 +22,45 @@ public class EnvDeleteFailedEvent extends BaseNamedFlowEvent implements Selectab
     public Exception getException() {
         return exception;
     }
+
+    public static EnvDeleteFailedEventBuilder builder() {
+        return new EnvDeleteFailedEventBuilder();
+    }
+
+    public static final class EnvDeleteFailedEventBuilder {
+        private Long environmentId;
+
+        private String resourceName;
+
+        private String resourceCrn;
+
+        private Exception exception;
+
+        private EnvDeleteFailedEventBuilder() {
+        }
+
+        public EnvDeleteFailedEventBuilder withEnvironmentID(Long environmentId) {
+            this.environmentId = environmentId;
+            return this;
+        }
+
+        public EnvDeleteFailedEventBuilder withException(Exception exception) {
+            this.exception = exception;
+            return this;
+        }
+
+        public EnvDeleteFailedEventBuilder withResourceName(String resourceName) {
+            this.resourceName = resourceName;
+            return this;
+        }
+
+        public EnvDeleteFailedEventBuilder withResourceCrn(String resourceCrn) {
+            this.resourceCrn = resourceCrn;
+            return this;
+        }
+
+        public EnvDeleteFailedEvent build() {
+            return new EnvDeleteFailedEvent(environmentId, resourceName, exception, resourceCrn);
+        }
+    }
 }

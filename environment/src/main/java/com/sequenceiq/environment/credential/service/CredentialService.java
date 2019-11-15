@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
-import com.sequenceiq.cloudbreak.util.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
@@ -154,7 +154,9 @@ public class CredentialService extends AbstractCredentialService {
                 .ifPresent(name -> {
                     throw new BadRequestException("Credential already exists with name: " + name);
                 });
+        LOGGER.debug("Validating credential for cloudPlatform {} and creator {}.", credential.getCloudPlatform(), creatorUserCrn);
         credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform(), creatorUserCrn);
+        LOGGER.debug("Validating credential parameters for cloudPlatform {} and creator {}.", credential.getCloudPlatform(), creatorUserCrn);
         credentialValidator.validateParameters(Platform.platform(credential.getCloudPlatform()), new Json(credential.getAttributes()));
         credential.setResourceCrn(createCRN(accountId));
         credential.setCreator(creatorUserCrn);
@@ -176,6 +178,7 @@ public class CredentialService extends AbstractCredentialService {
                 .ifPresent(name -> {
                     throw new BadRequestException("Credential already exists with name: " + name);
                 });
+        LOGGER.debug("Validating credential for cloudPlatform {} and creator {}.", credential.getCloudPlatform(), creatorUserCrn);
         credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform(), creatorUserCrn);
         validateDeploymentAddress(credential);
         Credential created = credentialAdapter.initCodeGrantFlow(credential, accountId, creatorUserCrn);

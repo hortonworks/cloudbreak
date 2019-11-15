@@ -9,8 +9,8 @@ import org.codehaus.jackson.node.ObjectNode;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 
-import com.sequenceiq.cloudbreak.util.ValidationResult;
-import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.credential.domain.Credential;
 
 public class AwsCredentialValidatorTest {

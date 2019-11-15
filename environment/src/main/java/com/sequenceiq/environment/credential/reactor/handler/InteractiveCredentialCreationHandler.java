@@ -47,11 +47,17 @@ public class InteractiveCredentialCreationHandler implements EventHandler<Intera
         ExtendedCloudCredential extendedCloudCredential = interactiveCredentialCreationRequest.getExtendedCloudCredential();
         Credential credential = extendedCloudCredentialToCredentialConverter.convert(extendedCloudCredential);
         try {
+            LOGGER.debug("Azure init code grant flow for account id {} creator {} credential name {}",
+                    credential.getAccountId(), credential.getCreator(), credential.getName());
             credentialService.initCodeGrantFlow(credential.getAccountId(), credential, credential.getCreator());
             CredentialResponse payload = extendedCloudCredentialToCredentialConverter.convert(credential);
+            LOGGER.debug("Sending notification that the interactive credential successfully created account id {} creator {} credential name {}",
+                    credential.getAccountId(), credential.getCreator(), credential.getName());
             notificationService.send(CREDENTIAL_AZURE_INTERACTIVE_CREATED, payload, credential.getCreator());
             LOGGER.info("Azure interactive credential ({}) succesfully created", credential.getName());
         } catch (BadRequestException e) {
+            LOGGER.debug("Sending notification that the interactive credential failed to create account id {} creator {} credential name {}",
+                    credential.getAccountId(), credential.getCreator(), credential.getName());
             notificationService.send(CREDENTIAL_AZURE_INTERACTIVE_FAILED, credential.getCreator());
             LOGGER.info("Failed to create Azure interactive credential with name \"{}\"", credential.getName());
         }
