@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaCleanupService;
-import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaOperationFailedException;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -100,7 +99,7 @@ public class TerminationService {
     private void cleanupFreeIpa(Boolean forcedTermination, Stack stack) {
         try {
             freeIpaCleanupService.cleanup(stack, false, null);
-        } catch (FreeIpaOperationFailedException e) {
+        } catch (Exception e) {
             LOGGER.error("Failed to cleanup", e);
             if (!forcedTermination) {
                 throw e;
