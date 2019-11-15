@@ -112,8 +112,11 @@ public class ClusterProxyService {
     private List<TunnelEntry> tunnelEntries(Stack stack) {
         InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String gatewayIp = stack.getPrimaryGatewayInstance().getPublicIpWrapper();
-        int gatewayPort = ServiceFamilies.KNOX.getDefaultPort();
-        return singletonList(new TunnelEntry(primaryGatewayInstance.getInstanceId(), KnownServiceIdentifier.GATEWAY.name(), gatewayIp, gatewayPort));
+        TunnelEntry gatewayTunnel = new TunnelEntry(primaryGatewayInstance.getInstanceId(), KnownServiceIdentifier.GATEWAY.name(),
+                gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort());
+        TunnelEntry knoxTunnel = new TunnelEntry(primaryGatewayInstance.getInstanceId(), KnownServiceIdentifier.KNOX.name(),
+                gatewayIp, ServiceFamilies.KNOX.getDefaultPort());
+        return asList(gatewayTunnel, knoxTunnel);
     }
 
     private ClusterServiceConfig cmServiceConfig(Stack stack, ClientCertificate clientCertificate, String serviceName, String clusterManagerUrl) {
