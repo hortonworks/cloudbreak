@@ -21,6 +21,11 @@ public class StackScalePostAction implements Action<StackTestDto, CloudbreakClie
         return this;
     }
 
+    public StackScalePostAction withForced(Boolean forced) {
+        request.setForced(forced);
+        return this;
+    }
+
     public static StackScalePostAction valid() {
         return new StackScalePostAction().withGroup("worker").withDesiredCount(10);
     }
