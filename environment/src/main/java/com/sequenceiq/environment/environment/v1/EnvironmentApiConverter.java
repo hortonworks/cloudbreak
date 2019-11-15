@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
@@ -54,7 +53,6 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.dto.YarnParams;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
-import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 
 @Component
 public class EnvironmentApiConverter {
@@ -80,25 +78,18 @@ public class EnvironmentApiConverter {
 
     private final TunnelConverter tunnelConverter;
 
-    private final SdxEndpoint sdxEndpoint;
-
-    private final EntitlementService entitlementService;
-
     public EnvironmentApiConverter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
             RegionConverter regionConverter,
             CredentialToCredentialV1ResponseConverter credentialConverter,
-            CredentialViewConverter credentialViewConverter, TelemetryApiConverter telemetryApiConverter,
-            TunnelConverter tunnelConverter,
-            SdxEndpoint sdxEndpoint,
-            EntitlementService entitlementService) {
+            CredentialViewConverter credentialViewConverter,
+            TelemetryApiConverter telemetryApiConverter,
+            TunnelConverter tunnelConverter) {
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.regionConverter = regionConverter;
         this.credentialConverter = credentialConverter;
         this.credentialViewConverter = credentialViewConverter;
         this.telemetryApiConverter = telemetryApiConverter;
         this.tunnelConverter = tunnelConverter;
-        this.sdxEndpoint = sdxEndpoint;
-        this.entitlementService = entitlementService;
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {

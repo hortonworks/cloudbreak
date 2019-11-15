@@ -18,6 +18,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.network.EnvironmentNetworkService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -65,14 +66,14 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private void createNetwork(EnvironmentDto environmentDto) {
         environmentService.findEnvironmentById(environmentDto.getId())
                 .ifPresent(environment -> {
-                    setNetworkIfNeeded(environmentDto, environment);
+                    createCloudNetworkIfNeeded(environmentDto, environment);
                     environmentService.save(environment);
                 });
     }
 
-    private void setNetworkIfNeeded(EnvironmentDto environmentDto, Environment environment) {
-        if (hasNetwork(environment) && !hasExistingNetwork(environment)) {
-            BaseNetwork baseNetwork = environmentNetworkService.createNetwork(environmentDto, environment.getNetwork());
+    private void createCloudNetworkIfNeeded(EnvironmentDto environmentDto, Environment environment) {
+        if (hasNetwork(environment) && environment.getNetwork().getRegistrationType() == RegistrationType.CREATE_NEW) {
+            BaseNetwork baseNetwork = environmentNetworkService.createCloudNetwork(environmentDto, environment.getNetwork());
             baseNetwork = networkService.save(baseNetwork);
             environment.setNetwork(baseNetwork);
         }
@@ -82,10 +83,6 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
         return Objects.nonNull(environment.getNetwork())
                 && !CloudPlatform.YARN.name().equals(environment.getCloudPlatform())
                 && enabledPlatforms.contains(environment.getCloudPlatform());
-    }
-
-    private boolean hasExistingNetwork(Environment environment) {
-        return networkService.hasExistingNetwork(environment.getNetwork(), CloudPlatform.valueOf(environment.getCloudPlatform()));
     }
 
     private void stepToFreeIpaCreation(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environmentDto) {

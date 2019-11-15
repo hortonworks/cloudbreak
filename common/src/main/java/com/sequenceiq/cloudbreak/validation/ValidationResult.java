@@ -52,6 +52,10 @@ public class ValidationResult {
         VALID, ERROR
     }
 
+    public static ValidationResult empty() {
+        return builder().build();
+    }
+
     public static ValidationResultBuilder builder() {
         return new ValidationResultBuilder();
     }

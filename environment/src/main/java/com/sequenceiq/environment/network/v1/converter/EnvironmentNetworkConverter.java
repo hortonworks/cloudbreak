@@ -14,13 +14,11 @@ public interface EnvironmentNetworkConverter {
 
     BaseNetwork convert(Environment environment, NetworkDto creationDto, Map<String, CloudSubnet> subnetMetas);
 
-    BaseNetwork setProviderSpecificNetwork(BaseNetwork baseNetwork, CreatedCloudNetwork createdCloudNetwork);
+    BaseNetwork setCreatedCloudNetwork(BaseNetwork baseNetwork, CreatedCloudNetwork createdCloudNetwork);
 
     CloudPlatform getCloudPlatform();
 
     NetworkDto convertToDto(BaseNetwork source);
-
-    boolean hasExistingNetwork(BaseNetwork baseNetwork);
 
     Network convertToNetwork(BaseNetwork baseNetwork);
 }

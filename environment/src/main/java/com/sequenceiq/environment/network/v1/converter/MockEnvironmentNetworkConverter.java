@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.network.v1.converter;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -31,10 +30,9 @@ public class MockEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
     }
 
     @Override
-    public BaseNetwork setProviderSpecificNetwork(BaseNetwork baseNetwork, CreatedCloudNetwork createdCloudNetwork) {
+    public BaseNetwork setCreatedCloudNetwork(BaseNetwork baseNetwork, CreatedCloudNetwork createdCloudNetwork) {
         MockNetwork mockNetwork = (MockNetwork) baseNetwork;
         mockNetwork.setName(createdCloudNetwork.getStackName());
-        mockNetwork.setRegistrationType(RegistrationType.CREATE_NEW);
         mockNetwork.setVpcId(createdCloudNetwork.getNetworkId());
         mockNetwork.setSubnetMetas(createdCloudNetwork.getSubnets().stream()
                 .collect(Collectors.toMap(
@@ -87,8 +85,4 @@ public class MockEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
         return CloudPlatform.MOCK;
     }
 
-    @Override
-    public boolean hasExistingNetwork(BaseNetwork baseNetwork) {
-        return Optional.ofNullable((MockNetwork) baseNetwork).map(MockNetwork::getVpcId).isPresent();
-    }
 }

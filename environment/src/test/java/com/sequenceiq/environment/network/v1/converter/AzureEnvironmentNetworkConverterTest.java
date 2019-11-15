@@ -143,10 +143,9 @@ class AzureEnvironmentNetworkConverterTest {
         Map<String, Object> properties = Map.of("resourceGroupName", RESOURCE_GROUP_NAME);
         CreatedCloudNetwork createdCloudNetwork = new CreatedCloudNetwork("network-1", NETWORK_ID, createdSubnets, properties);
 
-        AzureNetwork actual = (AzureNetwork) underTest.setProviderSpecificNetwork(azureNetwork, createdCloudNetwork);
+        AzureNetwork actual = (AzureNetwork) underTest.setCreatedCloudNetwork(azureNetwork, createdCloudNetwork);
 
         assertEquals(createdCloudNetwork.getStackName(), actual.getName());
-        assertEquals(RegistrationType.CREATE_NEW, actual.getRegistrationType());
         assertEquals(NETWORK_ID, actual.getNetworkId());
         assertEquals(RESOURCE_GROUP_NAME, actual.getResourceGroupName());
         assertTrue(SUBNET_IDS.containsAll(actual.getSubnetMetas().keySet()));

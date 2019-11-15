@@ -36,10 +36,9 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     }
 
     @Override
-    public BaseNetwork setProviderSpecificNetwork(BaseNetwork baseNetwork, CreatedCloudNetwork createdCloudNetwork) {
+    public BaseNetwork setCreatedCloudNetwork(BaseNetwork baseNetwork, CreatedCloudNetwork createdCloudNetwork) {
         AzureNetwork azureNetwork = (AzureNetwork) baseNetwork;
         azureNetwork.setName(createdCloudNetwork.getStackName());
-        azureNetwork.setRegistrationType(RegistrationType.CREATE_NEW);
         azureNetwork.setNetworkId(createdCloudNetwork.getNetworkId());
         azureNetwork.setResourceGroupName(String.valueOf(createdCloudNetwork.getProperties().get("resourceGroupName")));
         azureNetwork.setSubnetMetas(createdCloudNetwork.getSubnets().stream()
@@ -82,17 +81,12 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     }
 
     private boolean isExistingNetworkSpecified(NetworkDto networkDto) {
-        return networkDto.getAzure() != null && networkDto.getAzure().getNetworkId() != null;
+        return networkDto.getAzure() != null && networkDto.getAzure().getNetworkId() != null && networkDto.getAzure().getResourceGroupName() != null;
     }
 
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
-    }
-
-    @Override
-    public boolean hasExistingNetwork(BaseNetwork baseNetwork) {
-        return Optional.ofNullable((AzureNetwork) baseNetwork).map(AzureNetwork::getNetworkId).isPresent();
     }
 
     @Override

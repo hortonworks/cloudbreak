@@ -2,7 +2,6 @@ package com.sequenceiq.environment.network.v1.converter;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -32,10 +31,9 @@ public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
     }
 
     @Override
-    public BaseNetwork setProviderSpecificNetwork(BaseNetwork baseNetwork, CreatedCloudNetwork createdCloudNetwork) {
+    public BaseNetwork setCreatedCloudNetwork(BaseNetwork baseNetwork, CreatedCloudNetwork createdCloudNetwork) {
         AwsNetwork awsNetwork = (AwsNetwork) baseNetwork;
         awsNetwork.setName(createdCloudNetwork.getStackName());
-        awsNetwork.setRegistrationType(RegistrationType.CREATE_NEW);
         awsNetwork.setVpcId(createdCloudNetwork.getNetworkId());
         awsNetwork.setSubnetMetas(createdCloudNetwork.getSubnets().stream()
                 .collect(Collectors.toMap(
@@ -80,11 +78,6 @@ public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AWS;
-    }
-
-    @Override
-    public boolean hasExistingNetwork(BaseNetwork baseNetwork) {
-        return Optional.ofNullable((AwsNetwork) baseNetwork).map(AwsNetwork::getVpcId).isPresent();
     }
 
     @Override

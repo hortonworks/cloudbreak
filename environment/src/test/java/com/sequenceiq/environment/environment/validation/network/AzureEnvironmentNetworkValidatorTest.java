@@ -72,7 +72,7 @@ class AzureEnvironmentNetworkValidatorTest {
         assertTrue(validationResult.hasError());
 
         String actual = validationResult.getErrors().get(0);
-        assertEquals("The 'resource group's name(resourceGroupName)' parameter should be specified for the 'AZURE' environment specific network!", actual);
+        assertEquals("If networkId is specified, resourceGroupName must be specified too.", actual);
     }
 
     @Test
@@ -96,7 +96,7 @@ class AzureEnvironmentNetworkValidatorTest {
         assertTrue(validationResult.hasError());
 
         String actual = validationResult.getErrors().get(0);
-        assertEquals("The 'network identifier(networkId)' parameter should be specified for the 'AZURE' environment specific network!", actual);
+        assertEquals("If resourceGroupName is specified, networkId must be specified too.", actual);
     }
 
     @Test
