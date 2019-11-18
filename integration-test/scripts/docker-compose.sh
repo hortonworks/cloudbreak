@@ -2,7 +2,7 @@
 
 set -x
 
-: ${INTEGRATIONTEST_SUITEFILES:=file:/it/src/main/resources/testsuites/v4/mock/all-in-mock-package.yaml${ADDITIONAL_SUITEFILES+,$ADDITIONAL_SUITEFILES}}
+: ${INTEGRATIONTEST_SUITEFILES:=${INTEGRATIONTEST_SUITE_FILES}${ADDITIONAL_SUITEFILES+,$ADDITIONAL_SUITEFILES}}
 : ${INTEGRATIONTEST_TESTSUITE_POLLINGINTERVAL:=1000}
 : ${INTEGCB_LOCATION?"integcb location"}
 
@@ -27,7 +27,11 @@ $INTEGCB_LOCATION/.deps/bin/docker-compose up -d caas-mock
 date
 echo -e "\n\033[1;96m--- Start cloudbreak\033[0m\n"
 cd $INTEGCB_LOCATION
-./cbd regenerate
+
+unset HTTPS_PROXY
+env
+
+TRACE=1 ./cbd regenerate
 ./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak environment periscope freeipa redbeams datalake
 
 date
@@ -78,7 +82,13 @@ if [[ "$CIRCLECI" ]]; then
         export INTEGRATIONTEST_YARN_IMAGEID=$INTEGRATIONTEST_YARN_IMAGEID
         export INTEGRATIONTEST_YARN_REGION=$INTEGRATIONTEST_YARN_REGION
         export INTEGRATIONTEST_YARN_LOCATION=$INTEGRATIONTEST_YARN_LOCATION
+    elif [[ "$AWS" == true ]]; then
+        export INTEGRATIONTEST_PARALLEL=true
+        export INTEGRATIONTEST_THREADCOUNT=4
+        export INTEGRATIONTEST_CLOUDPROVIDER="AWS"
     else
+        export INTEGRATIONTEST_PARALLEL=false
+        export INTEGRATIONTEST_THREADCOUNT=2
         export INTEGRATIONTEST_CLOUDPROVIDER="MOCK"
     fi
 
