@@ -19,7 +19,7 @@ public class SyncPollingScheduler<T> {
 
     private static final long NO_WAIT_INTERVAL = 0L;
 
-    private static final int POLLING_INTERVAL = 1;
+    private static final int POLLING_INTERVAL = 1000;
 
     private static final int MAX_POLLING_ATTEMPT = 1000;
 
