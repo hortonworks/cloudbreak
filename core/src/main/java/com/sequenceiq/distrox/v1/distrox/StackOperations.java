@@ -313,6 +313,11 @@ public class StackOperations {
         return converterUtil.convert(stack, StackStatusV4Response.class);
     }
 
+    public StackStatusV4Response getStatus(@NotNull String crn) {
+        Stack stack = stackService.getByCrn(crn);
+        return converterUtil.convert(stack, StackStatusV4Response.class);
+    }
+
     public void putPassword(@NotNull StackAccessDto stackAccessDto, Long workspaceId, @Valid UserNamePasswordV4Request userNamePasswordJson) {
         Stack stack;
         if (isNotEmpty(stackAccessDto.getName())) {
