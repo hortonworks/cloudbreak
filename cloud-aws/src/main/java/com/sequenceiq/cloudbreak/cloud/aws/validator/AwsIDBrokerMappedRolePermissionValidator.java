@@ -102,10 +102,12 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator {
                                                             CloudS3View cloudFileSystem) {
         String storageLocationBase = getStorageLocationBase(location);
         String datalakeBucket = storageLocationBase.split("/", 2)[0];
+        String dynamodbTableName = cloudFileSystem.getS3GuardDynamoTableName() != null ?
+                                        cloudFileSystem.getS3GuardDynamoTableName() : "";
         return Map.ofEntries(
             Map.entry("${STORAGE_LOCATION_BASE}", storageLocationBase),
             Map.entry("${DATALAKE_BUCKET}", datalakeBucket),
-            Map.entry("${DYNAMODB_TABLE_NAME}", cloudFileSystem.getS3GuardDynamoTableName())
+            Map.entry("${DYNAMODB_TABLE_NAME}", dynamodbTableName)
         );
     }
 

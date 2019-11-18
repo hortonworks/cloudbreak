@@ -43,6 +43,9 @@ public abstract class AwsIDBrokerMappedRolePermissionValidatorTest {
     public abstract void testGetPolicyJsonReplacements();
 
     @Test
+    public abstract void testGetPolicyJsonReplacementsNoDynamodb();
+
+    @Test
     public void testGetRoleArnsForUsers() {
         assertThat(getValidator().getRoleArnsForUsers(Collections.emptyList(),
             Collections.emptyMap())).isEqualTo(Collections.emptySortedSet());

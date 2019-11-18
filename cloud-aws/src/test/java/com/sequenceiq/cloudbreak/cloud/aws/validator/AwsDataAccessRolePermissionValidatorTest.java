@@ -84,4 +84,25 @@ public class AwsDataAccessRolePermissionValidatorTest extends AwsIDBrokerMappedR
 
         assertThat(policyJsonReplacements).isEqualTo(expectedPolicyJsonReplacements);
     }
+
+    @Override
+    public void testGetPolicyJsonReplacementsNoDynamodb() {
+        String storageLocationBaseStr = "bucket/cluster";
+        String bucket = "bucket";
+
+        Map<String, String> expectedPolicyJsonReplacements = Map.ofEntries(
+            Map.entry("${STORAGE_LOCATION_BASE}", storageLocationBaseStr),
+            Map.entry("${DATALAKE_BUCKET}", bucket),
+            Map.entry("${DYNAMODB_TABLE_NAME}", "")
+        );
+
+        StorageLocationBase storageLocationBase = new StorageLocationBase();
+        storageLocationBase.setValue(storageLocationBaseStr);
+        CloudS3View cloudFileSystem = new CloudS3View(CloudIdentityType.ID_BROKER);
+        Map<String, String> policyJsonReplacements = awsDataAccessRolePermissionValidator
+                                                        .getPolicyJsonReplacements(storageLocationBase,
+                                                            cloudFileSystem);
+
+        assertThat(policyJsonReplacements).isEqualTo(expectedPolicyJsonReplacements);
+    }
 }
