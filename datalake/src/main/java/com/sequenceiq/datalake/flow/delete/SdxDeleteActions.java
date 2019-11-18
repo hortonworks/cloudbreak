@@ -28,6 +28,7 @@ import com.sequenceiq.datalake.flow.delete.event.StackDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.StackDeletionWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
+import com.sequenceiq.datalake.service.sdx.SdxJobService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -44,6 +45,9 @@ public class SdxDeleteActions {
     @Inject
     private ProvisionerService provisionerService;
 
+    @Inject
+    private SdxJobService sdxJobService;
+
     @Bean(name = "SDX_DELETION_START_STATE")
     public Action<?, ?> sdxDeletion() {
         return new AbstractSdxAction<>(SdxDeleteStartEvent.class) {
@@ -57,6 +61,7 @@ public class SdxDeleteActions {
             protected void doExecute(SdxContext context, SdxDeleteStartEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Start stack deletion for SDX: {}", payload.getResourceId());
+                sdxJobService.unschedule(context.getSdxId());
                 provisionerService.startStackDeletion(payload.getResourceId(), payload.isForced());
                 sendEvent(context, SDX_STACK_DELETION_IN_PROGRESS_EVENT.event(), payload);
             }

@@ -31,6 +31,7 @@ import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
+import com.sequenceiq.datalake.service.sdx.SdxJobService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -46,6 +47,9 @@ public class SdxCreateActions {
 
     @Inject
     private SdxStatusService sdxStatusService;
+
+    @Inject
+    private SdxJobService sdxJobService;
 
     @Bean(name = "SDX_CREATION_WAIT_ENV_STATE")
     public Action<?, ?> envWaitInProgress() {
@@ -163,6 +167,7 @@ public class SdxCreateActions {
                 MDCBuilder.addRequestId(context.getRequestId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.SDX_CLUSTER_CREATED,
                         "Datalake is running", payload.getResourceId());
+                sdxJobService.schedule(context.getSdxId());
                 sendEvent(context, SDX_CREATE_FINALIZED_EVENT.event(), payload);
             }
 

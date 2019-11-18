@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleSt
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.distrox.v1.distrox.StackOperations;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -48,6 +50,9 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private StackOperations stackOperations;
 
     @Inject
     private UserService userService;
@@ -108,6 +113,11 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Override
     public StackV4Response get(String crn) {
         return stackCommonService.getByCrn(crn, Collections.emptySet());
+    }
+
+    @Override
+    public StackStatusV4Response getStatusByCrn(@ResourceCrn String crn) {
+        return stackOperations.getStatus(crn);
     }
 
     @Override

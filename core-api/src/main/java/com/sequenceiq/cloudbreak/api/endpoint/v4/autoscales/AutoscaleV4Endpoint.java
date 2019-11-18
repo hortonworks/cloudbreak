@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeFo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -79,6 +80,12 @@ public interface AutoscaleV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_BY_CRN, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getStackForAutoscale")
     StackV4Response get(@PathParam("crn") String crn);
+
+    @GET
+    @Path("/stack/crn/{crn}/status")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.GET_BY_CRN, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getStackStatusForAutoscale")
+    StackStatusV4Response getStatusByCrn(@PathParam("crn") String crn);
 
     @GET
     @Path("/stack/crn/{crn}/authorize/{userId}/{tenant}/{permission}")
