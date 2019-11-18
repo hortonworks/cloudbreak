@@ -12,6 +12,7 @@ jar {
 }
 
 dependencies {
+    compile project(':common')
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind',    version: jacksonDatabindVersion
     compile group: 'com.google.code.gson',       name: 'gson',                version: '2.6.2'
     compile group: 'org.springframework.data',   name: 'spring-data-commons', version: springDataJpaFrameworkVersion
