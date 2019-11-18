@@ -24,10 +24,11 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
@@ -85,8 +86,6 @@ import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.StackViewService;
-import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
@@ -103,11 +102,11 @@ public class ClusterHostServiceRunner {
 
     private static final int CM_HTTPS_PORT = 7183;
 
-    @Inject
-    private StackService stackService;
+    @Value("${cb.cm.heartbeat.interval}")
+    private String cmHeartbeatInterval;
 
     @Inject
-    private StackViewService stackViewService;
+    private StackService stackService;
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
@@ -144,9 +143,6 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private RecipeEngine recipeEngine;
-
-    @Inject
-    private ServiceProviderConnectorAdapter connector;
 
     @Inject
     private BlueprintService blueprintService;
@@ -310,6 +306,7 @@ public class ClusterHostServiceRunner {
         decoratePillarWithClouderaManagerCommunicationSettings(cluster, servicePillar);
         decoratePillarWithClouderaManagerAutoTls(cluster, servicePillar);
         decoratePillarWithClouderaManagerCsds(cluster, servicePillar);
+        decoratePillarWithClouderaManagerSettings(servicePillar);
     }
 
     private void addAmbariConfig(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, ClusterPreCreationApi connector)
@@ -411,7 +408,7 @@ public class ClusterHostServiceRunner {
     private void decoratePillarWithClouderaManagerLicense(Long stackId, Map<String, SaltPillarProperties> servicePillar) {
         String userCrn = stackService.get(stackId).getCreator().getUserCrn();
 
-        UserManagementProto.Account account = umsClient.getAccountDetails(userCrn, Crn.safeFromString(userCrn).getAccountId(), Optional.empty());
+        Account account = umsClient.getAccountDetails(userCrn, Crn.safeFromString(userCrn).getAccountId(), Optional.empty());
 
         if (StringUtils.isNotEmpty(account.getClouderaManagerLicenseKey())) {
             LOGGER.debug("Got license key from UMS: {}", account.getClouderaManagerLicenseKey());
@@ -453,6 +450,11 @@ public class ClusterHostServiceRunner {
                         singletonMap("csd-urls", csdUrls))));
     }
 
+    private void decoratePillarWithClouderaManagerSettings(Map<String, SaltPillarProperties> servicePillar) {
+        servicePillar.put("cloudera-manager-settings", new SaltPillarProperties("/cloudera-manager/settings.sls",
+                singletonMap("cloudera-manager", singletonMap("settings", singletonMap("heartbeat_interval", cmHeartbeatInterval)))));
+    }
+
     private Map<String, Map<String, String>> createGrainProperties(Iterable<GatewayConfig> gatewayConfigs, Cluster cluster) {
         Map<String, Map<String, String>> grainProperties = new HashMap<>();
         for (GatewayConfig gatewayConfig : gatewayConfigs) {
@@ -474,7 +476,7 @@ public class ClusterHostServiceRunner {
     private void addKnoxRoleForHosts(Map<String, Map<String, String>> grainProperties, Cluster cluster) {
         Map<String, List<String>> knoxServiceLocations = getComponentLocationByHostname(cluster, "KNOX_GATEWAY");
         knoxServiceLocations.getOrDefault("KNOX_GATEWAY", List.of())
-                                .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put("roles", "knox"));
+                .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put("roles", "knox"));
     }
 
     private Map<String, List<String>> getComponentLocationByHostname(Cluster cluster, String componentName) {

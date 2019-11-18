@@ -286,6 +286,7 @@ cb:
   cm:
     admin.role: "ROLE_ADMIN"
     user.role: "ROLE_USER"
+    heartbeat.interval: 3
 
   clouderamanager:
     entries:
