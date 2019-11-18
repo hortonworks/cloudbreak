@@ -68,6 +68,7 @@ base:
     - cloudera-manager.database
     - cloudera-manager.communication
     - cloudera-manager.autotls
+    - cloudera-manager.settings
     - gateway.init
     - gateway.ldap
     - gateway.settings

@@ -10,7 +10,8 @@ install-cloudera-manager-server:
 
 /etc/cloudera-scm-server/cm.settings:
   file.managed:
-    - contents: # Created by CB Saltstack
+    - contents:
+        setsettings HEARTBEAT_INTERVAL {{ cloudera_manager.settings.heartbeat_interval }}
     - user: cloudera-scm
     - group: cloudera-scm
     - mode: 600
