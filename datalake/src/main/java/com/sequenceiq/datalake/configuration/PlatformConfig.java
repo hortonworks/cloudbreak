@@ -36,10 +36,6 @@ public class PlatformConfig {
 
     private Set<CloudPlatform> allPossibleExternalDbPlatforms;
 
-    public boolean isExternalDatabaseSupportedFor(String cloudPlatform) {
-        return dbServiceSupportedPlatforms.contains(CloudPlatform.valueOf(cloudPlatform));
-    }
-
     public boolean isExternalDatabaseSupportedFor(CloudPlatform cloudPlatform) {
         return dbServiceSupportedPlatforms.contains(cloudPlatform);
     }
@@ -52,8 +48,8 @@ public class PlatformConfig {
         return allPossibleExternalDbPlatforms;
     }
 
-    public boolean isExternalDatabaseSupportedOrExperimental(String cloudPlatform) {
-        return allPossibleExternalDbPlatforms.contains(CloudPlatform.valueOf(cloudPlatform));
+    public boolean isExternalDatabaseSupportedOrExperimental(CloudPlatform cloudPlatform) {
+        return allPossibleExternalDbPlatforms.contains(cloudPlatform);
     }
 
     @PostConstruct

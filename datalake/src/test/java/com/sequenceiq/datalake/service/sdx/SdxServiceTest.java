@@ -2,7 +2,6 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.SDX_CLUSTER_DELETION_STARTED;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,7 +41,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -54,7 +52,6 @@ import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoin
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SDX service tests")
@@ -73,7 +70,7 @@ class SdxServiceTest {
     private static final Set<String> SUPPORTED_PLATFORMS = Set.of("AWS");
 
     @Mock
-    private PlatformConfig sdxPLatformConfig;
+    private SdxExternalDatabaseConfigurer externalDatabaseConfigurer;
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
@@ -190,90 +187,6 @@ class SdxServiceTest {
         Assertions.assertFalse(capturedSdx.isCreateDatabase());
         Assertions.assertTrue(createdSdxCluster.getCrn().matches("crn:cdp:datalake:us-west-1:hortonworks:datalake:.*"));
         verify(sdxReactorFlowManager).triggerSdxCreation(id);
-    }
-
-    @Test
-    void createSdxForAzureWithEnabledDB() {
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        when(sdxPLatformConfig.isExternalDatabaseSupportedFor("AZURE")).thenReturn(false);
-        when(sdxPLatformConfig.getSupportedExternalDatabasePlatforms()).thenReturn(Set.of(CloudPlatform.AWS));
-        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
-        sdxClusterRequest.setEnvironment("envir");
-        SdxDatabaseRequest externalDatabase = new SdxDatabaseRequest();
-        externalDatabase.setCreate(true);
-        sdxClusterRequest.setExternalDatabase(externalDatabase);
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
-        long id = 10L;
-        when(clock.getCurrentTimeMillis()).thenReturn(1L);
-        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE);
-        BadRequestException gotException = assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-        assertEquals(String.format("Cannot create external database for sdx: test-sdx-cluster, for now only %s is/are supported", SUPPORTED_PLATFORMS),
-                gotException.getMessage());
-    }
-
-    @Test
-    void createSdxForAwsWithEmptyDB() {
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
-        sdxClusterRequest.setEnvironment("envir");
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
-        when(sdxPLatformConfig.isExternalDatabaseSupportedOrExperimental("AWS")).thenReturn(true);
-        when(sdxPLatformConfig.isExternalDatabaseSupportedFor("AWS")).thenReturn(true);
-        long id = 10L;
-        when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
-            SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
-            sdxWithId.setId(id);
-            return sdxWithId;
-        });
-        when(clock.getCurrentTimeMillis()).thenReturn(1L);
-        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
-        SdxCluster createdSdxCluster = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
-        Assertions.assertEquals(id, createdSdxCluster.getId());
-        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
-        verify(sdxClusterRepository, times(1)).save(captor.capture());
-        SdxCluster capturedSdx = captor.getValue();
-        Assertions.assertEquals("tagecske", capturedSdx.getTags().getValue("mytag"));
-        Assertions.assertEquals(CLUSTER_NAME, capturedSdx.getClusterName());
-        Assertions.assertEquals(LIGHT_DUTY, capturedSdx.getClusterShape());
-        Assertions.assertEquals("envir", capturedSdx.getEnvName());
-        Assertions.assertEquals("hortonworks", capturedSdx.getAccountId());
-        Assertions.assertEquals(USER_CRN, capturedSdx.getInitiatorUserCrn());
-        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED,
-                ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, "Datalake requested", createdSdxCluster);
-        Assertions.assertEquals(1L, capturedSdx.getCreated());
-        Assertions.assertTrue(capturedSdx.isCreateDatabase());
-        verify(sdxReactorFlowManager).triggerSdxCreation(id);
-    }
-
-    public void testSetPlatformDefaultForAzureCreateDatabaseIfNeededWhenCreateIsNull() {
-        CloudPlatform cloudPlatform = CloudPlatform.AZURE;
-        when(sdxPLatformConfig.isExternalDatabaseSupportedFor("AZURE")).thenReturn(false);
-        SdxClusterRequest sdxClusterRequestWithExternalDatabase = new SdxClusterRequest();
-        sdxClusterRequestWithExternalDatabase.setExternalDatabase(new SdxDatabaseRequest());
-        SdxCluster sdxCluster = new SdxCluster();
-
-        underTest.setPlatformDefaultForCreateDatabaseIfNeeded(sdxClusterRequestWithExternalDatabase, sdxCluster, cloudPlatform.name());
-
-        assertEquals(CloudPlatform.AWS.equals(cloudPlatform), sdxCluster.isCreateDatabase());
-    }
-
-    public void testSetPlatformDefaultForAwsCreateDatabaseIfNeededWhenCreateIsNull() {
-        CloudPlatform cloudPlatform = CloudPlatform.AWS;
-        when(sdxPLatformConfig.isExternalDatabaseSupportedFor("AWS")).thenReturn(true);
-        SdxClusterRequest sdxClusterRequestWithExternalDatabase = new SdxClusterRequest();
-        sdxClusterRequestWithExternalDatabase.setExternalDatabase(new SdxDatabaseRequest());
-        SdxCluster sdxCluster = new SdxCluster();
-
-        underTest.setPlatformDefaultForCreateDatabaseIfNeeded(sdxClusterRequestWithExternalDatabase, sdxCluster, cloudPlatform.name());
-
-        assertEquals(CloudPlatform.AWS.equals(cloudPlatform), sdxCluster.isCreateDatabase());
     }
 
     private void mockEnvironmentCall(SdxClusterRequest sdxClusterRequest, CloudPlatform cloudPlatform) {
