@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_IDBROKER_MAPPINGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_NETWORK_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_PUBLICKEY_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_RDBMS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_S3GUARD_TABLE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_UMS_RESOURCE_EVENT;
@@ -100,6 +101,22 @@ public class EnvDeleteActions {
 
                 EnvironmentDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent, envDeleteState, logDeleteState);
                 sendEvent(context, DELETE_NETWORK_EVENT.selector(), envDto);
+            }
+        };
+    }
+
+    @Bean(name = "PUBLICKEY_DELETE_STARTED_STATE")
+    public Action<?, ?> publickeyDeleteAction() {
+        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
+                EnvironmentStatus environmentStatus = EnvironmentStatus.PUBLICKEY_DELETE_IN_PROGRESS;
+                ResourceEvent resourceEvent = ResourceEvent.ENVIRONMENT_PUBLICKEY_DELETION_STARTED;
+                EnvDeleteState envDeleteState = EnvDeleteState.PUBLICKEY_DELETE_STARTED_STATE;
+                String logDeleteState = "publickey";
+
+                EnvironmentDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent, envDeleteState, logDeleteState);
+                sendEvent(context, DELETE_PUBLICKEY_EVENT.selector(), envDto);
             }
         };
     }

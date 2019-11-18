@@ -1,7 +1,7 @@
-package com.sequenceiq.environment.environment.flow.deletion;
+package com.sequenceiq.environment.environment.flow.creation;
 
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_IDBROKER_MAPPINGS_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_PUBLICKEY_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_PUBLICKEY_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FAILED_ENV_CREATION_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -38,7 +38,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnviro
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
+import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
+import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
 import com.sequenceiq.flow.core.AbstractAction;
@@ -55,8 +56,7 @@ import reactor.bus.EventBus;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 @ExtendWith(MockitoExtension.class)
-class EnvDeleteActionsTest {
-
+class EnvCreationActionsTest {
     private static final String FLOW_ID = "flowId";
 
     private static final String FLOW_TRIGGER_USER_CRN = "flowTriggerUserCrn";
@@ -113,9 +113,9 @@ class EnvDeleteActionsTest {
     private Event<Object> event;
 
     @InjectMocks
-    private EnvDeleteActions underTest;
+    private EnvCreationActions underTest;
 
-    private EnvDeleteEvent actionPayload;
+    private EnvCreationEvent actionPayload;
 
     @Captor
     private ArgumentCaptor<String> selectorArgumentCaptor;
@@ -133,7 +133,7 @@ class EnvDeleteActionsTest {
     void setUp() {
         FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN);
         when(context.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
-        actionPayload = new EnvDeleteEvent(ACTION_PAYLOAD_SELECTOR, ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN);
+        actionPayload = new EnvCreationEvent(ACTION_PAYLOAD_SELECTOR, ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN);
         when(context.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(actionPayload);
         when(context.getExtendedState()).thenReturn(extendedState);
         when(extendedState.getVariables()).thenReturn(new HashMap<>());
@@ -143,39 +143,23 @@ class EnvDeleteActionsTest {
     }
 
     @Test
-    void idbmmsDeleteActionTestFailure() {
-        testFailure(underTest::idbmmsDeleteAction);
+    void publicKeyCreationActionTestFailure() {
+        testFailure(underTest::publickeyCreationAction);
     }
 
     @Test
-    void idbmmsDeleteActionTestNoEnvironment() {
-        testNoEnvironment(underTest::idbmmsDeleteAction, DELETE_IDBROKER_MAPPINGS_EVENT.selector());
+    void publicKeyCreationActionTestNoEnvironment() {
+        testNoEnvironment(underTest::publickeyCreationAction, FAILED_ENV_CREATION_EVENT.selector());
     }
 
     @Test
-    void idbmmsDeleteActionTestHappyPath() {
-        testDeleteActionHappyPath(underTest::idbmmsDeleteAction, DELETE_IDBROKER_MAPPINGS_EVENT.selector(),
-                EnvironmentStatus.IDBROKER_MAPPINGS_DELETE_IN_PROGRESS, ResourceEvent.ENVIRONMENT_IDBROKER_MAPPINGS_DELETION_STARTED);
+    void publicKeyCreationActionTestHappyPath() {
+        testCreationActionHappyPath(underTest::publickeyCreationAction, CREATE_PUBLICKEY_EVENT.selector(),
+                EnvironmentStatus.PUBLICKEY_CREATE_IN_PROGRESS, ResourceEvent.ENVIRONMENT_PUBLICKEY_CREATION_STARTED);
     }
 
-    @Test
-    void publicKeyDeleteActionTestFailure() {
-        testFailure(underTest::publickeyDeleteAction);
-    }
-
-    @Test
-    void publicKeyDeleteActionTestNoEnvironment() {
-        testNoEnvironment(underTest::publickeyDeleteAction, DELETE_PUBLICKEY_EVENT.selector());
-    }
-
-    @Test
-    void publicKeyDeleteActionTestHappyPath() {
-        testDeleteActionHappyPath(underTest::publickeyDeleteAction, DELETE_PUBLICKEY_EVENT.selector(),
-                EnvironmentStatus.PUBLICKEY_DELETE_IN_PROGRESS, ResourceEvent.ENVIRONMENT_PUBLICKEY_DELETION_STARTED);
-    }
-
-    private void testFailure(Supplier<Action<?, ?>> deleteAction) {
-        Action<?, ?> action = configureAction(deleteAction);
+    private void testFailure(Supplier<Action<?, ?>> creationAction) {
+        Action<?, ?> action = configureAction(creationAction);
 
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenThrow(new UnsupportedOperationException(MESSAGE));
         when(failureEvent.event()).thenReturn(FAILURE_EVENT);
@@ -192,8 +176,8 @@ class EnvDeleteActionsTest {
         verifyFailureEvent();
     }
 
-    private void testNoEnvironment(Supplier<Action<?, ?>> deleteAction, String selector) {
-        Action<?, ?> action = configureAction(deleteAction);
+    private void testNoEnvironment(Supplier<Action<?, ?>> creationAction, String selector) {
+        Action<?, ?> action = configureAction(creationAction);
 
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.empty());
 
@@ -206,21 +190,24 @@ class EnvDeleteActionsTest {
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
 
-        verifyDeleteActionSuccessEvent(selector);
+        verifyCreationActionFailureEvent(selector);
     }
 
-    private void testDeleteActionHappyPath(Supplier<Action<?, ?>> deleteAction,
+    private void testCreationActionHappyPath(Supplier<Action<?, ?>> creationAction,
             String selector,
             EnvironmentStatus environmentStatus,
             ResourceEvent eventStarted) {
 
-        Action<?, ?> action = configureAction(deleteAction);
+        Action<?, ?> action = configureAction(creationAction);
 
         Environment environment = mock(Environment.class);
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
         Environment savedEnvironment = mock(Environment.class);
         when(environmentService.save(environment)).thenReturn(savedEnvironment);
         EnvironmentDto environmentDto = mock(EnvironmentDto.class);
+        when(environmentDto.getResourceCrn()).thenReturn(ENVIRONMENT_CRN);
+        when(environmentDto.getName()).thenReturn(ENVIRONMENT_NAME);
+        when(environmentDto.getId()).thenReturn(ENVIRONMENT_ID);
         when(environmentService.getEnvironmentDto(savedEnvironment)).thenReturn(environmentDto);
         SimpleEnvironmentResponse response = mock(SimpleEnvironmentResponse.class);
         when(environmentApiConverter.dtoToSimpleResponse(environmentDto)).thenReturn(response);
@@ -232,7 +219,7 @@ class EnvDeleteActionsTest {
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
 
-        verifyDeleteActionSuccessEvent(selector);
+        verifyCreationActionSuccessEvent(selector);
     }
 
     private Action<?, ?> configureAction(Supplier<Action<?, ?>> actionSupplier) {
@@ -259,7 +246,7 @@ class EnvDeleteActionsTest {
         assertThat(payloadArgumentCaptor.getValue()).isSameAs(actionPayload);
     }
 
-    private void verifyDeleteActionSuccessEvent(String selector) {
+    private void verifyCreationActionSuccessEvent(String selector) {
         assertThat(selectorArgumentCaptor.getValue()).isEqualTo(selector);
 
         verifyEventFactoryAndHeaders();
@@ -271,6 +258,20 @@ class EnvDeleteActionsTest {
         assertThat(environmentDto.getResourceCrn()).isEqualTo(ENVIRONMENT_CRN);
         assertThat(environmentDto.getName()).isEqualTo(ENVIRONMENT_NAME);
         assertThat(environmentDto.getId()).isEqualTo(ENVIRONMENT_ID);
+    }
+
+    private void verifyCreationActionFailureEvent(String selector) {
+        assertThat(selectorArgumentCaptor.getValue()).isEqualTo(selector);
+
+        verifyEventFactoryAndHeaders();
+
+        Object payload = payloadArgumentCaptor.getValue();
+        assertThat(payload).isInstanceOf(EnvCreationFailureEvent.class);
+
+        EnvCreationFailureEvent failureEvent = (EnvCreationFailureEvent) payload;
+        assertThat(failureEvent.getResourceCrn()).isEqualTo(ENVIRONMENT_CRN);
+        assertThat(failureEvent.getResourceName()).isEqualTo(ENVIRONMENT_NAME);
+        assertThat(failureEvent.getResourceId()).isEqualTo(ENVIRONMENT_ID);
     }
 
     private void verifyEventFactoryAndHeaders() {

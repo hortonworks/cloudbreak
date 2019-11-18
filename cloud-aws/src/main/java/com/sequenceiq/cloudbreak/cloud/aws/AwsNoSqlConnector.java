@@ -28,8 +28,6 @@ public class AwsNoSqlConnector implements NoSqlConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNoSqlConnector.class);
 
-    private static final int ACCESS_DENIED_ERROR_CODE = 403;
-
     private final AwsClient awsClient;
 
     public AwsNoSqlConnector(AwsClient awsClient) {

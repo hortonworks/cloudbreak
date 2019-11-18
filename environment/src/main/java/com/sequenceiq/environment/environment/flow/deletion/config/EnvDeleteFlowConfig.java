@@ -8,6 +8,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteStat
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.IDBROKER_MAPPINGS_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.INIT_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.NETWORK_DELETE_STARTED_STATE;
+import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.PUBLICKEY_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.RDBMS_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.S3GUARD_TABLE_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.UMS_RESOURCE_DELETE_STARTED_STATE;
@@ -18,6 +19,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_IDBROKER_MAPPINGS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_NETWORK_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_PUBLICKEY_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_RDBMS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_S3GUARD_TABLE_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_UMS_RESOURCE_DELETE_EVENT;
@@ -44,7 +46,10 @@ public class EnvDeleteFlowConfig extends AbstractFlowConfiguration<EnvDeleteStat
             .from(FREEIPA_DELETE_STARTED_STATE).to(RDBMS_DELETE_STARTED_STATE)
             .event(START_RDBMS_DELETE_EVENT).defaultFailureEvent()
 
-            .from(RDBMS_DELETE_STARTED_STATE).to(NETWORK_DELETE_STARTED_STATE)
+            .from(RDBMS_DELETE_STARTED_STATE).to(PUBLICKEY_DELETE_STARTED_STATE)
+            .event(START_PUBLICKEY_DELETE_EVENT).defaultFailureEvent()
+
+            .from(PUBLICKEY_DELETE_STARTED_STATE).to(NETWORK_DELETE_STARTED_STATE)
             .event(START_NETWORK_DELETE_EVENT).defaultFailureEvent()
 
             .from(NETWORK_DELETE_STARTED_STATE).to(IDBROKER_MAPPINGS_DELETE_STARTED_STATE)

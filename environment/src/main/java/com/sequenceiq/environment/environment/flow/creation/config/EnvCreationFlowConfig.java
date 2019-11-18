@@ -7,12 +7,14 @@ import static com.sequenceiq.environment.environment.flow.creation.EnvCreationSt
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.FREEIPA_CREATION_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.INIT_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.NETWORK_CREATION_STARTED_STATE;
+import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.PUBLICKEY_CREATION_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINALIZE_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.HANDLED_FAILED_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_VALIDATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_FREEIPA_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_PUBLICKEY_CREATION_EVENT;
 
 import java.util.List;
 
@@ -36,7 +38,10 @@ public class EnvCreationFlowConfig extends AbstractFlowConfiguration<EnvCreation
             .from(ENVIRONMENT_CREATION_VALIDATION_STATE).to(NETWORK_CREATION_STARTED_STATE)
             .event(START_NETWORK_CREATION_EVENT).defaultFailureEvent()
 
-            .from(NETWORK_CREATION_STARTED_STATE).to(FREEIPA_CREATION_STARTED_STATE)
+            .from(NETWORK_CREATION_STARTED_STATE).to(PUBLICKEY_CREATION_STARTED_STATE)
+            .event(START_PUBLICKEY_CREATION_EVENT).defaultFailureEvent()
+
+            .from(PUBLICKEY_CREATION_STARTED_STATE).to(FREEIPA_CREATION_STARTED_STATE)
             .event(START_FREEIPA_CREATION_EVENT).defaultFailureEvent()
 
             .from(FREEIPA_CREATION_STARTED_STATE).to(ENV_CREATION_FINISHED_STATE)

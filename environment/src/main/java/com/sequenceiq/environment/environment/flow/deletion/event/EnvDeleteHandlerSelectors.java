@@ -12,7 +12,8 @@ public enum EnvDeleteHandlerSelectors implements FlowEvent {
     DELETE_S3GUARD_TABLE_EVENT,
     DELETE_UMS_RESOURCE_EVENT,
     DELETE_DATAHUB_CLUSTERS_EVENT,
-    DELETE_DATALAKE_CLUSTERS_EVENT;
+    DELETE_DATALAKE_CLUSTERS_EVENT,
+    DELETE_PUBLICKEY_EVENT;
 
     @Override
     public String event() {

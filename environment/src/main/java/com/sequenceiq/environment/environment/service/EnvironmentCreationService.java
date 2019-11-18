@@ -119,7 +119,7 @@ public class EnvironmentCreationService {
         boolean result = false;
         if (StringUtils.isEmpty(creationDto.getAdminGroupName())) {
             Map<UmsRight, String> virtualGroups = virtualGroupService.createVirtualGroups(creationDto.getAccountId(), envCrn);
-            LOGGER.info("The virtualgroups for [{}] environment are created: {}", virtualGroups);
+            LOGGER.info("The virtualgroups for [{}] environment are created: {}", creationDto.getName(), virtualGroups);
             result = true;
         }
         return result;

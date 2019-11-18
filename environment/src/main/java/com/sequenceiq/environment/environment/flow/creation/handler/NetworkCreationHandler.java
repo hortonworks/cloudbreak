@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.creation.handler;
 
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_FREEIPA_CREATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_PUBLICKEY_CREATION_EVENT;
 
 import java.util.Objects;
 import java.util.Set;
@@ -52,7 +52,7 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
             createNetwork(environmentDto);
-            stepToFreeIpaCreation(environmentDtoEvent, environmentDto);
+            initiateNextStep(environmentDtoEvent, environmentDto);
         } catch (Exception e) {
             EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
                     environmentDto.getId(),
@@ -85,10 +85,10 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
                 && enabledPlatforms.contains(environment.getCloudPlatform());
     }
 
-    private void stepToFreeIpaCreation(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environmentDto) {
+    private void initiateNextStep(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environmentDto) {
         EnvCreationEvent envCreationEvent = EnvCreationEvent.builder()
                 .withResourceId(environmentDto.getResourceId())
-                .withSelector(START_FREEIPA_CREATION_EVENT.selector())
+                .withSelector(START_PUBLICKEY_CREATION_EVENT.selector())
                 .withResourceCrn(environmentDto.getResourceCrn())
                 .withResourceName(environmentDto.getName())
                 .build();

@@ -30,6 +30,7 @@ class AuthenticationDtoConverterTest {
                 .withLoginUserName(LOGIN)
                 .withPublicKey(PUBLIC_KEY)
                 .withPublicKeyId(PUBLIC_KEY_ID)
+                .withManagedKey(true)
                 .build();
 
         EnvironmentAuthentication result = underTest.dtoToAuthentication(dto);
@@ -37,7 +38,8 @@ class AuthenticationDtoConverterTest {
         assertThat(result)
                 .matches(m -> Objects.equals(m.getLoginUserName(), dto.getLoginUserName()))
                 .matches(m -> Objects.equals(m.getPublicKey(), dto.getPublicKey()))
-                .matches(m -> Objects.equals(m.getPublicKeyId(), dto.getPublicKeyId()));
+                .matches(m -> Objects.equals(m.getPublicKeyId(), dto.getPublicKeyId()))
+                .matches(m -> Objects.equals(m.isManagedKey(), dto.isManagedKey()));
     }
 
     @Test
@@ -47,12 +49,14 @@ class AuthenticationDtoConverterTest {
         environment.setLoginUserName(LOGIN);
         environment.setPublicKey(PUBLIC_KEY);
         environment.setPublicKeyId(PUBLIC_KEY_ID);
+        environment.setManagedKey(true);
 
         AuthenticationDto result = underTest.authenticationToDto(environment);
 
         assertThat(result)
                 .matches(m -> Objects.equals(m.getLoginUserName(), environment.getLoginUserName()))
                 .matches(m -> Objects.equals(m.getPublicKey(), environment.getPublicKey()))
-                .matches(m -> Objects.equals(m.getPublicKeyId(), environment.getPublicKeyId()));
+                .matches(m -> Objects.equals(m.getPublicKeyId(), environment.getPublicKeyId()))
+                .matches(m -> Objects.equals(m.isManagedKey(), environment.isManagedKey()));
     }
 }

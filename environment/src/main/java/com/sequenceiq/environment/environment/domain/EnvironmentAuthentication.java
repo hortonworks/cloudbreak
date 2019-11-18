@@ -24,6 +24,8 @@ public class EnvironmentAuthentication {
 
     private String loginUserName;
 
+    private boolean managedKey;
+
     public Long getId() {
         return id;
     }
@@ -54,5 +56,13 @@ public class EnvironmentAuthentication {
 
     public void setLoginUserName(String loginUserName) {
         this.loginUserName = loginUserName;
+    }
+
+    public boolean isManagedKey() {
+        return managedKey;
+    }
+
+    public void setManagedKey(boolean managedKey) {
+        this.managedKey = managedKey;
     }
 }
