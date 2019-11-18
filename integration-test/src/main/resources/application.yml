@@ -152,14 +152,16 @@ integrationtest:
     defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     blueprintCdhVersion: 7.0.2
     availabilityZone:
-    region: West Europe
-    location: West Europe
+    region: West US
+    location: West US
     network:
-      networkId:
-      noFirewallRules:
-      noPublicIp:
-      resourceGroupName:
+      networkId: CDP-Build-US-W
+      noFirewallRules: false
+      noPublicIp: false
+      resourceGroupName: CDP-Build
       subnetIds:
+        - default
+        - GatewaySubnet
     credential:
       appId:
       appPassword:
