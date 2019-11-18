@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,6 +146,7 @@ public class CloudStorageConverter {
                 type = FileSystemType.GCS;
             } else if (storageIdentity.getS3() != null) {
                 cloudFileSystemView = cloudStorageParametersConverter.s3ToCloudView(storageIdentity);
+                setDynamoDBTableName((CloudS3View) cloudFileSystemView, cloudStorageRequest);
                 type = FileSystemType.S3;
             } else if (storageIdentity.getWasb() != null) {
                 cloudFileSystemView = cloudStorageParametersConverter.wasbToCloudView(storageIdentity);
@@ -160,6 +162,15 @@ public class CloudStorageConverter {
             }
         }
         return type;
+    }
+
+    private void setDynamoDBTableName(CloudS3View cloudFileSystemView, CloudStorageBase cloudStorageRequest) {
+        if (cloudStorageRequest.getAws() != null &&
+                cloudStorageRequest.getAws().getS3Guard() != null &&
+                cloudStorageRequest.getAws().getS3Guard().getDynamoTableName() != null) {
+            String dynamoTableName = cloudStorageRequest.getAws().getS3Guard().getDynamoTableName();
+            cloudFileSystemView.setS3GuardDynamoTableName(dynamoTableName);
+        }
     }
 
     private void validateCloudFileSystemViews(List<CloudFileSystemView> cloudFileSystemViews, FileSystemType type) {
