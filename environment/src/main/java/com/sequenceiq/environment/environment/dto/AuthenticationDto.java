@@ -2,13 +2,19 @@ package com.sequenceiq.environment.environment.dto;
 
 public class AuthenticationDto {
 
-    private String publicKey;
+    private final String publicKey;
 
-    private String publicKeyId;
+    private final String publicKeyId;
 
-    private String loginUserName;
+    private final String loginUserName;
 
-    private AuthenticationDto() {
+    private final boolean managedKey;
+
+    private AuthenticationDto(Builder builder) {
+        loginUserName = builder.loginUserName;
+        publicKey = builder.publicKey;
+        publicKeyId = builder.publicKeyId;
+        managedKey = builder.managedKey;
     }
 
     public String getPublicKey() {
@@ -23,6 +29,10 @@ public class AuthenticationDto {
         return loginUserName;
     }
 
+    public boolean isManagedKey() {
+        return managedKey;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -34,6 +44,8 @@ public class AuthenticationDto {
         private String publicKey;
 
         private String publicKeyId;
+
+        private boolean managedKey;
 
         private Builder() {
         }
@@ -53,12 +65,13 @@ public class AuthenticationDto {
             return this;
         }
 
+        public Builder withManagedKey(boolean managedKey) {
+            this.managedKey = managedKey;
+            return this;
+        }
+
         public AuthenticationDto build() {
-            AuthenticationDto authenticationDto = new AuthenticationDto();
-            authenticationDto.loginUserName = loginUserName;
-            authenticationDto.publicKey = publicKey;
-            authenticationDto.publicKeyId = publicKeyId;
-            return authenticationDto;
+            return new AuthenticationDto(this);
         }
     }
 }

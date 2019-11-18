@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest.DEFAULT_USER_NAME;
 import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto.EnvironmentChangeCredentialDtoBuilder.anEnvironmentChangeCredentialDto;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -197,10 +198,12 @@ public class EnvironmentApiConverter {
         if (authentication != null) {
             builder.withLoginUserName(authentication.getLoginUserName())
                     .withPublicKey(authentication.getPublicKey())
-                    .withPublicKeyId(authentication.getPublicKeyId());
+                    .withPublicKeyId(authentication.getPublicKeyId())
+                    .withManagedKey(Objects.nonNull(authentication.getPublicKey()));
         } else {
             builder.withLoginUserName(DEFAULT_USER_NAME)
                     .withPublicKey(DUMMY_SSH_KEY)
+                    .withManagedKey(true)
                     .withPublicKeyId(null);
         }
         return builder.build();

@@ -5,6 +5,7 @@ import com.sequenceiq.flow.core.FlowEvent;
 public enum EnvCreationHandlerSelectors implements FlowEvent {
     VALIDATE_ENVIRONMENT_EVENT,
     CREATE_NETWORK_EVENT,
+    CREATE_PUBLICKEY_EVENT,
     CREATE_FREEIPA_EVENT;
 
     @Override

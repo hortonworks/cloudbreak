@@ -12,6 +12,7 @@ public class AuthenticationDtoConverter {
         environmentAuthentication.setLoginUserName(authenticationDto.getLoginUserName());
         environmentAuthentication.setPublicKey(authenticationDto.getPublicKey());
         environmentAuthentication.setPublicKeyId(authenticationDto.getPublicKeyId());
+        environmentAuthentication.setManagedKey(authenticationDto.isManagedKey());
         return environmentAuthentication;
     }
 
@@ -20,6 +21,7 @@ public class AuthenticationDtoConverter {
                 .withLoginUserName(authentication.getLoginUserName())
                 .withPublicKey(authentication.getPublicKey())
                 .withPublicKeyId(authentication.getPublicKeyId())
+                .withManagedKey(authentication.isManagedKey())
                 .build();
         return authenticationDto;
     }

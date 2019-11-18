@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.creation;
 
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_PUBLICKEY_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.VALIDATE_ENVIRONMENT_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINALIZE_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.HANDLED_FAILED_ENV_CREATION_EVENT;
@@ -17,6 +18,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -31,7 +33,6 @@ import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.notification.NotificationService;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 @Configuration
 public class EnvCreationActions {
@@ -99,6 +100,33 @@ public class EnvCreationActions {
                             payload.getResourceCrn());
                     notificationService.send(ResourceEvent.ENVIRONMENT_NETWORK_CREATION_FAILED, payload, context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to create network for environment! No environment found with id '{}'.", payload.getResourceId());
+                    sendEvent(context, failureEvent);
+                });
+            }
+        };
+    }
+
+    @Bean(name = "PUBLICKEY_CREATION_STARTED_STATE")
+    public Action<?, ?> publickeyCreationAction() {
+        return new AbstractEnvironmentCreationAction<>(EnvCreationEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
+                environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
+                    LOGGER.info("PUBLICKEY_CREATION_STARTED_STATE");
+                    environment.setStatus(EnvironmentStatus.PUBLICKEY_CREATE_IN_PROGRESS);
+                    environment = environmentService.save(environment);
+                    EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
+                    SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                    notificationService.send(ResourceEvent.ENVIRONMENT_PUBLICKEY_CREATION_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
+                    sendEvent(context, CREATE_PUBLICKEY_EVENT.selector(), environmentDto);
+                }, () -> {
+                    EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
+                            payload.getResourceId(),
+                            payload.getResourceName(),
+                            null,
+                            payload.getResourceCrn());
+                    notificationService.send(ResourceEvent.ENVIRONMENT_PUBLICKEY_CREATION_FAILED, payload, context.getFlowTriggerUserCrn());
+                    LOGGER.warn("Failed to create public key for environment! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
                 });
             }
