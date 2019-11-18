@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.validation.ValidationResult.State.VALID;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -17,17 +19,17 @@ public class ValidationResult {
 
     private final String formattedErrors;
 
-    private ValidationResult(State state, List<String> errors) {
+    private ValidationResult(State state, SortedSet<String> errors) {
         this.state = state;
-        this.errors = errors;
-        formattedErrors = IntStream.range(0, errors.size())
-                .mapToObj(i -> i + 1 + ". " + errors.get(i))
+        this.errors = new ArrayList<>(errors);
+        formattedErrors = IntStream.range(0, this.errors.size())
+                .mapToObj(i -> i + 1 + ". " + this.errors.get(i))
                 .collect(Collectors.joining("\n "));
     }
 
     public ValidationResult merge(ValidationResult other) {
         State mergeState = state == ERROR || other.state == ERROR ? ERROR : VALID;
-        List<String> mergedError = new ArrayList<>(errors);
+        SortedSet<String> mergedError = new TreeSet<>(this.errors);
         mergedError.addAll(other.errors);
         return new ValidationResult(mergeState, mergedError);
     }
@@ -64,7 +66,7 @@ public class ValidationResult {
 
         private State state = VALID;
 
-        private final List<String> errors = new ArrayList<>();
+        private final SortedSet<String> errors = new TreeSet<>();
 
         public ValidationResultBuilder error(String error) {
             if (state == VALID) {
