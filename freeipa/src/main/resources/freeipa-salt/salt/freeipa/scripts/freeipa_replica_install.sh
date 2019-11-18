@@ -5,17 +5,16 @@ set -e
 FQDN=$(hostname -f)
 IPADDR=$(hostname -i)
 
-ipa-server-install \
+ipa-replica-install \
+          --server $FREEIPA_TO_REPLICATE \
+          --setup-ca \
           --realm $REALM \
           --domain $DOMAIN \
           --hostname $FQDN \
-          -a $FPW \
-          -p $FPW \
+          --principal $ADMIN_USER \
+          --admin-password $FPW \
           --setup-dns \
           --auto-reverse \
-{%- for zone in salt['pillar.get']('freeipa:reverseZones').split(',') %}
-          --reverse-zone {{ zone }} \
-{%- endfor %}
           --allow-zone-overlap \
           --ssh-trust-dns \
           --mkhomedir \
