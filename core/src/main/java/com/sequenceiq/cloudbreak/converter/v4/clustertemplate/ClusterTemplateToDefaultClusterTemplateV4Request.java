@@ -25,7 +25,7 @@ public class ClusterTemplateToDefaultClusterTemplateV4Request extends AbstractCo
         ret.setName(source.getName());
         ret.setType(source.getType());
         StackV4Request stackV4Request = getConversionService().convert(source.getStackTemplate(), StackV4Request.class);
-        ret.setDistroXTemplate(stackV4RequestConverter.convert(stackV4Request));
+        ret.setDistroXTemplate(stackV4RequestConverter.convert(stackV4Request, null));
         return ret;
     }
 }

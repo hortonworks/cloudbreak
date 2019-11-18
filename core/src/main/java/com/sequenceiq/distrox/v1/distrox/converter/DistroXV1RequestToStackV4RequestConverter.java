@@ -21,9 +21,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.network.DefaultNetworkRequiredService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
@@ -39,16 +37,10 @@ import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 public class DistroXV1RequestToStackV4RequestConverter {
 
     @Inject
-    private DistroXEnvironmentV1ToEnvironmentSettingsConverter environmentConverter;
-
-    @Inject
     private DistroXAuthenticationToStaAuthenticationConverter authenticationConverter;
 
     @Inject
     private DistroXImageToImageSettingsConverter imageConverter;
-
-    @Inject
-    private DistroXClusterToClusterConverter clusterConverter;
 
     @Inject
     private InstanceGroupV1ToInstanceGroupV4Converter instanceGroupConverter;
@@ -60,12 +52,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
     private DistroXParameterConverter stackParameterConverter;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
-
-    @Inject
-    private WorkspaceService workspaceService;
-
-    @Inject
     private DefaultNetworkRequiredService defaultNetworkRequiredService;
 
     @Inject
@@ -75,11 +61,14 @@ public class DistroXV1RequestToStackV4RequestConverter {
     private TelemetryConverter telemetryConverter;
 
     @Inject
+    // TODO this is a heavy wight converter
+    private DistroXClusterToClusterConverter clusterConverter;
+
+    @Inject
+    // TODO this is a heavy wight converter
     private SdxClientService sdxClientService;
 
-    public StackV4Request convert(DistroXV1Request source) {
-        DetailedEnvironmentResponse environment = Optional.ofNullable(environmentClientService.getByName(source.getEnvironmentName()))
-                .orElseThrow(() -> new BadRequestException("No environment name provided hence unable to obtain some important data"));
+    public StackV4Request convert(DistroXV1Request source, DetailedEnvironmentResponse environment) {
         if (environment != null && environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
             throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
         }
@@ -108,18 +97,14 @@ public class DistroXV1RequestToStackV4RequestConverter {
         return request;
     }
 
-    public StackV4Request convertAsTemplate(DistroXV1Request source) {
+    public StackV4Request convertAsTemplate(DistroXV1Request source, DetailedEnvironmentResponse environment) {
         StackV4Request request = new StackV4Request();
-        DetailedEnvironmentResponse environment = null;
-        if (source.getEnvironmentName() != null) {
-            environment = environmentClientService.getByName(source.getEnvironmentName());
-            if (environment != null) {
-                if (environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
-                    throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
-                }
-                request.setCloudPlatform(getCloudPlatform(environment));
-                request.setEnvironmentCrn(environment.getCrn());
+        if (environment != null) {
+            if (environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
+                throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
             }
+            request.setCloudPlatform(getCloudPlatform(environment));
+            request.setEnvironmentCrn(environment.getCrn());
         }
         SdxClusterResponse sdxClusterResponse = getSdxClusterResponse(environment);
         request.setName(source.getName());
@@ -184,15 +169,11 @@ public class DistroXV1RequestToStackV4RequestConverter {
         return yarnParameters;
     }
 
-    public DistroXV1Request convert(StackV4Request source) {
+    public DistroXV1Request convert(StackV4Request source, DetailedEnvironmentResponse environment) {
         DistroXV1Request request = new DistroXV1Request();
         request.setName(source.getName());
-        DetailedEnvironmentResponse environment = null;
-        if (source.getEnvironmentCrn() != null) {
-            environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
-            if (environment != null && environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
-                throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
-            }
+        if (environment != null && environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
+            throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
         }
         request.setEnvironmentName(getIfNotNull(environment, EnvironmentBaseResponse::getName));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));

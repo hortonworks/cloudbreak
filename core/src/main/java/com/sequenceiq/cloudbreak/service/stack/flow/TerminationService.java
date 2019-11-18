@@ -100,8 +100,9 @@ public class TerminationService {
         try {
             freeIpaCleanupService.cleanup(stack, false, null);
         } catch (Exception e) {
-            LOGGER.error("Failed to cleanup", e);
+            LOGGER.error("Failed to cleanup, forced: {}", forcedTermination,  e);
             if (!forcedTermination) {
+                LOGGER.info("Since forced termination was disabled, therefore an exception was thrown", e);
                 throw e;
             }
         }

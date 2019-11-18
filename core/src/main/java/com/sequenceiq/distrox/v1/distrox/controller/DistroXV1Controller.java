@@ -27,9 +27,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
@@ -44,8 +44,8 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXMaintenanceModeV1ToMai
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXRepairV1RequestToClusterRepairV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXScaleV1RequestToStackScaleV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToCreateAWSClusterRequestConverter;
-import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.StackRequestToCreateAWSClusterRequestConverter;
+import com.sequenceiq.distrox.v1.distrox.service.DistroXCreationService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Controller
@@ -58,9 +58,6 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Inject
     private WorkspaceService workspaceService;
-
-    @Inject
-    private DistroXV1RequestToStackV4RequestConverter stackRequestConverter;
 
     @Inject
     private DistroXScaleV1RequestToStackScaleV4RequestConverter scaleRequestConverter;
@@ -83,11 +80,14 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Inject
     private EnvironmentClientService environmentClientService;
 
+    @Inject
+    private DistroXCreationService distroXCreationService;
+
     @Override
     public StackViewV4Responses list(String environmentName, String environmentCrn) {
         StackViewV4Responses stackViewV4Responses;
         if (!Strings.isNullOrEmpty(environmentName)) {
-            stackViewV4Responses =  stackOperations.listByEnvironmentName(
+            stackViewV4Responses = stackOperations.listByEnvironmentName(
                     workspaceService.getForCurrentUser().getId(), environmentName, StackType.WORKLOAD);
         } else {
             stackViewV4Responses = stackOperations.listByEnvironmentCrn(
@@ -98,9 +98,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     public StackV4Response post(@Valid DistroXV1Request request) {
-        return stackOperations.post(
-                workspaceService.getForCurrentUser().getId(),
-                stackRequestConverter.convert(request));
+        return distroXCreationService.create(request);
     }
 
     @Override
@@ -286,7 +284,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         return stackOperations.postStackForBlueprint(
                 StackAccessDto.builder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId(),
-                stackRequestConverter.convert(stackRequest));
+                distroXCreationService.expensiveConversion(stackRequest));
     }
 
     @Override
@@ -294,7 +292,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         return stackOperations.postStackForBlueprint(
                 StackAccessDto.builder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId(),
-                stackRequestConverter.convert(stackRequest));
+                distroXCreationService.expensiveConversion(stackRequest));
     }
 
     @Override

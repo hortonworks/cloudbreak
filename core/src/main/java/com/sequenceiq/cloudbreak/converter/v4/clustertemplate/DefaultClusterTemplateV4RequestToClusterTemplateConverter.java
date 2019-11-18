@@ -62,7 +62,7 @@ public class DefaultClusterTemplateV4RequestToClusterTemplateConverter
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         clusterTemplate.setWorkspace(workspace);
         clusterTemplate.setTemplateContent(defaultClusterTemplateCache.getByName(source.getName()));
-        StackV4Request stackV4Request = stackV4RequestConverter.convertAsTemplate(source.getDistroXTemplate());
+        StackV4Request stackV4Request = stackV4RequestConverter.convertAsTemplate(source.getDistroXTemplate(), null);
         stackV4Request.setType(StackType.TEMPLATE);
         stackV4Request.setCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()));
         Stack stack = converterUtil.convert(stackV4Request, Stack.class);

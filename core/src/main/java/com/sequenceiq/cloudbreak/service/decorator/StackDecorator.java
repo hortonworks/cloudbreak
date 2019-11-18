@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CdpResourceTypeProvider;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
-import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
@@ -56,7 +55,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
@@ -65,9 +63,6 @@ public class StackDecorator {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDecorator.class);
 
     private static final double ONE_HUNDRED = 100.0;
-
-    @Inject
-    private CredentialClientService credentialClientService;
 
     @Inject
     private NetworkService networkService;
@@ -98,9 +93,6 @@ public class StackDecorator {
 
     @Inject
     private EnvironmentClientService environmentClientService;
-
-    @Inject
-    private CredentialEndpoint credentialEndpoint;
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;

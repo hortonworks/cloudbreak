@@ -62,7 +62,7 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         clusterTemplate.setWorkspace(workspace);
-        StackV4Request stackV4Request = stackV4RequestConverter.convert(source.getDistroXTemplate());
+        StackV4Request stackV4Request = stackV4RequestConverter.convertAsTemplate(source.getDistroXTemplate(), null);
         stackV4Request.setType(StackType.TEMPLATE);
         Stack stack = converterUtil.convert(stackV4Request, Stack.class);
         clusterTemplate.setStackTemplate(stack);
