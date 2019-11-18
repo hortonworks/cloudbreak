@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Maps;
@@ -173,11 +174,13 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         Set<String> defaultGatewayCidrs = defaultGatewayCidr.stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
         if (!defaultGatewayCidrs.isEmpty()) {
             for (InstanceGroup gateway : gateways) {
-                Set<SecurityRule> rules = gateway.getSecurityGroup().getSecurityRules();
-                defaultGatewayCidrs.forEach(cloudbreakCidr -> rules.add(createSecurityRule(gateway.getSecurityGroup(), cloudbreakCidr,
-                        stack.getGatewayPort())));
-                LOGGER.info("The control plane cidrs {} are added to the {} gateway group for the {} port.", defaultGatewayCidrs, gateway.getGroupName(),
-                        stack.getGatewayPort());
+                if (CollectionUtils.isEmpty(gateway.getSecurityGroup().getSecurityGroupIds())) {
+                    Set<SecurityRule> rules = gateway.getSecurityGroup().getSecurityRules();
+                    defaultGatewayCidrs.forEach(cloudbreakCidr -> rules.add(createSecurityRule(gateway.getSecurityGroup(), cloudbreakCidr,
+                            stack.getGatewayPort())));
+                    LOGGER.info("The control plane cidrs {} are added to the {} gateway group for the {} port.", defaultGatewayCidrs, gateway.getGroupName(),
+                            stack.getGatewayPort());
+                }
             }
         }
     }

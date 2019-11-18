@@ -109,11 +109,13 @@ public class CreateFreeIpaRequestToStackConverter {
         Set<String> defaultGatewayCidrs = defaultGatewayCidr.stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
         if (!defaultGatewayCidrs.isEmpty()) {
             for (InstanceGroup gateway : gateways) {
-                Set<SecurityRule> rules = gateway.getSecurityGroup().getSecurityRules();
-                defaultGatewayCidrs.forEach(cloudbreakCidr -> rules.add(createSecurityRule(gateway.getSecurityGroup(), cloudbreakCidr,
-                        stack.getGatewayport().toString())));
-                LOGGER.info("The control plane cidrs {} are added to the {} gateway group for the {} port.", defaultGatewayCidrs, gateway.getGroupName(),
-                        stack.getGatewayport());
+                if (CollectionUtils.isEmpty(gateway.getSecurityGroup().getSecurityGroupIds())) {
+                    Set<SecurityRule> rules = gateway.getSecurityGroup().getSecurityRules();
+                    defaultGatewayCidrs.forEach(cloudbreakCidr -> rules.add(createSecurityRule(gateway.getSecurityGroup(), cloudbreakCidr,
+                            stack.getGatewayport().toString())));
+                    LOGGER.info("The control plane cidrs {} are added to the {} gateway group for the {} port.", defaultGatewayCidrs, gateway.getGroupName(),
+                            stack.getGatewayport());
+                }
             }
         }
     }
