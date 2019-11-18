@@ -32,7 +32,7 @@ if [[ $rm_flag ]]; then
 fi
 
 chmod +x cbd
-cbd_version=$(./cbd --version)
+cbd_version=$(TRACE=1 ./cbd --version)
 mkdir etc
 cp ../../mock-caas/src/test/resources/etc/license.txt etc/license.txt
 echo -e "$cbd_version"

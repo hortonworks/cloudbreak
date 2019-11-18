@@ -8,4 +8,4 @@ ALTER TABLE environment_network DROP COLUMN IF EXISTS subnetids;
 -- SQL to undo the change goes here.
 
 ALTER TABLE environment_network DROP COLUMN IF EXISTS privateSubnetCreation;
-ALTER TABLE environment_network ADD COLUMN IF NOT EXISTS subnetids TEXT NOT NULL;
+ALTER TABLE environment_network ADD COLUMN IF NOT EXISTS subnetids TEXT;

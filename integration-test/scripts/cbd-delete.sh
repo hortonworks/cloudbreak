@@ -2,5 +2,5 @@
 
 cd $INTEGCB_LOCATION
 
-./cbd kill
-./cbd delete --force
+TRACE=1 ./cbd kill
+TRACE=1 ./cbd delete --force
