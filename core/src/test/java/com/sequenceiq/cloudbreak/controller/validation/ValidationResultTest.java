@@ -34,6 +34,14 @@ public class ValidationResultTest {
         assertError(result);
     }
 
+    @Test
+    public void testDuplicateErrors() {
+        underTest.error(ERROR_MESSAGE);
+        underTest.error(ERROR_MESSAGE);
+        ValidationResult result = underTest.build();
+        assertError(result);
+    }
+
     private void assertError(ValidationResult result) {
         assertEquals(State.ERROR, result.getState());
         assertEquals(ERROR_MESSAGE, result.getErrors().get(0));
