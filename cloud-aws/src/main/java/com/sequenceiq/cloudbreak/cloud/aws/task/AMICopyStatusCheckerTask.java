@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
+import com.amazonaws.services.ec2.model.Image;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
@@ -24,7 +25,7 @@ public class AMICopyStatusCheckerTask extends PollBooleanStateTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AMICopyStatusCheckerTask.class);
 
-    private static final String AMI_ERROR_STATE = "failed";
+    private static final Set<String> AMI_ERROR_STATES = Set.of("invalid", "failed", "error");
 
     private static final String AMI_AVAILABLE_STATE = "available";
 
@@ -43,19 +44,31 @@ public class AMICopyStatusCheckerTask extends PollBooleanStateTask {
         LOGGER.debug("Checking copied AMIs status are available: '{}'", String.join(",", imageIds));
         DescribeImagesResult describeImagesResult = amazonEC2Client.describeImages(new DescribeImagesRequest().withImageIds(imageIds));
         checkForCopyFailures(describeImagesResult);
-        return describeImagesResult.getImages()
+        boolean completed = describeImagesResult.getImages()
                 .stream()
                 .allMatch(el -> el.getState().equalsIgnoreCase(AMI_AVAILABLE_STATE));
+        if (!completed) {
+            LOGGER.info("Image copying is in progress, image states: [{}]", describeImagesResult
+                    .getImages()
+                    .stream()
+                    .map(this::getImageStateMessage)
+                    .collect(Collectors.joining(", ")));
+        }
+        return completed;
     }
 
     private void checkForCopyFailures(DescribeImagesResult describeImagesResult) {
         Set<String> failedCopies = describeImagesResult.getImages()
                 .stream()
-                .filter(el -> el.getState().equalsIgnoreCase(AMI_ERROR_STATE))
-                .map(image -> String.format("AMI: '%s' failed due to: '%s'", image.getImageId(), image.getStateReason()))
+                .filter(el -> AMI_ERROR_STATES.contains(el.getState().toLowerCase()))
+                .map(image -> String.format("AMI: '%s' is in '%s' state due to: '%s'", image.getImageId(), image.getState(), image.getStateReason()))
                 .collect(Collectors.toSet());
         if (!failedCopies.isEmpty()) {
             throw new CloudConnectorException(String.format("AMI(s) failed to copy: '%s'", String.join(", ", failedCopies)));
         }
+    }
+
+    private String getImageStateMessage(Image image) {
+        return image.getImageId() + '[' + image.getState() + "]: " + image.getStateReason();
     }
 }
