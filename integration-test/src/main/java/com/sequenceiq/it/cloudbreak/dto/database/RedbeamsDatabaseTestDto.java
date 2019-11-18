@@ -1,26 +1,21 @@
 package com.sequenceiq.it.cloudbreak.dto.database;
 
 import java.util.List;
-// import java.util.function.BiConsumer;
-// import java.util.function.Function;
 import java.util.stream.Collectors;
 
-// import javax.ws.rs.WebApplicationException;
-
-// import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.dto.DeletableRedbeamsTestDto;
-// import com.sequenceiq.it.cloudbreak.Assertion;
-// import com.sequenceiq.it.cloudbreak.GherkinTest;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.DeletableRedbeamsTestDto;
+import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Response;
 
 @Prototype
-public class RedbeamsDatabaseTestDto extends DeletableRedbeamsTestDto<DatabaseV4Request, DatabaseV4Response, RedbeamsDatabaseTestDto, DatabaseV4Response> {
+public class RedbeamsDatabaseTestDto extends DeletableRedbeamsTestDto<DatabaseV4Request, DatabaseV4Response, RedbeamsDatabaseTestDto, DatabaseV4Response>
+        implements Searchable {
 
     public static final String DATABASE = "DATABASE";
 
@@ -40,16 +35,6 @@ public class RedbeamsDatabaseTestDto extends DeletableRedbeamsTestDto<DatabaseV4
     public RedbeamsDatabaseTestDto(DatabaseV4Request request, TestContext testContext) {
         super(request, testContext);
     }
-
-    // @Override
-    // public void cleanUp(TestContext context, RedbeamsClient redbeamsClient) {
-    //     LOGGER.info("Cleaning up resource with name: {}", getName());
-    //     try {
-    //         redbeamsClient.getEndpoints().databaseV4Endpoint().deleteByName(cloudbreakClient.getWorkspaceId(), getName());
-    //     } catch (WebApplicationException ignore) {
-    //         LOGGER.warn("Cleaning up resource failed", ignore);
-    //     }
-    // }
 
     @Override
     public RedbeamsDatabaseTestDto valid() {
@@ -133,5 +118,10 @@ public class RedbeamsDatabaseTestDto extends DeletableRedbeamsTestDto<DatabaseV4
     @Override
     public int order() {
         return 500;
+    }
+
+    @Override
+    public String getSearchId() {
+        return getName();
     }
 }

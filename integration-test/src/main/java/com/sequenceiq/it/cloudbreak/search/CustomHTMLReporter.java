@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.logsearch;
+package com.sequenceiq.it.cloudbreak.search;
 
 import java.io.File;
 import java.util.ArrayList;

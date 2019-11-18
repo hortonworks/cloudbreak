@@ -42,10 +42,11 @@ import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.search.Searchable;
 
 @Prototype
 public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest, DescribeFreeIpaResponse, FreeIPATestDto>
-        implements Purgable<ListFreeIpaResponse, FreeIPAClient> {
+        implements Purgable<ListFreeIpaResponse, FreeIPAClient>, Searchable {
 
     @Inject
     private FreeIPATestClient freeIPATestClient;
@@ -217,5 +218,10 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
     @Override
     public Class<FreeIPAClient> client() {
         return FreeIPAClient.class;
+    }
+
+    @Override
+    public String getSearchId() {
+        return getName();
     }
 }

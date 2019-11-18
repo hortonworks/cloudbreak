@@ -44,6 +44,7 @@ import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
+import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
@@ -58,7 +59,7 @@ import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 @Prototype
 public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterRequest, SdxClusterDetailResponse, SdxInternalTestDto>
-        implements Purgable<SdxClusterResponse, SdxClient>, Investigable {
+        implements Purgable<SdxClusterResponse, SdxClient>, Investigable, Searchable {
 
     private static final String DEFAULT_SDX_NAME = "test-sdx" + '-' + UUID.randomUUID().toString().replaceAll("-", "");
 
@@ -410,5 +411,10 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         String crn = getResponse().getCrn();
 
         return "SDX audit events: " + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), "stacks", null, crn);
+    }
+
+    @Override
+    public String getSearchId() {
+        return getName();
     }
 }
