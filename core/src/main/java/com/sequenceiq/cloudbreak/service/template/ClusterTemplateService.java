@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.dto.ClusterDefinitionAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
@@ -112,6 +113,9 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @Inject
     private BlueprintService blueprintService;
+
+    @Inject
+    private ClusterTemplateCloudPlatformValidator cloudPlatformValidator;
 
     @Override
     protected WorkspaceResourceRepository<ClusterTemplate, Long> repository() {
@@ -214,7 +218,8 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return !isUsableClusterTemplate(response);
     }
 
-    public boolean isUsableClusterTemplate(ClusterTemplateViewV4Response response) {
+    @VisibleForTesting
+    boolean isUsableClusterTemplate(ClusterTemplateViewV4Response response) {
         return (isUserManaged(response) && hasEnvironment(response)) || isDefaultTemplate(response);
     }
 
@@ -228,6 +233,11 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     private boolean isDefaultTemplate(ClusterTemplateViewV4Response response) {
         return ResourceStatus.DEFAULT == response.getStatus();
+    }
+
+    @VisibleForTesting
+    boolean isClusterTemplateHasValidCloudPlatform(ClusterTemplateViewV4Response response) {
+        return cloudPlatformValidator.isClusterTemplateCloudPlatformValid(response.getCloudPlatform(), threadBasedUserCrnProvider.getAccountId());
     }
 
     public void updateDefaultClusterTemplates(long workspaceId) {
@@ -266,6 +276,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
             return responses.stream()
                     .filter(this::isUsableClusterTemplate)
+                    .filter(this::isClusterTemplateHasValidCloudPlatform)
                     .collect(toSet());
         } catch (TransactionExecutionException e) {
             LOGGER.warn("Unable to find cluster definitions due to {}", e.getMessage());
