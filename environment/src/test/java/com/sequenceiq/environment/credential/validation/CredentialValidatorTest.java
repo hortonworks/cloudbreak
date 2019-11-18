@@ -64,14 +64,14 @@ class CredentialValidatorTest {
     // @formatter:off
     // CHECKSTYLE:OFF
     static Object[][] validateCredentialCloudPlatformDataProvider() {
-        return new Object[][] {
+        return new Object[][]{
                 // testCaseName             cloudPlatform   azureEnabled    validExpected
-                { AWS + AZURE_DISABLED,     AWS,            false,          true },
-                { AZURE + AZURE_DISABLED,   AZURE,          false,          false },
-                { FOO + AZURE_DISABLED,     FOO,            false,          false },
-                { AWS + AZURE_ENABLED,      AWS,            true,           true },
-                { AZURE + AZURE_ENABLED,    AZURE,          true,           true },
-                { FOO + AZURE_ENABLED,      FOO,            true,           false },
+                {AWS + AZURE_DISABLED, AWS, false, true},
+                {AZURE + AZURE_DISABLED, AZURE, false, false},
+                {FOO + AZURE_DISABLED, FOO, false, false},
+                {AWS + AZURE_ENABLED, AWS, true, true},
+                {AZURE + AZURE_ENABLED, AZURE, true, true},
+                {FOO + AZURE_ENABLED, FOO, true, false},
         };
     }
     // CHECKSTYLE:ON
