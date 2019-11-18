@@ -32,12 +32,13 @@ import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 
 @Prototype
-public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implements Purgable<StackV4Response, CloudbreakClient>, Investigable {
+public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implements Purgable<StackV4Response, CloudbreakClient>, Investigable, Searchable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXTestDto.class);
 
@@ -201,5 +202,10 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         Long id = getResponse().getId();
 
         return "DistroX audit events: " + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), "stacks", id, null);
+    }
+
+    @Override
+    public String getSearchId() {
+        return getName();
     }
 }

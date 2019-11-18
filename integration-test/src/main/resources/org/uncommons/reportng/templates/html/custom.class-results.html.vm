@@ -15,10 +15,10 @@
     #else
       $testResult.name$testInstanceName
     #end
-    #set ($logSearchUrlIndexPostFix = "logSearchUrl")
-    #set ($logSearchUrl = $testResult.testContext.getAttribute("$testResult.name$testInstanceName$logSearchUrlIndexPostFix"))
-    #if ( $logSearchUrl )
-    &#183; <a href=$logSearchUrl target="_blank">LogSearch</a>
+    #set ($searchUrlIndexPostFix = "searchUrl")
+    #set ($searchUrl = $testResult.testContext.getAttribute("$testResult.name$testInstanceName$searchUrlIndexPostFix"))
+    #if ( $searchUrl )
+    &#183; <a href=$searchUrl target="_blank">Search in logs</a>
     #end
   </td>
   <td class="duration">

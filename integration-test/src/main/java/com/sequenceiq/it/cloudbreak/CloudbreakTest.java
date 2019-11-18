@@ -2,22 +2,18 @@ package com.sequenceiq.it.cloudbreak;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.util.StringUtils;
 import org.testng.ITestContext;
-import org.testng.ITestResult;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
@@ -25,10 +21,7 @@ import org.testng.annotations.BeforeTest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.UserProfileV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.TestParameter;
-import com.sequenceiq.it.cloudbreak.logsearch.LogSearchProps;
-import com.sequenceiq.it.cloudbreak.logsearch.LogSearchUtil;
 
-@EnableConfigurationProperties(LogSearchProps.class)
 public class CloudbreakTest extends GherkinTest {
 
     public static final String CLOUDBREAK_SERVER_ROOT = "CLOUDBREAK_SERVER_ROOT";
@@ -76,9 +69,6 @@ public class CloudbreakTest extends GherkinTest {
     @Inject
     private Environment environment;
 
-    @Inject
-    private LogSearchProps logSearchProps;
-
     private TestParameter testParameter;
 
     public CloudbreakTest() {
@@ -101,8 +91,6 @@ public class CloudbreakTest extends GherkinTest {
         testContext.putContextParam(CLOUDBREAK_SERVER_ROOT, server + cbRootContextPath);
         testContext.putContextParam(ACCESS_KEY, accesskey);
         testContext.putContextParam(SECRET_KEY, secretkey);
-        testContext.putContextParam(LOG_SEARCH_QUERY_TYPES, logSearchProps.getQueryTypes());
-        testContext.putContextParam(LOG_SEARCH_URL_PREFIX, logSearchProps.getUrl());
 
         testContext.putContextParam(AUTOSCALE_CLIENT_ID, autoscaleUaaClientId);
         testContext.putContextParam(AUTOSCALE_SECRET, autoscaleUaaClientSecret);
@@ -114,8 +102,6 @@ public class CloudbreakTest extends GherkinTest {
             client.create(testContext);
 
             UserProfileV4Response profile = CloudbreakClient.getSingletonCloudbreakClient().userProfileV4Endpoint().get();
-            LogSearchUtil.addQueryModelForLogSearchUrlToContext(testContext, LogSearchUtil.LOG_SEARCH_CBOWNER_ID,
-                    LogSearchUtil.LOG_SEARCH_CBOWNER_QUERY_TYPE, profile.getUsername());
 
             setWorkspaceByUserProfile(testContext, profile);
         } catch (Exception exception) {
@@ -147,16 +133,6 @@ public class CloudbreakTest extends GherkinTest {
 
         LOGGER.info("Application.yml based parameters ::: ");
         getTestParameter().putAll(getAllKnownProperties(environment));
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void addLogSearchUrlToParameters(ITestResult testResult) {
-        Optional<String> url = LogSearchUtil.createLogSearchUrl(getItContext(),
-                logSearchProps.getTimeRangeInterval(), logSearchProps.getComponents());
-        if (url.isPresent()) {
-            LOGGER.info("Logsearch URL of {} method is {}", testResult.getName(), url.get());
-            testResult.getTestContext().setAttribute(testResult.getName() + "logSearchUrl", url.get());
-        }
     }
 
     private Map<String, String> getAllKnownProperties(Environment env) {
