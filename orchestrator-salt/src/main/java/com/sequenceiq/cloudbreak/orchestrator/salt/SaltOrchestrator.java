@@ -488,6 +488,36 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
+    @Override
+    public void installFreeIPA(GatewayConfig primaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+        Set<String> primaryServerHostname = Collections.singleton(primaryGateway.getHostname());
+
+        Set<String> replicaServersHostnames = allGatewayConfigs.stream()
+                .filter(gwc -> !gwc.getHostname().equals(primaryGateway.getHostname()))
+                .map(GatewayConfig::getHostname).collect(Collectors.toSet());
+
+        try (SaltConnector sc = createSaltConnector(primaryGateway)) {
+            LOGGER.debug("Set primary FreeIPA: {}", primaryServerHostname);
+            runSaltCommand(sc, new GrainAddRunner(primaryServerHostname, allNodes, "freeipa_primary"), exitCriteriaModel);
+            runNewService(sc, new HighStateRunner(primaryServerHostname, allNodes), exitCriteriaModel);
+
+            LOGGER.debug("Set replica FreeIPA: {}", replicaServersHostnames);
+            runSaltCommand(sc, new GrainAddRunner(replicaServersHostnames, allNodes, "freeipa_replica"), exitCriteriaModel);
+            runNewService(sc, new HighStateRunner(replicaServersHostnames, allNodes), exitCriteriaModel);
+        } catch (ExecutionException e) {
+            LOGGER.warn("Error occurred during FreeIPA installation", e);
+            if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
+                throw (CloudbreakOrchestratorFailedException) e.getCause();
+            }
+            throw new CloudbreakOrchestratorFailedException(e);
+        } catch (Exception e) {
+            LOGGER.warn("Error occurred during FreeIPA installation", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
     @Override
     public void resetAmbari(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {

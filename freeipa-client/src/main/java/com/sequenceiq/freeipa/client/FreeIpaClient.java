@@ -34,6 +34,8 @@ import com.sequenceiq.freeipa.client.model.Privilege;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.client.model.Role;
 import com.sequenceiq.freeipa.client.model.Service;
+import com.sequenceiq.freeipa.client.model.TopologySegment;
+import com.sequenceiq.freeipa.client.model.TopologySuffix;
 import com.sequenceiq.freeipa.client.model.User;
 
 public class FreeIpaClient {
@@ -553,4 +555,37 @@ public class FreeIpaClient {
     public void updatePasswordPolicy(Map<String, Object> params) throws FreeIpaClientException {
         invoke("pwpolicy_mod", Collections.emptyList(), params, Object.class);
     }
+
+    public List<TopologySuffix> findAllTopologySuffixes() throws FreeIpaClientException {
+        List<String> flags = List.of();
+        Map<String, Object> params = Map.of();
+        ParameterizedType type = TypeUtils
+                .parameterize(List.class, TopologySuffix.class);
+        return (List<TopologySuffix>) invoke("topologysuffix_find", flags, params, type).getResult();
+    }
+
+    public List<TopologySegment> findTopologySegments(String topologySuffixCn) throws FreeIpaClientException {
+        List<String> flags = List.of(topologySuffixCn);
+        Map<String, Object> params = Map.of();
+        ParameterizedType type = TypeUtils
+                .parameterize(List.class, TopologySegment.class);
+        return (List<TopologySegment>) invoke("topologysegment_find", flags, params, type).getResult();
+    }
+
+    public TopologySegment addTopologySegment(String topologySuffixCn, TopologySegment topologySegment) throws FreeIpaClientException {
+        List<String> flags = List.of(topologySuffixCn, topologySegment.getCn());
+        Map<String, Object> params = Map.of(
+            "iparepltoposegmentleftnode", topologySegment.getLeftNode(),
+            "iparepltoposegmentrightnode", topologySegment.getRightNode(),
+            "iparepltoposegmentdirection", topologySegment.getDirection()
+        );
+        return (TopologySegment) invoke("topologysegment_add", flags, params, TopologySegment.class).getResult();
+    }
+
+    public TopologySegment deleteTopologySegment(String topologySuffixCn, TopologySegment topologySegment) throws FreeIpaClientException {
+        List<String> flags = List.of(topologySuffixCn, topologySegment.getCn());
+        Map<String, Object> params = Map.of();
+        return (TopologySegment) invoke("topologysegment_del", flags, params, TopologySegment.class).getResult();
+    }
+
 }
