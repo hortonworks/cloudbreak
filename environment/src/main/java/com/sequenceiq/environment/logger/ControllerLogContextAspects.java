@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.logger;
 
+import java.util.Arrays;
+
 import javax.inject.Inject;
 
 import org.aspectj.lang.JoinPoint;
@@ -11,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.logger.LogContextService;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -35,8 +38,8 @@ public class ControllerLogContextAspects {
             String[] paramNames = sig.getParameterNames();
             logContextService.buildMDCParams(joinPoint.getTarget(), paramNames, args);
             MDCBuilder.addRequestId(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
-            LOGGER.trace("A controller method has been intercepted: {} with params {}, {}, MDC logger context is built.", joinPoint.toShortString(),
-                    sig.getParameterNames(), args);
+            LOGGER.debug("A controller method has been intercepted: {} with params {}, {}, MDC logger context is built.", joinPoint.toShortString(),
+                    sig.getParameterNames(), AnonymizerUtil.anonymize(Arrays.toString(args)));
         } catch (Exception any) {
             LOGGER.warn("MDCContext build failed: ", any);
         }

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.logger.LogContextService;
 
 @Component
@@ -47,7 +48,8 @@ public class ControllerLogContextAspects {
             }
             logContextService.buildMDCParams(joinPoint.getTarget(), paramNames, args);
 
-            LOGGER.debug("Added selected controller method parameters to MDC; param names {}", Arrays.toString(paramNames));
+            LOGGER.debug("A controller method has been intercepted: {} with params {}, {}, MDC logger context is built.", joinPoint.toShortString(),
+                    sig.getParameterNames(), AnonymizerUtil.anonymize(Arrays.toString(args)));
         } catch (Exception e) {
             LOGGER.warn("Failed to add controller method parameters to MDC, continuing with call", e);
         }
