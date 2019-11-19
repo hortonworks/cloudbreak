@@ -5,6 +5,13 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAI
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.WAIT_FOR_SYNC;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.INSTANCE_NAME;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_DELETED_CBMETADATA;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_OPERATION_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_STATE_SYNCED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_STATUS_RETRIEVAL_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_STOPPED_ON_PROVIDER;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -30,7 +37,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -61,9 +67,6 @@ public class StackSyncService {
 
     @Inject
     private ImageService imageService;
-
-    @Inject
-    private CloudbreakMessagesService cloudbreakMessagesService;
 
     public void updateInstances(Stack stack, Iterable<InstanceMetaData> instanceMetaDataList, Collection<CloudVmInstanceStatus> instanceStatuses,
             boolean stackStatusUpdateEnabled) {
@@ -116,8 +119,8 @@ public class StackSyncService {
             } catch (CloudConnectorException e) {
                 LOGGER.warn(e.getMessage(), e);
                 eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(),
-                        cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATUS_RETRIEVAL_FAILED.code(),
-                                Collections.singletonList(instance.getInstanceId())));
+                        STACK_SYNC_INSTANCE_STATUS_RETRIEVAL_FAILED,
+                        Collections.singletonList(instance.getInstanceId()));
                 instanceStateCounts.put(InstanceSyncState.UNKNOWN, instanceStateCounts.get(InstanceSyncState.UNKNOWN) + 1);
             }
         }
@@ -180,8 +183,8 @@ public class StackSyncService {
                 LOGGER.debug("Instance '{}' is reported as deleted on the cloud provider, setting its state to DELETED_ON_PROVIDER_SIDE.",
                         instance.getInstanceId());
                 eventService.fireCloudbreakEvent(stack.getId(), "RECOVERY",
-                        cloudbreakMessagesService.getMessage(Msg.CLUSTER_FAILED_NODES_REPORTED.code(),
-                                Collections.singletonList(instance.getDiscoveryFQDN())));
+                        CLUSTER_FAILED_NODES_REPORTED,
+                        Collections.singletonList(instance.getDiscoveryFQDN()));
                 updateMetaDataToDeletedOnProviderSide(stack, instance);
             }
         }
@@ -190,26 +193,20 @@ public class StackSyncService {
     private void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, boolean stackStatusUpdateEnabled) {
         Set<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
         if (instanceStateCounts.get(InstanceSyncState.UNKNOWN) > 0) {
-            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE.code()));
+            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE);
         } else if (instanceStateCounts.get(InstanceSyncState.IN_PROGRESS) > 0) {
-            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_OPERATION_IN_PROGRESS.code()));
+            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_SYNC_INSTANCE_OPERATION_IN_PROGRESS);
         } else if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0 && instanceStateCounts.get(InstanceSyncState.STOPPED) > 0) {
-            eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(),
-                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STOPPED_ON_PROVIDER.code()));
+            eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), STACK_SYNC_INSTANCE_STOPPED_ON_PROVIDER);
         } else if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0) {
             updateStackStatusIfEnabled(stack.getId(), DetailedStackStatus.AVAILABLE, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
-            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATE_SYNCED.code()));
+            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_SYNC_INSTANCE_STATE_SYNCED);
         } else if (instanceStateCounts.get(InstanceSyncState.STOPPED).equals(instances.size())) {
             updateStackStatusIfEnabled(stack.getId(), DetailedStackStatus.STOPPED, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
-            eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(),
-                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATE_SYNCED.code()));
+            eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), STACK_SYNC_INSTANCE_STATE_SYNCED);
         } else {
             updateStackStatusIfEnabled(stack.getId(), DetailedStackStatus.DELETE_FAILED, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
-            eventService.fireCloudbreakEvent(stack.getId(), DELETE_FAILED.name(),
-                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATE_SYNCED.code()));
+            eventService.fireCloudbreakEvent(stack.getId(), DELETE_FAILED.name(), STACK_SYNC_INSTANCE_STATE_SYNCED);
         }
     }
 
@@ -237,9 +234,7 @@ public class StackSyncService {
         name = instanceMetaData.getDiscoveryFQDN() == null ? instanceMetaData.getInstanceId() : String.format("%s (%s)", instanceMetaData.getInstanceId(),
                 instanceMetaData.getDiscoveryFQDN());
 
-        eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_DELETED_CBMETADATA.code(),
-                        Collections.singletonList(name)));
+        eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_SYNC_INSTANCE_DELETED_CBMETADATA, Collections.singletonList(name));
     }
 
     private void updateMetaDataToRunning(InstanceMetaData instanceMetaData) {
@@ -247,30 +242,5 @@ public class StackSyncService {
         instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
         instanceMetaData.setStatusReason("Services running");
         instanceMetaDataService.save(instanceMetaData);
-    }
-
-    private enum Msg {
-
-        STACK_SYNC_INSTANCE_STATUS_RETRIEVAL_FAILED("stack.sync.instance.status.retrieval.failed"),
-        STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE("stack.sync.instance.status.couldnt.determine"),
-        STACK_SYNC_INSTANCE_OPERATION_IN_PROGRESS("stack.sync.instance.operation.in.progress"),
-        STACK_SYNC_INSTANCE_STOPPED_ON_PROVIDER("stack.sync.instance.stopped.on.provider"),
-        STACK_SYNC_INSTANCE_STATE_SYNCED("stack.sync.instance.state.synced"),
-        STACK_SYNC_HOST_DELETED("stack.sync.host.deleted"),
-        STACK_SYNC_INSTANCE_REMOVAL_FAILED("stack.sync.instance.removal.failed"),
-        STACK_SYNC_HOST_UPDATED("stack.sync.host.updated"),
-        STACK_SYNC_INSTANCE_TERMINATED("stack.sync.instance.terminated"),
-        STACK_SYNC_INSTANCE_DELETED_CBMETADATA("stack.sync.instance.deleted.cbmetadata"),
-        CLUSTER_FAILED_NODES_REPORTED("cluster.failednodes.reported");
-
-        private final String code;
-
-        Msg(String msgCode) {
-            code = msgCode;
-        }
-
-        public String code() {
-            return code;
-        }
     }
 }

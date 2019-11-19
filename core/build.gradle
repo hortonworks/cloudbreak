@@ -236,6 +236,8 @@ dependencies {
   compile project(':cluster-dns-connector')
   compile project(':cluster-proxy')
 
+  implementation project(":notification-sender")
+
   runtime project(':orchestrator-salt')
   runtime project(':orchestrator-yarn')
   runtime project(':cloud-reactor')
@@ -248,8 +250,6 @@ dependencies {
   runtime project(':cluster-ambari')
   runtime project(':cluster-cm')
   runtime project(':auth-connector')
-
-
   runtime group: 'activation',                    name: 'activation'
 
   testCompile project(path: ':core-model', configuration: 'tests')

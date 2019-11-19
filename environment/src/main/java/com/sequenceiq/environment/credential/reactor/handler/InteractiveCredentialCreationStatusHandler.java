@@ -61,7 +61,7 @@ public class InteractiveCredentialCreationStatusHandler implements EventHandler<
             notification.withEventType(event.name());
             LOGGER.info("Interactive credential creation success status: {}", new Json(notification).getValue());
         }
-        notificationService.send(event, notification, threadBaseUserCrnProvider.getAccountId());
+        notificationService.send(event, notification, threadBaseUserCrnProvider.getUserCrn());
     }
 
     static class InteractiveCredentialNotification {

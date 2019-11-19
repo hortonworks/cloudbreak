@@ -4,6 +4,9 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_IGNORED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
@@ -49,16 +52,12 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
-import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.ccm.key.CcmResourceUtil;
-import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
-import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
-import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
-import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
-import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
@@ -84,6 +83,7 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
+import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
@@ -100,7 +100,6 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
@@ -123,6 +122,9 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
+import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -166,9 +168,6 @@ public class StackService implements ResourceIdProvider {
 
     @Inject
     private SaltSecurityConfigService saltSecurityConfigService;
-
-    @Inject
-    private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Inject
     private AmbariBlueprintValidator ambariBlueprintValidator;
@@ -817,9 +816,7 @@ public class StackService implements ResourceIdProvider {
         boolean result = true;
         StopRestrictionReason reason = stack.isInfrastructureStoppable();
         if (stack.isStopped()) {
-            String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_IGNORED.code());
-            LOGGER.debug(statusDesc);
-            eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), statusDesc);
+            eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), STACK_STOP_IGNORED);
             result = false;
         } else if (reason != StopRestrictionReason.NONE) {
             throw new BadRequestException(
@@ -833,16 +830,13 @@ public class StackService implements ResourceIdProvider {
 
     private void setStackStatusToStopRequested(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
-        String message = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_REQUESTED.code());
-        eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), message);
+        eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), STACK_STOP_REQUESTED);
     }
 
     private void start(Stack stack, Cluster cluster, boolean updateCluster, User user) {
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         if (stack.isAvailable()) {
-            String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_START_IGNORED.code());
-            LOGGER.debug(statusDesc);
-            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), statusDesc);
+            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_START_IGNORED);
         } else if ((!stack.isStopped() || (cluster != null && !cluster.isStopped())) && !stack.isStartFailed()) {
             throw new BadRequestException(
                     String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stack.getName()));
@@ -1135,22 +1129,6 @@ public class StackService implements ResourceIdProvider {
 
     public Set<StackListItem> getByWorkspaceId(Long workspaceId, String environmentCrn, StackType stackType) {
         return stackRepository.findByWorkspaceId(workspaceId, environmentCrn, stackType);
-    }
-
-    private enum Msg {
-        STACK_STOP_IGNORED("stack.stop.ignored"),
-        STACK_START_IGNORED("stack.start.ignored"),
-        STACK_STOP_REQUESTED("stack.stop.requested");
-
-        private final String code;
-
-        Msg(String msgCode) {
-            code = msgCode;
-        }
-
-        public String code() {
-            return code;
-        }
     }
 
     StackRepository repository() {

@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack.repair;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_ATTEMPTING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_COMPLETE_CLEAN;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_TRIGGERED;
+
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
@@ -18,7 +22,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Component
@@ -41,12 +44,12 @@ public class StackRepairService {
     public void add(Stack stack, Collection<String> unhealthyInstanceIds) {
         if (unhealthyInstanceIds.isEmpty()) {
             LOGGER.debug("No instances are unhealthy, returning...");
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_COMPLETE_CLEAN, Status.AVAILABLE.name());
+            flowMessageService.fireEventAndLog(stack.getId(), Status.AVAILABLE.name(), STACK_REPAIR_COMPLETE_CLEAN);
             return;
         }
         UnhealthyInstances unhealthyInstances = groupInstancesByHostGroups(stack, unhealthyInstanceIds);
         Runnable stackRepairFlowSubmitter = new StackRepairFlowSubmitter(stack.getId(), unhealthyInstances);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_ATTEMPTING, Status.UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), STACK_REPAIR_ATTEMPTING);
         executorService.submit(stackRepairFlowSubmitter);
     }
 
@@ -91,7 +94,7 @@ public class StackRepairService {
             while (!submitted) {
                 try {
                     reactorFlowManager.triggerStackRepairFlow(stackId, unhealthyInstances);
-                    flowMessageService.fireEventAndLog(stackId, Msg.STACK_REPAIR_TRIGGERED, Status.UPDATE_IN_PROGRESS.name());
+                    flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), STACK_REPAIR_TRIGGERED);
                     submitted = true;
                 } catch (FlowsAlreadyRunningException | FlowNotAcceptedException ignored) {
                     trials++;

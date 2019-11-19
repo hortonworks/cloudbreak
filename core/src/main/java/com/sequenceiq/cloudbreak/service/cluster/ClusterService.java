@@ -10,6 +10,15 @@ import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.M
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPOSITORY_VERSION;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPO_ID_TAG;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.VDF_REPO_KEY_PREFIX;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AUTORECOVERY_REQUESTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_HOST_STATUS_UPDATED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_REQUESTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PRIMARY_GATEWAY_UNHEALTHY_SYNC_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NODES_REPORTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_IGNORED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_REQUESTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STOP_IGNORED;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
@@ -17,7 +26,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -95,6 +103,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
@@ -539,26 +548,22 @@ public class ClusterService {
             boolean hasAutoRecoverableNodes = !autoRecoveryNodesMap.isEmpty();
             if (hasAutoRecoverableNodes) {
                 flowManager.triggerClusterRepairFlow(cluster.getStack().getId(), autoRecoveryNodesMap, false);
-                String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.CLUSTER_AUTORECOVERY_REQUESTED.code(),
-                        Collections.singletonList(autoRecoveryNodesMap));
-                updateChangedHosts(cluster, autoRecoveryMetadata.keySet(), InstanceStatus.SERVICES_HEALTHY, InstanceStatus.WAITING_FOR_REPAIR, recoveryMessage);
+                updateChangedHosts(cluster, autoRecoveryMetadata.keySet(), InstanceStatus.SERVICES_HEALTHY, InstanceStatus.WAITING_FOR_REPAIR,
+                        CLUSTER_AUTORECOVERY_REQUESTED);
             }
             if (!failedMetadata.isEmpty()) {
-                String failedNodesMessage = cloudbreakMessagesService.getMessage(Msg.CLUSTER_FAILED_NODES_REPORTED.code(),
-                        Collections.singletonList(failedMetadata.keySet()));
-                updateChangedHosts(cluster, failedMetadata.keySet(), InstanceStatus.SERVICES_HEALTHY, InstanceStatus.SERVICES_UNHEALTHY, failedNodesMessage);
+                updateChangedHosts(cluster, failedMetadata.keySet(), InstanceStatus.SERVICES_HEALTHY, InstanceStatus.SERVICES_UNHEALTHY,
+                        CLUSTER_FAILED_NODES_REPORTED);
             }
             if (!newHealthyNodes.isEmpty()) {
-                String recoveredMessage = cloudbreakMessagesService.getMessage(Msg.CLUSTER_RECOVERED_NODES_REPORTED.code(),
-                        Collections.singletonList(newHealthyNodes));
-                updateChangedHosts(cluster, newHealthyNodes, InstanceStatus.SERVICES_UNHEALTHY, InstanceStatus.SERVICES_HEALTHY, recoveredMessage);
+                updateChangedHosts(cluster, newHealthyNodes, InstanceStatus.SERVICES_UNHEALTHY, InstanceStatus.SERVICES_HEALTHY,
+                        CLUSTER_RECOVERED_NODES_REPORTED);
             }
 
             if (!hasAutoRecoverableNodes) {
                 Optional<InstanceMetaData> primaryGateway = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(cluster.getStack().getId());
                 if (primaryGateway.isPresent() && failedMetadata.containsKey(primaryGateway.get().getDiscoveryFQDN())) {
-                    String syncStartedMessage = cloudbreakMessagesService.getMessage(Msg.CLUSTER_PRIMARY_GATEWAY_UNHEALTHY_SYNC_STARTED.code());
-                    eventService.fireCloudbreakEvent(cluster.getStack().getId(), RECOVERY, syncStartedMessage);
+                    eventService.fireCloudbreakEvent(cluster.getStack().getId(), RECOVERY, CLUSTER_PRIMARY_GATEWAY_UNHEALTHY_SYNC_STARTED);
                     flowManager.triggerStackSync(cluster.getStack().getId());
                 }
             }
@@ -800,9 +805,7 @@ public class ClusterService {
     private void triggerRepair(Long stackId, Map<String, List<String>> failedNodeMap, boolean removeOnly, List<String> recoveryMessageArgument) {
         if (!failedNodeMap.isEmpty()) {
             flowManager.triggerClusterRepairFlow(stackId, failedNodeMap, removeOnly);
-            String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.CLUSTER_MANUALRECOVERY_REQUESTED.code(), List.of(recoveryMessageArgument));
-            LOGGER.debug(recoveryMessage);
-            eventService.fireCloudbreakEvent(stackId, RECOVERY, recoveryMessage);
+            eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_REQUESTED, recoveryMessageArgument);
         } else {
             throw new BadRequestException(String.format("Could not trigger cluster repair  for stack %s, because node list is incorrect", stackId));
         }
@@ -822,7 +825,8 @@ public class ClusterService {
     }
 
     private void updateChangedHosts(Cluster cluster, Set<String> hostNames, InstanceStatus expectedState,
-            InstanceStatus newState, String recoveryMessage) throws TransactionExecutionException {
+            InstanceStatus newState, ResourceEvent resourceEvent) throws TransactionExecutionException {
+        String recoveryMessage = cloudbreakMessagesService.getMessage(resourceEvent.getMessage(), hostNames);
         Set<InstanceMetaData> notTerminatedInstanceMetaDatasForStack = instanceMetaDataService.findNotTerminatedForStack(cluster.getStack().getId());
         Collection<InstanceMetaData> changedHosts = new HashSet<>();
         transactionService.required(() -> {
@@ -841,7 +845,7 @@ public class ClusterService {
                 } else {
                     eventType = RECOVERY;
                 }
-                eventService.fireCloudbreakEvent(cluster.getStack().getId(), eventType, recoveryMessage);
+                eventService.fireCloudbreakEvent(cluster.getStack().getId(), eventType, resourceEvent, List.of(String.join(",", hostNames)));
                 instanceMetaDataService.saveAll(changedHosts);
             }
             return null;
@@ -854,14 +858,11 @@ public class ClusterService {
 
     private void start(Stack stack, Cluster cluster) {
         if (stack.isStartInProgress()) {
-            String message = cloudbreakMessagesService.getMessage(Msg.CLUSTER_START_REQUESTED.code());
-            eventService.fireCloudbreakEvent(stack.getId(), START_REQUESTED.name(), message);
+            eventService.fireCloudbreakEvent(stack.getId(), START_REQUESTED.name(), CLUSTER_START_REQUESTED);
             updateClusterStatusByStackId(stack.getId(), START_REQUESTED);
         } else {
             if (cluster.isAvailable()) {
-                String statusDesc = cloudbreakMessagesService.getMessage(Msg.CLUSTER_START_IGNORED.code());
-                LOGGER.debug(statusDesc);
-                eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
+                eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), CLUSTER_START_IGNORED);
             } else if (!cluster.isClusterReadyForStart() && !cluster.isStartFailed()) {
                 throw new BadRequestException(
                         String.format("Cannot update the status of cluster '%s' to STARTED, because it isn't in STOPPED state.", cluster.getId()));
@@ -878,9 +879,7 @@ public class ClusterService {
     private void stop(Stack stack, Cluster cluster) {
         StopRestrictionReason reason = stack.isInfrastructureStoppable();
         if (cluster.isStopped()) {
-            String statusDesc = cloudbreakMessagesService.getMessage(Msg.CLUSTER_STOP_IGNORED.code());
-            LOGGER.debug(statusDesc);
-            eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
+            eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), CLUSTER_STOP_IGNORED);
         } else if (reason != StopRestrictionReason.NONE) {
             throw new BadRequestException(
                     String.format("Cannot stop a cluster '%s'. Reason: %s", cluster.getId(), reason.getReason()));
@@ -961,9 +960,11 @@ public class ClusterService {
                         instanceMetaData.setStatusReason(clusterManagerState.getStatusReason());
                         instanceMetaDataService.save(instanceMetaData);
                         // TODO: don't send events one by one and save all of the instancemetadata with one repo call
-                        eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                                cloudbreakMessagesService.getMessage(Msg.CLUSTER_HOST_STATUS_UPDATED.code(),
-                                        Arrays.asList(instanceMetaData.getDiscoveryFQDN(), newState.name())));
+                        eventService.fireCloudbreakEvent(
+                                stack.getId(),
+                                AVAILABLE.name(),
+                                CLUSTER_HOST_STATUS_UPDATED,
+                                Arrays.asList(instanceMetaData.getDiscoveryFQDN(), newState.name()));
                     }
                 }
                 return stack.getCluster();
@@ -1378,28 +1379,6 @@ public class ClusterService {
 
     public void pureDelete(Cluster cluster) {
         repository.delete(cluster);
-    }
-
-    private enum Msg {
-        CLUSTER_START_IGNORED("cluster.start.ignored"),
-        CLUSTER_STOP_IGNORED("cluster.stop.ignored"),
-        CLUSTER_HOST_STATUS_UPDATED("cluster.host.status.updated"),
-        CLUSTER_START_REQUESTED("cluster.start.requested"),
-        CLUSTER_AUTORECOVERY_REQUESTED("cluster.autorecovery.requested"),
-        CLUSTER_MANUALRECOVERY_REQUESTED("cluster.manualrecovery.requested"),
-        CLUSTER_FAILED_NODES_REPORTED("cluster.failednodes.reported"),
-        CLUSTER_RECOVERED_NODES_REPORTED("cluster.recoverednodes.reported"),
-        CLUSTER_PRIMARY_GATEWAY_UNHEALTHY_SYNC_STARTED("cluster.pgw.unhealthy.sync.started");
-
-        private final String code;
-
-        Msg(String msgCode) {
-            code = msgCode;
-        }
-
-        public String code() {
-            return code;
-        }
     }
 
 }

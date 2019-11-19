@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BOOTSTRAPPER_ERROR_INVALID_NODECOUNT;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -32,6 +34,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -104,7 +107,7 @@ public class ClusterBootstrapperErrorHandlerTest {
             }
             return Optional.empty();
         });
-        when(cloudbreakMessagesService.getMessage(eq("bootstrapper.error.invalide.nodecount"), any())).thenReturn("invalide.nodecount");
+        when(cloudbreakMessagesService.getMessage(eq(CLUSTER_BOOTSTRAPPER_ERROR_INVALID_NODECOUNT.getMessage()), any())).thenReturn("invalide.nodecount");
         thrown.expect(CloudbreakOrchestratorFailedException.class);
         thrown.expectMessage("invalide.nodecount");
 
@@ -146,7 +149,7 @@ public class ClusterBootstrapperErrorHandlerTest {
         underTest.terminateFailedNodes(null, orchestrator, TestUtil.stack(),
                 new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 443, "instanceId", false), prepareNodes(stack));
 
-        verify(eventService, times(4)).fireCloudbreakEvent(anyLong(), anyString(), nullable(String.class));
+        verify(eventService, times(4)).fireCloudbreakEvent(anyLong(), anyString(), any(ResourceEvent.class), nullable(Collection.class));
         verify(instanceGroupService, times(3)).save(any(InstanceGroup.class));
         verify(instanceMetaDataService, times(3)).save(any(InstanceMetaData.class));
         verify(connector, times(3)).removeInstances(any(Stack.class), anySet(), anyString());

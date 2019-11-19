@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_FORCED_DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_DELETE_FAILED;
 
 import javax.inject.Inject;
 
@@ -13,7 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.message.Msg;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -52,20 +55,20 @@ public class StackTerminationService {
         LOGGER.debug("Terminate stack result: {}", payload);
         Stack stack = context.getStack();
         terminationService.finalizeTermination(stack.getId(), forcedTermination);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DELETE_COMPLETED, DELETE_COMPLETED.name());
+        flowMessageService.fireEventAndLog(stack.getId(), DELETE_COMPLETED.name(), STACK_DELETE_COMPLETED);
         clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_SUCCESSFUL, stack);
     }
 
     public void handleStackTerminationError(StackView stackView, StackFailureEvent payload, boolean forced) {
         String stackUpdateMessage;
-        Msg eventMessage;
+        ResourceEvent resourceEvent;
         DetailedStackStatus status;
         if (!forced) {
             Exception errorDetails = payload.getException();
             stackUpdateMessage = "Termination failed: " + errorDetails.getMessage();
             status = DetailedStackStatus.DELETE_FAILED;
-            eventMessage = Msg.STACK_INFRASTRUCTURE_DELETE_FAILED;
+            resourceEvent = STACK_INFRASTRUCTURE_DELETE_FAILED;
             stackUpdater.updateStackStatus(stackView.getId(), status, stackUpdateMessage);
             LOGGER.debug("Error during stack termination flow: ", errorDetails);
         } else {
@@ -73,9 +76,9 @@ public class StackTerminationService {
             clusterService.updateClusterStatusByStackId(stackView.getId(), DELETE_COMPLETED);
             stackUpdateMessage = "Stack was force terminated.";
             status = DetailedStackStatus.DELETE_COMPLETED;
-            eventMessage = Msg.STACK_FORCED_DELETE_COMPLETED;
+            resourceEvent = STACK_FORCED_DELETE_COMPLETED;
         }
-        flowMessageService.fireEventAndLog(stackView.getId(), eventMessage, status.name(), stackUpdateMessage);
+        flowMessageService.fireEventAndLog(stackView.getId(), status.name(), resourceEvent, stackUpdateMessage);
     }
 
     public void deleteDnsEntry(Stack stack) {

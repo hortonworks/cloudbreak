@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PACKAGES_ON_INSTANCES_ARE_DIFFERENT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -81,7 +84,7 @@ public class PackageVersionChecker {
     public CheckResult checkInstancesHaveAllMandatoryPackageVersion(Set<InstanceMetaData> instanceMetaDataSet) {
         Map<String, List<String>> instancesWithMissingPackageVersions = instanceMetadataUpdater.collectInstancesWithMissingPackageVersions(instanceMetaDataSet);
         if (!instancesWithMissingPackageVersions.isEmpty()) {
-            String message = messagesService.getMessage(InstanceMetadataUpdater.Msg.PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING.code(),
+            String message = messagesService.getMessage(CLUSTER_PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING.getMessage(),
                     Collections.singletonList(instancesWithMissingPackageVersions.entrySet().stream()
                             .map(entry -> String.format("Instance ID: [%s] Packages without version: [%s]",
                                     entry.getKey(), StringUtils.join(entry.getValue(), ",")))
@@ -94,7 +97,7 @@ public class PackageVersionChecker {
     public CheckResult checkInstancesHaveMultiplePackageVersions(Set<InstanceMetaData> instanceMetaDataSet) {
         List<String> packagesWithMultipleVersions = instanceMetadataUpdater.collectPackagesWithMultipleVersions(instanceMetaDataSet);
         if (!packagesWithMultipleVersions.isEmpty()) {
-            String message = messagesService.getMessage(InstanceMetadataUpdater.Msg.PACKAGES_ON_INSTANCES_ARE_DIFFERENT.code(),
+            String message = messagesService.getMessage(CLUSTER_PACKAGES_ON_INSTANCES_ARE_DIFFERENT.getMessage(),
                     Collections.singletonList(String.join(",", packagesWithMultipleVersions)));
             return CheckResult.failed(message);
         }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.ambari;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_CLUSTER_DECOMMISSIONING_TIME;
 
 import java.util.Collection;
 import java.util.Map;
@@ -14,7 +15,6 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
-import com.sequenceiq.cloudbreak.message.Msg;
 
 @Component
 public class AmbariDecommissionTimeCalculator {
@@ -47,7 +47,7 @@ public class AmbariDecommissionTimeCalculator {
             double decommissionFraction = usedSpace / globalDfsSpace;
             double decommissionSeconds = DECOMMISSIONING_MAGIC_NUMBER * eachNodeCapacityInGB * clusterUtilizationFraction * decommissionFraction;
             long decommissionMinutes = Math.round(decommissionSeconds / SECONDS_PER_MINUTE);
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_DECOMMISSIONING_TIME, AVAILABLE.name(),
+            flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), CLUSTER_MANAGER_CLUSTER_DECOMMISSIONING_TIME,
                     concatenateTimeString(decommissionMinutes));
         }
     }

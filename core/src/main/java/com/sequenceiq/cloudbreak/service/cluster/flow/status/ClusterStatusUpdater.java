@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.status;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AMBARI_CLUSTER_COULD_NOT_SYNC;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED;
+
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -15,7 +19,6 @@ import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -31,9 +34,6 @@ public class ClusterStatusUpdater {
     private CloudbreakEventService cloudbreakEventService;
 
     @Inject
-    private CloudbreakMessagesService cloudbreakMessagesService;
-
-    @Inject
     private ClusterApiConnectors clusterApiConnectors;
 
     public void updateClusterStatus(Stack stack, Cluster cluster) {
@@ -42,10 +42,8 @@ public class ClusterStatusUpdater {
                 updateClusterStatus(stack.getId(), cluster, stack.getStatus());
                 cluster.setStatus(stack.getStatus());
             }
-            String msg = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_COULD_NOT_SYNC.code(), Arrays.asList(stack.getStatus(),
-                    cluster == null ? "" : cluster.getStatus()));
-            LOGGER.warn(msg);
-            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), msg);
+            List<String> eventMessageArgs = Arrays.asList(stack.getStatus().name(), cluster == null ? "" : cluster.getStatus().name());
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), CLUSTER_AMBARI_CLUSTER_COULD_NOT_SYNC, eventMessageArgs);
         } else if (cluster != null && cluster.getClusterManagerIp() != null) {
             Long stackId = stack.getId();
             clusterService.updateClusterMetadata(stackId);
@@ -76,8 +74,7 @@ public class ClusterStatusUpdater {
                 statusReason = "The cluster's state is up to date.";
             }
         }
-        cloudbreakEventService.fireCloudbreakEvent(stackId, statusInEvent.name(), cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SYNCHRONIZED.code(),
-                Collections.singletonList(statusReason)));
+        cloudbreakEventService.fireCloudbreakEvent(stackId, statusInEvent.name(), CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED, Collections.singletonList(statusReason));
     }
 
     private boolean isUpdateEnabled(ClusterStatus clusterStatus) {
@@ -98,20 +95,5 @@ public class ClusterStatusUpdater {
             LOGGER.debug("Cluster {} status hasn't changed: {}", cluster.getId(), status);
         }
         return result;
-    }
-
-    private enum Msg {
-        AMBARI_CLUSTER_COULD_NOT_SYNC("ambari.cluster.could.not.sync"),
-        AMBARI_CLUSTER_SYNCHRONIZED("ambari.cluster.synchronized");
-
-        private final String code;
-
-        Msg(String msgCode) {
-            code = msgCode;
-        }
-
-        public String code() {
-            return code;
-        }
     }
 }

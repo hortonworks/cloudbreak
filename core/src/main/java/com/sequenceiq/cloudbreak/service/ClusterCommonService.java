@@ -28,16 +28,15 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.HostGroupDecorator;
@@ -74,9 +73,6 @@ public class ClusterCommonService {
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;
-
-    @Inject
-    private CloudbreakMessagesService messagesService;
 
     @Inject
     private BlueprintService blueprintService;
@@ -221,7 +217,8 @@ public class ClusterCommonService {
 
     /**
      * Get cluster host details (ips + cluster name) - ini format
-     * @param stack stack object that is used to fill the cluster details ini
+     *
+     * @param stack     stack object that is used to fill the cluster details ini
      * @param loginUser ssh username that will be used as a default user in the inventory
      * @return Ini file content in string
      */
@@ -264,7 +261,7 @@ public class ClusterCommonService {
         if (!status.equals(cluster.getStatus())) {
             cluster.setStatus(status);
             clusterService.save(cluster);
-            cloudbreakEventService.fireCloudbreakEvent(stackId, event.name(), messagesService.getMessage(event.getMessage()));
+            cloudbreakEventService.fireCloudbreakEvent(stackId, event.name(), event);
         }
     }
 }

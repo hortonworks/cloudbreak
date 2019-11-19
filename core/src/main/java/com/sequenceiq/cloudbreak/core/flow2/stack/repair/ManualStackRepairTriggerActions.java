@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.repair;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_DETECTION_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_FAILED;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -17,7 +20,6 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionRequest;
@@ -42,7 +44,7 @@ public class ManualStackRepairTriggerActions {
 
             @Override
             protected void doExecute(StackRepairTriggerContext context, StackEvent payload, Map<Object, Object> variables) {
-                flowMessageService.fireEventAndLog(payload.getResourceId(), Msg.STACK_REPAIR_DETECTION_STARTED, Status.UPDATE_IN_PROGRESS.name());
+                flowMessageService.fireEventAndLog(payload.getResourceId(), Status.UPDATE_IN_PROGRESS.name(), STACK_REPAIR_DETECTION_STARTED);
                 sendEvent(context);
             }
 
@@ -76,7 +78,7 @@ public class ManualStackRepairTriggerActions {
 
             @Override
             protected void doExecute(StackRepairTriggerContext context, UnhealthyInstancesDetectionResult payload, Map<Object, Object> variables) {
-                flowMessageService.fireEventAndLog(payload.getResourceId(), Msg.STACK_REPAIR_FAILED, Status.AVAILABLE.name(), payload.getStatusReason());
+                flowMessageService.fireEventAndLog(payload.getResourceId(), Status.AVAILABLE.name(), STACK_REPAIR_FAILED, payload.getStatusReason());
                 sendEvent(context);
             }
 

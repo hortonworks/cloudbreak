@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FLOW_RETRY_FLOW_START;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.flow.core.Flow2Handler;
@@ -43,9 +44,6 @@ public class OperationRetryService {
     @Inject
     private CloudbreakEventService eventService;
 
-    @Inject
-    private CloudbreakMessagesService cloudbreakMessagesService;
-
     @Resource
     private List<String> failHandledEvents;
 
@@ -66,9 +64,7 @@ public class OperationRetryService {
         }
 
         String name = retryableFlows.get(0).getName();
-        String statusDesc = cloudbreakMessagesService.getMessage(Msg.RETRY_FLOW_START.code(), List.of(name));
-        LOGGER.info(statusDesc);
-        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), statusDesc);
+        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), FLOW_RETRY_FLOW_START, List.of(name));
 
         Optional<FlowLog> failedFlowLog = getMostRecentFailedLog(flowLogs);
         failedFlowLog.map(log -> getLastSuccessfulStateLog(log.getCurrentState(), flowLogs))
@@ -123,19 +119,5 @@ public class OperationRetryService {
                         .setName(displayName)
                         .setFailDate(flowLog.getCreated())
                         .build()).get();
-    }
-
-    public enum Msg {
-        RETRY_FLOW_START("retry.flow.start");
-
-        private final String code;
-
-        Msg(String msgCode) {
-            code = msgCode;
-        }
-
-        public String code() {
-            return code;
-        }
     }
 }

@@ -4,6 +4,10 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.MAINTENANCE_MODE_VALIDATION_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.MAINTENANCE_MODE_VALIDATION_FINISHED_FOUND_WARNINGS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.MAINTENANCE_MODE_VALIDATION_FINISHED_NO_WARNINGS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.MAINTENANCE_MODE_VALIDATION_STARTED;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.CheckResult;
@@ -34,8 +39,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
-import com.sequenceiq.cloudbreak.message.Msg;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -87,7 +90,7 @@ public class MaintenanceModeValidationService {
     public void setUpValidationFlow(Long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, "Validating repos and images...");
-        flowMessageService.fireEventAndLog(stackId, Msg.MAINTENANCE_MODE_VALIDATION_STARTED, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), MAINTENANCE_MODE_VALIDATION_STARTED);
     }
 
     public List<Warning> validateStackRepository(Long clusterId, String stackRepo) {
@@ -178,11 +181,9 @@ public class MaintenanceModeValidationService {
             if (!warnings.isEmpty()) {
                 String warningJson = new ObjectMapper().writeValueAsString(warnings);
                 LOGGER.warn(String.format("Found warnings: {%s}", warningJson));
-                flowMessageService.fireEventAndLog(stackId, Msg.MAINTENANCE_MODE_VALIDATION_FINISHED_FOUND_WARNINGS,
-                        AVAILABLE.name(), warningJson);
+                flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), MAINTENANCE_MODE_VALIDATION_FINISHED_FOUND_WARNINGS, warningJson);
             } else {
-                flowMessageService.fireEventAndLog(stackId, Msg.MAINTENANCE_MODE_VALIDATION_FINISHED_NO_WARNINGS,
-                        AVAILABLE.name());
+                flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), MAINTENANCE_MODE_VALIDATION_FINISHED_NO_WARNINGS);
             }
         } catch (JsonProcessingException e) {
             throw new CloudbreakServiceException("Validation result could not be serialized!", e);
@@ -195,8 +196,7 @@ public class MaintenanceModeValidationService {
         clusterService.updateClusterStatusByStackId(stackId, MAINTENANCE_MODE_ENABLED);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE,
                 String.format("Validation has been finished with error: %s", error));
-        flowMessageService.fireEventAndLog(stackId, Msg.MAINTENANCE_MODE_VALIDATION_FAILED, UPDATE_FAILED.name(),
-                errorDetailes);
+        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), MAINTENANCE_MODE_VALIDATION_FAILED, errorDetailes);
     }
 
     protected enum WarningType {

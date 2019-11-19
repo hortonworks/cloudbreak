@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.reset;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CREATE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RESET;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -10,7 +13,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -29,7 +31,7 @@ public class ClusterResetService {
     private StackUpdater stackUpdater;
 
     public void resetCluster(long stackId) {
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_RESET, Status.UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_RESET);
     }
 
     public void handleResetClusterFailure(StackView stackView, Exception exception) {
@@ -37,6 +39,6 @@ public class ClusterResetService {
                 ? exception.getCause().getMessage() : exception.getMessage();
         clusterService.updateClusterStatusByStackId(stackView.getId(), Status.CREATE_FAILED, errorMessage);
         stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE);
-        flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_CREATE_FAILED, Status.CREATE_FAILED.name(), errorMessage);
+        flowMessageService.fireEventAndLog(stackView.getId(), Status.CREATE_FAILED.name(), CLUSTER_CREATE_FAILED, errorMessage);
     }
 }

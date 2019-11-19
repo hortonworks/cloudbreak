@@ -3,6 +3,19 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_REGENERATE_KEYTABS_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_REINSTALL_COMPONENTS_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RESTART_ALL_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RE_REGISTER_WITH_CLUSTER_PROXY;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALED_UP;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_UP;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SINGLE_MASTER_REPAIR_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SINGLE_MASTER_REPAIR_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_COMPONENTS_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_MANAGEMENT_SERVER_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STOP_COMPONENTS_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STOP_MANAGEMENT_SERVER_STARTED;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -23,7 +36,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.message.Msg;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -50,55 +63,55 @@ class ClusterUpscaleFlowService {
 
     void ambariRepairSingleMasterStarted(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Repairing single master of cluster finished.");
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SINGLE_MASTER_REPAIR_STARTED, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SINGLE_MASTER_REPAIR_STARTED);
     }
 
     void ambariRepairSingleMasterFinished(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Repairing single master of cluster finished.");
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SINGLE_MASTER_REPAIR_FINISHED, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SINGLE_MASTER_REPAIR_FINISHED);
     }
 
     void upscalingClusterManager(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Upscaling the cluster.");
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SCALING_UP, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_UP);
     }
 
     void reRegisterWithClusterProxy(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Re-registering with Cluster Proxy service.");
-        flowMessageService.fireEventAndLog(stackId, Msg.RE_REGISTER_WITH_CLUSTER_PROXY, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_RE_REGISTER_WITH_CLUSTER_PROXY);
     }
 
     void stopClusterManagementServer(long stackId) {
-        sendMessage(stackId, Msg.CLUSTER_STOP_MANAGEMENT_SERVER_STARTED, "Stopping cluster management server.");
+        sendMessage(stackId, CLUSTER_STOP_MANAGEMENT_SERVER_STARTED, "Stopping cluster management server.");
     }
 
     void clusterStopComponents(long stackId) {
-        sendMessage(stackId, Msg.CLUSTER_STOP_COMPONENTS_STARTED, "Stopping components.");
+        sendMessage(stackId, CLUSTER_STOP_COMPONENTS_STARTED, "Stopping components.");
     }
 
     void startClusterManagementServer(long stackId) {
-        sendMessage(stackId, Msg.CLUSTER_START_MANAGEMENT_SERVER_STARTED, "Starting cluster management server.");
+        sendMessage(stackId, CLUSTER_START_MANAGEMENT_SERVER_STARTED, "Starting cluster management server.");
     }
 
     void regenerateKeytabs(long stackId) {
-        sendMessage(stackId, Msg.CLUSTER_REGENERATE_KEYTABS_STARTED, "Regenerating ambari keytabs.");
+        sendMessage(stackId, CLUSTER_REGENERATE_KEYTABS_STARTED, "Regenerating ambari keytabs.");
     }
 
     void reinstallClusterComponents(long stackId) {
-        sendMessage(stackId, Msg.CLUSTER_REINSTALL_COMPONENTS_STARTED, "Reinstalling cluster components.");
+        sendMessage(stackId, CLUSTER_REINSTALL_COMPONENTS_STARTED, "Reinstalling cluster components.");
     }
 
     void startComponentsOnNewHosts(long stackId) {
-        sendMessage(stackId, Msg.CLUSTER_START_COMPONENTS_STARTED, "Start components on new hosts.");
+        sendMessage(stackId, CLUSTER_START_COMPONENTS_STARTED, "Start components on new hosts.");
     }
 
     void restartAllClusterComponents(long stackId) {
-        sendMessage(stackId, Msg.CLUSTER_RESTART_ALL_STARTED, "Restarting all components on all nodes.");
+        sendMessage(stackId, CLUSTER_RESTART_ALL_STARTED, "Restarting all components on all nodes.");
     }
 
-    private void sendMessage(long stackId, Msg ambariMessage, String statusReason) {
+    private void sendMessage(long stackId, ResourceEvent resourceEvent, String statusReason) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, statusReason);
-        flowMessageService.fireEventAndLog(stackId, ambariMessage, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), resourceEvent);
     }
 
     void clusterUpscaleFinished(StackView stackView, String hostgroupName) {
@@ -107,11 +120,11 @@ class ClusterUpscaleFlowService {
         if (success) {
             LOGGER.debug("Cluster upscaled successfully");
             clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
-            flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_SCALED_UP, AVAILABLE.name());
+            flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_SCALED_UP);
         } else {
             LOGGER.debug("Cluster upscale failed. {} hosts failed to upscale", numOfFailedHosts);
             clusterService.updateClusterStatusByStackId(stackView.getId(), UPDATE_FAILED);
-            flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to",
+            flowMessageService.fireEventAndLog(stackView.getId(), UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, "added to",
                     String.format("Cluster upscale operation failed on %d node(s).", numOfFailedHosts));
         }
     }
@@ -121,7 +134,7 @@ class ClusterUpscaleFlowService {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_FAILED, errorDetails.getMessage());
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.PROVISIONED,
                 String.format("New node(s) could not be added to the cluster: %s", errorDetails));
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to", errorDetails);
+        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, "added to", errorDetails.getMessage());
     }
 
     private int updateMetadata(StackView stackView, String hostGroupName) {

@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAI
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE;
 
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +36,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
@@ -101,7 +101,7 @@ public class StackSyncActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Error during Stack synchronization flow:", payload.getException());
-                flowMessageService.fireEventAndLog(context.getStackView().getId(), Msg.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE, UPDATE_FAILED.name());
+                flowMessageService.fireEventAndLog(context.getStackView().getId(), UPDATE_FAILED.name(), STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE);
                 sendEvent(context);
             }
 

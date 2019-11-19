@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BOOTSTRAPPER_ERROR_BOOTSTRAP_FAILED_ON_NODES;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BOOTSTRAPPER_ERROR_DELETING_NODE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BOOTSTRAPPER_ERROR_INVALID_NODECOUNT;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,22 +19,22 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @Component
 public class ClusterBootstrapperErrorHandler {
@@ -58,23 +62,6 @@ public class ClusterBootstrapperErrorHandler {
     @Inject
     private Clock clock;
 
-    private enum Msg {
-
-        BOOTSTRAPPER_ERROR_BOOTSTRAP_FAILED_ON_NODES("bootstrapper.error.nodes.failed"),
-        BOOTSTRAPPER_ERROR_DELETING_NODE("bootstrapper.error.deleting.node"),
-        BOOTSTRAPPER_ERROR_INVALID_NODECOUNT("bootstrapper.error.invalide.nodecount");
-
-        private final String code;
-
-        Msg(String msgCode) {
-            code = msgCode;
-        }
-
-        public String code() {
-            return code;
-        }
-    }
-
     public void terminateFailedNodes(HostOrchestrator hostOrchestrator, ContainerOrchestrator containerOrchestrator,
             Stack stack, GatewayConfig gatewayConfig, Set<Node> nodes)
             throws CloudbreakOrchestratorFailedException {
@@ -83,10 +70,8 @@ public class ClusterBootstrapperErrorHandler {
                 : containerOrchestrator.getAvailableNodes(gatewayConfig, nodes);
         List<Node> missingNodes = selectMissingNodes(nodes, allAvailableNode);
         if (!missingNodes.isEmpty()) {
-            String message = cloudbreakMessagesService.getMessage(Msg.BOOTSTRAPPER_ERROR_BOOTSTRAP_FAILED_ON_NODES.code(),
-                    Collections.singletonList(missingNodes.size()));
-            LOGGER.debug(message);
-            eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
+            eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), CLUSTER_BOOTSTRAPPER_ERROR_BOOTSTRAP_FAILED_ON_NODES,
+                    Arrays.asList(String.valueOf(missingNodes.size())));
 
             for (Node missingNode : missingNodes) {
                 InstanceMetaData instanceMetaData =
@@ -95,14 +80,13 @@ public class ClusterBootstrapperErrorHandler {
                 InstanceGroup ig = instanceGroupService.findOneByGroupNameInStack(stack.getId(), instanceMetaData.getInstanceGroup().getGroupName())
                         .orElseThrow(NotFoundException.notFound("instanceGroup", instanceMetaData.getInstanceGroup().getGroupName()));
                 if (ig.getNodeCount() < 1) {
-                    throw new CloudbreakOrchestratorFailedException(cloudbreakMessagesService.getMessage(Msg.BOOTSTRAPPER_ERROR_INVALID_NODECOUNT.code(),
+                    throw new CloudbreakOrchestratorFailedException(cloudbreakMessagesService.getMessage(
+                            CLUSTER_BOOTSTRAPPER_ERROR_INVALID_NODECOUNT.getMessage(),
                             Collections.singletonList(ig.getGroupName())));
                 }
                 instanceGroupService.save(ig);
-                message = cloudbreakMessagesService.getMessage(Msg.BOOTSTRAPPER_ERROR_DELETING_NODE.code(),
+                eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), CLUSTER_BOOTSTRAPPER_ERROR_DELETING_NODE,
                         Arrays.asList(instanceMetaData.getInstanceId(), ig.getGroupName()));
-                LOGGER.debug(message);
-                eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
                 deleteResourceAndDependencies(stack, instanceMetaData);
                 deleteInstanceResourceFromDatabase(stack, instanceMetaData);
                 instanceMetaData.setTerminationDate(clock.getCurrentTimeMillis());
