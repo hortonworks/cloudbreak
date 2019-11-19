@@ -33,8 +33,8 @@ public class AwsRangerAuditRolePermissionValidator extends AwsIDBrokerMappedRole
     @Override
     String getStorageLocationBase(StorageLocationBase location) {
         return location.getValue()
-                    .replace(FileSystemType.S3.getProtocol() + "://", "")
-                    .replace("/ranger/audit", "");
+                .replace(FileSystemType.S3.getProtocol() + "://", "")
+                .replace("/ranger/audit", "");
     }
 
     @Override

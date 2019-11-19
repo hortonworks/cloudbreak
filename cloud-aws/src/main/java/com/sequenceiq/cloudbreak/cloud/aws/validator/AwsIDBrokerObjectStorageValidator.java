@@ -1,19 +1,20 @@
 package com.sequenceiq.cloudbreak.cloud.aws.validator;
 
-import javax.inject.Inject;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
-import com.amazonaws.services.identitymanagement.model.InstanceProfile;
-import com.amazonaws.services.identitymanagement.model.Role;
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
+import com.amazonaws.services.identitymanagement.model.InstanceProfile;
+import com.amazonaws.services.identitymanagement.model.Role;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsIamService;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
@@ -46,14 +47,14 @@ public class AwsIDBrokerObjectStorageValidator {
     private AwsIamService awsIamService;
 
     public ValidationResult validateObjectStorage(AmazonIdentityManagement iam,
-                                                    SpiFileSystem spiFileSystem,
-                                                    ValidationResultBuilder resultBuilder) {
+            SpiFileSystem spiFileSystem,
+            ValidationResultBuilder resultBuilder) {
         List<CloudFileSystemView> cloudFileSystems = spiFileSystem.getCloudFileSystems();
         for (CloudFileSystemView cloudFileSystemView : cloudFileSystems) {
             CloudS3View cloudFileSystem = (CloudS3View) cloudFileSystemView;
             String instanceProfileArn = cloudFileSystem.getInstanceProfile();
             InstanceProfile instanceProfile = awsIamService.getInstanceProfile(iam, instanceProfileArn,
-                resultBuilder);
+                    resultBuilder);
             if (instanceProfile != null) {
                 CloudIdentityType cloudIdentityType = cloudFileSystem.getCloudIdentityType();
                 if (CloudIdentityType.ID_BROKER.equals(cloudIdentityType)) {
@@ -68,7 +69,7 @@ public class AwsIDBrokerObjectStorageValidator {
     }
 
     private void validateIDBroker(AmazonIdentityManagement iam, InstanceProfile instanceProfile,
-                                    CloudS3View cloudFileSystem, ValidationResultBuilder resultBuilder) {
+            CloudS3View cloudFileSystem, ValidationResultBuilder resultBuilder) {
         awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile, resultBuilder);
 
         Set<Role> allMappedRoles = getAllMappedRoles(iam, cloudFileSystem, resultBuilder);
@@ -79,7 +80,7 @@ public class AwsIDBrokerObjectStorageValidator {
     }
 
     private void validateLog(InstanceProfile instanceProfile, CloudS3View cloudFileSystem,
-                                ValidationResultBuilder resultBuilder) {
+            ValidationResultBuilder resultBuilder) {
         awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile, resultBuilder);
 
         //TODO - need to figure out how to get LOGS_LOCATION_BASE value
@@ -87,7 +88,7 @@ public class AwsIDBrokerObjectStorageValidator {
     }
 
     Set<Role> getAllMappedRoles(AmazonIdentityManagement iam, CloudFileSystemView cloudFileSystemView,
-                                ValidationResultBuilder resultBuilder) {
+            ValidationResultBuilder resultBuilder) {
         Set<Role> roles = Collections.emptySet();
         AccountMappingBase accountMappings = cloudFileSystemView.getAccountMapping();
         if (accountMappings != null) {

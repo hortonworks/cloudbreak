@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.aws.validator;
 
 import java.util.List;
+
 import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.policy.Action;
 import com.amazonaws.auth.policy.Policy;
@@ -11,10 +14,8 @@ import com.amazonaws.auth.policy.Statement;
 import com.amazonaws.auth.policy.actions.SecurityTokenServiceActions;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.Role;
-
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsIamService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
-import org.springframework.stereotype.Component;
 
 @Component
 public class AwsInstanceProfileEC2TrustValidator {
@@ -35,8 +36,8 @@ public class AwsInstanceProfileEC2TrustValidator {
             }
         }
         resultBuilder.error(
-            String.format("The instance profile (%s) doesn't have an EC2 trust relationship.",
-                instanceProfile.getArn()));
+                String.format("The instance profile (%s) doesn't have an EC2 trust relationship.",
+                        instanceProfile.getArn()));
         return false;
     }
 
@@ -44,11 +45,11 @@ public class AwsInstanceProfileEC2TrustValidator {
         return principals
                 .stream()
                 .anyMatch(principal -> "Service".equals(principal.getProvider())
-                                            && Services.AmazonEC2.getServiceId().equals(principal.getId()));
+                        && Services.AmazonEC2.getServiceId().equals(principal.getId()));
     }
 
     boolean checkAssumeRoleInActions(List<Action> actions) {
         return actions.stream().anyMatch(
-            action -> SecurityTokenServiceActions.AssumeRole.getActionName().equals(action.getActionName()));
+                action -> SecurityTokenServiceActions.AssumeRole.getActionName().equals(action.getActionName()));
     }
 }
