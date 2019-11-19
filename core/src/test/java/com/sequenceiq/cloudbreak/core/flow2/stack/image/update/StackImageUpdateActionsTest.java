@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -46,11 +46,10 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.StackCreation
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.message.Msg;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageUpdateEvent;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -60,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -210,8 +210,8 @@ public class StackImageUpdateActionsTest {
 
         checkImageAction.execute(stateContext);
 
-        verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), eq(Msg.STACK_IMAGE_UPDATE_STARTED),
-                eq(Status.UPDATE_IN_PROGRESS.name()));
+        verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), eq(Status.UPDATE_IN_PROGRESS.name()),
+                eq(ResourceEvent.STACK_IMAGE_UPDATE_STARTED));
         verify(stackImageUpdateService, times(1)).getNewImageIfVersionsMatch(any(Stack.class), anyString(), eq(null), eq(null));
         verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.CHECK_IMAGE_VERESIONS_FINISHED_EVENT.event()), any(Event.class));
     }
@@ -226,8 +226,8 @@ public class StackImageUpdateActionsTest {
 
         checkImageAction.execute(stateContext);
 
-        verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), eq(Msg.STACK_IMAGE_UPDATE_STARTED),
-                eq(Status.UPDATE_IN_PROGRESS.name()));
+        verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), eq(Status.UPDATE_IN_PROGRESS.name()),
+                eq(ResourceEvent.STACK_IMAGE_UPDATE_STARTED));
         verify(stackImageUpdateService, times(0)).getNewImageIfVersionsMatch(any(Stack.class), anyString(), eq(null), eq(null));
         verify(eventBus, times(0)).notify(eq(StackImageUpdateEvent.CHECK_IMAGE_VERESIONS_FINISHED_EVENT.event()), any(Event.class));
         verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT.event()), any(Event.class));
@@ -310,8 +310,8 @@ public class StackImageUpdateActionsTest {
 
         finishAction.execute(stateContext);
 
-        verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), eq(Msg.STACK_IMAGE_UPDATE_FINISHED),
-                eq(Status.AVAILABLE.name()));
+        verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), eq(Status.AVAILABLE.name()),
+                eq(ResourceEvent.STACK_IMAGE_UPDATE_FINISHED));
     }
 
     @Test
@@ -325,8 +325,8 @@ public class StackImageUpdateActionsTest {
 
         handleImageUpdateFailureAction.execute(stateContext);
 
-        verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), eq(Msg.STACK_IMAGE_UPDATE_FAILED),
-                eq(Status.UPDATE_FAILED.name()), eq("test"));
+        verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), eq(Status.UPDATE_FAILED.name()),
+                eq(ResourceEvent.STACK_IMAGE_UPDATE_FAILED), eq("test"));
         verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILE_HANDLED_EVENT.event()), any(Event.class));
 
     }

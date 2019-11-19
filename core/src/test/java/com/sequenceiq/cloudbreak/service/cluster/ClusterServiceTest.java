@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AUTORECOVERY_REQUESTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NODES_REPORTED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -280,11 +283,16 @@ public class ClusterServiceTest {
 
         Map<String, List<String>> autoRecoveredNodes = Map.of("master", List.of("host1"));
         verify(flowManager).triggerClusterRepairFlow(STACK_ID, autoRecoveredNodes, false);
-        verify(cloudbreakMessagesService, times(1)).getMessage("cluster.autorecovery.requested", Collections.singletonList(autoRecoveredNodes));
-        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(STACK_ID, "RECOVERY", "auto recovery");
 
-        verify(cloudbreakMessagesService, times(1)).getMessage("cluster.failednodes.reported", Collections.singletonList(Set.of("host2")));
-        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(STACK_ID, "RECOVERY", "failed node");
+        verify(cloudbreakMessagesService, times(1)).getMessage(CLUSTER_AUTORECOVERY_REQUESTED.getMessage(),
+                Set.of("host1"));
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(STACK_ID, "RECOVERY",
+                CLUSTER_AUTORECOVERY_REQUESTED, List.of("host1"));
+
+        verify(cloudbreakMessagesService, times(1)).getMessage(CLUSTER_FAILED_NODES_REPORTED.getMessage(),
+                Set.of("host2"));
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(STACK_ID, "RECOVERY",
+                CLUSTER_FAILED_NODES_REPORTED, List.of("host2"));
     }
 
     @Test
@@ -344,8 +352,8 @@ public class ClusterServiceTest {
 
         underTest.reportHealthChange(STACK_CRN, Set.of(), Set.of("host1"));
 
-        verify(cloudbreakMessagesService).getMessage("cluster.recoverednodes.reported", Collections.singletonList(Set.of("host1")));
-        verify(cloudbreakEventService).fireCloudbreakEvent(STACK_ID, "AVAILABLE", "recovery detected");
+        verify(cloudbreakMessagesService).getMessage("cluster.recoverednodes.reported", Set.of("host1"));
+        verify(cloudbreakEventService).fireCloudbreakEvent(STACK_ID, "AVAILABLE", CLUSTER_RECOVERED_NODES_REPORTED, List.of("host1"));
         assertEquals(InstanceStatus.SERVICES_HEALTHY, host1.getInstanceStatus());
     }
 

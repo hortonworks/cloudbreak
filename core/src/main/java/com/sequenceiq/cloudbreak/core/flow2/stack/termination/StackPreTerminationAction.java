@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DELETE_IN_PROGRESS;
 
 import java.util.List;
 import java.util.Map;
@@ -19,8 +20,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
@@ -35,9 +34,6 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
 
     @Inject
     private StackUpdater stackUpdater;
-
-    @Inject
-    private CloudbreakMessagesService messagesService;
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;
@@ -65,8 +61,7 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
         } else {
             putClusterToDeleteInProgressState(stack);
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_IN_PROGRESS, "Terminating the cluster and its infrastructure.");
-            cloudbreakEventService.fireCloudbreakEvent(context.getStack().getId(), DELETE_IN_PROGRESS.name(),
-                    messagesService.getMessage(Msg.STACK_DELETE_IN_PROGRESS.code()));
+            cloudbreakEventService.fireCloudbreakEvent(context.getStack().getId(), DELETE_IN_PROGRESS.name(), STACK_DELETE_IN_PROGRESS);
             sendEvent(context);
             LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
             LOGGER.debug("Triggering terminate stack event: {}", payload);

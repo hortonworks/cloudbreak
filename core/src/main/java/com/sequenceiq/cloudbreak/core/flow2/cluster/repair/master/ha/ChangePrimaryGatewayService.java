@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_GATEWAY_CHANGE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_GATEWAY_CHANGED_SUCCESSFULLY;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_GATEWAY_CHANGE_FAILED;
 
 import java.util.Optional;
 import java.util.Set;
@@ -22,7 +25,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -67,7 +69,7 @@ public class ChangePrimaryGatewayService {
     public void changePrimaryGatewayStarted(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, "Changing gateway.");
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_GATEWAY_CHANGE, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_GATEWAY_CHANGE);
     }
 
     public void primaryGatewayChanged(long stackId, String newPrimaryGatewayFQDN) throws CloudbreakException, TransactionExecutionException {
@@ -105,13 +107,12 @@ public class ChangePrimaryGatewayService {
     public void ambariServerStarted(StackView stack) {
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Gateway successfully changed.");
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_GATEWAY_CHANGED_SUCCESSFULLY, AVAILABLE.name(),
-                stackUtil.extractClusterManagerIp(stack));
+        flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), CLUSTER_GATEWAY_CHANGED_SUCCESSFULLY, stackUtil.extractClusterManagerIp(stack));
     }
 
     public void changePrimaryGatewayFailed(long stackId, Exception exception) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_FAILED);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Cluster could not be started: " + exception.getMessage());
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_GATEWAY_CHANGE_FAILED, UPDATE_FAILED.name(), exception.getMessage());
+        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_GATEWAY_CHANGE_FAILED, exception.getMessage());
     }
 }

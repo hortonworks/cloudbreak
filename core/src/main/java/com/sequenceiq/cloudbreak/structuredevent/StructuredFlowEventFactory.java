@@ -86,12 +86,17 @@ public class StructuredFlowEventFactory {
     }
 
     public StructuredNotificationEvent createStructuredNotificationEvent(Long stackId, String notificationType, String message, String instanceGroupName) {
+        Stack stack = stackService.getByIdWithTransaction(stackId);
+        return createStructuredNotificationEvent(stack, notificationType, message, instanceGroupName);
+    }
+
+    public StructuredNotificationEvent createStructuredNotificationEvent(Stack stack, String notificationType, String message, String instanceGroupName) {
+        Long stackId = stack.getId();
         NotificationDetails notificationDetails = new NotificationDetails();
         notificationDetails.setNotificationType(notificationType);
         notificationDetails.setNotification(message);
         notificationDetails.setStackId(stackId);
 
-        Stack stack = stackService.getByIdWithTransaction(stackId);
         String stackName = stack.getName();
         String userName = stack.getCreator().getUserName();
         String userId = stack.getCreator().getUserId();

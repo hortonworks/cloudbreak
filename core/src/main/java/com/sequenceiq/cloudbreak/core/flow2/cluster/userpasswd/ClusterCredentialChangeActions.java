@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CHANGE_CREDENTIAL_FAILED;
 
 import java.util.Map;
 
@@ -19,7 +20,6 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTrigger
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterCredentialChangeRequest;
@@ -90,7 +90,7 @@ public class ClusterCredentialChangeActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Exception during cluster authentication change!: {}", payload.getException().getMessage());
-                flowMessageService.fireEventAndLog(payload.getResourceId(), Msg.CLUSTER_CHANGE_CREDENTIAL_FAILED, UPDATE_FAILED.name());
+                flowMessageService.fireEventAndLog(payload.getResourceId(), UPDATE_FAILED.name(), CLUSTER_CHANGE_CREDENTIAL_FAILED);
                 sendEvent(context);
             }
 

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_IN_PR
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.WAIT_FOR_SYNC;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_CLEANUP_SERVICE_TRIGGER_SYNC;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -153,7 +154,6 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     }
 
     private void fireEvent(Long stackId) {
-        eventService.fireCloudbreakEvent(stackId, UPDATE_IN_PROGRESS.name(),
-                "Couldn't retrieve the cluster's status, starting to sync.");
+        eventService.fireCloudbreakEvent(stackId, UPDATE_IN_PROGRESS.name(), STACK_CLEANUP_SERVICE_TRIGGER_SYNC);
     }
 }

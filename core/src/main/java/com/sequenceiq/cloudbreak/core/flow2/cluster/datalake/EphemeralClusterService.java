@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DATALAKE_UPDATE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DATALAKE_UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DATALAKE_UPDATE_FINISHED;
 
 import javax.inject.Inject;
 
@@ -10,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
-import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
@@ -29,18 +31,18 @@ public class EphemeralClusterService {
     public void updateClusterStarted(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, "Ephemeral cluster update started");
-        flowMessageService.fireEventAndLog(stackId, Msg.STACK_DATALAKE_UPDATE, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), STACK_DATALAKE_UPDATE);
     }
 
     public void updateClusterFinished(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, AVAILABLE);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Ephemeral cluster has been updated");
-        flowMessageService.fireEventAndLog(stackId, Msg.STACK_DATALAKE_UPDATE_FINISHED, AVAILABLE.name());
+        flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), STACK_DATALAKE_UPDATE_FINISHED);
     }
 
     public void updateClusterFailed(long stackId, Exception exception) {
         clusterService.updateClusterStatusByStackId(stackId, AVAILABLE);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Ephemeral cluster update failed " + exception.getMessage());
-        flowMessageService.fireEventAndLog(stackId, Msg.STACK_DATALAKE_UPDATE_FAILED, UPDATE_FAILED.name());
+        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_DATALAKE_UPDATE_FAILED);
     }
 }

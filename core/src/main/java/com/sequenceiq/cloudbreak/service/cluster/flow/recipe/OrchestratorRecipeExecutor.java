@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPLOAD_RECIPES;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,7 +32,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -42,9 +42,9 @@ import com.sequenceiq.cloudbreak.recipe.CentralRecipeUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeExecutionFailureCollector.RecipeFailure;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.recipe.GeneratedRecipeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -63,9 +63,6 @@ class OrchestratorRecipeExecutor {
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;
-
-    @Inject
-    private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Inject
     private StackUtil stackUtil;
@@ -244,23 +241,7 @@ class OrchestratorRecipeExecutor {
         if (!recipes.isEmpty()) {
             Collections.sort(recipes);
             String messageStr = Joiner.on(';').join(recipes);
-            cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(),
-                    cloudbreakMessagesService.getMessage(Msg.UPLOAD_RECIPES.code(), Collections.singletonList(messageStr)));
-        }
-    }
-
-    private enum Msg {
-
-        UPLOAD_RECIPES("recipes.upload");
-
-        private final String code;
-
-        Msg(String msgCode) {
-            code = msgCode;
-        }
-
-        public String code() {
-            return code;
+            cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(), CLUSTER_UPLOAD_RECIPES, Collections.singletonList(messageStr));
         }
     }
 }

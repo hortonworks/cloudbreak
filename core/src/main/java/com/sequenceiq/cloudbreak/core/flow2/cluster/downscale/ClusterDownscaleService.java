@@ -3,6 +3,11 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.downscale;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FORCE_REMOVING_NODE_FROM_HOSTGROUP;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALED_DOWN;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_DOWN;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_FAILED;
 
 import java.util.List;
 import java.util.Set;
@@ -21,8 +26,8 @@ import com.sequenceiq.cloudbreak.cluster.service.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
-import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -51,26 +56,26 @@ public class ClusterDownscaleService {
     private InstanceMetaDataService instanceMetaDataService;
 
     public void clusterDownscaleStarted(long stackId, String hostGroupName, Integer scalingAdjustment, Set<Long> privateIds, ClusterDownscaleDetails details) {
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_DOWN);
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
         if (scalingAdjustment != null) {
             LOGGER.info("Decommissioning {} hosts from host group '{}'", Math.abs(scalingAdjustment), hostGroupName);
-            flowMessageService.fireInstanceGroupEventAndLog(stackId, Msg.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, Status.UPDATE_IN_PROGRESS.name(),
-                    hostGroupName, Math.abs(scalingAdjustment), hostGroupName);
+            flowMessageService.fireInstanceGroupEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), hostGroupName, CLUSTER_REMOVING_NODE_FROM_HOSTGROUP,
+                    String.valueOf(Math.abs(scalingAdjustment)), hostGroupName);
         } else if (!CollectionUtils.isEmpty(privateIds)) {
             LOGGER.info("Decommissioning {} hosts from host group '{}'", privateIds, hostGroupName);
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             List<String> decomissionedHostNames = stackService.getHostNamesForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
-            Msg message = details.isForced() ? Msg.CLUSTER_FORCE_REMOVING_NODE_FROM_HOSTGROUP : Msg.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP;
-            flowMessageService.fireInstanceGroupEventAndLog(stackId, message, Status.UPDATE_IN_PROGRESS.name(),
-                    hostGroupName, decomissionedHostNames, hostGroupName);
+            ResourceEvent resourceEvent = details.isForced() ? CLUSTER_FORCE_REMOVING_NODE_FROM_HOSTGROUP : CLUSTER_REMOVING_NODE_FROM_HOSTGROUP;
+            flowMessageService.fireInstanceGroupEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), hostGroupName, resourceEvent,
+                    String.join(",", decomissionedHostNames), hostGroupName);
         }
     }
 
     public void finalizeClusterScaleDown(Long stackId) {
         StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
         clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SCALED_DOWN, AVAILABLE.name());
+        flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_SCALED_DOWN);
     }
 
     public void updateMetadataStatusToFailed(DecommissionResult payload) {
@@ -83,8 +88,7 @@ public class ClusterDownscaleService {
             }
             String errorDetailes = String.format("The following hosts are '%s': %s", InstanceStatus.DECOMMISSION_FAILED,
                     String.join(", ", payload.getHostNames()));
-            flowMessageService.fireEventAndLog(payload.getResourceId(),
-                    Msg.CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "removed from", errorDetailes);
+            flowMessageService.fireEventAndLog(payload.getResourceId(), UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, "removed from", errorDetailes);
         }
     }
 
@@ -95,8 +99,7 @@ public class ClusterDownscaleService {
         }
         String errorDetailes = String.format("The following hosts are in '%s': %s",
                 InstanceStatus.ORCHESTRATION_FAILED, String.join(", ", payload.getFailedHostNames()));
-        flowMessageService.fireEventAndLog(payload.getResourceId(),
-                Msg.CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "removed from", errorDetailes);
+        flowMessageService.fireEventAndLog(payload.getResourceId(), UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, "removed from", errorDetailes);
     }
 
     public void handleClusterDownscaleFailure(long stackId, Exception error) {
@@ -108,6 +111,6 @@ public class ClusterDownscaleService {
         }
         clusterService.updateClusterStatusByStackId(stackId, status, errorDetailes);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Node(s) could not be removed from the cluster: " + errorDetailes);
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "removed from", errorDetailes);
+        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, "removed from", errorDetailes);
     }
 }

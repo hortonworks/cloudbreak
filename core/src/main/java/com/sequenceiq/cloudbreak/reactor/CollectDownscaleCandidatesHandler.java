@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SELECT_FOR_DOWNSCALE;
 
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +19,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -110,7 +110,7 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
                 "FQDN: " + instanceMetaData.getDiscoveryFQDN() : "Private id: " + instanceMetaData.getPrivateId())
                 .collect(Collectors.joining(","));
 
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_SELECT_FOR_DOWNSCALE, AVAILABLE.name(), collectedHostsAsString);
+        flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_SELECT_FOR_DOWNSCALE, collectedHostsAsString);
         return collectedCandidates.stream().map(InstanceMetaData::getPrivateId).collect(Collectors.toSet());
     }
 

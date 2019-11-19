@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_DELETE_FAILED;
 
 import java.util.Optional;
 
@@ -20,7 +21,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -58,7 +58,7 @@ public class ClusterTerminationFlowService {
     public void finishClusterTerminationNotAllowed(ClusterViewContext context, ClusterTerminationResult payload) {
         StackView stackView = context.getStack();
         Long stackId = stackView.getId();
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), "Operation not allowed");
+        flowMessageService.fireEventAndLog(stackId, DELETE_FAILED.name(), CLUSTER_DELETE_FAILED, "Operation not allowed");
         clusterService.updateClusterStatusByStackId(stackId, AVAILABLE);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE);
     }
@@ -72,7 +72,7 @@ public class ClusterTerminationFlowService {
             cluster.get().setStatus(DELETE_FAILED);
             cluster.get().setStatusReason(errorDetails.getMessage());
             clusterService.updateCluster(cluster.get());
-            flowMessageService.fireEventAndLog(cluster.get().getStack().getId(), Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), errorDetails.getMessage());
+            flowMessageService.fireEventAndLog(cluster.get().getStack().getId(), DELETE_FAILED.name(), CLUSTER_DELETE_FAILED, errorDetails.getMessage());
         }
     }
 

@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.message.Msg;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -64,35 +64,37 @@ public class ClusterDownscaleServiceTest {
 
     @Test
     public void testClusterDownscaleStartedWhenScalingAdjustmentIsGivenAndItIsPositiveThenInstanceGroupEventWillBeCalledThisNumber() {
-        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Msg.CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
+        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_SCALING_DOWN);
 
         underTest.clusterDownscaleStarted(STACK_ID, HOST_GROUP_NAME, 1, PRIVATE_IDS, details);
 
-        verify(flowMessageService, times(1)).fireInstanceGroupEventAndLog(STACK_ID, Msg.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP,
-                Status.UPDATE_IN_PROGRESS.name(), HOST_GROUP_NAME, 1, HOST_GROUP_NAME);
-        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Msg.CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
+        verify(flowMessageService, times(1)).fireInstanceGroupEventAndLog(STACK_ID,
+                Status.UPDATE_IN_PROGRESS.name(), HOST_GROUP_NAME, ResourceEvent.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, "1", HOST_GROUP_NAME);
+        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(),
+                ResourceEvent.CLUSTER_SCALING_DOWN);
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.UPDATE_IN_PROGRESS);
         verify(stackService, times(0)).getByIdWithListsInTransaction(anyLong());
         verify(stackService, times(0)).getByIdWithListsInTransaction(STACK_ID);
         verify(stackService, times(0)).getHostNamesForPrivateIds(anyListOf(InstanceMetaData.class), anySet());
-        verify(flowMessageService, times(0)).fireInstanceGroupEventAndLog(eq(STACK_ID), any(Msg.class), anyString(), anyString(),
-                anyListOf(String.class), anyString());
+        verify(flowMessageService, times(0)).fireInstanceGroupEventAndLog(eq(STACK_ID), anyString(), anyString(),
+                any(ResourceEvent.class), anyString());
     }
 
     @Test
     public void testClusterDownscaleStartedWhenScalingAdjustmentIsGivenAndItIsNegativeThenInstanceGroupEventWillBeCalledWithTheAbsoluteValueOfThisNumber() {
-        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Msg.CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
+        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_SCALING_DOWN);
 
         underTest.clusterDownscaleStarted(STACK_ID, HOST_GROUP_NAME, -1, PRIVATE_IDS, details);
 
-        verify(flowMessageService, times(1)).fireInstanceGroupEventAndLog(STACK_ID, Msg.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP,
-                Status.UPDATE_IN_PROGRESS.name(), HOST_GROUP_NAME, 1, HOST_GROUP_NAME);
-        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Msg.CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
+        verify(flowMessageService, times(1)).fireInstanceGroupEventAndLog(STACK_ID,
+                Status.UPDATE_IN_PROGRESS.name(), HOST_GROUP_NAME, ResourceEvent.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, "1", HOST_GROUP_NAME);
+        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(),
+                ResourceEvent.CLUSTER_SCALING_DOWN);
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.UPDATE_IN_PROGRESS);
         verify(stackService, times(0)).getByIdWithListsInTransaction(anyLong());
         verify(stackService, times(0)).getByIdWithListsInTransaction(STACK_ID);
         verify(stackService, times(0)).getHostNamesForPrivateIds(anyListOf(InstanceMetaData.class), anySet());
-        verify(flowMessageService, times(0)).fireInstanceGroupEventAndLog(eq(STACK_ID), any(Msg.class), anyString(), anyString(),
-                anyListOf(String.class), anyString());
+        verify(flowMessageService, times(0)).fireInstanceGroupEventAndLog(eq(STACK_ID), anyString(), anyString(),
+                any(ResourceEvent.class), anyString());
     }
 }

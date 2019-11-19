@@ -1,23 +1,23 @@
 package com.sequenceiq.cloudbreak.service.events;
 
+import java.util.Collection;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
-import com.sequenceiq.cloudbreak.notification.NotificationSender;
-import com.sequenceiq.cloudbreak.service.notification.NotificationAssemblingService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
+import com.sequenceiq.notification.NotificationService;
 
 import reactor.bus.Event;
 import reactor.fn.Consumer;
 
-@Component
-public class CloudbreakEventHandler implements Consumer<Event<StructuredNotificationEvent>> {
+@Service
+public class CloudbreakEventHandler implements Consumer<Event<CloudbreakCompositeEvent>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakEventHandler.class);
 
@@ -25,19 +25,27 @@ public class CloudbreakEventHandler implements Consumer<Event<StructuredNotifica
     private StructuredEventClient structuredEventClient;
 
     @Inject
-    private NotificationSender notificationSender;
-
-    @Inject
-    private NotificationAssemblingService<Object> notificationAssemblingService;
-
-    @Inject
-    private ConversionService conversionService;
+    private NotificationService notificationService;
 
     @Override
-    public void accept(Event<StructuredNotificationEvent> cloudbreakEvent) {
-        StructuredNotificationEvent structuredNotificationEvent = cloudbreakEvent.getData();
+    public void accept(Event<CloudbreakCompositeEvent> cloudbreakEvent) {
+        CloudbreakCompositeEvent cloudbreakCompositeEvent = cloudbreakEvent.getData();
+        StructuredNotificationEvent structuredNotificationEvent = cloudbreakCompositeEvent.getStructuredNotificationEvent();
         structuredEventClient.sendStructuredEvent(structuredNotificationEvent);
-        CloudbreakEventV4Response cloudbreakEventV4Response = conversionService.convert(structuredNotificationEvent, CloudbreakEventV4Response.class);
-        notificationSender.send(notificationAssemblingService.createNotification(cloudbreakEventV4Response));
+        sendDistroxNotificaiton(cloudbreakCompositeEvent);
+    }
+
+    private void sendDistroxNotificaiton(CloudbreakCompositeEvent cloudbreakCompositeEvent) {
+        String owner = cloudbreakCompositeEvent.getOwner();
+        StackV4Response stackResponse = cloudbreakCompositeEvent.getStackResponse();
+        if (stackResponse != null) {
+            try {
+                Collection<String> resourceEventMessageArgs = cloudbreakCompositeEvent.getResourceEventMessageArgs();
+                notificationService.send(cloudbreakCompositeEvent.getResourceEvent(), resourceEventMessageArgs, stackResponse, owner);
+            } catch (Exception e) {
+                String msg = String.format("Failed to send notification from structured event, stack('%s')", stackResponse.getId());
+                LOGGER.warn(msg, e);
+            }
+        }
     }
 }

@@ -3,6 +3,10 @@ package com.sequenceiq.cloudbreak.service.cluster;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PACKAGES_ON_INSTANCES_ARE_DIFFERENT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PACKAGE_VERSIONS_ARE_CHANGED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PACKAGE_VERSION_CANNOT_BE_QUERIED;
 
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
@@ -42,7 +46,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -69,9 +72,6 @@ public class InstanceMetadataUpdater {
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;
-
-    @Inject
-    private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Inject
     private StackService stackService;
@@ -161,39 +161,38 @@ public class InstanceMetadataUpdater {
     private void notifyIfVersionsCannotBeQueried(Stack stack, List<String> failedVersionQueryByHost) {
         if (!failedVersionQueryByHost.isEmpty()) {
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_FAILED.name(),
-                    cloudbreakMessagesService.getMessage(Msg.PACKAGE_VERSION_CANNOT_BE_QUERIED.code(),
-                            Collections.singletonList(failedVersionQueryByHost.stream()
-                                    .collect(Collectors.joining("\r\n")))));
+                    CLUSTER_PACKAGE_VERSION_CANNOT_BE_QUERIED,
+                    Collections.singletonList(failedVersionQueryByHost.stream().collect(Collectors.joining("\r\n"))));
         }
     }
 
     private void notifyIfPackagesHaveChangedVersions(Stack stack, Map<String, Multimap<String, String>> changedVersionsByHost) {
         if (!changedVersionsByHost.isEmpty()) {
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_REQUESTED.name(),
-                    cloudbreakMessagesService.getMessage(Msg.PACKAGE_VERSIONS_ARE_CHANGED.code(),
-                            Collections.singletonList(changedVersionsByHost.entrySet().stream()
-                                    .map(entry -> String.format("On Instance ID: [%s], package versions have been changed: [%s]",
-                                            entry.getKey(), entry.getValue().toString()))
-                                    .collect(Collectors.joining("\r\n")))));
+                    CLUSTER_PACKAGE_VERSIONS_ARE_CHANGED,
+                    Collections.singletonList(changedVersionsByHost.entrySet().stream()
+                            .map(entry -> String.format("On Instance ID: [%s], package versions have been changed: [%s]",
+                                    entry.getKey(), entry.getValue().toString()))
+                            .collect(Collectors.joining("\r\n"))));
         }
     }
 
     private void notifyIfInstancesMissingPackageVersion(Stack stack, Map<String, List<String>> instancesWithMissingPackageVersions) {
         if (!instancesWithMissingPackageVersions.isEmpty()) {
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                    cloudbreakMessagesService.getMessage(Msg.PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING.code(),
-                            Collections.singletonList(instancesWithMissingPackageVersions.entrySet().stream()
-                                    .map(entry -> String.format("Instance ID: [%s] Packages without version: [%s]",
-                                            entry.getKey(), StringUtils.join(entry.getValue(), ",")))
-                                    .collect(Collectors.joining(" * ")))));
+                    CLUSTER_PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING,
+                    Collections.singletonList(instancesWithMissingPackageVersions.entrySet().stream()
+                            .map(entry -> String.format("Instance ID: [%s] Packages without version: [%s]",
+                                    entry.getKey(), StringUtils.join(entry.getValue(), ",")))
+                            .collect(Collectors.joining(" * "))));
         }
     }
 
     private void notifyIfPackagesHaveDifferentVersions(Stack stack, List<String> packagesWithMultipleVersions) {
         if (!packagesWithMultipleVersions.isEmpty()) {
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                    cloudbreakMessagesService.getMessage(Msg.PACKAGES_ON_INSTANCES_ARE_DIFFERENT.code(),
-                            Collections.singletonList(String.join(",", packagesWithMultipleVersions))));
+                    CLUSTER_PACKAGES_ON_INSTANCES_ARE_DIFFERENT,
+                    Collections.singletonList(String.join(",", packagesWithMultipleVersions)));
         }
     }
 
@@ -348,23 +347,6 @@ public class InstanceMetadataUpdater {
     private Image updatePackageVersions(Image image, Map<String, String> packageVersionsOnHost) {
         return new Image(image.getImageName(), image.getUserdata(), image.getOs(), image.getOsType(), image.getImageCatalogUrl(),
                 image.getImageCatalogName(), image.getImageId(), packageVersionsOnHost);
-    }
-
-    public enum Msg {
-        PACKAGES_ON_INSTANCES_ARE_DIFFERENT("ambari.cluster.sync.instance.different.packages"),
-        PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING("ambari.cluster.sync.instance.missing.package.versions"),
-        PACKAGE_VERSIONS_ARE_CHANGED("ambari.cluster.sync.instance.changed.packages"),
-        PACKAGE_VERSION_CANNOT_BE_QUERIED("ambari.cluster.sync.instance.failedquery.packages");
-
-        private final String code;
-
-        Msg(String msgCode) {
-            code = msgCode;
-        }
-
-        public String code() {
-            return code;
-        }
     }
 
     public static class Package {

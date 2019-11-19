@@ -1,26 +1,34 @@
 package com.sequenceiq.cloudbreak.service.events;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -30,6 +38,7 @@ import reactor.bus.EventBus;
 import reactor.bus.selector.Selectors;
 
 @Service
+@Transactional
 public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakEventService.class);
 
@@ -45,9 +54,6 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private CloudbreakEventHandler cloudbreakEventHandler;
 
     @Inject
-    private StructuredFlowEventFactory structuredFlowEventFactory;
-
-    @Inject
     private StructuredEventService structuredEventService;
 
     @Inject
@@ -59,42 +65,41 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     @Inject
     private WorkspaceService workspaceService;
 
+    @Inject
+    private CloudbreakMessagesService messagesService;
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private StructuredFlowEventFactory structuredFlowEventFactory;
+
+    @Inject
+    private StackToStackV4ResponseConverter stackV4ResponseConverter;
+
     @PostConstruct
     public void setup() {
         reactor.on(Selectors.$(CLOUDBREAK_EVENT), cloudbreakEventHandler);
     }
 
     @Override
-    public void fireCloudbreakEvent(Long entityId, String eventType, String eventMessage) {
-        StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(entityId, eventType, eventMessage, null);
-        LOGGER.debug("Firing Cloudbreak event: entityId: {}, type: {}, message: {}", entityId, eventType, eventMessage);
-        reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
+    public void fireCloudbreakEvent(Long entityId, String eventType, ResourceEvent resourceEvent) {
+        fireCloudbreakEvent(entityId, eventType, resourceEvent, null);
     }
 
     @Override
-    public void fireLdapEvent(LdapDetails ldapDetails, String eventType, String eventMessage, boolean notifyWorkspace) {
-        StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(ldapDetails, eventType, eventMessage,
-                notifyWorkspace);
-        LOGGER.debug("Firing Ldap event: entityId: {}, entityName: {}, type: {}, message: {}", ldapDetails.getId(), ldapDetails.getName(), eventType,
-                eventMessage);
-        reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
+    public void fireCloudbreakEvent(Long stackId, String eventType, ResourceEvent resourceEvent, Collection<String> eventMessageArgs) {
+        String eventMessage = getMessage(resourceEvent, eventMessageArgs);
+        LOGGER.debug("Firing Cloudbreak event: stackId: {}, type: {}, message: {}", stackId, eventType, eventMessage);
+        fireEventWithPayload(stackId, eventType, resourceEvent, eventMessageArgs, eventMessage, null);
     }
 
     @Override
-    public void fireRdsEvent(RdsDetails rdsDetails, String eventType, String eventMessage, boolean notifyWorkspace) {
-        StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(rdsDetails, eventType, eventMessage,
-                notifyWorkspace);
-        LOGGER.debug("Firing RDS event: entityId: {}, entityName: {}, type: {}, message: {}", rdsDetails.getId(), rdsDetails.getName(), eventType,
-                eventMessage);
-        reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
-    }
-
-    @Override
-    public void fireCloudbreakInstanceGroupEvent(Long stackId, String eventType, String eventMessage, String instanceGroupName) {
-        StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(stackId, eventType, eventMessage,
-                instanceGroupName);
+    public void fireCloudbreakInstanceGroupEvent(Long stackId, String eventType, String instanceGroupName, ResourceEvent resourceEvent,
+            Collection<String> eventMessageArgs) {
+        String eventMessage = getMessage(resourceEvent, eventMessageArgs);
         LOGGER.debug("Firing Cloudbreak event: stackId: {}, type: {}, message: {}, instancegroup: {}", stackId, eventType, eventMessage, instanceGroupName);
-        reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
+        fireEventWithPayload(stackId, eventType, resourceEvent, eventMessageArgs, eventMessage, instanceGroupName);
     }
 
     @Override
@@ -121,5 +126,39 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         return Optional.ofNullable(stackId)
                 .map(id -> structuredEventService.getEventsLimitedWithTypeAndResourceId(StructuredNotificationEvent.class, "stacks", id, pageable))
                 .orElse(Page.empty());
+    }
+
+    private String getMessage(ResourceEvent resourceEvent, Collection<String> eventMessageArgs) {
+        return CollectionUtils.isEmpty(eventMessageArgs)
+                ? messagesService.getMessage(resourceEvent.getMessage())
+                : messagesService.getMessage(resourceEvent.getMessage(), eventMessageArgs);
+    }
+
+    private void fireEventWithPayload(Long stackId, String eventType, ResourceEvent resourceEvent, Collection<String> eventMessageArgs,
+            String eventMessage, String instanceGroupName) {
+
+        Stack stack = stackService.getByIdWithTransaction(stackId);
+        StructuredNotificationEvent structuredNotificationEvent = structuredFlowEventFactory.createStructuredNotificationEvent(
+                stack,
+                eventType,
+                eventMessage,
+                instanceGroupName);
+
+        CloudbreakCompositeEvent compositeEvent = new CloudbreakCompositeEvent(resourceEvent, eventMessageArgs, structuredNotificationEvent);
+        if (stackTypeIsDistroX(stack.getType())) {
+            StackV4Response stackV4Response = stackV4ResponseConverter.convert(stack);
+            compositeEvent = new CloudbreakCompositeEvent(
+                    resourceEvent,
+                    eventMessageArgs,
+                    structuredNotificationEvent,
+                    stackV4Response,
+                    stack.getCreator().getUserCrn()
+            );
+        }
+        reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(compositeEvent));
+    }
+
+    private boolean stackTypeIsDistroX(StackType stackType) {
+        return stackType == null || StackType.WORKLOAD.equals(stackType);
     }
 }

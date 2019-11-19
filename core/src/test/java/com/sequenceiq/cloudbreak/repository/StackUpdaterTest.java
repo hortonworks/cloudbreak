@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
@@ -56,7 +57,7 @@ public class StackUpdaterTest {
         Stack newStack = underTest.updateStackStatus(1L, DetailedStackStatus.DELETE_COMPLETED);
         assertEquals(newStatus.getStatus(), newStack.getStatus());
         assertEquals("", newStack.getStatusReason());
-        verify(cloudbreakEventService, times(0)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
+        verify(cloudbreakEventService, times(0)).fireCloudbreakEvent(anyLong(), anyString(), any(ResourceEvent.class));
     }
 
     @Test

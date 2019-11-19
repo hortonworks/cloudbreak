@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.COMMON_BAD_REQUEST_NOTIFICATION_PATTERN;
+
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
@@ -31,7 +35,7 @@ abstract class SendNotificationExceptionMapper<E extends Throwable> extends Base
             } catch (RuntimeException e) {
                 LOGGER.error("Can't read entity for mapping", e);
             }
-            eventService.fireCloudbreakEvent(stackId, "BAD_REQUEST", message);
+            eventService.fireCloudbreakEvent(stackId, "BAD_REQUEST", COMMON_BAD_REQUEST_NOTIFICATION_PATTERN, List.of(message));
         }
         return response;
     }

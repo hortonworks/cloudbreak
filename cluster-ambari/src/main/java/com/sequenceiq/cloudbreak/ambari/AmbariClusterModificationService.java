@@ -2,10 +2,7 @@ package com.sequenceiq.cloudbreak.ambari;
 
 import static com.sequenceiq.cloudbreak.ambari.AmbariMessages.AMBARI_CLUSTER_INSTALL_FAILED;
 import static com.sequenceiq.cloudbreak.ambari.AmbariMessages.AMBARI_CLUSTER_SERVICES_INIT_FAILED;
-import static com.sequenceiq.cloudbreak.ambari.AmbariMessages.AMBARI_CLUSTER_SERVICES_STARTING;
 import static com.sequenceiq.cloudbreak.ambari.AmbariMessages.AMBARI_CLUSTER_SERVICES_START_FAILED;
-import static com.sequenceiq.cloudbreak.ambari.AmbariMessages.AMBARI_CLUSTER_SERVICES_STOPPED;
-import static com.sequenceiq.cloudbreak.ambari.AmbariMessages.AMBARI_CLUSTER_SERVICES_STOPPING;
 import static com.sequenceiq.cloudbreak.ambari.AmbariMessages.AMBARI_CLUSTER_SERVICES_STOP_FAILED;
 import static com.sequenceiq.cloudbreak.ambari.AmbariMessages.AMBARI_CLUSTER_UPSCALE_FAILED;
 import static com.sequenceiq.cloudbreak.ambari.AmbariOperationType.INIT_SERVICES_AMBARI_PROGRESS_STATE;
@@ -15,6 +12,9 @@ import static com.sequenceiq.cloudbreak.ambari.AmbariOperationType.STOP_AMBARI_P
 import static com.sequenceiq.cloudbreak.ambari.AmbariOperationType.UPSCALE_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.ambari.HostGroupAssociationBuilder.FQDN;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_CLUSTER_SERVICES_STARTING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_CLUSTER_SERVICES_STOPPED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_CLUSTER_SERVICES_STOPPING;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
 import static java.util.Collections.singletonMap;
@@ -178,8 +178,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
     private void stopHadoopServices(Stack stack, AmbariClient ambariClient) throws URISyntaxException, IOException, CloudbreakException {
         LOGGER.info("Stop all Hadoop services");
         eventService
-                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
-                        cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_SERVICES_STOPPING.code()));
+                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_CLUSTER_SERVICES_STOPPING);
         int requestId = ambariClient.stopAllServices();
         if (requestId != -1) {
             waitForServicesToStop(stack, ambariClient, requestId);
@@ -188,8 +187,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
             throw new CloudbreakException("Failed to stop Hadoop services.");
         }
         eventService
-                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
-                        cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_SERVICES_STOPPED.code()));
+                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_CLUSTER_SERVICES_STOPPED);
     }
 
     private void waitForServicesToStop(Stack stack, AmbariClient ambariClient, int requestId) throws CloudbreakException {
@@ -233,8 +231,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
 
     private int startHadoopServices(Stack stack, AmbariClient ambariClient) {
         LOGGER.info("Starting all Hadoop services");
-        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
-                cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_SERVICES_STARTING.code()));
+        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_CLUSTER_SERVICES_STARTING);
         int requestId = 0;
         try {
             requestId = ambariClient.startAllServices();

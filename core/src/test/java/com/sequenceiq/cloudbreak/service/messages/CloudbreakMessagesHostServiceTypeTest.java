@@ -18,14 +18,14 @@ import com.sequenceiq.cloudbreak.message.MessagesConfig;
 public class CloudbreakMessagesHostServiceTypeTest {
 
     @Inject
-    private CloudbreakMessagesService messageService;
+    private CloudbreakMessagesService messagesService;
 
     @Test
     public void shouldResolveMessageIfCodeProvided() {
         // GIVEN
 
         // WHEN
-        String message = messageService.getMessage("test.message");
+        String message = messagesService.getMessage("test.message");
         // THEN
 
         Assert.assertEquals("Invalid message", "Hi my dear friend", message);
@@ -38,7 +38,7 @@ public class CloudbreakMessagesHostServiceTypeTest {
 
 
         // WHEN
-        String message = messageService.getMessage("stack.infrastructure.time", Collections.singletonList(123));
+        String message = messagesService.getMessage("stack.infrastructure.time", Collections.singletonList(123));
         // THEN
         Assert.assertEquals("Invalid message resolution!", "Infrastructure creation took 123 seconds", message);
 

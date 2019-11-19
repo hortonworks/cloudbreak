@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -64,9 +64,6 @@ public class InstanceMetadataUpdaterTest {
     private CloudbreakEventService cloudbreakEventService;
 
     @Mock
-    private CloudbreakMessagesService cloudbreakMessagesService;
-
-    @Mock
     private HostOrchestrator hostOrchestrator;
 
     @Mock
@@ -83,7 +80,6 @@ public class InstanceMetadataUpdaterTest {
         MockitoAnnotations.initMocks(this);
         when(hostOrchestratorResolver.get(anyString())).thenReturn(hostOrchestrator);
         when(gatewayConfigService.getGatewayConfig(any(Stack.class), any(InstanceMetaData.class), anyBoolean())).thenReturn(gatewayConfig);
-        when(cloudbreakMessagesService.getMessage(anyString(), anyCollection())).thenReturn("message");
 
         InstanceMetadataUpdater.Package packageByName = new InstanceMetadataUpdater.Package();
         packageByName.setName("packageByName");
@@ -119,7 +115,7 @@ public class InstanceMetadataUpdaterTest {
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(createStack());
         underTest.updatePackageVersionsOnAllInstances(1L);
 
-        verify(cloudbreakEventService, times(0)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
+        verify(cloudbreakEventService, times(0)).fireCloudbreakEvent(anyLong(), anyString(), any(ResourceEvent.class));
     }
 
     @Test
@@ -134,9 +130,10 @@ public class InstanceMetadataUpdaterTest {
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
         underTest.updatePackageVersionsOnAllInstances(1L);
 
-        verify(cloudbreakEventService, times(2)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
-        verify(cloudbreakMessagesService, times(1))
-                .getMessage(eq(InstanceMetadataUpdater.Msg.PACKAGE_VERSION_CANNOT_BE_QUERIED.code()), anyCollection());
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(),
+                eq(ResourceEvent.CLUSTER_PACKAGE_VERSION_CANNOT_BE_QUERIED), anyCollection());
+        verify(cloudbreakEventService, times(2)).fireCloudbreakEvent(anyLong(), anyString(),
+                any(ResourceEvent.class), anyCollection());
         assertEquals(SERVICES_UNHEALTHY, stack.getInstanceGroups().stream()
                 .filter(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream()
                         .filter(instanceMetaData -> StringUtils.equals(instanceMetaData.getDiscoveryFQDN(), "hostByCmd"))
@@ -158,11 +155,10 @@ public class InstanceMetadataUpdaterTest {
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(createStack());
         underTest.updatePackageVersionsOnAllInstances(1L);
 
-        verify(cloudbreakEventService, times(2)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
-        verify(cloudbreakMessagesService, times(1))
-                .getMessage(eq(InstanceMetadataUpdater.Msg.PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING.code()), anyCollection());
-        verify(cloudbreakMessagesService, times(1))
-                .getMessage(eq(InstanceMetadataUpdater.Msg.PACKAGE_VERSIONS_ARE_CHANGED.code()), anyCollection());
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(),
+                eq(ResourceEvent.CLUSTER_PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING), anyCollection());
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(),
+                eq(ResourceEvent.CLUSTER_PACKAGE_VERSIONS_ARE_CHANGED), anyCollection());
     }
 
     @Test
@@ -177,11 +173,10 @@ public class InstanceMetadataUpdaterTest {
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(createStack());
         underTest.updatePackageVersionsOnAllInstances(1L);
 
-        verify(cloudbreakEventService, times(2)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
-        verify(cloudbreakMessagesService, times(1))
-                .getMessage(eq(InstanceMetadataUpdater.Msg.PACKAGES_ON_INSTANCES_ARE_DIFFERENT.code()), anyCollection());
-        verify(cloudbreakMessagesService, times(1))
-                .getMessage(eq(InstanceMetadataUpdater.Msg.PACKAGE_VERSIONS_ARE_CHANGED.code()), anyCollection());
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(),
+                eq(ResourceEvent.CLUSTER_PACKAGES_ON_INSTANCES_ARE_DIFFERENT), anyCollection());
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(),
+                eq(ResourceEvent.CLUSTER_PACKAGE_VERSIONS_ARE_CHANGED), anyCollection());
     }
 
     private Map<String, String> packageMap() {

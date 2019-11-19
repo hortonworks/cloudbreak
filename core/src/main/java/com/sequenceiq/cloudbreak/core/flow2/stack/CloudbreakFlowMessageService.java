@@ -8,9 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
-import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @Service
@@ -24,20 +24,11 @@ public class CloudbreakFlowMessageService implements FlowMessageService {
     @Inject
     private CloudbreakEventService cloudbreakEventService;
 
-    public void fireEventAndLog(Long stackId, String message, String eventType) {
-        cloudbreakEventService.fireCloudbreakEvent(stackId, eventType, message);
+    public void fireEventAndLog(Long stackId, String eventType, ResourceEvent resourceEvent, String... eventMessageArgs) {
+        cloudbreakEventService.fireCloudbreakEvent(stackId, eventType, resourceEvent, Arrays.asList(eventMessageArgs));
     }
 
-    public void fireEventAndLog(Long stackId, Msg msgCode, String eventType, Object... args) {
-        cloudbreakEventService.fireCloudbreakEvent(stackId, eventType, message(msgCode, args));
-    }
-
-    public void fireInstanceGroupEventAndLog(Long stackId, Msg msgCode, String eventType, String instanceGroup, Object... args) {
-        cloudbreakEventService.fireCloudbreakInstanceGroupEvent(stackId, eventType, message(msgCode, args), instanceGroup);
-    }
-
-    public String message(Msg msgCode, Object... args) {
-        LOGGER.debug("{} [STACK_FLOW_STEP].", msgCode);
-        return messagesService.getMessage(msgCode.code(), Arrays.asList(args));
+    public void fireInstanceGroupEventAndLog(Long stackId, String eventType, String instanceGroup, ResourceEvent resourceEvent, String... eventMessageArgs) {
+        cloudbreakEventService.fireCloudbreakInstanceGroupEvent(stackId, eventType, instanceGroup, resourceEvent, Arrays.asList(eventMessageArgs));
     }
 }

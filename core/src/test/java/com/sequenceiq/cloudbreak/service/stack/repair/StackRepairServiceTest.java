@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.repair;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_ATTEMPTING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_COMPLETE_CLEAN;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -25,7 +27,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.repair.StackRepairService.StackRepairFlowSubmitter;
 
@@ -57,7 +58,7 @@ public class StackRepairServiceTest {
         underTest.add(stack, Collections.emptySet());
 
         verifyZeroInteractions(executorService);
-        verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_COMPLETE_CLEAN, Status.AVAILABLE.name());
+        verify(flowMessageService).fireEventAndLog(stack.getId(), Status.AVAILABLE.name(), STACK_REPAIR_COMPLETE_CLEAN);
     }
 
     @Test
@@ -96,7 +97,7 @@ public class StackRepairServiceTest {
         expectedUnhealthyInstances.addInstance(instanceId3, slaveGroup2);
 
         verify(executorService).submit(argThat(new StackRepairFlowSubmitterMatcher(stack.getId(), expectedUnhealthyInstances)));
-        verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_ATTEMPTING, Status.UPDATE_IN_PROGRESS.name());
+        verify(flowMessageService).fireEventAndLog(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), STACK_REPAIR_ATTEMPTING);
     }
 
     private void setupInstanceMetadata(Long stackId, String instanceId, String privateIp, InstanceGroup instanceGroup) {

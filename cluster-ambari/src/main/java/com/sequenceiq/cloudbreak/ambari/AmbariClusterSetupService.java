@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.ambari;
 
 import static com.sequenceiq.cloudbreak.ambari.AmbariMessages.AMBARI_CLUSTER_HOST_JOIN_FAILED;
 import static com.sequenceiq.cloudbreak.ambari.AmbariMessages.AMBARI_CLUSTER_INSTALL_FAILED;
-import static com.sequenceiq.cloudbreak.ambari.AmbariMessages.AMBARI_CLUSTER_SERVICES_STARTED;
 import static com.sequenceiq.cloudbreak.ambari.AmbariOperationType.INSTALL_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.ambari.AmbariOperationType.START_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.ambari.AmbariOperationType.START_OPERATION_STATE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_CLUSTER_SERVICES_STARTED;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
@@ -203,8 +203,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
         } else if (isTimeout(servicesStartResult)) {
             throw new CloudbreakException("Timeout while starting Ambari services.");
         }
-        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
-                cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_SERVICES_STARTED.code()));
+        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_CLUSTER_SERVICES_STARTED);
     }
 
     @Override

@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.stop;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STOPPED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STOPPING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STOP_FAILED;
+
 import java.time.Duration;
 
 import javax.inject.Inject;
@@ -8,11 +12,10 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.message.Msg;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -33,7 +36,7 @@ public class ClusterStopService {
 
     public void stoppingCluster(long stackId) {
         updateClusterUptime(stackId);
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_STOPPING, Status.UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_STOPPING);
         clusterService.updateClusterStatusByStackId(stackId, Status.STOP_IN_PROGRESS);
     }
 
@@ -46,12 +49,12 @@ public class ClusterStopService {
 
     public void clusterStopFinished(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, Status.STOPPED);
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_STOPPED, Status.STOPPED.name());
+        flowMessageService.fireEventAndLog(stackId, Status.STOPPED.name(), CLUSTER_STOPPED);
     }
 
     public void handleClusterStopFailure(StackView stackView, String errorReason) {
         clusterService.updateClusterStatusByStackId(stackView.getId(), Status.STOP_FAILED);
         stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "The cluster could not be stopped: " + errorReason);
-        flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_STOP_FAILED, Status.STOP_FAILED.name(), errorReason);
+        flowMessageService.fireEventAndLog(stackView.getId(), Status.STOP_FAILED.name(), CLUSTER_STOP_FAILED, errorReason);
     }
 }
