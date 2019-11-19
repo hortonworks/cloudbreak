@@ -2,23 +2,23 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import javax.inject.Inject;
 
+import org.springframework.stereotype.Service;
+
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.validator.AwsIDBrokerObjectStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
-import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
@@ -59,23 +59,22 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
 
     @Override
     public ObjectStorageValidateResponse validateObjectStorage(ObjectStorageValidateRequest request) {
-
         AwsCredentialView awsCredentialView = new AwsCredentialView(request.getCredential());
         AmazonIdentityManagement iam = awsClient.createAmazonIdentityManagement(awsCredentialView);
         SpiFileSystem spiFileSystem = request.getSpiFileSystem();
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         ValidationResult validationResult = awsIDBrokerObjectStorageValidator.validateObjectStorage(
-            iam, spiFileSystem, resultBuilder);
+                iam, spiFileSystem, resultBuilder);
         ObjectStorageValidateResponse response;
         if (validationResult.hasError()) {
             response = ObjectStorageValidateResponse.builder()
-                        .withStatus(ResponseStatus.ERROR)
-                        .withError(validationResult.getFormattedErrors())
-                        .build();
+                    .withStatus(ResponseStatus.ERROR)
+                    .withError(validationResult.getFormattedErrors())
+                    .build();
         } else {
             response = ObjectStorageValidateResponse.builder()
-                        .withStatus(ResponseStatus.OK)
-                        .build();
+                    .withStatus(ResponseStatus.OK)
+                    .build();
         }
         return response;
     }

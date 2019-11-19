@@ -14,8 +14,6 @@ import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
-import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -42,10 +40,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
+import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
 import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -78,7 +78,7 @@ public class StackRequestManifester {
     private GrpcIdbmmsClient idbmmsClient;
 
     public void configureStackForSdxCluster(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster,
-                                            StackV4Request stackRequest, DetailedEnvironmentResponse environment) {
+            StackV4Request stackRequest, DetailedEnvironmentResponse environment) {
         StackV4Request generatedStackV4Request = setupStackRequestForCloudbreak(sdxClusterRequest, sdxCluster, stackRequest, environment);
         gatewayManifester.configureGatewayForSdxCluster(generatedStackV4Request);
         addStackV4RequestAsString(sdxCluster, generatedStackV4Request);
@@ -95,8 +95,7 @@ public class StackRequestManifester {
     }
 
     private StackV4Request setupStackRequestForCloudbreak(SdxClusterRequest sdxClusterRequest,
-                                                            SdxCluster sdxCluster, StackV4Request stackRequest,
-                                                            DetailedEnvironmentResponse environment) {
+            SdxCluster sdxCluster, StackV4Request stackRequest, DetailedEnvironmentResponse environment) {
         LOGGER.info("Setting up stack request of SDX {} for cloudbreak", sdxCluster.getClusterName());
         stackRequest.setName(sdxCluster.getClusterName());
         stackRequest.setType(StackType.DATALAKE);
@@ -138,9 +137,9 @@ public class StackRequestManifester {
         return network.isExistingNetwork()
                 ? network.getSubnetMetas().values().stream().findFirst().orElseThrow(getException())
                 : network.getSubnetMetas().entrySet().stream()
-                        .filter(entry -> !entry.getValue().isPrivateSubnet()).findFirst()
-                        .map(Map.Entry::getValue)
-                        .orElseThrow(getException());
+                .filter(entry -> !entry.getValue().isPrivateSubnet()).findFirst()
+                .map(Map.Entry::getValue)
+                .orElseThrow(getException());
     }
 
     private Supplier<BadRequestException> getException() {
@@ -273,7 +272,7 @@ public class StackRequestManifester {
                     && environment.getTelemetry().getFeatures().getReportDeploymentLogs() != null) {
                 FeaturesRequest featuresRequest = new FeaturesRequest();
                 featuresRequest.setReportDeploymentLogs(
-                    environment.getTelemetry().getFeatures().getReportDeploymentLogs());
+                        environment.getTelemetry().getFeatures().getReportDeploymentLogs());
                 telemetryRequest.setFeatures(featuresRequest);
             }
             stackV4Request.setTelemetry(telemetryRequest);
@@ -281,9 +280,9 @@ public class StackRequestManifester {
     }
 
     private void prepareCloudStorageForStack(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request,
-                                                SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
+            SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         CloudStorageRequest cloudStorageRequest = cloudStorageManifester.initCloudStorageRequest(environment,
-            stackV4Request.getCluster(), sdxCluster, sdxClusterRequest);
+                stackV4Request.getCluster(), sdxCluster, sdxClusterRequest);
         stackV4Request.getCluster().setCloudStorage(cloudStorageRequest);
     }
 
@@ -301,7 +300,7 @@ public class StackRequestManifester {
                     mappingsConfig = idbmmsClient.getMappingsConfig(IAM_INTERNAL_ACTOR_CRN, environmentCrn, Optional.empty());
                 } catch (IdbmmsOperationException e) {
                     throw new BadRequestException(String.format("Unable to get mappings: %s",
-                        e.getMessage()), e);
+                            e.getMessage()), e);
                 }
                 AccountMappingBase accountMapping = new AccountMappingBase();
                 accountMapping.setGroupMappings(mappingsConfig.getGroupMappings());

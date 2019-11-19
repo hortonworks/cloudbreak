@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.validation.cloudstorage;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
@@ -11,7 +13,6 @@ import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.Credential;
 import com.sequenceiq.datalake.service.validation.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import org.springframework.stereotype.Component;
 
 @Component
 public class CloudStorageValidator {
@@ -23,8 +24,7 @@ public class CloudStorageValidator {
     private final CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint;
 
     public CloudStorageValidator(CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
-                                    SecretService secretService,
-                                    CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint) {
+            SecretService secretService, CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint) {
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
         this.secretService = secretService;
         this.cloudProviderServicesV4Endpoint = cloudProviderServicesV4Endpoint;
@@ -36,9 +36,9 @@ public class CloudStorageValidator {
             CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
 
             ObjectStorageValidateRequest request = createObjectStorageValidateRequest(
-                environment.getCloudPlatform(), cloudCredential, cloudStorageRequest);
+                    environment.getCloudPlatform(), cloudCredential, cloudStorageRequest);
             ObjectStorageValidateResponse response = cloudProviderServicesV4Endpoint
-                                                        .validateObjectStorage(request);
+                    .validateObjectStorage(request);
             if (ResponseStatus.ERROR.equals(response.getStatus())) {
                 throw new BadRequestException(response.getError());
             }
@@ -46,7 +46,7 @@ public class CloudStorageValidator {
     }
 
     private ObjectStorageValidateRequest createObjectStorageValidateRequest(
-        String cloudPlatform, CloudCredential credential, CloudStorageRequest cloudStorageRequest) {
+            String cloudPlatform, CloudCredential credential, CloudStorageRequest cloudStorageRequest) {
         return ObjectStorageValidateRequest.builder()
                 .withCloudPlatform(cloudPlatform)
                 .withCredential(credential)

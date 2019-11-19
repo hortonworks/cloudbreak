@@ -14,7 +14,7 @@ import com.sequenceiq.common.model.FileSystemType;
 
 public class AwsDataAccessRolePermissionValidatorTest extends AwsIDBrokerMappedRolePermissionValidatorTest {
     private final AwsDataAccessRolePermissionValidator awsDataAccessRolePermissionValidator =
-        new AwsDataAccessRolePermissionValidator();
+            new AwsDataAccessRolePermissionValidator();
 
     @Override
     public AwsIDBrokerMappedRolePermissionValidator getValidator() {
@@ -24,26 +24,26 @@ public class AwsDataAccessRolePermissionValidatorTest extends AwsIDBrokerMappedR
     @Override
     public void testGetUsers() {
         assertThat(awsDataAccessRolePermissionValidator.getUsers())
-            .isEqualTo(AccountMappingSubject.DATA_ACCESS_USERS);
+                .isEqualTo(AccountMappingSubject.DATA_ACCESS_USERS);
     }
 
     @Override
     public void testGetPolicyFileNames() {
         List<String> expectedPolicyFileNamesNoS3Guard = Arrays.asList(
-            "aws-cdp-bucket-access-policy.json",
-            "aws-cdp-datalake-admin-s3-policy.json"
+                "aws-cdp-bucket-access-policy.json",
+                "aws-cdp-datalake-admin-s3-policy.json"
         );
         List<String> policyFileNamesNoS3Guard = awsDataAccessRolePermissionValidator
-                                                    .getPolicyFileNames(false);
+                .getPolicyFileNames(false);
         assertThat(policyFileNamesNoS3Guard).isEqualTo(expectedPolicyFileNamesNoS3Guard);
 
         List<String> expectedPolicyFileNamesS3Guard = Arrays.asList(
-            "aws-cdp-bucket-access-policy.json",
-            "aws-cdp-datalake-admin-s3-policy.json",
-            "aws-cdp-dynamodb-policy.json"
+                "aws-cdp-bucket-access-policy.json",
+                "aws-cdp-datalake-admin-s3-policy.json",
+                "aws-cdp-dynamodb-policy.json"
         );
         List<String> policyFileNamesS3Guard = awsDataAccessRolePermissionValidator
-                                                    .getPolicyFileNames(true);
+                .getPolicyFileNames(true);
         assertThat(policyFileNamesS3Guard).isEqualTo(expectedPolicyFileNamesS3Guard);
     }
 
@@ -69,9 +69,9 @@ public class AwsDataAccessRolePermissionValidatorTest extends AwsIDBrokerMappedR
         String dynamodbTableName = "tableName";
 
         Map<String, String> expectedPolicyJsonReplacements = Map.ofEntries(
-            Map.entry("${STORAGE_LOCATION_BASE}", storageLocationBaseStr),
-            Map.entry("${DATALAKE_BUCKET}", bucket),
-            Map.entry("${DYNAMODB_TABLE_NAME}", dynamodbTableName)
+                Map.entry("${STORAGE_LOCATION_BASE}", storageLocationBaseStr),
+                Map.entry("${DATALAKE_BUCKET}", bucket),
+                Map.entry("${DYNAMODB_TABLE_NAME}", dynamodbTableName)
         );
 
         StorageLocationBase storageLocationBase = new StorageLocationBase();
@@ -79,8 +79,8 @@ public class AwsDataAccessRolePermissionValidatorTest extends AwsIDBrokerMappedR
         CloudS3View cloudFileSystem = new CloudS3View(CloudIdentityType.ID_BROKER);
         cloudFileSystem.setS3GuardDynamoTableName(dynamodbTableName);
         Map<String, String> policyJsonReplacements = awsDataAccessRolePermissionValidator
-                                                        .getPolicyJsonReplacements(storageLocationBase,
-                                                            cloudFileSystem);
+                .getPolicyJsonReplacements(storageLocationBase,
+                        cloudFileSystem);
 
         assertThat(policyJsonReplacements).isEqualTo(expectedPolicyJsonReplacements);
     }

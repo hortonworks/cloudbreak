@@ -6,15 +6,16 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.policy.Policy;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.EvaluationResult;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.Role;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsIamService;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -25,12 +26,12 @@ public class AwsLogRolePermissionValidator {
     private AwsIamService awsIamService;
 
     public void validate(AmazonIdentityManagement iam, InstanceProfile instanceProfile,
-                            CloudS3View cloudFileSystem, ValidationResultBuilder validationResultBuilder) {
+            CloudS3View cloudFileSystem, ValidationResultBuilder validationResultBuilder) {
         SortedSet<String> failedActions = new TreeSet<>();
 
         // TODO need to figure out how to get LOGS_LOCATION_BASE value
         Map<String, String> replacements = Map.ofEntries(
-            Map.entry("${LOGS_LOCATION_BASE}", "")
+                Map.entry("${LOGS_LOCATION_BASE}", "")
         );
 
         Policy policy = awsIamService.getPolicy("aws-cdp-log-policy.json", replacements);
@@ -38,27 +39,28 @@ public class AwsLogRolePermissionValidator {
         List<Policy> policies = Collections.singletonList(policy);
         for (Role role : roles) {
             List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam, role,
-                policies);
+                    policies);
             failedActions.addAll(getFailedActions(role, evaluationResults));
         }
 
         if (!failedActions.isEmpty()) {
             validationResultBuilder.error(String.format("The role(s) (%s) don't have the required permissions:%n%s",
-                String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
-                String.join("\n", failedActions)));
+                    String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
+                    String.join("\n", failedActions)));
         }
     }
 
     /**
      * Finds all the denied results and generates a set of failed actions
-     * @param role Role that was being evaluated
+     *
+     * @param role              Role that was being evaluated
      * @param evaluationResults result of the simulate policy
      */
     SortedSet<String> getFailedActions(Role role, List<EvaluationResult> evaluationResults) {
         return evaluationResults.stream()
-                    .filter(evaluationResult -> evaluationResult.getEvalDecision().toLowerCase().contains("deny"))
-                    .map(evaluationResult -> String.format("%s:%s:%s", role.getArn(),
+                .filter(evaluationResult -> evaluationResult.getEvalDecision().toLowerCase().contains("deny"))
+                .map(evaluationResult -> String.format("%s:%s:%s", role.getArn(),
                         evaluationResult.getEvalActionName(), evaluationResult.getEvalResourceName()))
-                    .collect(Collectors.toCollection(TreeSet::new));
+                .collect(Collectors.toCollection(TreeSet::new));
     }
 }

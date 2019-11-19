@@ -14,6 +14,12 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.amazonaws.auth.policy.Policy;
 import com.amazonaws.auth.policy.Principal;
 import com.amazonaws.auth.policy.Resource;
@@ -30,12 +36,6 @@ import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.NoSuchEntityException;
 import com.amazonaws.services.identitymanagement.model.Role;
 import com.amazonaws.services.identitymanagement.model.ServiceFailureException;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.Mock;
-
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
@@ -61,14 +61,14 @@ public class AwsIamServiceTest {
         String instanceProfileArn = "account/missingInstanceProfile";
         ValidationResultBuilder validationRequestBuilder = new ValidationResultBuilder();
         InstanceProfile instanceProfile = awsIamService.getInstanceProfile(iam, instanceProfileArn,
-            validationRequestBuilder);
+                validationRequestBuilder);
 
         assertThat(instanceProfile).isNull();
         ValidationResult validationResult = validationRequestBuilder.build();
         assertThat(validationResult.hasError()).isTrue();
         assertThat(validationResult.getErrors()).isEqualTo(
-            Collections.singletonList(String.format("Instance profile (%s) doesn't exist.",
-                instanceProfileArn)));
+                Collections.singletonList(String.format("Instance profile (%s) doesn't exist.",
+                        instanceProfileArn)));
     }
 
     @Test
@@ -78,14 +78,14 @@ public class AwsIamServiceTest {
         String instanceProfileArn = "account/potentialInstanceProfile";
         ValidationResultBuilder validationRequestBuilder = new ValidationResultBuilder();
         InstanceProfile instanceProfile = awsIamService.getInstanceProfile(iam, instanceProfileArn,
-            validationRequestBuilder);
+                validationRequestBuilder);
 
         assertThat(instanceProfile).isNull();
         ValidationResult validationResult = validationRequestBuilder.build();
         assertThat(validationResult.hasError()).isTrue();
         assertThat(validationResult.getErrors()).isEqualTo(
-            Collections.singletonList(String.format("Instance profile (%s) doesn't exist.",
-                instanceProfileArn)));
+                Collections.singletonList(String.format("Instance profile (%s) doesn't exist.",
+                        instanceProfileArn)));
     }
 
     @Test
@@ -99,7 +99,7 @@ public class AwsIamServiceTest {
 
         ValidationResultBuilder validationRequestBuilder = new ValidationResultBuilder();
         InstanceProfile instanceProfile = awsIamService.getInstanceProfile(iam, instanceProfileArn,
-            validationRequestBuilder);
+                validationRequestBuilder);
 
         assertThat(instanceProfile.getArn()).isEqualTo(instanceProfileArn);
         assertThat(validationRequestBuilder.build().hasError()).isFalse();
@@ -124,7 +124,7 @@ public class AwsIamServiceTest {
         ValidationResult validationResult = validationRequestBuilder.build();
         assertThat(validationResult.hasError()).isTrue();
         assertThat(validationResult.getErrors()).isEqualTo(
-            Collections.singletonList(String.format("Role (%s) doesn't exist.", roleArn)));
+                Collections.singletonList(String.format("Role (%s) doesn't exist.", roleArn)));
     }
 
     @Test
@@ -139,7 +139,7 @@ public class AwsIamServiceTest {
         ValidationResult validationResult = validationRequestBuilder.build();
         assertThat(validationResult.hasError()).isTrue();
         assertThat(validationResult.getErrors()).isEqualTo(
-            Collections.singletonList(String.format("Role (%s) doesn't exist.", roleArn)));
+                Collections.singletonList(String.format("Role (%s) doesn't exist.", roleArn)));
     }
 
     @Test
@@ -161,14 +161,14 @@ public class AwsIamServiceTest {
     @Test
     public void testGetAssumeRolePolicyDocument() throws IOException {
         String assumeRolePolicyDocument = awsIamService.getResourceFileAsString(
-            "json/aws-assume-role-policy-document.json");
+                "json/aws-assume-role-policy-document.json");
         String encodedAssumeRolePolicyDocument = URLEncoder.encode(assumeRolePolicyDocument,
-            StandardCharsets.UTF_8);
+                StandardCharsets.UTF_8);
 
 
         Statement statement = new Statement(Effect.Allow).withId("1")
-                                    .withPrincipals(new Principal("AWS", "arn:aws:iam::123456890:role/assume-role"))
-                                    .withActions(SecurityTokenServiceActions.AssumeRole);
+                .withPrincipals(new Principal("AWS", "arn:aws:iam::123456890:role/assume-role"))
+                .withActions(SecurityTokenServiceActions.AssumeRole);
         Policy expectedAssumeRolePolicy = new Policy().withStatements(statement);
 
         Role role = mock(Role.class);
@@ -193,13 +193,13 @@ public class AwsIamServiceTest {
         assertThat(awsIamService.handleTemplateReplacements("abc", Collections.emptyMap())).isEqualTo("abc");
 
         assertThat(awsIamService.handleTemplateReplacements("abc",
-            Collections.singletonMap("abc", "def"))).isEqualTo("def");
+                Collections.singletonMap("abc", "def"))).isEqualTo("def");
         assertThat(awsIamService.handleTemplateReplacements("abcabc",
-            Collections.singletonMap("abc", "def"))).isEqualTo("defdef");
+                Collections.singletonMap("abc", "def"))).isEqualTo("defdef");
 
         Map<String, String> replacements = Map.ofEntries(
-            Map.entry("abc", "def"),
-            Map.entry("ghi", "jkl")
+                Map.entry("abc", "def"),
+                Map.entry("ghi", "jkl")
         );
         assertThat(awsIamService.handleTemplateReplacements("abc ghi", replacements)).isEqualTo("def jkl");
     }
@@ -209,74 +209,74 @@ public class AwsIamServiceTest {
         assertThat(awsIamService.getPolicy("abc", Collections.emptyMap())).isNull();
 
         Policy expectedPolicyNoReplacements = new Policy().withStatements(
-            new Statement(Effect.Allow).withId("FullObjectAccessUnderAuditDir")
-                .withActions(S3Actions.GetObject, S3Actions.PutObject)
-                .withResources(new Resource("arn:aws:s3:::${STORAGE_LOCATION_BASE}/ranger/audit/*")),
-            new Statement(Effect.Allow).withId("LimitedAccessToDataLakeBucket")
-                .withActions(S3Actions.AbortMultipartUpload, S3Actions.ListObjects,
-                    S3Actions.ListBucketMultipartUploads)
-                .withResources(new Resource("arn:aws:s3:::${DATALAKE_BUCKET}"))
+                new Statement(Effect.Allow).withId("FullObjectAccessUnderAuditDir")
+                        .withActions(S3Actions.GetObject, S3Actions.PutObject)
+                        .withResources(new Resource("arn:aws:s3:::${STORAGE_LOCATION_BASE}/ranger/audit/*")),
+                new Statement(Effect.Allow).withId("LimitedAccessToDataLakeBucket")
+                        .withActions(S3Actions.AbortMultipartUpload, S3Actions.ListObjects,
+                                S3Actions.ListBucketMultipartUploads)
+                        .withResources(new Resource("arn:aws:s3:::${DATALAKE_BUCKET}"))
         );
         assertThat(awsIamService.getPolicy("aws-cdp-ranger-audit-s3-policy.json",
-            Collections.emptyMap()).toJson()).isEqualTo(expectedPolicyNoReplacements.toJson());
+                Collections.emptyMap()).toJson()).isEqualTo(expectedPolicyNoReplacements.toJson());
 
         Policy expectedPolicyWithReplacements = new Policy().withStatements(
-            new Statement(Effect.Allow).withId("FullObjectAccessUnderAuditDir")
-                .withActions(S3Actions.GetObject, S3Actions.PutObject)
-                .withResources(new Resource("arn:aws:s3:::mybucket/mycluster/ranger/audit/*")),
-            new Statement(Effect.Allow).withId("LimitedAccessToDataLakeBucket")
-                .withActions(S3Actions.AbortMultipartUpload, S3Actions.ListObjects,
-                    S3Actions.ListBucketMultipartUploads)
-                .withResources(new Resource("arn:aws:s3:::mybucket"))
+                new Statement(Effect.Allow).withId("FullObjectAccessUnderAuditDir")
+                        .withActions(S3Actions.GetObject, S3Actions.PutObject)
+                        .withResources(new Resource("arn:aws:s3:::mybucket/mycluster/ranger/audit/*")),
+                new Statement(Effect.Allow).withId("LimitedAccessToDataLakeBucket")
+                        .withActions(S3Actions.AbortMultipartUpload, S3Actions.ListObjects,
+                                S3Actions.ListBucketMultipartUploads)
+                        .withResources(new Resource("arn:aws:s3:::mybucket"))
         );
 
         Map<String, String> policyReplacements = new HashMap<>();
         policyReplacements.put("${STORAGE_LOCATION_BASE}", "mybucket/mycluster");
         policyReplacements.put("${DATALAKE_BUCKET}", "mybucket");
         assertThat(awsIamService.getPolicy("aws-cdp-ranger-audit-s3-policy.json",
-            policyReplacements).toJson()).isEqualTo(expectedPolicyWithReplacements.toJson());
+                policyReplacements).toJson()).isEqualTo(expectedPolicyWithReplacements.toJson());
     }
 
     @Test
     public void testGetStatementActions() {
         assertThat(awsIamService.getStatementActions(new Statement(Effect.Allow)))
-            .isEqualTo(new TreeSet<>());
+                .isEqualTo(new TreeSet<>());
 
         SortedSet<String> expectedSingleAction = new TreeSet<>();
         expectedSingleAction.add(S3Actions.GetObject.getActionName());
         Statement statementSingleAction = new Statement(Effect.Allow).withActions(S3Actions.GetObject);
         assertThat(awsIamService.getStatementActions(statementSingleAction))
-            .isEqualTo(expectedSingleAction);
+                .isEqualTo(expectedSingleAction);
 
         SortedSet<String> expectedMultipleActions = new TreeSet<>();
         expectedMultipleActions.add(S3Actions.GetObject.getActionName());
         expectedMultipleActions.add(S3Actions.PutObject.getActionName());
         Statement statementMultipleActions = new Statement(Effect.Allow)
-                                                    .withActions(S3Actions.GetObject, S3Actions.PutObject);
+                .withActions(S3Actions.GetObject, S3Actions.PutObject);
         assertThat(awsIamService.getStatementActions(statementMultipleActions))
-            .isEqualTo(expectedMultipleActions);
+                .isEqualTo(expectedMultipleActions);
     }
 
     @Test
     public void testGetStatementResources() {
         assertThat(awsIamService.getStatementResources(new Statement(Effect.Allow)))
-            .isEqualTo(new TreeSet<>());
+                .isEqualTo(new TreeSet<>());
 
         SortedSet<String> expectedSingleResource = new TreeSet<>();
         expectedSingleResource.add("resource1");
         Statement statementSingleResouce = new Statement(Effect.Allow)
-                                                    .withResources(new Resource("resource1"));
+                .withResources(new Resource("resource1"));
         assertThat(awsIamService.getStatementResources(statementSingleResouce))
-            .isEqualTo(expectedSingleResource);
+                .isEqualTo(expectedSingleResource);
 
         SortedSet<String> expectedMultipleResources = new TreeSet<>();
         expectedMultipleResources.add("resource1");
         expectedMultipleResources.add("resource2");
         Statement statementMultipleResources = new Statement(Effect.Allow)
-                                    .withResources(
-                                        new Resource("resource1"),
-                                        new Resource("resource2"));
+                .withResources(
+                        new Resource("resource1"),
+                        new Resource("resource2"));
         assertThat(awsIamService.getStatementResources(statementMultipleResources))
-            .isEqualTo(expectedMultipleResources);
+                .isEqualTo(expectedMultipleResources);
     }
 }
