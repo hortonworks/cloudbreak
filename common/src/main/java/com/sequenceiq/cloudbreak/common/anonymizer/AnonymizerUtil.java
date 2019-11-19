@@ -4,20 +4,20 @@ import java.util.regex.Pattern;
 
 public class AnonymizerUtil {
 
-    public static final String REPLACEMENT = "****";
+    public static final String REPLACEMENT = "$1****";
 
     private static final ReplacePattern[] PATTERNS = {
             //common PW
-            new ReplacePattern("(?i)(?<="
+            new ReplacePattern("(?i)("
                     + "password=|password\":\"|password:|password |"
                     + "pass=|pass\":\"|pass:|pass |"
                     + "key=|key\":\"|key:|key |"
                     + "credential=|credential\":\"|credential:|credential "
-                    + ")(?=\\S*)[^\\s'\"]*", REPLACEMENT),
+                    + ")([^\\s'\"]*)", REPLACEMENT),
             //WASB
-            new ReplacePattern("(?i)(?<=\\.blob\\.core\\.windows\\.net\":\")(?=\\S*)[^\\s'\"]*", REPLACEMENT),
+            new ReplacePattern("(?i)(\\.blob\\.core\\.windows\\.net\":\")([^\\s'\"])*", REPLACEMENT),
             //CM
-            new ReplacePattern("(?<=\"name\":\\s{0,100}\"[^\"]{0,100}password\",\\s{0,100}\"value\":\\s{0,100}\")[^\\s'\"]*", REPLACEMENT)
+            new ReplacePattern("(\"name\":\\s*\"[^\"]*password\",\\s*\"value\":\\s*\")[^\\s'\"]*", REPLACEMENT)
     };
 
     private AnonymizerUtil() {
