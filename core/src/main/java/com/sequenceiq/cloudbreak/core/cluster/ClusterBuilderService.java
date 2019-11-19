@@ -160,8 +160,21 @@ public class ClusterBuilderService {
                 .orElse(null);
 
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
-        clusterService.save(connector.clusterSetupService().buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, sdxContext,
-                sdxStackCrn, telemetry, kerberosConfig));
+        String template = connector.clusterSetupService().prepareTemplate(instanceMetaDataByHostGroup,
+                templatePreparationObject,
+                sdxContext,
+                sdxStackCrn,
+                kerberosConfig);
+        cluster.setExtendedBlueprintText(template);
+        clusterService.save(cluster);
+        cluster = connector.clusterSetupService().buildCluster(instanceMetaDataByHostGroup,
+                templatePreparationObject,
+                sdxContext,
+                sdxStackCrn,
+                telemetry,
+                kerberosConfig,
+                template);
+        clusterService.save(cluster);
         recipeEngine.executePostInstallRecipes(stack);
         Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataByHostGroup.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
         clusterCreationSuccessHandler.handleClusterCreationSuccess(instanceMetaDatas, stack.getCluster());

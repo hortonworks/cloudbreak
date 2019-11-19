@@ -33,6 +33,7 @@
     <suppress checks="RegexpSingleline" files="ClusterServiceCredential.java"/>
     <suppress id="hashtable-instantiation" files="LdapConfigValidator.java"/>
     <suppress checks="MethodName" files="EnvironmentResourceRepository.java"/>
+    <suppress checks="ParameterNumber" files="ClusterSetupService.java|AmbariClusterSetupService.java|ClouderaManagerSetupService.java"/>
     <suppress checks="IllegalCatch|CyclomaticComplexity" files="SecretAspects.java|SecretAspectService.java"/>
     <suppress files="com[\\/]sequenceiq[\\/]cloudbreak[\\/]" checks="ExecutableStatementCount"/>
     <suppress files="com[\\/]sequenceiq[\\/]periscope[\\/]monitor[\\/]" checks="ExecutableStatementCount"/>
