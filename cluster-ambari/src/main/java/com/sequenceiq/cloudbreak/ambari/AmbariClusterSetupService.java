@@ -127,14 +127,29 @@ public class AmbariClusterSetupService implements ClusterSetupService {
     }
 
     @Override
-    public Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            String sdxContext, String sdxStackCrn, Telemetry telemetry, KerberosConfig kerberosConfig) {
+    public String prepareTemplate(
+        Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup,
+        TemplatePreparationObject templatePreparationObject,
+        String sdxContext,
+        String sdxStackCrn,
+        KerberosConfig kerberosConfig) {
+        return centralBlueprintUpdater.getBlueprintText(templatePreparationObject);
+    }
+
+    @Override
+    public Cluster buildCluster(
+        Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup,
+        TemplatePreparationObject templatePreparationObject,
+        String sdxContext,
+        String sdxStackCrn,
+        Telemetry telemetry,
+        KerberosConfig kerberosConfig,
+        String template) {
         Cluster cluster = stack.getCluster();
         try {
             Set<InstanceMetaData> runningInstanceMetaDataSet = stack.getRunningInstanceMetaDataSet();
             ambariRepositoryVersionService.setBaseRepoURL(stack.getName(), cluster.getId(), ambariClient);
-            String blueprintText = centralBlueprintUpdater.getBlueprintText(templatePreparationObject);
-            addBlueprint(stack.getId(), ambariClient, blueprintText, cluster.getTopologyValidation());
+            addBlueprint(stack.getId(), ambariClient, template, cluster.getTopologyValidation());
             PollingResult waitForHostsResult = ambariPollingServiceProvider.hostsPollingService(stack, ambariClient, runningInstanceMetaDataSet);
             clusterConnectorPollingResultChecker
                     .checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));

@@ -145,8 +145,39 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     @Override
-    public Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            String sdxContext, String sdxStackCrn, Telemetry telemetry, KerberosConfig kerberosConfig) {
+    public String prepareTemplate(
+        Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup,
+        TemplatePreparationObject templatePreparationObject,
+        String sdxContext,
+        String sdxCrn,
+        KerberosConfig kerberosConfig) {
+        Long clusterId = stack.getCluster().getId();
+        try {
+            Set<InstanceMetaData> instances = instanceMetaDataByHostGroup.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+            waitForHosts(instances);
+            String sdxContextName = Optional.ofNullable(sdxContext).map(this::createDataContext).orElse(null);
+            ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
+            ApiClusterTemplate apiClusterTemplate = getCmTemplate(templatePreparationObject, sdxContextName, instanceMetaDataByHostGroup,
+                    clouderaManagerRepoDetails, clusterId);
+
+            return getExtendedBlueprintText(apiClusterTemplate);
+        } catch (CancellationException cancellationException) {
+            throw cancellationException;
+        } catch (Exception e) {
+            LOGGER.info("Error while building the cluster. Message: {}", e.getMessage(), e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Cluster buildCluster(
+        Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup,
+        TemplatePreparationObject templatePreparationObject,
+        String sdxContext,
+        String sdxStackCrn,
+        Telemetry telemetry,
+        KerberosConfig kerberosConfig,
+        String template) {
         Cluster cluster = stack.getCluster();
         Long clusterId = cluster.getId();
         try {
@@ -158,11 +189,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             startCmMgmtServices(templatePreparationObject, sdxStackCrn, telemetry, sdxContextName);
 
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
-            ApiClusterTemplate apiClusterTemplate = getCmTemplate(templatePreparationObject, sdxContextName, instanceMetaDataByHostGroup,
-                    clouderaManagerRepoDetails, clusterId);
-
+            ApiClusterTemplate apiClusterTemplate = JsonUtil.readValue(template, ApiClusterTemplate.class);
             cluster.setExtendedBlueprintText(getExtendedBlueprintText(apiClusterTemplate));
-            LOGGER.info("Generated Cloudera cluster template: {}", AnonymizerUtil.anonymize(cluster.getExtendedBlueprintText()));
+            LOGGER.info("Generated Cloudera cluster template: {}", AnonymizerUtil.anonymize(template));
             ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
 
             updateConfig(clouderaManagerResourceApi, stack.getType());

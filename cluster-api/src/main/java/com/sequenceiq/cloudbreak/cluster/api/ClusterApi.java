@@ -9,12 +9,9 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public interface ClusterApi {
@@ -29,12 +26,6 @@ public interface ClusterApi {
 
     default String getSdxContext() {
         return clusterSetupService().getSdxContext();
-    }
-
-    default Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            String sdxContext, String sdxCrn, Telemetry telemetry, KerberosConfig kerberosConfig) {
-        return clusterSetupService().buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, sdxContext, sdxCrn, telemetry,
-                kerberosConfig);
     }
 
     default void waitForHosts(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException {
