@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -28,7 +29,7 @@ public class ClusterTemplateCloudPlatformValidator {
     }
 
     public boolean isClusterTemplateCloudPlatformValid(String cloudPlatform, String accountId) {
-        return enabledPlatforms.contains(cloudPlatform)
+        return (enabledPlatforms.contains(cloudPlatform) || CollectionUtils.isEmpty(enabledPlatforms))
                 && (!AZURE.name().equalsIgnoreCase(cloudPlatform) || entitlementService.azureEnabled(IAM_INTERNAL_ACTOR_CRN, accountId));
     }
 
