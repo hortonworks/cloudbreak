@@ -204,7 +204,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     private SdxTestDto withTestNameAsTag() {
         String callingMethodName = testNameExtractorUtil.getExecutingTestName();
-        tagAdderUtil.addTestNameTag(getRequest().getTags(), callingMethodName);
+        tagAdderUtil.addTestNameTag(getRequest().initAndGetTags(), callingMethodName);
         return this;
     }
 }
