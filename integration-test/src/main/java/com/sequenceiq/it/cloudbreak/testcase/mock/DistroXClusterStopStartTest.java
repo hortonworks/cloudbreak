@@ -18,13 +18,10 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.AbstractClouderaManagerTest;
-import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
 
     private static final String IMAGE_CATALOG_ID = "f6e778fc-7f17-4535-9021-515351df3691";
-
-    private static final SdxClusterStatusResponse SDX_RUNNING = SdxClusterStatusResponse.RUNNING;
 
     private static final String MOCK_HOSTNAME = "mockrdshost";
 

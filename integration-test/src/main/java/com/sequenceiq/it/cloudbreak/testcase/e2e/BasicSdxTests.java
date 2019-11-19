@@ -20,15 +20,9 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class  BasicSdxTests extends AbstractE2ETest {
 
-    protected static final SdxClusterStatusResponse SDX_RUNNING = SdxClusterStatusResponse.RUNNING;
-
-    protected static final String IDBROKER_HOSTGROUP = HostGroupType.IDBROKER.getName();
-
-    protected static final String MASTER_HOSTGROUP = HostGroupType.MASTER.getName();
-
-    private Map<String, InstanceStatus> instancesRegistered = new HashMap<>() {{
-        put(MASTER_HOSTGROUP, InstanceStatus.SERVICES_HEALTHY);
-        put(IDBROKER_HOSTGROUP, InstanceStatus.SERVICES_HEALTHY);
+    private Map<String, InstanceStatus> instancesHealthy = new HashMap<>() {{
+        put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
+        put(HostGroupType.IDBROKER.getName(), InstanceStatus.SERVICES_HEALTHY);
     }};
 
     @Inject
@@ -57,9 +51,9 @@ public class  BasicSdxTests extends AbstractE2ETest {
         testContext
                 .given(sdx, SdxTestDto.class)
                 .when(sdxTestClient.create(), key(sdx))
-                .await(SDX_RUNNING)
+                .await(SdxClusterStatusResponse.RUNNING)
                 .then((tc, testDto, client) -> {
-                    return waitUtil.waitForSdxInstancesStatus(testDto, client, instancesRegistered);
+                    return waitUtil.waitForSdxInstancesStatus(testDto, client, instancesHealthy);
                 })
                 .validate();
     }
@@ -68,7 +62,7 @@ public class  BasicSdxTests extends AbstractE2ETest {
         return sdxTestClient;
     }
 
-    protected Map<String, InstanceStatus> getSdxInstancesRegisteredState() {
-        return instancesRegistered;
+    protected Map<String, InstanceStatus> getSdxInstancesHealthyState() {
+        return instancesHealthy;
     }
 }
