@@ -16,7 +16,6 @@ import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class AwsSdxCloudStorageTests extends BasicSdxTests {
-    protected static final SdxClusterStatusResponse SDX_DELETED = SdxClusterStatusResponse.DELETED;
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -39,9 +38,9 @@ public class AwsSdxCloudStorageTests extends BasicSdxTests {
         testContext
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
-                .await(SDX_RUNNING)
+                .await(SdxClusterStatusResponse.RUNNING)
                 .then((tc, testDto, client) -> {
-                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesRegisteredState());
+                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
                 .then((tc, testDto, client) -> {
                     return amazonS3Util.list(tc, testDto, client);

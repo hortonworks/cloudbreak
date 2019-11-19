@@ -25,10 +25,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class MockSdxTests extends AbstractIntegrationTest {
 
-    protected static final SdxClusterStatusResponse SDX_RUNNING = SdxClusterStatusResponse.RUNNING;
-
-    protected static final SdxClusterStatusResponse SDX_DELETED = SdxClusterStatusResponse.DELETED;
-
     private static final String TEMPLATE_JSON = "classpath:/templates/sdx-cluster-template.json";
 
     @Inject
@@ -66,9 +62,9 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .withStackRequest(stack, cluster)
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .await(SDX_RUNNING)
+                .await(SdxClusterStatusResponse.RUNNING)
                 .then((tc, testDto, client) -> sdxTestClient.deleteInternal().action(tc, testDto, client))
-                .await(SDX_DELETED)
+                .await(SdxClusterStatusResponse.DELETED)
                 .validate();
     }
 
@@ -104,9 +100,9 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .withTemplate(ResourceUtil.readResourceAsJson(applicationContext, TEMPLATE_JSON))
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .await(SDX_RUNNING)
+                .await(SdxClusterStatusResponse.RUNNING)
                 .then((tc, testDto, client) -> sdxTestClient.deleteInternal().action(tc, testDto, client))
-                .await(SDX_DELETED)
+                .await(SdxClusterStatusResponse.DELETED)
                 .validate();
     }
 
@@ -150,6 +146,6 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .withStackRequest(stack, cluster)
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .await(SDX_RUNNING);
+                .await(SdxClusterStatusResponse.RUNNING);
     }
 }

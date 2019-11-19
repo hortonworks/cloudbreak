@@ -46,8 +46,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
 
     private static final String IMAGE_CATALOG_ID = "f6e778fc-7f17-4535-9021-515351df3691";
 
-    private static final SdxClusterStatusResponse SDX_RUNNING = SdxClusterStatusResponse.RUNNING;
-
     private static final String MOCK_HOSTNAME = "mockrdshost";
 
     private static final String CM_FOR_DISTRO_X = "cm4dstrx";
@@ -165,7 +163,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .given(sdxInternal, SdxInternalTestDto.class).withStackRequest(stack, cluster).withDatabase(sdxDatabaseRequestWithCreateTrue())
                 .withCloudStorage(testStorage()).withEnvironmentKey(key(storageEnvKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .await(SDX_RUNNING)
+                .await(SdxClusterStatusResponse.RUNNING)
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)
                 .withImageCatalog(getImageCatalogName(testContext))
@@ -221,7 +219,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .given(sdxInternal, SdxInternalTestDto.class).withStackRequest(stack, cluster).withDatabase(sdxDatabaseRequestWithCreateTrue())
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .await(SDX_RUNNING)
+                .await(SdxClusterStatusResponse.RUNNING)
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)
                 .withImageCatalog(getImageCatalogName(testContext))

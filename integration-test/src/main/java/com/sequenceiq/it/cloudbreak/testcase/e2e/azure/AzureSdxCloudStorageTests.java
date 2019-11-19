@@ -7,8 +7,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -24,21 +22,9 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class AzureSdxCloudStorageTests extends AbstractE2ETest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureSdxCloudStorageTests.class);
-
-    private static final SdxClusterStatusResponse SDX_RUNNING = SdxClusterStatusResponse.RUNNING;
-
-    private static final SdxClusterStatusResponse SDX_DELETED = SdxClusterStatusResponse.DELETED;
-
-    private static final InstanceStatus SERVICES_RUNNING = InstanceStatus.SERVICES_RUNNING;
-
-    private static final String IDBROKER_HOSTGROUP = HostGroupType.IDBROKER.getName();
-
-    private static final String MASTER_HOSTGROUP = HostGroupType.MASTER.getName();
-
-    private Map<String, InstanceStatus> instancesRegistered = new HashMap<String, InstanceStatus>() {{
-        put(MASTER_HOSTGROUP, SERVICES_RUNNING);
-        put(IDBROKER_HOSTGROUP, SERVICES_RUNNING);
+    private Map<String, InstanceStatus> instancesHealthy = new HashMap<String, InstanceStatus>() {{
+        put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
+        put(HostGroupType.IDBROKER.getName(), InstanceStatus.SERVICES_HEALTHY);
     }};
 
     @Inject
@@ -71,9 +57,9 @@ public class AzureSdxCloudStorageTests extends AbstractE2ETest {
         testContext
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
-                .await(SDX_RUNNING)
+                .await(SdxClusterStatusResponse.RUNNING)
                 .then((tc, testDto, client) -> {
-                    return waitUtil.waitForSdxInstancesStatus(testDto, client, instancesRegistered);
+                    return waitUtil.waitForSdxInstancesStatus(testDto, client, instancesHealthy);
                 })
                 .then((tc, testDto, client) -> {
                     return azureCloudBlobUtil.listAllFoldersInAContaier(tc, testDto, client);

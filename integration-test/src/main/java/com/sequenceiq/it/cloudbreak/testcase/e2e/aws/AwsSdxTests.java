@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
@@ -39,18 +40,17 @@ import com.sequenceiq.it.util.ResourceUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class AwsSdxTests extends BasicSdxTests {
-    protected static final SdxClusterStatusResponse SDX_REPAIR_IN_PROGRESS = SdxClusterStatusResponse.REPAIR_IN_PROGRESS;
 
     private static final String CREATE_FILE_RECIPE = "classpath:/recipes/post-install.sh";
 
     private Map<String, InstanceStatus> instancesDeletedOnProviderSide = new HashMap<String, InstanceStatus>() {{
-        put(MASTER_HOSTGROUP, InstanceStatus.DELETED_ON_PROVIDER_SIDE);
-        put(IDBROKER_HOSTGROUP, InstanceStatus.DELETED_ON_PROVIDER_SIDE);
+        put(HostGroupType.MASTER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE);
+        put(HostGroupType.IDBROKER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE);
     }};
 
     private Map<String, InstanceStatus> instancesStopped = new HashMap<String, InstanceStatus>() {{
-        put(MASTER_HOSTGROUP, InstanceStatus.STOPPED);
-        put(IDBROKER_HOSTGROUP, InstanceStatus.STOPPED);
+        put(HostGroupType.MASTER.getName(), InstanceStatus.STOPPED);
+        put(HostGroupType.IDBROKER.getName(), InstanceStatus.STOPPED);
     }};
 
     @Inject
@@ -96,32 +96,32 @@ public class AwsSdxTests extends BasicSdxTests {
         testContext
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
-                .await(SDX_RUNNING, key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .then((tc, testDto, client) -> {
-                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesRegisteredState());
+                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
                 .then((tc, testDto, client) -> {
-                    expectedMasterVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, MASTER_HOSTGROUP));
-                    expectedIDBrokerVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, IDBROKER_HOSTGROUP));
+                    expectedMasterVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, HostGroupType.MASTER.getName()));
+                    expectedIDBrokerVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, HostGroupType.IDBROKER.getName()));
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
-                    amazonEC2Util.deleteHostGroupInstances(tc, testDto, client, MASTER_HOSTGROUP);
-                    amazonEC2Util.deleteHostGroupInstances(tc, testDto, client, IDBROKER_HOSTGROUP);
+                    amazonEC2Util.deleteHostGroupInstances(tc, testDto, client, HostGroupType.MASTER.getName());
+                    amazonEC2Util.deleteHostGroupInstances(tc, testDto, client, HostGroupType.IDBROKER.getName());
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, instancesDeletedOnProviderSide);
                 })
                 .when(sdxTestClient.repair(), key(sdx))
-                .await(SDX_REPAIR_IN_PROGRESS, key(sdx))
-                .await(SDX_RUNNING, key(sdx))
+                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .then((tc, testDto, client) -> {
-                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesRegisteredState());
+                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
                 .then((tc, testDto, client) -> {
-                    actualMasterVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, MASTER_HOSTGROUP));
-                    actualIDBrokerVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, IDBROKER_HOSTGROUP));
+                    actualMasterVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, HostGroupType.MASTER.getName()));
+                    actualIDBrokerVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, HostGroupType.IDBROKER.getName()));
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
@@ -167,31 +167,31 @@ public class AwsSdxTests extends BasicSdxTests {
                 .given(stack, StackTestDto.class).withCluster(cluster).withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
                 .given(sdxInternal, SdxInternalTestDto.class).withStackRequest(stack, cluster)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .await(SDX_RUNNING)
+                .await(SdxClusterStatusResponse.RUNNING)
                 .then((tc, testDto, client) -> {
-                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesRegisteredState());
+                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
                 .then((tc, testDto, client) -> {
-                    return sshJUtil.checkFilesOnHostByNameAndPath(testDto, client, List.of(MASTER_HOSTGROUP, IDBROKER_HOSTGROUP),
+                    return sshJUtil.checkFilesOnHostByNameAndPath(testDto, client, List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()),
                             filePath, fileName, 1);
                 })
                 .then((tc, testDto, client) -> {
-                    amazonEC2Util.stopHostGroupInstances(tc, testDto, client, MASTER_HOSTGROUP);
-                    amazonEC2Util.stopHostGroupInstances(tc, testDto, client, IDBROKER_HOSTGROUP);
+                    amazonEC2Util.stopHostGroupInstances(tc, testDto, client, HostGroupType.MASTER.getName());
+                    amazonEC2Util.stopHostGroupInstances(tc, testDto, client, HostGroupType.IDBROKER.getName());
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, instancesStopped);
                 })
                 .when(sdxTestClient.repairInternal(), key(sdxInternal))
-                .await(SDX_REPAIR_IN_PROGRESS, key(sdxInternal))
-                .await(SDX_RUNNING, key(sdxInternal))
+                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdxInternal))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .then((tc, testDto, client) -> {
-                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesRegisteredState());
+                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
                 .then((tc, testDto, client) -> {
-                    return sshJUtil.checkFilesOnHostByNameAndPath(testDto, client, List.of(MASTER_HOSTGROUP, IDBROKER_HOSTGROUP), filePath,
-                            fileName, 1);
+                    return sshJUtil.checkFilesOnHostByNameAndPath(testDto, client, List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()),
+                            filePath, fileName, 1);
                 })
                 .validate();
     }
