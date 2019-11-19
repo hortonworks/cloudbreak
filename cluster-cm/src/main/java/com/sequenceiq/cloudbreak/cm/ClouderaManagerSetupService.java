@@ -102,6 +102,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     @Inject
     private ClouderaManagerConfigService clouderaManagerConfigService;
 
+    @Inject
+    private ClouderaManagerMgmtLaunchService clouderaManagerMgmtLaunchService;
+
     private final Stack stack;
 
     private final HttpClientConfig clientConfig;
@@ -186,7 +189,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             clouderaManagerLicenseService.validateClouderaManagerLicense(stack.getCreator());
             String sdxContextName = Optional.ofNullable(sdxContext).map(this::createDataContext).orElse(null);
 
-            startCmMgmtServices(templatePreparationObject, sdxStackCrn, telemetry, sdxContextName);
+            configureCmMgmtServices(templatePreparationObject, sdxStackCrn, telemetry, sdxContextName);
 
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
             ApiClusterTemplate apiClusterTemplate = JsonUtil.readValue(template, ApiClusterTemplate.class);
@@ -200,9 +203,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 refreshParcelRepos(clouderaManagerResourceApi);
             }
             installCluster(cluster, apiClusterTemplate, clouderaManagerResourceApi, prewarmed);
-            if (!CMRepositoryVersionUtil.isEnableKerberosSupportedViaBlueprint(clouderaManagerRepoDetails)) {
-                kerberosService.configureKerberosViaApi(apiClient, clientConfig, stack, kerberosConfig);
-            }
+            clouderaManagerMgmtLaunchService.startManagementServices(stack, apiClient);
+            configureKerberos(kerberosConfig, clouderaManagerRepoDetails);
             clouderaManagerConfigService.setCdpEnvironmentIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_0_2, apiClient, clientConfig);
         } catch (CancellationException cancellationException) {
             throw cancellationException;
@@ -217,6 +219,13 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         return cluster;
     }
 
+    private void configureKerberos(KerberosConfig kerberosConfig, ClouderaManagerRepo clouderaManagerRepoDetails)
+            throws ApiException, CloudbreakException {
+        if (!CMRepositoryVersionUtil.isEnableKerberosSupportedViaBlueprint(clouderaManagerRepoDetails)) {
+            kerberosService.configureKerberosViaApi(apiClient, clientConfig, stack, kerberosConfig);
+        }
+    }
+
     private ApiClusterTemplate getCmTemplate(TemplatePreparationObject templatePreparationObject, String sdxContextName,
             Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, ClouderaManagerRepo clouderaManagerRepoDetails, Long clusterId) {
 
@@ -226,7 +235,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 clouderaManagerProductDetails, sdxContextName);
     }
 
-    private void startCmMgmtServices(TemplatePreparationObject templatePreparationObject, String sdxCrn, Telemetry telemetry,
+    private void configureCmMgmtServices(TemplatePreparationObject templatePreparationObject, String sdxCrn, Telemetry telemetry,
             String sdxContextName) throws ApiException {
         Optional<ApiHost> optionalCmHost = getCmHost(templatePreparationObject, apiClient);
         if (optionalCmHost.isPresent()) {
