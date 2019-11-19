@@ -119,6 +119,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
 
+    @Value("${cb.https.port}")
+    private Integer httpsPort;
+
     @Override
     public Stack convert(StackV4Request source) {
         Workspace workspace = workspaceService.getForCurrentUser();
@@ -176,8 +179,8 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             for (InstanceGroup gateway : gateways) {
                 if (CollectionUtils.isEmpty(gateway.getSecurityGroup().getSecurityGroupIds())) {
                     Set<SecurityRule> rules = gateway.getSecurityGroup().getSecurityRules();
-                    defaultGatewayCidrs.forEach(cloudbreakCidr -> rules.add(createSecurityRule(gateway.getSecurityGroup(), cloudbreakCidr,
-                            stack.getGatewayPort())));
+                    String ports = (stack.getGatewayPort() == null ? nginxPort.toString() : stack.getGatewayPort().toString()) + "," + httpsPort;
+                    defaultGatewayCidrs.forEach(cloudbreakCidr -> rules.add(createSecurityRule(gateway.getSecurityGroup(), cloudbreakCidr, ports)));
                     LOGGER.info("The control plane cidrs {} are added to the {} gateway group for the {} port.", defaultGatewayCidrs, gateway.getGroupName(),
                             stack.getGatewayPort());
                 }
@@ -185,9 +188,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private SecurityRule createSecurityRule(SecurityGroup securityGroup, String cidr, Integer port) {
+    private SecurityRule createSecurityRule(SecurityGroup securityGroup, String cidr, String ports) {
         SecurityRule securityRule = new SecurityRule();
-        securityRule.setPorts(port == null ? nginxPort.toString() : port.toString());
+        securityRule.setPorts(ports);
         securityRule.setProtocol(TCP_PROTOCOL);
         securityRule.setCidr(cidr);
         securityRule.setSecurityGroup(securityGroup);
