@@ -18,6 +18,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 import com.sequenceiq.freeipa.api.v1.kerberos.doc.KerberosConfigOperationDescription;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
@@ -26,6 +27,7 @@ import com.sequenceiq.service.api.doc.ContentType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+@RetryingRestClient
 @Path("/v1/kerberos")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v1/kerberos", description = KERBEROS_CONFIG_V4_DESCRIPTION, protocols = "http,https")

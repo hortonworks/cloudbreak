@@ -15,6 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 import com.sequenceiq.freeipa.api.v1.ldap.doc.LdapConfigOpDescription;
 import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigResponse;
@@ -25,6 +26,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Path("/v1/ldaps")
+@RetryingRestClient
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v1/ldaps", description = LDAP_CONFIG_DESCRIPTION, protocols = "http,https")
 public interface LdapConfigV1Endpoint {

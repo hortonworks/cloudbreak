@@ -24,11 +24,13 @@ import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
+import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Path("/autoscale")
+@RetryingRestClient
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/autoscale", description = ControllerDescription.AUTOSCALE_DESCRIPTION, protocols = "http,https")
 public interface AutoscaleV4Endpoint {

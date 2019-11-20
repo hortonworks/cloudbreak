@@ -16,6 +16,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.springframework.validation.annotation.Validated;
+
+import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.redbeams.api.RedbeamsApi;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
@@ -36,14 +39,13 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 
-import org.springframework.validation.annotation.Validated;
-
+@Validated
+@RetryingRestClient
 @Path("/v4/databaseservers")
 @Produces(MediaType.APPLICATION_JSON)
 @Api(tags = {"database servers"},
         protocols = "http,https",
         authorizations = { @Authorization(value = RedbeamsApi.CRN_HEADER_API_KEY) })
-@Validated
 public interface DatabaseServerV4Endpoint {
 
     @GET

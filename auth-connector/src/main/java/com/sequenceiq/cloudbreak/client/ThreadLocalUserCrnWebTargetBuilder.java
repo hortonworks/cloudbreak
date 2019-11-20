@@ -4,6 +4,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.WebTarget;
 
+import org.glassfish.jersey.client.ClientProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +12,8 @@ import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 
 public class ThreadLocalUserCrnWebTargetBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadLocalUserCrnWebTargetBuilder.class);
+
+    private static final int TWO_MINUTES_IN_MILLIS = 2 * 60 * 1000;
 
     private final String serviceAddress;
 
@@ -67,6 +70,8 @@ public class ThreadLocalUserCrnWebTargetBuilder {
         if (tracer != null) {
             client.register(tracer);
         }
+        client.property(ClientProperties.CONNECT_TIMEOUT, TWO_MINUTES_IN_MILLIS);
+        client.property(ClientProperties.READ_TIMEOUT, TWO_MINUTES_IN_MILLIS);
         WebTarget webTarget = client.target(serviceAddress).path(apiRoot);
         LOGGER.info("WebTarget has been created with token: service address: {}, configKey: {}", serviceAddress, configKey);
         return webTarget;

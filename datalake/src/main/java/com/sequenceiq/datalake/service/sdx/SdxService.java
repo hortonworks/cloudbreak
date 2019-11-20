@@ -47,9 +47,9 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
-import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
@@ -77,7 +77,7 @@ public class SdxService implements ResourceIdProvider {
     private DistroxService distroxService;
 
     @Inject
-    private EnvironmentEndpoint environmentEndpoint;
+    private EnvironmentClientService environmentClientService;
 
     @Inject
     private StackRequestManifester stackRequestManifester;
@@ -401,6 +401,6 @@ public class SdxService implements ResourceIdProvider {
     }
 
     private DetailedEnvironmentResponse getEnvironment(SdxClusterRequest sdxClusterRequest) {
-        return environmentEndpoint.getByName(sdxClusterRequest.getEnvironment());
+        return environmentClientService.getByName(sdxClusterRequest.getEnvironment());
     }
 }

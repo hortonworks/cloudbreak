@@ -21,8 +21,8 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
@@ -41,7 +41,7 @@ public class EnvironmentService {
     private SdxStatusService sdxStatusService;
 
     @Inject
-    private EnvironmentEndpoint environmentEndpoint;
+    private EnvironmentClientService environmentClientService;
 
     public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId, String requestId) {
         PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC_FOR_ENV_POLLING, TimeUnit.SECONDS,
@@ -85,11 +85,11 @@ public class EnvironmentService {
     }
 
     private DetailedEnvironmentResponse getDetailedEnvironmentResponse(String environmentCrn) {
-        return environmentEndpoint.getByCrn(environmentCrn);
+        return environmentClientService.getByCrn(environmentCrn);
     }
 
     public DetailedEnvironmentResponse getDetailedEnvironmentResponseByName(String environmentName) {
-        return environmentEndpoint.getByName(environmentName);
+        return environmentClientService.getByName(environmentName);
     }
 
 }

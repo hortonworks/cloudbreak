@@ -9,6 +9,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserOperationDescriptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
@@ -20,6 +21,7 @@ import com.sequenceiq.service.api.doc.ContentType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+@RetryingRestClient
 @Path("/v1/freeipa/user")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v1/freeipa/user", description = "Synchronize users to FreeIPA", protocols = "http,https")

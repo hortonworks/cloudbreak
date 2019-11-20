@@ -18,12 +18,14 @@ import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.EventOpDescription;
+import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Path("/v4/events")
+@RetryingRestClient
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v4/events", description = ControllerDescription.EVENT_DESCRIPTION, protocols = "http,https")
 public interface EventV4Endpoint {

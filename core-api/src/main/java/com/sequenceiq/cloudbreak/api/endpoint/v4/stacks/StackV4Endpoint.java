@@ -58,10 +58,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
+import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+@RetryingRestClient
 @Path("/v4/{workspaceId}/stacks")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v4/{workspaceId}/stacks", protocols = "http,https")

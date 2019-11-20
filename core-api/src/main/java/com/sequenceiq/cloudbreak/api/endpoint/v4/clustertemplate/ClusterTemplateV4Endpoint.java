@@ -22,12 +22,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Responses;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterTemplateOpDescription;
+import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v4/{workspaceId}/cluster_templates")
+@RetryingRestClient
 @Consumes(MediaType.APPLICATION_JSON)
+@Path("/v4/{workspaceId}/cluster_templates")
 @Api(value = "/v4/{workspaceId}/clustertemplates", description = ControllerDescription.CLUSTER_TEMPLATE_V4_DESCRIPTION, protocols = "http,https")
 public interface ClusterTemplateV4Endpoint {
     @POST

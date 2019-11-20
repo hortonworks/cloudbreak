@@ -14,11 +14,13 @@ import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UserOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UserProfileOpDescription;
+import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Path("/v4/users")
+@RetryingRestClient
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v4/users", description = ControllerDescription.USER_DESCRIPTION, protocols = "http,https")
 public interface UserV4Endpoint {
