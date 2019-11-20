@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.network.v1.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -111,8 +112,8 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(environment.getName(), actual.getName());
         assertNull(actual.getNetworkId());
         assertNull(actual.getResourceGroupName());
-        assertNull(actual.getNoPublicIp());
-        assertNull(actual.getNoFirewallRules());
+        assertFalse(actual.getNoPublicIp());
+        assertFalse(actual.getNoFirewallRules());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(RegistrationType.CREATE_NEW, actual.getRegistrationType());
         assertTrue(SUBNET_IDS.containsAll(actual.getSubnetMetas().keySet()));
