@@ -67,8 +67,9 @@ class RepositoryRestrictionTest {
 
     private String getExceptionMessage(String repoName, Set<String> affectedClasses) {
         String listedClasses = String.join(", ", affectedClasses);
-        String initiativeMessage = "Repositories should've injected in the related service class and nowhere else!";
-        return String.format("%s %nRepository (%s) has injected more than one time in the following classes: %s", initiativeMessage, repoName, listedClasses);
+        String initiativeMessage = "Repositories should've been injected in the related service class and nowhere else!";
+        return String.format("%s %nRepository (%s) has been injected more than one time in the following classes: %s",
+                initiativeMessage, repoName, listedClasses);
     }
 
 }

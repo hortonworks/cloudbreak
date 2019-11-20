@@ -35,10 +35,10 @@ public interface EnvironmentRepository extends BaseJpaRepository<Environment, Lo
     Set<Environment> findByAccountId(@Param("accountId") String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
-    Set<Environment> findByNameInAndAccountIdAndArchivedIsFalse(Set<String> names, String accountId);
+    Set<Environment> findByNameInAndAccountIdAndArchivedIsFalse(Collection<String> names, String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
-    Set<Environment> findByResourceCrnInAndAccountIdAndArchivedIsFalse(Set<String> resourceCrns, String accountId);
+    Set<Environment> findByResourceCrnInAndAccountIdAndArchivedIsFalse(Collection<String> resourceCrns, String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
     Optional<Environment> findByNameAndAccountIdAndArchivedIsFalse(@Param("name") String name, @Param("accountId") String accountId);
