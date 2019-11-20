@@ -15,6 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 import com.sequenceiq.freeipa.api.v1.dns.doc.DnsOperationDescriptions;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
@@ -26,6 +27,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Path("/v1/dns")
+@RetryingRestClient
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v1/dns", description = "Amange DNS in FreeIPA", protocols = "http,https")
 public interface DnsV1Endpoint {

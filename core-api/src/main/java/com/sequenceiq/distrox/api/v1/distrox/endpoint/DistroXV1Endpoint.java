@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
@@ -70,6 +71,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1R
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+@RetryingRestClient
 @Path("/v1/distrox")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

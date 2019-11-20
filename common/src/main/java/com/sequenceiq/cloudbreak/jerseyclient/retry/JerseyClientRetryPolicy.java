@@ -1,17 +1,17 @@
-package com.sequenceiq.cloudbreak.cm.client.retry;
+package com.sequenceiq.cloudbreak.jerseyclient.retry;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryPolicy;
 import org.springframework.retry.context.RetryContextSupport;
 
-import com.cloudera.api.swagger.client.ApiException;
+public class JerseyClientRetryPolicy implements RetryPolicy {
 
-public class ApiExceptionRetryPolicy implements RetryPolicy {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApiExceptionRetryPolicy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JerseyClientRetryPolicy.class);
 
     private static final int RETRY_LIMIT = 5;
 
@@ -20,16 +20,15 @@ public class ApiExceptionRetryPolicy implements RetryPolicy {
         Throwable lastThrowable = context.getLastThrowable();
         if (lastThrowable == null) {
             return true;
-        }
-        if (lastThrowable instanceof ApiException) {
-            if (context.getRetryCount() <= RETRY_LIMIT) {
-                int code = ApiException.class.cast(lastThrowable).getCode();
-                return code == HttpStatus.INTERNAL_SERVER_ERROR.value();
-            } else {
-                return false;
+        } else {
+            if (lastThrowable instanceof WebApplicationException) {
+                WebApplicationException wae = (WebApplicationException) lastThrowable;
+                if (wae.getResponse().getStatusInfo().getFamily() == Response.Status.Family.CLIENT_ERROR) {
+                    return false;
+                }
             }
         }
-        return false;
+        return context.getRetryCount() <= RETRY_LIMIT;
     }
 
     @Override
@@ -46,7 +45,7 @@ public class ApiExceptionRetryPolicy implements RetryPolicy {
         RetryContextSupport contextSupport = RetryContextSupport.class.cast(context);
         contextSupport.registerThrowable(throwable);
         if (throwable != null) {
-            LOGGER.warn("Exception occurred during CM API call.", throwable);
+            LOGGER.warn("Exception occurred during a REST API call.", throwable);
         }
     }
 }

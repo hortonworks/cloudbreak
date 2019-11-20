@@ -16,10 +16,12 @@ import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UserProfileOpDescription;
+import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+@RetryingRestClient
 @Path("/v4/user_profiles")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v4/user_profiles", description = ControllerDescription.USER_PROFILES_V4_DESCRIPTION, protocols = "http,https")

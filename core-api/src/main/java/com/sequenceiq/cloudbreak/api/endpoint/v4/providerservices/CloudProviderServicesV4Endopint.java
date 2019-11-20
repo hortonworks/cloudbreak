@@ -16,7 +16,9 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadata
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
+import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 
+@RetryingRestClient
 @Path("/v4/cloudprovider")
 @Consumes(MediaType.APPLICATION_JSON)
 public interface CloudProviderServicesV4Endopint {

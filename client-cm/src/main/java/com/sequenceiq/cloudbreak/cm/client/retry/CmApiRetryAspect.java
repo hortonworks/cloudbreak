@@ -25,8 +25,6 @@ public class CmApiRetryAspect {
     // CHECKSTYLE:OFF
     public Object retryableApiCall(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         // CHECKSTYLE:ON
-        return cmApiRetryTemplate.execute(context -> {
-            return proceedingJoinPoint.proceed();
-        });
+        return cmApiRetryTemplate.execute(context -> proceedingJoinPoint.proceed());
     }
 }

@@ -22,10 +22,12 @@ import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.RecipeOpDescription;
+import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+@RetryingRestClient
 @Path("/v4/{workspaceId}/recipes")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v4/{workspaceId}/recipes", description = ControllerDescription.RECIPES_V4_DESCRIPTION, protocols = "http,https")

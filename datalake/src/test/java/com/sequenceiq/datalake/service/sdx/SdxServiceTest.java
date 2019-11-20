@@ -46,9 +46,9 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
-import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -79,7 +79,7 @@ class SdxServiceTest {
     private SdxReactorFlowManager sdxReactorFlowManager;
 
     @Mock
-    private EnvironmentEndpoint environmentEndpoint;
+    private EnvironmentClientService environmentClientService;
 
     @Mock
     private StackRequestManifester stackRequestManifester;
@@ -199,7 +199,7 @@ class SdxServiceTest {
                 .setResource(UUID.randomUUID().toString())
                 .setAccountId(UUID.randomUUID().toString())
                 .build().toString());
-        when(environmentEndpoint.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
     }
 
     @Test

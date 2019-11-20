@@ -26,11 +26,13 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.AccountPreferencesDes
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.RepositoryConfigsValidationOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.SecurityRuleOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
+import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Path("/v4/utils")
+@RetryingRestClient
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v4/utils", description = ControllerDescription.UTIL_V4_DESCRIPTION, protocols = "http,https")
 public interface UtilV4Endpoint {

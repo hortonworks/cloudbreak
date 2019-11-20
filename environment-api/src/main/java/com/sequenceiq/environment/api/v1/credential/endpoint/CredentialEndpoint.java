@@ -20,6 +20,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
+import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 import com.sequenceiq.environment.api.doc.credential.CredentialDescriptor;
 import com.sequenceiq.environment.api.doc.credential.CredentialOpDescription;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
@@ -30,6 +31,7 @@ import com.sequenceiq.environment.api.v1.credential.model.response.InteractiveCr
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+@RetryingRestClient
 @Path("/v1/credentials")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v1/credentials", description = CREDENTIAL_DESCRIPTION, protocols = "http,https")
