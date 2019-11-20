@@ -13,6 +13,7 @@ import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
 import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
@@ -62,6 +63,14 @@ public class AwsSessionCredentialClient {
             LOGGER.error("Unable to assume role. Check exception for details.", e);
             throw e;
         }
+    }
+
+    STSAssumeRoleSessionCredentialsProvider createSTSAssumeRoleSessionCredentialsProvider(AwsCredentialView awsCredential) {
+        String externalId = awsCredential.getExternalId();
+        return new STSAssumeRoleSessionCredentialsProvider.Builder(awsCredential.getRoleArn(), roleSessionName)
+                .withExternalId(StringUtils.isEmpty(externalId) ? deprecatedExternalId : externalId)
+                .withRoleSessionDurationSeconds(DEFAULT_SESSION_CREDENTIALS_DURATION)
+                .build();
     }
 
     private AWSSecurityTokenService awsSecurityTokenServiceClient(AwsCredentialView awsCredential) {

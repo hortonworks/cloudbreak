@@ -18,22 +18,28 @@ import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.client.builder.AwsSyncClientBuilder;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.retry.PredefinedBackoffStrategies.EqualJitterBackoffStrategy;
 import com.amazonaws.retry.RetryPolicy;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.AmazonAutoScalingClientBuilder;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
+import com.amazonaws.services.cloudformation.AmazonCloudFormationClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient;
+import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -83,7 +89,7 @@ public class AwsClient {
 
     public AmazonEC2Client createAccess(AwsCredentialView awsCredential, String regionName) {
         AmazonEC2Client client = isRoleAssumeRequired(awsCredential)
-                ? new AmazonEC2Client(credentialClient.retrieveCachedSessionCredentials(awsCredential))
+                ? createAwsClientWithCredentialProvider(awsCredential, AmazonEC2ClientBuilder.standard(), AmazonEC2Client.class)
                 : new AmazonEC2Client(createAwsCredentials(awsCredential));
         client.setRegion(RegionUtils.getRegion(regionName));
         return client;
@@ -91,13 +97,15 @@ public class AwsClient {
 
     public AWSSecurityTokenService createAwsSecurityTokenService(AwsCredentialView awsCredential) {
         return isRoleAssumeRequired(awsCredential)
-                ? new AWSSecurityTokenServiceClient(credentialClient.retrieveCachedSessionCredentials(awsCredential))
+                ? createAwsClientWithCredentialProvider(awsCredential,
+                AWSSecurityTokenServiceClientBuilder.standard(), AWSSecurityTokenServiceClient.class)
                 : new AWSSecurityTokenServiceClient(createAwsCredentials(awsCredential));
     }
 
     public AmazonIdentityManagement createAmazonIdentityManagement(AwsCredentialView awsCredential) {
         return isRoleAssumeRequired(awsCredential)
-                ? new AmazonIdentityManagementClient(credentialClient.retrieveCachedSessionCredentials(awsCredential))
+                ? createAwsClientWithCredentialProvider(awsCredential,
+                AmazonIdentityManagementClientBuilder.standard(), AmazonIdentityManagementClient.class)
                 : new AmazonIdentityManagementClient(createAwsCredentials(awsCredential));
     }
 
@@ -116,7 +124,8 @@ public class AwsClient {
 
     public AmazonCloudFormationClient createCloudFormationClient(AwsCredentialView awsCredential, String regionName) {
         AmazonCloudFormationClient client = isRoleAssumeRequired(awsCredential)
-                ? new AmazonCloudFormationClient(credentialClient.retrieveCachedSessionCredentials(awsCredential))
+                ? createAwsClientWithCredentialProvider(awsCredential,
+                AmazonCloudFormationClientBuilder.standard(), AmazonCloudFormationClient.class)
                 : new AmazonCloudFormationClient(createAwsCredentials(awsCredential));
         client.setRegion(RegionUtils.getRegion(regionName));
         return client;
@@ -128,7 +137,8 @@ public class AwsClient {
 
     public AmazonAutoScalingClient createAutoScalingClient(AwsCredentialView awsCredential, String regionName) {
         AmazonAutoScalingClient client = isRoleAssumeRequired(awsCredential)
-                ? new AmazonAutoScalingClient(credentialClient.retrieveCachedSessionCredentials(awsCredential))
+                ? createAwsClientWithCredentialProvider(awsCredential,
+                AmazonAutoScalingClientBuilder.standard(), AmazonAutoScalingClient.class)
                 : new AmazonAutoScalingClient(createAwsCredentials(awsCredential));
         client.setRegion(RegionUtils.getRegion(regionName));
         return client;
@@ -227,5 +237,11 @@ public class AwsClient {
             throw new CredentialVerificationException("Missing access or secret key from the credential.");
         }
         return new BasicAWSCredentials(accessKey, secretKey);
+    }
+
+    private <R, B extends AwsSyncClientBuilder> R createAwsClientWithCredentialProvider(AwsCredentialView awsCredential, B builder, Class<R> clazz) {
+        return clazz.cast(builder.withCredentials(
+                credentialClient.createSTSAssumeRoleSessionCredentialsProvider(awsCredential))
+                .build());
     }
 }
