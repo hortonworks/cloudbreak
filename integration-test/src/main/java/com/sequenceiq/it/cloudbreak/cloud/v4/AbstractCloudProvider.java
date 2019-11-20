@@ -26,8 +26,6 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     private static final String DEFAULT_ACCESS_CIDR = "0.0.0.0/0";
 
-    private static final String CLOUDBREAK_DEFAULT = "cloudbreak-default";
-
     @Inject
     private TestParameter testParameter;
 
@@ -44,18 +42,18 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
-        return imageCatalog.withName(CLOUDBREAK_DEFAULT).withUrl(null);
+        return imageCatalog.withName(commonCloudProperties.getImageCatalogName()).withUrl(null);
     }
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        imageSettings.withImageCatalog(CLOUDBREAK_DEFAULT);
+        imageSettings.withImageCatalog(commonCloudProperties.getImageCatalogName());
         return imageSettings;
     }
 
     @Override
     public DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings) {
-        imageSettings.withImageCatalog(CLOUDBREAK_DEFAULT);
+        imageSettings.withImageCatalog(commonCloudProperties.getImageCatalogName());
         return imageSettings;
     }
 
