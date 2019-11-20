@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import java.util.Date;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,13 +12,14 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
 import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
 import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
+import com.amazonaws.services.securitytoken.model.Credentials;
+import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.sequenceiq.cloudbreak.cloud.aws.cache.AwsCachingConfig;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 
@@ -40,11 +43,11 @@ public class AwsSessionCredentialClient {
     private AwsDefaultZoneProvider awsDefaultZoneProvider;
 
     @Cacheable(value = AwsCachingConfig.TEMPORARY_AWS_CREDENTIAL_CACHE, unless = "#awsCredential.getId() == null")
-    public BasicSessionCredentials retrieveCachedSessionCredentials(AwsCredentialView awsCredential) {
+    public AwsSessionCredentials retrieveCachedSessionCredentials(AwsCredentialView awsCredential) {
         return retrieveSessionCredentials(awsCredential);
     }
 
-    public BasicSessionCredentials retrieveSessionCredentials(AwsCredentialView awsCredential) {
+    public AwsSessionCredentials retrieveSessionCredentials(AwsCredentialView awsCredential) {
         String externalId = awsCredential.getExternalId();
         AssumeRoleRequest assumeRoleRequest = new AssumeRoleRequest()
                 .withDurationSeconds(DEFAULT_SESSION_CREDENTIALS_DURATION)
@@ -54,10 +57,21 @@ public class AwsSessionCredentialClient {
         LOGGER.debug("Trying to assume role with role arn {}", awsCredential.getRoleArn());
         try {
             AssumeRoleResult result = awsSecurityTokenServiceClient(awsCredential).assumeRole(assumeRoleRequest);
-            return new BasicSessionCredentials(
-                    result.getCredentials().getAccessKeyId(),
-                    result.getCredentials().getSecretAccessKey(),
-                    result.getCredentials().getSessionToken());
+            Credentials credentialsResponse = result.getCredentials();
+
+            String formattedExpirationDate = "";
+            Date expirationTime = credentialsResponse.getExpiration();
+            if (expirationTime != null) {
+                formattedExpirationDate = new StdDateFormat().format(expirationTime);
+            }
+            LOGGER.debug("Assume role result credential: role arn: {}, expiration date: {}",
+                    awsCredential.getRoleArn(), formattedExpirationDate);
+
+            return new AwsSessionCredentials(
+                    credentialsResponse.getAccessKeyId(),
+                    credentialsResponse.getSecretAccessKey(),
+                    credentialsResponse.getSessionToken(),
+                    credentialsResponse.getExpiration());
         } catch (SdkClientException e) {
             LOGGER.error("Unable to assume role. Check exception for details.", e);
             throw e;

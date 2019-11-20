@@ -82,22 +82,22 @@ public class AwsClient {
     }
 
     public AmazonEC2Client createAccess(AwsCredentialView awsCredential, String regionName) {
-        AmazonEC2Client client = isRoleAssumeRequired(awsCredential)
-                ? new AmazonEC2Client(credentialClient.retrieveCachedSessionCredentials(awsCredential))
-                : new AmazonEC2Client(createAwsCredentials(awsCredential));
+        AmazonEC2Client client = isRoleAssumeRequired(awsCredential) ?
+                new AmazonEC2Client(createAwsSessionCredentialProvider(awsCredential)) :
+                new AmazonEC2Client(createAwsCredentials(awsCredential));
         client.setRegion(RegionUtils.getRegion(regionName));
         return client;
     }
 
     public AWSSecurityTokenService createAwsSecurityTokenService(AwsCredentialView awsCredential) {
         return isRoleAssumeRequired(awsCredential)
-                ? new AWSSecurityTokenServiceClient(credentialClient.retrieveCachedSessionCredentials(awsCredential))
+                ? new AWSSecurityTokenServiceClient(createAwsSessionCredentialProvider(awsCredential))
                 : new AWSSecurityTokenServiceClient(createAwsCredentials(awsCredential));
     }
 
     public AmazonIdentityManagement createAmazonIdentityManagement(AwsCredentialView awsCredential) {
         return isRoleAssumeRequired(awsCredential)
-                ? new AmazonIdentityManagementClient(credentialClient.retrieveCachedSessionCredentials(awsCredential))
+                ? new AmazonIdentityManagementClient(createAwsSessionCredentialProvider(awsCredential))
                 : new AmazonIdentityManagementClient(createAwsCredentials(awsCredential));
     }
 
@@ -115,9 +115,9 @@ public class AwsClient {
     }
 
     public AmazonCloudFormationClient createCloudFormationClient(AwsCredentialView awsCredential, String regionName) {
-        AmazonCloudFormationClient client = isRoleAssumeRequired(awsCredential)
-                ? new AmazonCloudFormationClient(credentialClient.retrieveCachedSessionCredentials(awsCredential))
-                : new AmazonCloudFormationClient(createAwsCredentials(awsCredential));
+        AmazonCloudFormationClient client = isRoleAssumeRequired(awsCredential) ?
+                new AmazonCloudFormationClient(createAwsSessionCredentialProvider(awsCredential)) :
+                new AmazonCloudFormationClient(createAwsCredentials(awsCredential));
         client.setRegion(RegionUtils.getRegion(regionName));
         return client;
     }
@@ -127,9 +127,9 @@ public class AwsClient {
     }
 
     public AmazonAutoScalingClient createAutoScalingClient(AwsCredentialView awsCredential, String regionName) {
-        AmazonAutoScalingClient client = isRoleAssumeRequired(awsCredential)
-                ? new AmazonAutoScalingClient(credentialClient.retrieveCachedSessionCredentials(awsCredential))
-                : new AmazonAutoScalingClient(createAwsCredentials(awsCredential));
+        AmazonAutoScalingClient client = isRoleAssumeRequired(awsCredential) ?
+                new AmazonAutoScalingClient(createAwsSessionCredentialProvider(awsCredential)) :
+                new AmazonAutoScalingClient(createAwsCredentials(awsCredential));
         client.setRegion(RegionUtils.getRegion(regionName));
         return client;
     }
@@ -227,5 +227,9 @@ public class AwsClient {
             throw new CredentialVerificationException("Missing access or secret key from the credential.");
         }
         return new BasicAWSCredentials(accessKey, secretKey);
+    }
+
+    private AwsSessionCredentialProvider createAwsSessionCredentialProvider(AwsCredentialView awsCredential) {
+        return new AwsSessionCredentialProvider(awsCredential, credentialClient);
     }
 }
