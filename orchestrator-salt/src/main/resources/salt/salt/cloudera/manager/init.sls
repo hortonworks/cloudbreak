@@ -3,6 +3,7 @@
 
 install-cloudera-manager-server:
   pkg.installed:
+    - failhard: True
     - pkgs:
       - cloudera-manager-daemons
       - cloudera-manager-agent
