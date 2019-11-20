@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -114,66 +113,6 @@ public class EnvironmentService implements ResourceIdProvider {
         return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
     }
 
-    public EnvironmentDto deleteByNameAndAccountId(String environmentName, String accountId, String actualUserCrn, boolean forced) {
-        Optional<Environment> environment = environmentRepository
-                .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId);
-        MDCBuilder.buildMdcContext(environment.orElseThrow(()
-                -> new NotFoundException(String.format("No environment found with name '%s'", environmentName))));
-        LOGGER.debug(String.format("Deleting environment [name: %s]", environment.get().getName()));
-        delete(environment.get(), actualUserCrn, forced);
-        return environmentDtoConverter.environmentToDto(environment.get());
-    }
-
-    public EnvironmentDto deleteByCrnAndAccountId(String crn, String accountId, String actualUserCrn, boolean forced) {
-        Optional<Environment> environment = environmentRepository
-                .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId);
-        MDCBuilder.buildMdcContext(environment.orElseThrow(()
-                -> new NotFoundException(String.format("No environment found with crn '%s'", crn))));
-        LOGGER.debug(String.format("Deleting  environment [name: %s]", environment.get().getName()));
-        delete(environment.get(), actualUserCrn, forced);
-        return environmentDtoConverter.environmentToDto(environment.get());
-    }
-
-    public Environment delete(Environment environment, String userCrn, boolean forced) {
-        MDCBuilder.buildMdcContext(environment);
-        LOGGER.debug("Deleting environment with name: {}", environment.getName());
-        if (forced) {
-            reactorFlowManager.triggerForcedDeleteFlow(environment, userCrn);
-        } else {
-            checkIsEnvironmentDeletable(environment);
-            reactorFlowManager.triggerDeleteFlow(environment, userCrn);
-        }
-        return environment;
-    }
-
-    public List<EnvironmentDto> deleteMultipleByNames(Set<String> environmentNames, String accountId, String actualUserCrn, boolean forced) {
-        List<EnvironmentDto> environmentDtos = new ArrayList<>();
-        //TODO: it can have less results than the desired - is it okay?
-        Set<Environment> environments = environmentRepository
-                .findByNameInAndAccountIdAndArchivedIsFalse(environmentNames, accountId);
-        for (Environment environment : environments) {
-            LOGGER.debug(String.format("Starting to archive environment [name: %s]", environment.getName()));
-            //TODO: it will fail with the n th element and finished - this is a bug
-            delete(environment, actualUserCrn, forced);
-            environmentDtos.add(environmentDtoConverter.environmentToDto(environment));
-        }
-        return environmentDtos;
-    }
-
-    public List<EnvironmentDto> deleteMultipleByCrns(Set<String> crns, String accountId, String actualUserCrn, boolean forced) {
-        List<EnvironmentDto> environmentDtos = new ArrayList<>();
-        //TODO: it can have less results than the desired - is it okay?
-        Set<Environment> environments = environmentRepository
-                .findByResourceCrnInAndAccountIdAndArchivedIsFalse(crns, accountId);
-        for (Environment environment : environments) {
-            LOGGER.debug(String.format("Starting to archive environment [CRN: %s]", environment.getName()));
-            //TODO: it will fail with the n th element and finished - this is a bug
-            delete(environment, actualUserCrn, forced);
-            environmentDtos.add(environmentDtoConverter.environmentToDto(environment));
-        }
-        return environmentDtos;
-    }
-
     public void setRegions(Environment environment, Set<String> requestedRegions, CloudRegions cloudRegions) {
         Set<Region> regionSet = new HashSet<>();
         Map<com.sequenceiq.cloudbreak.cloud.model.Region, String> displayNames = cloudRegions.getDisplayNames();
@@ -232,28 +171,6 @@ public class EnvironmentService implements ResourceIdProvider {
         return platformParameterService.getRegionsByCredential(platformResourceRequest);
     }
 
-    private void checkIsEnvironmentDeletable(Environment env) {
-        LOGGER.info("Checking if environment [name: {}] is deletable", env.getName());
-
-        Set<String> sdxNames = environmentResourceDeletionService.getAttachedSdxClusterNames(env);
-        if (!sdxNames.isEmpty()) {
-            throw new BadRequestException(String.format("The following Data Lake cluster(s) must be terminated before Environment deletion [%s]",
-                    String.join(", ", sdxNames)));
-        }
-
-        Set<String> datalakes = environmentResourceDeletionService.getDatalakeClusterNames(env);
-        if (!datalakes.isEmpty()) {
-            throw new BadRequestException(String.format("The following Data Lake cluster(s) must be terminated before Environment deletion [%s]",
-                    String.join(", ", datalakes)));
-        }
-
-        Set<String> distroXClusterNames = environmentResourceDeletionService.getAttachedDistroXClusterNames(env);
-        if (!distroXClusterNames.isEmpty()) {
-            throw new BadRequestException(String.format("The following Data Hub cluster(s) must be terminated before Environment deletion [%s]",
-                    String.join(", ", distroXClusterNames)));
-        }
-    }
-
     public List<EnvironmentDto> findAllByIdInAndStatusIn(Collection<Long> resourceIds, Collection<EnvironmentStatus> environmentStatuses) {
         List<Environment> environments = environmentRepository
                 .findAllByIdInAndStatusInAndArchivedIsFalse(resourceIds, environmentStatuses);
@@ -304,5 +221,13 @@ public class EnvironmentService implements ResourceIdProvider {
         } else {
             environment.setAdminGroupName(adminGroupName);
         }
+    }
+
+    public Collection<Environment> findByResourceCrnInAndAccountIdAndArchivedIsFalse(Collection<String> crns, String accountId) {
+        return environmentRepository.findByResourceCrnInAndAccountIdAndArchivedIsFalse(crns, accountId);
+    }
+
+    public Collection<Environment> findByNameInAndAccountIdAndArchivedIsFalse(Collection<String> environmentNames, String accountId) {
+        return environmentRepository.findByNameInAndAccountIdAndArchivedIsFalse(environmentNames, accountId);
     }
 }
