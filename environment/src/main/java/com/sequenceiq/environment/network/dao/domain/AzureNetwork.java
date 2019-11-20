@@ -31,7 +31,7 @@ public class AzureNetwork extends BaseNetwork {
     }
 
     public Boolean getNoPublicIp() {
-        return noPublicIp == null ? false : noPublicIp;
+        return noPublicIp == null ? Boolean.FALSE : noPublicIp;
     }
 
     public void setNoPublicIp(Boolean noPublicIp) {
@@ -39,7 +39,7 @@ public class AzureNetwork extends BaseNetwork {
     }
 
     public Boolean getNoFirewallRules() {
-        return noFirewallRules == null ? false : noFirewallRules;
+        return noFirewallRules == null ? Boolean.FALSE : noFirewallRules;
     }
 
     public void setNoFirewallRules(Boolean noFirewallRules) {
