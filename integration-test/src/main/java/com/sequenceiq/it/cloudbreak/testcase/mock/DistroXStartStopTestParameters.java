@@ -10,9 +10,9 @@ class DistroXStartStopTestParameters {
 
     private static final String STEP = "step";
 
-    private static final int DEFAULT_TIMES = 4;
+    private static final int DEFAULT_TIMES = 8;
 
-    private static final int DEFAULT_STEP = 10;
+    private static final int DEFAULT_STEP = 100;
 
     private static final String DEFAULT_HOSTGROUP = "worker";
 
