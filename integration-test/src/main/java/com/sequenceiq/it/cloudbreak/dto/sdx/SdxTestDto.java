@@ -19,11 +19,13 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.util.TagAdderUtil;
 import com.sequenceiq.it.util.TestNameExtractorUtil;
@@ -38,7 +40,8 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 @Prototype
-public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxClusterDetailResponse, SdxTestDto> implements Purgable<SdxClusterResponse, SdxClient> {
+public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxClusterDetailResponse, SdxTestDto> implements Purgable<SdxClusterResponse, SdxClient>,
+        Investigable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxTestDto.class);
 
@@ -206,5 +209,15 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         String callingMethodName = testNameExtractorUtil.getExecutingTestName();
         tagAdderUtil.addTestNameTag(getRequest().initAndGetTags(), callingMethodName);
         return this;
+    }
+
+    @Override
+    public String investigate() {
+        if (getResponse() == null || getResponse().getCrn() == null) {
+            return null;
+        }
+        String crn = getResponse().getCrn();
+
+        return "SDX audit events: " + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), "stacks", null, crn);
     }
 }
