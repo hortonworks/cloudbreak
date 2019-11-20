@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.log;
 
+import java.util.Arrays;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -9,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
@@ -27,8 +30,8 @@ public class ControllerLogContextAspects {
         String[] paramNames = sig.getParameterNames();
         Long clusterId = getClusterId(paramNames, args);
         MDCBuilder.buildMdcContext(clusterId, "", "CLUSTER");
-        LOGGER.trace("A controller method has been intercepted: {} with params {}, {}, MDC logger context is built.", joinPoint.toShortString(),
-                sig.getParameterNames(), args);
+        LOGGER.debug("A controller method has been intercepted: {} with params {}, {}, MDC logger context is built.", joinPoint.toShortString(),
+                sig.getParameterNames(), AnonymizerUtil.anonymize(Arrays.toString(args)));
     }
 
     private Long getClusterId(String[] paramNames, Object[] args) {
