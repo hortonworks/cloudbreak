@@ -25,6 +25,7 @@ import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
@@ -41,9 +42,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
-import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class AwsTerminateService {
@@ -130,6 +131,7 @@ public class AwsTerminateService {
             }
             awsElasticIpService.releaseReservedIp(amazonEC2Client, resources);
             cleanupEncryptedResources(ac, resources, regionName, amazonEC2Client);
+            deleteKeyPair(ac, stack);
             deleteLaunchConfiguration(resources, ac);
         } else if (resources != null) {
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
@@ -139,6 +141,22 @@ public class AwsTerminateService {
             LOGGER.debug("No resources to release.");
         }
         return awsResourceConnector.check(ac, resources);
+    }
+
+    private void deleteKeyPair(AuthenticatedContext ac, CloudStack stack) {
+        AwsCredentialView awsCredential = new AwsCredentialView(ac.getCloudCredential());
+        String region = ac.getCloudContext().getLocation().getRegion().value();
+        if (!awsClient.existingKeyPairNameSpecified(stack.getInstanceAuthentication())) {
+            try {
+                AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
+                DeleteKeyPairRequest deleteKeyPairRequest = new DeleteKeyPairRequest(awsClient.getKeyPairName(ac));
+                client.deleteKeyPair(deleteKeyPairRequest);
+            } catch (Exception e) {
+                String errorMessage = String.format("Failed to delete public key [roleArn:'%s', region: '%s'], detailed message: %s",
+                        awsCredential.getRoleArn(), region, e.getMessage());
+                LOGGER.warn(errorMessage, e);
+            }
+        }
     }
 
     private void cleanupEncryptedResources(AuthenticatedContext ac, List<CloudResource> resources, String regionName, AmazonEC2Client amazonEC2Client) {
