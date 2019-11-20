@@ -21,6 +21,8 @@ import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
+import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
@@ -93,6 +95,7 @@ public class AwsLaunchService {
 
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
+        createKeyPair(ac, stack);
         String cFStackName = cfStackUtil.getCfStackName(ac);
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
@@ -180,6 +183,30 @@ public class AwsLaunchService {
                         CloudResource::getGroup,
                         instance -> List.of(instance.getInstanceId()),
                         (listOne, listTwo) -> Stream.concat(listOne.stream(), listTwo.stream()).collect(Collectors.toList())));
+    }
+
+    private void createKeyPair(AuthenticatedContext ac, CloudStack stack) {
+        if (!awsClient.existingKeyPairNameSpecified(stack.getInstanceAuthentication())) {
+            AwsCredentialView awsCredential = new AwsCredentialView(ac.getCloudCredential());
+            try {
+                String region = ac.getCloudContext().getLocation().getRegion().value();
+                LOGGER.debug("Importing public key to {} region on AWS", region);
+                AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
+                String keyPairName = awsClient.getKeyPairName(ac);
+                ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(keyPairName, stack.getInstanceAuthentication().getPublicKey());
+                try {
+                    client.describeKeyPairs(new DescribeKeyPairsRequest().withKeyNames(keyPairName));
+                    LOGGER.debug("Key-pair already exists: {}", keyPairName);
+                } catch (AmazonServiceException e) {
+                    client.importKeyPair(importKeyPairRequest);
+                }
+            } catch (Exception e) {
+                String errorMessage = String.format("Failed to import public key [roleArn:'%s'], detailed message: %s", awsCredential.getRoleArn(),
+                        e.getMessage());
+                LOGGER.info(errorMessage, e);
+                throw new CloudConnectorException(e.getMessage(), e);
+            }
+        }
     }
 
     private boolean isNoCIDRProvided(boolean existingVPC, boolean existingSubnet, String cidr) {
