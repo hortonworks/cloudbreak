@@ -6,7 +6,7 @@
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "CDP 1.2 - Data Engineering Hue HA template: Apache Spark, Apache Hive, Hue, Apache Oozie"
+      "blueprintName": "CDP 1.2 - Data Engineering Hue HA: Apache Spark, Apache Hive, Hue, Apache Oozie"
     },
     "instanceGroups": [
       {
