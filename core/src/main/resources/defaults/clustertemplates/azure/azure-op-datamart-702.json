@@ -26,27 +26,14 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D12_v2",
+          "instanceType": "Standard_D16_v3",
           "rootVolume": {
             "size": 50
           }
         },
         "nodeCount": 1,
         "type": "GATEWAY",
-        "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "9443",
-                "443",
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        }
+        "recoveryMode": "MANUAL"
       },
       {
         "name": "master2",
@@ -65,25 +52,14 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D12_v2",
+          "instanceType": "Standard_D16_v3",
           "rootVolume": {
             "size": 50
           }
         },
         "nodeCount": 1,
         "type": "CORE",
-        "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        }
+        "recoveryMode": "MANUAL"
       },
       {
         "name": "master3",
@@ -102,25 +78,14 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D12_v2",
+          "instanceType": "Standard_D16_v3",
           "rootVolume": {
             "size": 50
           }
         },
         "nodeCount": 1,
         "type": "CORE",
-        "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        }
+        "recoveryMode": "MANUAL"
       },
       {
         "name": "coordinator",
@@ -139,25 +104,14 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D12_v2",
+          "instanceType": "Standard_D16_v3",
           "rootVolume": {
             "size": 50
           }
         },
         "nodeCount": 1,
         "type": "CORE",
-        "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        }
+        "recoveryMode": "MANUAL"
       },
       {
         "name": "executor",
@@ -176,25 +130,14 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D12_v2",
+          "instanceType": "Standard_D16_v3",
           "rootVolume": {
             "size": 50
           }
         },
         "nodeCount": 3,
         "type": "CORE",
-        "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        }
+        "recoveryMode": "MANUAL"
       }
     ]
   }

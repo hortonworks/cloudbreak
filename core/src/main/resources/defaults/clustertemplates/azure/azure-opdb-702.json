@@ -12,17 +12,6 @@
         "name": "master",
         "nodeCount": 2,
         "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        },
         "template": {
           "attachedVolumes": [
             {
@@ -38,7 +27,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D12_v2",
+          "instanceType": "Standard_D16_v3",
           "rootVolume": {
             "size": 50
           },
@@ -50,19 +39,6 @@
         "name": "gateway",
         "nodeCount": 1,
         "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22",
-                "443",
-                "9443"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        },
         "template": {
           "attachedVolumes": [
             {
@@ -78,7 +54,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D3_v2",
+          "instanceType": "Standard_D8_v3",
           "rootVolume": {
             "size": 50
           },
@@ -90,17 +66,6 @@
         "name": "leader",
         "nodeCount": 1,
         "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        },
         "template": {
           "attachedVolumes": [
             {
@@ -116,7 +81,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D3_v2",
+          "instanceType": "Standard_D8_v3",
           "rootVolume": {
             "size": 50
           },
@@ -128,17 +93,6 @@
         "name": "worker",
         "nodeCount": 3,
         "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        },
         "template": {
           "attachedVolumes": [
             {
@@ -154,7 +108,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D3_v2",
+          "instanceType": "Standard_D8_v3",
           "rootVolume": {
             "size": 50
           },

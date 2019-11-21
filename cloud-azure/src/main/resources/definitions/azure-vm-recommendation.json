@@ -1,7 +1,7 @@
 {
   "master": {
     "type": "master",
-    "flavor": "Standard_D12_v2",
+    "flavor": "Standard_D16_v3",
     "cardinality": 1,
     "volumeType": "MAGNETIC",
     "volumeCount": 1,
@@ -9,7 +9,7 @@
   },
   "worker": {
     "type": "worker",
-    "flavor": "Standard_D3_v2",
+    "flavor": "Standard_D8_v3",
     "cardinality": 3,
     "volumeType": "MAGNETIC",
     "volumeCount": 1,
@@ -17,7 +17,7 @@
   },
   "broker": {
     "type": "broker",
-    "flavor": "Standard_D12_v2",
+    "flavor": "Standard_D16_v3",
     "cardinality": 3,
     "volumeType": "MAGNETIC",
     "volumeCount": 1,
@@ -25,7 +25,7 @@
   },
   "quorum": {
     "type": "quorum",
-    "flavor": "Standard_D3_v2",
+    "flavor": "Standard_D8_v3",
     "cardinality": 3,
     "volumeType": "MAGNETIC",
     "volumeCount": 1,

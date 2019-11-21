@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -72,11 +73,21 @@ public class AzurePlatformResources implements PlatformResources {
 
     private static final float NO_MB_PER_GB = 1024.0f;
 
-    @Value("${cb.azure.default.vmtype:Standard_D12_v2}")
+    @Value("${cb.azure.default.vmtype:Standard_D16_v3}")
     private String armVmDefault;
 
     @Value("${cb.arm.zone.parameter.default:North Europe}")
     private String armZoneParameterDefault;
+
+    @Value("#{'${cb.azure.distrox.enabled.instance.types:}'.split(',')}")
+    private List<String> enabledDistroxInstanceTypes;
+
+    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> enabledDistroxInstanceTypes.stream()
+            .filter(it -> !it.isEmpty())
+            .map(it -> getMachineType(it))
+            .collect(Collectors.toList())
+            .stream()
+            .anyMatch(di -> vmt.value().startsWith(di));
 
     @Inject
     private AzureClientService azureClientService;
@@ -89,6 +100,10 @@ public class AzurePlatformResources implements PlatformResources {
     @PostConstruct
     public void init() {
         regionCoordinates = readRegionCoordinates(resourceDefinition("zone-coordinates"));
+    }
+
+    private String getMachineType(String it) {
+        return it.trim().replaceAll("\\s+", "");
     }
 
     public String resourceDefinition(String resource) {
@@ -222,6 +237,20 @@ public class AzurePlatformResources implements PlatformResources {
         cloudVmResponses.put(region.value(), types);
         defaultCloudVmResponses.put(region.value(), defaultVmType);
         return new CloudVmTypes(cloudVmResponses, defaultCloudVmResponses);
+    }
+
+    @Override
+    @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + 'distrox'")
+    public CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        CloudVmTypes cloudVmTypes = virtualMachines(cloudCredential, region, filters);
+        Map<String, Set<VmType>> returnVmResponses = new HashMap<>();
+        Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
+        for (Entry<String, Set<VmType>> stringSetEntry : cloudVmResponses.entrySet()) {
+            returnVmResponses.put(stringSetEntry.getKey(), stringSetEntry.getValue().stream()
+                    .filter(enabledDistroxInstanceTypeFilter)
+                    .collect(Collectors.toSet()));
+        }
+        return new CloudVmTypes(returnVmResponses, cloudVmTypes.getDefaultCloudVmResponses());
     }
 
     @Override
