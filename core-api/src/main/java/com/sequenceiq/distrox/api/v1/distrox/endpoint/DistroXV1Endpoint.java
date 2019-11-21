@@ -129,7 +129,7 @@ public interface DistroXV1Endpoint {
     void retryByName(@PathParam("name") String name);
 
     @GET
-    @Path("{name}/retry")
+    @Path("name/{name}/retry")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.StackOpDescription.LIST_RETRYABLE_FLOWS, produces = ContentType.JSON, notes = Notes.LIST_RETRYABLE_NOTES,
             nickname = "listRetryableFlowsDistroXV1")
