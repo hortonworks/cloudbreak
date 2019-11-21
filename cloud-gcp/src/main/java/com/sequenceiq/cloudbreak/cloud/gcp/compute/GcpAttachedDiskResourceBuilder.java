@@ -170,7 +170,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
 
         if (!volumeSetAttributes.getDeleteOnTermination()) {
-            resource.setInstanceId(null);
+            resource.setStatus(CommonStatus.DETACHED);
             volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
             resource.putParameter(CloudResource.ATTRIBUTES, volumeSetAttributes);
             resourceNotifier.notifyUpdate(resource, auth.getCloudContext());

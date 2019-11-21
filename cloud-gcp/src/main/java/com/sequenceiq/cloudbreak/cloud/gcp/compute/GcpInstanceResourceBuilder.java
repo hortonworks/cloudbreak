@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -203,6 +204,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private void updateDiskSetWithInstanceName(AuthenticatedContext auth, List<CloudResource> computeResources, Instance instance) {
         for (CloudResource resource : filterResourcesByType(computeResources, ResourceType.GCP_ATTACHED_DISKSET)) {
             resource.setInstanceId(instance.getName());
+            resource.setStatus(CommonStatus.CREATED);
             persistenceNotifier.notifyUpdate(resource, auth.getCloudContext());
         }
     }

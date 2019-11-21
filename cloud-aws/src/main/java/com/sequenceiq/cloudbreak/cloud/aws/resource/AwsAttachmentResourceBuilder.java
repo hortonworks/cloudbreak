@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
@@ -93,6 +94,7 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
         }
 
         volumeSet.setInstanceId(instance.getInstanceId());
+        volumeSet.setStatus(CommonStatus.CREATED);
         return List.of(volumeSet);
     }
 

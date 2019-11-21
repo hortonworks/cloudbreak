@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
-import com.sequenceiq.common.api.type.CommonStatus;
 
 @Component(ResourceDeleteThread.NAME)
 @Scope("prototype")
@@ -62,7 +61,7 @@ public class ResourceDeleteThread implements Callable<ResourceRequestResult<List
     @Override
     public ResourceRequestResult<List<CloudResourceStatus>> call() throws Exception {
         LOGGER.debug("Deleting compute resource {}", resource);
-        if (resource.getStatus() == CommonStatus.CREATED) {
+        if (resource.getStatus().resourceExists()) {
             CloudResource deletedResource;
             try {
                 deletedResource = builder.delete(context, auth, resource);

@@ -255,7 +255,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         boolean anyDeleted = cloudResourceStatuses.stream().map(CloudResourceStatus::getStatus).anyMatch(ResourceStatus.DELETED::equals);
         if (!volumeSetAttributes.getDeleteOnTermination() && !anyDeleted) {
             LOGGER.debug("Volumes will be preserved.");
-            resource.setInstanceId(null);
+            resource.setStatus(CommonStatus.DETACHED);
             volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
             resource.putParameter(CloudResource.ATTRIBUTES, volumeSetAttributes);
             resourceNotifier.notifyUpdate(resource, auth.getCloudContext());

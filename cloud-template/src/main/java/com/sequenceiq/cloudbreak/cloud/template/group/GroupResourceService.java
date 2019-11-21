@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.cloud.template.ResourceNotNeededException;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
-import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -91,7 +90,7 @@ public class GroupResourceService {
             GroupResourceBuilder<ResourceBuilderContext> builder = builderChain.get(i);
             List<CloudResource> specificResources = getResources(resources, builder.resourceType());
             for (CloudResource resource : specificResources) {
-                if (resource.getStatus() == CommonStatus.CREATED) {
+                if (resource.getStatus().resourceExists()) {
                     CloudResource deletedResource = builder.delete(context, auth, resource, network);
                     if (deletedResource != null) {
                         PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(
