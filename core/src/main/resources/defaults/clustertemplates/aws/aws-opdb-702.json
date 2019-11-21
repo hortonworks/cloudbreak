@@ -13,17 +13,6 @@
         "name": "master",
         "nodeCount": 2,
         "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        },
         "template": {
           "attachedVolumes": [
             {
@@ -49,19 +38,6 @@
         "name": "gateway",
         "nodeCount": 1,
         "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22",
-                "443",
-                "9443"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        },
         "template": {
           "attachedVolumes": [
             {
@@ -87,17 +63,6 @@
         "name": "leader",
         "nodeCount": 1,
         "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        },
         "template": {
           "attachedVolumes": [
             {
@@ -123,17 +88,6 @@
         "name": "worker",
         "nodeCount": 3,
         "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        },
         "template": {
           "attachedVolumes": [
             {

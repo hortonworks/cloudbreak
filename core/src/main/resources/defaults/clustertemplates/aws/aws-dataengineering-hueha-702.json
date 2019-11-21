@@ -31,20 +31,7 @@
         },
         "nodeCount": 1,
         "type": "GATEWAY",
-        "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "9443",
-                "443",
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        }
+        "recoveryMode": "MANUAL"
       },
       {
         "name": "compute",
@@ -68,18 +55,7 @@
         },
         "nodeCount": 0,
         "type": "CORE",
-        "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        }
+        "recoveryMode": "MANUAL"
       },
       {
         "name": "worker",
@@ -103,18 +79,7 @@
         },
         "nodeCount": 3,
         "type": "CORE",
-        "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        }
+        "recoveryMode": "MANUAL"
       }
     ]
   }
