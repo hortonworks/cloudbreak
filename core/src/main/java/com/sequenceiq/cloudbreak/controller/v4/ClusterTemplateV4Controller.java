@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.dto.Clus
 import static java.util.stream.Collectors.toSet;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -77,7 +78,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
         try {
             ClusterTemplate clusterTemplate = transactionService.required(() -> clusterTemplateService.getByNameForWorkspaceId(name, workspaceId));
             ClusterTemplateV4Response response = transactionService.required(() -> converterUtil.convert(clusterTemplate, ClusterTemplateV4Response.class));
-            environmentServiceDecorator.prepareEnvironment(response);
+            Optional.ofNullable(response.getEnvironmentCrn()).ifPresent(crn -> environmentServiceDecorator.prepareEnvironment(response));
             return response;
         } catch (TransactionExecutionException cse) {
             LOGGER.warn("Unable to find cluster definition due to " + cse.getMessage(), cse.getCause());
