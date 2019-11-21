@@ -11,7 +11,7 @@
       "longitude": "114.1850093"
     },
     {
-      "name": "South East Asia",
+      "name": "Southeast Asia",
       "latitude": "1.293033466",
       "longitude": "103.8558207"
     },
@@ -66,26 +66,6 @@
       "longitude": "121.4365047"
     },
     {
-      "name": "China North",
-      "latitude": "39.92889223",
-      "longitude": "116.3882857"
-    },
-    {
-      "name": "US Gov Iowa",
-      "latitude": "41.66108624",
-      "longitude": "-91.52997929"
-    },
-    {
-      "name": "US DoD Central",
-      "latitude": "41.66108624",
-      "longitude": "-91.52997929"
-    },
-    {
-      "name": "US Gov Arizona",
-      "latitude": "34.59001914",
-      "longitude": "-112.4477723"
-    },
-    {
       "name": "West Europe",
       "latitude": "52.34996869",
       "longitude": "4.916640176"
@@ -96,19 +76,9 @@
       "longitude": "-108.7584367"
     },
     {
-      "name": "China East",
-      "latitude": "31.21645245",
-      "longitude": "121.4365047"
-    },
-    {
       "name": "Central India",
       "latitude": "18.53001752",
       "longitude": "73.85000362"
-    },
-    {
-      "name": "Germany Central",
-      "latitude": "50.09997683",
-      "longitude": "8.67501542"
     },
     {
       "name": "UK West",
@@ -124,11 +94,6 @@
       "name": "West India",
       "latitude": "19.01699038",
       "longitude": "72.8569893"
-    },
-    {
-      "name": "US Gov Virginia",
-      "latitude": "47.52367413",
-      "longitude": "-92.53640365"
     },
     {
       "name": "South India",
@@ -156,19 +121,9 @@
       "longitude": "-91.52997929"
     },
     {
-      "name": "US DoD East",
-      "latitude": "47.52367413",
-      "longitude": "-92.53640365"
-    },
-    {
       "name": "UK South",
       "latitude": "51.49999473",
       "longitude": "-0.116721844"
-    },
-    {
-      "name": "Germany Northeast",
-      "latitude": "52.13042137",
-      "longitude": "11.62000362"
     },
     {
       "name": "US Gov Texas",
@@ -219,16 +174,6 @@
       "name": "South Africa West",
       "latitude": "-34.075691",
       "longitude": "18.843266"
-    },
-    {
-      "name": "China North 2",
-      "latitude": "39.92889223",
-      "longitude": "116.3882857"
-    },
-    {
-      "name": "China East 2",
-      "latitude": "31.21645245",
-      "longitude": "121.4365047"
     }
   ]
 }
