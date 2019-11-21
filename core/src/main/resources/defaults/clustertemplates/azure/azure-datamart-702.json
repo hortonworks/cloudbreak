@@ -51,7 +51,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D3_v2",
+          "instanceType": "Standard_D8_v3",
           "rootVolume": {
             "size": 50
           }
@@ -77,7 +77,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D3_v2",
+          "instanceType": "Standard_D8_v3",
           "rootVolume": {
             "size": 50
           }

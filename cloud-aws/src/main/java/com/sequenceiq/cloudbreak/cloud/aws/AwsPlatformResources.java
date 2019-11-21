@@ -572,7 +572,7 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
+    @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + 'distrox'")
     public CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return getCloudVmTypes(cloudCredential, region, filters, enabledDistroxInstanceTypeFilter);
     }
