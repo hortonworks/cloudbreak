@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -165,7 +166,7 @@ public class AwsUpscaleService {
     private List<CloudResource> getReattachableVolumeSets(List<Group> scaledGroups, List<CloudResource> resources) {
         return resources.stream()
                 .filter(cloudResource -> ResourceType.AWS_VOLUMESET.equals(cloudResource.getType()))
-                .filter(cloudResource -> Objects.isNull(cloudResource.getInstanceId()))
+                .filter(cloudResource -> CommonStatus.DETACHED.equals(cloudResource.getStatus()))
                 .collect(Collectors.toList());
     }
 

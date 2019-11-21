@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -83,7 +84,7 @@ public class GcpResourceConnector extends AbstractResourceConnector {
         List<CloudResource> diskSets = resources.stream()
                 .filter(cloudResource -> scalingGroup.getName().equalsIgnoreCase(cloudResource.getGroup()))
                 .filter(cloudResource -> ResourceType.GCP_ATTACHED_DISKSET.equals(cloudResource.getType()))
-                .filter(cloudResource -> StringUtils.isEmpty(cloudResource.getInstanceId()))
+                .filter(cloudResource -> StringUtils.isEmpty(cloudResource.getInstanceId()) || CommonStatus.DETACHED.equals(cloudResource.getStatus()))
                 .collect(Collectors.toList());
         for (int i = 0; i < diskSets.size(); i++) {
             CloudResource cloudResource = diskSets.get(i);

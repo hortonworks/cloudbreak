@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.azure.upscale;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -16,7 +15,6 @@ import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -33,12 +31,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
 public class AzureUpscaleService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureResourceConnector.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureUpscaleService.class);
 
     @Inject
     private AzureUtils azureUtils;
@@ -109,7 +108,7 @@ public class AzureUpscaleService {
     private List<CloudResource> getReattachableVolumeSets(List<CloudResource> resources) {
         return resources.stream()
                 .filter(cloudResource -> ResourceType.AZURE_VOLUMESET.equals(cloudResource.getType()))
-                .filter(cloudResource -> Objects.isNull(cloudResource.getInstanceId()))
+                .filter(cloudResource -> CommonStatus.DETACHED.equals(cloudResource.getStatus()))
                 .collect(Collectors.toList());
     }
 }

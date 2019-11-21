@@ -19,7 +19,7 @@ public class CloudResource extends DynamicModel {
 
     private final ResourceType type;
 
-    private final CommonStatus status;
+    private CommonStatus status;
 
     private final String name;
 
@@ -86,6 +86,10 @@ public class CloudResource extends DynamicModel {
 
     public String getInstanceId() {
         return instanceId;
+    }
+
+    public void setStatus(CommonStatus status) {
+        this.status = status;
     }
 
     public void setInstanceId(String instanceId) {

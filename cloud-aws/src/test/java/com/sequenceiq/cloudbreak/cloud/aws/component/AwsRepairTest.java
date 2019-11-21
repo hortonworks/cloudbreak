@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -127,9 +126,9 @@ public class AwsRepairTest extends AwsComponentTest {
                         .name(AWS_SUBNET_ID)
                         .type(ResourceType.AWS_SUBNET)
                         .build(),
-                createVolumeResource(VOLUME_ID_1, null, SIZE_DISK_1, FSTAB_1),
-                createVolumeResource(VOLUME_ID_2, null, SIZE_DISK_2, FSTAB_2),
-                createVolumeResource(VOLUME_ID_3, INSTANCE_ID_3, SIZE_DISK_2, FSTAB_2));
+                createVolumeResource(VOLUME_ID_1, INSTANCE_ID_1, SIZE_DISK_1, FSTAB_1, CommonStatus.DETACHED),
+                createVolumeResource(VOLUME_ID_2, INSTANCE_ID_2, SIZE_DISK_2, FSTAB_2, CommonStatus.DETACHED),
+                createVolumeResource(VOLUME_ID_3, INSTANCE_ID_3, SIZE_DISK_2, FSTAB_2, CommonStatus.CREATED));
 
         InMemoryStateStore.putStack(1L, PollGroup.POLLABLE);
 
@@ -218,8 +217,8 @@ public class AwsRepairTest extends AwsComponentTest {
         CloudInstance secondCloudInstance = new CloudInstance(INSTANCE_ID_2, instanceTemplate, authentication);
         List<CloudInstance> cloudInstancesToRemove = List.of(firstCloudInstance, secondCloudInstance);
 
-        CloudResource instance1VolumeResource = createVolumeResource(VOLUME_ID_1, INSTANCE_ID_1, SIZE_DISK_1, FSTAB_1);
-        CloudResource instance2VolumeResource = createVolumeResource(VOLUME_ID_2, INSTANCE_ID_2, SIZE_DISK_2, FSTAB_2);
+        CloudResource instance1VolumeResource = createVolumeResource(VOLUME_ID_1, INSTANCE_ID_1, SIZE_DISK_1, FSTAB_1, CommonStatus.CREATED);
+        CloudResource instance2VolumeResource = createVolumeResource(VOLUME_ID_2, INSTANCE_ID_2, SIZE_DISK_2, FSTAB_2, CommonStatus.CREATED);
         List<CloudResource> resources = List.of(instance1VolumeResource, instance2VolumeResource);
 
         AuthenticatedContext authenticatedContext = getAuthenticatedContext();
@@ -228,13 +227,15 @@ public class AwsRepairTest extends AwsComponentTest {
 
         verify(persistenceNotifier).notifyUpdate(argThat(cloudResource -> ResourceType.AWS_VOLUMESET.equals(cloudResource.getType())
                         && VOLUME_ID_1.equals(cloudResource.getName())
-                        && Objects.isNull(cloudResource.getInstanceId())
+                        && INSTANCE_ID_1.equals(cloudResource.getInstanceId())
+                        && CommonStatus.DETACHED.equals(cloudResource.getStatus())
                         && cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).getDeleteOnTermination()),
                 eq(authenticatedContext.getCloudContext()));
 
         verify(persistenceNotifier).notifyUpdate(argThat(cloudResource -> ResourceType.AWS_VOLUMESET.equals(cloudResource.getType())
                         && VOLUME_ID_2.equals(cloudResource.getName())
-                        && Objects.isNull(cloudResource.getInstanceId())
+                        && INSTANCE_ID_2.equals(cloudResource.getInstanceId())
+                        && CommonStatus.DETACHED.equals(cloudResource.getStatus())
                         && cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).getDeleteOnTermination()),
                 eq(authenticatedContext.getCloudContext()));
 
@@ -253,7 +254,7 @@ public class AwsRepairTest extends AwsComponentTest {
                 && argument.getMaxSize().equals(1)));
     }
 
-    private CloudResource createVolumeResource(String volumeId, String instanceId, int sizeDisk, String fstab) {
+    private CloudResource createVolumeResource(String volumeId, String instanceId, int sizeDisk, String fstab, CommonStatus status) {
         Map<String, Object> attributes = new HashMap<>();
         attributes.put(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
                 .withAvailabilityZone(AVAILABILITY_ZONE)
@@ -264,7 +265,7 @@ public class AwsRepairTest extends AwsComponentTest {
         return CloudResource.builder()
                 .group(WORKER_GROUP)
                 .name(volumeId)
-                .status(CommonStatus.CREATED)
+                .status(status)
                 .type(ResourceType.AWS_VOLUMESET)
                 .instanceId(instanceId)
                 .persistent(true)
