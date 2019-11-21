@@ -15,9 +15,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -53,6 +55,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.authorization.lookup.WorkspaceAwareRepositoryLookupService;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
@@ -62,7 +65,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
 import com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.flow.ha.NodeConfig;
@@ -86,11 +88,17 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
 
     private static final int MAX_CONTENT_LENGTH = 65535;
 
+    private static final String ID = "id";
+
+    private static final String CRN = "crn";
+
     private final List<String> skippedHeadersList = Lists.newArrayList("authorization");
 
     private final Map<String, WorkspaceResourceRepository<?, ?>> pathRepositoryMap = new HashMap<>();
 
-    private final Pattern extendRestParamsFromResponsePattern = Pattern.compile("\"id\":([0-9]*)");
+    private final Pattern extractIdRestParamFromResponsePattern = Pattern.compile("\"" + ID + "\":([0-9]*)");
+
+    private final Pattern extractCrnRestParamFromResponsePattern = Pattern.compile("\"" + CRN + "\":\"([0-9a-zA-Z:-]*)\"");
 
     @Inject
     private NodeConfig nodeConfig;
@@ -236,41 +244,72 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     }
 
     protected void extendRestParamsFromResponse(Map<String, String> params, CharSequence responseBody) {
-        if (responseBody != null && isResourceIdIsAbsentOrNull(params)) {
-            String resourceId = extractResourceIdFromJson(responseBody);
-            if (StringUtils.isEmpty(resourceId)) {
-                Matcher matcher = extendRestParamsFromResponsePattern.matcher(responseBody);
-                if (matcher.find() && matcher.groupCount() >= 1) {
-                    resourceId = matcher.group(1);
-                }
-            }
+        boolean resourceIdIsAbsentOrNull = isResourceIdIsAbsentOrNull(params);
+        boolean resourceCrnIsAbsentOrNull = isResourceCrnIsAbsentOrNull(params);
+        if (responseBody != null && (resourceIdIsAbsentOrNull || resourceCrnIsAbsentOrNull)) {
+            Set<String> resourcesParamsToCollect = new HashSet<>();
+            decorateSetWithValueIfNecessary(resourceIdIsAbsentOrNull, ID, resourcesParamsToCollect);
+            decorateSetWithValueIfNecessary(resourceCrnIsAbsentOrNull, CRN, resourcesParamsToCollect);
+            Map<String, String> resourceParams = extractResourceValueFromJson(responseBody, resourcesParamsToCollect);
+            extractResourceParamWithPattern(responseBody, resourceIdIsAbsentOrNull, resourceParams, ID, extractIdRestParamFromResponsePattern);
+            extractResourceParamWithPattern(responseBody, resourceCrnIsAbsentOrNull, resourceParams, CRN, extractCrnRestParamFromResponsePattern);
+            addExtractedValuesToParameters(params, resourceParams, ID, RESOURCE_ID);
+            addExtractedValuesToParameters(params, resourceParams, CRN, RESOURCE_CRN);
+        }
+    }
 
-            if (resourceId != null) {
-                params.put(RESOURCE_ID, resourceId);
+    private void addExtractedValuesToParameters(Map<String, String> params, Map<String, String> resourceParams, String id, String resourceId) {
+        if (resourceParams.containsKey(id)) {
+            params.put(resourceId, resourceParams.get(id));
+        }
+    }
+
+    private void extractResourceParamWithPattern(CharSequence responseBody, boolean resourceIdIsAbsentOrNull, Map<String, String> resourceParams, String key,
+            Pattern pattern) {
+        if (resourceIdIsAbsentOrNull && !resourceParams.containsKey(key)) {
+            Matcher matcher = pattern.matcher(responseBody);
+            if (matcher.find() && matcher.groupCount() >= 1) {
+                resourceParams.put(key, matcher.group(1));
             }
         }
     }
 
-    private String extractResourceIdFromJson(CharSequence responseBody) {
-        String resourceId = null;
+    private void decorateSetWithValueIfNecessary(boolean decorate, String value, Set<String> set) {
+        if (decorate) {
+            set.add(value);
+        }
+    }
+
+    private Map<String, String> extractResourceValueFromJson(CharSequence responseBody, Set<String> pathes) {
+        Map<String, String> resourceMap = new HashMap<>(pathes.size());
         try {
             if (JsonUtil.isValid(responseBody.toString())) {
                 JsonNode jsonNode = JsonUtil.readTree(responseBody.toString());
-                JsonNode idNode = jsonNode.path("id");
-                if (idNode.isMissingNode()) {
-                    LOGGER.debug("Response was a JSON but no ID available");
-                } else {
-                    resourceId = idNode.asText();
+                for (String path : pathes) {
+                    JsonNode idNode = jsonNode.path(path);
+                    if (idNode.isMissingNode()) {
+                        LOGGER.debug("Response was a JSON but no " + path + " available");
+                    } else {
+                        resourceMap.put(path, idNode.asText());
+                    }
                 }
             }
         } catch (IOException e) {
             LOGGER.error("Json parsing failed for ", e);
         }
-        return resourceId;
+        return resourceMap;
     }
 
     private boolean isResourceIdIsAbsentOrNull(Map<String, String> params) {
-        return !params.containsKey(RESOURCE_ID) || params.get(RESOURCE_ID) == null;
+        return isParameterAbsentOrNull(params, RESOURCE_ID);
+    }
+
+    private boolean isParameterAbsentOrNull(Map<String, String> params, String parameter) {
+        return !params.containsKey(parameter) || params.get(parameter) == null;
+    }
+
+    private boolean isResourceCrnIsAbsentOrNull(Map<String, String> params) {
+        return isParameterAbsentOrNull(params, RESOURCE_CRN);
     }
 
     private boolean isLoggingEnabled(ContainerRequestContext requestContext) {

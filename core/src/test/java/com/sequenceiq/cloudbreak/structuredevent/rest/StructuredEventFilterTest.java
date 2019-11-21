@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest;
 
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_CRN;
 import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -125,9 +126,47 @@ class StructuredEventFilterTest {
     }
 
     @Test
+    public void testResourceCrnParsingWhenValidJsonIsReturned() {
+        Map<String, String> params = new HashMap<>();
+        underTest.extendRestParamsFromResponse(params, "{\"crn\": \"crn:cdp:datahub:us-west-1:cloudera:cluster:b20f9cb7-05fa-48ce-b249-02f5ab755808\"}");
+        assertEquals(params.get(RESOURCE_CRN), "crn:cdp:datahub:us-west-1:cloudera:cluster:b20f9cb7-05fa-48ce-b249-02f5ab755808",
+                "Should find resourceCrn in valid JSON response");
+    }
+
+    @Test
+    public void testResourceCrnAndIdParsingWhenValidJsonIsReturned() {
+        Map<String, String> params = new HashMap<>();
+        underTest.extendRestParamsFromResponse(params,
+                "{\"crn\": \"crn:cdp:datahub:us-west-1:cloudera:cluster:b20f9cb7-05fa-48ce-b249-02f5ab755808\", \"id\": \"12345\"}");
+        assertEquals(params.get(RESOURCE_CRN), "crn:cdp:datahub:us-west-1:cloudera:cluster:b20f9cb7-05fa-48ce-b249-02f5ab755808",
+                "Should find resourceCrn in valid JSON response");
+        assertEquals(params.get(RESOURCE_ID), "12345", "Should find resourceId in valid JSON response");
+    }
+
+    @Test
     public void testResourceIdParsingWhenNonJson() {
         Map<String, String> params = new HashMap<>();
         underTest.extendRestParamsFromResponse(params, "\"id\":12345 Something other written here");
+        assertEquals(params.get(RESOURCE_ID), "12345", "Should find resourceId in response");
+    }
+
+    @Test
+    public void testResourceCrnParsingWhenNonJson() {
+        Map<String, String> params = new HashMap<>();
+        underTest.extendRestParamsFromResponse(params,
+                "\"crn\":\"crn:cdp:datahub:us-west-1:cloudera:cluster:b20f9cb7-05fa-48ce-b249-02f5ab755808\" Something other written here");
+        assertEquals(params.get(RESOURCE_CRN), "crn:cdp:datahub:us-west-1:cloudera:cluster:b20f9cb7-05fa-48ce-b249-02f5ab755808",
+                "Should find resourceCrn in response");
+    }
+
+    @Test
+    public void testResourceCrnAndIdParsingWhenNonJson() {
+        Map<String, String> params = new HashMap<>();
+        underTest.extendRestParamsFromResponse(params,
+                "\"crn\":\"crn:cdp:datahub:us-west-1:cloudera:cluster:b20f9cb7-05fa-48ce-b249-02f5ab755808\" Something other written here "
+                        + "\"id\":12345 Something other written here");
+        assertEquals(params.get(RESOURCE_CRN), "crn:cdp:datahub:us-west-1:cloudera:cluster:b20f9cb7-05fa-48ce-b249-02f5ab755808",
+                "Should find resourceCrn in response");
         assertEquals(params.get(RESOURCE_ID), "12345", "Should find resourceId in response");
     }
 
