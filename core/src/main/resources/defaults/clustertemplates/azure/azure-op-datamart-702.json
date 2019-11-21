@@ -33,20 +33,7 @@
         },
         "nodeCount": 1,
         "type": "GATEWAY",
-        "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "9443",
-                "443",
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        }
+        "recoveryMode": "MANUAL"
       },
       {
         "name": "master2",
@@ -72,18 +59,7 @@
         },
         "nodeCount": 1,
         "type": "CORE",
-        "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        }
+        "recoveryMode": "MANUAL"
       },
       {
         "name": "master3",
@@ -109,18 +85,7 @@
         },
         "nodeCount": 1,
         "type": "CORE",
-        "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        }
+        "recoveryMode": "MANUAL"
       },
       {
         "name": "coordinator",
@@ -146,18 +111,7 @@
         },
         "nodeCount": 1,
         "type": "CORE",
-        "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        }
+        "recoveryMode": "MANUAL"
       },
       {
         "name": "executor",
@@ -183,18 +137,7 @@
         },
         "nodeCount": 3,
         "type": "CORE",
-        "recoveryMode": "MANUAL",
-        "securityGroup": {
-          "securityRules": [
-            {
-              "subnet": "0.0.0.0/0",
-              "ports": [
-                "22"
-              ],
-              "protocol": "tcp"
-            }
-          ]
-        }
+        "recoveryMode": "MANUAL"
       }
     ]
   }
