@@ -245,6 +245,7 @@ public class StackSyncService {
     private void updateMetaDataToRunning(InstanceMetaData instanceMetaData) {
         LOGGER.info("Instance '{}' state to RUNNING.", instanceMetaData.getInstanceId());
         instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
+        instanceMetaData.setStatusReason("Services running");
         instanceMetaDataService.save(instanceMetaData);
     }
 

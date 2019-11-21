@@ -739,8 +739,13 @@ public class ClusterService {
 
     private boolean isRepairNeededForHost(ManualClusterRepairMode repairMode, Set<String> instanceHostNames, InstanceMetaData instanceMetaData) {
         return repairMode == ManualClusterRepairMode.HOST_GROUP
-                ? instanceMetaData.getInstanceStatus() == InstanceStatus.SERVICES_UNHEALTHY
+                ? isUnhealthy(instanceMetaData)
                 : instanceHostNames.contains(instanceMetaData.getDiscoveryFQDN());
+    }
+
+    private boolean isUnhealthy(InstanceMetaData instanceMetaData) {
+        return instanceMetaData.getInstanceStatus() == InstanceStatus.SERVICES_UNHEALTHY ||
+                instanceMetaData.getInstanceStatus() == InstanceStatus.DELETED_ON_PROVIDER_SIDE;
     }
 
     private Set<String> getInstanceHostNames(ManualClusterRepairMode repairMode, Stack stack, List<String> nodeIds) {

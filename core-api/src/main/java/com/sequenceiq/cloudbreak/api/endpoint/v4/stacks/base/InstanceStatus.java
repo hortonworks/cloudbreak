@@ -21,6 +21,7 @@ public enum InstanceStatus {
             case SERVICES_HEALTHY:
                 return "HEALTHY";
             case DECOMMISSION_FAILED:
+            case DELETED_ON_PROVIDER_SIDE:
             case SERVICES_UNHEALTHY:
                 return "UNHEALTHY";
             case WAITING_FOR_REPAIR:
