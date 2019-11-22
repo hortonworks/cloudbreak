@@ -122,6 +122,16 @@
             <name>knoxsso.cookie.secure.only</name>
             <value>true</value>
         </param>
+        {% if salt['pillar.get']('gateway:userfacingfqdn') is defined and salt['pillar.get']('gateway:userfacingfqdn')|length > 1 %}
+        <!--
+        Scope the KnoxSSO cookie to the Knox host only instead of auto determining the cookie domain.
+        The value * is special and means replace it with the domain of the request itself.
+        -->
+        <param>
+            <name>knoxsso.cookie.domain.suffix</name>
+            <value>*</value>
+        </param>
+        {% endif %}
         <param>
             <!-- 24 hours in milliseconds = 86400000 -->
             <name>knoxsso.token.ttl</name>
