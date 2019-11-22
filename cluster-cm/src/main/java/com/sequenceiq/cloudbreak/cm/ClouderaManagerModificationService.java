@@ -135,7 +135,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 activateParcel(clustersResourceApi);
                 clouderaManagerRoleRefreshService.refreshClusterRoles(apiClient, stack);
             }
-            return upscaleHostNames;
+            return instanceMetaDatas.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
         } catch (ApiException e) {
             LOGGER.warn("Failed to upscale: {}", e.getResponseBody(), e);
             throw new CloudbreakException("Failed to upscale", e);
