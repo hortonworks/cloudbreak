@@ -17,6 +17,8 @@ import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementPro
 import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListMinaSshdServicesRequest;
 import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListMinaSshdServicesResponse;
 import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.MinaSshdService;
+import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.UnregisterSshTunnelingKeyRequest;
+import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.UnregisterSshTunnelingKeyResponse;
 import com.sequenceiq.cloudbreak.ccm.exception.CcmException;
 import com.sequenceiq.cloudbreak.ccmimpl.altus.config.MinaSshdManagementClientConfig;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
@@ -69,10 +71,8 @@ public class MinaSshdManagementClient {
                 .setAccountId(accountId);
 
         try {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Calling acquireMinaSshdService with requestId: {}, accountId: {}",
-                        requestId, accountId);
-            }
+            LOGGER.debug("Calling acquireMinaSshdService with requestId: {}, accountId: {}",
+                    requestId, accountId);
             AcquireMinaSshdServiceResponse response = blockingStub.acquireMinaSshdService(requestBuilder.build());
             if (response == null) {
                 throw new CcmException("Got null response from MinaSshdManagementService acquireMinaSshdService gRPC call", false);
@@ -89,9 +89,7 @@ public class MinaSshdManagementClient {
             Status status = e.getStatus();
             Status.Code code = status.getCode();
             boolean retryable = GrpcUtil.isRetryable(code);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Got status code: {}, retryable: {}", code, retryable);
-            }
+            LOGGER.debug("Got status code: {}, retryable: {}", code, retryable);
             throw new CcmException(message, e, retryable);
         }
     }
@@ -123,10 +121,8 @@ public class MinaSshdManagementClient {
         ListMinaSshdServicesResponse response;
         do {
             try {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Calling listMinaSshdServices with requestId: {}, accountId: {}, serviceIds: [{}]",
-                            requestId, accountId, serviceIds);
-                }
+                LOGGER.debug("Calling listMinaSshdServices with requestId: {}, accountId: {}, serviceIds: [{}]",
+                        requestId, accountId, serviceIds);
                 response = minaSshdManagementBlockingStub.listMinaSshdServices(requestBuilder.build());
                 if (response == null) {
                     throw new CcmException("Got null response from MinaSshdManagementService listMinaSshdServices gRPC call", false);
@@ -143,9 +139,7 @@ public class MinaSshdManagementClient {
                 Status status = e.getStatus();
                 Status.Code code = status.getCode();
                 boolean retryable = GrpcUtil.isRetryable(code);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Got status code: {}, retryable: {}", code, retryable);
-                }
+                LOGGER.debug("Got status code: {}, retryable: {}", code, retryable);
                 throw new CcmException(message, e, retryable);
             }
             requestBuilder.setPageToken(response.getNextPageToken());
@@ -178,10 +172,8 @@ public class MinaSshdManagementClient {
                 .setKeyId(keyId);
 
         try {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Calling generateAndRegisterSshTunnelingKeyPair with requestId: {}, accountId: {}, minaSshdServiceId: {}, keyId: {}",
-                        requestId, accountId, minaSshdServiceId, keyId);
-            }
+            LOGGER.debug("Calling generateAndRegisterSshTunnelingKeyPair with requestId: {}, accountId: {}, minaSshdServiceId: {}, keyId: {}",
+                    requestId, accountId, minaSshdServiceId, keyId);
             GenerateAndRegisterSshTunnelingKeyPairResponse response = blockingStub.generateAndRegisterSshTunnelingKeyPair(requestBuilder.build());
             if (response == null) {
                 throw new CcmException("Got null response from MinaSshdManagementService generateAndRegisterSshTunnelingKeyPair gRPC call", false);
@@ -193,9 +185,46 @@ public class MinaSshdManagementClient {
             Status status = e.getStatus();
             Status.Code code = status.getCode();
             boolean retryable = GrpcUtil.isRetryable(code);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Got status code: {}, retryable: {}", code, retryable);
+            LOGGER.debug("Got status code: {}, retryable: {}", code, retryable);
+            throw new CcmException(message, e, retryable);
+        }
+    }
+
+    /**
+     * Wraps call to unregisterSshTunnelingKey.
+     *
+     * @param requestId         the request ID for the request
+     * @param minaSshdServiceId the minasshd service ID
+     * @param keyId             the key ID
+     * @return the response
+     * @throws CcmException if an exception occurs
+     */
+    public UnregisterSshTunnelingKeyResponse unregisterSshTunnelingKey(
+            String requestId, String minaSshdServiceId, String keyId) throws CcmException {
+        checkNotNull(requestId);
+        checkNotNull(minaSshdServiceId);
+        checkNotNull(keyId);
+
+        MinaSshdManagementBlockingStub blockingStub = newStub(requestId);
+        UnregisterSshTunnelingKeyRequest.Builder requestBuilder = UnregisterSshTunnelingKeyRequest.newBuilder()
+                .setMinaSshdServiceId(minaSshdServiceId)
+                .setKeyId(keyId);
+
+        try {
+            LOGGER.debug("Calling unregisterSshTunnelingKey with requestId: {}, minaSshdServiceId: {}, keyId: {}",
+                    requestId, minaSshdServiceId, keyId);
+            UnregisterSshTunnelingKeyResponse response = blockingStub.unregisterSshTunnelingKey(requestBuilder.build());
+            if (response == null) {
+                throw new CcmException("Got null response from MinaSshdManagementService unregisterSshTunnelingKey gRPC call", false);
+            } else {
+                return response;
             }
+        } catch (StatusRuntimeException e) {
+            String message = "MinaSshdManagementService unregisterSshTunnelingKey gRPC call failed: " + e.getMessage();
+            Status status = e.getStatus();
+            Status.Code code = status.getCode();
+            boolean retryable = GrpcUtil.isRetryable(code);
+            LOGGER.debug("Got status code: {}, retryable: {}", code, retryable);
             throw new CcmException(message, e, retryable);
         }
     }
