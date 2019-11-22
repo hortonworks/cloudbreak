@@ -161,8 +161,8 @@ public class EnvironmentApiConverter {
             LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Azure");
             AzureParams azureParams = new AzureParams();
             azureParams.setNetworkId(network.getAzure().getNetworkId());
-            azureParams.setNoFirewallRules(network.getAzure().getNoFirewallRules());
-            azureParams.setNoPublicIp(network.getAzure().getNoPublicIp());
+            azureParams.setNoFirewallRules(Boolean.TRUE.equals(network.getAzure().getNoFirewallRules()));
+            azureParams.setNoPublicIp(Boolean.TRUE.equals(network.getAzure().getNoPublicIp()));
             azureParams.setResourceGroupName(network.getAzure().getResourceGroupName());
             builder.withAzure(azureParams);
         }
