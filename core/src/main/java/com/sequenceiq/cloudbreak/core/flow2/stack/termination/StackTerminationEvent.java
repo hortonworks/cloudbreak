@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.CcmKeyDeregisterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.ClusterProxyDeregisterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationSuccess;
@@ -12,6 +13,7 @@ public enum StackTerminationEvent implements FlowEvent {
     PRE_TERMINATION_FAILED_EVENT(EventSelectorUtil.selector(StackPreTerminationFailed.class)),
     PRE_TERMINATION_FINISHED_EVENT(EventSelectorUtil.selector(StackPreTerminationSuccess.class)),
     CLUSTER_PROXY_DEREGISTER_SUCCEEDED_EVENT(EventSelectorUtil.selector(ClusterProxyDeregisterSuccess.class)),
+    CCM_KEY_DEREGISTER_SUCCEEDED_EVENT(EventSelectorUtil.selector(CcmKeyDeregisterSuccess.class)),
     TERMINATION_FINISHED_EVENT(EventSelectorUtil.selector(TerminateStackResult.class)),
     TERMINATION_FAILED_EVENT(EventSelectorUtil.failureSelector(TerminateStackResult.class)),
     TERMINATION_FINALIZED_EVENT("TERMINATESTACKFINALIZED"),

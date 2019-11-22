@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
+import com.sequenceiq.cloudbreak.ccm.key.CcmResourceUtil;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
 import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
@@ -144,8 +145,6 @@ public class StackService implements ResourceIdProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
     private static final String SSH_USER_CB = "cloudbreak";
-
-    private static final int CCM_KEY_ID_LENGTH = 36;
 
     @Inject
     private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
@@ -565,8 +564,7 @@ public class StackService implements ResourceIdProvider {
 
             Map<KnownServiceIdentifier, Integer> tunneledServicePorts = builder.build();
 
-            // JSA TODO Use stack ID or something else instead?
-            String keyId = StringUtils.right(stack.getResourceCrn(), CCM_KEY_ID_LENGTH);
+            String keyId = CcmResourceUtil.getKeyId(stack.getResourceCrn());
             String actorCrn = Objects.requireNonNull(userCrn, "userCrn is null");
             ccmParameters = ccmParameterSupplier.getCcmParameters(actorCrn, accountId, keyId, tunneledServicePorts).orElse(null);
         }
