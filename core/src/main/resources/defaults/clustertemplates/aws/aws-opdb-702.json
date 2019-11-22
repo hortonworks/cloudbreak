@@ -1,6 +1,6 @@
 {
-  "name": "CDP 1.2 - Operational Database template",
-  "description": "",
+  "name": "CDP 1.2 - Operational Database for AWS",
+  "description": "Operational Database with Apache HBase",
   "type": "OTHER",
   "featureState": "RELEASED",
   "cloudPlatform": "AWS",

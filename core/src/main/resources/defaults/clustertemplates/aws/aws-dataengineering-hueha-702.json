@@ -1,7 +1,7 @@
 {
-  "name": "CDP 1.2 - Data Engineering Hue HA template",
-  "description": "",
-  "type": "DATAENGINEERING",
+  "name": "CDP 1.2 -  Data Engineering HA for AWS",
+  "description": "Data Engineering Hue HA with Apache Spark, Apache Hive, Hue, Apache Oozie",
+  "type": "DATAENGINEERING_HA",
   "featureState": "RELEASED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
