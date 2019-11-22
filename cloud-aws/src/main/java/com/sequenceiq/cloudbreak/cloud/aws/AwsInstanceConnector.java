@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -31,7 +32,9 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.poller.PollerUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
@@ -49,6 +52,9 @@ public class AwsInstanceConnector implements InstanceConnector {
 
     @Inject
     private AwsClient awsClient;
+
+    @Inject
+    private PollerUtil pollerUtil;
 
     @Value("${cb.aws.hostkey.verify:}")
     private boolean verifyHostKey;
@@ -77,36 +83,20 @@ public class AwsInstanceConnector implements InstanceConnector {
     )
     @Override
     public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
-        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
-
-        for (String group : getGroups(vms)) {
-            Collection<String> instances = new ArrayList<>();
-            Collection<CloudInstance> cloudInstances = new ArrayList<>();
-
-            for (CloudInstance vm : vms) {
-                if (vm.getTemplate().getGroupName().equals(group)) {
-                    instances.add(vm.getInstanceId());
-                    cloudInstances.add(vm);
-                }
+        try {
+            Collection<String> instances = instanceIdsWhichAreNotInCorrectState(vms, amazonEC2Client, "Running");
+            if (!instances.isEmpty()) {
+                amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
             }
-            try {
-                removeInstanceIdsWhichAreNotInCorrectState(instances, amazonEC2Client, "Running");
-                if (!instances.isEmpty()) {
-                    amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
-                }
-                for (CloudInstance cloudInstance : cloudInstances) {
-                    statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
-                }
-            } catch (AmazonEC2Exception e) {
-                handleEC2Exception(vms, e);
-            } catch (SdkClientException e) {
-                LOGGER.warn("Failed to send request to AWS: ", e);
-                throw e;
-            }
+        } catch (AmazonEC2Exception e) {
+            handleEC2Exception(vms, e);
+        } catch (SdkClientException e) {
+            LOGGER.warn("Failed to send start request to AWS: ", e);
+            throw e;
         }
-        return statuses;
+        return pollerUtil.waitFor(ac, vms, Sets.newHashSet(InstanceStatus.STARTED, InstanceStatus.FAILED));
     }
 
     @Retryable(
@@ -116,36 +106,20 @@ public class AwsInstanceConnector implements InstanceConnector {
     )
     @Override
     public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
-        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
-
-        for (String group : getGroups(vms)) {
-            Collection<String> instances = new ArrayList<>();
-            Collection<CloudInstance> cloudInstances = new ArrayList<>();
-
-            for (CloudInstance vm : vms) {
-                if (vm.getTemplate().getGroupName().equals(group)) {
-                    instances.add(vm.getInstanceId());
-                    cloudInstances.add(vm);
-                }
+        try {
+            Collection<String> instances = instanceIdsWhichAreNotInCorrectState(vms, amazonEC2Client, "Stopped");
+            if (!instances.isEmpty()) {
+                amazonEC2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instances));
             }
-            try {
-                removeInstanceIdsWhichAreNotInCorrectState(instances, amazonEC2Client, "Stopped");
-                if (!instances.isEmpty()) {
-                    amazonEC2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instances));
-                }
-                for (CloudInstance cloudInstance : cloudInstances) {
-                    statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
-                }
-            } catch (AmazonEC2Exception e) {
-                handleEC2Exception(vms, e);
-            } catch (SdkClientException e) {
-                LOGGER.warn("Failed to send request to AWS: ", e);
-                throw e;
-            }
+        } catch (AmazonEC2Exception e) {
+            handleEC2Exception(vms, e);
+        } catch (SdkClientException e) {
+            LOGGER.warn("Failed to send stop request to AWS: ", e);
+            throw e;
         }
-        return statuses;
+        return pollerUtil.waitFor(ac, vms, Sets.newHashSet(InstanceStatus.STOPPED, InstanceStatus.FAILED));
     }
 
     private void handleEC2Exception(List<CloudInstance> vms, AmazonEC2Exception e) throws AmazonEC2Exception {
@@ -227,7 +201,8 @@ public class AwsInstanceConnector implements InstanceConnector {
         return cloudVmInstanceStatuses;
     }
 
-    private void removeInstanceIdsWhichAreNotInCorrectState(Collection<String> instances, AmazonEC2 amazonEC2Client, String state) {
+    private Collection<String> instanceIdsWhichAreNotInCorrectState(List<CloudInstance> vms, AmazonEC2 amazonEC2Client, String state) {
+        Set<String> instances = vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toCollection(HashSet::new));
         DescribeInstancesResult describeInstances = amazonEC2Client.describeInstances(
                 new DescribeInstancesRequest().withInstanceIds(instances));
         for (Reservation reservation : describeInstances.getReservations()) {
@@ -237,16 +212,6 @@ public class AwsInstanceConnector implements InstanceConnector {
                 }
             }
         }
+        return instances;
     }
-
-    private Collection<String> getGroups(Iterable<CloudInstance> vms) {
-        Collection<String> groups = new HashSet<>();
-        for (CloudInstance vm : vms) {
-            if (!groups.contains(vm.getTemplate().getGroupName())) {
-                groups.add(vm.getTemplate().getGroupName());
-            }
-        }
-        return groups;
-    }
-
 }
