@@ -13,9 +13,10 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class SdxStartFlowConfig extends AbstractFlowConfiguration<SdxStartState, SdxStartEvent> {
+public class SdxStartFlowConfig extends AbstractFlowConfiguration<SdxStartState, SdxStartEvent> implements RetryableFlowConfiguration<SdxStartEvent> {
 
     private static final List<Transition<SdxStartState, SdxStartEvent>> TRANSITIONS = new Transition.Builder<SdxStartState, SdxStartEvent>()
             .defaultFailureEvent(SdxStartEvent.SDX_START_FAILED_EVENT)
@@ -68,5 +69,10 @@ public class SdxStartFlowConfig extends AbstractFlowConfiguration<SdxStartState,
     @Override
     protected FlowEdgeConfig<SdxStartState, SdxStartEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public SdxStartEvent getFailHandledEvent() {
+        return SdxStartEvent.SDX_START_FAILED_HANDLED_EVENT;
     }
 }

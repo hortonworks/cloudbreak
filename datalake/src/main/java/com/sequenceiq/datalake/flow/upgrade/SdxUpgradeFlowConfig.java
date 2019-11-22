@@ -21,9 +21,10 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class SdxUpgradeFlowConfig extends AbstractFlowConfiguration<SdxUpgradeState, SdxUpgradeEvent> {
+public class SdxUpgradeFlowConfig extends AbstractFlowConfiguration<SdxUpgradeState, SdxUpgradeEvent> implements RetryableFlowConfiguration<SdxUpgradeEvent> {
 
     private static final List<Transition<SdxUpgradeState, SdxUpgradeEvent>> TRANSITIONS =
             new Transition.Builder<SdxUpgradeState, SdxUpgradeEvent>()
@@ -87,5 +88,10 @@ public class SdxUpgradeFlowConfig extends AbstractFlowConfiguration<SdxUpgradeSt
     @Override
     protected FlowEdgeConfig<SdxUpgradeState, SdxUpgradeEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public SdxUpgradeEvent getFailHandledEvent() {
+        return SDX_UPGRADE_FAILED_HANDLED_EVENT;
     }
 }
