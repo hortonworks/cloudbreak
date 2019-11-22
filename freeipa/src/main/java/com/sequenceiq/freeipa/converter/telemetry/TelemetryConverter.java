@@ -25,7 +25,7 @@ public class TelemetryConverter {
 
     private final String databusEndpoint;
 
-    public TelemetryConverter(@Value("${freeipa.telemetry.enabled:false}") boolean freeIpaTelemetryEnabled,
+    public TelemetryConverter(@Value("${freeipa.telemetry.enabled:true}") boolean freeIpaTelemetryEnabled,
             @Value("${cluster.deployment.logs.report:false}") boolean reportDeplymentLogs,
             @Value("${altus.databus.endpoint:}") String databusEndpoint) {
         this.freeIpaTelemetryEnabled = freeIpaTelemetryEnabled;
