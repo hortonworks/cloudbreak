@@ -34,6 +34,8 @@ import com.sequenceiq.freeipa.client.model.User;
 
 public class FreeIpaClient {
 
+    public static final String PASSWORD_EXPIRATION_DATETIME = "20380101000000Z";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaClient.class);
 
     private static final String DEFAULT_API_VERSION = "2.230";
@@ -148,7 +150,7 @@ public class FreeIpaClient {
                 "sn", lastName,
                 "loginshell", "/bin/bash",
                 "random", true,
-                "setattr", "krbPasswordExpiration=20380101000000Z"
+                "setattr", "krbPasswordExpiration=" + PASSWORD_EXPIRATION_DATETIME
         );
         return (User) invoke("user_add", flags, params, User.class).getResult();
     }
@@ -157,7 +159,11 @@ public class FreeIpaClient {
         // FreeIPA expires any password that is set by another user. Work around this by
         // performing a separate API call to set the password expiration into the future
         userMod(user, "userpassword", password);
-        userMod(user, "setattr", "krbPasswordExpiration=20380101000000Z");
+        updateUserPasswordExpiration(user);
+    }
+
+    public void updateUserPasswordExpiration(String user) throws FreeIpaClientException {
+        userMod(user, "setattr", "krbPasswordExpiration=" + PASSWORD_EXPIRATION_DATETIME);
     }
 
     public User userMod(String user, String key, Object value) throws FreeIpaClientException {

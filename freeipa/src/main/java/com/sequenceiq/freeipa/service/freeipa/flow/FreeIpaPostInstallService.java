@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -11,11 +12,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Permission;
+import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
-import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserService;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
 public class FreeIpaPostInstallService {
@@ -73,8 +76,22 @@ public class FreeIpaPostInstallService {
             freeIpaClient.setUsernameLength(MAX_USERNAME_LENGTH);
         }
         passwordPolicyService.updatePasswordPolicy(freeIpaClient);
+        modifyAdminPasswordExpirationIfNeeded(freeIpaClient);
         userService.synchronizeUsers(
-            threadBasedUserCrnProvider.getAccountId(), threadBasedUserCrnProvider.getUserCrn(), Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
+                threadBasedUserCrnProvider.getAccountId(), threadBasedUserCrnProvider.getUserCrn(), Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
+    }
 
+    public void modifyAdminPasswordExpirationIfNeeded(FreeIpaClient client) throws FreeIpaClientException {
+        Optional<User> user = client.userFind(freeIpaClientFactory.getAdminUser());
+        if (user.isPresent() && !FreeIpaClient.PASSWORD_EXPIRATION_DATETIME.equals(user.get().getKrbPasswordExpiration())) {
+            User actualUser = user.get();
+            LOGGER.debug(String.format("Modifying user [%s] current password expiration time [%s] to [%s]",
+                    actualUser.getUid(), actualUser.getKrbPasswordExpiration(), FreeIpaClient.PASSWORD_EXPIRATION_DATETIME));
+            client.updateUserPasswordExpiration(actualUser.getUid());
+        } else if (user.isEmpty()) {
+            LOGGER.warn(String.format("No [%s] user found!", freeIpaClientFactory.getAdminUser()));
+        } else {
+            LOGGER.debug("Password expiration is already set.");
+        }
     }
 }
