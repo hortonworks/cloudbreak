@@ -17,7 +17,9 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.SecurityRuleUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
+import com.sequenceiq.cloudbreak.util.CidrUtil;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -106,21 +108,27 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
     private void setupSecurityAccess(InstanceGroupType type, SecurityAccessResponse securityAccess, SecurityGroupV4Request securityGroup) {
         String securityGroupIdForKnox = securityAccess.getSecurityGroupIdForKnox();
         String defaultSecurityGroupId = securityAccess.getDefaultSecurityGroupId();
-        String cidr = securityAccess.getCidr();
+        String cidrs = securityAccess.getCidr();
         if (type == InstanceGroupType.GATEWAY) {
-            setSecurityAccess(securityGroup, securityGroupIdForKnox, cidr);
+            setSecurityAccess(securityGroup, securityGroupIdForKnox, cidrs);
         } else {
-            setSecurityAccess(securityGroup, defaultSecurityGroupId, cidr);
+            setSecurityAccess(securityGroup, defaultSecurityGroupId, cidrs);
         }
     }
 
-    private void setSecurityAccess(SecurityGroupV4Request securityGroup, String securityGroupId, String cidr) {
+    private void setSecurityAccess(SecurityGroupV4Request securityGroup, String securityGroupId, String cidrs) {
         if (!Strings.isNullOrEmpty(securityGroupId)) {
             securityGroup.setSecurityGroupIds(Set.of(securityGroupId));
             securityGroup.setSecurityRules(new ArrayList<>());
-        } else if (!Strings.isNullOrEmpty(cidr)) {
-            for (SecurityRuleV4Request securityRule : securityGroup.getSecurityRules()) {
-                securityRule.setSubnet(cidr);
+        } else if (!Strings.isNullOrEmpty(cidrs)) {
+            List<SecurityRuleV4Request> generatedSecurityRules = new ArrayList<>();
+            List<SecurityRuleV4Request> originalSecurityRules = securityGroup.getSecurityRules();
+            for (String cidr : CidrUtil.cidrs(cidrs)) {
+                SecurityRuleUtil.propagateCidr(generatedSecurityRules, originalSecurityRules, cidr);
+            }
+            // Because of YCLOUD we should not set this if null
+            if (originalSecurityRules != null) {
+                securityGroup.setSecurityRules(generatedSecurityRules);
             }
             securityGroup.setSecurityGroupIds(new HashSet<>());
         } else {
