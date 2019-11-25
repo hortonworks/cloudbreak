@@ -13,7 +13,7 @@ public class RepositoryConfigsTests extends CloudbreakTest {
 
     private static final String VALID_AMBARI_GPGKEY_URL = "http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins";
 
-    private static final String VALID_MPACK_URL = "http://private-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.4.5-2/HDP-2.6.4.5-2.xml";
+    private static final String VALID_MPACK_URL = "http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.1.6.0-35/HDP-3.1.6.0-35.xml";
 
     private static final String VALID_STACK_BASE_URL = "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.5.0/";
 
