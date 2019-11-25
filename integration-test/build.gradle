@@ -87,7 +87,7 @@ dependencies {
     compile group:  'org.testng',                   name: 'testng',                         version: '7.0.0-beta3'
     compile group:  'javax.el',                     name: 'javax.el-api',                   version: '3.0.0'
     compile group:  'org.apache.commons',           name: 'commons-lang3',                  version: '3.4'
-    compile group: 'org.pacesys.openstack4j.connectors', name: 'openstack4j-jersey2',       version: '3.1.0-jersey26_v3fix'
+    compile group: 'org.pacesys.openstack4j.connectors', name: 'openstack4j-jersey2',       version: openstackConnectorVersion
     compile(group:  'org.apache.sshd',              name: 'sshd-core',                      version: '1.2.0') {
         exclude group: 'ch.qos.logback'
     }
