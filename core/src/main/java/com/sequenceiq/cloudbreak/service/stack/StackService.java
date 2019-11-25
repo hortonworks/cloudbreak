@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -26,14 +25,12 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.cedarsoftware.util.io.JsonReader;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
@@ -49,15 +46,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
-import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
-import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
-import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
-import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
-import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
-import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
-import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
@@ -79,10 +68,10 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationSt
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
+import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
@@ -122,6 +111,9 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
+import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -144,8 +136,6 @@ public class StackService implements ResourceIdProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
     private static final String SSH_USER_CB = "cloudbreak";
-
-    private static final int CCM_KEY_ID_LENGTH = 36;
 
     @Inject
     private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
@@ -245,9 +235,6 @@ public class StackService implements ResourceIdProvider {
 
     @Inject
     private StackIdViewToStackResponseConverter stackIdViewToStackResponseConverter;
-
-    @Autowired(required = false)
-    private CcmParameterSupplier ccmParameterSupplier;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -518,7 +505,6 @@ public class StackService implements ResourceIdProvider {
         stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
 
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
 
         stack.setResourceCrn(createCRN(accountId));
 
@@ -539,40 +525,8 @@ public class StackService implements ResourceIdProvider {
         measure(() -> instanceMetaDataService.saveAll(savedStack.getInstanceMetaDataAsList()),
                 LOGGER, "Instance metadatas saved in {} ms for stack {}", stackName);
 
-        SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys(workspace);
-
-        securityConfig.setStack(savedStack);
-
-        measure(() -> {
-            saltSecurityConfigService.save(securityConfig.getSaltSecurityConfig());
-            securityConfigService.save(securityConfig);
-        }, LOGGER, "Security config save took {} ms for stack {}", stackName);
-        savedStack.setSecurityConfig(securityConfig);
-
-        CcmParameters ccmParameters = null;
-        if ((ccmParameterSupplier != null) && Boolean.TRUE.equals(stack.getUseCcm())) {
-            ImmutableMap.Builder<KnownServiceIdentifier, Integer> builder = ImmutableMap.builder();
-
-            // Configure a tunnel for nginx
-            int gatewayPort = Optional.ofNullable(stack.getGatewayPort()).orElse(ServiceFamilies.GATEWAY.getDefaultPort());
-            builder.put(KnownServiceIdentifier.GATEWAY, gatewayPort);
-
-            // Optionally configure a tunnel for (nginx fronting) Knox
-            if (stack.getCluster().getGateway() != null) {
-                // JSA TODO Do we support a non-default port for the nginx that fronts Knox?
-                builder.put(KnownServiceIdentifier.KNOX, ServiceFamilies.KNOX.getDefaultPort());
-            }
-
-            Map<KnownServiceIdentifier, Integer> tunneledServicePorts = builder.build();
-
-            // JSA TODO Use stack ID or something else instead?
-            String keyId = StringUtils.right(stack.getResourceCrn(), CCM_KEY_ID_LENGTH);
-            String actorCrn = Objects.requireNonNull(userCrn, "userCrn is null");
-            ccmParameters = ccmParameterSupplier.getCcmParameters(actorCrn, accountId, keyId, tunneledServicePorts).orElse(null);
-        }
-
         try {
-            imageService.create(savedStack, platformString, connector.getPlatformParameters(savedStack), imgFromCatalog, ccmParameters);
+            imageService.create(savedStack, platformString, imgFromCatalog);
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Cloudbreak Image not found", e);
             throw new CloudbreakApiException(e.getMessage(), e);
@@ -1076,27 +1030,28 @@ public class StackService implements ResourceIdProvider {
     }
 
     private void storeTelemetryForStack(Stack stack) {
-        try {
-            for (Component component : stack.getComponents()) {
-                if (ComponentType.TELEMETRY.equals(component.getComponentType())) {
-                    if (stack.getCluster() != null && StringUtils.isNoneEmpty(
-                            stack.getType().name(), stack.getResourceCrn(), stack.getCluster().getName())) {
-                        LOGGER.debug("Found TELEMETRY component for stack, will enrich that "
-                                + "with cluster data before saving it.");
-                        FluentClusterType fluentClusterType = StackType.DATALAKE.equals(stack.getType())
-                                ? FluentClusterType.DATALAKE : FluentClusterType.DATAHUB;
+        if (stack.getCluster() == null || StringUtils.isAnyEmpty(stack.getType().name(), stack.getResourceCrn(), stack.getCluster().getName())) {
+            return;
+        }
+        List<Component> enrichedComponents = stack.getComponents().stream()
+                .filter(component -> ComponentType.TELEMETRY.equals(component.getComponentType()))
+                .map(component -> {
+                    LOGGER.debug("Found TELEMETRY component for stack, will enrich that with cluster data before saving it.");
+                    FluentClusterType fluentClusterType = StackType.DATALAKE.equals(stack.getType())
+                            ? FluentClusterType.DATALAKE : FluentClusterType.DATAHUB;
+                    try {
                         Telemetry telemetry = component.getAttributes().get(Telemetry.class);
                         cloudStorageFolderResolverService.updateStorageLocation(telemetry,
                                 fluentClusterType.value(),
                                 stack.getCluster().getName(), stack.getResourceCrn());
                         component.setAttributes(Json.silent(telemetry));
+                    } catch (IOException e) {
+                        LOGGER.info("Could not create Cloudbreak telemetry component.", e);
                     }
-                    componentConfigProviderService.store(component);
-                }
-            }
-        } catch (IllegalArgumentException | IOException e) {
-            LOGGER.info("Could not create Cloudbreak telemetry component.", e);
-        }
+                    return component;
+                })
+                .collect(Collectors.toList());
+        componentConfigProviderService.store(enrichedComponents);
     }
 
     private String createCRN(String accountId) {

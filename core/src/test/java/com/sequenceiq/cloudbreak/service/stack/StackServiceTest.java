@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -649,7 +648,7 @@ public class StackServiceTest {
         String platformString = "AWS";
         doThrow(new CloudbreakImageNotFoundException("Image not found"))
                 .when(imageService)
-                .create(eq(stack), eq(platformString), eq(parameters), nullable(StatedImage.class), nullable(CcmParameters.class));
+                .create(eq(stack), eq(platformString), nullable(StatedImage.class));
 
         try {
             stack = underTest.create(stack, platformString, mock(StatedImage.class), user, workspace);

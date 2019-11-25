@@ -21,7 +21,7 @@ public class Component implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "component_generator")
-    @SequenceGenerator(name = "component_generator", sequenceName = "component_id_seq", allocationSize = 1)
+    @SequenceGenerator(name = "component_generator", sequenceName = "component_id_seq", allocationSize = 20)
     private Long id;
 
     @Enumerated(EnumType.STRING)

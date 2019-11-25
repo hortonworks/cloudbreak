@@ -37,7 +37,7 @@ public class UserDataBuilder {
     @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
-    Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
+    public Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters parameters, String saltBootPassword, String cbCert, CcmParameters ccmParameters) {
         Map<InstanceGroupType, String> result = new EnumMap<>(InstanceGroupType.class);
         for (InstanceGroupType type : InstanceGroupType.values()) {

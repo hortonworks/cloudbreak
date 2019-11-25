@@ -270,7 +270,7 @@ public class StackCreatorService {
         StackV4Response response = measure(() -> converterUtil.convert(savedStack, StackV4Response.class),
                 LOGGER, "Stack response has been created in {} ms for stack {}", savedStack.getName());
 
-        flowManager.triggerProvisioning(savedStack.getId());
+//        flowManager.triggerProvisioning(savedStack.getId());
 
         metricService.submit(STACK_PREPARATION, System.currentTimeMillis() - start);
 
