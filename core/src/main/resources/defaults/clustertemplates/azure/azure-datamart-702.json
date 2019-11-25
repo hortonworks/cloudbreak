@@ -25,7 +25,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D12_v2",
+          "instanceType": "Standard_D16_v3",
           "rootVolume": {
             "size": 50
           }
