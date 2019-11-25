@@ -8,5 +8,6 @@ gpgkey={{ salt['pillar.get']('cloudera-manager:repo:gpgKeyUrl') }}
 gpgcheck=0
 {%- endif %}
 enabled=1
+skip_if_unavailable=1
 autorefresh=0
 type=rpm-md
