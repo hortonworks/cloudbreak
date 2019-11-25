@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
 import java.util.List;
@@ -17,14 +19,14 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @Component
 public class HbaseRestKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
 
-    private static final String CONFIG_SAFETY_VALVE = "hbase_restserver_config_safety_valve";
+    static final String HBASE_RESTSERVER_CONFIG_SAFETY_VALVE = "hbase_restserver_config_safety_valve";
 
     private static final String SUPPORT_PROXYUSER = "hbase.rest.support.proxyuser";
 
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         return List.of(
-                config(CONFIG_SAFETY_VALVE,
+                config(HBASE_RESTSERVER_CONFIG_SAFETY_VALVE,
                         ConfigUtils.getSafetyValveProperty(SUPPORT_PROXYUSER, "true")));
     }
 
@@ -40,9 +42,11 @@ public class HbaseRestKnoxRoleConfigProvider extends AbstractRoleConfigProvider 
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+        String cdhVersion = cmTemplateProcessor.getVersion().orElse("");
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
-                && source.getGatewayView().getExposedServices().contains(ExposedService.HBASE_REST.getKnoxService());
+                && source.getGatewayView().getExposedServices().contains(ExposedService.HBASE_REST.getKnoxService())
+                && !isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0);
     }
 
 }
