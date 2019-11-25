@@ -74,6 +74,7 @@ class EnvironmentResourceDeletionServiceTest {
         environment.setId(1L);
         environment.setCreator(CRN);
         environment.setName(ENVIRONMENT_NAME);
+        environment.setResourceCrn(ENVIRONMENT_CRN);
     }
 
     @Test
@@ -84,16 +85,16 @@ class EnvironmentResourceDeletionServiceTest {
 
     @Test
     void getDatalakeClusterNames() {
-        when(datalakeEndpoint.list(anyString())).thenReturn(new StackViewV4Responses());
+        when(datalakeEndpoint.list(isNull(), anyString())).thenReturn(new StackViewV4Responses());
         environmentResourceDeletionServiceUnderTest.getDatalakeClusterNames(environment);
-        verify(datalakeEndpoint).list(eq(ENVIRONMENT_NAME));
+        verify(datalakeEndpoint).list(isNull(), eq(ENVIRONMENT_CRN));
     }
 
     @Test
     void getAttachedDistroXClusterNames() {
         when(distroXEndpoint.list(anyString(), any())).thenReturn(new StackViewV4Responses());
         environmentResourceDeletionServiceUnderTest.getAttachedDistroXClusterNames(environment);
-        verify(distroXEndpoint, times(1)).list(eq(ENVIRONMENT_NAME), isNull());
+        verify(distroXEndpoint, times(1)).list(eq(ENVIRONMENT_NAME), eq(ENVIRONMENT_CRN));
     }
 
     @Test

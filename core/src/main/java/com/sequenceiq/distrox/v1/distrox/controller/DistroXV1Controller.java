@@ -10,10 +10,10 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.dto.StackAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
@@ -27,9 +27,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
@@ -52,8 +52,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 @InternalReady
 public class DistroXV1Controller implements DistroXV1Endpoint {
 
-    @Inject
     @Lazy
+    @Inject
     private StackOperations stackOperations;
 
     @Inject
@@ -85,15 +85,16 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     public StackViewV4Responses list(String environmentName, String environmentCrn) {
-        StackViewV4Responses stackViewV4Responses;
-        if (!Strings.isNullOrEmpty(environmentName)) {
-            stackViewV4Responses =  stackOperations.listByEnvironmentName(
+        if (StringUtils.isNotEmpty(environmentName) && StringUtils.isNotEmpty(environmentCrn)){
+            throw new BadRequestException("Both environmentName and environmentCrn parameters cannot be set.");
+        }
+        if (StringUtils.isNotEmpty(environmentName)) {
+            return stackOperations.listByEnvironmentName(
                     workspaceService.getForCurrentUser().getId(), environmentName, StackType.WORKLOAD);
         } else {
-            stackViewV4Responses = stackOperations.listByEnvironmentCrn(
+            return stackOperations.listByEnvironmentCrn(
                     workspaceService.getForCurrentUser().getId(), environmentCrn, StackType.WORKLOAD);
         }
-        return stackViewV4Responses;
     }
 
     @Override

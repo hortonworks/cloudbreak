@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.flow.start.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -17,6 +19,8 @@ import reactor.bus.Event;
 @Component
 public class StartFreeipaHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StartFreeipaHandler.class);
+
     private final FreeipaService freeipaService;
 
     protected StartFreeipaHandler(EventSender eventSender, FreeipaService freeipaService) {
@@ -33,7 +37,7 @@ public class StartFreeipaHandler extends EventSenderAwareHandler<EnvironmentDto>
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            freeipaService.startAttachedFreeipa(environmentDto.getId(), environmentDto.getResourceCrn());
+            freeipaService.startAttachedFreeipaInstances(environmentDto.getId(), environmentDto.getResourceCrn());
             EnvStartEvent envStartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
                     .withSelector(EnvStartStateSelectors.ENV_START_DATALAKE_EVENT.selector())
                     .withResourceId(environmentDto.getId())
@@ -41,6 +45,7 @@ public class StartFreeipaHandler extends EventSenderAwareHandler<EnvironmentDto>
                     .build();
             eventSender().sendEvent(envStartEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
+            LOGGER.error("Error occurred during starting FreeIpa(s) for environment {}.", environmentDto, e);
             EnvStartFailedEvent failedEvent = new EnvStartFailedEvent(environmentDto.getId(), environmentDto.getName(), e, environmentDto.getResourceCrn(),
                     EnvironmentStatus.START_FREEIPA_FAILED);
             eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());

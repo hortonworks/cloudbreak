@@ -85,7 +85,7 @@ public class EnvironmentResourceDeletionService {
         LOGGER.debug("Get Datalake clusters of the environment: '{}'", environment.getName());
         try {
             Set<String> datalakeClusterNames = datalakeV4Endpoint
-                    .list(environment.getName())
+                    .list(null, environment.getResourceCrn())
                     .getResponses()
                     .stream()
                     .map(StackViewV4Response::getName)

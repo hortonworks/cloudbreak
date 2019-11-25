@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.flow.stop.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -8,7 +10,7 @@ import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopFailedEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopHandlerSelectors;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelectors;
-import com.sequenceiq.environment.environment.service.DistroxService;
+import com.sequenceiq.environment.environment.service.DatahubService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -17,11 +19,13 @@ import reactor.bus.Event;
 @Component
 public class StopDatahubHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
-    private final DistroxService distroxService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(StopDatahubHandler.class);
 
-    protected StopDatahubHandler(EventSender eventSender, DistroxService distroxService) {
+    private final DatahubService datahubService;
+
+    protected StopDatahubHandler(EventSender eventSender, DatahubService datahubService) {
         super(eventSender);
-        this.distroxService = distroxService;
+        this.datahubService = datahubService;
     }
 
     @Override
@@ -33,7 +37,7 @@ public class StopDatahubHandler extends EventSenderAwareHandler<EnvironmentDto> 
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            distroxService.stopAttachedDistrox(environmentDto.getId(), environmentDto.getName());
+            datahubService.stopAttachedDatahubClusters(environmentDto.getId(), environmentDto.getResourceCrn());
             EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
                     .withSelector(EnvStopStateSelectors.ENV_STOP_DATALAKE_EVENT.selector())
                     .withResourceId(environmentDto.getId())
@@ -41,6 +45,7 @@ public class StopDatahubHandler extends EventSenderAwareHandler<EnvironmentDto> 
                     .build();
             eventSender().sendEvent(envStopEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
+            LOGGER.error("Error occurred during stopping Datahub(s) for environment. {}", environmentDto, e);
             EnvStopFailedEvent failedEvent = new EnvStopFailedEvent(environmentDto.getId(), environmentDto.getName(), e, environmentDto.getResourceCrn(),
                     EnvironmentStatus.STOP_DATAHUB_FAILED);
             eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());

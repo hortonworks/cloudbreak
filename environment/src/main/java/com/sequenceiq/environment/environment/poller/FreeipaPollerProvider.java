@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.service;
+package com.sequenceiq.environment.environment.poller;
 
 import javax.ws.rs.NotFoundException;
 
@@ -16,13 +16,13 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Component
-public class FreeipaPollerCollection {
+public class FreeipaPollerProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeipaPollerCollection.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeipaPollerProvider.class);
 
     private final FreeIpaV1Endpoint freeIpaV1Endpoint;
 
-    public FreeipaPollerCollection(FreeIpaV1Endpoint freeIpaV1Endpoint) {
+    public FreeipaPollerProvider(FreeIpaV1Endpoint freeIpaV1Endpoint) {
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
     }
 

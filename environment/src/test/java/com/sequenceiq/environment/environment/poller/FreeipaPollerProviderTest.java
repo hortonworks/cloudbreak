@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.service;
+package com.sequenceiq.environment.environment.poller;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.START_FAILED;
@@ -27,7 +27,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @ExtendWith(MockitoExtension.class)
-public class FreeipaPollerCollectionTest {
+public class FreeipaPollerProviderTest {
 
     private static final Long ENV_ID = 1000L;
 
@@ -35,7 +35,7 @@ public class FreeipaPollerCollectionTest {
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
 
     @InjectMocks
-    private FreeipaPollerCollection underTest;
+    private FreeipaPollerProvider underTest;
 
     @ParameterizedTest
     @MethodSource("freeipaStopStatuses")

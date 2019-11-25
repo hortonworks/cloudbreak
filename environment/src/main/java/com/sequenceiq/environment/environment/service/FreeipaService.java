@@ -3,6 +3,8 @@ package com.sequenceiq.environment.environment.service;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import javax.ws.rs.WebApplicationException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +12,10 @@ import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptMaker;
+import com.dyngr.exception.PollerException;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.environment.environment.poller.FreeipaPollerProvider;
+import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
@@ -26,29 +32,64 @@ public class FreeipaService {
 
     private final FreeIpaV1Endpoint freeIpaV1Endpoint;
 
-    private final FreeipaPollerCollection freeipaPollerCollection;
+    private final FreeipaPollerProvider freeipaPollerProvider;
 
-    public FreeipaService(FreeIpaV1Endpoint freeIpaV1Endpoint, FreeipaPollerCollection freeipaPollerCollection) {
+    private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    public FreeipaService(FreeIpaV1Endpoint freeIpaV1Endpoint, FreeipaPollerProvider freeipaPollerProvider,
+            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
-        this.freeipaPollerCollection = freeipaPollerCollection;
+        this.freeipaPollerProvider = freeipaPollerProvider;
+        this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
     }
 
-    public void stopAttachedFreeipa(Long envId, String envCrn) {
-        pollingFreeipa(envCrn, freeIpaV1Endpoint::stop, freeipaPollerCollection.stopPoller(envId, envCrn));
+    public void startAttachedFreeipaInstances(Long envId, String envCrn) {
+        executeFreeIpaOperationAndStartPolling(envCrn, this::startFreeIpa, freeipaPollerProvider.startPoller(envId, envCrn));
     }
 
-    public void startAttachedFreeipa(Long envId, String envCrn) {
-        pollingFreeipa(envCrn, freeIpaV1Endpoint::start, freeipaPollerCollection.startPoller(envId, envCrn));
+    public void stopAttachedFreeipaInstances(Long envId, String envCrn) {
+        executeFreeIpaOperationAndStartPolling(envCrn, this::stopFreeIpa, freeipaPollerProvider.stopPoller(envId, envCrn));
     }
 
-    private void pollingFreeipa(String envCrn, Consumer<String> fn, AttemptMaker<Void> attemptMaker) {
-        DescribeFreeIpaResponse describeFreeipa = freeipaPollerCollection.describe(envCrn);
-        if (describeFreeipa != null && !describeFreeipa.getStatus().isAvailable()) {
-            fn.accept(envCrn);
+    private void startFreeIpa(String environmentCrn) {
+        try {
+            freeIpaV1Endpoint.start(environmentCrn);
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to start FreeIpa(s) for environment '{}' due to: '{}'", environmentCrn, errorMessage, e);
+            throw new EnvironmentServiceException(errorMessage, e);
         }
-        Polling.stopAfterAttempt(attempt)
-                .stopIfException(true)
-                .waitPeriodly(sleeptime, TimeUnit.SECONDS)
-                .run(attemptMaker);
+    }
+
+    private void stopFreeIpa(String environmentCrn) {
+        try {
+            freeIpaV1Endpoint.stop(environmentCrn);
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to stop FreeIpa(s) for environment '{}' due to: '{}'", environmentCrn, errorMessage, e);
+            throw new EnvironmentServiceException(errorMessage, e);
+        }
+    }
+
+    private void executeFreeIpaOperationAndStartPolling(String envCrn, Consumer<String> freeIpaOperation, AttemptMaker<Void> attemptMaker) {
+        try {
+            DescribeFreeIpaResponse describeFreeipa = freeipaPollerProvider.describe(envCrn);
+            if (describeFreeipa != null && !describeFreeipa.getStatus().isAvailable()) {
+                freeIpaOperation.accept(envCrn);
+                Polling.stopAfterAttempt(attempt)
+                        .stopIfException(true)
+                        .waitPeriodly(sleeptime, TimeUnit.SECONDS)
+                        .run(attemptMaker);
+            }
+        } catch (PollerException e) {
+            if (e.getCause() != null && e.getCause() instanceof WebApplicationException) {
+                WebApplicationException wae = (WebApplicationException) e.getCause();
+                String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(wae);
+                throw new EnvironmentServiceException(errorMessage, e);
+            }
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            throw new EnvironmentServiceException(errorMessage, e);
+        }
     }
 }

@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,23 +17,23 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
+import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
 
 @ExtendWith(MockitoExtension.class)
-public class DistroxServiceTest {
+public class DatahubServiceTest {
 
     @Mock
     private DistroXV1Endpoint distroXV1Endpoint;
 
     @Mock
-    private PollerCollection pollerCollection;
+    private DatahubPollerProvider datahubPollerProvider;
 
     @InjectMocks
-    private DistroxService underTest;
+    private DatahubService underTest;
 
     @BeforeEach
     public void setup() {
@@ -45,10 +44,9 @@ public class DistroxServiceTest {
     @Test
     public void testStopAttachedDistroxWhenNoAttachedDistroX() {
         when(distroXV1Endpoint.list("envName", null)).thenReturn(new StackViewV4Responses(Collections.emptySet()));
-        when(pollerCollection.stopDistroXPoller(new ArrayList<>(), new ArrayList<>(), 1L)).thenReturn(new ArrayList<>());
-        when(pollerCollection.evaluateResult(anyList())).thenReturn(AttemptResults.finishWith(null));
+        when(datahubPollerProvider.stopDatahubClustersPoller(new ArrayList<>(), 1L)).thenReturn(() -> null);
 
-        underTest.stopAttachedDistrox(1L, "envName");
+        underTest.stopAttachedDatahubClusters(1L, "envName");
 
         verify(distroXV1Endpoint, times(1)).putStopByCrns(anyList());
     }
@@ -61,10 +59,9 @@ public class DistroxServiceTest {
         ArrayList<String> pollingCrn = new ArrayList<>();
         pollingCrn.add("crn");
         when(distroXV1Endpoint.list("envName", null)).thenReturn(new StackViewV4Responses(Set.of(stack)));
-        when(pollerCollection.stopDistroXPoller(pollingCrn, new ArrayList<>(), 1L)).thenReturn(List.of(AttemptResults.finishWith(null)));
-        when(pollerCollection.evaluateResult(anyList())).thenReturn(AttemptResults.finishWith(null));
+        when(datahubPollerProvider.stopDatahubClustersPoller(pollingCrn, 1L)).thenReturn(() -> null);
 
-        underTest.stopAttachedDistrox(1L, "envName");
+        underTest.stopAttachedDatahubClusters(1L, "envName");
 
         verify(distroXV1Endpoint, times(1)).putStopByCrns(anyList());
     }
@@ -72,10 +69,9 @@ public class DistroxServiceTest {
     @Test
     public void testStartAttachedDistroxWhenNoAttachedDistroX() {
         when(distroXV1Endpoint.list("envName", null)).thenReturn(new StackViewV4Responses(Collections.emptySet()));
-        when(pollerCollection.startDistroXPoller(new ArrayList<>(), new ArrayList<>(), 1L)).thenReturn(new ArrayList<>());
-        when(pollerCollection.evaluateResult(anyList())).thenReturn(AttemptResults.finishWith(null));
+        when(datahubPollerProvider.startDatahubClustersPoller(new ArrayList<>(), 1L)).thenReturn(() -> null);
 
-        underTest.startAttachedDistrox(1L, "envName");
+        underTest.startAttachedDatahubClusters(1L, "envName");
 
         verify(distroXV1Endpoint, times(1)).putStartByCrns(anyList());
     }
@@ -87,9 +83,8 @@ public class DistroxServiceTest {
         stack.setName("name");
         stack.setStatus(Status.STOPPED);
         when(distroXV1Endpoint.list("envName", null)).thenReturn(new StackViewV4Responses(Set.of(stack)));
-        when(pollerCollection.evaluateResult(anyList())).thenReturn(AttemptResults.finishWith(null));
 
-        underTest.startAttachedDistrox(1L, "envName");
+        underTest.startAttachedDatahubClusters(1L, "envName");
 
         verify(distroXV1Endpoint, times(1)).putStartByCrns(anyList());
     }
