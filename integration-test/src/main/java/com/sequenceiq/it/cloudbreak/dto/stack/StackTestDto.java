@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
+import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -26,11 +27,13 @@ import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.search.Searchable;
+import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.v4.StackActionV4;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
-public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purgable<StackV4Response, CloudbreakClient> {
+public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purgable<StackV4Response, CloudbreakClient>, Searchable, Investigable {
 
     public static final String STACK = "STACK";
 
@@ -119,5 +122,20 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
 
     public GeneratedBlueprintV4Response getGeneratedBlueprint() {
         return generatedBlueprint;
+    }
+
+    @Override
+    public String investigate() {
+        if (getResponse() == null || getResponse().getId() == null) {
+            return null;
+        }
+        Long id = getResponse().getId();
+
+        return "DistroX audit events: " + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), "stacks", id, null);
+    }
+
+    @Override
+    public String getSearchId() {
+        return getName();
     }
 }

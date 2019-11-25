@@ -56,9 +56,9 @@ public class KibanaSearchUrl implements SearchUrl {
     }
 
     private String getAppState() {
-        return String.format("(columns:!('@message','@app',cloudbreak_name),filters:!(%s,('$state':(store:appState),"
+        return String.format("(columns:!('@message','@app',cloudbreak_name),filters:!(%s('$state':(store:appState),"
                         + "meta:(alias:!n,disabled:!f,index:'logstash-*',key:cloudbreak_name,negate:!f,params:!(%s),"
-                        + "type:phrases,value:'%s'),query:(bool:(minimum_should_match:1,should:!(%s"
+                        + "type:phrases,value:%s),query:(bool:(minimum_should_match:1,should:!(%s"
                         + "))))),index:'logstash-*',interval:auto,query:(match_all:()),sort:!('@timestamp',desc))",
                 getEnvironmentQuery(), getResourceList(), getResourceList(), getResourceQueries());
 
@@ -77,7 +77,7 @@ public class KibanaSearchUrl implements SearchUrl {
         if (env == null || !"".equals(env)) {
             envQuery = String.format("('$state':(store:appState),meta:"
                     + "(alias:!n,disabled:!f,index:'logstash-*',key:'@app',negate:!f,type:phrase,value:%s),"
-                    + "query:(match:('@app':(query:%s,type:phrase))))", env, env);
+                    + "query:(match:('@app':(query:%s,type:phrase)))),", env, env);
         }
 
         return envQuery;
