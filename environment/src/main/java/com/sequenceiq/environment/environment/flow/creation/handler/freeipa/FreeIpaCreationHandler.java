@@ -40,6 +40,7 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFai
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.v1.TelemetryApiConverter;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
+import com.sequenceiq.cloudbreak.util.CidrUtil;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
@@ -225,8 +226,11 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private void setSecurityAccess(SecurityAccessDto securityAccess, CreateFreeIpaRequest createFreeIpaRequest) {
         SecurityGroupRequest securityGroupRequest = new SecurityGroupRequest();
         if (!Strings.isNullOrEmpty(securityAccess.getCidr())) {
-            SecurityRuleRequest securityRuleRequest = createSecurityRuleRequest(securityAccess.getCidr());
-            securityGroupRequest.setSecurityRules(List.of(securityRuleRequest));
+            securityGroupRequest.setSecurityRules(new ArrayList<>());
+            for (String cidr : CidrUtil.cidrs(securityAccess.getCidr())) {
+                SecurityRuleRequest securityRuleRequest = createSecurityRuleRequest(cidr);
+                securityGroupRequest.getSecurityRules().add(securityRuleRequest);
+            }
             securityGroupRequest.setSecurityGroupIds(new HashSet<>());
         } else if (!Strings.isNullOrEmpty(securityAccess.getDefaultSecurityGroupId())) {
             securityGroupRequest.setSecurityGroupIds(Set.of(securityAccess.getDefaultSecurityGroupId()));

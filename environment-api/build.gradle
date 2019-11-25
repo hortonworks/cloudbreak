@@ -42,6 +42,8 @@ dependencies {
     testImplementation group: "org.hibernate",                 name: "hibernate-validator",            version: hibernateValidatorVersion
 
     testRuntimeOnly    group: "org.junit.jupiter",             name: "junit-jupiter-engine",           version: junitJupiterVersion
+    testImplementation group: 'org.mockito',                   name: 'mockito-core',                   version: mockitoVersion
+    testImplementation group: 'org.mockito',                   name: 'mockito-junit-jupiter',          version: '2.21.0'
 }
 
 test {
