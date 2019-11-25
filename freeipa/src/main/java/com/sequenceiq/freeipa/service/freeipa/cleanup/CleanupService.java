@@ -1,9 +1,13 @@
 package com.sequenceiq.freeipa.service.freeipa.cleanup;
 
+import static org.apache.commons.lang3.StringUtils.removeStart;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,7 +42,6 @@ import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtV1Controller;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationStatusService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -53,9 +56,6 @@ public class CleanupService {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private FreeIpaService freeIpaService;
 
     @Inject
     private KerberosMgmtV1Controller kerberosMgmtV1Controller;
@@ -89,7 +89,7 @@ public class CleanupService {
         Map<String, String> certCleanupFailed = new HashMap<>();
         Set<Cert> certs = client.findAllCert();
         certs.stream()
-                .filter(cert -> hosts.contains(StringUtils.removeStart(cert.getSubject(), "CN=")))
+                .filter(cert -> hosts.stream().anyMatch(host -> substringBefore(host, ".").equals(substringBefore(removeStart(cert.getSubject(), "CN="), "."))))
                 .filter(cert -> !cert.isRevoked())
                 .forEach(cert -> {
                     try {
@@ -154,7 +154,7 @@ public class CleanupService {
                         com.sequenceiq.freeipa.client.model.Service::getKrbcanonicalname));
         for (String host : hostsToRemove) {
             Set<String> services = principalCanonicalMap.entrySet().stream().filter(e -> e.getKey().contains(host))
-                    .map(Map.Entry::getValue).collect(Collectors.toSet());
+                    .map(Entry::getValue).collect(Collectors.toSet());
             LOGGER.debug("Services to delete: {}", services);
             for (String service : services) {
                 try {
