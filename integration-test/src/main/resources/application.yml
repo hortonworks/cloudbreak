@@ -168,7 +168,7 @@ integrationtest:
       subscriptionId:
       tenantId:
     instance:
-      type: Standard_D12_v2
+      type: Standard_D16_v3
       volumeSize: 100
       volumeCount: 1
       volumeType: StandardSSD_LRS
