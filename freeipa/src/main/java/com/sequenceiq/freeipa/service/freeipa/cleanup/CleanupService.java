@@ -41,6 +41,7 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtV1Controller;
+import com.sequenceiq.freeipa.ldap.LdapConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationStatusService;
@@ -71,6 +72,9 @@ public class CleanupService {
 
     @Inject
     private KerberosConfigService kerberosConfigService;
+
+    @Inject
+    private LdapConfigService ldapConfigService;
 
     public OperationStatus cleanup(String accountId, CleanupRequest request) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);
@@ -182,11 +186,18 @@ public class CleanupService {
             }
         });
         if (StringUtils.isNotBlank(clusterName)) {
+            Stack stack = stackService.getStackById(stackId);
+            String environmentCrn = stack.getEnvironmentCrn();
+            String accountId = stack.getAccountId();
             try {
-                Stack stack = stackService.getStackById(stackId);
-                kerberosConfigService.delete(stack.getEnvironmentCrn(), stack.getAccountId(), clusterName);
+                kerberosConfigService.delete(environmentCrn, accountId, clusterName);
             } catch (NotFoundException e) {
                 LOGGER.warn("No kerberos config found for cluster [{}] to delete", clusterName);
+            }
+            try {
+                ldapConfigService.delete(environmentCrn, accountId, clusterName);
+            } catch (NotFoundException e) {
+                LOGGER.warn("No ldap config found for cluster [{}] to delete", clusterName);
             }
         }
         return Pair.of(userCleanupSuccess, userCleanupFailed);

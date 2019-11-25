@@ -65,6 +65,14 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
         });
     }
 
+    public void delete(String environmentCrn, String accountId, String clusterName) {
+        Optional<LdapConfig> ldapConfig =
+                ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterName(accountId, environmentCrn, clusterName);
+        ldapConfig.ifPresentOrElse(this::delete, () -> {
+            throw notFound("LdapConfig for environment", environmentCrn).get();
+        });
+    }
+
     public void deleteAllInEnvironment(String environmentCrn, String accountId) {
         ldapConfigRepository.findByAccountIdAndEnvironmentCrn(accountId, environmentCrn).forEach(this::delete);
     }
