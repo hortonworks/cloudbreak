@@ -134,7 +134,7 @@ class PublicKeyDeleteHandlerTest {
         when(cloudConnector.publicKey()).thenReturn(publicKeyConnector);
         CloudCredential cloudCredential = new CloudCredential();
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(cloudCredential);
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(createEnvironment(true)));
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(createEnvironment(true, true)));
         IllegalStateException error = new IllegalStateException("error");
         doThrow(error).when(publicKeyConnector).unregister(any());
 
@@ -153,7 +153,7 @@ class PublicKeyDeleteHandlerTest {
         when(cloudConnector.publicKey()).thenReturn(publicKeyConnector);
         CloudCredential cloudCredential = new CloudCredential();
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(cloudCredential);
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(createEnvironment(true)));
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(createEnvironment(true, true)));
 
         underTest.accept(environmentDtoEvent);
 
@@ -166,7 +166,20 @@ class PublicKeyDeleteHandlerTest {
 
     @Test
     void acceptNonManagedKey() {
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(createEnvironment(false)));
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(createEnvironment(false, true)));
+
+        underTest.accept(environmentDtoEvent);
+
+        verify(eventSender).sendEvent(baseNamedFlowEvent.capture(), headersArgumentCaptor.capture());
+        verify(cloudPlatformConnectors, never()).get(any());
+        verify(cloudPlatformConnectors, never()).get(any(), any());
+        verify(publicKeyConnector, never()).unregister(any());
+        verifyEnvDeleteEvent();
+    }
+
+    @Test
+    void acceptSimulateFailedEnvCreationMissingPublicKeyId() {
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(createEnvironment(true, false)));
 
         underTest.accept(environmentDtoEvent);
 
@@ -183,13 +196,13 @@ class PublicKeyDeleteHandlerTest {
         assertThat(underTest.selector()).isEqualTo("DELETE_PUBLICKEY_EVENT");
     }
 
-    private Environment createEnvironment(boolean managedPublicKey) {
+    private Environment createEnvironment(boolean managedPublicKey, boolean hasPublicKey) {
         Environment env = new Environment();
         env.setId(ENVIRONMENT_ID);
         env.setResourceCrn(ENVIRONMENT_CRN);
         EnvironmentAuthentication authentication = new EnvironmentAuthentication();
         authentication.setManagedKey(managedPublicKey);
-        authentication.setPublicKeyId(PUBLIC_KEY_ID);
+        authentication.setPublicKeyId(hasPublicKey ? PUBLIC_KEY_ID : null);
         env.setAuthentication(authentication);
         env.setLocation(LOCATION);
         env.setCloudPlatform(CLOUD_PLATFORM);

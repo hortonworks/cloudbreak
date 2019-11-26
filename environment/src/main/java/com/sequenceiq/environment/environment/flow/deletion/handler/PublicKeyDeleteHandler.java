@@ -68,7 +68,7 @@ public class PublicKeyDeleteHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private void deleteManagedKey(Environment environment) {
-        if (environment.getAuthentication().isManagedKey()) {
+        if (environment.getAuthentication().isManagedKey() && environment.getAuthentication().getPublicKeyId() != null) {
             LOGGER.debug("Environment {} has managed public key. Deleting.", environment.getName());
             deletePublicKey(environment);
         } else {
