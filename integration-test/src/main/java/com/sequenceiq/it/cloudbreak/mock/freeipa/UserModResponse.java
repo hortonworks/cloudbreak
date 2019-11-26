@@ -11,6 +11,7 @@ import spark.Response;
 
 @Component
 public class UserModResponse extends AbstractFreeIpaResponse<User> {
+
     @Override
     public String method() {
         return "user_mod";
@@ -22,6 +23,7 @@ public class UserModResponse extends AbstractFreeIpaResponse<User> {
         user.setDn("admin");
         user.setUid("admin");
         user.setMemberOfGroup(List.of("admins"));
+        user.setKrbPasswordExpiration("20290101000000Z");
         return user;
     }
 }
