@@ -12,15 +12,17 @@ import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyRequest;
 import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyResult;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest;
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityResult;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.cloud.aws.cache.AwsCredentialCachingConfig;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
@@ -33,11 +35,13 @@ public class AwsCredentialVerifier {
     @Inject
     private AwsClient awsClient;
 
+    @Cacheable(value = AwsCredentialCachingConfig.TEMPORARY_AWS_CREDENTIAL_VERIFIER_CACHE,
+            unless = "#awsCredential == null")
     public void validateAws(AwsCredentialView awsCredential) throws AwsPermissionMissingException {
         String policies = new String(Base64.getDecoder().decode(awsPlatformParameters.getCredentialPoliciesJson()));
         try {
             Map<String, List<String>> resourcesWithActions = getRequiredActions(policies);
-            AmazonIdentityManagement amazonIdentityManagement = awsClient.createAmazonIdentityManagement(awsCredential);
+            AmazonIdentityManagementRetryClient amazonIdentityManagement = awsClient.createAmazonIdentityManagementRetryClient(awsCredential);
             AWSSecurityTokenService awsSecurityTokenService = awsClient.createAwsSecurityTokenService(awsCredential);
             String arn;
             if (awsCredential.getRoleArn() != null) {

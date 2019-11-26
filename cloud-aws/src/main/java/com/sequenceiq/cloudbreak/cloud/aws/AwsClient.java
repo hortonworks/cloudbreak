@@ -36,6 +36,7 @@ import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -93,6 +94,10 @@ public class AwsClient {
         return isRoleAssumeRequired(awsCredential)
                 ? new AWSSecurityTokenServiceClient(createAwsSessionCredentialProvider(awsCredential))
                 : new AWSSecurityTokenServiceClient(createAwsCredentials(awsCredential));
+    }
+
+    public AmazonIdentityManagementRetryClient createAmazonIdentityManagementRetryClient(AwsCredentialView awsCredential) {
+        return new AmazonIdentityManagementRetryClient(createAmazonIdentityManagement(awsCredential), retry);
     }
 
     public AmazonIdentityManagement createAmazonIdentityManagement(AwsCredentialView awsCredential) {
