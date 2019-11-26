@@ -1,5 +1,5 @@
 {
-  "name": "CDP 1.2 - Data Mart template for Azure",
+  "name": "Data Mart for Azure",
   "description": "",
   "type": "DATAMART",
   "cloudPlatform": "AZURE",
