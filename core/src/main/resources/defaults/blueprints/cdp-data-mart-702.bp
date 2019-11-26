@@ -1,5 +1,5 @@
 {
-  "description": "CDP 1.2 Data Mart template with Apache Impala and Hue",
+  "description": "CDP 1.2 Data Mart with Apache Impala and Hue",
   "blueprint": {
     "cdhVersion": "7.0.2",
     "displayName": "datamart",
