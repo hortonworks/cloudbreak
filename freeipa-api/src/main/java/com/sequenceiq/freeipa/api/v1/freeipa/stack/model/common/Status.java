@@ -23,7 +23,8 @@ public enum Status {
     START_FAILED,
     STOP_FAILED,
     WAIT_FOR_SYNC,
-    MAINTENANCE_MODE_ENABLED;
+    MAINTENANCE_MODE_ENABLED,
+    UNKNOWN;
 
     public boolean isRemovableStatus() {
         return Arrays.asList(AVAILABLE, UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,

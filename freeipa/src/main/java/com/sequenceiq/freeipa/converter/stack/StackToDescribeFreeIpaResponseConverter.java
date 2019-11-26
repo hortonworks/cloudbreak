@@ -63,6 +63,7 @@ public class StackToDescribeFreeIpaResponseConverter {
         describeFreeIpaResponse.setPlacement(convert(stack));
         describeFreeIpaResponse.setInstanceGroups(instanceGroupConverter.convert(stack.getInstanceGroups()));
         describeFreeIpaResponse.setStatus(stack.getStackStatus().getStatus());
+        describeFreeIpaResponse.setStatusString(stack.getStackStatus().getStatusString());
         describeFreeIpaResponse.setStatusReason(stack.getStackStatus().getStatusReason());
         decorateFreeIpaServerResponseWithIps(describeFreeIpaResponse.getFreeIpa(), describeFreeIpaResponse.getInstanceGroups());
         describeFreeIpaResponse.setAppVersion(stack.getAppVersion());
