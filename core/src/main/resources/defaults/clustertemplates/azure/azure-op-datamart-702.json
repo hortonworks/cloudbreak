@@ -1,12 +1,12 @@
 {
-  "name": "CDP 1.2 - Operations Data Mart template",
+  "name": "Real-time Data Mart for Azure",
   "description": "",
   "type": "DATAMART",
   "featureState": "RELEASED",
   "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "CDP 1.2 - Operations Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark"
+      "blueprintName": "CDP 1.2 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark"
     },
     "instanceGroups": [
       {
