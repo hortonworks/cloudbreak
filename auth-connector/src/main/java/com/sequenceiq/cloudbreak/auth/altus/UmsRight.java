@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
 public enum UmsRight {
+    ENVIRONMENT_ACCESS("environments/accessEnvironment"),
     CLOUDER_MANAGER_ADMIN("environments/adminClouderaManager"),
     RANGER_ADMIN("environments/adminRanger"),
     KNOX_ADMIN("environments/adminKnox"),

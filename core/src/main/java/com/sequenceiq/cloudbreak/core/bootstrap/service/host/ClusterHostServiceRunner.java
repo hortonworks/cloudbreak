@@ -37,6 +37,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -177,6 +180,9 @@ public class ClusterHostServiceRunner {
     @Inject
     private MountDisks mountDisks;
 
+    @Inject
+    private VirtualGroupService virtualGroupService;
+
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, List<String> candidateAddresses) {
         try {
             Set<Node> nodes = stackUtil.collectNodes(stack);
@@ -240,7 +246,8 @@ public class ClusterHostServiceRunner {
                 singletonMap("cluster", singletonMap("name", stack.getCluster().getName()))));
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
         Map<String, List<String>> serviceLocations = getServiceLocations(cluster);
-        saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar, connector, kerberosConfig, serviceLocations);
+        Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
+        saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar, ldapView, connector, kerberosConfig, serviceLocations);
 
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
@@ -250,7 +257,6 @@ public class ClusterHostServiceRunner {
             addAmbariConfig(cluster, servicePillar, connector);
         }
 
-        Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
 
         saveSssdAdPillar(servicePillar, kerberosConfig);
@@ -508,7 +514,7 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar,
+    private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar, Optional<LdapView> ldapView,
             ClusterPreCreationApi connector, KerberosConfig kerberosConfig, Map<String, List<String>> serviceLocations) throws IOException {
         Map<String, Object> gateway = new HashMap<>();
         gateway.put("address", gatewayConfig.getPublicAddress());
@@ -528,6 +534,9 @@ public class ClusterHostServiceRunner {
             gateway.put("signkey", clusterGateway.getSignKey());
             gateway.put("tokencert", clusterGateway.getTokenCert());
             gateway.put("mastersecret", clusterGateway.getKnoxMasterSecret());
+            String adminGroup = ldapView.isPresent() ? ldapView.get().getAdminGroup() : "";
+            VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(cluster.getEnvironmentCrn(), adminGroup);
+            gateway.put("envAccessGroup", virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.ENVIRONMENT_ACCESS.getRight()));
             List<Map<String, Object>> topologies = getTopologies(clusterGateway);
             gateway.put("topologies", topologies);
             if (cluster.getBlueprint() != null) {
