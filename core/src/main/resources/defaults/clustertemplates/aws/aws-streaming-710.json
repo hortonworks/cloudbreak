@@ -1,5 +1,5 @@
 {
-  "name": "CDP 1.2 - Streams Messaging Heavy Duty",
+  "name": "Streams Messaging Heavy Duty for AWS",
   "description": "",
   "type": "STREAMING",
   "cloudPlatform": "AWS",
@@ -21,11 +21,6 @@
           ],
           "rootVolume": {
             "size": 100
-          },
-          "aws": {
-            "encryption": {
-              "type": "NONE"
-            }
           }
         },
         "nodeCount": 1,
@@ -43,11 +38,6 @@
               "type": "standard"
             }
           ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
-            }
-          },
           "rootVolume": {
             "size": 50
           }
@@ -69,11 +59,6 @@
           ],
           "rootVolume": {
             "size": 50
-          },
-          "aws": {
-            "encryption": {
-              "type": "NONE"
-            }
           }
         },
         "nodeCount": 3,
