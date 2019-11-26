@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.model.User;
 
 import spark.Request;
@@ -23,6 +24,7 @@ public class UserFindResponse extends AbstractFreeIpaResponse<Set<User>> {
         user.setDn("admin");
         user.setUid("admin");
         user.setMemberOfGroup(List.of("admins"));
+        user.setKrbPasswordExpiration(FreeIpaClient.PASSWORD_EXPIRATION_DATETIME);
         return Set.of(user);
     }
 }
