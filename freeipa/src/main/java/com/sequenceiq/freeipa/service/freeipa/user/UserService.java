@@ -99,7 +99,7 @@ public class UserService {
     private UserSyncStatusService userSyncStatusService;
 
     public SyncOperationStatus synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
-                                                Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+            Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
 
         validateParameters(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
         LOGGER.debug("Synchronizing users in account {} for environmentCrns {}, userCrns {}, and machineUserCrns {}",
@@ -120,15 +120,15 @@ public class UserService {
         if (syncOperation.getStatus() == SynchronizationStatus.RUNNING) {
             MDCBuilder.addFlowId(syncOperation.getOperationId());
             asyncTaskExecutor.submit(() -> asyncSynchronizeUsers(
-                syncOperation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter));
+                    syncOperation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter));
         }
 
         return syncOperationToSyncOperationStatus.convert(syncOperation);
     }
 
     private void asyncSynchronizeUsers(
-        String operationId, String accountId, String actorCrn, List<Stack> stacks,
-        Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+            String operationId, String accountId, String actorCrn, List<Stack> stacks,
+            Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
         try {
             Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
 
@@ -142,12 +142,12 @@ public class UserService {
                             }));
 
             boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
-            Json umsEventGenerationIdsJson =  fullSync ?
+            Json umsEventGenerationIdsJson = fullSync ?
                     new Json(umsEventGenerationIdsProvider.getEventGenerationIds(accountId, requestIdOptional)) :
                     null;
 
             Map<String, UsersState> envToUmsStateMap = umsUsersStateProvider
-                .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userCrnFilter, machineUserCrnFilter, requestIdOptional);
+                    .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userCrnFilter, machineUserCrnFilter, requestIdOptional);
 
             Collection<SuccessDetails> success = new ConcurrentLinkedQueue<>();
             Collection<FailureDetails> failure = new ConcurrentLinkedQueue<>();
@@ -233,7 +233,7 @@ public class UserService {
     }
 
     private void processUsersWorkloadCredentials(
-        String environmentCrn, UsersState umsUsersState, FreeIpaClient freeIpaClient) throws IOException, FreeIpaClientException {
+            String environmentCrn, UsersState umsUsersState, FreeIpaClient freeIpaClient) throws IOException, FreeIpaClientException {
         Config config = freeIpaClient.getConfig();
         if (config.getIpauserobjectclasses() == null || !config.getIpauserobjectclasses().contains(Config.CDP_USER_ATTRIBUTE)) {
             LOGGER.debug("Doesn't seems like having config attribute, no credentials sync required for env:{}", environmentCrn);
@@ -247,8 +247,8 @@ public class UserService {
         for (FmsUser u : umsUsersState.getUsers()) {
             WorkloadCredential workloadCredential = umsUsersState.getUsersWorkloadCredentialMap().get(u.getName());
             if (workloadCredential == null
-                || StringUtils.isEmpty(workloadCredential.getHashedPassword())
-                || CollectionUtils.isEmpty(workloadCredential.getKeys())) {
+                    || StringUtils.isEmpty(workloadCredential.getHashedPassword())
+                    || CollectionUtils.isEmpty(workloadCredential.getKeys())) {
                 continue;
             }
 
@@ -257,9 +257,9 @@ public class UserService {
             String ansEncodedKrbPrincipalKey = KrbKeySetEncoder.getASNEncodedKrbPrincipalKey(workloadCredential.getKeys());
 
             Map<String, Object> params =
-                ImmutableMap.of("setattr", ImmutableList.of(
-                    "cdpHashedPassword=" + workloadCredential.getHashedPassword(),
-                    "cdpUnencryptedKrbPrincipalKey=" + ansEncodedKrbPrincipalKey));
+                    ImmutableMap.of("setattr", ImmutableList.of(
+                            "cdpHashedPassword=" + workloadCredential.getHashedPassword(),
+                            "cdpUnencryptedKrbPrincipalKey=" + ansEncodedKrbPrincipalKey));
 
             freeIpaClient.userMod(u.getName(), params);
             LOGGER.debug("Password synced for the user:{}, for the environment: {}", u.getName(), environmentCrn);
