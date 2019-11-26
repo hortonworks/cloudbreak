@@ -23,6 +23,33 @@
          <name>Default</name>
          <enabled>true</enabled>
       </provider>
+
+{% if salt['pillar.get']('gateway:envAccessGroup') is defined and salt['pillar.get']('gateway:envAccessGroup') | length > 0 %}
+      <provider>
+         <role>identity-assertion</role>
+         <name>HadoopGroupProvider</name>
+         <enabled>true</enabled>
+         <param>
+            <name>CENTRAL_GROUP_CONFIG_PREFIX</name>
+            <value>gateway.group.config.</value>
+         </param>
+      </provider>
+
+      <provider>
+         <role>authorization</role>
+         <name>AclsAuthz</name>
+         <enabled>true</enabled>
+         <param>
+            <name>knox.acl.mode</name>
+            <value>AND</value>
+         </param>
+         <param>
+            <name>knoxtoken.acl</name>
+            <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+         </param>
+      </provider>
+{% endif %}
+
    </gateway>
 
    <service>

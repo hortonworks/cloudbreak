@@ -11,16 +11,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn.Service;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 
-import io.grpc.Status;
+import io.grpc.Status.Code;
 import io.grpc.StatusRuntimeException;
 
 @Component
 public class VirtualGroupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(VirtualGroupService.class);
 
-    private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
+    private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Service.IAM).getInternalCrnForServiceAsString();
 
     @Inject
     private GrpcUmsClient grpcUmsClient;
@@ -62,7 +63,7 @@ public class VirtualGroupService {
         try {
             virtualGroup = grpcUmsClient.getWorkloadAdministrationGroupName(IAM_INTERNAL_ACTOR_CRN, accountId, Optional.empty(), right, environmentCrn);
         } catch (StatusRuntimeException ex) {
-            if (Status.Code.NOT_FOUND != ex.getStatus().getCode()) {
+            if (Code.NOT_FOUND != ex.getStatus().getCode()) {
                 throw ex;
             }
         }
