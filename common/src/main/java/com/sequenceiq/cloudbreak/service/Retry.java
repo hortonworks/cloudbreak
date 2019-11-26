@@ -8,6 +8,8 @@ public interface Retry {
 
     <T> T testWith2SecDelayMax15Times(Supplier<T> action) throws ActionFailedException;
 
+    <T> T testWith1SecDelayMax5Times(Supplier<T> action) throws ActionFailedException;
+
     class ActionFailedException extends RuntimeException {
         public ActionFailedException() {
         }
