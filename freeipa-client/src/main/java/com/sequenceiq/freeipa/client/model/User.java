@@ -23,6 +23,9 @@ public class User {
     @JsonProperty(value = "memberof_group")
     private List<String> memberOfGroup;
 
+    @JsonDeserialize(using = ListFlatteningDeserializer.class)
+    private String krbPasswordExpiration;
+
     public String getDn() {
         return dn;
     }
@@ -63,6 +66,14 @@ public class User {
         this.memberOfGroup = memberOfGroup;
     }
 
+    public String getKrbPasswordExpiration() {
+        return krbPasswordExpiration;
+    }
+
+    public void setKrbPasswordExpiration(String krbPasswordExpiration) {
+        this.krbPasswordExpiration = krbPasswordExpiration;
+    }
+
     @Override
     public String toString() {
         return "User{"
@@ -70,7 +81,8 @@ public class User {
                 + ", sn='" + sn + '\''
                 + ", uid='" + uid + '\''
                 + ", givenname='" + givenname + '\''
-                + ", memberOfGroup=" + memberOfGroup
+                + ", memberOfGroup=" + memberOfGroup + '\''
+                + ", krbPasswordExpiration='" + krbPasswordExpiration + '\''
                 + '}';
     }
 }

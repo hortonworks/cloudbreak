@@ -22,6 +22,7 @@ public class UserAddResponse extends AbstractFreeIpaResponse<User> {
         user.setDn("admin");
         user.setUid("admin");
         user.setMemberOfGroup(List.of("admins"));
+        user.setKrbPasswordExpiration("20290101000000Z");
         return user;
     }
 }
