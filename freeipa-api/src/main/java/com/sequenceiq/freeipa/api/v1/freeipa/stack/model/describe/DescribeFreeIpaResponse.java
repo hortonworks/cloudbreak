@@ -63,6 +63,8 @@ public class DescribeFreeIpaResponse {
 
     private Status status;
 
+    private String statusString;
+
     private String statusReason;
 
     @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_APPLICATION_VERSION)
@@ -184,5 +186,13 @@ public class DescribeFreeIpaResponse {
 
     public void setAppVersion(String appVersion) {
         this.appVersion = appVersion;
+    }
+
+    public String getStatusString() {
+        return statusString;
+    }
+
+    public void setStatusString(String statusString) {
+        this.statusString = statusString;
     }
 }

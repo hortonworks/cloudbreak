@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common;
 
 public enum DetailedStackStatus {
-    UNKNOWN(null),
+    UNKNOWN(Status.UNKNOWN),
     // Provision statuses
     PROVISION_REQUESTED(Status.REQUESTED),
     PROVISION_SETUP(Status.CREATE_IN_PROGRESS),

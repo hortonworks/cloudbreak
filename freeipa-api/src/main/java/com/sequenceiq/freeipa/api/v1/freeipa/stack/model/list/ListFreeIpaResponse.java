@@ -31,6 +31,8 @@ public class ListFreeIpaResponse {
 
     private Status status;
 
+    private String statusString;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -71,4 +73,11 @@ public class ListFreeIpaResponse {
         this.status = status;
     }
 
+    public String getStatusString() {
+        return statusString;
+    }
+
+    public void setStatusString(String statusString) {
+        this.statusString = statusString;
+    }
 }

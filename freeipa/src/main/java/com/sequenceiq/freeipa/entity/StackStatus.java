@@ -3,9 +3,8 @@ package com.sequenceiq.freeipa.entity;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,6 +15,8 @@ import javax.persistence.Table;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.entity.util.DetailsStackStatusConverter;
+import com.sequenceiq.freeipa.entity.util.StackStatusConverter;
 
 @Entity
 @Table(name = "stackstatus")
@@ -30,14 +31,20 @@ public class StackStatus {
 
     private Long created;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = StackStatusConverter.class)
     private Status status;
+
+    @Column(name = "status", insertable = false, updatable = false)
+    private String statusString;
 
     @Column(columnDefinition = "TEXT")
     private String statusReason;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = DetailsStackStatusConverter.class)
     private DetailedStackStatus detailedStackStatus;
+
+    @Column(name = "detailedStackStatus", insertable = false, updatable = false)
+    private String detailedStackStatusString;
 
     public StackStatus() {
     }
@@ -78,6 +85,10 @@ public class StackStatus {
         return status;
     }
 
+    public String getStatusString() {
+        return statusString;
+    }
+
     public void setStatusReason(String statusReason) {
         this.statusReason = statusReason;
     }
@@ -92,6 +103,10 @@ public class StackStatus {
 
     public DetailedStackStatus getDetailedStackStatus() {
         return detailedStackStatus;
+    }
+
+    public String getDetailedStackStatusString() {
+        return detailedStackStatusString;
     }
 
     public void setCreated(Long created) {
