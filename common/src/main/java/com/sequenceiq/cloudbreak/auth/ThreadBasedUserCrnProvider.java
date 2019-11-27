@@ -5,6 +5,8 @@ import java.util.Stack;
 
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -12,7 +14,9 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 @Service
 public class ThreadBasedUserCrnProvider {
 
-    private static final ThreadLocal<Stack<String>> USER_CRN = new InheritableThreadLocal<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ThreadBasedUserCrnProvider.class);
+
+    private static final ThreadLocal<Stack<String>> USER_CRN = new ThreadLocal<>();
 
     @Nullable
     public String getUserCrn() {
@@ -34,6 +38,10 @@ public class ThreadBasedUserCrnProvider {
         if (stack == null) {
             stack = new Stack<>();
             USER_CRN.set(stack);
+        }
+        if (!stack.isEmpty() && !stack.peek().equals(userCrn)) {
+            LOGGER.error("Trying to push crn to stack {} when it already contains {}", userCrn, stack.get(0));
+            throw new IllegalStateException(String.format("Trying to push crn to stack %s when it already contains %s", userCrn, stack.get(0)));
         }
         stack.push(userCrn);
     }
