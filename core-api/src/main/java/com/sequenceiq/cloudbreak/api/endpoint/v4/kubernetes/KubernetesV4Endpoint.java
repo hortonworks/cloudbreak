@@ -16,7 +16,6 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.requests.KubernetesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Responses;
-import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.KubernetesConfigOpDescription;
@@ -28,49 +27,50 @@ import io.swagger.annotations.ApiOperation;
 @RetryingRestClient
 @Path("/v4/{workspaceId}/kubernetes")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/{workspaceId}/kubernetes", description = ControllerDescription.KUBERNETESCONFIGS_V4_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v4/{workspaceId}/kubernetes", description = ControllerDescription.KUBERNETESCONFIGS_V4_DESCRIPTION, protocols = "http,https",
+        consumes = MediaType.APPLICATION_JSON)
 public interface KubernetesV4Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = KubernetesConfigOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.KUBERNETESCONFIG_NOTES,
+    @ApiOperation(value = KubernetesConfigOpDescription.LIST_BY_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.KUBERNETESCONFIG_NOTES,
             nickname = "listKubernetesConfigsByWorkspace")
     KubernetesV4Responses list(@PathParam("workspaceId") Long workspaceId);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = KubernetesConfigOpDescription.CREATE_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.KUBERNETESCONFIG_NOTES,
+    @ApiOperation(value = KubernetesConfigOpDescription.CREATE_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.KUBERNETESCONFIG_NOTES,
             nickname = "createKubernetesConfigInWorkspace")
     KubernetesV4Response post(@PathParam("workspaceId") Long workspaceId, @Valid KubernetesV4Request request);
 
     @PUT
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = KubernetesConfigOpDescription.PUT_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.KUBERNETESCONFIG_NOTES,
+    @ApiOperation(value = KubernetesConfigOpDescription.PUT_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.KUBERNETESCONFIG_NOTES,
             nickname = "putKubernetesConfigInWorkspace")
     KubernetesV4Response put(@PathParam("workspaceId") Long workspaceId, @Valid KubernetesV4Request request);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = KubernetesConfigOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.KUBERNETESCONFIG_NOTES,
+    @ApiOperation(value = KubernetesConfigOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.KUBERNETESCONFIG_NOTES,
             nickname = "getKubernetesConfigInWorkspace")
     KubernetesV4Response get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @DELETE
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = KubernetesConfigOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.KUBERNETESCONFIG_NOTES,
-            nickname = "deleteKubernetesConfigInWorkspace")
+    @ApiOperation(value = KubernetesConfigOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON,
+            notes = Notes.KUBERNETESCONFIG_NOTES, nickname = "deleteKubernetesConfigInWorkspace")
     KubernetesV4Response delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = KubernetesConfigOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.KUBERNETESCONFIG_NOTES,
-            nickname = "deleteKubernetesConfigsInWorkspace")
+    @ApiOperation(value = KubernetesConfigOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON,
+            notes = Notes.KUBERNETESCONFIG_NOTES, nickname = "deleteKubernetesConfigsInWorkspace")
     KubernetesV4Responses deleteMultiple(@PathParam("workspaceId") Long workspaceId, Set<String> names);
 
 }

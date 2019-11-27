@@ -33,7 +33,7 @@ import io.swagger.annotations.ApiOperation;
 @Path("/v1/env")
 @RetryingRestClient
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/env", protocols = "http,https")
+@Api(value = "/v1/env", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface EnvironmentEndpoint {
 
     @POST

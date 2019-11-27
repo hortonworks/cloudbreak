@@ -28,7 +28,7 @@ import io.swagger.annotations.ApiOperation;
 @Path("/v1/ldaps")
 @RetryingRestClient
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/ldaps", description = LDAP_CONFIG_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v1/ldaps", description = LDAP_CONFIG_DESCRIPTION, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface LdapConfigV1Endpoint {
     @GET
     @Path("")

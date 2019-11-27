@@ -14,7 +14,6 @@ public class PlatformResourceModelDescription {
     public static final String VIRTUAL_MACHNES = "virtual machines";
     public static final String DEFAULT_VIRTUAL_MACHINES = "default virtual machines";
     public static final String CONNECTOR_V1_DESCRIPTION = "Returns cloud provider specific resource types by workspace";
-    public static final String JSON_CONTENT_TYPE = "application/json";
 
     public static class OpDescription {
         public static final String GET_DISK_TYPES = "retrieve available disk types";
