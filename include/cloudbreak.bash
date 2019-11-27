@@ -11,7 +11,6 @@ cloudbreak-config() {
   cloudbreak-conf-defaults
   cloudbreak-conf-autscale
   cloudbreak-conf-uaa
-  cloudbreak-conf-smtp
   cloudbreak-conf-cloud-provider
   cloudbreak-conf-rest-client
   cloudbreak-conf-ui
@@ -29,7 +28,6 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_TRAEFIK v1.6.6-alpine
     env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v7
-    env-import DOCKER_TAG_POSTFIX latest
     env-import DOCKER_TAG_UAA 3.6.5-certs
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
     env-import DOCKER_TAG_CERT_TOOL 0.2.0
@@ -59,7 +57,6 @@ cloudbreak-conf-tags() {
     env-import DOCKER_IMAGE_CBD_LOGSINK hortonworks/socat
     env-import DOCKER_IMAGE_CBD_LOGSPOUT hortonworks/logspout
     env-import DOCKER_IMAGE_CBD_LOGROTATE hortonworks/logrotate
-    env-import DOCKER_IMAGE_CBD_POSTFIX catatnight/postfix
     env-import DOCKER_IMAGE_CBD_POSTGRES postgres
 
     env-import CB_DEFAULT_SUBSCRIPTION_ADDRESS http://uluwatu.service.consul:3000/notifications
@@ -115,23 +112,6 @@ cloudbreak-conf-capabilities() {
     env-import CB_CAPABILITIES ""
     CB_CAPABILITIES=$(echo $CB_CAPABILITIES | awk '{print toupper($0)}')
     env-import INFO_APP_CAPABILITIES "$CB_CAPABILITIES"
-}
-
-cloudbreak-conf-smtp() {
-    env-import LOCAL_SMTP_PASSWORD "$UAA_DEFAULT_USER_PW"
-    if ! [[ "$LOCAL_SMTP_PASSWORD" ]]; then
-        LOCAL_SMTP_PASSWORD="cloudbreak"
-    fi
-
-    env-import CLOUDBREAK_SMTP_SENDER_USERNAME "admin"
-    env-import CLOUDBREAK_SMTP_SENDER_PASSWORD "$LOCAL_SMTP_PASSWORD"
-    env-import CLOUDBREAK_SMTP_SENDER_HOST "smtp.service.consul"
-    env-import CLOUDBREAK_SMTP_SENDER_PORT 25
-    env-import CLOUDBREAK_SMTP_SENDER_FROM "noreply@hortonworks.com"
-    env-import CLOUDBREAK_SMTP_AUTH "true"
-    env-import CLOUDBREAK_SMTP_STARTTLS_ENABLE "false"
-    env-import CLOUDBREAK_SMTP_TYPE "smtp"
-    env-import CLOUDBREAK_TELEMETRY_MAIL_ADDRESS "aws-marketplace@hortonworks.com"
 }
 
 is_linux() {

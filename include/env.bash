@@ -117,14 +117,6 @@ CB_UI_MAX_WAIT - Wait timeout for `cbd start-wait` command
 CB_UPSCALE_MAX_NODECOUNT - Max number of nodes with which upscale is allowed (default is 100)
 CERTS_BUCKET - S3 bucket name for backup and restore certificates via `cbd aws [certs-restore-s3  certs-upload-s3]` commands
 CERT_VALIDATION - Enables cert validation in Cloudbreak and Autoscale
-CLOUDBREAK_SMTP_AUTH - Configures mail.smtp.auth in Cloudbreak
-CLOUDBREAK_SMTP_SENDER_FROM - Email address of the sender
-CLOUDBREAK_SMTP_SENDER_HOST - SMTP server address ot hostname
-CLOUDBREAK_SMTP_SENDER_PASSWORD - Password
-CLOUDBREAK_SMTP_SENDER_PORT - Port of the SMTP server
-CLOUDBREAK_SMTP_SENDER_USERNAME - User name for SMTP authentication
-CLOUDBREAK_SMTP_STARTTLS_ENABLE - Configures mail.smtp.starttls.enable in Cloudbreak
-CLOUDBREAK_SMTP_TYPE - Defines mail.transport.protocol in CLoudbreak
 COMMON_DB - Name of the database container
 COMMON_DB_VOL - Name of the database volume
 CURL_CONNECT_TIMEOUT - Timeout for curl command
@@ -145,7 +137,6 @@ DOCKER_IMAGE_CBD_REGISTRATOR - Registrator Docker image name
 DOCKER_IMAGE_CBD_LOGSINK - Logsink Docker image name
 DOCKER_IMAGE_CBD_LOGSPOUT - Logspout Docker image name
 DOCKER_IMAGE_CBD_LOGROTATE - Logrotate Docker image name
-DOCKER_IMAGE_CBD_POSTFIX - Postfix Docker image name
 DOCKER_IMAGE_CBD_POSTGRES - Postgres Docker image name
 DOCKER_TAG_ALPINE - Alpine container version
 DOCKER_TAG_CBD_SMARTSENSE - SmartSense container version
@@ -155,7 +146,6 @@ DOCKER_TAG_CONSUL - Consul container version
 DOCKER_TAG_HAVEGED - Haveged container version
 DOCKER_TAG_MIGRATION - Migration container version
 DOCKER_TAG_PERISCOPE - Autoscale container version
-DOCKER_TAG_POSTFIX - Postfix container version
 DOCKER_TAG_POSTGRES - Postgresql container version
 DOCKER_TAG_LOGROTATE - Logrotate container version
 DOCKER_TAG_REGISTRATOR - Registrator container version
@@ -177,7 +167,6 @@ IDENTITY_DB_NAME - Name of the Identity database
 IDENTITY_DB_PASS - Password for the Identity database authentication
 IDENTITY_DB_URL - Url for the Identity database connection included the port number
 IDENTITY_DB_USER - User for the Identity database authentication
-LOCAL_SMTP_PASSWORD - Default password for the internal mail server
 PERISCOPE_HBM2DDL_STRATEGY - Configures hibernate.hbm2ddl.auto in Autoscale
 PERISCOPE_DB_ENV_DB - Name of the Autoscale database
 PERISCOPE_DB_ENV_PASS - Password for the Autoscale database authentication
