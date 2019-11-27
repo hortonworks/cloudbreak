@@ -10,7 +10,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
-import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.cloudbreak.util.FreeIpaPasswordUtil;
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
 import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigResponse;
@@ -181,7 +181,7 @@ public class LdapConfigV1Service {
                 String bindUser = "ldapbind-" + clusterName;
                 Optional<User> existinguser = freeIpaClient.userFind(bindUser);
                 User user = existinguser.isPresent() ? existinguser.get() : freeIpaClient.userAdd(bindUser, "service", "account");
-                String password = PasswordUtil.generatePassword();
+                String password = FreeIpaPasswordUtil.generatePassword();
                 freeIpaClient.userSetPassword(user.getUid(), password);
                 ldapConfig = ldapConfigRegisterService.createLdapConfig(stack.get().getId(), user.getDn(), password, clusterName);
             }

@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
-import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.cloudbreak.util.FreeIpaPasswordUtil;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
@@ -102,7 +102,7 @@ public class KerberosConfigV1Service {
                 String bindUser = "kerberosbind-" + clusterName;
                 Optional<User> existinguser = freeIpaClient.userFind(bindUser);
                 User user = existinguser.isPresent() ? existinguser.get() : freeIpaClient.userAdd(bindUser, "service", "account");
-                String password = PasswordUtil.generatePassword();
+                String password = FreeIpaPasswordUtil.generatePassword();
                 freeIpaClient.userSetPassword(user.getUid(), password);
                 freeIpaClient.addRoleMember("Enrollment Administrator", Set.of(user.getUid()), null, null, null, null);
                 freeIpaPermissionService.setPermissions(freeIpaClient);

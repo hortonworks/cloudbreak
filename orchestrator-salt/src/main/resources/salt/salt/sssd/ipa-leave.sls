@@ -17,7 +17,7 @@ remove_cm_service_account:
   cmd.run:
     - name: sh /opt/salt/scripts/remove_cm_sa.sh 2>&1 | tee -a /var/log/remove_cm_sa.log && exit ${PIPESTATUS[0]}
     - env:
-        - password: {{salt['pillar.get']('sssd-ipa:password')}}
+        - password: "{{salt['pillar.get']('sssd-ipa:password')}}"
     - onlyif: ls /etc/cloudera-scm-server/cmf.keytab
     - require:
       - file: create_remove_cm_sa_script
