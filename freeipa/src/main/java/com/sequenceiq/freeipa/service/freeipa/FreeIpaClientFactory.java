@@ -73,7 +73,7 @@ public class FreeIpaClientFactory {
         LOGGER.debug("Creating FreeIpaClient for stack {}", stack.getResourceCrn());
 
         try {
-            if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled() && stack.getClusterProxyRegistered()) {
+            if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
                 HttpClientConfig httpClientConfig = new HttpClientConfig(clusterProxyConfiguration.getClusterProxyHost());
                 FreeIpa freeIpa = freeIpaService.findByStack(stack);
                 String clusterProxyPath = toClusterProxyBasepath(stack.getResourceCrn());

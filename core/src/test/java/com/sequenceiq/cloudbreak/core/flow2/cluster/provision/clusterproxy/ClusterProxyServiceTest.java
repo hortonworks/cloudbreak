@@ -37,12 +37,14 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.Tunnel;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterProxyServiceTest {
@@ -62,6 +64,9 @@ public class ClusterProxyServiceTest {
 
     @Mock
     private SecurityConfigService securityConfigService;
+
+    @Mock
+    private StackUpdater stackUpdater;
 
     @InjectMocks
     private ClusterProxyService service;
@@ -150,8 +155,8 @@ public class ClusterProxyServiceTest {
     private ClusterServiceConfig cmInternalServiceConfig() {
         ClusterServiceCredential cloudbreakUser = new ClusterServiceCredential("cloudbreak", "/cb/test-data/secret/cbpassword:secret");
         ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt", "/cb/test-data/secret/dppassword:secret", true);
-        ClientCertificate clientCertificate = new ClientCertificate("/cb/test-data/secret/clientKey:secret",
-                "/cb/test-data/secret/clientCert:secret");
+        ClientCertificate clientCertificate = new ClientCertificate("/cb/test-data/secret/clientKey:secret:base64",
+                "/cb/test-data/secret/clientCert:secret:base64");
         return new ClusterServiceConfig("cb-internal",
                 List.of("https://10.10.10.10:9443"), asList(cloudbreakUser, dpUser), clientCertificate, null);
     }
@@ -173,6 +178,7 @@ public class ClusterProxyServiceTest {
         stack.setId(STACK_ID);
         stack.setCluster(testCluster());
         stack.setGatewayPort(9443);
+        stack.setClusterProxyRegistered(true);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         InstanceMetaData primaryInstanceMetaData = new InstanceMetaData();
@@ -189,6 +195,7 @@ public class ClusterProxyServiceTest {
     private Stack testStackUsingCCM() {
         Stack stack = testStack();
         stack.setUseCcm(true);
+        stack.setTunnel(Tunnel.CCM);
         return stack;
     }
 

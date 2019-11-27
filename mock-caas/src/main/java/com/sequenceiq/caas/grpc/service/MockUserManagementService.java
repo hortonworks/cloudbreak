@@ -138,6 +138,9 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     @Value("${auth.databus.credential.fluent.profile:default}")
     private String databusFluentCredentialProfile;
 
+    @Value("${auth.mock.ccm.enable}")
+    private boolean enableCcm;
+
     private String cbLicense;
 
     private AltusCredential telemetyPublisherCredential;
@@ -312,12 +315,15 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Override
     public void getAccount(GetAccountRequest request, StreamObserver<GetAccountResponse> responseObserver) {
+        UserManagementProto.Account.Builder builder = UserManagementProto.Account.newBuilder();
+        if (enableCcm) {
+            builder.addEntitlements(createEntitlement(REVERSE_SSH_TUNNEL));
+        }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
-                        .setAccount(UserManagementProto.Account.newBuilder()
+                        .setAccount(builder
                                 .setClouderaManagerLicenseKey(cbLicense)
                                 .setWorkloadSubdomain(ACCOUNT_SUBDOMAIN)
-                                .addEntitlements(createEntitlement(REVERSE_SSH_TUNNEL))
                                 .addEntitlements(createEntitlement(CDP_AZURE))
                                 .addEntitlements(createEntitlement(CDP_AUTOMATIC_USERSYNC_POLLER))
                                 .build())

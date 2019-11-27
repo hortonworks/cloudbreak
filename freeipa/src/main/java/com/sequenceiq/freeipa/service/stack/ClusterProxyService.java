@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
@@ -106,6 +107,18 @@ public class ClusterProxyService {
         return Optional.of(response);
     }
 
+    public boolean useClusterProxyForCommunication(Tunnel tunnel) {
+        return clusterProxyConfiguration.isClusterProxyIntegrationEnabled() && tunnel.useClusterProxy();
+    }
+
+    public boolean useClusterProxyForCommunication(Stack stack) {
+        return useClusterProxyForCommunication(stack.getTunnel());
+    }
+
+    public boolean isCreateConfigForClusterProxy(Stack stack) {
+        return useClusterProxyForCommunication(stack) && stack.isClusterProxyRegistered();
+    }
+
     public void deregisterFreeIpa(String accountId, String environmentCrn) {
         deregisterFreeIpa(stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId));
     }
@@ -136,7 +149,7 @@ public class ClusterProxyService {
     }
 
     private List<TunnelEntry> createTunnelEntries(Stack stack, HttpClientConfig httpClientConfig, GatewayConfig primaryGatewayConfig) {
-        if (stack.getUseCcm()) {
+        if (stack.getTunnel().useCcm()) {
             String tunnelKey = primaryGatewayConfig.getInstanceId();
             String tunnelHost = primaryGatewayConfig.getPrivateAddress();
             Integer tunnelPort = primaryGatewayConfig.getGatewayPort();

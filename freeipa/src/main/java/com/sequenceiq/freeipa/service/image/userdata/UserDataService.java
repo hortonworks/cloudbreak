@@ -92,7 +92,7 @@ public class UserDataService {
 
     private CcmParameters fetchCcmParameters(Stack stack) {
         CcmParameters ccmParameters = null;
-        if ((ccmParameterSupplier != null) && stack.getUseCcm()) {
+        if ((ccmParameterSupplier != null) && stack.getTunnel().useCcm()) {
             int gatewayPort = Optional.ofNullable(stack.getGatewayport()).orElse(ServiceFamilies.GATEWAY.getDefaultPort());
             Map<KnownServiceIdentifier, Integer> tunneledServicePorts = Collections.singletonMap(KnownServiceIdentifier.GATEWAY, gatewayPort);
             // JSA TODO Use stack ID or something else instead?

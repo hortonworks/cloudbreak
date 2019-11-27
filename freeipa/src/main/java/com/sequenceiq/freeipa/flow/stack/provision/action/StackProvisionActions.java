@@ -211,7 +211,7 @@ public class StackProvisionActions {
                 Stack stack = stackProvisionService.setupMetadata(context, payload);
                 StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(),
                         context.getCloudCredential(), context.getCloudStack());
-                if (newContext.getStack().getUseCcm()) {
+                if (newContext.getStack().getTunnel().useCcm()) {
                     GetTlsInfoResult getTlsInfoResult = new GetTlsInfoResult(context.getCloudContext().getId(), new TlsInfo(true));
                     sendEvent(newContext, getTlsInfoResult.selector(), getTlsInfoResult);
                 } else {
@@ -243,7 +243,7 @@ public class StackProvisionActions {
         return new AbstractStackProvisionAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
-                if (!context.getStack().getUseCcm()) {
+                if (!context.getStack().getTunnel().useCcm()) {
                     stackProvisionService.setupTls(context);
                 }
                 sendEvent(context, new StackEvent(StackProvisionEvent.TLS_SETUP_FINISHED_EVENT.event(), context.getStack().getId()));

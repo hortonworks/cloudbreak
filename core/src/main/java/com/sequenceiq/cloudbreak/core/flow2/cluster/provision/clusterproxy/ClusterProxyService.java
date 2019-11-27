@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.common.api.type.Tunnel;
 
 @Component
 public class ClusterProxyService {
@@ -60,20 +61,20 @@ public class ClusterProxyService {
     private ClusterProxyConfiguration clusterProxyConfiguration;
 
     public ConfigRegistrationResponse registerCluster(Stack stack) {
-            ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack);
+        ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack);
         ConfigRegistrationResponse configRegistrationResponse = clusterProxyRegistrationClient.registerConfig(proxyConfigRequest);
         stackUpdater.updateClusterProxyRegisteredFlag(stack, true);
         return configRegistrationResponse;
     }
 
     public ConfigRegistrationResponse reRegisterCluster(Stack stack) {
-            ConfigRegistrationRequest proxyConfigRequest = createProxyConfigReRegisterRequest(stack);
-            return clusterProxyRegistrationClient.registerConfig(proxyConfigRequest);
+        ConfigRegistrationRequest proxyConfigRequest = createProxyConfigReRegisterRequest(stack);
+        return clusterProxyRegistrationClient.registerConfig(proxyConfigRequest);
     }
 
     public void registerGatewayConfiguration(Long stackId) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        if  (!stack.getCluster().hasGateway()) {
+        if (!stack.getCluster().hasGateway()) {
             LOGGER.warn("Cluster {} with crn {} in environment {} not configured with Gateway (Knox). Not updating Cluster Proxy with Gateway url.",
                     stack.getCluster().getName(), stack.getResourceCrn(), stack.getEnvironmentCrn());
             return;
@@ -81,9 +82,21 @@ public class ClusterProxyService {
         registerGateway(stack);
     }
 
+    public boolean useClusterProxyForCommunication(Tunnel tunnel) {
+        return clusterProxyConfiguration.isClusterProxyIntegrationEnabled() && tunnel.useClusterProxy();
+    }
+
+    public boolean useClusterProxyForCommunication(Stack stack) {
+        return useClusterProxyForCommunication(stack.getTunnel());
+    }
+
+    public boolean isCreateConfigForClusterProxy(Stack stack) {
+        return useClusterProxyForCommunication(stack) && stack.isClusterProxyRegistered();
+    }
+
     private void registerGateway(Stack stack) {
-            ConfigUpdateRequest request = new ConfigUpdateRequest(stack.getResourceCrn(), knoxUrl(stack));
-            clusterProxyRegistrationClient.updateConfig(request);
+        ConfigUpdateRequest request = new ConfigUpdateRequest(stack.getResourceCrn(), knoxUrl(stack));
+        clusterProxyRegistrationClient.updateConfig(request);
     }
 
     public void deregisterCluster(Stack stack) {
@@ -93,8 +106,8 @@ public class ClusterProxyService {
 
     private ConfigRegistrationRequest createProxyConfigRequest(Stack stack) {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
-            .withAliases(singletonList(clusterId(stack.getCluster()))).withServices(serviceConfigs(stack));
-        if (stack.getUseCcm()) {
+                .withAliases(singletonList(clusterId(stack.getCluster()))).withServices(serviceConfigs(stack));
+        if (stack.getTunnel().useCcm()) {
             requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack));
         }
         return requestBuilder.build();
@@ -103,7 +116,7 @@ public class ClusterProxyService {
     private ConfigRegistrationRequest createProxyConfigReRegisterRequest(Stack stack) {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withAliases(singletonList(clusterId(stack.getCluster()))).withServices(serviceConfigs(stack)).withKnoxUrl(knoxUrl(stack));
-        if (stack.getUseCcm()) {
+        if (stack.getTunnel().useCcm()) {
             requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack));
         }
         return requestBuilder.build();
@@ -134,10 +147,10 @@ public class ClusterProxyService {
         Cluster cluster = stack.getCluster();
 
         String cloudbreakUser = cluster.getCloudbreakAmbariUser();
-        String cloudbreakPasswordVaultPath = vaultPath(cluster.getCloudbreakAmbariPasswordSecret());
+        String cloudbreakPasswordVaultPath = vaultPath(cluster.getCloudbreakAmbariPasswordSecret(), false);
 
         String dpUser = cluster.getDpAmbariUser();
-        String dpPasswordVaultPath = vaultPath(cluster.getDpAmbariPasswordSecret());
+        String dpPasswordVaultPath = vaultPath(cluster.getDpAmbariPasswordSecret(), false);
 
         List<ClusterServiceCredential> credentials = asList(new ClusterServiceCredential(cloudbreakUser, cloudbreakPasswordVaultPath),
                 new ClusterServiceCredential(dpUser, dpPasswordVaultPath, true));
@@ -150,8 +163,8 @@ public class ClusterProxyService {
         if (securityConfigOptional.isPresent()
                 && StringUtils.isNoneBlank(securityConfigOptional.get().getClientCert(), securityConfigOptional.get().getClientCertSecret())) {
             SecurityConfig securityConfig = securityConfigOptional.get();
-            String clientCertRef = vaultPath(securityConfig.getClientCertSecret());
-            String clientKeyRef =  vaultPath(securityConfig.getClientKeySecret());
+            String clientCertRef = vaultPath(securityConfig.getClientCertSecret(), true);
+            String clientKeyRef = vaultPath(securityConfig.getClientKeySecret(), true);
             clientCertificate = new ClientCertificate(clientKeyRef, clientCertRef);
         }
         return clientCertificate;
@@ -181,9 +194,10 @@ public class ClusterProxyService {
         return String.format("%s/proxy/%s/%s", clusterProxyConfiguration.getClusterProxyBasePath(), crn, CB_INTERNAL);
     }
 
-    private String vaultPath(String vaultSecretJsonString) {
+    private String vaultPath(String vaultSecretJsonString, boolean base64) {
         try {
-            return JsonUtil.readValue(vaultSecretJsonString, VaultSecret.class).getPath() + ":secret:base64";
+            String path = JsonUtil.readValue(vaultSecretJsonString, VaultSecret.class).getPath() + ":secret";
+            return base64 ? path + ":base64" : path;
         } catch (IOException e) {
             throw new VaultConfigException(String.format("Could not parse vault secret string '%s'", vaultSecretJsonString), e);
         }

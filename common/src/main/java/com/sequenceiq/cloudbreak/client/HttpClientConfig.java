@@ -61,7 +61,7 @@ public class HttpClientConfig {
         return this.serverCert != null || this.clientCert != null || this.clientKey != null;
     }
 
-    public boolean isClusterProxyenabled() {
+    public boolean isClusterProxyEnabled() {
         return StringUtils.isNoneBlank(clusterCrn, clusterProxyUrl);
     }
 }

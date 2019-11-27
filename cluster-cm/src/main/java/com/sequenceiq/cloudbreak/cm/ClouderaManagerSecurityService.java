@@ -254,12 +254,8 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         usersResourceApi.createUsers2(apiUser2List);
     }
 
-    public ApiClient getDefaultClient(Integer gatewayPort, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
-        ApiClient client = clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, gatewayPort, "admin", "admin");
-        if (clientConfig.isClusterProxyenabled()) {
-            client.addDefaultHeader("Proxy-Ignore-Auth", "true");
-        }
-        return client;
+    private ApiClient getDefaultClient(Integer gatewayPort, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
+        return clouderaManagerApiClientProvider.getDefaultClient(gatewayPort, clientConfig);
     }
 
     public ApiClient getClient(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {

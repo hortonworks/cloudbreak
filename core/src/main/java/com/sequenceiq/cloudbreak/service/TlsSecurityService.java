@@ -112,17 +112,17 @@ public class TlsSecurityService {
             SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) {
         SecurityConfig securityConfig = getSecurityConfigByStackIdOrThrowNotFound(stackId);
         Stack stack = stackService.getById(stackId);
-        String connectionIp = getGatewayIp(securityConfig, gatewayInstance, stack.isClusterProxyRegistered());
+        String connectionIp = getGatewayIp(securityConfig, gatewayInstance, stack);
         HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp, gatewayInstance);
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
         String saltSignPrivateKeyB64 = saltSecurityConfig.getSaltSignPrivateKey();
         GatewayConfig gatewayConfig = new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(),
-                gatewayInstance.getDiscoveryFQDN(), getGatewayPort(gatewayPort, stack.isClusterProxyRegistered()), gatewayInstance.getInstanceId(),
+                gatewayInstance.getDiscoveryFQDN(), getGatewayPort(gatewayPort, stack), gatewayInstance.getInstanceId(),
                 conf.getServerCert(), conf.getClientCert(), conf.getClientKey(), saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(),
                 saltClientConfig.getSignatureKeyPem(), knoxGatewayEnabled,
                 InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()), new String(decodeBase64(saltSignPrivateKeyB64)),
                 new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())), securityConfig.getUserFacingCert(), securityConfig.getUserFacingKey());
-        if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled() && stack.isClusterProxyRegistered()) {
+        if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
             gatewayConfig
                     .withPath(clusterProxyService.getProxyPath(stack.getResourceCrn()))
                     .withProtocol(clusterProxyConfiguration.getClusterProxyProtocol());
@@ -130,9 +130,9 @@ public class TlsSecurityService {
         return gatewayConfig;
     }
 
-    public String getGatewayIp(SecurityConfig securityConfig, InstanceMetaData gatewayInstance, boolean clusterProxyRegistered) {
+    public String getGatewayIp(SecurityConfig securityConfig, InstanceMetaData gatewayInstance, Stack stack) {
         String gatewayIP = gatewayInstance.getPublicIpWrapper();
-        if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled() && clusterProxyRegistered) {
+        if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
             gatewayIP = clusterProxyConfiguration.getClusterProxyHost();
         } else if (securityConfig.isUsePrivateIpToTls()) {
             gatewayIP = gatewayInstance.getPrivateIp();
@@ -140,8 +140,8 @@ public class TlsSecurityService {
         return gatewayIP;
     }
 
-    private Integer getGatewayPort(Integer stackPort, boolean clusterProxyRegistered) {
-        if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled() && clusterProxyRegistered) {
+    private Integer getGatewayPort(Integer stackPort, Stack stack) {
+        if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
             return clusterProxyConfiguration.getClusterProxyPort();
         } else {
             return stackPort;
@@ -170,7 +170,9 @@ public class TlsSecurityService {
     private HttpClientConfig decorateWithCLusterProxyConfig(Long stackId, HttpClientConfig httpClientConfig) {
         if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
             Stack stack = stackService.getById(stackId);
-            return httpClientConfig.withClusterProxy(clusterProxyConfiguration.getClusterProxyUrl(), stack.getResourceCrn());
+            if (clusterProxyService.useClusterProxyForCommunication(stack)) {
+                return httpClientConfig.withClusterProxy(clusterProxyConfiguration.getClusterProxyUrl(), stack.getResourceCrn());
+            }
         }
         return httpClientConfig;
     }

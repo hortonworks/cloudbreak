@@ -65,8 +65,9 @@ public class UserDataService {
 
     public void createUserData(Long stackId) throws CloudbreakImageNotFoundException {
         Stack stack = stackService.getById(stackId);
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
         Future<PlatformParameters> platformParametersFuture =
-                intermediateBuilderExecutor.submit(() -> connector.getPlatformParameters(stack));
+                intermediateBuilderExecutor.submit(() -> connector.getPlatformParameters(stack, userCrn));
         SecurityConfig securityConfig = stack.getSecurityConfig();
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
         String cbPrivKey = saltSecurityConfig.getSaltBootSignPrivateKey();
@@ -88,7 +89,7 @@ public class UserDataService {
 
     private CcmParameters fetchCcmParameters(Stack stack) {
         CcmParameters ccmParameters = null;
-        if ((ccmParameterSupplier != null) && stack.getUseCcm()) {
+        if ((ccmParameterSupplier != null) && stack.getTunnel().useCcm()) {
             ImmutableMap.Builder<KnownServiceIdentifier, Integer> builder = ImmutableMap.builder();
             int gatewayPort = Optional.ofNullable(stack.getGatewayPort()).orElse(ServiceFamilies.GATEWAY.getDefaultPort());
             builder.put(KnownServiceIdentifier.GATEWAY, gatewayPort);

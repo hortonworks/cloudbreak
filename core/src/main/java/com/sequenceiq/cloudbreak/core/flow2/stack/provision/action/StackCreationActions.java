@@ -212,7 +212,7 @@ public class StackCreationActions {
                 Stack stack = stackCreationService.setupMetadata(context, payload);
                 StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(), context.getCloudCredential(),
                         context.getCloudStack());
-                if (newContext.getStack().getUseCcm()) {
+                if (newContext.getStack().getTunnel().useCcm()) {
                     GetTlsInfoResult getTlsInfoResult = new GetTlsInfoResult(context.getCloudContext().getId(), new TlsInfo(true));
                     sendEvent(newContext, getTlsInfoResult.selector(), getTlsInfoResult);
                 } else {
@@ -253,7 +253,7 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<>(GetSSHFingerprintsResult.class) {
             @Override
             protected void doExecute(StackContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws Exception {
-                if (!context.getStack().getUseCcm()) {
+                if (!context.getStack().getTunnel().useCcm()) {
                     stackCreationService.setupTls(context);
                 }
                 StackWithFingerprintsEvent fingerprintsEvent = new StackWithFingerprintsEvent(payload.getResourceId(), payload.getSshFingerprints());

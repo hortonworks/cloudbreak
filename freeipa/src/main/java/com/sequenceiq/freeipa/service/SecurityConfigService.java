@@ -25,8 +25,8 @@ public class SecurityConfigService {
 
     public SecurityConfig findOneByStack(Stack stack) {
         SecurityConfig securityConfig = securityConfigRepository.findOneByStackId(stack.getId());
-        if ((StringUtils.isBlank(securityConfig.getClientCertVault()) && StringUtils.isNotBlank(securityConfig.getClientCert()))
-                || (StringUtils.isBlank(securityConfig.getClientKeyVault()) && StringUtils.isNotBlank(securityConfig.getClientKey()))) {
+        if (securityConfig != null && ((StringUtils.isBlank(securityConfig.getClientCertVault()) && StringUtils.isNotBlank(securityConfig.getClientCert()))
+                || (StringUtils.isBlank(securityConfig.getClientKeyVault()) && StringUtils.isNotBlank(securityConfig.getClientKey())))) {
             LOGGER.debug("Migrate SecurityConfig secrets to vault with id: [{}]", securityConfig.getId());
             securityConfig.setAccountId(stack.getAccountId());
             securityConfig.setClientCertVault(securityConfig.getClientCert());

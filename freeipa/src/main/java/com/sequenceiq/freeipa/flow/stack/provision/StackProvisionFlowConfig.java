@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.provision;
 
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.CLUSTER_PROXY_REGISTRATION_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.CLUSTER_PROXY_REGISTRATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.COLLECT_METADATA_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.COLLECT_METADATA_FINISHED_EVENT;
@@ -70,7 +71,7 @@ public class StackProvisionFlowConfig extends AbstractFlowConfiguration<StackPro
             .from(GET_TLS_INFO_STATE).to(TLS_SETUP_STATE).event(SETUP_TLS_EVENT).defaultFailureEvent()
             .from(TLS_SETUP_STATE).to(CLUSTERPROXY_REGISTRATION_STATE).event(TLS_SETUP_FINISHED_EVENT).defaultFailureEvent()
             .from(CLUSTERPROXY_REGISTRATION_STATE).to(STACK_CREATION_FINISHED_STATE)
-                .event(CLUSTER_PROXY_REGISTRATION_FINISHED_EVENT).defaultFailureEvent()
+            .event(CLUSTER_PROXY_REGISTRATION_FINISHED_EVENT).failureEvent(CLUSTER_PROXY_REGISTRATION_FAILED_EVENT)
             .from(STACK_CREATION_FINISHED_STATE).to(FINAL_STATE).event(STACK_CREATION_FINISHED_EVENT).defaultFailureEvent()
             .build();
 
@@ -98,7 +99,7 @@ public class StackProvisionFlowConfig extends AbstractFlowConfiguration<StackPro
 
     @Override
     public StackProvisionEvent[] getInitEvents() {
-        return new StackProvisionEvent[] {
+        return new StackProvisionEvent[]{
                 START_CREATION_EVENT
         };
     }

@@ -25,7 +25,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -48,7 +47,6 @@ import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
-import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
@@ -240,9 +238,6 @@ public class StackService implements ResourceIdProvider {
 
     @Inject
     private StackIdViewToStackResponseConverter stackIdViewToStackResponseConverter;
-
-    @Autowired(required = false)
-    private CcmParameterSupplier ccmParameterSupplier;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -513,7 +508,6 @@ public class StackService implements ResourceIdProvider {
         stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
 
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
 
         stack.setResourceCrn(createCRN(accountId));
 

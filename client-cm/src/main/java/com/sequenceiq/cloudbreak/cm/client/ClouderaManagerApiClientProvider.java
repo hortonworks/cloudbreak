@@ -25,7 +25,7 @@ public class ClouderaManagerApiClientProvider {
 
     public ApiClient getDefaultClient(Integer gatewayPort, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
         ApiClient client = getClouderaManagerClient(clientConfig, gatewayPort, "admin", "admin");
-        if (clientConfig.isClusterProxyenabled()) {
+        if (clientConfig.isClusterProxyEnabled()) {
             client.addDefaultHeader("Proxy-Ignore-Auth", "true");
         }
         return client;
@@ -63,8 +63,8 @@ public class ClouderaManagerApiClientProvider {
             throws ClouderaManagerClientInitException {
         try {
             ApiClient cmClient = new ApiClient();
-            if (clientConfig.isClusterProxyenabled()) {
-                cmClient.setBasePath(clientConfig.getClusterProxyUrl() + "/proxy/" + clientConfig.getClusterCrn() + "/cloudera-manager" + context);
+            if (clientConfig.isClusterProxyEnabled()) {
+                cmClient.setBasePath(clientConfig.getClusterProxyUrl() + "/proxy/" + clientConfig.getClusterCrn() + "/cb-internal" + context);
                 cmClient.addDefaultHeader("Proxy-Ignore-Auth", "true");
             } else if (port != null) {
                 cmClient.setBasePath("https://" + clientConfig.getApiAddress() + ':' + port + context);
@@ -84,7 +84,7 @@ public class ClouderaManagerApiClientProvider {
         cmClient.setVerifyingSsl(true);
 
         try {
-            if (isCmSslConfigValidClientConfigValid(clientConfig) && !clientConfig.isClusterProxyenabled()) {
+            if (isCmSslConfigValidClientConfigValid(clientConfig) && !clientConfig.isClusterProxyEnabled()) {
                 SSLContext sslContext = SSLContexts.custom()
                         .loadTrustMaterial(KeyStoreUtil.createTrustStore(clientConfig.getServerCert()), null)
                         .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientConfig.getClientCert(), clientConfig.getClientKey()), "consul".toCharArray())
