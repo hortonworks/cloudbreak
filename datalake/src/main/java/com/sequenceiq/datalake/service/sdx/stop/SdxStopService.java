@@ -150,7 +150,7 @@ public class SdxStopService {
 
     public void stopAllDatahub(Long sdxId) {
         SdxCluster sdxCluster = sdxService.getById(sdxId);
-        distroxService.stopAttachedDistrox(sdxCluster.getEnvName());
+        distroxService.stopAttachedDistrox(sdxCluster.getEnvCrn());
     }
 
     private void checkFreeipaRunning(String envCrn) {

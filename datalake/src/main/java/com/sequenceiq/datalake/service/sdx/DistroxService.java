@@ -42,10 +42,10 @@ public class DistroxService {
     @Inject
     private DistroXV1Endpoint distroXV1Endpoint;
 
-    public Collection<StackViewV4Response> getAttachedDistroXClusters(String environmentName, String environmentCrn) {
-        LOGGER.debug("Get DistroX clusters of the environment: '{}'", environmentName);
+    public Collection<StackViewV4Response> getAttachedDistroXClusters(String environmentCrn) {
+        LOGGER.debug("Get DistroX clusters of the environment: '{}'", environmentCrn);
         try {
-            return distroXV1Endpoint.list(environmentName, environmentCrn).getResponses();
+            return distroXV1Endpoint.list(null, environmentCrn).getResponses();
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to get DistroX clusters from Cloudbreak service due to: '%s' ", e.getMessage());
             LOGGER.error(message, e);
@@ -53,8 +53,8 @@ public class DistroxService {
         }
     }
 
-    public void stopAttachedDistrox(String envName) {
-        Collection<StackViewV4Response> attachedDistroXClusters = getAttachedDistroXClusters(envName, null);
+    public void stopAttachedDistrox(String envCrn) {
+        Collection<StackViewV4Response> attachedDistroXClusters = getAttachedDistroXClusters(envCrn);
         ArrayList<String> pollingCrn = attachedDistroXClusters.stream().map(StackViewV4Response::getCrn).collect(Collectors.toCollection(ArrayList::new));
         distroXV1Endpoint.putStopByCrns(pollingCrn);
         Polling.stopAfterAttempt(attempt)

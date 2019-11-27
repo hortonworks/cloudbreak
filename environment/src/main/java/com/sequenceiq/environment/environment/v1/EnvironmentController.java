@@ -21,6 +21,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCh
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -92,6 +93,13 @@ public class EnvironmentController implements EnvironmentEndpoint {
         String accountId = threadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByNameAndAccountId(environmentName, accountId);
         return environmentApiConverter.dtoToDetailedResponse(environmentDto);
+    }
+
+    @Override
+    public EnvironmentCrnResponse getCrnByName(String environmentName) {
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String crn = environmentService.getCrnByNameAndAccountId(environmentName, accountId);
+        return environmentApiConverter.crnResponse(environmentName, crn);
     }
 
     @Override

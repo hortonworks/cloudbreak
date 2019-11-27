@@ -29,7 +29,7 @@ public class DistroXDeleteService {
     }
 
     public void deleteDistroXClustersForEnvironment(PollingConfig pollingConfig, Environment environment) {
-        Collection<StackViewV4Response> list = distroXV1Endpoint.list(environment.getName(), null).getResponses();
+        Collection<StackViewV4Response> list = distroXV1Endpoint.list(null, environment.getResourceCrn()).getResponses();
         LOGGER.info("Found {} Data Hub clusters for environment {}.", list.size(), environment.getName());
         if (list.isEmpty()) {
             LOGGER.info("No Data Hub clusters found for environment.");
@@ -53,7 +53,7 @@ public class DistroXDeleteService {
     }
 
     private AttemptResult<Object> periodicCheckForDeletion(Environment environment) {
-        Collection<StackViewV4Response> actualClusterList = distroXV1Endpoint.list(environment.getName(), null).getResponses();
+        Collection<StackViewV4Response> actualClusterList = distroXV1Endpoint.list(null, environment.getResourceCrn()).getResponses();
         if (!actualClusterList.isEmpty()) {
             if (actualClusterList.stream().anyMatch(c -> c.getStatus() == Status.DELETE_FAILED)) {
                 return AttemptResults.breakFor(new IllegalStateException("Found a cluster with delete failed status."));

@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.HostGroupViewRepository;
 import com.sequenceiq.cloudbreak.repository.StackApiViewRepository;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.core.FlowLogService;
 
 @Service
@@ -82,9 +81,8 @@ public class StackApiViewService {
             return retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, null, stackType);
         } else {
             LOGGER.info("Environment name was defined so we will query all the stack in the {} environment.", environmentName);
-            DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(environmentName);
-            // TODO: fix this. this is overkill. create a getEnvCrnByName endpoint.
-            return retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, environmentResponse.getCrn(), stackType);
+            String environmentCrn = environmentClientService.getCrnByName(environmentName);
+            return retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, environmentCrn, stackType);
         }
     }
 

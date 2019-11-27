@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,6 +20,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
@@ -74,6 +74,7 @@ class EnvironmentResourceDeletionServiceTest {
         environment.setId(1L);
         environment.setCreator(CRN);
         environment.setName(ENVIRONMENT_NAME);
+        environment.setResourceCrn(ENVIRONMENT_CRN);
     }
 
     @Test
@@ -84,16 +85,16 @@ class EnvironmentResourceDeletionServiceTest {
 
     @Test
     void getDatalakeClusterNames() {
-        when(datalakeEndpoint.list(anyString())).thenReturn(new StackViewV4Responses());
+        when(datalakeEndpoint.list(isNull(), anyString())).thenReturn(new StackViewV4Responses());
         environmentResourceDeletionServiceUnderTest.getDatalakeClusterNames(environment);
-        verify(datalakeEndpoint).list(eq(ENVIRONMENT_NAME));
+        verify(datalakeEndpoint).list(isNull(), eq(ENVIRONMENT_CRN));
     }
 
     @Test
     void getAttachedDistroXClusterNames() {
-        when(distroXEndpoint.list(anyString(), any())).thenReturn(new StackViewV4Responses());
+        when(distroXEndpoint.list(any(), anyString())).thenReturn(new StackViewV4Responses());
         environmentResourceDeletionServiceUnderTest.getAttachedDistroXClusterNames(environment);
-        verify(distroXEndpoint, times(1)).list(eq(ENVIRONMENT_NAME), isNull());
+        verify(distroXEndpoint).list(ArgumentMatchers.isNull(), eq(ENVIRONMENT_CRN));
     }
 
     @Test
@@ -107,8 +108,8 @@ class EnvironmentResourceDeletionServiceTest {
         Assertions.assertThrows(EnvironmentServiceException.class,
                 () -> environmentResourceDeletionServiceUnderTest.deleteClusterDefinitionsOnCloudbreak(ENVIRONMENT_CRN));
 
-        verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(anyLong(), any(), any(), anyString());
-        verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
+        verify(clusterTemplateV4Endpoint).deleteMultiple(anyLong(), any(), any(), anyString());
+        verify(clusterTemplateV4Endpoint).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
     }
 
     @Test
@@ -118,8 +119,8 @@ class EnvironmentResourceDeletionServiceTest {
         Assertions.assertThrows(EnvironmentServiceException.class,
                 () -> environmentResourceDeletionServiceUnderTest.deleteClusterDefinitionsOnCloudbreak(ENVIRONMENT_CRN));
 
-        verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(anyLong(), any(), any(), anyString());
-        verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
+        verify(clusterTemplateV4Endpoint).deleteMultiple(anyLong(), any(), any(), anyString());
+        verify(clusterTemplateV4Endpoint).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
     }
 
     @Test
@@ -130,8 +131,8 @@ class EnvironmentResourceDeletionServiceTest {
         Assertions.assertThrows(EnvironmentServiceException.class,
                 () -> environmentResourceDeletionServiceUnderTest.deleteClusterDefinitionsOnCloudbreak(ENVIRONMENT_CRN));
 
-        verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(anyLong(), any(), any(), anyString());
-        verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
+        verify(clusterTemplateV4Endpoint).deleteMultiple(anyLong(), any(), any(), anyString());
+        verify(clusterTemplateV4Endpoint).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
     }
 
     @Configuration

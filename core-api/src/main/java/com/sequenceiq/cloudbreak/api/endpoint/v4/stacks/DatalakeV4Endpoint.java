@@ -28,6 +28,6 @@ public interface DatalakeV4Endpoint {
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "listDatalakes")
-    StackViewV4Responses list(@QueryParam("environment") String environmentName);
+    StackViewV4Responses list(@QueryParam("environment") String environmentName, @QueryParam("environmentCrn") String environmentCrn);
 
 }

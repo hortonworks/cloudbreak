@@ -277,6 +277,16 @@ public class EnvironmentDto implements Payload {
         this.experimentalFeatures = experimentalFeatures;
     }
 
+    @Override
+    public String toString() {
+        return "EnvironmentDto{"
+                + "name='" + name + '\''
+                + ", cloudPlatform='" + cloudPlatform + '\''
+                + ", resourceCrn='" + resourceCrn + '\''
+                + ", status=" + status
+                + '}';
+    }
+
     public static Builder builder() {
         return new Builder();
     }

@@ -309,7 +309,7 @@ class SdxServiceTest {
     }
 
     private void mockCBCallForDistroXClusters(Set<StackViewV4Response> stackViews) {
-        when(distroxService.getAttachedDistroXClusters(anyString(), anyString())).thenReturn(stackViews);
+        when(distroxService.getAttachedDistroXClusters(anyString())).thenReturn(stackViews);
     }
 
     private SdxCluster getSdxClusterForDeletionTest() {

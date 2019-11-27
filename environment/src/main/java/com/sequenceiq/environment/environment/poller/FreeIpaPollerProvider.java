@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.service;
+package com.sequenceiq.environment.environment.poller;
 
 import javax.ws.rs.NotFoundException;
 
@@ -16,13 +16,13 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Component
-public class FreeipaPollerCollection {
+public class FreeIpaPollerProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeipaPollerCollection.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaPollerProvider.class);
 
     private final FreeIpaV1Endpoint freeIpaV1Endpoint;
 
-    public FreeipaPollerCollection(FreeIpaV1Endpoint freeIpaV1Endpoint) {
+    public FreeIpaPollerProvider(FreeIpaV1Endpoint freeIpaV1Endpoint) {
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
     }
 
@@ -67,7 +67,7 @@ public class FreeipaPollerCollection {
 
     private AttemptResult<Void> checkStopStatus(DescribeFreeIpaResponse freeIpaResponse) {
         if (freeIpaResponse.getStatus() == Status.STOP_FAILED) {
-            LOGGER.info("Freeipa stop failed for '{}' with status {}, reason: {}", freeIpaResponse.getName(), freeIpaResponse.getStatus(),
+            LOGGER.error("Freeipa stop failed for '{}' with status {}, reason: {}", freeIpaResponse.getName(), freeIpaResponse.getStatus(),
                     freeIpaResponse.getStatusReason());
             return AttemptResults.breakFor("Freeipa stop failed '" + freeIpaResponse.getName() + "', " + freeIpaResponse.getStatusReason());
         } else {
@@ -77,7 +77,7 @@ public class FreeipaPollerCollection {
 
     private AttemptResult<Void> checkStartStatus(DescribeFreeIpaResponse freeIpaResponse) {
         if (freeIpaResponse.getStatus() == Status.START_FAILED) {
-            LOGGER.info("Freeipa start failed for '{}' with status {}, reason: {}", freeIpaResponse.getName(), freeIpaResponse.getStatus(),
+            LOGGER.error("Freeipa start failed for '{}' with status {}, reason: {}", freeIpaResponse.getName(), freeIpaResponse.getStatus(),
                     freeIpaResponse.getStatusReason());
             return AttemptResults.breakFor("Freeipa start failed '" + freeIpaResponse.getName() + "', " + freeIpaResponse.getStatusReason());
         } else {

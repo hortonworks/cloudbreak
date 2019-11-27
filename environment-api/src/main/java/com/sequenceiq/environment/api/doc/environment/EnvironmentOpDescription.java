@@ -23,6 +23,7 @@ public class EnvironmentOpDescription {
     public static final String STOP_BY_NAME = "Stop an environment by name. The datahubs, datalake and freeipa will be stopped in this order";
     public static final String STOP_BY_CRN = "Stop an environment by CRN. The datahubs, datalake and freeipa will be stopped in this order";
     public static final String CLI_COMMAND = "produce cli command input for environment creation";
+    public static final String GET_CRN_BY_NAME = "Get the crn of an environment by name.";
 
     private EnvironmentOpDescription() {
     }

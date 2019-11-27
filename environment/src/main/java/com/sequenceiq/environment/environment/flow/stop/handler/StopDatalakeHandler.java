@@ -8,7 +8,7 @@ import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopFailedEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopHandlerSelectors;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelectors;
-import com.sequenceiq.environment.environment.service.DatalakeService;
+import com.sequenceiq.environment.environment.service.SdxService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -17,11 +17,11 @@ import reactor.bus.Event;
 @Component
 public class StopDatalakeHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
-    private final DatalakeService datalakeService;
+    private final SdxService sdxService;
 
-    protected StopDatalakeHandler(EventSender eventSender, DatalakeService datalakeService) {
+    protected StopDatalakeHandler(EventSender eventSender, SdxService sdxService) {
         super(eventSender);
-        this.datalakeService = datalakeService;
+        this.sdxService = sdxService;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class StopDatalakeHandler extends EventSenderAwareHandler<EnvironmentDto>
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            datalakeService.stopAttachedDatalake(environmentDto.getId(), environmentDto.getName());
+            sdxService.stopAttachedDatalakeClusters(environmentDto.getId(), environmentDto.getName());
             EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
                     .withSelector(EnvStopStateSelectors.ENV_STOP_FREEIPA_EVENT.selector())
                     .withResourceId(environmentDto.getId())
@@ -41,8 +41,7 @@ public class StopDatalakeHandler extends EventSenderAwareHandler<EnvironmentDto>
                     .build();
             eventSender().sendEvent(envStopEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
-            EnvStopFailedEvent failedEvent = new EnvStopFailedEvent(environmentDto.getId(), environmentDto.getName(), e, environmentDto.getResourceCrn(),
-                    EnvironmentStatus.STOP_DATALAKE_FAILED);
+            EnvStopFailedEvent failedEvent = new EnvStopFailedEvent(environmentDto, e, EnvironmentStatus.STOP_DATALAKE_FAILED);
             eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         }
     }

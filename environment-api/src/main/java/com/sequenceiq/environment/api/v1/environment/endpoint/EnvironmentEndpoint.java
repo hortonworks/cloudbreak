@@ -24,6 +24,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCh
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 
@@ -48,6 +49,13 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "getEnvironmentV1ByName")
     DetailedEnvironmentResponse getByName(@PathParam("name") String environmentName);
+
+    @GET
+    @Path("/crnByName/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.GET_CRN_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "getCrnByNameV1")
+    EnvironmentCrnResponse getCrnByName(String environmentName);
 
     @DELETE
     @Path("/name/{name}")

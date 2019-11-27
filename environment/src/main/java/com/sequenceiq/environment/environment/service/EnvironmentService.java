@@ -230,4 +230,10 @@ public class EnvironmentService implements ResourceIdProvider {
     public Collection<Environment> findByNameInAndAccountIdAndArchivedIsFalse(Collection<String> environmentNames, String accountId) {
         return environmentRepository.findByNameInAndAccountIdAndArchivedIsFalse(environmentNames, accountId);
     }
+
+    public String getCrnByNameAndAccountId(String environmentName, String accountId) {
+        return environmentRepository.findResourceCrnByNameAndAccountId(environmentName, accountId)
+                .orElseThrow(() -> new BadRequestException(
+                        String.format("Environment with name '%s' was not found for account '%s'.", environmentName, accountId)));
+    }
 }

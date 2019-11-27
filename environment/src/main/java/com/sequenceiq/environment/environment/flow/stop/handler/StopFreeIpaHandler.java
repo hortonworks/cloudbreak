@@ -8,18 +8,18 @@ import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopFailedEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopHandlerSelectors;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelectors;
-import com.sequenceiq.environment.environment.service.FreeipaService;
+import com.sequenceiq.environment.environment.service.FreeIpaService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
 import reactor.bus.Event;
 
 @Component
-public class StopFreeipaHandler extends EventSenderAwareHandler<EnvironmentDto> {
+public class StopFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
-    private final FreeipaService freeipaService;
+    private final FreeIpaService freeipaService;
 
-    protected StopFreeipaHandler(EventSender eventSender, FreeipaService freeipaService) {
+    protected StopFreeIpaHandler(EventSender eventSender, FreeIpaService freeipaService) {
         super(eventSender);
         this.freeipaService = freeipaService;
     }
@@ -33,7 +33,7 @@ public class StopFreeipaHandler extends EventSenderAwareHandler<EnvironmentDto> 
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            freeipaService.stopAttachedFreeipa(environmentDto.getId(), environmentDto.getResourceCrn());
+            freeipaService.stopAttachedFreeipaInstances(environmentDto.getId(), environmentDto.getResourceCrn());
             EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
                     .withSelector(EnvStopStateSelectors.FINISH_ENV_STOP_EVENT.selector())
                     .withResourceId(environmentDto.getId())
@@ -41,8 +41,7 @@ public class StopFreeipaHandler extends EventSenderAwareHandler<EnvironmentDto> 
                     .build();
             eventSender().sendEvent(envStopEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
-            EnvStopFailedEvent failedEvent = new EnvStopFailedEvent(environmentDto.getId(), environmentDto.getName(), e, environmentDto.getResourceCrn(),
-                    EnvironmentStatus.STOP_FREEIPA_FAILED);
+            EnvStopFailedEvent failedEvent = new EnvStopFailedEvent(environmentDto, e, EnvironmentStatus.STOP_FREEIPA_FAILED);
             eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         }
     }
