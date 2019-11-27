@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint;
 
-import static com.sequenceiq.cloudbreak.doc.ContentType.JSON;
-
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -29,13 +27,14 @@ import io.swagger.annotations.ApiOperation;
 @RetryingRestClient
 @Consumes(MediaType.APPLICATION_JSON)
 @Path("/v4/{workspaceId}/blueprints_util")
-@Api(value = "/v4/{workspaceId}/blueprints_util", description = ControllerDescription.BLUEPRINT_V4_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v4/{workspaceId}/blueprints_util", description = ControllerDescription.BLUEPRINT_V4_DESCRIPTION, protocols = "http,https",
+        consumes = MediaType.APPLICATION_JSON)
 public interface BlueprintUtilV4Endpoint {
 
     @GET
     @Path("service_dependencies")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = JSON, notes = Notes.CONNECTOR_NOTES,
+    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getServiceAndDependencies")
     ServiceDependencyMatrixV4Response getServiceAndDependencies(@PathParam("workspaceId") Long workspaceId,
         @QueryParam("services") Set<String> services, @QueryParam("platform") String platform);
@@ -43,14 +42,14 @@ public interface BlueprintUtilV4Endpoint {
     @GET
     @Path("services")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = JSON, notes = Notes.CONNECTOR_NOTES,
+    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getServiceList")
     SupportedVersionsV4Response getServiceList(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("generate")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = JSON, notes = Notes.CONNECTOR_NOTES,
+    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getGeneratedTemplate")
     GeneratedCmTemplateV4Response getGeneratedTemplate(@PathParam("workspaceId") Long workspaceId,
         @QueryParam("services") Set<String> services, @QueryParam("platform") String platform);
@@ -58,7 +57,7 @@ public interface BlueprintUtilV4Endpoint {
     @GET
     @Path("recommendation")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = JSON, notes = Notes.CONNECTOR_NOTES,
+    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "createRecommendationForWorkspace")
     RecommendationV4Response createRecommendation(@PathParam("workspaceId") Long workspaceId,
             @QueryParam("blueprintName") String blueprintName,
@@ -71,7 +70,7 @@ public interface BlueprintUtilV4Endpoint {
     @GET
     @Path("service_versions")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_SERVICE_VERSIONS_BY_BLUEPRINT_NAME, produces = JSON, notes = Notes.CONNECTOR_NOTES,
+    @ApiOperation(value = ConnectorOpDescription.GET_SERVICE_VERSIONS_BY_BLUEPRINT_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getServiceVersionsByBlueprintName")
     BlueprintServicesV4Response getServicesByBlueprint(@PathParam("workspaceId") Long workspaceId,
         @QueryParam("blueprintName") String blueprintName);

@@ -11,7 +11,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
-import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.FileSystemOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
@@ -22,13 +21,14 @@ import io.swagger.annotations.ApiOperation;
 @RetryingRestClient
 @Consumes(MediaType.APPLICATION_JSON)
 @Path("/v4/{workspaceId}/file_systems")
-@Api(value = "/v4/{workspaceId}/file_systems", description = ControllerDescription.FILESYSTEMS_V4_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v4/{workspaceId}/file_systems", description = ControllerDescription.FILESYSTEMS_V4_DESCRIPTION, protocols = "http,https",
+        consumes = MediaType.APPLICATION_JSON)
 public interface FileSystemV4Endpoint {
 
     @GET
     @Path("parameters")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FileSystemOpDescription.FILE_SYSTEM_PARAMETERS, produces = ContentType.JSON, nickname = "getFileSystemParameters")
+    @ApiOperation(value = FileSystemOpDescription.FILE_SYSTEM_PARAMETERS, produces = MediaType.APPLICATION_JSON, nickname = "getFileSystemParameters")
     FileSystemParameterV4Responses getFileSystemParameters(
             @PathParam("workspaceId") Long workspaceId,
             @NotNull @QueryParam("blueprintName") String blueprintName,

@@ -2,7 +2,6 @@ package com.sequenceiq.periscope.api.endpoint.v1;
 
 import static com.sequenceiq.periscope.doc.ApiDescription.CONFIGURATION_DESCRIPTION;
 import static com.sequenceiq.periscope.doc.ApiDescription.ConfigurationNotes.NOTES;
-import static com.sequenceiq.periscope.doc.ApiDescription.JSON;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -21,19 +20,19 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/v1/clusters/{clusterId}/configurations")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/configurations", description = CONFIGURATION_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v1/configurations", description = CONFIGURATION_DESCRIPTION, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface ConfigurationEndpoint {
 
     @POST
     @Path("scaling")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConfigurationOpDescription.CONFIGURATION_POST, produces = JSON, notes = NOTES)
+    @ApiOperation(value = ConfigurationOpDescription.CONFIGURATION_POST, produces = MediaType.APPLICATION_JSON, notes = NOTES)
     ScalingConfigurationRequest setScalingConfiguration(@PathParam("clusterId") Long clusterId, @Valid ScalingConfigurationRequest json);
 
     @GET
     @Path("scaling")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConfigurationOpDescription.CONFIGURATION_GET, produces = JSON, notes = NOTES)
+    @ApiOperation(value = ConfigurationOpDescription.CONFIGURATION_GET, produces = MediaType.APPLICATION_JSON, notes = NOTES)
     ScalingConfigurationRequest getScalingConfiguration(@PathParam("clusterId") Long clusterId);
 
 }

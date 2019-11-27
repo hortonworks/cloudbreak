@@ -8,7 +8,6 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.StringUtils;
 
 import com.sequenceiq.environment.api.EnvironmentApi;
 import com.sequenceiq.environment.credential.v1.CredentialV1Controller;
@@ -32,15 +31,13 @@ public class EndpointConfig extends ResourceConfig {
             EnvironmentController.class,
             PlatformResourceController.class);
 
-    private static final String VERSION_UNAVAILABLE = "unspecified";
-
     private final String applicationVersion;
 
     private final Boolean auditEnabled;
 
     private final List<ExceptionMapper<?>> exceptionMappers;
 
-    public EndpointConfig(@Value("${info.app.version:}") String applicationVersion,
+    public EndpointConfig(@Value("${info.app.version:unspecified}") String applicationVersion,
             @Value("${environment.structuredevent.rest.enabled:false}") Boolean auditEnabled,
             List<ExceptionMapper<?>> exceptionMappers, ServerTracingDynamicFeature serverTracingDynamicFeature,
             ClientTracingFeature clientTracingFeature) {
@@ -59,11 +56,7 @@ public class EndpointConfig extends ResourceConfig {
         BeanConfig swaggerConfig = new BeanConfig();
         swaggerConfig.setTitle("Environment API");
         swaggerConfig.setDescription("Environment operation related API.");
-        if (StringUtils.isEmpty(applicationVersion)) {
-            swaggerConfig.setVersion(VERSION_UNAVAILABLE);
-        } else {
-            swaggerConfig.setVersion(applicationVersion);
-        }
+        swaggerConfig.setVersion(applicationVersion);
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(EnvironmentApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");

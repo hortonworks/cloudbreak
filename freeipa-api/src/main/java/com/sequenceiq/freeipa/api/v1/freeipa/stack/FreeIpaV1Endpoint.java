@@ -22,7 +22,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaReq
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
-import com.sequenceiq.service.api.doc.ContentType;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,71 +29,73 @@ import io.swagger.annotations.ApiOperation;
 @RetryingRestClient
 @Path("/v1/freeipa")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/freeipa", protocols = "http,https")
+@Api(value = "/v1/freeipa", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface FreeIpaV1Endpoint {
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.CREATE, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "createFreeIpaV1")
+    @ApiOperation(value = FreeIpaOperationDescriptions.CREATE, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "createFreeIpaV1")
     DescribeFreeIpaResponse create(@Valid CreateFreeIpaRequest request);
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.GET_BY_ENVID, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+    @ApiOperation(value = FreeIpaOperationDescriptions.GET_BY_ENVID, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "getFreeIpaByEnvironmentV1")
     DescribeFreeIpaResponse describe(@QueryParam("environment") @NotEmpty String environmentCrn);
 
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.LIST_BY_ACCOUNT, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+    @ApiOperation(value = FreeIpaOperationDescriptions.LIST_BY_ACCOUNT, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "listFreeIpaClustersByAccountV1")
     List<ListFreeIpaResponse> list();
 
     @GET
     @Path("ca.crt")
     @Produces(MediaType.TEXT_PLAIN)
-    @ApiOperation(value = FreeIpaOperationDescriptions.GET_ROOTCERTIFICATE_BY_ENVID, produces = ContentType.TEXT_PLAIN, notes = FreeIpaNotes.FREEIPA_NOTES,
+    @ApiOperation(value = FreeIpaOperationDescriptions.GET_ROOTCERTIFICATE_BY_ENVID, produces = MediaType.TEXT_PLAIN, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "getFreeIpaRootCertificateByEnvironmentV1")
     String getRootCertificate(@QueryParam("environment") @NotEmpty String environmentCrn);
 
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.DELETE_BY_ENVID, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+    @ApiOperation(value = FreeIpaOperationDescriptions.DELETE_BY_ENVID, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "deleteFreeIpaByEnvironmentV1")
     void delete(@QueryParam("environment") @NotEmpty String environmentCrn);
 
     @POST
     @Path("cleanup")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.CLEANUP, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "cleanupV1")
+    @ApiOperation(value = FreeIpaOperationDescriptions.CLEANUP, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "cleanupV1")
     OperationStatus cleanup(@Valid CleanupRequest request) throws Exception;
 
     @PUT
     @Path("start")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.START, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "startV1")
+    @ApiOperation(value = FreeIpaOperationDescriptions.START, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "startV1")
     void start(@QueryParam("environment") @NotEmpty String environmentCrn);
 
     @PUT
     @Path("stop")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.STOP, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "stopV1")
+    @ApiOperation(value = FreeIpaOperationDescriptions.STOP, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "stopV1")
     void stop(@QueryParam("environment") @NotEmpty String environmentCrn);
 
     @POST
     @Path("cluster-proxy/register")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.REGISTER_WITH_CLUSTER_PROXY, produces = ContentType.JSON,
+    @ApiOperation(value = FreeIpaOperationDescriptions.REGISTER_WITH_CLUSTER_PROXY, produces = MediaType.APPLICATION_JSON,
             notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "clusterProxyRegisterV1")
     String registerWithClusterProxy(@QueryParam("environment") @NotEmpty String environmentCrn);
 
     @POST
     @Path("cluster-proxy/deregister")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.DEREGISTER_WITH_CLUSTER_PROXY, produces = ContentType.JSON,
+    @ApiOperation(value = FreeIpaOperationDescriptions.DEREGISTER_WITH_CLUSTER_PROXY, produces = MediaType.APPLICATION_JSON,
             notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "clusterProxyDeregisterV1")
     void deregisterWithClusterProxy(@QueryParam("environment") @NotEmpty String environmentCrn);
 }
