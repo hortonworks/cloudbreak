@@ -374,7 +374,7 @@ public class SdxService implements ResourceIdProvider {
     }
 
     private void checkIfSdxIsDeletable(SdxCluster sdxCluster) {
-        Collection<StackViewV4Response> attachedDistroXClusters = distroxService.getAttachedDistroXClusters(sdxCluster.getEnvName(), sdxCluster.getEnvCrn());
+        Collection<StackViewV4Response> attachedDistroXClusters = distroxService.getAttachedDistroXClusters(sdxCluster.getEnvCrn());
         if (!attachedDistroXClusters.isEmpty()) {
             throw new BadRequestException(String.format("The following Data Hub cluster(s) must be terminated before SDX deletion [%s]",
                     String.join(", ", attachedDistroXClusters.stream().map(StackViewV4Response::getName).collect(Collectors.toList()))));

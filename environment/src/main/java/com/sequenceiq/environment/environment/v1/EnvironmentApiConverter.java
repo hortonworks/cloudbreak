@@ -31,6 +31,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnviro
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
@@ -353,5 +354,12 @@ public class EnvironmentApiConverter {
                 .withSecurityGroupIdForKnox(securityAccess.getSecurityGroupIdForKnox())
                 .withDefaultSecurityGroupId(securityAccess.getDefaultSecurityGroupId())
                 .build();
+    }
+
+    public EnvironmentCrnResponse crnResponse(String environmentName, String crn) {
+        EnvironmentCrnResponse response = new EnvironmentCrnResponse();
+        response.setEnvironmentName(environmentName);
+        response.setEnvironmentCrn(crn);
+        return response;
     }
 }

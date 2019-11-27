@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.service;
+package com.sequenceiq.environment.environment.poller;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.START_FAILED;
@@ -27,7 +27,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @ExtendWith(MockitoExtension.class)
-public class FreeipaPollerCollectionTest {
+class FreeIpaPollerProviderTest {
 
     private static final Long ENV_ID = 1000L;
 
@@ -35,11 +35,11 @@ public class FreeipaPollerCollectionTest {
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
 
     @InjectMocks
-    private FreeipaPollerCollection underTest;
+    private FreeIpaPollerProvider underTest;
 
     @ParameterizedTest
     @MethodSource("freeipaStopStatuses")
-    public void testStopPoller(Status s1Status, AttemptState attemptState, String message) throws Exception {
+    void testStopPoller(Status s1Status, AttemptState attemptState, String message) throws Exception {
         String crn = "crn";
         DescribeFreeIpaResponse stack1 = getDescribeFreeIpaResponse(s1Status, crn);
 
@@ -53,7 +53,7 @@ public class FreeipaPollerCollectionTest {
 
     @ParameterizedTest
     @MethodSource("freeipaStartStatuses")
-    public void testStartPoller(Status s1Status, AttemptState attemptState, String message) throws Exception {
+    void testStartPoller(Status s1Status, AttemptState attemptState, String message) throws Exception {
         String crn = "crn";
         DescribeFreeIpaResponse stack1 = getDescribeFreeIpaResponse(s1Status, crn);
 
@@ -66,7 +66,7 @@ public class FreeipaPollerCollectionTest {
     }
 
     @Test
-    public void testStartPollerWhenFreeipaNull() throws Exception {
+    void testStartPollerWhenFreeipaNull() throws Exception {
         String crn = "crn";
         Mockito.when(freeIpaV1Endpoint.describe(crn)).thenReturn(null);
 

@@ -69,4 +69,19 @@ public class EnvironmentClientService {
             throw new CloudbreakServiceException(message, e);
         }
     }
+
+    public String getCrnByName(String environmentName) {
+        try {
+            return environmentEndpoint.getCrnByName(environmentName).getEnvironmentCrn();
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to GET environmentCrn by name due to: %s. %s.", e.getMessage(), errorMessage);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        } catch (ProcessingException | IllegalStateException e) {
+            String message = String.format("Failed to GET environmentCrn by name due to: '%s' ", e.getMessage());
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
 }
