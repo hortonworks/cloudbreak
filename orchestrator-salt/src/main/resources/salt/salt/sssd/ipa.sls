@@ -19,12 +19,12 @@ join_ipa:
     - name: |
         runuser -l root -c 'ipa-client-install --server={{salt['pillar.get']('sssd-ipa:server')}} --realm={{salt['pillar.get']('sssd-ipa:realm')}} \
           --domain={{salt['pillar.get']('sssd-ipa:domain')}} --mkhomedir --principal={{salt['pillar.get']('sssd-ipa:principal')}} \
-          --password {{salt['pillar.get']('sssd-ipa:password')}} --unattended --force-join --ssh-trust-dns --no-ntp --unattended'
+          --password "{{salt['pillar.get']('sssd-ipa:password')}}" --unattended --force-join --ssh-trust-dns --no-ntp --unattended'
 {% endif%}
     - unless: ipa env
     - runas: root
     - env:
-        - PW: {{salt['pillar.get']('sssd-ipa:password')}}
+        - PW: "{{salt['pillar.get']('sssd-ipa:password')}}"
 
 {% if salt['file.directory_exists']('/yarn-private') %}
 dns_remove_script:
@@ -47,7 +47,7 @@ add_dns_record:
     - name: echo $PW | kinit {{salt['pillar.get']('sssd-ipa:principal')}} && ipa dnsrecord-add {{salt['pillar.get']('sssd-ipa:domain')}}. $(hostname) --a-rec=$(hostname -i) --a-create-reverse
     - unless: echo $PW | kinit {{salt['pillar.get']('sssd-ipa:principal')}} && ipa dnsrecord-find {{salt['pillar.get']('sssd-ipa:domain')}} --a-rec=$(hostname -i)
     - env:
-        - PW: {{salt['pillar.get']('sssd-ipa:password')}}
+        - PW: "{{salt['pillar.get']('sssd-ipa:password')}}"
 
 {% if not salt['file.directory_exists']('/yarn-private') %}
 
@@ -125,7 +125,7 @@ generate_cm_freeipa_keytab:
 {% endif %}
     - runas: root
     - env:
-        - password: {{salt['pillar.get']('sssd-ipa:password')}}
+        - password: "{{salt['pillar.get']('sssd-ipa:password')}}"
     - unless: ls /etc/cloudera-scm-server/cmf.keytab
     - require:
       - file: create_cm_keytab_generation_script
