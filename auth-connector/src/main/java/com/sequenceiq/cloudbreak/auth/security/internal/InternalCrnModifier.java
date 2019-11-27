@@ -45,6 +45,7 @@ public class InternalCrnModifier {
                         .setResource(userCrn.getResource())
                         .build();
                 LOGGER.debug("Changing internal CRN to {}", newUserCrn);
+                threadBasedUserCrnProvider.removeUserCrn();
                 threadBasedUserCrnProvider.setUserCrn(newUserCrn.toString());
                 createNewUser(newUserCrn);
             }
