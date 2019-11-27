@@ -7,9 +7,9 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 @Service("RestRequestThreadLocalService")
 public class CloudbreakRestRequestThreadLocalService implements RestRequestThreadLocalService {
 
-    private static final ThreadLocal<Long> REQUESTED_WORKSPACE_ID = new InheritableThreadLocal<>();
+    private static final ThreadLocal<Long> REQUESTED_WORKSPACE_ID = new ThreadLocal<>();
 
-    private static final ThreadLocal<CloudbreakUser> CLOUDBREAK_USER = new InheritableThreadLocal<>();
+    private static final ThreadLocal<CloudbreakUser> CLOUDBREAK_USER = new ThreadLocal<>();
 
     public void setRequestedWorkspaceId(Long workspaceId) {
         REQUESTED_WORKSPACE_ID.set(workspaceId);
