@@ -17,7 +17,6 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionSuccessEvent;
@@ -55,7 +54,6 @@ public class SdxDeleteActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxDeleteStartEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Start stack deletion for SDX: {}", payload.getResourceId());
                 provisionerService.startStackDeletion(payload.getResourceId(), payload.isForced());
                 sendEvent(context, SDX_STACK_DELETION_IN_PROGRESS_EVENT.event(), payload);
@@ -79,7 +77,6 @@ public class SdxDeleteActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxDeleteStartEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Datalake stack deletion in progress: {}", payload.getResourceId());
                 sendEvent(context, StackDeletionWaitRequest.from(context, payload));
             }
@@ -102,7 +99,6 @@ public class SdxDeleteActions {
 
             @Override
             protected void doExecute(SdxContext context, StackDeletionSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Datalake delete remote database of sdx cluster: {}", payload.getResourceId());
                 sendEvent(context, RdsDeletionWaitRequest.from(context, payload));
             }
@@ -125,7 +121,6 @@ public class SdxDeleteActions {
 
             @Override
             protected void doExecute(SdxContext context, RdsDeletionSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Datalake delete finalized: {}", payload.getResourceId());
                 sendEvent(context, SDX_DELETE_FINALIZED_EVENT.event(), payload);
             }
@@ -148,7 +143,6 @@ public class SdxDeleteActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxDeletionFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake delete failed for datalake: {}", payload.getResourceId(), exception);
                 String statusReason = "Datalake deletion failed";

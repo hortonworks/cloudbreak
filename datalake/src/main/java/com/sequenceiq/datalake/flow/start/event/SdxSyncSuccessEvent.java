@@ -4,8 +4,8 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class SdxSyncSuccessEvent extends SdxEvent {
 
-    public SdxSyncSuccessEvent(Long sdxId, String userId, String requestId) {
-        super(sdxId, userId, requestId);
+    public SdxSyncSuccessEvent(Long sdxId, String userId) {
+        super(sdxId, userId);
     }
 
     @Override

@@ -4,8 +4,8 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class StackCreationSuccessEvent extends SdxEvent {
 
-    public StackCreationSuccessEvent(Long sdxId, String userId, String requestId) {
-        super(sdxId, userId, requestId);
+    public StackCreationSuccessEvent(Long sdxId, String userId) {
+        super(sdxId, userId);
     }
 
     @Override

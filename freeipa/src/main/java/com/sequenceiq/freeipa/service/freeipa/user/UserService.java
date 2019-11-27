@@ -33,8 +33,8 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
@@ -120,35 +120,29 @@ public class UserService {
 
         if (operation.getStatus() == OperationState.RUNNING) {
             MDCBuilder.addFlowId(operation.getOperationId());
-            asyncTaskExecutor.submit(() -> asyncSynchronizeUsers(
-                    operation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter));
+            Optional<String> requestId = MDCUtils.getRequestId();
+            asyncTaskExecutor.submit(() -> asyncSynchronizeUsers(requestId, operation.getOperationId(),
+                    accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter));
         }
 
         return operationToSyncOperationStatus.convert(operation);
     }
 
     private void asyncSynchronizeUsers(
-            String operationId, String accountId, String actorCrn, List<Stack> stacks,
+            Optional<String> requestId, String operationId, String accountId, String actorCrn, List<Stack> stacks,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
         try {
             Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
 
-            Optional<String> requestIdOptional = Optional.of(
-                    Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()))
-                            .orElseGet(() -> {
-                                String requestId = UUID.randomUUID().toString();
-                                LOGGER.debug("No requestId found. Setting request id to new UUID [{}]", requestId);
-                                MDCBuilder.addRequestId(requestId);
-                                return requestId;
-                            }));
+            MDCBuilder.addRequestId(requestId.orElse(UUID.randomUUID().toString()));
 
             boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
             Json umsEventGenerationIdsJson = fullSync ?
-                    new Json(umsEventGenerationIdsProvider.getEventGenerationIds(accountId, requestIdOptional)) :
+                    new Json(umsEventGenerationIdsProvider.getEventGenerationIds(accountId, requestId)) :
                     null;
 
             Map<String, UsersState> envToUmsStateMap = umsUsersStateProvider
-                    .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userCrnFilter, machineUserCrnFilter, requestIdOptional);
+                    .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userCrnFilter, machineUserCrnFilter, requestId);
 
             Collection<SuccessDetails> success = new ConcurrentLinkedQueue<>();
             Collection<FailureDetails> failure = new ConcurrentLinkedQueue<>();

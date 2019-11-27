@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
-import com.sequenceiq.cloudbreak.client.UserCrnClientRequestFilter;
+import com.sequenceiq.cloudbreak.client.ApiClientRequestFilter;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.freeipa.api.FreeIpaApi;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
@@ -24,7 +24,7 @@ import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 public class FreeIpaApiClientConfig {
 
     @Inject
-    private UserCrnClientRequestFilter userCrnClientRequestFilter;
+    private ApiClientRequestFilter apiClientRequestFilter;
 
     @Inject
     private ClientTracingFeature clientTracingFeature;
@@ -36,7 +36,7 @@ public class FreeIpaApiClientConfig {
                 .withCertificateValidation(freeIpaApiClientParams.isCertificateValidation())
                 .withIgnorePreValidation(freeIpaApiClientParams.isIgnorePreValidation())
                 .withDebug(freeIpaApiClientParams.isRestDebug())
-                .withClientRequestFilter(userCrnClientRequestFilter)
+                .withClientRequestFilter(apiClientRequestFilter)
                 .withTracer(clientTracingFeature)
                 .withApiRoot(FreeIpaApi.API_ROOT_CONTEXT)
                 .build();

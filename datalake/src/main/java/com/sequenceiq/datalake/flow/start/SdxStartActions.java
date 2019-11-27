@@ -18,7 +18,6 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
@@ -57,7 +56,6 @@ public class SdxStartActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxStartStartEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Execute sync flow for SDX: {}", payload.getResourceId());
                 sendEvent(context);
             }
@@ -85,7 +83,6 @@ public class SdxStartActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxSyncSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Execute start flow for SDX: {}", payload.getResourceId());
                 startService.start(payload.getResourceId());
                 sendEvent(context, SDX_START_IN_PROGRESS_EVENT.event(), payload);
@@ -109,7 +106,6 @@ public class SdxStartActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("SDX start in progress: {}", payload.getResourceId());
                 sendEvent(context);
             }
@@ -137,7 +133,6 @@ public class SdxStartActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxStartSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("SDX start finalized: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.SDX_START_FINISHED, "Datalake is running",
                         payload.getResourceId());
@@ -162,7 +157,6 @@ public class SdxStartActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxStartFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 Exception exception = payload.getException();
                 DatalakeStatusEnum failedStatus = DatalakeStatusEnum.START_FAILED;
                 LOGGER.info("Update SDX status to {} for resource: {}", failedStatus, payload.getResourceId(), exception);

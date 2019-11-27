@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
@@ -77,14 +79,17 @@ public class PasswordService {
                 environmentCrnFilter, List.of(userCrn));
         if (operation.getStatus() == OperationState.RUNNING) {
             MDCBuilder.addFlowId(operation.getOperationId());
-            asyncTaskExecutor.submit(() -> asyncSetPasswords(operation.getOperationId(), accountId, actorCrn, userCrn, password, stacks));
+            Optional<String> requestId = MDCUtils.getRequestId();
+            asyncTaskExecutor.submit(() -> asyncSetPasswords(requestId, operation.getOperationId(), accountId, actorCrn, userCrn, password, stacks));
         }
 
         return operationToSyncOperationStatus.convert(operation);
     }
 
-    private void asyncSetPasswords(String operationId, String accountId, String actorCrn, String userCrn, String password, List<Stack> stacks) {
+    private void asyncSetPasswords(Optional<String> requestId, String operationId,
+            String accountId, String actorCrn, String userCrn, String password, List<Stack> stacks) {
         try {
+            MDCBuilder.addRequestId(requestId.orElse(UUID.randomUUID().toString()));
             String userId = getUserIdFromUserCrn(actorCrn, userCrn);
 
             List<SetPasswordRequest> requests = new ArrayList<>();
@@ -120,9 +125,9 @@ public class PasswordService {
         Crn crn = Crn.safeFromString(userCrn);
         switch (crn.getResourceType()) {
             case USER:
-                return umsClient.getUserDetails(actorCrn, userCrn, Optional.empty()).getWorkloadUsername();
+                return umsClient.getUserDetails(actorCrn, userCrn, MDCUtils.getRequestId()).getWorkloadUsername();
             case MACHINE_USER:
-                return umsClient.getMachineUserDetails(actorCrn, userCrn, Optional.empty()).getWorkloadUsername();
+                return umsClient.getMachineUserDetails(actorCrn, userCrn, MDCUtils.getRequestId()).getWorkloadUsername();
             default:
                 throw new IllegalArgumentException(String.format("UserCrn %s is not of resource type USER or MACHINE_USER", userCrn));
         }

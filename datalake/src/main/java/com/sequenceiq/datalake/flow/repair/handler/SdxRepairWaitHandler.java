@@ -12,7 +12,6 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairFailedEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairSuccessEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairWaitRequest;
@@ -48,24 +47,22 @@ public class SdxRepairWaitHandler implements EventHandler<SdxRepairWaitRequest> 
         SdxRepairWaitRequest sdxRepairWaitRequest = event.getData();
         Long sdxId = sdxRepairWaitRequest.getResourceId();
         String userId = sdxRepairWaitRequest.getUserId();
-        String requestId = sdxRepairWaitRequest.getRequestId();
-        MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {
             LOGGER.debug("Start polling stack deletion process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
             repairService.waitCloudbreakClusterRepair(sdxId, pollingConfig);
-            response = new SdxRepairSuccessEvent(sdxId, userId, requestId);
+            response = new SdxRepairSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Repair polling exited before timeout. Cause: ", userBreakException);
-            response = new SdxRepairFailedEvent(sdxId, userId, requestId, userBreakException);
+            response = new SdxRepairFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Repair poller stopped for stack: {}", sdxId);
-            response = new SdxRepairFailedEvent(sdxId, userId, requestId,
+            response = new SdxRepairFailedEvent(sdxId, userId,
                     new PollerStoppedException("Datalake repair timed out after " + DURATION_IN_MINUTES + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Repair polling failed for stack: {}", sdxId);
-            response = new SdxRepairFailedEvent(sdxId, userId, requestId, exception);
+            response = new SdxRepairFailedEvent(sdxId, userId, exception);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

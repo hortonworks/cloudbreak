@@ -3,8 +3,8 @@ package com.sequenceiq.datalake.flow.delete.event;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class RdsDeletionSuccessEvent extends SdxEvent {
-    public RdsDeletionSuccessEvent(Long sdxId, String userId, String requestId) {
-        super(sdxId, userId, requestId);
+    public RdsDeletionSuccessEvent(Long sdxId, String userId) {
+        super(sdxId, userId);
     }
 
     @Override

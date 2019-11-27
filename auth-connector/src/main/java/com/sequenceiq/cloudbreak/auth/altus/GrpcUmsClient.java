@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -413,11 +414,11 @@ public class GrpcUmsClient {
     @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn,
             String roleCrn, UserManagementProto.AccessKeyType.Value accessKeyType) {
-        Optional<String> machineUserCrn = createMachineUser(machineUserName, userCrn, Optional.empty());
+        Optional<String> machineUserCrn = createMachineUser(machineUserName, userCrn, MDCUtils.getRequestId());
         if (StringUtils.isNotEmpty(roleCrn)) {
-            assignMachineUserRole(userCrn, machineUserCrn.orElse(null), roleCrn, Optional.empty());
+            assignMachineUserRole(userCrn, machineUserCrn.orElse(null), roleCrn, MDCUtils.getRequestId());
         }
-        return generateAccessSecretKeyPair(userCrn, machineUserCrn.orElse(null), Optional.empty(), accessKeyType);
+        return generateAccessSecretKeyPair(userCrn, machineUserCrn.orElse(null), MDCUtils.getRequestId(), accessKeyType);
     }
 
     /**
@@ -429,10 +430,10 @@ public class GrpcUmsClient {
      */
     public void clearMachineUserWithAccessKeysAndRole(String machineUserName, String userCrn, String roleCrn) {
         if (StringUtils.isNotEmpty(roleCrn)) {
-            unassignMachineUserRole(userCrn, machineUserName, roleCrn, Optional.empty());
+            unassignMachineUserRole(userCrn, machineUserName, roleCrn, MDCUtils.getRequestId());
         }
-        deleteMachineUserAccessKeys(userCrn, machineUserName, Optional.empty());
-        deleteMachineUser(machineUserName, userCrn, Optional.empty());
+        deleteMachineUserAccessKeys(userCrn, machineUserName, MDCUtils.getRequestId());
+        deleteMachineUser(machineUserName, userCrn, MDCUtils.getRequestId());
     }
 
     /**
