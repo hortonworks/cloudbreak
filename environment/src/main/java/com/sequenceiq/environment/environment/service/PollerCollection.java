@@ -38,7 +38,7 @@ public class PollerCollection {
     }
 
     public List<AttemptResult<Void>> stopDistroXPoller(List<String> pollingCrn, List<String> remaining, Long envId) {
-        if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
+        if (PollGroup.CANCELLED == EnvironmentInMemoryStateStore.get(envId)) {
             String message = "Datahub polling cancelled in inmemory store, id: " + envId;
             LOGGER.info(message);
             throw new PollerStoppedException(message);
@@ -60,7 +60,7 @@ public class PollerCollection {
     }
 
     public List<AttemptResult<Void>> startDistroXPoller(List<String> pollingCrn, List<String> remaining, Long envId) {
-        if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
+        if (PollGroup.CANCELLED == EnvironmentInMemoryStateStore.get(envId)) {
             String message = "Datahub polling cancelled in inmemory store, id: " + envId;
             LOGGER.info(message);
             throw new PollerStoppedException(message);
@@ -81,7 +81,7 @@ public class PollerCollection {
     }
 
     public List<AttemptResult<Void>> stopDatalakePoller(List<String> pollingCrn, List<String> remaining, Long envId) {
-        if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
+        if (PollGroup.CANCELLED == EnvironmentInMemoryStateStore.get(envId)) {
             String message = "Datalake polling cancelled in inmemory store, id: " + envId;
             LOGGER.info(message);
             throw new PollerStoppedException(message);
@@ -102,7 +102,7 @@ public class PollerCollection {
     }
 
     public List<AttemptResult<Void>> startDatalakePoller(List<String> pollingCrn, List<String> remaining, Long envId) {
-        if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
+        if (PollGroup.CANCELLED == EnvironmentInMemoryStateStore.get(envId)) {
             String message = "Datalake polling cancelled in inmemory store, id: " + envId;
             LOGGER.info(message);
             throw new PollerStoppedException(message);
@@ -136,10 +136,10 @@ public class PollerCollection {
 
     private AttemptResult<Void> checkStartStatus(StackV4Response stack) {
         ClusterV4Response cluster = stack.getCluster();
-        if (Status.START_FAILED.equals(stack.getStatus())) {
+        if (Status.START_FAILED == stack.getStatus()) {
             LOGGER.info("Datahub stack start failed for '{}' with status: {} and reason: {}", stack.getName(), stack.getStatus(), stack.getStatusReason());
             return AttemptResults.breakFor("Datahub stack start failed '" + stack.getName() + "', " + stack.getStatusReason());
-        } else if (cluster != null && Status.START_FAILED.equals(cluster.getStatus())) {
+        } else if (cluster != null && Status.START_FAILED == cluster.getStatus()) {
             LOGGER.info("Datahub cluster start failed for '{}' with status: {} and reason: {}", cluster.getName(), cluster.getStatus(), stack.getStatusReason());
             return AttemptResults.breakFor("Datahub cluster start failed '" + cluster.getName() + "', " + cluster.getStatusReason());
         } else {
@@ -156,10 +156,10 @@ public class PollerCollection {
 
     private AttemptResult<Void> checkStopStatus(StackV4Response stack) {
         ClusterV4Response cluster = stack.getCluster();
-        if (Status.STOP_FAILED.equals(stack.getStatus())) {
+        if (Status.STOP_FAILED == stack.getStatus()) {
             LOGGER.info("Datahub cluster stop failed for '{}' with status: {} and reason: {}", stack.getName(), stack.getStatus(), stack.getStatusReason());
             return AttemptResults.breakFor("Datahub stack stop failed '" + stack.getName() + "', " + stack.getStatusReason());
-        } else if (cluster != null && Status.STOP_FAILED.equals(cluster.getStatus())) {
+        } else if (cluster != null && Status.STOP_FAILED == cluster.getStatus()) {
             LOGGER.info("Datahub cluster stop failed for '{}' with status: {} and reason: {}", cluster.getName(), cluster.getStatus(),
                     cluster.getStatusReason());
             return AttemptResults.breakFor("Datahub cluster stop failed '" + cluster.getName() + "', " + cluster.getStatusReason());
@@ -176,7 +176,7 @@ public class PollerCollection {
     }
 
     private AttemptResult<Void> checkStopStatus(SdxClusterResponse sdx) {
-        if (sdx.getStatus() == SdxClusterStatusResponse.STOP_FAILED) {
+        if (SdxClusterStatusResponse.STOP_FAILED == sdx.getStatus()) {
             LOGGER.info("SDX stop failed for '{}' with status {}, reason: {}", sdx.getName(), sdx.getStatus(), sdx.getStatusReason());
             return AttemptResults.breakFor("SDX stop failed '" + sdx.getName() + "', " + sdx.getStatusReason());
         } else {

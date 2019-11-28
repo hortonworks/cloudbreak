@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.v1;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,7 +16,6 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.credential.model.response.EmptyResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
@@ -200,7 +201,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     public Object getCreateEnvironmentForCliByName(String environmentName) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByNameAndAccountId(environmentName, accountId);
-        if (!CloudPlatform.AWS.name().equals(environmentDto.getCloudPlatform())) {
+        if (!AWS.equalsIgnoreCase(environmentDto.getCloudPlatform())) {
             return new EmptyResponse();
         }
         return environmentService.getCreateAWSEnvironmentForCli(environmentDto);
@@ -210,7 +211,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     public Object getCreateEnvironmentForCliByCrn(String crn) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
-        if (!CloudPlatform.AWS.name().equals(environmentDto.getCloudPlatform())) {
+        if (!AWS.equalsIgnoreCase(environmentDto.getCloudPlatform())) {
             return new EmptyResponse();
         }
         return environmentService.getCreateAWSEnvironmentForCli(environmentDto);
@@ -220,7 +221,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     public Object getCreateEnvironmentForCli(EnvironmentRequest environmentRequest) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByNameForAccountId(environmentRequest.getCredentialName(), accountId);
-        if (!CloudPlatform.AWS.name().equals(credential.getCloudPlatform())) {
+        if (!AWS.equalsIgnoreCase(credential.getCloudPlatform())) {
             return new EmptyResponse();
         }
         return environmentService.getCreateAWSEnvironmentForCli(environmentRequest, credential.getCloudPlatform());
