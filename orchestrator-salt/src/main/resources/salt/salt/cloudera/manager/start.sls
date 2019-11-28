@@ -12,3 +12,5 @@ start_server:
   service.running:
     - enable: True
     - name: cloudera-scm-server
+    - require:
+        - pkg: ipa_packages_install

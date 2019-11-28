@@ -118,11 +118,11 @@ public class SdxStopService {
             return AttemptResults.finishWith(stackV4Response);
         } else {
             if (Status.STOP_FAILED.equals(stackV4Response.getStatus())) {
-                LOGGER.info("Stack stop failed for Stack {} with status {}, reason", stackV4Response.getName(), stackV4Response.getStatus(),
+                LOGGER.info("Stack stop failed for Stack {} with status {}, reason {}", stackV4Response.getName(), stackV4Response.getStatus(),
                         stackV4Response.getStatusReason());
                 return sdxStopFailed(sdxCluster, stackV4Response.getStatusReason());
             } else if (cluster != null && Status.STOP_FAILED.equals(cluster.getStatus())) {
-                LOGGER.info("Cluster stop failed for Cluster {} status {}, reason", cluster.getName(),
+                LOGGER.info("Cluster stop failed for Cluster {} status {}, reason {}", cluster.getName(),
                         stackV4Response.getCluster().getStatus(), stackV4Response.getStatusReason());
                 return sdxStopFailed(sdxCluster, cluster.getStatusReason());
             } else if (!stackV4Response.getStatus().isStopState()) {
