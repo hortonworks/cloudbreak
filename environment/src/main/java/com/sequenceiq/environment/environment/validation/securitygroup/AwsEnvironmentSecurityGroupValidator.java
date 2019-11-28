@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
+import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 
@@ -31,7 +32,7 @@ public class AwsEnvironmentSecurityGroupValidator implements EnvironmentSecurity
             if (onlyOneSecurityGroupIdDefined(securityAccessDto)) {
                 resultBuilder.error(securityGroupIdsMustBePresent());
             } else if (isSecurityGroupIdDefined(securityAccessDto)) {
-                if (!Strings.isNullOrEmpty(environmentDto.getNetwork().getNetworkCidr())) {
+                if (RegistrationType.CREATE_NEW.equals(environmentDto.getNetwork().getRegistrationType())) {
                     resultBuilder.error(networkIdMustBePresent(getCloudPlatform().name()));
                     return;
                 }
