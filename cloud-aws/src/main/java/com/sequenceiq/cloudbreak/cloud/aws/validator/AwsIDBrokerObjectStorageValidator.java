@@ -76,6 +76,7 @@ public class AwsIDBrokerObjectStorageValidator {
         awsIDBrokerAssumeRoleValidator.canAssumeRoles(iam, instanceProfile, allMappedRoles, resultBuilder);
 
         awsDataAccessRolePermissionValidator.validate(iam, cloudFileSystem, resultBuilder);
+
         awsRangerAuditRolePermissionValidator.validate(iam, cloudFileSystem, resultBuilder);
     }
 
@@ -87,7 +88,7 @@ public class AwsIDBrokerObjectStorageValidator {
         //awsLogRolePermissionValidator.validate(iam, instanceProfile, cloudFileSystem, resultBuilder);
     }
 
-    Set<Role> getAllMappedRoles(AmazonIdentityManagement iam, CloudFileSystemView cloudFileSystemView,
+    private Set<Role> getAllMappedRoles(AmazonIdentityManagement iam, CloudFileSystemView cloudFileSystemView,
             ValidationResultBuilder resultBuilder) {
         Set<Role> roles = Collections.emptySet();
         AccountMappingBase accountMappings = cloudFileSystemView.getAccountMapping();
