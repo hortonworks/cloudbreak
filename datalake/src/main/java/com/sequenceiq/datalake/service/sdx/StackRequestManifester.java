@@ -271,6 +271,7 @@ public class StackRequestManifester {
                 accountMapping.setGroupMappings(mappingsConfig.getGroupMappings());
                 accountMapping.setUserMappings(mappingsConfig.getActorMappings());
                 cloudStorage.setAccountMapping(accountMapping);
+                LOGGER.info("Initial account mappings fetched from IDBMMS: {}", JsonUtil.writeValueAsStringSilent(accountMapping));
             } else {
                 LOGGER.info("IDBMMS usage is disabled for environment {}. Proceeding with {} mappings for stack {}.", environmentCrn,
                         mappingSource == IdBrokerMappingSource.MOCK

@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.policy.Policy;
@@ -22,6 +24,9 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 
 @Component
 public class AwsLogRolePermissionValidator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsLogRolePermissionValidator.class);
+
     @Inject
     private AwsIamService awsIamService;
 
@@ -44,7 +49,7 @@ public class AwsLogRolePermissionValidator {
         }
 
         if (!failedActions.isEmpty()) {
-            validationResultBuilder.error(String.format("The role(s) (%s) don't have the required permissions:%n%s",
+            validationResultBuilder.error(String.format("The log role (%s) don't have the required permissions: %n%s",
                     String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
                     String.join("\n", failedActions)));
         }
