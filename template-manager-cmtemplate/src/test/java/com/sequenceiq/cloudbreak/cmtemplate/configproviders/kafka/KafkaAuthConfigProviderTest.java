@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -62,13 +63,6 @@ class KafkaAuthConfigProviderTest {
     @BeforeEach
     void setUp() {
         underTest = new KafkaAuthConfigProvider();
-    }
-
-    private static ApiClusterTemplateConfig config(String name, String value) {
-        ApiClusterTemplateConfig cfg = new ApiClusterTemplateConfig();
-        cfg.setName(name);
-        cfg.setValue(value);
-        return cfg;
     }
 
     private static TemplatePreparationObject createTemplatePreparationObject() {

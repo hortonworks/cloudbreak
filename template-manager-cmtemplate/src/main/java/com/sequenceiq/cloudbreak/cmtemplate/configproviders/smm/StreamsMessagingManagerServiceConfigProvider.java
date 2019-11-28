@@ -22,10 +22,14 @@ public class StreamsMessagingManagerServiceConfigProvider extends AbstractRdsRol
         String cmHost = source.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN()
                 .orElse(source.getGeneralClusterConfigs().getClusterManagerIp());
 
+        boolean ssl = source.getGeneralClusterConfigs().getAutoTlsEnabled();
+
         List<ApiClusterTemplateConfig> configs = Lists.newArrayList(
                 config("cm.metrics.host", cmHost),
                 config("cm.metrics.username", source.getGeneralClusterConfigs().getCloudbreakAmbariUser()),
-                config("cm.metrics.password", source.getGeneralClusterConfigs().getCloudbreakAmbariPassword())
+                config("cm.metrics.password", source.getGeneralClusterConfigs().getCloudbreakAmbariPassword()),
+                config("cm.metrics.protocol", ssl ? "https" : "http"),
+                config("cm.metrics.port", ssl ? "7183" : "7180")
         );
         return configs;
     }

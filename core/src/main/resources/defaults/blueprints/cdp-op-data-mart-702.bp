@@ -1,5 +1,5 @@
 {
-  "description": "CDP 1.2 Operations Data Mart template with Apache Impala, Hue, Apache Kudu, and Apache Spark",
+  "description": "CDP 1.2 Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark",
   "blueprint": {
     "cdhVersion": "7.0.2",
     "displayName": "op-datamart",

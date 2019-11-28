@@ -13,7 +13,6 @@ import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -164,19 +163,6 @@ public class StackOperations {
     }
 
     public void delete(StackAccessDto stackAccessDto, Long workspaceId, boolean forced) {
-        validateAccessDto(stackAccessDto);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        if (isNotEmpty(stackAccessDto.getName())) {
-            LOGGER.info("Delete Stack in workspace {} with name {}.", workspaceId, stackAccessDto.getName());
-            stackCommonService.deleteByNameInWorkspace(stackAccessDto.getName(), workspaceId, forced, user);
-        } else {
-            LOGGER.info("Delete Stack in workspace {} with crn {}.", workspaceId, stackAccessDto.getCrn());
-            stackCommonService.deleteByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, forced, user);
-        }
-    }
-
-    @Async
-    public void asyncDelete(StackAccessDto stackAccessDto, Long workspaceId, Boolean forced) {
         validateAccessDto(stackAccessDto);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         if (isNotEmpty(stackAccessDto.getName())) {

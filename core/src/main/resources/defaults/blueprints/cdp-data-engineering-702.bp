@@ -1,5 +1,5 @@
 {
-  "description": "CDP 1.2 Data Engineering template",
+  "description": "CDP 1.2 Data Engineering",
   "blueprint": {
     "cdhVersion": "7.0.2",
     "displayName": "dataengineering",

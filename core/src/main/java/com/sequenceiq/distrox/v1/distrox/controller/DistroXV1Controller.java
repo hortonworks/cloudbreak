@@ -164,7 +164,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
                 .map(name -> StackAccessDto.builder().withName(name).build())
                 .collect(Collectors.toSet());
         stackAccessDtos
-                .forEach(stackAccessDto -> stackOperations.asyncDelete(stackAccessDto, workspaceService.getForCurrentUser().getId(), forced));
+                .forEach(stackAccessDto -> stackOperations.delete(stackAccessDto, workspaceService.getForCurrentUser().getId(), forced));
     }
 
     private void multideleteByCrn(DistroXMultiDeleteV1Request multiDeleteRequest, Boolean forced) {
@@ -172,7 +172,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
                 .map(crn -> StackAccessDto.builder().withCrn(crn).build())
                 .collect(Collectors.toSet());
         stackAccessDtos
-                .forEach(stackAccessDto -> stackOperations.asyncDelete(stackAccessDto, workspaceService.getForCurrentUser().getId(), forced));
+                .forEach(stackAccessDto -> stackOperations.delete(stackAccessDto, workspaceService.getForCurrentUser().getId(), forced));
     }
 
     @Override
