@@ -3,20 +3,6 @@ server.servlet.context-path: "/dl"
 spring:
   application:
     name: DatalakeService
-  quartz:
-    job-store-type: jdbc
-    overwrite-existing-jobs: true
-    properties:
-      org:
-        quartz:
-          jobStore:
-            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
-            class: org.quartz.impl.jdbcjobstore.JobStoreTX
-            useProperties: true
-            isClustered: true
-            clusterCheckinInterval: 60000
-          scheduler:
-            instanceId: AUTO
 
 opentracing:
   jaeger:

@@ -1,0 +1,26 @@
+plugins {
+  id "java"
+  id 'maven'
+}
+
+repositories {
+  mavenLocal()
+  maven { url = "$repoUrl" }
+  mavenCentral()
+  maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
+  maven { url "https://repo.spring.io/release" }
+  maven { url "https://plugins.gradle.org/m2/" }
+}
+
+jar {
+  baseName = 'status-checker'
+}
+
+dependencies {
+  compile project(':common')
+
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',               version: springBootVersion
+
+  testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
+  testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
+}
