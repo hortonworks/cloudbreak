@@ -33,7 +33,8 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
         String name = getResourcePropertyProvider().getName();
         withName(name)
                 .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.defaultHostGroup(getTestContext()))
-                .withCluster(getTestContext().given(DistroXClusterTestDto.class));
+                .withCluster(getTestContext().given(DistroXClusterTestDto.class))
+                .withImageSettings(getTestContext().given(DistroXImageTestDto.class));
         return getCloudProvider().distrox(this);
     }
 
