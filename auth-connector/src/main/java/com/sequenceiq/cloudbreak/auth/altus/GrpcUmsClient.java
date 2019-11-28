@@ -505,8 +505,10 @@ public class GrpcUmsClient {
     // @CacheEvict(cacheNames = {"umsUserRightsCache", "umsUserRoleAssigmentsCache", "umsResourceAssigneesCache"}, key = "#userCrn")
     public void notifyResourceDeleted(String userCrn, String resourceCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            LOGGER.debug("Notify UMS about resource ('{}') was deleted", resourceCrn);
             UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
             client.notifyResourceDeleted(requestId.orElse(UUID.randomUUID().toString()), resourceCrn);
+            LOGGER.debug("Notify resource delete UMS call has been finished for resource crn: {} (by {})", resourceCrn, userCrn);
         }
     }
 
