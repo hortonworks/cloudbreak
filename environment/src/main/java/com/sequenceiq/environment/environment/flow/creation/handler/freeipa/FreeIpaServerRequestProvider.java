@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.dns.EnvironmentBasedDomainNameProvider;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.cloudbreak.util.FreeIpaPasswordUtil;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 
@@ -45,7 +45,7 @@ class FreeIpaServerRequestProvider {
 
         String adminGroupName = environment.getAdminGroupName();
         FreeIpaServerRequest freeIpaServerRequest = new FreeIpaServerRequest();
-        freeIpaServerRequest.setAdminPassword(PasswordUtil.generatePassword());
+        freeIpaServerRequest.setAdminPassword(FreeIpaPasswordUtil.generatePassword());
         freeIpaServerRequest.setDomain(domain);
         freeIpaServerRequest.setHostname(FREEIPA_HOSTNAME);
         freeIpaServerRequest.setAdminGroupName(adminGroupName);
