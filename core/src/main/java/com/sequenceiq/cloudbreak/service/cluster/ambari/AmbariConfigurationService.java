@@ -27,19 +27,19 @@ public class AmbariConfigurationService {
 
     private static final String AZURE_ADDRESS_SUFFIX = "cloudapp.net";
 
-    @Value("${cb.ambari.database.databaseEngine}")
+    @Value("${cb.ambari.database.databaseEngine:}")
     private String databaseEngine;
 
-    @Value("${cb.ambari.database.name}")
+    @Value("${cb.ambari.database.db}")
     private String name;
 
-    @Value("${cb.ambari.database.host}")
+    @Value("${cb.ambari.database.host:}")
     private String host;
 
     @Value("${cb.ambari.database.port}")
     private Integer port;
 
-    @Value("${cb.ambari.database.username}")
+    @Value("${cb.ambari.database.user}")
     private String userName;
 
     @Inject

@@ -69,7 +69,7 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
     public OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException, InvalidTokenException {
         Jwt jwtToken = JwtHelper.decode(accessToken);
         try {
-            Map<String, String> claims = objectMapper.readValue(jwtToken.getClaims(), new MapTypeReference());
+            Map<String, String> claims = objectMapper.readValue(jwtToken.getClaims(), new MapTypeReference<>());
             return "uaa".equals(claims.get("zid")) ? getOAuth2Authentication(accessToken) : getSSOAuthentication(accessToken, jwtToken);
         } catch (IOException e) {
             LOGGER.error("Token does not claim anything", e);
@@ -88,7 +88,7 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
 
     private OAuth2Authentication getSSOAuthentication(String accessToken, Jwt jwt) {
         try {
-            Map<String, Object> claims = objectMapper.readValue(jwt.getClaims(), new MapTypeReference());
+            Map<String, Object> claims = objectMapper.readValue(jwt.getClaims(), new MapTypeReference<>());
             String tenant;
             if (claims.get("aud") != null) {
                 tenant = claims.get("aud").toString();
@@ -125,10 +125,6 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
         }
     }
 
-    private boolean isAssymetricKey(String key) {
-        return key.startsWith("-----BEGIN");
-    }
-
-    private static class MapTypeReference extends TypeReference<Map<String, Object>> {
+    private static class MapTypeReference<T, U> extends TypeReference<Map<T, U>> {
     }
 }

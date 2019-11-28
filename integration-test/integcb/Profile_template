@@ -1,6 +1,6 @@
 export CB_DB_ROOT_PATH=/var/lib/boot2docker/it-test
 export DOCKER_TAG_CLOUDBREAK=dev
-export CB_JAVA_OPTS='-Xmx4G -Drest.debug=true -Dmock.spi.endpoint=https://test.service.consul:9443'
+export CB_JAVA_OPTS='-Xmx4G -Drest.debug=true -Dmock.spi.endpoint=https://test:9443'
 export UAA_DEFAULT_SECRET=cbsecret2015
 export UAA_DEFAULT_USER_PW=cloudbreak
 export REMOVE_CONTAINER=

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 : ${CB_PERFTEST_HOST:=192.168.99.100}
-: ${CB_MOCK_HOST:="mockhosts.service.consul"}
+: ${CB_MOCK_HOST:="mockhosts"}
 : ${CB_USERNAME:=admin@example.com}
 : ${CB_PASSWORD:=cloudbreak}
 : ${CB_NUMBER_OF_USERS:=1}

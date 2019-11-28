@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class CachedImageCatalogProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(CachedImageCatalogProvider.class);
 
-    @Value("${cb.etc.config.dir}")
+    @Value("${cb.etc.config.dir:}")
     private String etcConfigDir;
 
     @Value("#{'${cb.enabled.linux.types}'.split(',')}")

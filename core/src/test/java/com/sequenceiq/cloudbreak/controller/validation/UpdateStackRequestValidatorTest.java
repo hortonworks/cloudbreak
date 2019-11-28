@@ -4,7 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -22,9 +21,9 @@ import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.validation.UpdateStackRequestValidator;
 
 public class UpdateStackRequestValidatorTest {
@@ -37,7 +36,7 @@ public class UpdateStackRequestValidatorTest {
     public void setUp() {
         underTest = new UpdateStackRequestValidator();
         constraintValidatorContext = new ConstraintValidatorContextImpl(
-                new ArrayList<>(), null,
+                null,
                 PathImpl.createPathFromString("status"),
                 new DummyConstraintDescriptor(),
                 null

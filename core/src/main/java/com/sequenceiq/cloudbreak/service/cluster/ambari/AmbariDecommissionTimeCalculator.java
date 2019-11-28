@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static org.joda.time.DateTimeConstants.SECONDS_PER_MINUTE;
 
 import java.util.Collection;
 import java.util.Map;
@@ -22,6 +21,8 @@ import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 public class AmbariDecommissionTimeCalculator {
 
     private static final int DECOMMISSIONING_MAGIC_NUMBER = 12;
+
+    private static final int SECONDS_PER_MINUTE = 60;
 
     @Inject
     private FlowMessageService flowMessageService;

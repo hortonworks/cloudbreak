@@ -15,7 +15,7 @@ public class CloudbreakResourceReaderService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakResourceReaderService.class);
 
-    @Value("${cb.etc.config.dir}")
+    @Value("${cb.etc.config.dir:}")
     private String etcConfigDir;
 
     public String resourceDefinition(String prefix, String resource) {

@@ -12,6 +12,9 @@ echo -e "\n\033[1;96m--- Kill running test container\033[0m\n"
 cd ..
 $INTEGCB_LOCATION/.deps/bin/docker-compose down
 
+echo -e "\n\033[1;96m--- Create docker network\033[0m\n"
+docker network create cbreak_default || true
+
 export INTEGRATIONTEST_SUITEFILES=file:/it/src/main/resources/testsuites/blueprinttests.yaml,file:/it/src/main/resources/testsuites/recipetests.yaml,file:/it/src/main/resources/testsuites/repoconfigstests.yaml,file:/it/src/main/resources/testsuites/disktypetests.yaml,file:/it/src/main/resources/testsuites/securityruletests.yaml,file:/it/src/main/resources/testsuites/v2/mock/all-in-mock-package.yaml,file:/it/src/main/resources/testsuites/v2/mock/v2-mock-stack-maintenance-mode.yaml,file:/it/src/main/resources/testsuites/v2/mock/v2-mock-stackcreate-scaling.yaml,file:/it/src/main/resources/testsuites/v2/mock/v2-mock-knoxgateway-stackcreate.yaml,file:/it/src/main/resources/testsuites/v2/mock/v2-mock-kerberized-stackcreate-scaling.yaml${ADDITIONAL_SUITEFILES+,$ADDITIONAL_SUITEFILES}
 export INTEGRATIONTEST_TESTSUITE_POLLINGINTERVAL=1000
 
@@ -21,7 +24,7 @@ echo $INTEGRATIONTEST_SUITEFILES
 echo -e "\n\033[1;96m--- Start cloudbreak\033[0m\n"
 cd $INTEGCB_LOCATION
 ./cbd regenerate
-./cbd start-wait consul registrator identity commondb cloudbreak
+./cbd start-wait identity commondb cloudbreak
 
 echo -e "\n\033[1;96m--- Start testing... (it may take few minutes to finish.)\033[0m\n"
 cd ..
