@@ -30,7 +30,6 @@ import com.sequenceiq.datalake.flow.stop.event.SdxStopFailedEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStopSuccessEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStopWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
-import com.sequenceiq.datalake.service.sdx.SdxJobService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -47,9 +46,6 @@ public class SdxStopActions {
 
     @Inject
     private SdxStopService stopService;
-
-    @Inject
-    private SdxJobService sdxJobService;
 
     @Bean(name = "SDX_STOP_SYNC_STATE")
     public Action<?, ?> sdxSync() {

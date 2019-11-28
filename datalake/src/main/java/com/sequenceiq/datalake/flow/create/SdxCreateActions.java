@@ -29,13 +29,14 @@ import com.sequenceiq.datalake.flow.create.event.RdsWaitSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
+import com.sequenceiq.datalake.job.SdxClusterJobAdapter;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
-import com.sequenceiq.datalake.service.sdx.SdxJobService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.statuschecker.service.JobService;
 
 @Configuration
 public class SdxCreateActions {
@@ -49,7 +50,7 @@ public class SdxCreateActions {
     private SdxStatusService sdxStatusService;
 
     @Inject
-    private SdxJobService sdxJobService;
+    private JobService jobService;
 
     @Bean(name = "SDX_CREATION_WAIT_ENV_STATE")
     public Action<?, ?> envWaitInProgress() {
@@ -167,7 +168,7 @@ public class SdxCreateActions {
                 MDCBuilder.addRequestId(context.getRequestId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.SDX_CLUSTER_CREATED,
                         "Datalake is running", payload.getResourceId());
-                sdxJobService.schedule(context.getSdxId());
+                jobService.schedule(context.getSdxId(), SdxClusterJobAdapter.class);
                 sendEvent(context, SDX_CREATE_FINALIZED_EVENT.event(), payload);
             }
 

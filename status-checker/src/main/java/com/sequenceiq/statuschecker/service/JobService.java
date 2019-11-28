@@ -1,5 +1,7 @@
-package com.sequenceiq.datalake.service.sdx;
+package com.sequenceiq.statuschecker.service;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -8,6 +10,7 @@ import java.util.Random;
 
 import javax.inject.Inject;
 
+import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -19,59 +22,66 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.job.DatalakeStatusCheckerJob;
-import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.statuschecker.configuration.StatusCheckerProperties;
+import com.sequenceiq.statuschecker.model.JobResourceAdapter;
 
 @Service
-public class SdxJobService {
+public class JobService {
 
     public static final String JOB_GROUP = "datalake-jobs";
 
     public static final String TRIGGER_GROUP = "datalake-triggers";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SdxJobService.class);
+    public static final String LOCAL_ID = "localId";
+
+    public static final String REMOTE_RESOURCE_CRN = "remoteResourceCrn";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JobService.class);
 
     private static final int RANDOM_DELAY = 100;
 
     private static final Random RANDOM = new SecureRandom();
 
-    @Value("${datalake.autosync.intervalsec:60}")
-    private int intervalInSeconds;
+    @Inject
+    private StatusCheckerProperties properties;
 
     @Inject
     private Scheduler scheduler;
 
     @Inject
-    private SdxClusterRepository sdxClusterRepository;
+    private ApplicationContext applicationContext;
 
-    public void schedule(SdxCluster cluster) {
-        JobDetail jobDetail = buildJobDetail(cluster.getId().toString(), cluster.getStackCrn());
+    public <T> void schedule(JobResourceAdapter<T> resource) {
+        JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource());
         Trigger trigger = buildJobTrigger(jobDetail);
         try {
-            if (scheduler.getJobDetail(JobKey.jobKey(cluster.getId().toString(), JOB_GROUP)) != null) {
-                unschedule(cluster.getId());
+            if (scheduler.getJobDetail(JobKey.jobKey(resource.getLocalId(), JOB_GROUP)) != null) {
+                unschedule(resource.getLocalId());
             }
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
-            LOGGER.error(String.format("Error during scheduling quartz job: %s", cluster.getId()), e);
+            LOGGER.error(String.format("Error during scheduling quartz job: %s", resource.getLocalId()), e);
         }
     }
 
-    public void schedule(Long sdxId) {
-        sdxClusterRepository
-                .findById(sdxId)
-                .ifPresent(cluster -> schedule(cluster));
+    public void schedule(Long id, Class<? extends JobResourceAdapter> resource) {
+        try {
+            Constructor<? extends JobResourceAdapter> c = resource.getConstructor(Long.class, ApplicationContext.class);
+            JobResourceAdapter resourceAdapter = c.newInstance(id, applicationContext);
+            schedule(resourceAdapter);
+        } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            LOGGER.error(String.format("Error during scheduling quartz job: %s", id), e);
+        }
     }
 
-    public void unschedule(Long sdxId) {
+    public void unschedule(String id) {
         try {
-            scheduler.deleteJob(JobKey.jobKey(sdxId.toString(), JOB_GROUP));
+            scheduler.deleteJob(JobKey.jobKey(id, JOB_GROUP));
         } catch (SchedulerException e) {
-            LOGGER.error(String.format("Error during unscheduling quartz job: %s", sdxId), e);
+            LOGGER.error(String.format("Error during unscheduling quartz job: %s", id), e);
         }
     }
 
@@ -83,13 +93,13 @@ public class SdxJobService {
         }
     }
 
-    private JobDetail buildJobDetail(String sdxId, String crn) {
+    private <T> JobDetail buildJobDetail(String sdxId, String crn, Class<? extends Job> clazz) {
         JobDataMap jobDataMap = new JobDataMap();
 
-        jobDataMap.put("sdxId", sdxId);
-        jobDataMap.put("stackCrn", crn);
+        jobDataMap.put(LOCAL_ID, sdxId);
+        jobDataMap.put(REMOTE_RESOURCE_CRN, crn);
 
-        return JobBuilder.newJob(DatalakeStatusCheckerJob.class)
+        return JobBuilder.newJob(clazz)
                 .withIdentity(sdxId, JOB_GROUP)
                 .withDescription("Checking datalake status Job")
                 .usingJobData(jobDataMap)
@@ -104,7 +114,7 @@ public class SdxJobService {
                 .withDescription("Checking datalake status Trigger")
                 .startAt(delayedFirstStart())
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-                        .withIntervalInSeconds(intervalInSeconds)
+                        .withIntervalInSeconds(properties.getIntervalInSeconds())
                         .repeatForever()
                         .withMisfireHandlingInstructionIgnoreMisfires())
                 .build();

@@ -1,6 +1,7 @@
-package com.sequenceiq.datalake.configuration;
+package com.sequenceiq.statuschecker.configuration;
 
-import org.springframework.beans.factory.annotation.Value;
+import javax.inject.Inject;
+
 import org.springframework.boot.autoconfigure.quartz.SchedulerFactoryBeanCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,12 +9,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SchedulerFactoryConfig {
 
-    @Value("${datalake.autosync.enabled:false}")
-    private boolean autoSyncEnabled;
+    @Inject
+    private StatusCheckerProperties properties;
 
     @Bean
     public SchedulerFactoryBeanCustomizer schedulerFactoryBeanCustomizer() {
-        return bean -> bean.setAutoStartup(autoSyncEnabled);
+        return bean -> {
+            bean.setAutoStartup(properties.isAutoSyncEnabled());
+        };
     }
 
 }

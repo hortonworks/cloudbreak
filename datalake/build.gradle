@@ -34,6 +34,7 @@ dependencies {
   compile project(':datalake-api')
   compile project(':environment-api')
   compile project(':redbeams-api')
+  compile project(':status-checker')
   implementation     project(":freeipa-api")
 
   implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                          version: okhttpVersion
