@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
 import java.util.List;
@@ -15,17 +17,22 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @Component
 public class HiveKnoxConfigProvider implements CmTemplateComponentConfigProvider {
 
-    private static final String HIVE_SERVICE_CONFIG_SAFETY_VALVE = "hive_service_config_safety_valve";
+    static final String HIVE_SERVICE_CONFIG_SAFETY_VALVE = "hive_service_config_safety_valve";
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
-        KerberosConfig kerberosConfigOpt = templatePreparationObject.getKerberosConfig().get();
-        String realm = kerberosConfigOpt.getRealm();
-        String keytab = ConfigUtils.getSafetyValveProperty("hive.server2.authentication.spnego.keytab", "hive.keytab");
-        String principal = ConfigUtils.getSafetyValveProperty("hive.server2.authentication.spnego.principal", "HTTP/_HOST@" + realm);
         String filePerEvent = ConfigUtils.getSafetyValveProperty("hive.hook.proto.file.per.event", "true");
-        return List.of(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE,
-                principal + keytab + filePerEvent));
+
+        String cdhVersion = templateProcessor.getVersion().orElse("");
+        if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
+            return List.of(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, filePerEvent));
+        } else {
+            KerberosConfig kerberosConfigOpt = templatePreparationObject.getKerberosConfig().get();
+            String realm = kerberosConfigOpt.getRealm();
+            String principal = ConfigUtils.getSafetyValveProperty("hive.server2.authentication.spnego.principal", "HTTP/_HOST@" + realm);
+            String keytab = ConfigUtils.getSafetyValveProperty("hive.server2.authentication.spnego.keytab", "hive.keytab");
+            return List.of(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, principal + keytab + filePerEvent));
+        }
     }
 
     @Override
