@@ -48,4 +48,4 @@ build-freeipa-dockerhub:
 	 make -C docker-freeipa dockerhub
 
 create-rc-version-tag:
-    ./scripts/create-rc-version-tag.sh
+    	./scripts/create-rc-version-tag.sh
