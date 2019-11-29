@@ -397,22 +397,30 @@ public class StackCreatorService {
             return null;
         }
         return executorService.submit(() -> {
-            try {
-                boolean base = blueprintService.isAmbariBlueprint(blueprint) ? shouldUseBaseAmbariImage(clusterRequest) : shouldUseBaseCMImage(clusterRequest);
-                LOGGER.info("The stack with name {} will use base image: {}", stackName, base);
-                return imageService.determineImageFromCatalog(workspace.getId(), stackRequest.getImage(), platformString, blueprint, base, user, image -> true);
-            } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
-                throw new BadRequestException(e.getMessage(), e);
-            }
+            boolean base = blueprintService.isAmbariBlueprint(blueprint) ? shouldUseBaseAmbariImage(clusterRequest) : shouldUseBaseCMImage(clusterRequest);
+            LOGGER.info("The stack with name {} will use base image: {}", stackName, base);
+            return imageService.determineImageFromCatalog(workspace.getId(), stackRequest.getImage(), platformString, blueprint, base, user, image -> true);
         });
     }
 
     private StatedImage getImageCatalog(Future<StatedImage> imgFromCatalogFuture) {
+        int time = 1;
+        TimeUnit unit = TimeUnit.MINUTES;
         return Optional.ofNullable(imgFromCatalogFuture).map(f -> {
             try {
-                return f.get(1, TimeUnit.HOURS);
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                throw new RuntimeException("Image catalog determination failed", e);
+                return f.get(time, unit);
+            } catch (ExecutionException e) {
+                if (e.getCause() instanceof CloudbreakImageNotFoundException) {
+                    throw new BadRequestException("Image id settings are incorrect.", e);
+                }
+                if (e.getCause() instanceof CloudbreakImageCatalogException) {
+                    throw new BadRequestException("Image catalog settings are incorrect.", e.getCause());
+                }
+                throw new RuntimeException("Unknown error happened when determining image from image catalog", e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Determining image from image catalog interrupted", e);
+            } catch (TimeoutException e) {
+                throw new RuntimeException(String.format("Could not determine image from image catalog in %d %s", time, unit), e);
             }
         }).orElse(null);
     }
