@@ -23,6 +23,15 @@ public class SecurityAccessDto {
         return cidr;
     }
 
+    @Override
+    public String toString() {
+        return "SecurityAccessDto{" +
+            "securityGroupIdForKnox='" + securityGroupIdForKnox + '\'' +
+            ", defaultSecurityGroupId='" + defaultSecurityGroupId + '\'' +
+            ", cidr='" + cidr + '\'' +
+            '}';
+    }
+
     public static Builder builder() {
         return new Builder();
     }

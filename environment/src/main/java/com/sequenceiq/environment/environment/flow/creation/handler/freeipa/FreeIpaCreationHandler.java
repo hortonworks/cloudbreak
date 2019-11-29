@@ -136,7 +136,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         try {
             DescribeFreeIpaResponse freeIpa = freeIpaV1Endpoint.describe(environment.getResourceCrn());
             LOGGER.info("FreeIpa for environmentCrn '{}' already exists. Using this one.", environment.getResourceCrn());
-            if (freeIpa.getStatus().equals(CREATE_IN_PROGRESS)) {
+            if (CREATE_IN_PROGRESS == freeIpa.getStatus()) {
                 awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
             }
         } catch (NotFoundException nfe) {
@@ -272,7 +272,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_INTERVAL,
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_COUNT,
                 FreeIpaCreationRetrievalTask.FREEIPA_FAILURE_COUNT);
-        if (pollWithTimeout.getKey() == SUCCESS) {
+        if (SUCCESS == pollWithTimeout.getKey()) {
             eventSender().sendEvent(getNextStepObject(environment), environmentDtoEvent.getHeaders());
         } else {
             throw new FreeIpaOperationFailedException(pollWithTimeout.getValue().getMessage());

@@ -14,7 +14,7 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 public class SubnetIdProvider {
 
     public String provide(NetworkDto network) {
-        return RegistrationType.EXISTING.equals(network.getRegistrationType()) ? network.getSubnetIds().iterator().next()
+        return RegistrationType.EXISTING == network.getRegistrationType() ? network.getSubnetIds().iterator().next()
                 : getPublicSubnetIds(network.getSubnetMetas()).iterator().next();
     }
 

@@ -284,7 +284,7 @@ public class EnvironmentApiConverter {
                 .withSubnetIds(network.getSubnetIds())
                 .withNetworkCidr(network.getNetworkCidr())
                 .withSubnetMetas(network.getSubnetMetas())
-                .withExistingNetwork(RegistrationType.EXISTING.equals(network.getRegistrationType()))
+                .withExistingNetwork(RegistrationType.EXISTING == network.getRegistrationType())
                 .withAws(getIfNotNull(network.getAws(), p -> EnvironmentNetworkAwsParams.EnvironmentNetworkAwsParamsBuilder
                         .anEnvironmentNetworkAwsParams()
                         .withVpcId(p.getVpcId())

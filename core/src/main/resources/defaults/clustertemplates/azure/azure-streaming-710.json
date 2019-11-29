@@ -48,7 +48,7 @@
             {
               "count": 1,
               "size": 1000,
-              "type": "Premium_LRS"
+              "type": "StandardSSD_LRS"
             }
           ]
         },

@@ -185,7 +185,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
 
     @Override
     public Object getCreateCredentialForCli(CredentialRequest credentialRequest) {
-        if (!CloudPlatform.AWS.name().equals(credentialRequest.getCloudPlatform())) {
+        if (!CloudPlatform.AWS.equalsIgnoreCase(credentialRequest.getCloudPlatform())) {
             return new EmptyResponse();
         }
         return credentialService.getCreateAWSCredentialForCli(credentialRequest);

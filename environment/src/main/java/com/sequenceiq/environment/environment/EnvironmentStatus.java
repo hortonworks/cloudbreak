@@ -59,6 +59,7 @@ public enum EnvironmentStatus {
             CREATION_INITIATED,
             UPDATE_INITIATED,
             NETWORK_CREATION_IN_PROGRESS,
+            PUBLICKEY_CREATE_IN_PROGRESS,
             FREEIPA_CREATION_IN_PROGRESS,
             AVAILABLE);
 
@@ -73,13 +74,22 @@ public enum EnvironmentStatus {
     }
 
     public boolean isDeleteInProgress() {
-        return List.of(NETWORK_DELETE_IN_PROGRESS, FREEIPA_DELETE_IN_PROGRESS, RDBMS_DELETE_IN_PROGRESS, IDBROKER_MAPPINGS_DELETE_IN_PROGRESS,
-                S3GUARD_TABLE_DELETE_IN_PROGRESS, CLUSTER_DEFINITION_DELETE_PROGRESS, UMS_RESOURCE_DELETE_IN_PROGRESS, DELETE_INITIATED,
-                DATAHUB_CLUSTERS_DELETE_IN_PROGRESS, DATALAKE_CLUSTERS_DELETE_IN_PROGRESS, PUBLICKEY_DELETE_IN_PROGRESS)
-                .contains(this);
+        return List.of(
+                NETWORK_DELETE_IN_PROGRESS,
+                FREEIPA_DELETE_IN_PROGRESS,
+                RDBMS_DELETE_IN_PROGRESS,
+                IDBROKER_MAPPINGS_DELETE_IN_PROGRESS,
+                S3GUARD_TABLE_DELETE_IN_PROGRESS,
+                CLUSTER_DEFINITION_DELETE_PROGRESS,
+                UMS_RESOURCE_DELETE_IN_PROGRESS,
+                DELETE_INITIATED,
+                DATAHUB_CLUSTERS_DELETE_IN_PROGRESS,
+                DATALAKE_CLUSTERS_DELETE_IN_PROGRESS,
+                PUBLICKEY_DELETE_IN_PROGRESS
+        ).contains(this);
     }
 
     public boolean isSuccessfullyDeleted() {
-        return ARCHIVED.equals(this);
+        return ARCHIVED == this;
     }
 }

@@ -28,7 +28,7 @@ public class FreeipaPollerCollection {
 
     public AttemptMaker<Void> startPoller(Long envId, String envCrn) {
         return () -> {
-            if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
+            if (PollGroup.CANCELLED == EnvironmentInMemoryStateStore.get(envId)) {
                 LOGGER.info("Freeipa polling cancelled in inmemory store, id: " + envId);
                 return AttemptResults.breakFor("Freeipa polling cancelled in inmemory store, id: " + envId);
             }
@@ -43,7 +43,7 @@ public class FreeipaPollerCollection {
 
     public AttemptMaker<Void> stopPoller(Long envId, String envCrn) {
         return () -> {
-            if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
+            if (PollGroup.CANCELLED == EnvironmentInMemoryStateStore.get(envId)) {
                 LOGGER.info("Freeipa polling cancelled in inmemory store, id: " + envId);
                 return AttemptResults.breakFor("Freeipa polling cancelled in inmemory store, id: " + envId);
             }

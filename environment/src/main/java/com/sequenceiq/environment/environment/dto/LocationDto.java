@@ -41,8 +41,12 @@ public class LocationDto {
 
     @Override
     public String toString() {
-        return "{" + "name='" + name + '\''
-                + ", displayName='" + displayName + '\'' + '}';
+        return "LocationDto{" +
+            "name='" + name + '\'' +
+            ", displayName='" + displayName + '\'' +
+            ", latitude=" + latitude +
+            ", longitude=" + longitude +
+            '}';
     }
 
     public static LocationDtoBuilder builder() {
