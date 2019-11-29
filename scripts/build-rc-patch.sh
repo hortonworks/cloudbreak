@@ -1,32 +1,13 @@
 #!/bin/bash -e
 set -x
-: ${WORKSPACE=.}
-: ${BRANCH=rc-$(git describe --abbrev=0 --tags | cut -d '-' -f 1 | cut -d '.' -f 1,2)}
 
-MINOR_VERSION=$(echo "$BRANCH" | cut -d'-' -f 2)
-LATEST_RELEASED_TAG_ON_BRANCH=$(git tag -l --sort=-v:refname | grep ^$MINOR_VERSION | awk '!/rc/ && !/dev/' | head -n 1)
-LATEST_RC_TAG_ON_BRANCH=$(git tag -l --sort=-v:refname | grep ^$MINOR_VERSION | grep 'rc' | head -n 1)
+echo "Build version: $VERSION"
 
-echo "$LATEST_RC_TAG_ON_BRANCH"
-if [[ -z $LATEST_RC_TAG_ON_BRANCH ]]; then
-    echo "no '-rc' tag found on branch $BRANCH"
-    echo "need to add '-rc.1'"
-    VERSION=$MINOR_VERSION.0-rc.1
-else
-    if [[ $LATEST_RELEASED_TAG_ON_BRANCH = $(echo $LATEST_RC_TAG_ON_BRANCH | cut -d'-' -f 1) ]]; then
-        echo "need to increase version with reckon from $LATEST_RELEASED_TAG_ON_BRANCH"
-        RECKONED_VERSION=$(./gradlew -Penv=jenkins -b build.gradle buildInfo -Preckon.scope=patch -Preckon.stage=rc | grep Reckoned)
-        VERSION=${RECKONED_VERSION#Reckoned version: }
-    else
-        LATEST_RC_NUMBER=$(echo $LATEST_RC_TAG_ON_BRANCH | cut -d'.' -f 4)
-        VERSION=$(echo $LATEST_RC_TAG_ON_BRANCH | cut -d'-' -f 1)-rc.$((LATEST_RC_NUMBER+1))
-    fi;
-fi;
+./gradlew -Penv=jenkins -b build.gradle buildInfo build uploadArchives -Pversion=$VERSION --info --stacktrace --parallel -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
 
-git tag -a $VERSION -m "$VERSION"
-git push origin $VERSION
-
-./gradlew -Penv=jenkins -b build.gradle build uploadArchives -Pversion=$VERSION --info --stacktrace --parallel -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
-
-echo "Computed next rc version: $VERSION"
-echo VERSION=$VERSION > $WORKSPACE/version
+aws s3 cp ./core/build/swagger/cb.json s3://cloudbreak-swagger/swagger-$(VERSION).json --acl public-read
+aws s3 cp ./environment/build/swagger/environment.json s3://environment-swagger/swagger-$(VERSION).json --acl public-read
+aws s3 cp ./datalake/build/swagger/freeipa.json s3://freeipa-swagger/swagger-$(VERSION).json --acl public-read
+aws s3 cp ./freeipa/build/swagger/redbeams.json s3://redbeams-swagger/swagger-$(VERSION).json --acl public-read
+aws s3 cp ./redbeams/build/swagger/datalake.json s3://datalake-swagger/swagger-$(VERSION).json --acl public-read
+aws s3 cp ./autoscale/build/swagger/autoscale.json s3://autoscale-swagger/swagger-$(VERSION).json --acl public-read
