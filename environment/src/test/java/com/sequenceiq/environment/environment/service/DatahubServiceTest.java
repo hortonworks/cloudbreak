@@ -24,8 +24,14 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessage
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.poller.ClusterPollerResultEvaluator;
 import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
+import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
 
+import net.jcip.annotations.NotThreadSafe;
+
+@NotThreadSafe
 class DatahubServiceTest {
+
+    private static final long ENV_ID = 165_343_536L;
 
     private static final String ENV_CRN = "envCrn";
 
@@ -41,13 +47,14 @@ class DatahubServiceTest {
     void setup() {
         ReflectionTestUtils.setField(underTest, "attemptCount", 5);
         ReflectionTestUtils.setField(underTest, "sleepTime", 1);
+        EnvironmentInMemoryStateStore.delete(ENV_ID);
     }
 
     @Test
     void testStopAttachedDatahubWhenNoAttachedDatahub() {
         when(distroXV1Endpoint.list(null, ENV_CRN)).thenReturn(new StackViewV4Responses(Collections.emptySet()));
 
-        underTest.stopAttachedDatahubClusters(1L, ENV_CRN);
+        underTest.stopAttachedDatahubClusters(ENV_ID, ENV_CRN);
 
         verify(distroXV1Endpoint, times(0)).putStopByCrns(anyList());
     }
@@ -59,7 +66,7 @@ class DatahubServiceTest {
         when(distroXV1Endpoint.getByCrn(anyString(), anySet()))
                 .thenReturn(getStack(Status.AVAILABLE), getStack(Status.AVAILABLE), getStack(Status.STOPPED));
 
-        underTest.stopAttachedDatahubClusters(1L, ENV_CRN);
+        underTest.stopAttachedDatahubClusters(ENV_ID, ENV_CRN);
 
         verify(distroXV1Endpoint, times(1)).putStopByCrns(anyList());
     }
@@ -68,7 +75,7 @@ class DatahubServiceTest {
     void testStartAttachedDatahubWhenNoAttachedDatahub() {
         when(distroXV1Endpoint.list(null, ENV_CRN)).thenReturn(new StackViewV4Responses(Collections.emptySet()));
 
-        underTest.startAttachedDatahubClusters(1L, ENV_CRN);
+        underTest.startAttachedDatahubClusters(ENV_ID, ENV_CRN);
 
         verify(distroXV1Endpoint, times(0)).putStartByCrns(anyList());
     }
@@ -80,7 +87,7 @@ class DatahubServiceTest {
         when(distroXV1Endpoint.getByCrn(anyString(), anySet()))
                 .thenReturn(getStack(Status.STOPPED), getStack(Status.STOPPED), getStack(Status.AVAILABLE));
 
-        underTest.startAttachedDatahubClusters(1L, ENV_CRN);
+        underTest.startAttachedDatahubClusters(ENV_ID, ENV_CRN);
 
         verify(distroXV1Endpoint, times(1)).putStartByCrns(anyList());
     }

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,12 +20,15 @@ import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
+import net.jcip.annotations.NotThreadSafe;
+
+@NotThreadSafe
 @ExtendWith(MockitoExtension.class)
 class FreeIpaCreationRetrievalTaskTest {
 
     private static final String ENV_CRN = "envCrn";
 
-    private static final long ENV_ID = 1L;
+    private static final long ENV_ID = 243_937_713L;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private FreeIpaPollerObject freeIpaPollerObject;
@@ -35,6 +39,11 @@ class FreeIpaCreationRetrievalTaskTest {
     @BeforeEach
     void setup() {
         when(freeIpaPollerObject.getEnvironmentId()).thenReturn(ENV_ID);
+    }
+
+    @AfterEach
+    void cleanup() {
+        EnvironmentInMemoryStateStore.delete(ENV_ID);
     }
 
     @Test
