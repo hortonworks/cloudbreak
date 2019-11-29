@@ -222,4 +222,9 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     public <T extends CloudbreakTestDto> T deleteGiven(Class<T> clazz, Action<T, U> action, RunningParameter runningParameter) {
         throw new NotImplementedException(String.format("The entity(%s) must be implement the valid() method.", getClass()));
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + "[name: " + getName() + "]";
+    }
 }

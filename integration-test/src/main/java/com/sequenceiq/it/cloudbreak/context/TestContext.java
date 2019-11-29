@@ -103,6 +103,8 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private boolean initialized;
 
+    private CloudbreakUser actingUser;
+
     public Map<String, CloudbreakTestDto> getResources() {
         return resources;
     }
@@ -155,11 +157,11 @@ public abstract class TestContext implements ApplicationContextAware {
             return entity;
         }
 
-        String who = getWho(runningParameter);
+        CloudbreakUser who = getWho(runningParameter);
 
-        LOGGER.info("when {} action on {}, name: {}", key, entity, entity.getName());
+        LOGGER.info("when {} action on {} by {}, name: {}", key, entity, who, entity.getName());
         try {
-            return action.action(this, entity, getMicroserviceClient(clientClass, who));
+            return action.action(this, entity, getMicroserviceClient(clientClass, who.getAccessKey()));
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
                 LOGGER.error("when [{}] action is failed: {}, name: {}", key, ResponseUtil.getErrorMessage(e), entity.getName(), e);
@@ -194,15 +196,15 @@ public abstract class TestContext implements ApplicationContextAware {
             return entity;
         }
 
-        String who = getWho(runningParameter);
+        CloudbreakUser who = getWho(runningParameter);
 
-        LOGGER.info("then {} assertion on {}, name: {}", key, entity, entity.getName());
+        LOGGER.info("then {} assertion on {} by {}, name: {}", key, entity, who, entity.getName());
         try {
             CloudbreakTestDto cloudbreakTestDto = resources.get(key);
             if (cloudbreakTestDto != null) {
-                return assertion.doAssertion(this, (T) cloudbreakTestDto, getMicroserviceClient(clientClass, who));
+                return assertion.doAssertion(this, (T) cloudbreakTestDto, getMicroserviceClient(clientClass, who.getAccessKey()));
             } else {
-                assertion.doAssertion(this, entity, getMicroserviceClient(clientClass, who));
+                assertion.doAssertion(this, entity, getMicroserviceClient(clientClass, who.getAccessKey()));
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
@@ -214,13 +216,13 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public TestContext as() {
-        checkShutdown();
         return as(Actor::defaultUser);
     }
 
     public TestContext as(Actor actor) {
         checkShutdown();
         CloudbreakUser acting = actor.acting(testParameter);
+        setActingUser(acting);
         if (clients.get(acting.getAccessKey()) == null) {
             CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, acting);
             FreeIPAClient freeIPAClient = FreeIPAClient.createProxyFreeIPAClient(testParameter, acting);
@@ -255,8 +257,19 @@ public abstract class TestContext implements ApplicationContextAware {
         return Optional.ofNullable(description);
     }
 
-    protected String getDefaultUser() {
-        return testParameter.get(CloudbreakTest.ACCESS_KEY);
+    protected String getActingUserAccessKey() {
+        if (this.actingUser == null) {
+            return testParameter.get(CloudbreakTest.ACCESS_KEY);
+        }
+        return actingUser.getAccessKey();
+    }
+
+    protected void setActingUser(CloudbreakUser actingUser) {
+        this.actingUser = actingUser;
+    }
+
+    protected CloudbreakUser getActingUser() {
+        return actingUser;
     }
 
     public <O extends CloudbreakTestDto> O init(Class<O> clss) {
@@ -426,11 +439,11 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public CloudbreakClient getCloudbreakClient() {
-        return getCloudbreakClient(getDefaultUser());
+        return getCloudbreakClient(getActingUserAccessKey());
     }
 
     public <U extends MicroserviceClient> U getMicroserviceClient(Class<? extends MicroserviceClient> msClientClass) {
-        return getMicroserviceClient(msClientClass, getDefaultUser());
+        return getMicroserviceClient(msClientClass, getActingUserAccessKey());
     }
 
     public <T extends CloudbreakTestDto> T await(Class<T> entityClass, Map<String, Status> desiredStatuses) {
@@ -469,7 +482,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 throw new RuntimeException("Key provided but no result in resource map, key=" + key);
             }
 
-            CloudbreakClient cloudbreakClient = getCloudbreakClient(getWho(runningParameter));
+            CloudbreakClient cloudbreakClient = getCloudbreakClient(getWho(runningParameter).getAccessKey());
             statuses.putAll(waitUtil.waitAndCheckStatuses(cloudbreakClient, awaitEntity.getName(), desiredStatuses, pollingInterval));
             if (!desiredStatuses.containsValue(Status.DELETE_COMPLETED)) {
                 awaitEntity.refresh(this, cloudbreakClient);
@@ -504,7 +517,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 throw new RuntimeException("Key provided but no result in resource map, key=" + key);
             }
 
-            FreeIPAClient freeIPAClient = getMicroserviceClient(FreeIPAClient.class, getWho(runningParameter));
+            FreeIPAClient freeIPAClient = getMicroserviceClient(FreeIPAClient.class, getWho(runningParameter).getAccessKey());
             String environmentCrn = awaitEntity.getRequest().getEnvironmentCrn();
             statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(freeIPAClient, environmentCrn, desiredStatuses, pollingInterval));
             if (!desiredStatuses.equals(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED)) {
@@ -540,7 +553,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 throw new RuntimeException("Key provided but no result in resource map, key=" + key);
             }
 
-            EnvironmentClient environmentClient = getMicroserviceClient(EnvironmentClient.class, getWho(runningParameter));
+            EnvironmentClient environmentClient = getMicroserviceClient(EnvironmentClient.class, getWho(runningParameter).getAccessKey());
             String environmentName = awaitEntity.getResponse().getName();
             statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(environmentClient, environmentName, desiredStatuses, pollingInterval));
             if (!desiredStatuses.equals(EnvironmentStatus.ARCHIVED)) {
@@ -576,7 +589,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 throw new RuntimeException("Key provided but no result in resource map, key=" + key);
             }
 
-            SdxClient sdxClient = getMicroserviceClient(SdxClient.class, getWho(runningParameter));
+            SdxClient sdxClient = getMicroserviceClient(SdxClient.class, getWho(runningParameter).getAccessKey());
             String sdxName = entity.getName();
             statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(sdxClient, sdxName, desiredStatuses, pollingInterval));
             if (!desiredStatuses.equals(SdxClusterStatusResponse.DELETED)) {
@@ -612,7 +625,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 throw new RuntimeException("Key provided but no result in resource map, key=" + key);
             }
 
-            SdxClient sdxClient = getMicroserviceClient(SdxClient.class, getWho(runningParameter));
+            SdxClient sdxClient = getMicroserviceClient(SdxClient.class, getWho(runningParameter).getAccessKey());
             String sdxName = entity.getName();
             statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(sdxClient, sdxName, desiredStatuses, pollingInterval));
             if (!desiredStatuses.equals(SdxClusterStatusResponse.DELETED)) {
@@ -648,7 +661,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 throw new RuntimeException("Key provided but no result in resource map, key=" + key);
             }
 
-            SdxClient sdxClient = getMicroserviceClient(SdxClient.class, getWho(runningParameter));
+            SdxClient sdxClient = getMicroserviceClient(SdxClient.class, getWho(runningParameter).getAccessKey());
             String sdxName = entity.getName();
             statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(sdxClient, sdxName, desiredStatuses, pollingInterval));
             if (!desiredStatuses.equals(SdxClusterStatusResponse.DELETED)) {
@@ -725,21 +738,16 @@ public abstract class TestContext implements ApplicationContextAware {
         return entity;
     }
 
-    private String getWho(RunningParameter runningParameter) {
-        String who = runningParameter.getWho();
-        if (StringUtils.isEmpty(who)) {
-            who = getDefaultUser();
-            LOGGER.info("Run with default user. {}", who);
+    private CloudbreakUser getWho(RunningParameter runningParameter) {
+        Actor actor = runningParameter.getWho();
+        if (actor == null) {
+            LOGGER.info("Run with acting user. {}", getActingUser());
+            return getActingUser();
         } else {
-            String secondUser = testParameter.get(who);
-            if (StringUtils.isEmpty(secondUser)) {
-                LOGGER.info("Run with the given user. {}", secondUser);
-            } else {
-                who = secondUser;
-                LOGGER.info("Run with the second user. {}", who);
-            }
+            CloudbreakUser who = actor.acting(testParameter);
+            LOGGER.info("Run with given user. {}", who);
+            return who;
         }
-        return who;
     }
 
     private <T> String getKeyForAwait(T entity, Class<? extends T> entityClass, RunningParameter runningParameter) {
@@ -785,7 +793,7 @@ public abstract class TestContext implements ApplicationContextAware {
         List<CloudbreakTestDto> orderedTestDtos = testDtos.stream().sorted(new CompareByOrder()).collect(Collectors.toList());
         for (CloudbreakTestDto testDto : orderedTestDtos) {
             try {
-                testDto.cleanUp(this, getCloudbreakClient(getDefaultUser()));
+                testDto.cleanUp(this, getCloudbreakClient(getActingUserAccessKey()));
             } catch (Exception e) {
                 LOGGER.error("Was not able to cleanup resource [{}]., {}", testDto.getName(), ResponseUtil.getErrorMessage(e), e);
             }
@@ -799,5 +807,10 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public CloudProviderProxy getCloudProvider() {
         return cloudProvider;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + "{clients: " + clients + ", entities: " +  resources + "}";
     }
 }

@@ -12,8 +12,6 @@ import com.sequenceiq.sdx.client.SdxServiceApiKeyEndpoints;
 public class SdxClient extends MicroserviceClient {
     public static final String SDX_CLIENT = "SDX_CLIENT";
 
-    private static SdxServiceApiKeyEndpoints singletonSdxClient;
-
     private SdxServiceApiKeyEndpoints sdxClient;
 
     private String name;
@@ -26,10 +24,6 @@ public class SdxClient extends MicroserviceClient {
         this(SDX_CLIENT);
     }
 
-    public static synchronized SdxServiceApiKeyEndpoints getSingletonSdxClient() {
-        return singletonSdxClient;
-    }
-
     public static Function<IntegrationTestContext, SdxClient> getTestContextSdxClient(String key) {
         return testContext -> testContext.getContextParam(key, SdxClient.class);
     }
@@ -38,25 +32,9 @@ public class SdxClient extends MicroserviceClient {
         return getTestContextSdxClient(SDX_CLIENT);
     }
 
-    public static CloudbreakClient created() {
-        CloudbreakClient client = new CloudbreakClient();
-        client.setCreationStrategy(SdxClient::createProxySdxClient);
-        return client;
-    }
-
-    private static synchronized void createProxySdxClient(IntegrationTestContext integrationTestContext, Entity entity) {
-        SdxClient clientEntity = (SdxClient) entity;
-        if (singletonSdxClient == null) {
-            singletonSdxClient = new SdxServiceApiKeyClient(
-                    integrationTestContext.getContextParam(SdxTest.SDX_SERVER_ROOT),
-                    new ConfigKey(false, true, true))
-                    .withKeys(integrationTestContext.getContextParam(SdxTest.ACCESS_KEY), integrationTestContext.getContextParam(SdxTest.SECRET_KEY));
-        }
-        clientEntity.sdxClient = singletonSdxClient;
-    }
-
     public static synchronized SdxClient createProxySdxClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
         SdxClient clientEntity = new SdxClient();
+        clientEntity.setActing(cloudbreakUser);
         clientEntity.sdxClient = new SdxServiceApiKeyClient(
                 testParameter.get(SdxTest.SDX_SERVER_ROOT),
                 new ConfigKey(false, true, true))

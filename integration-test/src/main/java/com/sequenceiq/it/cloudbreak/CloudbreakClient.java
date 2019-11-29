@@ -73,6 +73,7 @@ public class CloudbreakClient extends MicroserviceClient {
 
     public static synchronized CloudbreakClient createProxyCloudbreakClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
         CloudbreakClient clientEntity = new CloudbreakClient();
+        clientEntity.setActing(cloudbreakUser);
         clientEntity.cloudbreakClient = new CloudbreakApiKeyClient(
                 testParameter.get(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
                 new ConfigKey(false, true, true))
