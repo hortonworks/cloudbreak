@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -114,12 +117,27 @@ public class AzureVolumeResourceBuilderTest {
     }
 
     @Test
-    public void testWhenReattachableVolumeExistsThenItShouldReturn() {
-        CloudResource volumeSetResource = mock(CloudResource.class);
-        when(volumeSetResource.getType()).thenReturn(ResourceType.AZURE_VOLUMESET);
-        CloudResource instanceResource = mock(CloudResource.class);
-        when(instanceResource.getType()).thenReturn(ResourceType.AZURE_INSTANCE);
-        when(context.getComputeResources(PRIVATE_ID)).thenReturn(List.of(volumeSetResource, instanceResource));
+    public void testWhenDetachedReattachableVolumeExistsThenItShouldReturn() {
+        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.DETACHED)
+                .name("volume").params(Map.of()).build();
+        CloudResource newInstance = CloudResource.builder().instanceId("instanceid").type(ResourceType.AZURE_INSTANCE).status(CommonStatus.CREATED)
+                .name("instance").params(Map.of()).build();
+        when(context.getComputeResources(PRIVATE_ID)).thenReturn(List.of(volumeSetResource, newInstance));
+
+        List<CloudResource> result = underTest.create(context, PRIVATE_ID, auth, group, image);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(volumeSetResource, result.get(0));
+    }
+
+    @Test
+    public void testWhenReattachableVolumeWithInstanceIdExistsThenItShouldReturn() {
+        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.CREATED).instanceId("instanceid")
+                .name("volume").params(Map.of()).build();
+        CloudResource newInstance = CloudResource.builder().instanceId("instanceid").type(ResourceType.AZURE_INSTANCE).status(CommonStatus.CREATED)
+                .name("instance").params(Map.of()).build();
+        when(context.getComputeResources(PRIVATE_ID)).thenReturn(List.of(volumeSetResource, newInstance));
 
         List<CloudResource> result = underTest.create(context, PRIVATE_ID, auth, group, image);
 
@@ -130,14 +148,16 @@ public class AzureVolumeResourceBuilderTest {
 
     @Test
     public void testWhenReattachableDoesNotExistsThenNewlyBuildedInstanceShouldBeCreated() {
-        CloudResource instanceResource = mock(CloudResource.class);
-        when(instanceResource.getType()).thenReturn(ResourceType.AZURE_INSTANCE);
-        when(context.getComputeResources(PRIVATE_ID)).thenReturn(List.of(instanceResource));
+        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.CREATED)
+                .name("volume").params(Map.of()).build();
+        CloudResource newInstance = CloudResource.builder().instanceId("instanceid").type(ResourceType.AZURE_INSTANCE).status(CommonStatus.CREATED)
+                .name("instance").params(Map.of()).build();
+        when(context.getComputeResources(PRIVATE_ID)).thenReturn(List.of(volumeSetResource, newInstance));
 
         List<CloudResource> result = underTest.create(context, PRIVATE_ID, auth, group, image);
 
         assertNotNull(result);
         assertEquals(1, result.size());
+        assertNotEquals(volumeSetResource, result.get(0));
     }
-
 }

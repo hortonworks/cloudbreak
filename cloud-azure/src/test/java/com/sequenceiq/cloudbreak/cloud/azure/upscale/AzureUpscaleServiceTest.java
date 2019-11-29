@@ -15,6 +15,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -31,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -110,7 +110,10 @@ public class AzureUpscaleServiceTest {
         when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
         when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView)).thenReturn(templateDeployment);
         when(templateDeployment.exportTemplate()).thenReturn(mock(DeploymentExportResult.class));
-        when(azureUtils.getInstanceCloudResources(cloudContext, templateDeployment, scaledGroups)).thenReturn(NEW_INSTANCES);
+        CloudResource newInstance = CloudResource.builder().instanceId("instanceid").type(ResourceType.AZURE_INSTANCE).status(CommonStatus.CREATED)
+                .name("instance").params(Map.of()).build();
+        List<CloudResource> newInstances = List.of(newInstance);
+        when(azureUtils.getInstanceCloudResources(cloudContext, templateDeployment, scaledGroups)).thenReturn(newInstances);
         when(cloudResourceHelper.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
 
         List<CloudResourceStatus> actual = underTest.upscale(ac, stack, resources, azureStackView, client);
@@ -129,15 +132,44 @@ public class AzureUpscaleServiceTest {
         verify(azureUtils).getResourceGroupName(any(CloudContext.class), eq(stack));
         verify(stack).getParameters();
         verify(azureStorage).isEncrytionNeeded(any());
+        verify(azureComputeResourceService).buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, List.of(), NETWORK_RESOURCES);
+    }
+
+    @Test
+    public void testUpscaleWhenThereAreReattachableVolumeSets() {
+        CloudContext cloudContext = createCloudContext();
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, null);
+        CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
+        CloudResource notReattachableVolumeSet = createCloudResource("volumes", ResourceType.AZURE_VOLUMESET);
+        CloudResource detachedVolumeSet = createCloudResource("detachedvolumes", ResourceType.AZURE_VOLUMESET, CommonStatus.DETACHED, null);
+        CloudResource alreadyCreatedVolumeSet = createCloudResource("alreadycreatedvolumes", ResourceType.AZURE_VOLUMESET, CommonStatus.CREATED,
+                "instanceid");
+        List<CloudResource> resources = List.of(detachedVolumeSet, alreadyCreatedVolumeSet, notReattachableVolumeSet, template);
+        List<Group> scaledGroups = createScaledGroups();
+
+        when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
+        when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView)).thenReturn(templateDeployment);
+        when(templateDeployment.exportTemplate()).thenReturn(mock(DeploymentExportResult.class));
+        CloudResource newInstance = CloudResource.builder().instanceId("instanceid").type(ResourceType.AZURE_INSTANCE).status(CommonStatus.CREATED)
+                .name("instance").params(Map.of()).build();
+        List<CloudResource> newInstances = List.of(newInstance);
+        when(azureUtils.getInstanceCloudResources(cloudContext, templateDeployment, scaledGroups)).thenReturn(newInstances);
+        when(cloudResourceHelper.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
+
+        underTest.upscale(ac, stack, resources, azureStackView, client);
+
+        ArgumentCaptor<List<CloudResource>> reattachCaptor = ArgumentCaptor.forClass(List.class);
+        verify(azureComputeResourceService).buildComputeResourcesForUpscale(eq(ac), eq(stack), eq(scaledGroups), eq(newInstances), reattachCaptor.capture(),
+                eq(NETWORK_RESOURCES));
+        List<CloudResource> reattachableVolumeSets = reattachCaptor.getValue();
+        assertEquals(2, reattachableVolumeSets.size());
+        assertEquals(detachedVolumeSet, reattachableVolumeSets.get(0));
+        assertEquals(alreadyCreatedVolumeSet, reattachableVolumeSets.get(1));
     }
 
     private List<Group> createScaledGroups() {
         Group group = mock(Group.class);
         return Collections.singletonList(group);
-    }
-
-    private CloudInstance createCloudInstance() {
-        return new CloudInstance(INSTANCE_ID, null, null);
     }
 
     private CloudContext createCloudContext() {
@@ -146,12 +178,16 @@ public class AzureUpscaleServiceTest {
     }
 
     private CloudResource createCloudResource(String name, ResourceType resourceType) {
+        return createCloudResource(name, resourceType, CommonStatus.CREATED, null);
+    }
+
+    private CloudResource createCloudResource(String name, ResourceType resourceType, CommonStatus status, String instanceId) {
         return new CloudResource.Builder()
                 .name(name)
-                .status(CommonStatus.CREATED)
+                .status(status)
                 .type(resourceType)
+                .instanceId(instanceId)
                 .params(PARAMETERS)
                 .build();
     }
-
 }
