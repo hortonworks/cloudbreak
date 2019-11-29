@@ -180,4 +180,20 @@ subprojects {
       url "https://repository.cloudera.com/cloudera/list/cm-private/"
     }
   }
+
+  eclipse {
+    classpath {
+      file.whenMerged {
+        cp -> if (project.hasProperty('protobuf')) {
+          cp.entries = cp.entries.findAll { element -> !element.getPath().startsWith('src/generated')}
+          cp.entries.addAll(
+            [
+              new org.gradle.plugins.ide.eclipse.model.SourceFolder('src/generated/main/java', null),
+              new org.gradle.plugins.ide.eclipse.model.SourceFolder('src/generated/main/grpc', null)
+            ]
+          )
+        }
+      }
+    }
+  }
 }
