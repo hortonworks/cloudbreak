@@ -1,8 +1,10 @@
 package com.sequenceiq.it.cloudbreak.context;
 
+import com.sequenceiq.it.cloudbreak.actor.Actor;
+
 public class RunningParameter {
 
-    private String who;
+    private Actor who;
 
     private boolean skipOnFail = true;
 
@@ -12,11 +14,11 @@ public class RunningParameter {
 
     private String expectedMessage;
 
-    public String getWho() {
+    public Actor getWho() {
         return who;
     }
 
-    public RunningParameter withWho(String who) {
+    public RunningParameter withWho(Actor who) {
         this.who = who;
         return this;
     }
@@ -66,7 +68,7 @@ public class RunningParameter {
                 .withSkipOnFail(false);
     }
 
-    public static RunningParameter who(String who) {
+    public static RunningParameter who(Actor who) {
         return new RunningParameter()
                 .withWho(who);
     }

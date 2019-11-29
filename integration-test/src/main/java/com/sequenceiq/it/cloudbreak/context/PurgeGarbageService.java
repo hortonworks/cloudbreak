@@ -50,7 +50,7 @@ public class PurgeGarbageService {
 
     private <T> void purge(TestContext testContext) {
         orderedPurgables().forEach(purgable -> {
-            MicroserviceClient cloudbreakClient = testContext.getMicroserviceClient(purgable.client(), testContext.getDefaultUser());
+            MicroserviceClient cloudbreakClient = testContext.getMicroserviceClient(purgable.client(), testContext.getActingUserAccessKey());
             Collection<Object> all = purgable.getAll(cloudbreakClient);
             all = all.stream()
                     .filter(purgable::deletable)

@@ -18,6 +18,7 @@ public class RedbeamsClient extends MicroserviceClient {
 
     public static synchronized RedbeamsClient createProxyRedbeamsClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
         RedbeamsClient clientEntity = new RedbeamsClient();
+        clientEntity.setActing(cloudbreakUser);
         clientEntity.endpoints = new RedbeamsApiKeyClient(
                 testParameter.get(RedBeamsTest.REDBEAMS_SERVER_ROOT),
                 new ConfigKey(false, true, true))

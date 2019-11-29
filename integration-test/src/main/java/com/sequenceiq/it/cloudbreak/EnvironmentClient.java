@@ -17,10 +17,6 @@ public class EnvironmentClient extends MicroserviceClient {
 
     public static final String ENVIRONMENT_CLIENT = "ENVIRONMENT_CLIENT";
 
-    private static com.sequenceiq.environment.client.EnvironmentClient singletonEnvironmentClient;
-
-    private static EnvironmentInternalCrnClient singletonEnvironmentInternalCrnClient;
-
     private com.sequenceiq.environment.client.EnvironmentClient environmentClient;
 
     private EnvironmentInternalCrnClient environmentInternalCrnClient;
@@ -33,10 +29,6 @@ public class EnvironmentClient extends MicroserviceClient {
         this(ENVIRONMENT_CLIENT);
     }
 
-    public static synchronized com.sequenceiq.environment.client.EnvironmentClient getSingletonEnvironmentClient() {
-        return singletonEnvironmentClient;
-    }
-
     public static Function<IntegrationTestContext, EnvironmentClient> getTestContextEnvironmentClient(String key) {
         return testContext -> testContext.getContextParam(key, EnvironmentClient.class);
     }
@@ -45,31 +37,9 @@ public class EnvironmentClient extends MicroserviceClient {
         return getTestContextEnvironmentClient(ENVIRONMENT_CLIENT);
     }
 
-    public static CloudbreakClient created() {
-        CloudbreakClient client = new CloudbreakClient();
-        client.setCreationStrategy(EnvironmentClient::createProxyEnvironmentClient);
-        return client;
-    }
-
-    private static synchronized void createProxyEnvironmentClient(IntegrationTestContext integrationTestContext, Entity entity) {
-        EnvironmentClient clientEntity = (EnvironmentClient) entity;
-        if (singletonEnvironmentClient == null) {
-            singletonEnvironmentClient = new EnvironmentServiceApiKeyClient(
-                    integrationTestContext.getContextParam(EnvironmentTest.ENVIRONMENT_SERVER_ROOT),
-                    new ConfigKey(false, true, true))
-                    .withKeys(integrationTestContext.getContextParam(EnvironmentTest.ACCESS_KEY),
-                            integrationTestContext.getContextParam(EnvironmentTest.SECRET_KEY));
-        }
-        if (singletonEnvironmentInternalCrnClient == null) {
-            singletonEnvironmentInternalCrnClient = createInternalEnvironmentClient(
-                    integrationTestContext.getContextParam(EnvironmentTest.ENVIRONMENT_INTERNAL_SERVER_ROOT));
-        }
-        clientEntity.environmentClient = singletonEnvironmentClient;
-        clientEntity.environmentInternalCrnClient = singletonEnvironmentInternalCrnClient;
-    }
-
     public static synchronized EnvironmentClient createProxyEnvironmentClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
         EnvironmentClient clientEntity = new EnvironmentClient();
+        clientEntity.setActing(cloudbreakUser);
         clientEntity.environmentClient = new EnvironmentServiceApiKeyClient(
                 testParameter.get(EnvironmentTest.ENVIRONMENT_SERVER_ROOT),
                 new ConfigKey(false, true, true))

@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakTest;
+import com.sequenceiq.it.cloudbreak.actor.Actor;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
@@ -65,7 +65,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .given(StackTestDto.class)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .when(stackTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_ACCESS_KEY).withLogError(false))
+                .when(stackTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(Actor::secondUser).withLogError(false))
                 .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -76,7 +76,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .given(BlueprintTestDto.class)
                 .withBlueprint(BLUEPRINT_TEXT)
                 .when(blueprintTestClient.createV4())
-                .when(blueprintTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_ACCESS_KEY).withLogError(false))
+                .when(blueprintTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(Actor::secondUser).withLogError(false))
                 .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -86,7 +86,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         testContext
                 .given(RecipeTestDto.class)
                 .when(recipeTestClient.createV4())
-                .when(recipeTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_ACCESS_KEY).withLogError(false))
+                .when(recipeTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(Actor::secondUser).withLogError(false))
                 .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -96,7 +96,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         testContext
                 .given(LdapTestDto.class)
                 .when(ldapTestClient.createV1())
-                .when(ldapTestClient.describeV1(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_ACCESS_KEY).withLogError(false))
+                .when(ldapTestClient.describeV1(), RunningParameter.key(FORBIDDEN_KEY).withWho(Actor::secondUser).withLogError(false))
                 .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -106,7 +106,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         testContext
                 .given(ImageCatalogTestDto.class)
                 .when(imageCatalogTestClient.createV4())
-                .when(imageCatalogTestClient.getImagesByNameV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_ACCESS_KEY)
+                .when(imageCatalogTestClient.getImagesByNameV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(Actor::secondUser)
                         .withLogError(false))
                 .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
@@ -117,7 +117,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         testContext
                 .given(ImageCatalogTestDto.class)
                 .when(imageCatalogTestClient.createV4())
-                .when(imageCatalogTestClient.getV4(Boolean.FALSE), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_ACCESS_KEY)
+                .when(imageCatalogTestClient.getV4(Boolean.FALSE), RunningParameter.key(FORBIDDEN_KEY).withWho(Actor::secondUser)
                         .withLogError(false))
                 .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
@@ -128,7 +128,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         testContext
                 .given(ProxyTestDto.class)
                 .when(proxyTestClient.create())
-                .when(proxyTestClient.get(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_ACCESS_KEY).withLogError(false))
+                .when(proxyTestClient.get(), RunningParameter.key(FORBIDDEN_KEY).withWho(Actor::secondUser).withLogError(false))
                 .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -138,7 +138,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         testContext
                 .given(KerberosTestDto.class)
                 .when(kerberosTestClient.createV1())
-                .when(kerberosTestClient.describeV1(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_ACCESS_KEY).withLogError(false))
+                .when(kerberosTestClient.describeV1(), RunningParameter.key(FORBIDDEN_KEY).withWho(Actor::secondUser).withLogError(false))
                 .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
