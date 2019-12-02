@@ -22,6 +22,17 @@ dependencies {
   compile group: 'javax.validation',                      name: 'validation-api',                 version: javaxValidationVersion
   compile group: 'org.apache.commons',                    name: 'commons-lang3',                  version: apacheCommonsLangVersion
 
-  testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
   testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
+
+  testImplementation group: "org.junit.jupiter",         name: "junit-jupiter-api",                        version: junitJupiterVersion
+  testImplementation group: "org.junit.jupiter",         name: "junit-jupiter-params",                     version: junitJupiterVersion
+  testImplementation group: "org.junit.vintage",         name: "junit-vintage-engine",                     version: junitJupiterVersion
+
+  testRuntimeOnly    group: "org.junit.jupiter",         name: "junit-jupiter-engine",                     version: junitJupiterVersion
+}
+
+test{
+  useJUnitPlatform {
+    includeEngines "junit-jupiter", "junit-vintage"
+  }
 }

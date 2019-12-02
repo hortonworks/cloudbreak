@@ -6,7 +6,6 @@ public class ControllerDescription {
     public static final String CLUSTER_DESCRIPTION = "Operations on clusters";
     public static final String EVENT_DESCRIPTION = "Operations on events";
     public static final String USER_DESCRIPTION = "Operations on users";
-    public static final String UTIL_V4_DESCRIPTION = "Miscellaneous utility operations";
     public static final String WORKSPACE_UTIL_V4_DESCRIPTION = "Miscellaneous workspace aware utility operations";
     public static final String MANAGEMENT_PACK_DESCRIPTION = "Operations on management packs";
 
