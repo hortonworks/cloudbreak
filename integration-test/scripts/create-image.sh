@@ -14,6 +14,7 @@ date
 echo -e "\n\033[1;96m--- Change Dockerfile \033[0m\n"
 docker run -d -v "$(pwd)"/integcb/docker-containers/docker-cloudbreak:/integcb/docker-containers/docker-cloudbreak \
  busybox:1.31.1 /bin/sh -c "sed -i '/cloudbreak-\$VERSION/c\ADD cloudbreak.jar /' /integcb/docker-containers/docker-cloudbreak/Dockerfile"
+echo "StatusCode######## $?"
 date
 echo -e "\n\033[1;96m--- Build dev cloudbreak test image\033[0m\n"
 docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak:dev ./integcb/docker-containers/docker-cloudbreak
