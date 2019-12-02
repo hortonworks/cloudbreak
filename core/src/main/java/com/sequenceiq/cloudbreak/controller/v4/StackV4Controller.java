@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -39,13 +40,14 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     public StackViewV4Responses list(Long workspaceId, String environmentCrn, boolean onlyDatalakes) {
-        StackType type;
+        List<StackType> types = new ArrayList<>();
         if (onlyDatalakes) {
-            type = StackType.DATALAKE;
+            types.add(StackType.DATALAKE);
         } else {
-            type = StackType.WORKLOAD;
+            types.add(StackType.DATALAKE);
+            types.add(StackType.WORKLOAD);
         }
-        return stackOperations.listByEnvironmentCrn(workspaceId, environmentCrn, type);
+        return stackOperations.listByEnvironmentCrn(workspaceId, environmentCrn, types);
     }
 
     @Override

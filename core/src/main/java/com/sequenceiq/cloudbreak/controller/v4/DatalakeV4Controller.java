@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.context.annotation.Lazy;
@@ -23,6 +25,6 @@ public class DatalakeV4Controller implements DatalakeV4Endpoint {
 
     @Override
     public StackViewV4Responses list(String environmentName) {
-        return stackOperations.listByEnvironmentName(workspaceService.getForCurrentUser().getId(), environmentName, StackType.DATALAKE);
+        return stackOperations.listByEnvironmentName(workspaceService.getForCurrentUser().getId(), environmentName, List.of(StackType.DATALAKE));
     }
 }
