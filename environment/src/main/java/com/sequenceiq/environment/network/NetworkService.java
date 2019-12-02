@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.network;
 
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.Map;
@@ -78,7 +77,7 @@ public class NetworkService {
     public Map<String, CloudSubnet> retrieveSubnetMetadata(Environment environment, NetworkDto network) {
         if (network == null || network.getSubnetIds().isEmpty()) {
             return Map.of();
-        } else if (AWS.equalsIgnoreCase(environment.getCloudPlatform())) {
+        } else if (CloudPlatform.AWS.name().equalsIgnoreCase(environment.getCloudPlatform())) {
             String regionName = environment.getRegionSet().iterator().next().getName();
             PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
             platformResourceRequest.setCredential(environment.getCredential());

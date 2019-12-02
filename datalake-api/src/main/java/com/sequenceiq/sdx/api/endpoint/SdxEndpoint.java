@@ -18,7 +18,6 @@ import javax.ws.rs.core.MediaType;
 import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
-import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
@@ -36,7 +35,7 @@ import io.swagger.annotations.ApiOperation;
 @Path("/sdx")
 @RetryingRestClient
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/sdx", protocols = "http,https")
+@Api(value = "/sdx", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface SdxEndpoint {
 
     @POST
@@ -157,36 +156,36 @@ public interface SdxEndpoint {
     @POST
     @Path("{name}/retry")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "retry sdx", produces = ContentType.JSON, nickname = "retrySdx")
+    @ApiOperation(value = "retry sdx", produces = MediaType.APPLICATION_JSON, nickname = "retrySdx")
     void retry(@PathParam("name") String name);
 
     @POST
     @Path("/crn/{crn}/retry")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "retry sdx by crn", produces = ContentType.JSON, nickname = "retrySdxByCrn")
+    @ApiOperation(value = "retry sdx by crn", produces = MediaType.APPLICATION_JSON, nickname = "retrySdxByCrn")
     void retryByCrn(@PathParam("crn") String crn);
 
     @POST
     @Path("{name}/start")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "start sdx", produces = ContentType.JSON, nickname = "startSdxByName")
+    @ApiOperation(value = "start sdx", produces = MediaType.APPLICATION_JSON, nickname = "startSdxByName")
     void startByName(@PathParam("name") String name);
 
     @POST
     @Path("/crn/{crn}/start")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "start sdx by crn", produces = ContentType.JSON, nickname = "startSdxByCrn")
+    @ApiOperation(value = "start sdx by crn", produces = MediaType.APPLICATION_JSON, nickname = "startSdxByCrn")
     void startByCrn(@PathParam("crn") String crn);
 
     @POST
     @Path("{name}/stop")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "stop sdx", produces = ContentType.JSON, nickname = "stopSdxByName")
+    @ApiOperation(value = "stop sdx", produces = MediaType.APPLICATION_JSON, nickname = "stopSdxByName")
     void stopByName(@PathParam("name") String name);
 
     @POST
     @Path("/crn/{crn}/stop")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "stop sdx by crn", produces = ContentType.JSON, nickname = "stopSdxByCrn")
+    @ApiOperation(value = "stop sdx by crn", produces = MediaType.APPLICATION_JSON, nickname = "stopSdxByCrn")
     void stopByCrn(@PathParam("crn") String crn);
 }

@@ -2,9 +2,11 @@ package com.sequenceiq.periscope.controller;
 
 import java.io.IOException;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.api.AutoscaleApi;
@@ -37,7 +39,11 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 @Component
 public class EndpointConfig extends ResourceConfig {
 
-    public EndpointConfig() throws IOException {
+    @Value("${info.app.version:unspecified}")
+    private String applicationVersion;
+
+    @PostConstruct
+    public void init() throws IOException {
         registerEndpoints();
         registerExceptionMappers();
         registerSwagger();
@@ -47,7 +53,7 @@ public class EndpointConfig extends ResourceConfig {
         BeanConfig beanConfig = new BeanConfig();
         beanConfig.setTitle("Auto-scaling API");
         beanConfig.setDescription(FileReaderUtils.readFileFromClasspath("swagger/auto-scaling-introduction"));
-        beanConfig.setVersion("1.9.0");
+        beanConfig.setVersion(applicationVersion);
         beanConfig.setSchemes(new String[]{"http", "https"});
         beanConfig.setBasePath(AutoscaleApi.API_ROOT_CONTEXT);
         beanConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");

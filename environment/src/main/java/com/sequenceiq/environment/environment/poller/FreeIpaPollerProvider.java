@@ -66,7 +66,7 @@ public class FreeIpaPollerProvider {
     }
 
     private AttemptResult<Void> checkStopStatus(DescribeFreeIpaResponse freeIpaResponse) {
-        if (freeIpaResponse.getStatus() == Status.STOP_FAILED) {
+        if (Status.STOP_FAILED.equals(freeIpaResponse.getStatus())) {
             LOGGER.error("Freeipa stop failed for '{}' with status {}, reason: {}", freeIpaResponse.getName(), freeIpaResponse.getStatus(),
                     freeIpaResponse.getStatusReason());
             return AttemptResults.breakFor("Freeipa stop failed '" + freeIpaResponse.getName() + "', " + freeIpaResponse.getStatusReason());

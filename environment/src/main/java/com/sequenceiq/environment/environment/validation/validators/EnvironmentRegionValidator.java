@@ -6,7 +6,7 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
-import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
@@ -28,7 +28,7 @@ public class EnvironmentRegionValidator {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         Set<String> requestedRegionNames = new HashSet<>(requestedRegions);
         if (!requestedRegionNames.contains(requestedLocation) && cloudRegions.areRegionsSupported()) {
-            if (!cloudPlatform.equalsIgnoreCase(CloudConstants.OPENSTACK) && !cloudPlatform.equalsIgnoreCase(CloudConstants.MOCK)) {
+            if (!CloudPlatform.OPENSTACK.equalsIgnoreCase(cloudPlatform) && !CloudPlatform.MOCK.equalsIgnoreCase(cloudPlatform)) {
                 resultBuilder.error(String.format("Location [%s] is not one of the regions: [%s].", requestedLocation,
                         String.join(", ", requestedRegionNames)));
             }

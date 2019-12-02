@@ -1128,7 +1128,13 @@ public class StackService implements ResourceIdProvider {
     }
 
     public Set<StackListItem> getByWorkspaceId(Long workspaceId, String environmentCrn, StackType stackType) {
-        return stackRepository.findByWorkspaceId(workspaceId, environmentCrn, stackType);
+        // we need to add the type explicitly. Because if the stack type is null that stack is WORKLOAD.
+        // The query contains the null check but type check will the same in case of stackType = null
+        StackType s = stackType;
+        if (s == null) {
+            s = StackType.WORKLOAD;
+        }
+        return stackRepository.findByWorkspaceId(workspaceId, environmentCrn, s);
     }
 
     StackRepository repository() {

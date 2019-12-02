@@ -95,7 +95,7 @@ public class SdxPollerProvider {
     }
 
     private AttemptResult<Void> checkSdxStopStatus(SdxClusterResponse sdx) {
-        if (sdx.getStatus() == SdxClusterStatusResponse.STOP_FAILED) {
+        if (SdxClusterStatusResponse.STOP_FAILED.equals(sdx.getStatus())) {
             LOGGER.error("SDX stop failed for '{}' with status {}, reason: {}", sdx.getName(), sdx.getStatus(), sdx.getStatusReason());
             return AttemptResults.breakFor("SDX stop failed '" + sdx.getName() + "', " + sdx.getStatusReason());
         } else {
@@ -104,7 +104,7 @@ public class SdxPollerProvider {
     }
 
     private AttemptResult<Void> checkSdxStartStatus(SdxClusterResponse sdx) {
-        if (sdx.getStatus() == SdxClusterStatusResponse.START_FAILED) {
+        if (SdxClusterStatusResponse.START_FAILED.equals(sdx.getStatus())) {
             LOGGER.error("SDX start failed for '{}' with status {}, reason: {}", sdx.getName(), sdx.getStatus(), sdx.getStatusReason());
             return AttemptResults.breakFor("SDX start failed '" + sdx.getName() + "', " + sdx.getStatusReason());
         } else {

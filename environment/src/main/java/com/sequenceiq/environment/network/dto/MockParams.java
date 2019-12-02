@@ -22,6 +22,14 @@ public class MockParams {
         this.vpcId = vpcId;
     }
 
+    @Override
+    public String toString() {
+        return "MockParams{" +
+                "vpcId='" + vpcId + '\'' +
+                ", internetGatewayId='" + internetGatewayId + '\'' +
+                '}';
+    }
+
     public static final class MockParamsBuilder {
 
         private String vpcId;
@@ -53,5 +61,4 @@ public class MockParams {
         }
 
     }
-
 }

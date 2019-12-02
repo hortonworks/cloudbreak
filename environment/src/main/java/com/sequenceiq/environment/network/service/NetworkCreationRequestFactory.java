@@ -53,7 +53,7 @@ public class NetworkCreationRequestFactory {
     }
 
     private boolean getPrivateSubnetEnabled(EnvironmentDto environmentDto) {
-        return PrivateSubnetCreation.ENABLED.equals(environmentDto.getNetwork().getPrivateSubnetCreation());
+        return PrivateSubnetCreation.ENABLED == environmentDto.getNetwork().getPrivateSubnetCreation();
     }
 
     private Set<String> getSubNetCidrs(String networkCidr) {

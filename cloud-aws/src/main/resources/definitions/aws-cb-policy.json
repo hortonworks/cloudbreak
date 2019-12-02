@@ -124,7 +124,9 @@
         "s3:HeadBucket",
         "s3:ListBucket",
         "s3:GetBucketLocation",
-        "s3:PutObject"
+        "s3:PutObject",
+        "s3:DeleteBucket",
+        "s3:PutBucketPublicAccessBlock"
       ],
       "Effect": "Allow",
       "Resource": [

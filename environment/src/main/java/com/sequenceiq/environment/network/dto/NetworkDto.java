@@ -123,6 +123,25 @@ public class NetworkDto {
         return cloudPlatform;
     }
 
+    @Override
+    public String toString() {
+        return "NetworkDto{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", networkId='" + networkId + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", aws=" + aws +
+                ", azure=" + azure +
+                ", yarn=" + yarn +
+                ", mock=" + mock +
+                ", networkCidr='" + networkCidr + '\'' +
+                ", subnetMetas=" + subnetMetas +
+                ", privateSubnetCreation=" + privateSubnetCreation +
+                ", registrationType=" + registrationType +
+                ", cloudPlatform=" + cloudPlatform +
+                '}';
+    }
+
     public static final class Builder {
 
         private Long id;

@@ -45,7 +45,8 @@ import io.swagger.annotations.Authorization;
 @Produces(MediaType.APPLICATION_JSON)
 @Api(tags = {"database servers"},
         protocols = "http,https",
-        authorizations = { @Authorization(value = RedbeamsApi.CRN_HEADER_API_KEY) })
+        authorizations = {@Authorization(value = RedbeamsApi.CRN_HEADER_API_KEY)},
+        produces = MediaType.APPLICATION_JSON)
 public interface DatabaseServerV4Endpoint {
 
     @GET
@@ -79,7 +80,7 @@ public interface DatabaseServerV4Endpoint {
     @Path("managed")
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.CREATE, notes = DatabaseServerNotes.CREATE,
-            nickname = "createDatabaseServer")
+            consumes = MediaType.APPLICATION_JSON, nickname = "createDatabaseServer")
     DatabaseServerStatusV4Response create(
             @Valid @ApiParam(DatabaseServerParamDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST) AllocateDatabaseServerV4Request request
     );
@@ -96,7 +97,7 @@ public interface DatabaseServerV4Endpoint {
     @Path("register")
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.REGISTER, notes = DatabaseServerNotes.REGISTER,
-            nickname = "registerDatabaseServer")
+            consumes = MediaType.APPLICATION_JSON, nickname = "registerDatabaseServer")
     DatabaseServerV4Response register(
             @Valid @ApiParam(DatabaseServerParamDescriptions.DATABASE_SERVER_REQUEST) DatabaseServerV4Request request
     );
@@ -125,7 +126,7 @@ public interface DatabaseServerV4Endpoint {
     @Path("")
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_MULTIPLE_BY_CRN, notes = DatabaseServerNotes.DELETE_MULTIPLE_BY_CRN,
-            nickname = "deleteMultipleDatabaseServersByCrn")
+            consumes = MediaType.APPLICATION_JSON, nickname = "deleteMultipleDatabaseServersByCrn")
     DatabaseServerV4Responses deleteMultiple(
             @ApiParam(DatabaseServerParamDescriptions.CRNS) Set<@ValidCrn String> crns,
             @QueryParam("force") @DefaultValue("false") boolean force
@@ -135,7 +136,7 @@ public interface DatabaseServerV4Endpoint {
     @Path("test")
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.TEST_CONNECTION, notes = DatabaseServerNotes.TEST_CONNECTION,
-            nickname = "testDatabaseServerConnection")
+            consumes = MediaType.APPLICATION_JSON, nickname = "testDatabaseServerConnection")
     DatabaseServerTestV4Response test(
             @Valid @ApiParam(DatabaseServerParamDescriptions.DATABASE_SERVER_TEST_REQUEST) DatabaseServerTestV4Request request
     );
@@ -144,7 +145,7 @@ public interface DatabaseServerV4Endpoint {
     @Path("createDatabase")
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.CREATE_DATABASE, notes = DatabaseServerNotes.CREATE_DATABASE,
-            nickname = "createDatabaseOnServer")
+            consumes = MediaType.APPLICATION_JSON, nickname = "createDatabaseOnServer")
     CreateDatabaseV4Response createDatabase(
             @Valid @ApiParam(DatabaseServerParamDescriptions.CREATE_DATABASE_REQUEST) CreateDatabaseV4Request request
     );

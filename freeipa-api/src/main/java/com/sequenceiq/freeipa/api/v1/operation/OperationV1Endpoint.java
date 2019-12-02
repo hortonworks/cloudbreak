@@ -11,7 +11,6 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 import com.sequenceiq.freeipa.api.v1.operation.doc.OperationDescriptions;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
-import com.sequenceiq.service.api.doc.ContentType;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -19,13 +18,13 @@ import io.swagger.annotations.ApiOperation;
 @RetryingRestClient
 @Path("/v1/operation")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/operation", description = "Manage operations in FreeIPA", protocols = "http,https")
+@Api(value = "/v1/operation", description = "Manage operations in FreeIPA", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface OperationV1Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.OPERATION_STATUS, notes = OperationDescriptions.NOTES, produces = ContentType.JSON,
+    @ApiOperation(value = OperationDescriptions.OPERATION_STATUS, notes = OperationDescriptions.NOTES, produces = MediaType.APPLICATION_JSON,
             nickname = "getOperationStatusV1")
     OperationStatus getOperationStatus(@NotNull @QueryParam("operationId") String operationId);
 }

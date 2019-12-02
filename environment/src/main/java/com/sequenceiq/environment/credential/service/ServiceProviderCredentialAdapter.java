@@ -82,7 +82,7 @@ public class ServiceProviderCredentialAdapter {
                 LOGGER.info(message, res.getErrorDetails());
                 throw new CredentialVerificationException(message + res.getErrorDetails(), res.getErrorDetails());
             }
-            if (CredentialStatus.FAILED.equals(res.getCloudCredentialStatus().getStatus())) {
+            if (CredentialStatus.FAILED == res.getCloudCredentialStatus().getStatus()) {
                 throw new CredentialVerificationException(message + res.getCloudCredentialStatus().getStatusReason(),
                         res.getCloudCredentialStatus().getException());
             }
@@ -99,7 +99,7 @@ public class ServiceProviderCredentialAdapter {
     private boolean setNewStatusText(Credential credential, CloudCredentialStatus status) {
         boolean changed = false;
         String originalVerificationStatusText = credential.getVerificationStatusText();
-        if (CredentialStatus.PERMISSIONS_MISSING.equals(status.getStatus())) {
+        if (CredentialStatus.PERMISSIONS_MISSING == status.getStatus()) {
             if (!StringUtils.equals(originalVerificationStatusText, status.getStatusReason())) {
                 credential.setVerificationStatusText(status.getStatusReason());
                 changed = true;
