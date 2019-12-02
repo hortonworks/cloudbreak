@@ -47,7 +47,7 @@ public class SaltBootstrapTest {
         saltConnector = mock(SaltConnector.class);
         gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "172.16.252.43",
                 "10-0-0-1.example.com", 9443, "instanceId", "serverCert", "clientCert", "clientKey",
-                "saltpasswd", "saltbootpassword", "signkey", false, true, null, null, null, null, null);
+                "saltpasswd", "saltbootpassword", "signkey", false, true, null, null, null, null);
 
         GenericResponse response = new GenericResponse();
         response.setStatusCode(HttpStatus.OK.value());

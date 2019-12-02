@@ -18,19 +18,23 @@ import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.aspect.Measure;
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.FixedSizePreloadCache;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 public class TlsSecurityService {
@@ -40,6 +44,15 @@ public class TlsSecurityService {
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Inject
+    private ClusterProxyConfiguration clusterProxyConfiguration;
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private ClusterProxyService clusterProxyService;
 
     @Value("${cb.security.keypair.cache.size:10}")
     private int keyPairCacheSize;
@@ -96,26 +109,43 @@ public class TlsSecurityService {
     }
 
     public GatewayConfig buildGatewayConfig(Long stackId, InstanceMetaData gatewayInstance, Integer gatewayPort,
-            SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled, Boolean useCcm) {
+            SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) {
         SecurityConfig securityConfig = getSecurityConfigByStackIdOrThrowNotFound(stackId);
-        String connectionIp = getGatewayIp(securityConfig, gatewayInstance);
+        Stack stack = stackService.getById(stackId);
+        String connectionIp = getGatewayIp(securityConfig, gatewayInstance, stack);
         HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp, gatewayInstance);
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
         String saltSignPrivateKeyB64 = saltSecurityConfig.getSaltSignPrivateKey();
-        return new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
-                gatewayPort, gatewayInstance.getInstanceId(), conf.getServerCert(), conf.getClientCert(), conf.getClientKey(),
-                saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem(),
-                knoxGatewayEnabled, InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()),
-                new String(decodeBase64(saltSignPrivateKeyB64)), new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())),
-                securityConfig.getUserFacingCert(), securityConfig.getUserFacingKey(), useCcm);
+        GatewayConfig gatewayConfig = new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(),
+                gatewayInstance.getDiscoveryFQDN(), getGatewayPort(gatewayPort, stack), gatewayInstance.getInstanceId(),
+                conf.getServerCert(), conf.getClientCert(), conf.getClientKey(), saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(),
+                saltClientConfig.getSignatureKeyPem(), knoxGatewayEnabled,
+                InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()), new String(decodeBase64(saltSignPrivateKeyB64)),
+                new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())), securityConfig.getUserFacingCert(), securityConfig.getUserFacingKey());
+        if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
+            gatewayConfig
+                    .withPath(clusterProxyService.getProxyPath(stack.getResourceCrn()))
+                    .withProtocol(clusterProxyConfiguration.getClusterProxyProtocol());
+        }
+        return gatewayConfig;
     }
 
-    public String getGatewayIp(SecurityConfig securityConfig, InstanceMetaData gatewayInstance) {
+    public String getGatewayIp(SecurityConfig securityConfig, InstanceMetaData gatewayInstance, Stack stack) {
         String gatewayIP = gatewayInstance.getPublicIpWrapper();
-        if (securityConfig.isUsePrivateIpToTls()) {
+        if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
+            gatewayIP = clusterProxyConfiguration.getClusterProxyHost();
+        } else if (securityConfig.isUsePrivateIpToTls()) {
             gatewayIP = gatewayInstance.getPrivateIp();
         }
         return gatewayIP;
+    }
+
+    private Integer getGatewayPort(Integer stackPort, Stack stack) {
+        if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
+            return clusterProxyConfiguration.getClusterProxyPort();
+        } else {
+            return stackPort;
+        }
     }
 
     public HttpClientConfig buildTLSClientConfigForPrimaryGateway(Long stackId, String apiAddress) {
@@ -126,14 +156,25 @@ public class TlsSecurityService {
     public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress, InstanceMetaData gateway) {
         Optional<SecurityConfig> securityConfig = securityConfigService.findOneByStackId(stackId);
         if (securityConfig.isEmpty()) {
-            return new HttpClientConfig(apiAddress);
+            return decorateWithCLusterProxyConfig(stackId, new HttpClientConfig(apiAddress));
         } else {
             String serverCert = gateway == null ? null : gateway.getServerCert() == null ? null : new String(decodeBase64(gateway.getServerCert()));
             String clientCertB64 = securityConfig.get().getClientCert();
             String clientKeyB64 = securityConfig.get().getClientKey();
-            return new HttpClientConfig(apiAddress, serverCert,
+            HttpClientConfig httpClientConfig = new HttpClientConfig(apiAddress, serverCert,
                     new String(decodeBase64(clientCertB64)), new String(decodeBase64(clientKeyB64)));
+            return decorateWithCLusterProxyConfig(stackId, httpClientConfig);
         }
+    }
+
+    private HttpClientConfig decorateWithCLusterProxyConfig(Long stackId, HttpClientConfig httpClientConfig) {
+        if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
+            Stack stack = stackService.getById(stackId);
+            if (clusterProxyService.useClusterProxyForCommunication(stack)) {
+                return httpClientConfig.withClusterProxy(clusterProxyConfiguration.getClusterProxyUrl(), stack.getResourceCrn());
+            }
+        }
+        return httpClientConfig;
     }
 
     public CertificateV4Response getCertificates(Long stackId) {

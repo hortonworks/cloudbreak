@@ -1,16 +1,11 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
-import com.sequenceiq.cloudbreak.ccm.endpoint.HostEndpoint;
-import com.sequenceiq.cloudbreak.ccm.endpoint.HttpsServiceEndpoint;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpoint;
-import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpointFinder;
-import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpointLookupException;
-import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpointRequest;
-import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 
 public class GatewayConfig {
 
@@ -51,18 +46,20 @@ public class GatewayConfig {
 
     private final String userFacingKey;
 
-    private Boolean useCcm;
+    private Optional<String> path = Optional.empty();
+
+    private String protocol = "https";
 
     public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress,
             Integer gatewayPort, String instanceId, Boolean knoxGatewayEnabled) {
         this(connectionAddress, publicAddress, privateAddress, null, gatewayPort,
-                instanceId, null, null, null, null, null, null, knoxGatewayEnabled, true, null, null, null, null, null);
+                instanceId, null, null, null, null, null, null, knoxGatewayEnabled, true, null, null, null, null);
     }
 
     public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress, String hostname,
             Integer gatewayPort, String instanceId, String serverCert, String clientCert, String clientKey, String saltPassword, String saltBootPassword,
             String signatureKey, Boolean knoxGatewayEnabled, boolean primary, String saltSignPrivateKey, String saltSignPublicKey,
-            String userFacingCert, String userFacingKey, Boolean useCcm) {
+            String userFacingCert, String userFacingKey) {
         this.connectionAddress = connectionAddress;
         this.publicAddress = publicAddress;
         this.privateAddress = privateAddress;
@@ -81,7 +78,6 @@ public class GatewayConfig {
         this.saltSignPublicKey = saltSignPublicKey;
         this.userFacingCert = userFacingCert;
         this.userFacingKey = userFacingKey;
-        this.useCcm = useCcm;
     }
 
     private GatewayConfig(GatewayConfig gatewayConfig, @Nonnull ServiceEndpoint serviceEndpoint) {
@@ -92,7 +88,7 @@ public class GatewayConfig {
                 gatewayConfig.saltPassword, gatewayConfig.saltBootPassword, gatewayConfig.signatureKey,
                 gatewayConfig.knoxGatewayEnabled, gatewayConfig.primary,
                 gatewayConfig.saltSignPrivateKey, gatewayConfig.saltSignPublicKey,
-                gatewayConfig.getUserFacingCert(), gatewayConfig.getUserFacingKey(), gatewayConfig.getUseCcm());
+                gatewayConfig.getUserFacingCert(), gatewayConfig.getUserFacingKey());
     }
 
     public String getConnectionAddress() {
@@ -116,7 +112,7 @@ public class GatewayConfig {
     }
 
     public String getGatewayUrl() {
-        return String.format("https://%s:%d", connectionAddress, gatewayPort);
+        return String.format("%s://%s:%d%s", protocol, connectionAddress, gatewayPort, path.orElse(""));
     }
 
     public String getInstanceId() {
@@ -171,51 +167,14 @@ public class GatewayConfig {
         return userFacingKey;
     }
 
-    public Boolean getUseCcm() {
-        return useCcm;
+    public GatewayConfig withPath(String path) {
+        this.path = Optional.of(path);
+        return this;
     }
 
-    /**
-     * Returns a gateway config for the nginx service on the gateway.
-     * The returned gateway config is identical to this one, except that
-     * its connection address and gateway port (and hence gateway URL)
-     * are determined using the specified service endpoint finder.
-     *
-     * @param serviceEndpointFinder  the service endpoint finder
-     * @return a gateway config for the nginx service on the gateway
-     * @throws ServiceEndpointLookupException if an exception occurs looking up the endpoint
-     * @throws InterruptedException           if the lookup is interrupted
-     */
-    public GatewayConfig getGatewayConfig(ServiceEndpointFinder serviceEndpointFinder)
-            throws ServiceEndpointLookupException, InterruptedException {
-        return new GatewayConfig(this, getServiceEndpoint(serviceEndpointFinder, !Boolean.TRUE.equals(getUseCcm())));
-    }
-
-    /**
-     * Returns a service endpoint for the nginx service on the gateway.
-     *
-     * @param serviceEndpointFinder  the service endpoint finder
-     * @param directAccessRequired whether the lookup should only allow direct access to the target service
-     * @return a service endpoint for the nginx service on the gateway
-     * @throws ServiceEndpointLookupException if an exception occurs looking up the endpoint
-     * @throws InterruptedException           if the lookup is interrupted
-     */
-    private ServiceEndpoint getServiceEndpoint(ServiceEndpointFinder serviceEndpointFinder, boolean directAccessRequired)
-            throws ServiceEndpointLookupException, InterruptedException {
-        ServiceEndpointRequest<HttpsServiceEndpoint> serviceEndpointRequest =
-                createServiceEndpointRequest(directAccessRequired);
-        return serviceEndpointFinder.getServiceEndpoint(serviceEndpointRequest);
-    }
-
-    /**
-     * Creates a service endpoint request for connecting to the nginx service on the gateway.
-     *
-     * @param directAccessRequired whether the lookup should only allow direct access to the target service
-     * @return a service endpoint request for connecting to the specified service on the gateway
-     */
-    private ServiceEndpointRequest<HttpsServiceEndpoint> createServiceEndpointRequest(boolean directAccessRequired) {
-        return ServiceEndpointRequest.createDefaultServiceEndpointRequest(
-                instanceId, new HostEndpoint(connectionAddress), gatewayPort, ServiceFamilies.GATEWAY, directAccessRequired);
+    public GatewayConfig withProtocol(String protocol) {
+        this.protocol = protocol;
+        return this;
     }
 
     public String toString() {

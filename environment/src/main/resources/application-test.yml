@@ -76,6 +76,9 @@ environment:
 #      cert.file: database.crt
 #      ssl: false
   enabledplatforms: AWS, AZURE, YARN
+  tunnel:
+    default: DIRECT
+    ccm.validate.entitlement: true
 
 cb:
   schema:

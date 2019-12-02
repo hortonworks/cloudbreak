@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.retry.annotation.Retryable;
@@ -35,9 +34,6 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.ccm.endpoint.DirectServiceEndpointFinder;
-import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpointFinder;
-import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpointLookupException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
@@ -114,9 +110,6 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Value("${rest.debug}")
     private boolean restDebug;
-
-    @Autowired(required = false)
-    private ServiceEndpointFinder serviceEndpointFinder = new DirectServiceEndpointFinder();
 
     private ExitCriteria exitCriteria;
 
@@ -980,11 +973,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     private SaltConnector createSaltConnector(GatewayConfig gatewayConfig) {
-        try {
-            return new SaltConnector(gatewayConfig.getGatewayConfig(serviceEndpointFinder), restDebug);
-        } catch (ServiceEndpointLookupException | InterruptedException e) {
-            throw new RuntimeException("Cannot determine service endpoint for gateway: " + gatewayConfig, e);
-        }
+        return new SaltConnector(gatewayConfig, restDebug);
     }
 
     private Set<Node> getResponsiveNodes(Set<Node> nodes, SaltConnector sc) {

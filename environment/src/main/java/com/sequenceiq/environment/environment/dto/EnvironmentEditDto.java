@@ -7,7 +7,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
-import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 

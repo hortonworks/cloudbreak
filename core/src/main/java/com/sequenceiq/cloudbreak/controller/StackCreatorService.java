@@ -80,7 +80,6 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 import com.sequenceiq.cloudbreak.validation.Validator;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
@@ -217,7 +216,8 @@ public class StackCreatorService {
                 }, LOGGER, "Stack's instance templates have been validated in {} ms for stack {}", stackName);
 
                 DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stackRequest.getEnvironmentCrn());
-                stack.setUseCcm(Tunnel.CCM == environment.getTunnel());
+                stack.setUseCcm(environment.getTunnel().useCcm());
+                stack.setTunnel(environment.getTunnel());
 
                 if (stackRequest.getCluster() != null) {
                     LOGGER.info("Cluster not null so creating cluster for stack name {}.", stackName);

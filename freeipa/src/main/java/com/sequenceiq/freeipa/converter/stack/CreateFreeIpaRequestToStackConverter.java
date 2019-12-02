@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementBase;
@@ -87,7 +88,6 @@ public class CreateFreeIpaRequestToStackConverter {
         stack.setName(source.getName());
         stack.setCreated(System.currentTimeMillis());
         stack.setGatewayport(source.getGatewayPort() == null ? nginxPort : source.getGatewayPort());
-        stack.setUseCcm(source.getUseCcm());
         stack.setStackStatus(new StackStatus(stack, "Stack provision requested.", DetailedStackStatus.PROVISION_REQUESTED));
         stack.setAvailabilityZone(Optional.ofNullable(source.getPlacement()).map(PlacementBase::getAvailabilityZone).orElse(null));
         updateCloudPlatformAndRelatedFields(source, stack, cloudPlatform);
@@ -98,9 +98,23 @@ public class CreateFreeIpaRequestToStackConverter {
             stack.setNetwork(networkConverter.convert(source.getNetwork()));
         }
         stack.setTelemetry(telemetryConverter.convert(source.getTelemetry()));
+        decorateStackWithTunnelAndCcm(stack, source);
         updateOwnerRelatedFields(accountId, userFuture, cloudPlatform, stack);
         extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack);
         return stack;
+    }
+
+    private void decorateStackWithTunnelAndCcm(Stack stack, CreateFreeIpaRequest source) {
+        if (source.getTunnel() != null) {
+            stack.setTunnel(source.getTunnel());
+            stack.setUseCcm(source.getTunnel().useCcm());
+        } else if (source.getUseCcm() != null) {
+            stack.setUseCcm(source.getUseCcm());
+            stack.setTunnel(source.getUseCcm() ? Tunnel.CCM : Tunnel.DIRECT);
+        } else {
+            stack.setTunnel(Tunnel.DIRECT);
+            stack.setUseCcm(Boolean.FALSE);
+        }
     }
 
     private void extendGatewaySecurityGroupWithDefaultGatewayCidrs(Stack stack) {

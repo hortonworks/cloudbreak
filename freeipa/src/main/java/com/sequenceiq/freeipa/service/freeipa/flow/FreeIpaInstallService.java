@@ -78,7 +78,6 @@ public class FreeIpaInstallService {
                 "password", freeIpa.getAdminPassword());
         servicePillarConfig.put("freeipa", new SaltPillarProperties("/freeipa/init.sls", Collections.singletonMap("freeipa", freeipaPillar)));
         decoratePillarsWithTelemetryConfigs(stack, servicePillarConfig);
-
         hostOrchestrator.initSaltConfig(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
         hostOrchestrator.runService(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
     }

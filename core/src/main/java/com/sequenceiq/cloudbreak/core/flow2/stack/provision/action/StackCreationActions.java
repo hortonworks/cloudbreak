@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
@@ -34,11 +33,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -52,10 +53,12 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.StackWithFingerprintsEvent;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataSuccess;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
@@ -94,11 +97,26 @@ public class StackCreationActions {
         };
     }
 
-    @Bean(name = "SETUP_STATE")
-    public Action<?, ?> provisioningSetupAction() {
+    @Bean(name = "CREATE_USER_DATA_STATE")
+    public Action<?, ?> createUserDataAction() {
         return new AbstractStackCreationAction<>(ValidationResult.class) {
             @Override
             protected void doExecute(StackContext context, ValidationResult payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new CreateUserDataRequest(context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "SETUP_STATE")
+    public Action<?, ?> provisioningSetupAction() {
+        return new AbstractStackCreationAction<>(CreateUserDataSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, CreateUserDataSuccess payload, Map<Object, Object> variables) {
                 stackCreationService.setupProvision(context.getStack());
                 sendEvent(context);
             }
@@ -194,7 +212,12 @@ public class StackCreationActions {
                 Stack stack = stackCreationService.setupMetadata(context, payload);
                 StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(), context.getCloudCredential(),
                         context.getCloudStack());
-                sendEvent(newContext);
+                if (newContext.getStack().getTunnel().useCcm()) {
+                    GetTlsInfoResult getTlsInfoResult = new GetTlsInfoResult(context.getCloudContext().getId(), new TlsInfo(true));
+                    sendEvent(newContext, getTlsInfoResult.selector(), getTlsInfoResult);
+                } else {
+                    sendEvent(newContext);
+                }
             }
 
             @Override
@@ -230,7 +253,9 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<>(GetSSHFingerprintsResult.class) {
             @Override
             protected void doExecute(StackContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws Exception {
-                stackCreationService.setupTls(context);
+                if (!context.getStack().getTunnel().useCcm()) {
+                    stackCreationService.setupTls(context);
+                }
                 StackWithFingerprintsEvent fingerprintsEvent = new StackWithFingerprintsEvent(payload.getResourceId(), payload.getSshFingerprints());
                 sendEvent(context, StackCreationEvent.TLS_SETUP_FINISHED_EVENT.event(), fingerprintsEvent);
             }
