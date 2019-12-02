@@ -10,6 +10,8 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -118,16 +120,18 @@ public class UpgradeServiceTest {
     public void shouldReturnNoNewImageAndTryUseBaseImage() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Stack stack = getStack();
         Image image = getImage("id-1");
-        setUpMocks(stack, image, false, "id-1", "id-1");
+        when(stackService.findStackByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(stack));
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
+        StatedImage currentImageFromCatalog = imageFromCatalog(false, "id-1");
+        when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(currentImageFromCatalog);
 
         UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackName(WORKSPACE_ID, CLUSTER_NAME, user);
 
         verify(stackService).findStackByNameAndWorkspaceId(eq(CLUSTER_NAME), eq(WORKSPACE_ID));
-        verify(clusterService).repairSupported(eq(stack));
-        verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
-        verify(componentConfigProviderService).getImage(1L);
-        verify(imageService)
-                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(true), eq(user), any());
+        verify(clusterService).repairSupported(stack);
+        verifyNoMoreInteractions(distroXV1Endpoint);
+        verifyZeroInteractions(componentConfigProviderService);
+        verifyZeroInteractions(imageService);
         assertThat(result.getUpgrade()).isEqualTo(null);
     }
 

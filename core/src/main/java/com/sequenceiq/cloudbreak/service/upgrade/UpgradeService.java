@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
@@ -53,6 +52,8 @@ public class UpgradeService {
     private static final boolean FORCE_REPAIR = true;
 
     private static final boolean REMOVE_ONLY = false;
+
+    private static final boolean NOT_BASE_IMAGE = false;
 
     private static final String SALT_BOOTSTRAP = "salt-bootstrap";
 
@@ -88,7 +89,11 @@ public class UpgradeService {
             return transactionService.required(() -> {
                 Optional<Stack> stack = stackService.findStackByNameAndWorkspaceId(stackName, workspaceId);
                 if (stack.isPresent()) {
-                    return getUpgradeOption(stack.get(), workspaceId, user);
+                    try {
+                        return getUpgradeOption(stack.get(), workspaceId, user);
+                    } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
+                        throw new BadRequestException(e.getMessage());
+                    }
                 } else {
                     throw notFoundException("Stack", stackName);
                 }
@@ -118,49 +123,97 @@ public class UpgradeService {
         }
     }
 
-    private UpgradeOptionV4Response getUpgradeOption(Stack stack, Long workspaceId, User user) {
+    private UpgradeOptionV4Response getUpgradeOption(Stack stack, Long workspaceId, User user)
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Image image = componentConfigProviderService.getImage(stack.getId());
         if (clusterService.repairSupported(stack) && attachedClustersStoppedOrDeleted(stack)) {
-            try {
-                Blueprint blueprint = stack.getCluster().getBlueprint();
-                Image image = componentConfigProviderService.getImage(stack.getId());
-                ImageSettingsV4Request imageSettingsV4Request = toImageSettingsRequest(image);
-                boolean baseImage = useBaseImage(image);
-                StatedImage latestImage = imageService
-                        .determineImageFromCatalog(workspaceId, imageSettingsV4Request, stack.getCloudPlatform().toLowerCase(), blueprint, baseImage, user,
-                                getImageFilter(image, baseImage, stack));
-                ImageInfoV4Response currentImageInfo = new ImageInfoV4Response(
-                        image.getImageName(),
-                        image.getImageId(),
-                        image.getImageCatalogName(),
-                        imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId()).getImage().getCreated());
-                if (!Objects.equals(image.getImageId(), latestImage.getImage().getUuid())) {
-                    ImageInfoV4Response upgradeImageInfo = new ImageInfoV4Response(
-                            latestImage.getImage().getImageSetsByProvider().get(stack.getPlatformVariant().toLowerCase()).get(stack.getRegion()),
-                            latestImage.getImage().getUuid(),
-                            latestImage.getImageCatalogName(),
-                            latestImage.getImage().getCreated()
-                    );
-                    return new UpgradeOptionV4Response(currentImageInfo, upgradeImageInfo);
-                } else {
-                    UpgradeOptionV4Response upgradeOptionV4Response = new UpgradeOptionV4Response();
-                    upgradeOptionV4Response.setCurrent(currentImageInfo);
-                    return upgradeOptionV4Response;
-                }
-            } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
-                throw new BadRequestException(e.getMessage());
+            StatedImage latestImage = getLatestImage(workspaceId, stack, image, user);
+            if (!Objects.equals(image.getImageId(), latestImage.getImage().getUuid())) {
+                return upgradeable(image, latestImage, stack);
+            } else {
+                return notUpgradable(image);
             }
         } else {
-            return new UpgradeOptionV4Response();
+            return notUpgradable(image);
         }
     }
 
-    private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> getImageFilter(Image image, boolean baseImage, Stack stack) {
-        if (baseImage) {
-            return packageVersionFilter(image.getPackageVersions(), baseImage);
-        } else {
-            return packageVersionFilter(image.getPackageVersions(), baseImage)
-                    .and(parcelFilter(stack));
+    private boolean attachedClustersStoppedOrDeleted(Stack stack) {
+        StackViewV4Responses stackViewV4Responses = distroXV1Endpoint.list(null, stack.getEnvironmentCrn());
+        for (StackViewV4Response stackViewV4Response : stackViewV4Responses.getResponses()) {
+            if (!(UPGRADEABLE_ATTACHED_DISTRO_X_STATES.contains(stack.getStatus())
+                    || UPGRADEABLE_ATTACHED_DISTRO_X_STATES.contains(getClusterStatus(stackViewV4Response)))) {
+                return false;
+            }
         }
+        return true;
+    }
+
+    private Status getClusterStatus(StackViewV4Response stack) {
+        if (stack.getCluster() == null) {
+            return null;
+        } else {
+            return stack.getCluster().getStatus();
+        }
+    }
+
+    private StatedImage getLatestImage(Long workspaceId, Stack stack, Image image, User user)
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        return imageService
+                .determineImageFromCatalog(
+                        workspaceId,
+                        toImageSettingsRequest(image),
+                        stack.getCloudPlatform().toLowerCase(),
+                        stack.getCluster().getBlueprint(),
+                        NOT_BASE_IMAGE,
+                        user,
+                        getImageFilter(image, stack));
+    }
+
+    private ImageSettingsV4Request toImageSettingsRequest(Image image) {
+        ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
+        imageSettingsV4Request.setOs(image.getOs());
+        imageSettingsV4Request.setCatalog(image.getImageCatalogName());
+        return imageSettingsV4Request;
+    }
+
+    private UpgradeOptionV4Response upgradeable(Image image, StatedImage latestImage, Stack stack)
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        UpgradeOptionV4Response response = notUpgradable(image);
+        ImageInfoV4Response upgradeImageInfo = new ImageInfoV4Response(
+                latestImage.getImage().getImageSetsByProvider().get(stack.getPlatformVariant().toLowerCase()).get(stack.getRegion()),
+                latestImage.getImage().getUuid(),
+                latestImage.getImageCatalogName(),
+                latestImage.getImage().getCreated()
+        );
+        response.setUpgrade(upgradeImageInfo);
+        return response;
+    }
+
+    private UpgradeOptionV4Response notUpgradable(Image image) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        ImageInfoV4Response currentImageInfo = new ImageInfoV4Response(
+                image.getImageName(),
+                image.getImageId(),
+                image.getImageCatalogName(),
+                imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId()).getImage().getCreated());
+        UpgradeOptionV4Response upgradeOptionV4Response = new UpgradeOptionV4Response();
+        upgradeOptionV4Response.setCurrent(currentImageInfo);
+        return upgradeOptionV4Response;
+    }
+
+    private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> getImageFilter(Image image, Stack stack) {
+        return packageVersionFilter(image.getPackageVersions())
+                .and(parcelFilter(stack));
+    }
+
+    private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> packageVersionFilter(Map<String, String> packageVersions) {
+        return image -> {
+            Map<String, String> catalogPackageVersions = new HashMap<>(image.getPackageVersions());
+            catalogPackageVersions.remove(SALT_BOOTSTRAP);
+            Map<String, String> originalPackageVersions = new HashMap<>(packageVersions);
+            originalPackageVersions.remove(SALT_BOOTSTRAP);
+            return originalPackageVersions.equals(catalogPackageVersions);
+        };
     }
 
     private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> parcelFilter(Stack stack) {
@@ -183,49 +236,5 @@ public class UpgradeService {
                         .equals(originalClusterComponentUrls);
             }
         };
-    }
-
-    private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> packageVersionFilter(Map<String, String> packageVersions, boolean baseImage) {
-        return image -> {
-            Map<String, String> catalogPackageVersions = new HashMap<>(image.getPackageVersions());
-            catalogPackageVersions.remove(SALT_BOOTSTRAP);
-            Map<String, String> originalPackageVersions = new HashMap<>(packageVersions);
-            originalPackageVersions.remove(SALT_BOOTSTRAP);
-            if (baseImage) {
-                return originalPackageVersions.entrySet().containsAll(catalogPackageVersions.entrySet());
-            } else {
-                return originalPackageVersions.equals(catalogPackageVersions);
-            }
-        };
-    }
-
-    private boolean useBaseImage(Image image) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        return !imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId()).getImage().isPrewarmed();
-    }
-
-    private boolean attachedClustersStoppedOrDeleted(Stack stack) {
-        StackViewV4Responses stackViewV4Responses = distroXV1Endpoint.list(null, stack.getEnvironmentCrn());
-        for (StackViewV4Response stackViewV4Response : stackViewV4Responses.getResponses()) {
-            if (!(UPGRADEABLE_ATTACHED_DISTRO_X_STATES.contains(stack.getStatus())
-                    || UPGRADEABLE_ATTACHED_DISTRO_X_STATES.contains(getClusterStatus(stackViewV4Response)))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private Status getClusterStatus(StackViewV4Response stack) {
-        if (stack.getCluster() == null) {
-            return null;
-        } else {
-            return stack.getCluster().getStatus();
-        }
-    }
-
-    private ImageSettingsV4Request toImageSettingsRequest(Image image) {
-        ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
-        imageSettingsV4Request.setOs(image.getOs());
-        imageSettingsV4Request.setCatalog(image.getImageCatalogName());
-        return imageSettingsV4Request;
     }
 }
