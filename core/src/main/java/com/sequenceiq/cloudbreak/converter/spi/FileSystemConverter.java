@@ -55,12 +55,14 @@ public class FileSystemConverter {
         if (cloudStorage != null && cloudStorage.getCloudIdentities() != null && !cloudStorage.getCloudIdentities().isEmpty()) {
             cloudFileSystemViews = cloudStorage.getCloudIdentities().stream()
                     .map(cloudIdentity -> {
-                        if (source.getType().isS3()) {
-                            return cloudIdentityToS3View(cloudIdentity);
-                        } else if (source.getType().isWasb()) {
-                            return cloudIdentityToWasbView(cloudIdentity);
-                        } else if (source.getType().isAdlsGen2()) {
-                            return cloudIdentityToAdlsGen2View(cloudIdentity);
+                        if (source.getType() != null) {
+                            if (source.getType().isS3()) {
+                                return cloudIdentityToS3View(cloudIdentity);
+                            } else if (source.getType().isWasb()) {
+                                return cloudIdentityToWasbView(cloudIdentity);
+                            } else if (source.getType().isAdlsGen2()) {
+                                return cloudIdentityToAdlsGen2View(cloudIdentity);
+                            }
                         }
                         return null;
                     })

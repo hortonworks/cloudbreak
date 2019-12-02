@@ -66,7 +66,7 @@ public class FreeIpaPollerProvider {
     }
 
     private AttemptResult<Void> checkStopStatus(DescribeFreeIpaResponse freeIpaResponse) {
-        if (freeIpaResponse.getStatus() == Status.STOP_FAILED) {
+        if (Status.STOP_FAILED.equals(freeIpaResponse.getStatus())) {
             LOGGER.error("Freeipa stop failed for '{}' with status {}, reason: {}", freeIpaResponse.getName(), freeIpaResponse.getStatus(),
                     freeIpaResponse.getStatusReason());
             return AttemptResults.breakFor("Freeipa stop failed '" + freeIpaResponse.getName() + "', " + freeIpaResponse.getStatusReason());
@@ -76,7 +76,7 @@ public class FreeIpaPollerProvider {
     }
 
     private AttemptResult<Void> checkStartStatus(DescribeFreeIpaResponse freeIpaResponse) {
-        if (freeIpaResponse.getStatus() == Status.START_FAILED) {
+        if (Status.START_FAILED.equals(freeIpaResponse.getStatus())) {
             LOGGER.error("Freeipa start failed for '{}' with status {}, reason: {}", freeIpaResponse.getName(), freeIpaResponse.getStatus(),
                     freeIpaResponse.getStatusReason());
             return AttemptResults.breakFor("Freeipa start failed '" + freeIpaResponse.getName() + "', " + freeIpaResponse.getStatusReason());
@@ -86,10 +86,10 @@ public class FreeIpaPollerProvider {
     }
 
     private boolean freeipaStopped(DescribeFreeIpaResponse freeipa) {
-        return freeipa.getStatus() == Status.STOPPED;
+        return Status.STOPPED.equals(freeipa.getStatus());
     }
 
     private boolean freeipaAvailable(DescribeFreeIpaResponse freeipa) {
-        return freeipa.getStatus() == Status.AVAILABLE;
+        return Status.AVAILABLE.equals(freeipa.getStatus());
     }
 }

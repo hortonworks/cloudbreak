@@ -8,7 +8,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
-import com.sequenceiq.service.api.doc.ContentType;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -16,11 +15,11 @@ import io.swagger.annotations.ApiOperation;
 @RetryingRestClient
 @Path("/v1/freeipa/test")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/freeipa/test", description = "Client test endpoint", protocols = "http,https")
+@Api(value = "/v1/freeipa/test", description = "Client test endpoint", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface ClientTestV1Endpoint {
     @GET
     @Path("{id}/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Retrieves user information", produces = ContentType.JSON, nickname = "userShowV1")
+    @ApiOperation(value = "Retrieves user information", produces = MediaType.APPLICATION_JSON, nickname = "userShowV1")
     String userShow(@PathParam("id") Long id, @PathParam("name") String name);
 }

@@ -179,10 +179,12 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         Set<String> defaultGatewayCidrs = defaultGatewayCidr.stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
         if (!defaultGatewayCidrs.isEmpty()) {
             for (InstanceGroup gateway : gateways) {
-                if (CollectionUtils.isEmpty(gateway.getSecurityGroup().getSecurityGroupIds())) {
-                    Set<SecurityRule> rules = gateway.getSecurityGroup().getSecurityRules();
-                    String ports = (stack.getGatewayPort() == null ? nginxPort.toString() : stack.getGatewayPort().toString()) + "," + httpsPort;
-                    defaultGatewayCidrs.forEach(cloudbreakCidr -> rules.add(createSecurityRule(gateway.getSecurityGroup(), cloudbreakCidr, ports)));
+                SecurityGroup securityGroup = Optional.ofNullable(gateway.getSecurityGroup()).orElse(new SecurityGroup());
+                gateway.setSecurityGroup(securityGroup);
+                if (CollectionUtils.isEmpty(securityGroup.getSecurityGroupIds())) {
+                    Set<SecurityRule> rules = securityGroup.getSecurityRules();
+                    String ports = (stack.getGatewayPort() == null ? nginxPort.toString() : stack.getGatewayPort().toString()) + ',' + httpsPort;
+                    defaultGatewayCidrs.forEach(cloudbreakCidr -> rules.add(createSecurityRule(securityGroup, cloudbreakCidr, ports)));
                     LOGGER.info("The control plane cidrs {} are added to the {} gateway group for the {} port.", defaultGatewayCidrs, gateway.getGroupName(),
                             stack.getGatewayPort());
                 }

@@ -12,6 +12,13 @@ public class YarnParams {
         this.queue = queue;
     }
 
+    @Override
+    public String toString() {
+        return "YarnParams{" +
+                "queue='" + queue + '\'' +
+                '}';
+    }
+
     public static final class YarnParamsBuilder {
         private String queue;
 

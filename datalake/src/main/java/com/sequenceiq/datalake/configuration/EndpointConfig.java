@@ -11,7 +11,6 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.StringUtils;
 
 import com.sequenceiq.datalake.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.datalake.controller.mapper.WebApplicaitonExceptionMapper;
@@ -31,9 +30,7 @@ public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS = Arrays.asList(SdxController.class, SdxInternalController.class);
 
-    private static final String VERSION_UNAVAILABLE = "unspecified";
-
-    @Value("${info.app.version:}")
+    @Value("${info.app.version:unspecified}")
     private String applicationVersion;
 
     @Value("${datalake.structuredevent.rest.enabled:false}")
@@ -66,15 +63,11 @@ public class EndpointConfig extends ResourceConfig {
         BeanConfig swaggerConfig = new BeanConfig();
         swaggerConfig.setTitle("Datalake API");
         swaggerConfig.setDescription("");
-        if (StringUtils.isEmpty(applicationVersion)) {
-            swaggerConfig.setVersion(VERSION_UNAVAILABLE);
-        } else {
-            swaggerConfig.setVersion(applicationVersion);
-        }
+        swaggerConfig.setVersion(applicationVersion);
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(SdxApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
-        swaggerConfig.setResourcePackage("com.sequenceiq.sdx.api,com.sequenceiq.flow.api");
+        swaggerConfig.setResourcePackage("com.sequenceiq.sdx.api");
         swaggerConfig.setScan(true);
         swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
         swaggerConfig.setPrettyPrint(true);

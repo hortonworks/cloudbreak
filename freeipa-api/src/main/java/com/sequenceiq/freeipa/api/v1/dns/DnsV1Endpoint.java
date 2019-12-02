@@ -21,7 +21,6 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
-import com.sequenceiq.service.api.doc.ContentType;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,33 +28,33 @@ import io.swagger.annotations.ApiOperation;
 @Path("/v1/dns")
 @RetryingRestClient
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/dns", description = "Amange DNS in FreeIPA", protocols = "http,https")
+@Api(value = "/v1/dns", description = "Amange DNS in FreeIPA", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface DnsV1Endpoint {
     @POST
     @Path("zone/cidr")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.ADD_DNS_ZONE_FOR_SUBNETS, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+    @ApiOperation(value = DnsOperationDescriptions.ADD_DNS_ZONE_FOR_SUBNETS, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "addDnsZoneForSubnetsV1")
     AddDnsZoneForSubnetsResponse addDnsZoneForSubnets(@Valid AddDnsZoneForSubnetsRequest request) throws Exception;
 
     @POST
     @Path("zone/id")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.ADD_DNS_ZONE_FOR_SUBNET_IDS, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+    @ApiOperation(value = DnsOperationDescriptions.ADD_DNS_ZONE_FOR_SUBNET_IDS, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "addDnsZoneForSubnetIdsV1")
     AddDnsZoneForSubnetsResponse addDnsZoneForSubnetIds(@Valid AddDnsZoneForSubnetIdsRequest request) throws Exception;
 
     @GET
     @Path("zone")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.LIST_DNS_ZONES, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+    @ApiOperation(value = DnsOperationDescriptions.LIST_DNS_ZONES, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "listDnsZonesV1")
     Set<String> listDnsZones(@QueryParam("environment") @NotEmpty String environmentCrn) throws Exception;
 
     @DELETE
     @Path("zone/cidr")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.DELETE_DNS_ZONE_BY_SUBNET, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+    @ApiOperation(value = DnsOperationDescriptions.DELETE_DNS_ZONE_BY_SUBNET, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "deleteDnsZoneBySubnetV1")
     void deleteDnsZoneBySubnet(@QueryParam("environment") @NotEmpty String environmentCrn,
             @QueryParam("subnet") @NotEmpty
@@ -65,7 +64,7 @@ public interface DnsV1Endpoint {
     @DELETE
     @Path("zone/id")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.DELETE_DNS_ZONE_BY_SUBNET_ID, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+    @ApiOperation(value = DnsOperationDescriptions.DELETE_DNS_ZONE_BY_SUBNET_ID, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "deleteDnsZoneBySubnetIdV1")
     void deleteDnsZoneBySubnetId(@QueryParam("environment") @NotEmpty String environmentCrn, @QueryParam("networkId") @NotEmpty String networkId,
             @QueryParam("subnetId") @NotEmpty String subnetId) throws Exception;
@@ -73,7 +72,7 @@ public interface DnsV1Endpoint {
     @DELETE
     @Path("record")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DnsOperationDescriptions.DELETE_DNS_RECORD_BY_FQDN, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+    @ApiOperation(value = DnsOperationDescriptions.DELETE_DNS_RECORD_BY_FQDN, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "deleteDnsRecordByFqdnV1")
     void deleteDnsRecordsByFqdn(@QueryParam("environment") @NotEmpty String environmentCrn, @QueryParam("fqdn") @NotEmpty List<String> fqdns) throws Exception;
 }

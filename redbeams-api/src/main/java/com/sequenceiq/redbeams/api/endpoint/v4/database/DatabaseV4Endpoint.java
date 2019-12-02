@@ -39,7 +39,8 @@ import io.swagger.annotations.Authorization;
 @Produces(MediaType.APPLICATION_JSON)
 @Api(tags = { "databases" },
     protocols = "http,https",
-    authorizations = { @Authorization(value = RedbeamsApi.CRN_HEADER_API_KEY) })
+    authorizations = { @Authorization(value = RedbeamsApi.CRN_HEADER_API_KEY) },
+    produces = MediaType.APPLICATION_JSON)
 public interface DatabaseV4Endpoint {
 
     @GET
@@ -54,7 +55,7 @@ public interface DatabaseV4Endpoint {
     @POST
     @Path("/register")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.REGISTER, notes = DatabaseNotes.REGISTER,
+    @ApiOperation(value = DatabaseOpDescription.REGISTER, notes = DatabaseNotes.REGISTER, consumes = MediaType.APPLICATION_JSON,
             nickname = "registerDatabase")
     DatabaseV4Response register(
         @Valid @ApiParam(DatabaseParamDescriptions.DATABASE_REQUEST) DatabaseV4Request request
@@ -100,7 +101,7 @@ public interface DatabaseV4Endpoint {
     @Path("")
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.DELETE_MULTIPLE_BY_CRN, notes = DatabaseNotes.DELETE_MULTIPLE_BY_CRN,
-            nickname = "deleteMultipleDatabasesByCrn")
+            consumes = MediaType.APPLICATION_JSON, nickname = "deleteMultipleDatabasesByCrn")
     DatabaseV4Responses deleteMultiple(
         @ApiParam(DatabaseParamDescriptions.CRNS) Set<@ValidCrn String> crns
     );
@@ -109,7 +110,7 @@ public interface DatabaseV4Endpoint {
     @Path("/test")
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.TEST_CONNECTION, notes = DatabaseNotes.TEST_CONNECTION,
-            nickname = "testDatabaseConnection")
+            consumes = MediaType.APPLICATION_JSON, nickname = "testDatabaseConnection")
     DatabaseTestV4Response test(
         @Valid @ApiParam(DatabaseParamDescriptions.DATABASE_TEST_REQUEST) DatabaseTestV4Request databaseTestV4Request
     );

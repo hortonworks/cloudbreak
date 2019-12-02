@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ResourceEventRes
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
-import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.AccountPreferencesDescription;
@@ -34,61 +33,62 @@ import io.swagger.annotations.ApiOperation;
 @Path("/v4/utils")
 @RetryingRestClient
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/utils", description = ControllerDescription.UTIL_V4_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v4/utils", description = ControllerDescription.UTIL_V4_DESCRIPTION, protocols = "http,https",
+        consumes = MediaType.APPLICATION_JSON)
 public interface UtilV4Endpoint {
 
     @GET
     @Path("client")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.CHECK_CLIENT_VERSION, produces = ContentType.JSON,
+    @ApiOperation(value = UtilityOpDescription.CHECK_CLIENT_VERSION, produces = MediaType.APPLICATION_JSON,
             nickname = "checkClientVersionV4")
     VersionCheckV4Result checkClientVersion(@QueryParam("version") String version);
 
     @GET
     @Path("stack_matrix")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.STACK_MATRIX, produces = ContentType.JSON, nickname = "getStackMatrixUtilV4")
+    @ApiOperation(value = UtilityOpDescription.STACK_MATRIX, produces = MediaType.APPLICATION_JSON, nickname = "getStackMatrixUtilV4")
     StackMatrixV4Response getStackMatrix();
 
     @GET
     @Path("cloud_storage_matrix")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.CLOUD_STORAGE_MATRIX, produces = ContentType.JSON, nickname = "getCloudStorageMatrixV4",
+    @ApiOperation(value = UtilityOpDescription.CLOUD_STORAGE_MATRIX, produces = MediaType.APPLICATION_JSON, nickname = "getCloudStorageMatrixV4",
             notes = "Define stack version at least at patch level eg. 2.6.0")
     CloudStorageSupportedV4Responses getCloudStorageMatrix(@QueryParam("stackVersion") String stackVersion);
 
     @POST
     @Path("validate_repository")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = RepositoryConfigsValidationOpDescription.POST_REPOSITORY_CONFIGS_VALIDATION, produces = ContentType.JSON,
+    @ApiOperation(value = RepositoryConfigsValidationOpDescription.POST_REPOSITORY_CONFIGS_VALIDATION, produces = MediaType.APPLICATION_JSON,
             notes = Notes.REPOSITORY_CONFIGS_VALIDATION_NOTES, nickname = "repositoryConfigsValidationV4")
     RepoConfigValidationV4Response repositoryConfigValidationRequest(@Valid RepoConfigValidationV4Request repoConfigValidationV4Request);
 
     @GET
     @Path("default_security_rules")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = SecurityRuleOpDescription.GET_DEFAULT_SECURITY_RULES, produces = ContentType.JSON,
+    @ApiOperation(value = SecurityRuleOpDescription.GET_DEFAULT_SECURITY_RULES, produces = MediaType.APPLICATION_JSON,
             notes = Notes.SECURITY_RULE_NOTES, nickname = "getDefaultSecurityRules")
     SecurityRulesV4Response getDefaultSecurityRules();
 
     @GET
     @Path("deployment")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = AccountPreferencesDescription.GET, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
+    @ApiOperation(value = AccountPreferencesDescription.GET, produces = MediaType.APPLICATION_JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
             nickname = "getDeploymentInfo")
     DeploymentPreferencesV4Response deployment();
 
     @POST
     @Path("notification_test")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.NOTIFICATION_TEST, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
+    @ApiOperation(value = UtilityOpDescription.NOTIFICATION_TEST, produces = MediaType.APPLICATION_JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
             nickname = "postNotificationTest")
     ResourceEventResponse postNotificationTest();
 
     @POST
     @Path("check_right")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.CHECK_RIGHT, produces = ContentType.JSON, notes = Notes.CHECK_RIGHT_NOTES,
+    @ApiOperation(value = UtilityOpDescription.CHECK_RIGHT, produces = MediaType.APPLICATION_JSON, notes = Notes.CHECK_RIGHT_NOTES,
             nickname = "checkRight")
     CheckRightV4Response checkRight(CheckRightV4Request checkRightV4Request);
 

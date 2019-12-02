@@ -1,6 +1,5 @@
 package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 
-import static com.sequenceiq.cloudbreak.doc.ContentType.JSON;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_CRN;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_NAME;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE;
@@ -58,7 +57,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RetryableFlowRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
@@ -75,7 +73,8 @@ import io.swagger.annotations.ApiOperation;
 @Path("/v1/distrox")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/distrox", protocols = "http,https")
+@Api(value = "/v1/distrox", protocols = "http,https",
+        consumes = MediaType.APPLICATION_JSON)
 public interface DistroXV1Endpoint {
 
     @GET
@@ -118,7 +117,8 @@ public interface DistroXV1Endpoint {
 
     @DELETE
     @Path("")
-    @ApiOperation(value = DELETE_MULTIPLE, produces = JSON, notes = Notes.STACK_NOTES, nickname = "deleteMultipleDistroXClustersByNamesV1")
+    @ApiOperation(value = DELETE_MULTIPLE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "deleteMultipleDistroXClustersByNamesV1")
     void deleteMultiple(DistroXMultiDeleteV1Request multiDeleteRequest, @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @POST
@@ -142,8 +142,8 @@ public interface DistroXV1Endpoint {
     @GET
     @Path("name/{name}/retry")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.StackOpDescription.LIST_RETRYABLE_FLOWS, produces = ContentType.JSON, notes = Notes.LIST_RETRYABLE_NOTES,
-            nickname = "listRetryableFlowsDistroXV1")
+    @ApiOperation(value = OperationDescriptions.StackOpDescription.LIST_RETRYABLE_FLOWS, produces = MediaType.APPLICATION_JSON,
+            notes = Notes.LIST_RETRYABLE_NOTES, nickname = "listRetryableFlowsDistroXV1")
     List<RetryableFlowResponse> listRetryableFlows(@PathParam("name") String name);
 
     @POST

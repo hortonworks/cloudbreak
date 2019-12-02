@@ -10,7 +10,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 
@@ -21,13 +20,14 @@ import io.swagger.annotations.ApiOperation;
 @Path("/v4/datalake")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/datalake", protocols = "http,https")
+@Api(value = "/v4/datalake", protocols = "http,https",
+        consumes = MediaType.APPLICATION_JSON)
 public interface DatalakeV4Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "listDatalakes")
+    @ApiOperation(value = LIST_BY_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "listDatalakes")
     StackViewV4Responses list(@QueryParam("environment") String environmentName, @QueryParam("environmentCrn") String environmentCrn);
 
 }

@@ -73,6 +73,7 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator {
         AccountMappingBase accountMappings = cloudFileSystem.getAccountMapping();
         if (accountMappings != null) {
             SortedSet<String> roleArns = getRoleArnsForUsers(getUsers(), accountMappings.getUserMappings());
+            LOGGER.info("Getting role from AWS, roleArns.size: {}, roleArns: {}", roleArns.size(), roleArns);
             Set<Role> roles = awsIamService.getValidRoles(iam, roleArns, validationResultBuilder);
 
             boolean s3guardEnabled = cloudFileSystem.getS3GuardDynamoTableName() != null;
@@ -91,9 +92,14 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator {
                 }
             }
             if (!failedActions.isEmpty()) {
-                validationResultBuilder.error(String.format("The role(s) (%s) don't have the required permissions:%n%s",
-                        String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
-                        String.join("\n", failedActions)));
+                String errorMessage = String.format("The role(s) (%s) don't have the required permissions:%n%s",
+                                String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
+                                String.join("\n", failedActions));
+                LOGGER.warn(errorMessage);
+                // TODO this is disabled temporary due to CB-4670
+                // validationResultBuilder.error(String.format("The role(s) (%s) don't have the required permissions:%n%s",
+                //        String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
+                //        String.join("\n", failedActions)));
             }
         }
     }
@@ -105,7 +111,7 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator {
      * @param cloudFileSystem CloudFileSystem to get dynamodb table name
      * @return map of simple replacements for policy json
      */
-    protected Map<String, String> getPolicyJsonReplacements(StorageLocationBase location,
+    Map<String, String> getPolicyJsonReplacements(StorageLocationBase location,
             CloudS3View cloudFileSystem) {
         String storageLocationBase = getStorageLocationBase(location);
         String datalakeBucket = storageLocationBase.split("/", 2)[0];
@@ -127,6 +133,7 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator {
      */
     SortedSet<String> getRoleArnsForUsers(Collection<String> users,
             Map<String, String> userMappings) {
+        LOGGER.debug("Filter out specific users: {} from userMappings: {}", users, userMappings);
         return userMappings.entrySet().stream()
                 .filter(m -> users.contains(m.getKey()))
                 .map(Entry::getValue).collect(Collectors.toCollection(TreeSet::new));

@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 import com.sequenceiq.freeipa.api.v1.kerberos.doc.KerberosConfigOperationDescription;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
-import com.sequenceiq.service.api.doc.ContentType;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,12 +29,13 @@ import io.swagger.annotations.ApiOperation;
 @RetryingRestClient
 @Path("/v1/kerberos")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/kerberos", description = KERBEROS_CONFIG_V4_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v1/kerberos", description = KERBEROS_CONFIG_V4_DESCRIPTION, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface KerberosConfigV1Endpoint {
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DESCRIBE_FOR_ENVIRONMENT, produces = ContentType.JSON, notes = KERBEROS_CONFIG_NOTES, nickname = "getKerberosConfigForEnvironment")
+    @ApiOperation(value = DESCRIBE_FOR_ENVIRONMENT, produces = MediaType.APPLICATION_JSON, notes = KERBEROS_CONFIG_NOTES,
+            nickname = "getKerberosConfigForEnvironment")
     DescribeKerberosConfigResponse describe(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 
     @GET
@@ -49,18 +49,21 @@ public interface KerberosConfigV1Endpoint {
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CREATE_FOR_ENVIRONMENT, produces = ContentType.JSON, notes = KERBEROS_CONFIG_NOTES, nickname = "createKerberosConfigForEnvironment")
+    @ApiOperation(value = CREATE_FOR_ENVIRONMENT, produces = MediaType.APPLICATION_JSON, notes = KERBEROS_CONFIG_NOTES,
+            nickname = "createKerberosConfigForEnvironment")
     DescribeKerberosConfigResponse create(@Valid CreateKerberosConfigRequest request);
 
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DELETE_BY_ENVIRONMENT, produces = ContentType.JSON, notes = KERBEROS_CONFIG_NOTES, nickname = "deleteKerberosConfigForEnvironment")
+    @ApiOperation(value = DELETE_BY_ENVIRONMENT, produces = MediaType.APPLICATION_JSON, notes = KERBEROS_CONFIG_NOTES,
+            nickname = "deleteKerberosConfigForEnvironment")
     void delete(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 
     @GET
     @Path("request")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = GET_REQUEST, produces = ContentType.JSON, notes = KERBEROS_CONFIG_NOTES, nickname = "getCreateKerberosRequestForEnvironment")
+    @ApiOperation(value = GET_REQUEST, produces = MediaType.APPLICATION_JSON, notes = KERBEROS_CONFIG_NOTES,
+            nickname = "getCreateKerberosRequestForEnvironment")
     CreateKerberosConfigRequest getRequest(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 }

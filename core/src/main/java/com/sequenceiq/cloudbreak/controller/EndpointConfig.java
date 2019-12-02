@@ -13,7 +13,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
@@ -80,9 +79,7 @@ public class EndpointConfig extends ResourceConfig {
             FlowController.class
     );
 
-    private static final String VERSION_UNAVAILABLE = "unspecified";
-
-    @Value("${info.app.version:}")
+    @Value("${info.app.version:unspecified}")
     private String cbVersion;
 
     @Value("${cb.structuredevent.rest.enabled:false}")
@@ -113,11 +110,7 @@ public class EndpointConfig extends ResourceConfig {
         BeanConfig swaggerConfig = new BeanConfig();
         swaggerConfig.setTitle("Cloudbreak API");
         swaggerConfig.setDescription(FileReaderUtils.readFileFromClasspath("swagger/cloudbreak-introduction"));
-        if (Strings.isNullOrEmpty(cbVersion)) {
-            swaggerConfig.setVersion(VERSION_UNAVAILABLE);
-        } else {
-            swaggerConfig.setVersion(cbVersion);
-        }
+        swaggerConfig.setVersion(cbVersion);
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(CoreApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/hortonworks/cloudbreak/blob/master/LICENSE");
