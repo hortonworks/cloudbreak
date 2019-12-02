@@ -2,11 +2,15 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 
 import java.util.Comparator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 
 public class CMRepositoryVersionUtil {
+
     public static final Versioned CLOUDERAMANAGER_VERSION_6_3_0 = () -> "6.3.0";
 
     public static final Versioned CLOUDERAMANAGER_VERSION_6_4_0 = () -> "6.4.0";
@@ -19,27 +23,34 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CFM_VERSION_2_0_0_0 = () -> "2.0.0.0";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CMRepositoryVersionUtil.class);
+
     private CMRepositoryVersionUtil() {
     }
 
     public static boolean isEnableKerberosSupportedViaBlueprint(ClouderaManagerRepo clouderaManagerRepoDetails) {
+        LOGGER.info("ClouderaManagerRepos compared for kerberos enablement");
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_6_3_0);
     }
 
     public static boolean isKeepHostTemplateSupportedViaBlueprint(ClouderaManagerRepo clouderaManagerRepoDetails) {
+        LOGGER.info("ClouderaManagerRepos compared for host template");
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_6_3_0);
     }
 
     public static boolean isKnoxGatewaySupported(ClouderaManagerRepo clouderaManagerRepoDetails) {
+        LOGGER.info("ClouderaManagerRepos compared for knox gateway support");
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_6_4_0);
     }
 
     public static boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {
+        LOGGER.info("Compared: Versioned {} with Versioned {}", currentVersion.getVersion(), limitedAPIVersion.getVersion());
         Comparator<Versioned> versionComparator = new VersionComparator();
         return versionComparator.compare(currentVersion, limitedAPIVersion) > -1;
     }
 
     public static boolean isVersionNewerOrEqualThanLimited(String currentVersion, Versioned limitedAPIVersion) {
+        LOGGER.info("Compared: String version {} with Versioned {}", currentVersion, limitedAPIVersion.getVersion());
         return isVersionNewerOrEqualThanLimited(() -> currentVersion, limitedAPIVersion);
     }
 }
