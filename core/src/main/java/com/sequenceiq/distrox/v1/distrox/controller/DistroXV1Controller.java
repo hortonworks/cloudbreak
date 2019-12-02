@@ -86,12 +86,11 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     public StackViewV4Responses list(String environmentName, String environmentCrn) {
         StackViewV4Responses stackViewV4Responses;
+        List<StackType> stackTypes = List.of(StackType.WORKLOAD);
         if (!Strings.isNullOrEmpty(environmentName)) {
-            stackViewV4Responses =  stackOperations.listByEnvironmentName(
-                    workspaceService.getForCurrentUser().getId(), environmentName, StackType.WORKLOAD);
+            stackViewV4Responses =  stackOperations.listByEnvironmentName(workspaceService.getForCurrentUser().getId(), environmentName, stackTypes);
         } else {
-            stackViewV4Responses = stackOperations.listByEnvironmentCrn(
-                    workspaceService.getForCurrentUser().getId(), environmentCrn, StackType.WORKLOAD);
+            stackViewV4Responses = stackOperations.listByEnvironmentCrn(workspaceService.getForCurrentUser().getId(), environmentCrn, stackTypes);
         }
         return stackViewV4Responses;
     }

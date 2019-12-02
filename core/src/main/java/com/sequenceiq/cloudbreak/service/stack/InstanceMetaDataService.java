@@ -170,8 +170,8 @@ public class InstanceMetaDataService {
         return repository.findRemovableInstances(stackId, groupName);
     }
 
-    public Set<StackInstanceCount> countByWorkspaceId(Long workspaceId, String environmentCrn, StackType stackType) {
-        return repository.countByWorkspaceId(workspaceId, environmentCrn, stackType);
+    public Set<StackInstanceCount> countByWorkspaceId(Long workspaceId, String environmentCrn, List<StackType> stackTypes) {
+        return repository.countByWorkspaceId(workspaceId, environmentCrn, stackTypes);
     }
 
     public Set<InstanceMetaData> findAllRequestedInStack(Long stackId) {

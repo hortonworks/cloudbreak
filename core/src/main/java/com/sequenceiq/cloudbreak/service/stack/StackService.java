@@ -1135,14 +1135,8 @@ public class StackService implements ResourceIdProvider {
         return stackRepository.findEphemeralClusters(stackId);
     }
 
-    public Set<StackListItem> getByWorkspaceId(Long workspaceId, String environmentCrn, StackType stackType) {
-        // we need to add the type explicitly. Because if the stack type is null that stack is WORKLOAD.
-        // The query contains the null check but type check will the same in case of stackType = null
-        StackType s = stackType;
-        if (s == null) {
-            s = StackType.WORKLOAD;
-        }
-        return stackRepository.findByWorkspaceId(workspaceId, environmentCrn, s);
+    public Set<StackListItem> getByWorkspaceId(Long workspaceId, String environmentCrn, List<StackType> stackTypes) {
+        return stackRepository.findByWorkspaceId(workspaceId, environmentCrn, stackTypes);
     }
 
     private enum Msg {

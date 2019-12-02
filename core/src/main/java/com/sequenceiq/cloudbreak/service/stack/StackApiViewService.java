@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -76,25 +75,25 @@ public class StackApiViewService {
         return stackApiViewRepository.save(stackApiView);
     }
 
-    public Set<StackApiView> retrieveStackViewsByWorkspaceIdAndEnvironmentName(Long workspaceId, String environmentName, @Nullable StackType stackType) {
+    public Set<StackApiView> retrieveStackViewsByWorkspaceIdAndEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         if (StringUtils.isEmpty(environmentName)) {
             LOGGER.info("Environment name was empty so we will query all the stack.");
-            return retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, null, stackType);
+            return retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, null, stackTypes);
         } else {
             LOGGER.info("Environment name was defined so we will query all the stack in the {} environment.", environmentName);
             DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(environmentName);
             // TODO: fix this. this is overkill. create a getEnvCrnByName endpoint.
-            return retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, environmentResponse.getCrn(), stackType);
+            return retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, environmentResponse.getCrn(), stackTypes);
         }
     }
 
-    public Set<StackApiView> retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(Long workspaceId, String environmentCrn, @Nullable StackType stackType) {
-        LOGGER.info("Retrieving stacks of type: {}, in environment: {}", stackType, environmentCrn);
+    public Set<StackApiView> retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(Long workspaceId, String environmentCrn, List<StackType> stackTypes) {
+        LOGGER.info("Retrieving stacks of type: {}, in environment: {}", stackTypes, environmentCrn);
 
-        Map<Long, Integer> instanceCounts = instanceMetaDataService.countByWorkspaceId(workspaceId, environmentCrn, stackType).stream()
+        Map<Long, Integer> instanceCounts = instanceMetaDataService.countByWorkspaceId(workspaceId, environmentCrn, stackTypes).stream()
                 .collect(Collectors.toMap(StackInstanceCount::getStackId, StackInstanceCount::getInstanceCount));
 
-        Set<StackListItem> stackList = stackService.getByWorkspaceId(workspaceId, environmentCrn, stackType);
+        Set<StackListItem> stackList = stackService.getByWorkspaceId(workspaceId, environmentCrn, stackTypes);
         Set<Long> clusterIds = stackList.stream().map(StackListItem::getClusterId).collect(Collectors.toSet());
         Map<Long, List<HostGroupView>> clusterHgMap = getClusterHostGroupMap(clusterIds);
         return stackList.stream()

@@ -75,9 +75,13 @@ public interface InstanceMetaDataRepository extends DisabledBaseRepository<Insta
     Long getMaxPrivateId(@Param("instanceGroups") List<InstanceGroup> instanceGroups);
 
     @Query("SELECT s.id as stackId, COUNT(i) as instanceCount "
-            + "FROM InstanceMetaData i JOIN i.instanceGroup ig JOIN ig.stack s WHERE s.workspace.id= :id AND i.instanceStatus <> 'TERMINATED' "
-            + "AND (:environmentCrn IS null OR s.environmentCrn = :environmentCrn) AND (:stackType IS null OR s.type = :stackType) GROUP BY s.id")
-    Set<StackInstanceCount> countByWorkspaceId(@Param("id") Long id, @Param("environmentCrn") String environmentCrn, @Param("stackType") StackType stackType);
+            + "FROM InstanceMetaData i JOIN i.instanceGroup ig JOIN ig.stack s WHERE s.workspace.id= :id "
+            + "AND i.instanceStatus <> 'TERMINATED' "
+            + "AND (:environmentCrn IS null OR s.environmentCrn = :environmentCrn) "
+            + "AND (s.type IS null OR s.type in :stackTypes) "
+            + "GROUP BY s.id")
+    Set<StackInstanceCount> countByWorkspaceId(@Param("id") Long id, @Param("environmentCrn") String environmentCrn,
+            @Param("stackTypes") List<StackType> stackTypes);
 
     @Query("SELECT i FROM InstanceMetaData i ")
     Set<InstanceMetaData> findAllRequestedByStackId(@Param("id") Long stackId);
@@ -86,6 +90,6 @@ public interface InstanceMetaDataRepository extends DisabledBaseRepository<Insta
     @Query("SELECT s.id as stackId, COUNT(i) as instanceCount "
             + "FROM InstanceMetaData i JOIN i.instanceGroup ig JOIN ig.stack s WHERE s.workspace.id= :id AND i.instanceStatus = 'SERVICES_UNHEALTHY' "
             + "GROUP BY s.id")
-    Set<StackInstanceCount> countUnhealthyByWorkspaceId(@Param("id")Long workspaceId);
+    Set<StackInstanceCount> countUnhealthyByWorkspaceId(@Param("id") Long workspaceId);
 
 }
