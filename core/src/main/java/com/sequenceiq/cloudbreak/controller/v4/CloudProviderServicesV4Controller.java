@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.controller.v4;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
@@ -19,6 +21,8 @@ import com.sequenceiq.cloudbreak.service.cloudprovider.CloudProviderService;
 
 @Controller
 public class CloudProviderServicesV4Controller implements CloudProviderServicesV4Endopint {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderServicesV4Controller.class);
 
     private final CloudProviderService cloudProviderService;
 
@@ -38,6 +42,7 @@ public class CloudProviderServicesV4Controller implements CloudProviderServicesV
     @Override
     public ObjectStorageValidateResponse validateObjectStorage(@Valid ObjectStorageValidateRequest request) {
         try {
+            LOGGER.info("Validate Object Storage request: {}", request);
             return cloudProviderService.validateObjectStorage(request);
         } catch (CloudConnectorException e) {
             throw new BadRequestException(e.getMessage());

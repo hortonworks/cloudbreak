@@ -245,6 +245,15 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected void createDefaultFreeIPA(TestContext testContext) {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
+        setUpFreeIpaRouteStubbing(mockedTestContext);
+        testContext
+                .given(FreeIPATestDto.class).withCatalog(mockedTestContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                .when(freeIPATestClient.create())
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
+                .validate();
+    }
+
+    protected void setUpFreeIpaRouteStubbing(MockedTestContext mockedTestContext) {
         DynamicRouteStack dynamicRouteStack = mockedTestContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
         dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/login_password", (request, response) -> {
             response.cookie("ipa_session", "dummysession");
@@ -262,11 +271,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/dnsrecord_find", freeIpaRouteHandler);
         dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/host_del", freeIpaRouteHandler);
         dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/role_find", freeIpaRouteHandler);
-        testContext
-                .given(FreeIPATestDto.class).withCatalog(mockedTestContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
-                .when(freeIPATestClient.create())
-                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
-                .validate();
     }
 
     protected void createDefaultEnvironment(TestContext testContext) {

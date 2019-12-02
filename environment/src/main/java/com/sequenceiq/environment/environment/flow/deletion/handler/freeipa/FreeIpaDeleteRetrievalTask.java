@@ -35,7 +35,7 @@ public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaP
             LOGGER.info("Checking the state of FreeIpa termination progress for environment: '{}'", environmentCrn);
             DescribeFreeIpaResponse freeIpaResponse = freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn);
             if (freeIpaResponse != null) {
-                if (freeIpaResponse.getStatus().equals(Status.DELETE_FAILED)) {
+                if (freeIpaResponse.getStatus() == Status.DELETE_FAILED) {
                     throw new FreeIpaOperationFailedException("FreeIpa deletion operation failed: " + freeIpaResponse.getStatusReason());
                 }
                 if (!freeIpaResponse.getStatus().isSuccessfullyDeleted()) {
@@ -83,7 +83,7 @@ public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaP
         try {
             String environmentCrn = freeIpaPollerObject.getEnvironmentCrn();
             Status status = freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn).getStatus();
-            if (status.equals(Status.DELETE_FAILED) || status.equals(Status.CREATE_FAILED)) {
+            if (status == Status.DELETE_FAILED || status == Status.CREATE_FAILED) {
                 return false;
             }
             return status.isFailed();

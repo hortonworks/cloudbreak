@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
@@ -50,7 +51,7 @@ public class EnvironmentValidatorService {
 
     public ValidationResult validateAwsEnvironmentRequest(EnvironmentRequest environmentRequest, String cloudPlatform) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
-        resultBuilder.ifError(() -> !AWS.name().equalsIgnoreCase(cloudPlatform),
+        resultBuilder.ifError(() -> !CloudPlatform.AWS.name().equalsIgnoreCase(cloudPlatform),
                 "Environment request is not for AWS.");
 
         resultBuilder.ifError(() -> StringUtils.isBlank(Optional.ofNullable(environmentRequest.getAws())

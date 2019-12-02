@@ -48,7 +48,9 @@ public class VirtualGroupService {
     public void cleanupVirtualGroups(String accountId, String environmentCrn) {
         for (UmsRight right : UmsRight.values()) {
             try {
+                LOGGER.debug("Start deleting virtual groups from UMS for environment '{}'", environmentCrn);
                 grpcUmsClient.deleteWorkloadAdministrationGroupName(IAM_INTERNAL_ACTOR_CRN, accountId, Optional.empty(), right.getRight(), environmentCrn);
+                LOGGER.debug("Virtual groups deletion from UMS has been finished successfully for environment '{}'", environmentCrn);
             } catch (RuntimeException ex) {
                 LOGGER.warn("UMS virtualgroup delete failed (this is not critical)", ex);
             }

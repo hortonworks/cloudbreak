@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow.creation.handler;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.YARN;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_PUBLICKEY_CREATION_EVENT;
 
@@ -9,7 +10,6 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
@@ -81,7 +81,7 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private boolean hasNetwork(Environment environment) {
         return Objects.nonNull(environment.getNetwork())
-                && !CloudPlatform.YARN.name().equals(environment.getCloudPlatform())
+                && !YARN.equalsIgnoreCase(environment.getCloudPlatform())
                 && enabledPlatforms.contains(environment.getCloudPlatform());
     }
 

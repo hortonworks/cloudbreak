@@ -26,6 +26,7 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
+import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
@@ -188,6 +189,7 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
     private NetworkDto getNewNetworkDto() {
         return NetworkDto.builder()
                 .withNetworkCidr("0.0.0.0/0")
+                .withRegistrationType(RegistrationType.CREATE_NEW)
                 .build();
     }
 

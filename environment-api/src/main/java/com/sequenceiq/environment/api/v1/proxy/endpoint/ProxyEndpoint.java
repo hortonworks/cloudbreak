@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 @RetryingRestClient
 @Path("/v1/proxies")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/proxies", protocols = "http,https")
+@Api(value = "/v1/proxies", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface ProxyEndpoint {
 
     @GET

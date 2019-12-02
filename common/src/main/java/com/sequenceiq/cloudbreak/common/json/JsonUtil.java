@@ -84,13 +84,15 @@ public class JsonUtil {
     }
 
     public static String writeValueAsStringSilent(Object object, boolean ignoreNull) {
-        try {
-            if (ignoreNull) {
-                MAPPER.setSerializationInclusion(Include.NON_NULL);
+        if (object != null) {
+            try {
+                if (ignoreNull) {
+                    MAPPER.setSerializationInclusion(Include.NON_NULL);
+                }
+                return MAPPER.writeValueAsString(object);
+            } catch (JsonProcessingException e) {
+                LOGGER.info("JSON parse went wrong in silent mode: {}", e.getMessage());
             }
-            return MAPPER.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-            LOGGER.info("JSON parse went wrong in silent mode: {}", e.getMessage());
         }
         return null;
     }

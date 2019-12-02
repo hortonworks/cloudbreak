@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE;
+
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
@@ -7,13 +9,16 @@ import org.testng.annotations.Test;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -22,6 +27,9 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
+
+    @Inject
+    private FreeIPATestClient freeIPATestClient;
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -43,11 +51,16 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
             when = "create an attached SDX and Datahub",
             then = "should be stopped first and started after it")
     public void testCreateStopStartEnvironment(TestContext testContext) {
+        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
+        setUpFreeIpaRouteStubbing(mockedTestContext);
         testContext
                 .given(EnvironmentNetworkTestDto.class)
-                .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(true)
+                .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIPATestDto.class).withCatalog(mockedTestContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                .when(freeIPATestClient.create())
+                .await(AVAILABLE)
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)

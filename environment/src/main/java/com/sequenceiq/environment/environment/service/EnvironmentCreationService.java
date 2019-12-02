@@ -167,7 +167,7 @@ public class EnvironmentCreationService {
     }
 
     private boolean isTunnelInvalid(String userCrn, Tunnel tunnel) {
-        return !entitlementService.ccmEnabled(userCrn, Crn.safeFromString(userCrn).getAccountId()) && Tunnel.CCM.equals(tunnel);
+        return !entitlementService.ccmEnabled(userCrn, Crn.safeFromString(userCrn).getAccountId()) && Tunnel.CCM == tunnel;
     }
 
     private boolean isCloudPlatformInvalid(String userCrn, String cloudPlatform) {

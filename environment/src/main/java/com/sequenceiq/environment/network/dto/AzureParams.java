@@ -42,6 +42,16 @@ public class AzureParams {
         this.noFirewallRules = noFirewallRules;
     }
 
+    @Override
+    public String toString() {
+        return "AzureParams{" +
+                "networkId='" + networkId + '\'' +
+                ", resourceGroupName='" + resourceGroupName + '\'' +
+                ", noPublicIp=" + noPublicIp +
+                ", noFirewallRules=" + noFirewallRules +
+                '}';
+    }
+
     public static final class AzureParamsBuilder {
         private String networkId;
 

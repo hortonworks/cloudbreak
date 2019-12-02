@@ -12,6 +12,13 @@ public class AwsParams {
         this.vpcId = vpcId;
     }
 
+    @Override
+    public String toString() {
+        return "AwsParams{" +
+                "vpcId='" + vpcId + '\'' +
+                '}';
+    }
+
     public static final class AwsParamsBuilder {
         private String vpcId;
 

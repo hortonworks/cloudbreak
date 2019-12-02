@@ -18,7 +18,8 @@ import io.swagger.annotations.ApiOperation;
 @Path("/flow_logs")
 @RetryingRestClient
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/flow_logs", description = "Operations on flow logs", protocols = "http,https")
+@Api(value = "/flow_logs", description = "Operations on flow logs", protocols = "http,https",
+        consumes = MediaType.APPLICATION_JSON)
 public interface FlowEndpoint {
 
     @GET

@@ -1,14 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.model.objectstorage;
 
+import java.util.Objects;
+
+import javax.validation.constraints.NotNull;
+
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformAware;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
-
-import javax.validation.constraints.NotNull;
-import java.util.Objects;
 
 public class ObjectStorageValidateRequest implements CloudPlatformAware {
 
@@ -90,7 +92,7 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
     public String toString() {
         return "ObjectStorageMetadataRequest{" +
                 ", cloudPlatform='" + cloudPlatform + '\'' +
-                ", cloudStorageRequest='" + cloudStorageRequest + '\'' +
+                ", cloudStorageRequest='" + JsonUtil.writeValueAsStringSilent(cloudStorageRequest) + '\'' +
                 ", spiFileSystem='" + spiFileSystem + '\'' +
                 '}';
     }

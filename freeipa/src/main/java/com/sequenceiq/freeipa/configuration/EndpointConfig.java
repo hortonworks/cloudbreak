@@ -10,7 +10,6 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.StringUtils;
 
 import com.sequenceiq.freeipa.api.FreeIpaApi;
 import com.sequenceiq.freeipa.controller.ClientTestV1Controller;
@@ -38,9 +37,7 @@ public class EndpointConfig extends ResourceConfig {
             UserV1Controller.class, ClientTestV1Controller.class, FreeIpaV1Controller.class, LdapConfigV1Controller.class,
             KerberosConfigV1Controller.class, KerberosMgmtV1Controller.class, DnsV1Controller.class, OperationV1Controller.class);
 
-    private static final String VERSION_UNAVAILABLE = "unspecified";
-
-    @Value("${info.app.version:}")
+    @Value("${info.app.version:unspecified}")
     private String applicationVersion;
 
     @Value("${freeipa.structuredevent.rest.enabled:false}")
@@ -73,11 +70,7 @@ public class EndpointConfig extends ResourceConfig {
         BeanConfig swaggerConfig = new BeanConfig();
         swaggerConfig.setTitle("FreeIPA API");
         swaggerConfig.setDescription("");
-        if (StringUtils.isEmpty(applicationVersion)) {
-            swaggerConfig.setVersion(VERSION_UNAVAILABLE);
-        } else {
-            swaggerConfig.setVersion(applicationVersion);
-        }
+        swaggerConfig.setVersion(applicationVersion);
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(FreeIpaApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");

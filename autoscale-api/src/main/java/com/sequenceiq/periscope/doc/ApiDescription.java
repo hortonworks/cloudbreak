@@ -2,8 +2,6 @@ package com.sequenceiq.periscope.doc;
 
 public class ApiDescription {
 
-    public static final String JSON = "application/json";
-
     public static final String ALERT_DESCRIPTION = "Operations on alerts";
     public static final String CONFIGURATION_DESCRIPTION = "Operations on configurations";
     public static final String HISTORY_DESCRIPTION = "Operations on histories";

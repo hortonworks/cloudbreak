@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
@@ -93,6 +95,9 @@ public class SdxService implements ResourceIdProvider {
 
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
+    @Inject
+    private CloudStorageManifester cloudStorageManifester;
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
         LOGGER.info("Searching for SDX cluster by ids and statuses.");
@@ -165,7 +170,13 @@ public class SdxService implements ResourceIdProvider {
         }
         externalDatabaseConfigurer.configure(CloudPlatform.valueOf(environment.getCloudPlatform()), sdxClusterRequest.getExternalDatabase(), sdxCluster);
         StackV4Request stackRequest = getStackRequest(stackV4Request, sdxClusterRequest.getClusterShape(), environment.getCloudPlatform());
-        stackRequestManifester.configureStackForSdxCluster(sdxClusterRequest, sdxCluster, stackRequest, environment);
+        prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
+        try {
+            sdxCluster.setStackRequest(JsonUtil.writeValueAsString(stackRequest));
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Can not parse internal stackrequest", e);
+            throw new BadRequestException("Can not parse internal stackrequest", e);
+        }
 
         MDCBuilder.buildMdcContext(sdxCluster);
 
@@ -177,6 +188,13 @@ public class SdxService implements ResourceIdProvider {
         sdxReactorFlowManager.triggerSdxCreation(sdxCluster.getId());
 
         return sdxCluster;
+    }
+
+    private void prepareCloudStorageForStack(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request,
+            SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
+        CloudStorageRequest cloudStorageRequest = cloudStorageManifester.initCloudStorageRequest(environment,
+                stackV4Request.getCluster(), sdxCluster, sdxClusterRequest);
+        stackV4Request.getCluster().setCloudStorage(cloudStorageRequest);
     }
 
     public void sync(String name) {

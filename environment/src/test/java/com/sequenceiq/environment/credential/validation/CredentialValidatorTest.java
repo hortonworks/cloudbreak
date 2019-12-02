@@ -80,7 +80,7 @@ class CredentialValidatorTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("validateCredentialCloudPlatformDataProvider")
     void testValidateCredentialCloudPlatform(String testCaseName, String cloudPlatform, boolean azureEnabled, boolean validExpected) {
-        if (AZURE.equalsIgnoreCase(cloudPlatform)) {
+        if (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform)) {
             when(entitlementService.azureEnabled(USER_CRN, ACCOUNT_ID)).thenReturn(azureEnabled);
         }
         if (validExpected) {
@@ -93,7 +93,7 @@ class CredentialValidatorTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("validateCredentialCloudPlatformDataProvider")
     void testIsCredentialCloudPlatformValid(String testCaseName, String cloudPlatform, boolean azureEnabled, boolean validExpected) {
-        if (AZURE.equalsIgnoreCase(cloudPlatform)) {
+        if (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform)) {
             when(entitlementService.azureEnabled(IAM_INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(azureEnabled);
         }
         assertThat(underTest.isCredentialCloudPlatformValid(cloudPlatform, ACCOUNT_ID)).isEqualTo(validExpected);

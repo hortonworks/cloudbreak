@@ -2,9 +2,10 @@ package com.sequenceiq.it.cloudbreak.mock.freeipa;
 
 import java.util.Map;
 
+import javax.ws.rs.core.MediaType;
+
 import org.springframework.http.HttpStatus;
 
-import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 
@@ -14,7 +15,7 @@ import spark.Response;
 public abstract class AbstractFreeIpaResponse<T> extends ITResponse {
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        response.type(ContentType.JSON);
+        response.type(MediaType.APPLICATION_JSON);
         response.status(HttpStatus.OK.value());
         RPCResponse<T> rpcResponse = new RPCResponse<>();
         rpcResponse.setSummary("summary");

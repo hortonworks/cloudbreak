@@ -34,7 +34,7 @@ import io.swagger.annotations.ApiOperation;
 @RetryingRestClient
 @Path("/v1/credentials")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/credentials", description = CREDENTIAL_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v1/credentials", description = CREDENTIAL_DESCRIPTION, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface CredentialEndpoint {
 
     @GET
