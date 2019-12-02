@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
@@ -78,6 +79,8 @@ import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -111,6 +114,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -226,6 +230,9 @@ public class ClusterService {
 
     @Inject
     private StackUpdater stackUpdater;
+
+    @Inject
+    private ImageCatalogService imageCatalogService;
 
     @Measure(ClusterService.class)
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
@@ -517,17 +524,17 @@ public class ClusterService {
         Map<String, InstanceMetaData> failedMetaData = new HashMap<>();
         for (String failedNode : failedNodes) {
             instanceMetaDataService.findHostInStack(stack.getId(), failedNode).ifPresentOrElse(instanceMetaData -> {
-                    hostGroupService.getByClusterIdAndName(cluster.getId(), instanceMetaData.getInstanceGroupName()).ifPresent(hostGroup -> {
-                        if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
-                            validateRepair(stack, instanceMetaData);
-                        }
-                        String hostGroupName = hostGroup.getName();
-                        if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
-                            prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryMetadata, failedNode, instanceMetaData, hostGroupName);
-                        } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
-                            failedMetaData.put(failedNode, instanceMetaData);
-                        }
-                    });
+                hostGroupService.getByClusterIdAndName(cluster.getId(), instanceMetaData.getInstanceGroupName()).ifPresent(hostGroup -> {
+                    if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
+                        validateRepair(stack, instanceMetaData);
+                    }
+                    String hostGroupName = hostGroup.getName();
+                    if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
+                        prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryMetadata, failedNode, instanceMetaData, hostGroupName);
+                    } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
+                        failedMetaData.put(failedNode, instanceMetaData);
+                    }
+                });
             }, () -> LOGGER.error("No metadata information for the node: " + failedNode));
         }
         handleChangedHosts(cluster, newHealthyNodes, autoRecoveryNodesMap, autoRecoveryMetadata, failedMetaData);
@@ -622,16 +629,20 @@ public class ClusterService {
                     LOGGER.info("Repair cannot be performed, because there is already an active flow. Stack id: {}", stackId);
                     throw new BadRequestException("Repair cannot be performed, because there is already an active flow.");
                 }
-                Stack stack = stackUpdater.updateStackStatus(stackId, DetailedStackStatus.REPAIR_IN_PROGRESS);
-                boolean repairWithReattach = !deleteVolumes;
-                checkReattachSupportedOnProvider(stack, repairWithReattach);
-                failedNodeMap.putAll(collectFailedNodeMap(stack, repairMode, repairWithReattach, repairedHostGroups, nodeIds, forceRepair));
-                if (repairMode == ManualClusterRepairMode.NODE_ID) {
-                    updateNodeVolumeSetsDeleteVolumesFlag(stack, nodeIds, deleteVolumes);
-                } else {
-                    updateIgNodeVolumeSetsDeleteVolumesFlag(stack, repairedHostGroups, deleteVolumes);
+                Stack stack = stackService.getById(stackId);
+                if (createdFromBaseImage(stack)) {
+                    throw new BadRequestException("Repair is not supported when cluster is created from base image.");
                 }
-                return stack;
+                Stack stackInRepair = stackUpdater.updateStackStatus(stackId, DetailedStackStatus.REPAIR_IN_PROGRESS);
+                boolean repairWithReattach = !deleteVolumes;
+                checkReattachSupportedOnProvider(stackInRepair, repairWithReattach);
+                failedNodeMap.putAll(collectFailedNodeMap(stackInRepair, repairMode, repairWithReattach, repairedHostGroups, nodeIds, forceRepair));
+                if (repairMode == ManualClusterRepairMode.NODE_ID) {
+                    updateNodeVolumeSetsDeleteVolumesFlag(stackInRepair, nodeIds, deleteVolumes);
+                } else {
+                    updateIgNodeVolumeSetsDeleteVolumesFlag(stackInRepair, repairedHostGroups, deleteVolumes);
+                }
+                return stackInRepair;
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
@@ -640,7 +651,20 @@ public class ClusterService {
         triggerRepair(stackId, failedNodeMap, removeOnly, repairedEntities);
     }
 
+    private boolean createdFromBaseImage(Stack stack) {
+        try {
+            Image image = componentConfigProviderService.getImage(stack.getId());
+            return !imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId()).getImage().isPrewarmed();
+        } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
     public boolean repairSupported(Stack stack) {
+        if (createdFromBaseImage(stack)) {
+            LOGGER.debug("Repair not supported for cluster {} because it was created from base image", stack.getId());
+            return false;
+        }
         try {
             checkReattachSupportedOnProvider(stack, true);
         } catch (BadRequestException ex) {

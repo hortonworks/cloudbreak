@@ -9,11 +9,6 @@ public class UpgradeOptionV4Response {
     public UpgradeOptionV4Response() {
     }
 
-    public UpgradeOptionV4Response(ImageInfoV4Response current, ImageInfoV4Response upgrade) {
-        this.current = current;
-        this.upgrade = upgrade;
-    }
-
     public ImageInfoV4Response getCurrent() {
         return current;
     }
