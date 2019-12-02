@@ -3,14 +3,14 @@ package com.sequenceiq.it.cloudbreak.dto.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
-import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
+import com.sequenceiq.common.api.util.versionchecker.VersionCheckResult;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 
 @Prototype
-public class VersionCheckTestDto extends AbstractCloudbreakTestDto<Object, VersionCheckV4Result, VersionCheckTestDto> {
+public class VersionCheckTestDto extends AbstractCloudbreakTestDto<Object, VersionCheckResult, VersionCheckTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VersionCheckTestDto.class);
 

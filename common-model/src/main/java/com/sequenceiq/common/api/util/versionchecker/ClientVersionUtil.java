@@ -1,8 +1,16 @@
-package com.sequenceiq.cloudbreak.util;
+package com.sequenceiq.common.api.util.versionchecker;
 
 public class ClientVersionUtil {
 
     private ClientVersionUtil() {
+    }
+
+    public static VersionCheckResult checkClientVersion(String apiVersion, String clientVersion) {
+        boolean compatible = checkVersion(apiVersion, clientVersion);
+        if (compatible) {
+            return new VersionCheckResult(true);
+        }
+        return new VersionCheckResult(false, String.format("The versions are not compatible: [server: '%s', client: '%s']", apiVersion, clientVersion));
     }
 
     public static boolean checkVersion(String server, String client) {

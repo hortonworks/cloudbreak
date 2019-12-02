@@ -1,55 +1,55 @@
-package com.sequenceiq.cloudbreak.util;
+package com.sequenceiq.common.api.util.versionchecker;
 
-import org.junit.Assert;
-import org.junit.Test;
 
-public class ClientVersionUtilTest {
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+class ClientVersionUtilTest {
     @Test
-    public void checkVersionOk() {
+    void checkVersionOk() {
         boolean result = ClientVersionUtil.checkVersion("2.4.0-dev.250", "2.4.0-rc.14");
-        Assert.assertTrue(result);
+        Assertions.assertTrue(result);
     }
 
     @Test
-    public void checkVersionOkWithV() {
+    void checkVersionOkWithV() {
         boolean result = ClientVersionUtil.checkVersion("2.4.0-dev.250", "v2.4.0-rc.14");
-        Assert.assertTrue(result);
+        Assertions.assertTrue(result);
     }
 
     @Test
-    public void checkVersionNok() {
+    void checkVersionNok() {
         boolean result = ClientVersionUtil.checkVersion("2.5.0-dev.250", "2.4.0-rc.14");
-        Assert.assertFalse(result);
+        Assertions.assertFalse(result);
     }
 
     @Test
-    public void checkVersionNokTooShort() {
+    void checkVersionNokTooShort() {
         boolean result = ClientVersionUtil.checkVersion("2", "2.4.0-rc.14");
-        Assert.assertFalse(result);
+        Assertions.assertFalse(result);
     }
 
     @Test
-    public void checkVersionNokUndefined() {
+    void checkVersionNokUndefined() {
         boolean result = ClientVersionUtil.checkVersion("undefined", "2.4.0-rc.14");
-        Assert.assertFalse(result);
+        Assertions.assertFalse(result);
     }
 
     @Test
-    public void checkVersionNokEmpty() {
+    void checkVersionNokEmpty() {
         boolean result = ClientVersionUtil.checkVersion("", "2.4.0-rc.14");
-        Assert.assertFalse(result);
+        Assertions.assertFalse(result);
     }
 
     @Test
-    public void checkVersionNokNull() {
+    void checkVersionNokNull() {
         boolean result = ClientVersionUtil.checkVersion(null, "2.4.0-rc.14");
-        Assert.assertFalse(result);
+        Assertions.assertFalse(result);
     }
 
     @Test
-    public void checkVersionOkSnapshotGoesThrough() {
+    void checkVersionOkSnapshotGoesThrough() {
         boolean result = ClientVersionUtil.checkVersion("2.5.0-dev.250", "snapshot-2.4.0-rc.14");
-        Assert.assertTrue(result);
+        Assertions.assertTrue(result);
     }
-
 }

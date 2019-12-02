@@ -14,6 +14,7 @@ import com.sequenceiq.environment.credential.v1.CredentialV1Controller;
 import com.sequenceiq.environment.environment.v1.EnvironmentController;
 import com.sequenceiq.environment.platformresource.v1.PlatformResourceController;
 import com.sequenceiq.environment.proxy.v1.controller.ProxyController;
+import com.sequenceiq.environment.util.v1.UtilController;
 
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
@@ -29,7 +30,8 @@ public class EndpointConfig extends ResourceConfig {
             CredentialV1Controller.class,
             ProxyController.class,
             EnvironmentController.class,
-            PlatformResourceController.class);
+            PlatformResourceController.class,
+            UtilController.class);
 
     private final String applicationVersion;
 
