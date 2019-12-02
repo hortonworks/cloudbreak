@@ -587,7 +587,7 @@ public class AzureClient {
         });
     }
 
-    public Iterable<Region> getRegion(com.sequenceiq.cloudbreak.cloud.model.Region region) {
+    public Collection<Region> getRegion(com.sequenceiq.cloudbreak.cloud.model.Region region) {
         Collection<Region> resultList = new HashSet<>();
         for (Region tmpRegion : Region.values()) {
             if (region == null || Strings.isNullOrEmpty(region.value())
