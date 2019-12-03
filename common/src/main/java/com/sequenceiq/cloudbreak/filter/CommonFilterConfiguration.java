@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.auth.CrnFilter;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.logger.MDCContextFilter;
 
 import io.opentracing.contrib.jaxrs2.server.SpanFinishingFilter;
@@ -17,16 +16,10 @@ public class CommonFilterConfiguration {
 
     private static final int CRN_FILTER_ORDER = 0;
 
-    private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    public CommonFilterConfiguration(ThreadBasedUserCrnProvider threadBasedUserCrnProvider) {
-        this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
-    }
-
     @Bean
     public FilterRegistrationBean<CrnFilter> crnFilterRegistrationBean() {
         FilterRegistrationBean<CrnFilter> registrationBean = new FilterRegistrationBean<>();
-        CrnFilter filter = new CrnFilter(threadBasedUserCrnProvider);
+        CrnFilter filter = new CrnFilter();
         registrationBean.setFilter(filter);
         registrationBean.setOrder(CRN_FILTER_ORDER);
         return registrationBean;
@@ -35,7 +28,7 @@ public class CommonFilterConfiguration {
     @Bean
     public FilterRegistrationBean<MDCContextFilter> mdcContextFilterRegistrationBean() {
         FilterRegistrationBean<MDCContextFilter> registrationBean = new FilterRegistrationBean<>();
-        MDCContextFilter filter = new MDCContextFilter(threadBasedUserCrnProvider);
+        MDCContextFilter filter = new MDCContextFilter();
         registrationBean.setFilter(filter);
         registrationBean.setOrder(Integer.MAX_VALUE);
         return registrationBean;

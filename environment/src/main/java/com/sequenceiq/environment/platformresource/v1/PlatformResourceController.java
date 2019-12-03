@@ -52,9 +52,6 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     @Inject
     private PlatformParameterService platformParameterService;
 
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     @Override
     public PlatformVmtypesResponse getVmTypesByCredential(
             String credentialName,
@@ -262,6 +259,6 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     }
 
     private String getAccountId() {
-        return threadBasedUserCrnProvider.getAccountId();
+        return ThreadBasedUserCrnProvider.getAccountId();
     }
 }

@@ -6,7 +6,6 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -17,9 +16,6 @@ public class FilterConfiguration {
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
-
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;

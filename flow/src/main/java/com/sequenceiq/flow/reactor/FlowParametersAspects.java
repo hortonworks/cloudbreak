@@ -1,7 +1,5 @@
 package com.sequenceiq.flow.reactor;
 
-import javax.inject.Inject;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -22,9 +20,6 @@ import reactor.bus.Event;
 public class FlowParametersAspects {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowParametersAspects.class);
 
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     @Pointcut("execution(public * reactor.fn.Consumer+.accept(..)) && within(com.sequenceiq..*)")
     public void interceptReactorConsumersAcceptMethod() {
     }
@@ -36,7 +31,7 @@ public class FlowParametersAspects {
             Event<?> event = (Event<?>) proceedingJoinPoint.getArgs()[0];
             flowTriggerUserCrn = event.getHeaders().get(FlowConstants.FLOW_TRIGGER_USERCRN);
             if (flowTriggerUserCrn != null) {
-                threadBasedUserCrnProvider.setUserCrn(flowTriggerUserCrn);
+                ThreadBasedUserCrnProvider.setUserCrn(flowTriggerUserCrn);
                 try {
                     MDCBuilder.buildMdcContextFromCrn(Crn.fromString(flowTriggerUserCrn));
                 } catch (Exception e) {
@@ -50,7 +45,7 @@ public class FlowParametersAspects {
             if (flowTriggerUserCrn != null) {
                 LOGGER.debug("FlowTriggerUserCrn remove from threadlocal on {}.",
                         proceedingJoinPoint.toShortString());
-                threadBasedUserCrnProvider.removeUserCrn();
+                ThreadBasedUserCrnProvider.removeUserCrn();
             }
         }
     }

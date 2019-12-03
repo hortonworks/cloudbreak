@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
@@ -38,9 +37,6 @@ public class AppConfig {
 
     @Inject
     private List<EnvironmentParametersConverter> environmentParametersConverters;
-
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Value("${rest.debug:false}")
     private boolean restDebug;

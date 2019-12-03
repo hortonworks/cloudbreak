@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
@@ -33,19 +34,21 @@ class FreeIpaServerRequestProviderTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private GrpcUmsClient grpcUmsClient;
 
-    @Mock
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private EnvironmentBasedDomainNameProvider environmentBasedDomainNameProvider;
 
     @InjectMocks
     private FreeIpaServerRequestProvider underTest;
 
+    @BeforeEach
+    public void init() {
+        ThreadBasedUserCrnProvider.removeUserCrn();
+    }
+
     @Test
     void testCreateWithLegacyDomain() {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder().build();
-        when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
         when(grpcUmsClient.getAccountDetails(USER_CRN, ACCOUNT_ID, Optional.empty())).thenReturn(account);
         when(environmentBasedDomainNameProvider.getDomainName(ENV_NAME, "internal")).thenReturn("mydomain");
 
@@ -59,7 +62,7 @@ class FreeIpaServerRequestProviderTest {
     @Test
     void testCreateWithDomainReturnedFromUms() {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder().setWorkloadSubdomain("checkme").build();
-        when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
         when(grpcUmsClient.getAccountDetails(USER_CRN, ACCOUNT_ID, Optional.empty())).thenReturn(account);
         when(environmentBasedDomainNameProvider.getDomainName(ENV_NAME, "checkme")).thenReturn("checkme.mydomain");
 

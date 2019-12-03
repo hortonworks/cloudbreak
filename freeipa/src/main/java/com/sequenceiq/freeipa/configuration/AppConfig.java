@@ -15,7 +15,6 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteria;
@@ -33,9 +32,6 @@ public class AppConfig {
 
     @Inject
     private List<HostOrchestrator> hostOrchestrators;
-
-    @Inject
-    private ThreadBasedUserCrnProvider threadBaseUserCrnProvider;
 
     @Bean
     @Primary

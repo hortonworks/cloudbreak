@@ -154,9 +154,6 @@ public class StackService implements ResourceIdProvider {
     private StackDownscaleValidatorService downscaleValidatorService;
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private SaltSecurityConfigService saltSecurityConfigService;
 
     @Inject
@@ -505,8 +502,7 @@ public class StackService implements ResourceIdProvider {
         }
         stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
 
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         stack.setResourceCrn(createCRN(accountId));
 
         Stack savedStack = measure(() -> stackRepository.save(stack),

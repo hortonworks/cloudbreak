@@ -33,9 +33,6 @@ import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 public class SdxController implements SdxEndpoint {
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private SdxService sdxService;
 
     @Inject
@@ -58,7 +55,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     public SdxClusterResponse create(@ValidStackNameFormat @ValidStackNameLength String name, @Valid SdxClusterRequest createSdxClusterRequest) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.createSdx(userCrn, name, createSdxClusterRequest, null);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         sdxClusterResponse.setName(sdxCluster.getClusterName());
@@ -67,13 +64,13 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     public void delete(String name, Boolean forced) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         sdxService.deleteSdx(userCrn, name, forced);
     }
 
     @Override
     public void deleteByCrn(String clusterCrn, Boolean forced) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         sdxService.deleteSdxByClusterCrn(userCrn, clusterCrn, forced);
     }
 
@@ -89,21 +86,21 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     public SdxClusterResponse get(String name) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
         return sdxClusterConverter.sdxClusterToResponse(sdxCluster);
     }
 
     @Override
     public SdxClusterResponse getByCrn(String clusterCrn) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, clusterCrn);
         return sdxClusterConverter.sdxClusterToResponse(sdxCluster);
     }
 
     @Override
     public List<SdxClusterResponse> getByEnvCrn(@ValidCrn String envCrn) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         List<SdxCluster> sdxClusters = sdxService.listSdxByEnvCrn(userCrn, envCrn);
         return sdxClusters.stream()
                 .map(sdx -> sdxClusterConverter.sdxClusterToResponse(sdx))
@@ -112,7 +109,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     public SdxClusterDetailResponse getDetailByCrn(String clusterCrn, Set<String> entries) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, clusterCrn);
         StackV4Response stackV4Response = sdxService.getDetail(sdxCluster.getClusterName(), entries);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
@@ -121,43 +118,43 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     public void repairCluster(String clusterName, SdxRepairRequest clusterRepairRequest) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         repairService.triggerRepairByName(userCrn, clusterName, clusterRepairRequest);
     }
 
     @Override
     public void repairClusterByCrn(String clusterCrn, SdxRepairRequest clusterRepairRequest) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         repairService.triggerRepairByCrn(userCrn, clusterCrn, clusterRepairRequest);
     }
 
     @Override
     public UpgradeOptionV4Response checkForUpgradeByName(String clusterName) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return sdxUpgradeService.checkForUpgradeByName(userCrn, clusterName);
     }
 
     @Override
     public UpgradeOptionV4Response checkForUpgradeByCrn(String clusterCrn) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return sdxUpgradeService.checkForUpgradeByCrn(userCrn, clusterCrn);
     }
 
     @Override
     public void upgradeClusterByName(String clusterName) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         sdxUpgradeService.triggerUpgradeByName(userCrn, clusterName);
     }
 
     @Override
     public void upgradeClusterByCrn(String clusterCrn) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         sdxUpgradeService.triggerUpgradeByCrn(userCrn, clusterCrn);
     }
 
     @Override
     public SdxClusterDetailResponse getDetail(String name, Set<String> entries) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
         StackV4Response stackV4Response = sdxService.getDetail(name, entries);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
@@ -166,7 +163,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     public List<SdxClusterResponse> list(String envName) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         List<SdxCluster> sdxClusters = sdxService.listSdx(userCrn, envName);
         return sdxClusters.stream()
                 .map(sdx -> sdxClusterConverter.sdxClusterToResponse(sdx))
@@ -180,48 +177,48 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     public void syncByCrn(String crn) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         sdxService.syncByCrn(userCrn, crn);
     }
 
     @Override
     public void retry(String name) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
         sdxRetryService.retrySdx(sdxCluster);
     }
 
     @Override
     public void retryByCrn(String crn) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
         sdxRetryService.retrySdx(sdxCluster);
     }
 
     @Override
     public void startByName(String name) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
         sdxStartService.triggerStartIfClusterNotRunning(sdxCluster);
     }
 
     @Override
     public void startByCrn(String crn) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
         sdxStartService.triggerStartIfClusterNotRunning(sdxCluster);
     }
 
     @Override
     public void stopByName(String name) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
         sdxStopService.triggerStopIfClusterNotStopped(sdxCluster);
     }
 
     @Override
     public void stopByCrn(String crn) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
         sdxStopService.triggerStopIfClusterNotStopped(sdxCluster);
     }

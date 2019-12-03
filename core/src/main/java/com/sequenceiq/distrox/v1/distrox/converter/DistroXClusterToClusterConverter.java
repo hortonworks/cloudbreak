@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -39,9 +38,6 @@ public class DistroXClusterToClusterConverter {
 
     @Inject
     private ProxyConfigDtoService proxyConfigDtoService;
-
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     public ClusterV4Request convert(DistroXV1Request request) {
         return convert(request, null);

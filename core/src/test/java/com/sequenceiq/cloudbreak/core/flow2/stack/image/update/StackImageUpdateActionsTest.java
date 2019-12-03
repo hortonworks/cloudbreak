@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -50,7 +50,6 @@ import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageUpdateEvent;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -60,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -144,9 +144,6 @@ public class StackImageUpdateActionsTest {
     @Mock
     private StackFailureContext failureContext;
 
-    @Mock
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     @InjectMocks
     private final AbstractStackImageUpdateAction<?> checkImageAction = spy(new StackImageUpdateActions().checkImageVersion());
 
@@ -198,6 +195,7 @@ public class StackImageUpdateActionsTest {
         when(stackService.getById(anyLong())).thenReturn(stack);
         when(stackUtil.getCloudCredential(stack)).thenReturn(cloudCredential);
 
+        ThreadBasedUserCrnProvider.removeUserCrn();
         variables.clear();
     }
 

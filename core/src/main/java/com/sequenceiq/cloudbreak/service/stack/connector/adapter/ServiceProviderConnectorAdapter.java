@@ -76,9 +76,6 @@ public class ServiceProviderConnectorAdapter {
     @Inject
     private CredentialClientService credentialClientService;
 
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -181,9 +178,9 @@ public class ServiceProviderConnectorAdapter {
     }
 
     public PlatformParameters getPlatformParameters(Stack stack, String userCrn) {
-        threadBasedUserCrnProvider.setUserCrn(userCrn);
+        ThreadBasedUserCrnProvider.setUserCrn(userCrn);
         PlatformParameters platformParameters = getPlatformParameters(stack);
-        threadBasedUserCrnProvider.removeUserCrn();
+        ThreadBasedUserCrnProvider.removeUserCrn();
         return platformParameters;
     }
 
