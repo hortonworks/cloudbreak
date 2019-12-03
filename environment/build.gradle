@@ -102,6 +102,13 @@ dependencies {
 bootRun {
   systemProperty "spring.profiles.active", System.properties["spring.profiles.active"]
   systemProperty "spring.config.location", System.properties["spring.config.location"]
+  systemProperty 'spring.config.additional-location', System.properties['spring.config.additional-location']
+
+  environment "AWS_ACCESS_KEY_ID", System.getenv('AWS_ACCESS_KEY_ID')
+  environment "AWS_SECRET_ACCESS_KEY", System.getenv('AWS_SECRET_ACCESS_KEY')
+  environment "CB_AWS_ACCOUNT_ID", System.getenv('CB_AWS_ACCOUNT_ID')
+  //Probably will need to add more for AZURE, GOV_CLOUD, GCE, etc
+
   if (project.hasProperty("jvmArgs")) {
     jvmArgs += project.jvmArgs.split("\\s+").toList()
   }
