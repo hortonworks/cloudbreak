@@ -11,13 +11,16 @@ import com.microsoft.azure.management.storage.StorageAccount;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureIDBrokerObjectStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @Service
 public class AzureObjectStorageConnector implements ObjectStorageConnector {
@@ -26,6 +29,9 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
 
     @Inject
     private AzureClientService azureClientService;
+
+    @Inject
+    private AzureIDBrokerObjectStorageValidator azureIDBrokerObjectStorageValidator;
 
     @Override
     public ObjectStorageMetadataResponse getObjectStorageMetadata(ObjectStorageMetadataRequest request) {
@@ -42,12 +48,27 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
                     .withStatus(ResponseStatus.RESOURCE_NOT_FOUND)
                     .build();
         }
-
     }
 
     @Override
     public ObjectStorageValidateResponse validateObjectStorage(ObjectStorageValidateRequest request) {
-        return ObjectStorageValidateResponse.builder().withStatus(ResponseStatus.OK).build();
+        AzureClient client = azureClientService.getClient(request.getCredential());
+        SpiFileSystem spiFileSystem = request.getSpiFileSystem();
+        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
+        ValidationResult validationResult = azureIDBrokerObjectStorageValidator.validateObjectStorage(
+                client, spiFileSystem, resultBuilder);
+        ObjectStorageValidateResponse response;
+        if (validationResult.hasError()) {
+            response = ObjectStorageValidateResponse.builder()
+                    .withStatus(ResponseStatus.ERROR)
+                    .withError(validationResult.getFormattedErrors())
+                    .build();
+        } else {
+            response = ObjectStorageValidateResponse.builder()
+                    .withStatus(ResponseStatus.OK)
+                    .build();
+        }
+        return response;
     }
 
     @Override
