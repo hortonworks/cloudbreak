@@ -31,6 +31,9 @@ public interface ServerParameters {
     @Nonnull
     String getCcmPublicKey();
 
+    @Nonnull
+    String getMinaSshdServiceId();
+
     /**
      * Adds keys and values corresponding to the CCM parameters to the specified template model.
      *

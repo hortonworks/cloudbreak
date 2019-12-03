@@ -34,7 +34,8 @@ public class CcmKeyDeregistrationHandler implements EventHandler<CcmKeyDeregistr
         if (Boolean.TRUE.equals(request.getUseCcm())) {
             LOGGER.debug("De-registering CCM key for freeipa stack {}", request.getResourceId());
             try {
-                ccmResourceTerminationListener.deregisterCcmSshTunnelingKey(request.getActorCrn(), request.getAccountId(), request.getKeyId());
+                ccmResourceTerminationListener.deregisterCcmSshTunnelingKey(request.getActorCrn(), request.getAccountId(), request.getKeyId(),
+                        request.getMinaSshdServiceId());
             } catch (Exception ex) {
                 LOGGER.warn("CCM key de-registration failed", ex);
             }

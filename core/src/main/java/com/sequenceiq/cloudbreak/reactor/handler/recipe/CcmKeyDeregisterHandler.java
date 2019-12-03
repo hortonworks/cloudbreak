@@ -44,7 +44,8 @@ public class CcmKeyDeregisterHandler implements EventHandler<CcmKeyDeregisterReq
                 LOGGER.debug("De-registering key from CCM. Cluster CRN: {}",
                         stack.getResourceCrn());
                 try {
-                    ccmResourceTerminationListener.deregisterCcmSshTunnelingKey(request.getActorCrn(), request.getAccountId(), request.getKeyId());
+                    ccmResourceTerminationListener.deregisterCcmSshTunnelingKey(request.getActorCrn(), request.getAccountId(), request.getKeyId(),
+                            stack.getMinaSshdServiceId());
                 } catch (Exception ex) {
                     LOGGER.warn("CCM key deregistration failed", ex);
                 }

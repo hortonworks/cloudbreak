@@ -56,6 +56,8 @@ public class ClusterProxyServiceTest {
 
     private static final String STACK_CRN = "crn:cdp:datahub:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:cluster:c681a099-bff3-4f3f-8884-1de9604a3a09";
 
+    private static final String MINA_ID = "mina-id";
+
     @Mock
     private StackService stackService;
 
@@ -137,8 +139,8 @@ public class ClusterProxyServiceTest {
     }
 
     private ConfigRegistrationRequest configRegistrationRequestWithTunnelEntries() {
-        List<TunnelEntry> tunnelEntries = List.of(new TunnelEntry("i-abc123", "GATEWAY", "10.10.10.10", 9443),
-                new TunnelEntry("i-abc123", "KNOX", "10.10.10.10", 443));
+        List<TunnelEntry> tunnelEntries = List.of(new TunnelEntry("i-abc123", "GATEWAY", "10.10.10.10", 9443, MINA_ID),
+                new TunnelEntry("i-abc123", "KNOX", "10.10.10.10", 443, MINA_ID));
         return new ConfigRegistrationRequestBuilder(STACK_CRN)
                 .withAliases(List.of(String.valueOf(CLUSTER_ID))).withServices(List.of(cmServiceConfig(), cmInternalServiceConfig()))
                 .withAccountId(TEST_ACCOUNT_ID)
@@ -196,6 +198,7 @@ public class ClusterProxyServiceTest {
         Stack stack = testStack();
         stack.setUseCcm(true);
         stack.setTunnel(Tunnel.CCM);
+        stack.setMinaSshdServiceId(MINA_ID);
         return stack;
     }
 
