@@ -203,7 +203,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
 
     @Override
     public ClusterStatusResult getStatus(boolean blueprintPresent) {
-        if (!isCMRunning()) {
+        if (!isClusterManagerRunning()) {
             return ClusterStatusResult.of(ClusterStatus.AMBARISERVER_NOT_RUNNING);
         } else if (blueprintPresent) {
             return determineClusterStatus(stack);
@@ -297,7 +297,8 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
                         mapping(ApiRole::getName, toList())));
     }
 
-    private boolean isCMRunning() {
+    @Override
+    public boolean isClusterManagerRunning() {
         try {
             clouderaManagerApiFactory.getClouderaManagerResourceApi(client).getVersion();
             return true;

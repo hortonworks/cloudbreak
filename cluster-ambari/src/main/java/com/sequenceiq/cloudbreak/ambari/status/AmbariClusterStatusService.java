@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.ambari.AmbariClientFactory;
@@ -74,5 +75,14 @@ public class AmbariClusterStatusService implements ClusterStatusService {
     @Override
     public Map<String, String> getHostStatusesRaw() {
         return ambariClient.getHostStatuses();
+    }
+
+    @Override
+    public boolean isClusterManagerRunning() {
+        try {
+            return !StringUtils.isEmpty(ambariClient.healthCheck());
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
