@@ -96,10 +96,7 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator {
                                 String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
                                 String.join("\n", failedActions));
                 LOGGER.warn(errorMessage);
-                // TODO this is disabled temporary due to CB-4670
-                // validationResultBuilder.error(String.format("The role(s) (%s) don't have the required permissions:%n%s",
-                //        String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
-                //        String.join("\n", failedActions)));
+                validationResultBuilder.error(errorMessage);
             }
         }
     }
