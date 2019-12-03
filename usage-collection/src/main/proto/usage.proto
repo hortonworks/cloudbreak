@@ -38,6 +38,8 @@ message Event {
         AltusIamUserUpdated altusIamUserUpdated = 6;
         // An Altus user interactively logged in.
         AltusIamUserInteractiveLogin altusIamUserInteractiveLogin = 7;
+        // An Altus user interactively login failure.
+        AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;
         // An Altus Data Engineering job was submitted.
         AltusDataEngineeringJobSubmitted altusDataEngineeringJobSubmitted = 8;
         // An Altus Data Engineering job's status changed.
@@ -160,6 +162,12 @@ message AltusIamUserUpdated {
 
 // Generated when an Altus user logs in interactively.
 message AltusIamUserInteractiveLogin {
+    // The Altus user ID of the user logging in.
+    string userId = 1;
+}
+
+// Generated when an Altus user interactive login fails.
+message AltusIamUserInteractiveLoginFailure {
     // The Altus user ID of the user logging in.
     string userId = 1;
 }
@@ -517,6 +525,8 @@ message AltusIamMachineUserCreated {
     string machineUserName = 3;
     // The CRN for the machine user.
     string crn = 4;
+    // Whether the machine user is an internal machine user.
+    bool internal = 5;
 }
 
 // Generated when an Altus IAM machine user has been deleted.
@@ -538,6 +548,8 @@ message AltusIamAccessKeyCreated {
     string actorCrn = 3;
     // The CRN for the access key.
     string crn = 4;
+    // Whether the access key is an internal access key.
+    bool internal = 5;
 }
 
 // Generated when an Altus IAM access key has been deleted.
@@ -558,7 +570,7 @@ message AltusSdxNamespaceCreated {
     string crn = 4;
 }
 
-// The status of an Altus Analytic DB cluster.
+// The status of an Altus SDX namespace.
 message AltusSdxNamespaceStatus {
     enum Value {
         // A value indicating the enum is unset.
@@ -671,6 +683,8 @@ message CDPDatalakeClusterRequested {
     string crn = 7;
     // The CRN of the Datalake cluster's creator.
     string creatorCrn = 8;
+    // The name of the cluster definition.
+    string clusterDefinitionName = 9;
 }
 
 // Generated when a CDP Datalake cluster's status changed.
@@ -708,6 +722,8 @@ message CDPDatahubClusterRequested {
     string crn = 8;
     // The CRN of the Datahub cluster's creator.
     string creatorCrn = 9;
+    // The name of the cluster definition.
+    string clusterDefinitionName = 10;
 }
 
 // Generated when a CDP Datahub cluster's status changed.
