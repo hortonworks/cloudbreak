@@ -7,13 +7,13 @@ public class StackDeletionWaitRequest extends SdxEvent {
 
     private final boolean forced;
 
-    public StackDeletionWaitRequest(Long sdxId, String userId, String requestId, boolean forced) {
-        super(sdxId, userId, requestId);
+    public StackDeletionWaitRequest(Long sdxId, String userId, boolean forced) {
+        super(sdxId, userId);
         this.forced = forced;
     }
 
     public static StackDeletionWaitRequest from(SdxContext context, SdxDeleteStartEvent payload) {
-        return new StackDeletionWaitRequest(context.getSdxId(), context.getUserId(), context.getRequestId(), payload.isForced());
+        return new StackDeletionWaitRequest(context.getSdxId(), context.getUserId(), payload.isForced());
     }
 
     @Override

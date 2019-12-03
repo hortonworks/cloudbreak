@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderS
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
-import com.sequenceiq.cloudbreak.client.UserCrnClientRequestFilter;
+import com.sequenceiq.cloudbreak.client.ApiClientRequestFilter;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
@@ -23,12 +23,12 @@ import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 @Configuration
 public class CloudbreakApiClientConfig {
 
-    private final UserCrnClientRequestFilter userCrnClientRequestFilter;
+    private final ApiClientRequestFilter apiClientRequestFilter;
 
     private final ClientTracingFeature clientTracingFeature;
 
-    public CloudbreakApiClientConfig(UserCrnClientRequestFilter userCrnClientRequestFilter, ClientTracingFeature clientTracingFeature) {
-        this.userCrnClientRequestFilter = userCrnClientRequestFilter;
+    public CloudbreakApiClientConfig(ApiClientRequestFilter apiClientRequestFilter, ClientTracingFeature clientTracingFeature) {
+        this.apiClientRequestFilter = apiClientRequestFilter;
         this.clientTracingFeature = clientTracingFeature;
     }
 
@@ -39,7 +39,7 @@ public class CloudbreakApiClientConfig {
                 .withCertificateValidation(cloudbreakApiClientParams.isCertificateValidation())
                 .withIgnorePreValidation(cloudbreakApiClientParams.isIgnorePreValidation())
                 .withDebug(cloudbreakApiClientParams.isRestDebug())
-                .withClientRequestFilter(userCrnClientRequestFilter)
+                .withClientRequestFilter(apiClientRequestFilter)
                 .withApiRoot(CoreApi.API_ROOT_CONTEXT)
                 .withTracer(clientTracingFeature)
                 .build();

@@ -39,10 +39,6 @@ class StackCreationHandlerTest {
 
     private static String userId = "userId";
 
-    private static String requestId = "requestId";
-
-    private static String sdxCrn = "sdxCrn";
-
     @Mock
     private ProvisionerService provisionerService;
 
@@ -63,11 +59,11 @@ class StackCreationHandlerTest {
     @Test
     void acceptTest() {
         long stackId = 2L;
-        StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId, userId, requestId);
+        StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId, userId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
-        doNothing().when(provisionerService).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class), eq(requestId));
+        doNothing().when(provisionerService).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class));
         stackCreationHandler.accept(receivedEvent);
-        verify(provisionerService, times(1)).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class), eq(requestId));
+        verify(provisionerService, times(1)).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class));
         final ArgumentCaptor<String> eventSelector = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<Event> sentEvent = ArgumentCaptor.forClass(Event.class);
         verify(eventBus, times(1)).notify(eventSelector.capture(), sentEvent.capture());
@@ -83,12 +79,12 @@ class StackCreationHandlerTest {
     @Test
     void acceptTestPollerStackFailed() {
         long stackId = 2L;
-        StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId, userId, requestId);
+        StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId, userId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
         doThrow(new UserBreakException("stack failed")).when(provisionerService)
-                .waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class), eq(requestId));
+                .waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class));
         stackCreationHandler.accept(receivedEvent);
-        verify(provisionerService, times(1)).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class), eq(requestId));
+        verify(provisionerService, times(1)).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class));
         final ArgumentCaptor<String> eventSelector = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<Event> sentEvent = ArgumentCaptor.forClass(Event.class);
         verify(eventBus, times(1)).notify(eventSelector.capture(), sentEvent.capture());
@@ -103,12 +99,12 @@ class StackCreationHandlerTest {
     @Test
     void acceptTestPollerStackTimeout() {
         long stackId = 2L;
-        StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId, userId, requestId);
+        StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId, userId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
         doThrow(new PollerStoppedException("stack timeout")).when(provisionerService)
-                .waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class), eq(requestId));
+                .waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class));
         stackCreationHandler.accept(receivedEvent);
-        verify(provisionerService, times(1)).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class), eq(requestId));
+        verify(provisionerService, times(1)).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class));
         final ArgumentCaptor<String> eventSelector = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<Event> sentEvent = ArgumentCaptor.forClass(Event.class);
         verify(eventBus, times(1)).notify(eventSelector.capture(), sentEvent.capture());
@@ -123,11 +119,11 @@ class StackCreationHandlerTest {
     @Test
     void acceptTestPollerStackOtherError() {
         long stackId = 2L;
-        StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId, userId, requestId);
+        StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId, userId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
-        doThrow(new PollerException("stack error")).when(provisionerService).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class), eq(requestId));
+        doThrow(new PollerException("stack error")).when(provisionerService).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class));
         stackCreationHandler.accept(receivedEvent);
-        verify(provisionerService, times(1)).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class), eq(requestId));
+        verify(provisionerService, times(1)).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class));
         final ArgumentCaptor<String> eventSelector = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<Event> sentEvent = ArgumentCaptor.forClass(Event.class);
         verify(eventBus, times(1)).notify(eventSelector.capture(), sentEvent.capture());

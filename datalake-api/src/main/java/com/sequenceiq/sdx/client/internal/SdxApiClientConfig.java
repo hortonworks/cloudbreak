@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
-import com.sequenceiq.cloudbreak.client.UserCrnClientRequestFilter;
+import com.sequenceiq.cloudbreak.client.ApiClientRequestFilter;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.sdx.api.SdxApi;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
@@ -19,7 +19,7 @@ import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 public class SdxApiClientConfig {
 
     @Inject
-    private UserCrnClientRequestFilter userCrnClientRequestFilter;
+    private ApiClientRequestFilter apiClientRequestFilter;
 
     @Inject
     private ClientTracingFeature clientTracingFeature;
@@ -31,7 +31,7 @@ public class SdxApiClientConfig {
                 .withCertificateValidation(sdxApiClientParams.isCertificateValidation())
                 .withIgnorePreValidation(sdxApiClientParams.isIgnorePreValidation())
                 .withDebug(sdxApiClientParams.isRestDebug())
-                .withClientRequestFilter(userCrnClientRequestFilter)
+                .withClientRequestFilter(apiClientRequestFilter)
                 .withApiRoot(SdxApi.API_ROOT_CONTEXT)
                 .withTracer(clientTracingFeature)
                 .build();

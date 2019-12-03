@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
-import com.sequenceiq.cloudbreak.client.UserCrnClientRequestFilter;
+import com.sequenceiq.cloudbreak.client.ApiClientRequestFilter;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.redbeams.api.RedbeamsApi;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.DatabaseV4Endpoint;
@@ -18,12 +18,12 @@ import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 @Configuration
 public class RedbeamsApiClientConfig {
 
-    private final UserCrnClientRequestFilter userCrnClientRequestFilter;
+    private final ApiClientRequestFilter apiClientRequestFilter;
 
     private final ClientTracingFeature clientTracingFeature;
 
-    public RedbeamsApiClientConfig(UserCrnClientRequestFilter userCrnClientRequestFilter, ClientTracingFeature clientTracingFeature) {
-        this.userCrnClientRequestFilter = userCrnClientRequestFilter;
+    public RedbeamsApiClientConfig(ApiClientRequestFilter apiClientRequestFilter, ClientTracingFeature clientTracingFeature) {
+        this.apiClientRequestFilter = apiClientRequestFilter;
         this.clientTracingFeature = clientTracingFeature;
     }
 
@@ -34,7 +34,7 @@ public class RedbeamsApiClientConfig {
                 .withCertificateValidation(redbeamsApiClientParams.isCertificateValidation())
                 .withIgnorePreValidation(redbeamsApiClientParams.isIgnorePreValidation())
                 .withDebug(redbeamsApiClientParams.isRestDebug())
-                .withClientRequestFilter(userCrnClientRequestFilter)
+                .withClientRequestFilter(apiClientRequestFilter)
                 .withTracer(clientTracingFeature)
                 .withApiRoot(RedbeamsApi.API_ROOT_CONTEXT)
                 .build();

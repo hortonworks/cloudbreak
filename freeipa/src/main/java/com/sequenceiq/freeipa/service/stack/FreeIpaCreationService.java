@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
@@ -20,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -106,7 +106,7 @@ public class FreeIpaCreationService {
 
     public DescribeFreeIpaResponse launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
         String userCrn = crnService.getUserCrn();
-        Future<User> userFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn, userCrn, Optional.empty()));
+        Future<User> userFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn, userCrn, MDCUtils.getRequestId()));
         Credential credential = credentialService.getCredentialByEnvCrn(request.getEnvironmentCrn());
         Stack stack = stackConverter.convert(request, accountId, userFuture, credential.getCloudPlatform());
         stack.setResourceCrn(crnService.createCrn(accountId, Crn.ResourceType.FREEIPA));

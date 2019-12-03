@@ -18,7 +18,6 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
@@ -58,7 +57,6 @@ public class SdxStopActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxStartStopEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Execute sync flow for SDX: {}", payload.getResourceId());
                 sendEvent(context);
             }
@@ -86,7 +84,6 @@ public class SdxStopActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxSyncSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Execute stop flow for SDX: {}", payload.getResourceId());
                 stopService.stop(payload.getResourceId());
                 sendEvent(context, SDX_STOP_ALL_DATAHUB_EVENT.event(), payload);
@@ -110,7 +107,6 @@ public class SdxStopActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Stopping all datahub clusters for SDX in progress: {}", payload.getResourceId());
                 sendEvent(context);
             }
@@ -138,7 +134,6 @@ public class SdxStopActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("SDX stop in progress: {}", payload.getResourceId());
                 sendEvent(context);
             }
@@ -166,7 +161,6 @@ public class SdxStopActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxStopSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("SDX stop finalized: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, ResourceEvent.SDX_STOP_FINISHED, "Datalake is stopped",
                         payload.getResourceId());
@@ -191,7 +185,6 @@ public class SdxStopActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxStopFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 Exception exception = payload.getException();
                 DatalakeStatusEnum failedStatus = DatalakeStatusEnum.STOP_FAILED;
                 LOGGER.info("Update SDX status to {} for resource: {}", failedStatus, payload.getResourceId(), exception);

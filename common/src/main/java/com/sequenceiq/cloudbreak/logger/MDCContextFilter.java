@@ -26,9 +26,9 @@ import com.sequenceiq.cloudbreak.logger.MdcContext.Builder;
 
 public class MDCContextFilter extends OncePerRequestFilter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MDCContextFilter.class);
+    public static final String REQUEST_ID_HEADER = "x-cdp-request-id";
 
-    private static final String REQUEST_ID_HEADER = "x-cdp-request-id";
+    private static final Logger LOGGER = LoggerFactory.getLogger(MDCContextFilter.class);
 
     private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 

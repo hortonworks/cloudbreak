@@ -18,7 +18,6 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
@@ -57,7 +56,6 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 sendEvent(context);
             }
 
@@ -84,7 +82,6 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, EnvWaitSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 RdsWaitRequest req = new RdsWaitRequest(context, payload.getDetailedEnvironmentResponse());
                 sendEvent(context, req.selector(), req);
             }
@@ -108,7 +105,6 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, RdsWaitSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 provisionerService.startStackProvisioning(payload.getResourceId(),
                         payload.getDetailedEnvironmentResponse(), payload.getDatabaseServerResponse());
 
@@ -133,7 +129,6 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 sendEvent(context);
             }
 
@@ -160,7 +155,6 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, StackCreationSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.SDX_CLUSTER_CREATED,
                         "Datalake is running", payload.getResourceId());
                 sendEvent(context, SDX_CREATE_FINALIZED_EVENT.event(), payload);
@@ -184,7 +178,6 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxCreateFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake create failed for datalakeId: {}", payload.getResourceId(), exception);
                 String statusReason = "Datalake creation failed";

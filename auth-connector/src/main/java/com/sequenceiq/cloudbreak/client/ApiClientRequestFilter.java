@@ -9,9 +9,11 @@ import javax.ws.rs.client.ClientRequestFilter;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.logger.MDCContextFilter;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
 @Component
-public class UserCrnClientRequestFilter implements ClientRequestFilter {
+public class ApiClientRequestFilter implements ClientRequestFilter {
 
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
@@ -19,5 +21,8 @@ public class UserCrnClientRequestFilter implements ClientRequestFilter {
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
         requestContext.getHeaders().putSingle(AbstractUserCrnServiceEndpoint.CRN_HEADER, threadBasedUserCrnProvider.getUserCrn());
+        if (MDCUtils.getRequestId().isPresent()) {
+            requestContext.getHeaders().putSingle(MDCContextFilter.REQUEST_ID_HEADER, MDCUtils.getRequestId().get());
+        }
     }
 }

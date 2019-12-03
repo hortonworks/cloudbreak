@@ -63,8 +63,6 @@ class ProvisionerServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
 
-    private static final String REQUEST_ID = "requestId";
-
     @Mock
     private SdxClusterRepository sdxClusterRepository;
 
@@ -134,7 +132,7 @@ class ProvisionerServiceTest {
 
         when(sdxClusterRepository.findById(2L)).thenReturn(Optional.of(sdxCluster));
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 100, TimeUnit.MILLISECONDS);
-        Assertions.assertThrows(PollerStoppedException.class, () -> provisionerService.waitCloudbreakClusterCreation(id, pollingConfig, REQUEST_ID));
+        Assertions.assertThrows(PollerStoppedException.class, () -> provisionerService.waitCloudbreakClusterCreation(id, pollingConfig));
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS,
                         ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, "Datalake stack creation in progress", sdxCluster);
@@ -152,7 +150,7 @@ class ProvisionerServiceTest {
         when(sdxClusterRepository.findById(2L)).thenReturn(Optional.of(sdxCluster));
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 500, TimeUnit.MILLISECONDS);
         Assertions.assertThrows(UserBreakException.class, () -> provisionerService
-                .waitCloudbreakClusterCreation(id, pollingConfig, REQUEST_ID), "Stack creation failed");
+                .waitCloudbreakClusterCreation(id, pollingConfig), "Stack creation failed");
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS,
                         ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, "Datalake stack creation in progress", sdxCluster);
@@ -177,7 +175,7 @@ class ProvisionerServiceTest {
 
         when(sdxClusterRepository.findById(2L)).thenReturn(Optional.of(sdxCluster));
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 1000, TimeUnit.MILLISECONDS);
-        provisionerService.waitCloudbreakClusterCreation(id, pollingConfig, REQUEST_ID);
+        provisionerService.waitCloudbreakClusterCreation(id, pollingConfig);
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS,
                         ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, "Datalake stack creation in progress", sdxCluster);
@@ -240,7 +238,7 @@ class ProvisionerServiceTest {
         when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet())).thenReturn(firstStackV4Response);
 
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
-        Assertions.assertThrows(PollerStoppedException.class, () -> provisionerService.waitCloudbreakClusterDeletion(id, pollingConfig, REQUEST_ID));
+        Assertions.assertThrows(PollerStoppedException.class, () -> provisionerService.waitCloudbreakClusterDeletion(id, pollingConfig));
     }
 
     @Test
@@ -257,7 +255,7 @@ class ProvisionerServiceTest {
                 .thenReturn(secondStackV4Response);
 
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
-        Assertions.assertThrows(UserBreakException.class, () -> provisionerService.waitCloudbreakClusterDeletion(id, pollingConfig, REQUEST_ID));
+        Assertions.assertThrows(UserBreakException.class, () -> provisionerService.waitCloudbreakClusterDeletion(id, pollingConfig));
     }
 
     @Test
@@ -268,7 +266,7 @@ class ProvisionerServiceTest {
         when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet())).thenThrow(new NotFoundException());
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
 
-        provisionerService.waitCloudbreakClusterDeletion(id, pollingConfig, REQUEST_ID);
+        provisionerService.waitCloudbreakClusterDeletion(id, pollingConfig);
 
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETED,
