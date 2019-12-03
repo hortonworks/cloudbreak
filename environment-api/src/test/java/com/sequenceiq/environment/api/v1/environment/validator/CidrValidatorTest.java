@@ -12,6 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.environment.api.v1.environment.validator.cidr.CidrValidator;
+
 @ExtendWith(MockitoExtension.class)
 class CidrValidatorTest {
 

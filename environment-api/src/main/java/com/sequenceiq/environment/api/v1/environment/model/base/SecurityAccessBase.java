@@ -6,7 +6,7 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
-import com.sequenceiq.environment.api.v1.environment.validator.ValidCidr;
+import com.sequenceiq.environment.api.v1.environment.validator.cidr.ValidCidr;
 
 import io.swagger.annotations.ApiModelProperty;
 

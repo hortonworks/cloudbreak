@@ -82,6 +82,9 @@ public class AzurePlatformResources implements PlatformResources {
     @Value("#{'${cb.azure.distrox.enabled.instance.types:}'.split(',')}")
     private List<String> enabledDistroxInstanceTypes;
 
+    @Value("${distrox.restrict.instance.types:true}")
+    private boolean restrictInstanceTypes;
+
     private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> enabledDistroxInstanceTypes.stream()
             .filter(it -> !it.isEmpty())
             .map(it -> getMachineType(it))
@@ -245,10 +248,17 @@ public class AzurePlatformResources implements PlatformResources {
         CloudVmTypes cloudVmTypes = virtualMachines(cloudCredential, region, filters);
         Map<String, Set<VmType>> returnVmResponses = new HashMap<>();
         Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
-        for (Entry<String, Set<VmType>> stringSetEntry : cloudVmResponses.entrySet()) {
-            returnVmResponses.put(stringSetEntry.getKey(), stringSetEntry.getValue().stream()
-                    .filter(enabledDistroxInstanceTypeFilter)
-                    .collect(Collectors.toSet()));
+        if (restrictInstanceTypes) {
+            for (Entry<String, Set<VmType>> stringSetEntry : cloudVmResponses.entrySet()) {
+                returnVmResponses.put(stringSetEntry.getKey(), stringSetEntry.getValue().stream()
+                        .filter(enabledDistroxInstanceTypeFilter)
+                        .collect(Collectors.toSet()));
+            }
+        } else {
+            for (Entry<String, Set<VmType>> stringSetEntry : cloudVmResponses.entrySet()) {
+                returnVmResponses.put(stringSetEntry.getKey(), stringSetEntry.getValue().stream()
+                        .collect(Collectors.toSet()));
+            }
         }
         return new CloudVmTypes(returnVmResponses, cloudVmTypes.getDefaultCloudVmResponses());
     }

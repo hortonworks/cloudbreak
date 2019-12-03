@@ -74,6 +74,7 @@ distrox:
     topology:
       name: cdp-proxy
     ssotype: SSO_PROVIDER
+  restrict.instance.types: true
 
 cb:
   uaa.startup.timeout.sec: 300

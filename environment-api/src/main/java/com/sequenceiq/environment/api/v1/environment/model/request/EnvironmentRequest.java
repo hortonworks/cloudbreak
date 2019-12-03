@@ -44,6 +44,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @NotNull
     private LocationRequest location;
 
+    @Valid
     @ApiModelProperty(EnvironmentModelDescription.NETWORK)
     private EnvironmentNetworkRequest network;
 
