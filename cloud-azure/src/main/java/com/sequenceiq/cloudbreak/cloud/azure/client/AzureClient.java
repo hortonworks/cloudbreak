@@ -40,6 +40,8 @@ import com.microsoft.azure.management.compute.VirtualMachineDataDisk;
 import com.microsoft.azure.management.compute.VirtualMachineInstanceView;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.graphrbac.RoleAssignment;
+import com.microsoft.azure.management.graphrbac.RoleAssignments;
+import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInner;
 import com.microsoft.azure.management.msi.Identity;
 import com.microsoft.azure.management.network.LoadBalancer;
 import com.microsoft.azure.management.network.Network;
@@ -670,7 +672,7 @@ public class AzureClient {
     }
 
     public List<Identity> filterIdentitiesByRoleAssignement(List<Identity> identityList, String roleAssignmentScope) {
-        PagedList<RoleAssignment> roleAssignments = listIdentityRoleAssignmentsByScope(roleAssignmentScope);
+        PagedList<RoleAssignment> roleAssignments = listRoleAssignmentsByScope(roleAssignmentScope);
         return identityList.stream().filter(
                 identity -> roleAssignments.stream()
                         .anyMatch(roleAssignment -> roleAssignment.principalId() != null
@@ -682,13 +684,26 @@ public class AzureClient {
         return handleAuthException(() -> azure.identities().getById(id));
     }
 
-    public PagedList<RoleAssignment> listIdentityRoleAssignmentsByScope(String scope) {
-        return handleAuthException(() -> azure.identities().manager()).graphRbacManager().roleAssignments().listByScope(scope);
+    public RoleAssignments getRoleAssignments() {
+        return handleAuthException(() -> azure.identities().manager()).graphRbacManager().roleAssignments();
+    }
+
+    public PagedList<RoleAssignment> listRoleAssignmentsByScope(String scope) {
+        return handleAuthException(() -> getRoleAssignments().listByScope(scope));
+    }
+
+    public PagedList<RoleAssignmentInner> listRoleAssignments() {
+        return handleAuthException(() ->
+                getRoleAssignments().manager().roleInner().withSubscriptionId(getCurrentSubscription().subscriptionId()).roleAssignments().list());
+    }
+
+    public PagedList<RoleAssignmentInner> listRoleAssignmentsByPrincipalId(String principalId) {
+        return handleAuthException(() -> getRoleAssignments().inner().list(String.format("$filter=principalId eq %s", principalId)));
     }
 
     public boolean checkIdentityRoleAssignement(String identityId, String scopeId) {
         Identity identity = getIdentityById(identityId);
-        PagedList<RoleAssignment> roleAssignments = listIdentityRoleAssignmentsByScope(scopeId);
+        PagedList<RoleAssignment> roleAssignments = listRoleAssignmentsByScope(scopeId);
         return roleAssignments.stream().anyMatch(roleAssignment -> roleAssignment.principalId() != null &&
                 roleAssignment.principalId().equalsIgnoreCase(identity.principalId()));
     }
