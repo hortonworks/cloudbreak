@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
+import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.domain.Region;
@@ -140,9 +141,16 @@ public class EnvironmentModificationService {
         if (networkChanged(editDto)) {
             Optional<BaseNetwork> original = networkService.findByEnvironment(environment.getId());
             original.ifPresent(baseNetwork -> editDto.getNetworkDto().setId(baseNetwork.getId()));
-            BaseNetwork network = createAndSetNetwork(environment, editDto.getNetworkDto(), editDto.getAccountId());
-            if (network != null) {
-                environment.setNetwork(network);
+            try {
+                BaseNetwork network = createAndSetNetwork(environment, editDto.getNetworkDto(), editDto.getAccountId());
+                if (network != null) {
+                    environment.setNetwork(network);
+                }
+            } catch (Exception e) {
+                environment.setStatus(EnvironmentStatus.UPDATE_FAILED);
+                environment.setStatusReason(e.getMessage());
+                environmentService.save(environment);
+                throw e;
             }
         }
     }
