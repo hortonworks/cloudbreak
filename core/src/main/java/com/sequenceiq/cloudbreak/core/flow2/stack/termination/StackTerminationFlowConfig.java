@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
+import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.CCM_KEY_DEREGISTER_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.CCM_KEY_DEREGISTER_SUCCEEDED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.CLUSTER_PROXY_DEREGISTER_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.CLUSTER_PROXY_DEREGISTER_SUCCEEDED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.PRE_TERMINATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.PRE_TERMINATION_FINISHED_EVENT;
@@ -35,9 +37,9 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
                     .from(PRE_TERMINATION_STATE).to(CLUSTER_PROXY_DEREGISTER_STATE).event(PRE_TERMINATION_FINISHED_EVENT)
                     .failureEvent(PRE_TERMINATION_FAILED_EVENT)
                     .from(CLUSTER_PROXY_DEREGISTER_STATE).to(CCM_KEY_DEREGISTER_STATE).event(CLUSTER_PROXY_DEREGISTER_SUCCEEDED_EVENT)
-                    .defaultFailureEvent()
+                    .failureEvent(CLUSTER_PROXY_DEREGISTER_FAILED_EVENT)
                     .from(CCM_KEY_DEREGISTER_STATE).to(TERMINATION_STATE).event(CCM_KEY_DEREGISTER_SUCCEEDED_EVENT)
-                    .noFailureEvent()
+                    .failureEvent(CCM_KEY_DEREGISTER_FAILED_EVENT)
                     .from(TERMINATION_STATE).to(TERMINATION_FINISHED_STATE).event(TERMINATION_FINISHED_EVENT).defaultFailureEvent()
                     .from(TERMINATION_FINISHED_STATE).to(FINAL_STATE).event(TERMINATION_FINALIZED_EVENT).defaultFailureEvent()
                     .build();
