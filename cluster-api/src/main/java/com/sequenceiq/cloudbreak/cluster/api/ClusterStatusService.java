@@ -20,4 +20,6 @@ public interface ClusterStatusService {
     Map<String, ClusterManagerState> getExtendedHostStatuses();
 
     Map<String, String> getHostStatusesRaw();
+
+    boolean isClusterManagerRunning();
 }

@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.R
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.VDF_REPO_KEY_PREFIX;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
+import static java.util.stream.Collectors.joining;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -76,6 +77,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
@@ -972,29 +974,55 @@ public class ClusterService {
     public Cluster updateClusterMetadata(Long stackId) {
         Stack stack = stackService.getById(stackId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        Map<String, ClusterManagerState> hostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
         Set<InstanceMetaData> notTerminatedInstanceMetaDatas = instanceMetaDataService.findNotTerminatedForStack(stackId);
-        try {
-            return transactionService.required(() -> {
-                for (InstanceMetaData instanceMetaData : notTerminatedInstanceMetaDatas) {
-                    if (instanceMetaData.getInstanceStatus().equals(InstanceStatus.SERVICES_RUNNING)) {
-                        ClusterManagerState clusterManagerState = hostStatuses.get(instanceMetaData.getDiscoveryFQDN());
-                        InstanceStatus newState = ClusterManagerState.ClusterManagerStatus.HEALTHY.equals(clusterManagerState.getClusterManagerStatus()) ?
-                                InstanceStatus.SERVICES_HEALTHY : InstanceStatus.SERVICES_UNHEALTHY;
-                        instanceMetaData.setInstanceStatus(newState);
-                        instanceMetaData.setStatusReason(clusterManagerState.getStatusReason());
-                        instanceMetaDataService.save(instanceMetaData);
-                        // TODO: don't send events one by one and save all of the instancemetadata with one repo call
-                        eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                                cloudbreakMessagesService.getMessage(Msg.CLUSTER_HOST_STATUS_UPDATED.code(),
-                                        Arrays.asList(instanceMetaData.getDiscoveryFQDN(), newState.name())));
-                    }
-                }
-                return stack.getCluster();
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
+        if (!connector.clusterStatusService().isClusterManagerRunning()) {
+            InstanceMetaData cmInstance = updateClusterManagerHostStatus(notTerminatedInstanceMetaDatas);
+            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), cloudbreakMessagesService.getMessage(Msg.CLUSTER_HOST_STATUS_UPDATED.code(),
+                    Arrays.asList(cmInstance.getDiscoveryFQDN(), cmInstance.getInstanceStatus().name())));
+            return stack.getCluster();
+        } else {
+            Map<String, ClusterManagerState> hostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
+            try {
+                return transactionService.required(() -> {
+                    List<InstanceMetaData> updatedInstanceMetaData = updateInstanceStatuses(notTerminatedInstanceMetaDatas, hostStatuses);
+                    instanceMetaDataService.saveAll(updatedInstanceMetaData);
+                    fireHostStatusUpdateNotification(stack, updatedInstanceMetaData);
+                    return stack.getCluster();
+                });
+            } catch (TransactionExecutionException e) {
+                throw new TransactionRuntimeExecutionException(e);
+            }
         }
+    }
+
+    private InstanceMetaData updateClusterManagerHostStatus(Set<InstanceMetaData> notTerminatedInstanceMetaDatas) {
+        InstanceMetaData cmInstance = notTerminatedInstanceMetaDatas.stream().filter(InstanceMetaData::getClusterManagerServer).findFirst()
+                .orElseThrow(() -> new CloudbreakServiceException("Cluster manager inaccessible, and the corresponding instance metadata not found."));
+        cmInstance.setInstanceStatus(InstanceStatus.SERVICES_UNHEALTHY);
+        cmInstance.setStatusReason("Cluster manager inaccessible.");
+        instanceMetaDataService.save(cmInstance);
+        return cmInstance;
+    }
+
+    private void fireHostStatusUpdateNotification(Stack stack, List<InstanceMetaData> updatedInstanceMetaData) {
+        String hostNotificationMessage = updatedInstanceMetaData.stream()
+                .map(instanceMetaData -> cloudbreakMessagesService.getMessage(Msg.CLUSTER_HOST_STATUS_UPDATED.code(),
+                        Arrays.asList(instanceMetaData.getDiscoveryFQDN(), instanceMetaData.getInstanceStatus().name())))
+                .collect(joining("; "));
+        eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), hostNotificationMessage);
+    }
+
+    private List<InstanceMetaData> updateInstanceStatuses(Set<InstanceMetaData> notTerminatedInstanceMetaDatas, Map<String, ClusterManagerState> hostStatuses) {
+        return notTerminatedInstanceMetaDatas.stream()
+                .filter(instanceMetaData -> InstanceStatus.SERVICES_RUNNING.equals(instanceMetaData.getInstanceStatus()))
+                .map(instanceMetaData -> {
+                    ClusterManagerState clusterManagerState = hostStatuses.get(instanceMetaData.getDiscoveryFQDN());
+                    InstanceStatus newState = ClusterManagerStatus.HEALTHY.equals(clusterManagerState.getClusterManagerStatus()) ?
+                            InstanceStatus.SERVICES_HEALTHY : InstanceStatus.SERVICES_UNHEALTHY;
+                    instanceMetaData.setInstanceStatus(newState);
+                    instanceMetaData.setStatusReason(clusterManagerState.getStatusReason());
+                    return instanceMetaData;
+                }).collect(Collectors.toList());
     }
 
     public Cluster recreate(Stack stack, String blueprintName, Set<HostGroup> hostGroups, boolean validateBlueprint,
