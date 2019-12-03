@@ -41,7 +41,8 @@ public class ThreadBasedUserCrnProvider {
         }
         if (!stack.isEmpty() && !stack.peek().equals(userCrn)) {
             LOGGER.error("Trying to push crn to stack {} when it already contains {}", userCrn, stack.get(0));
-            throw new IllegalStateException(String.format("Trying to push crn to stack %s when it already contains %s", userCrn, stack.get(0)));
+            // REMOVE IT UNTIL WE FIX
+            // throw new IllegalStateException(String.format("Trying to push crn to stack %s when it already contains %s", userCrn, stack.get(0)));
         }
         stack.push(userCrn);
     }
