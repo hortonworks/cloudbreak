@@ -39,7 +39,7 @@ Add the following to the file named `Profile` under the `cbd-local` directory yo
 Please note that the full path needs to be configured and env variables like `$USER` cannot be used. You also have to set a password for your local Cloudbreak in `UAA_DEFAULT_USER_PW`:
 
 ```
-export CB_LOCAL_DEV_LIST=cloudbreak,redbeams,environment,environmentservice,datalake,freeipa
+export CB_LOCAL_DEV_LIST=
 export UAA_DEFAULT_SECRET=cbsecret2015
 export CB_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/core/src/main/resources/schema
 export ENVIRONMENT_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/environment/src/main/resources/schema
@@ -51,7 +51,21 @@ export VAULT_AUTO_UNSEAL=true
 export DPS_VERSION=2.0.0.0-142
 ```
 
-In order to run Cloudbreak, Periscope, Datalake, FreeIPA, Redbeams, Environment, Auth Mock, IDBroker Mapping Management, and Environments2 API services locally (from IDEA or the command line), put this into your `Profile`:
+If you are using AWS, then also add the following lines, substituting your workload account id, and the AWS credentials that you have created for the CB role.
+
+```
+export CB_AWS_ACCOUNT_ID="THE_WORKLOAD_ACCOUNT_ID_PROBABLY_069336058373"
+export AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY"
+export AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY"
+
+```
+
+At first, yous should every service from cbd to check your that your cloud environment is set up correctly.
+```
+export CB_LOCAL_DEV_LIST=
+```
+
+When this setup works, you can remove services from cbd, and run them locally. For example, in order to run Cloudbreak, Periscope, Datalake, FreeIPA, Redbeams, Environment, Auth Mock, IDBroker Mapping Management, and Environments2 API services locally (from IDEA or the command line), put this into your `Profile`:
 ```
 export CB_LOCAL_DEV_LIST=cloudbreak,periscope,datalake,freeipa,redbeams,environment,auth-mock,idbmms,environments2-api
 ```
@@ -171,6 +185,13 @@ To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.Clou
 
 Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
 
+then add these entries to the environment variables (the same values the you set in Profile):
+```
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+CB_AWS_ACCOUNT_ID=
+```
+
 The database migration scripts are run automatically by Cloudbreak, but this migration can be turned off with the `-Dcb.schema.migration.auto=false` JVM option.
 
 ### Configure Before launch task
@@ -225,6 +246,13 @@ After importing the `cloudbreak` repo root, launch the FreeIPA application by ex
 
 Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
 
+then add these entries to the environment variables (the same values the you set in Profile):
+```
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+CB_AWS_ACCOUNT_ID=
+```
+
 ### Running Redbeams in IDEA
 
 After importing the `cloudbreak` repo root, launch the Redbeams application by executing the `com.sequenceiq.redbeams.RedbeamsApplication` class (set `Use classpath of module` to `cloudbreak.redbeams.main`) with the following JVM options:
@@ -241,6 +269,13 @@ After importing the `cloudbreak` repo root, launch the Redbeams application by e
 
 Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
 
+then add these entries to the environment variables (the same values the you set in Profile):
+```
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+CB_AWS_ACCOUNT_ID=
+```
+
 ### Running the Environment service in IDEA
 
 After importing the `cloudbreak` repo root, launch the Environment application by executing the `com.sequenceiq.environment.EnvironmentApplication` class (set `Use classpath of module` to `cloudbreak.environment.main`) with the following JVM options:
@@ -252,7 +287,7 @@ After importing the `cloudbreak` repo root, launch the Environment application b
 
 Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
 
-then add these field to the environment variables:
+then add these entries to the environment variables (the same values the you set in Profile):
 ```
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
@@ -272,10 +307,18 @@ Replace `<CBD_LOCAL_ETC>` with the full path of your `cbd-local/etc` directory t
 ## Command line
 
 ### Running Cloudbreak from the Command Line
-To run Cloudbreak from the command line, run the following Gradle command:
+To run Cloudbreak from the command line first set the the AWS environment variables (use the same values as in Profile)
 
 ```
-./gradlew :core:buildInfo :core:bootRun -PjvmArgs="-Dcb.db.port.5432.tcp.addr=localhost \
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+export CB_AWS_ACCOUNT_ID=...
+```
+
+then run the following Gradle command:
+
+```
+./gradlew :core:buildInfo :core:bootRun --no-daemon -PjvmArgs="-Dcb.db.port.5432.tcp.addr=localhost \
 -Dcb.db.port.5432.tcp.port=5432 \
 -Dcb.schema.scripts.location=$(pwd)/core/src/main/resources/schema
 -Dserver.port=9091 \
@@ -285,6 +328,7 @@ To run Cloudbreak from the command line, run the following Gradle command:
 ```
 
 Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
+
 
 The database migration scripts are run automatically by Cloudbreak, this migration can be turned off with the `-Dcb.schema.migration.auto=false` JVM option.
 
@@ -316,10 +360,18 @@ To run Datalake from the command line, run the following Gradle command:
 Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
 
 ### Running FreeIPA from the Command Line
-To run the FreeIPA management service from the command line, run the following Gradle command:
+To run the FreeIPA management service from the command line first set the the AWS environment variables (use the same values as in Profile)
+
+```
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+export CB_AWS_ACCOUNT_ID=...
+```
+
+then run the following Gradle command:
 
 ````
-./gradlew :freeipa:bootRun -PjvmArgs="-Dfreeipa.db.addr=localhost \
+./gradlew :freeipa:bootRun --no-daemon -PjvmArgs="-Dfreeipa.db.addr=localhost \
 -Dserver.port=8090 \
 -Dvault.root.token=<VAULT_ROOT_TOKEN> \
 -Dspring.config.location=$(pwd)/freeipa/src/main/resources/application.yml,$(pwd)/freeipa/build/resources/main/application.properties"
@@ -328,10 +380,18 @@ To run the FreeIPA management service from the command line, run the following G
 Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
 
 ### Running Redbeams from the Command Line
-To run Redbeams from the command line, run the following Gradle command:
+To run the Redbeams from the command line first set the the AWS environment variables (use the same values as in Profile)
 
 ```
-./gradlew :redbeams:bootRun -PjvmArgs="-Dredbeams.db.port.5432.tcp.addr=localhost \
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+export CB_AWS_ACCOUNT_ID=...
+```
+
+then run the following Gradle command:
+
+```
+./gradlew :redbeams:bootRun --no-daemon -PjvmArgs="-Dredbeams.db.port.5432.tcp.addr=localhost \
 -Dredbeams.db.port.5432.tcp.port=5432 \
 -Dredbeams.cloudbreak.url=http://localhost:8080 \
 -Dredbeams.schema.scripts.location=$(pwd)/redbeams/src/main/resources/schema \
@@ -344,7 +404,15 @@ To run Redbeams from the command line, run the following Gradle command:
 Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
 
 ### Running the Environment service from the Command Line
-To run the Environment service from the command line, run the following Gradle command:
+To run the Environment service from the command line first set the the AWS environment variables (use the same values as in Profile)
+
+```
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+export CB_AWS_ACCOUNT_ID=...
+```
+
+then run the following Gradle command:
 
 ```
 ./gradlew :environment:bootRun -PjvmArgs="\
