@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.termination;
 
+import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.CCM_KEY_DEREGISTRATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.CLUSTER_PROXY_DEREGISTRATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.REMOVE_MACHINE_USER_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.STACK_TERMINATION_FAIL_HANDLED_EVENT;
@@ -7,6 +8,7 @@ import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEven
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.TERMINATION_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.TERMINATION_FINALIZED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.TERMINATION_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState.DEREGISTER_CCMKEY_STATE;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState.DEREGISTER_CLUSTERPROXY_STATE;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState.INIT_STATE;
@@ -29,7 +31,8 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
             new Builder<StackTerminationState, StackTerminationEvent>()
                     .defaultFailureEvent(TERMINATION_FAILED_EVENT)
                     .from(INIT_STATE).to(DEREGISTER_CLUSTERPROXY_STATE).event(TERMINATION_EVENT).noFailureEvent()
-                    .from(DEREGISTER_CLUSTERPROXY_STATE).to(REMOVE_MACHINE_USER_STATE).event(CLUSTER_PROXY_DEREGISTRATION_FINISHED_EVENT).noFailureEvent()
+                    .from(DEREGISTER_CLUSTERPROXY_STATE).to(DEREGISTER_CCMKEY_STATE).event(CLUSTER_PROXY_DEREGISTRATION_FINISHED_EVENT).noFailureEvent()
+                    .from(DEREGISTER_CCMKEY_STATE).to(REMOVE_MACHINE_USER_STATE).event(CCM_KEY_DEREGISTRATION_FINISHED_EVENT).noFailureEvent()
                     .from(REMOVE_MACHINE_USER_STATE).to(TERMINATION_STATE).event(REMOVE_MACHINE_USER_FINISHED_EVENT).noFailureEvent()
                     .from(TERMINATION_STATE).to(TERMINATION_FINISHED_STATE).event(TERMINATION_FINISHED_EVENT).defaultFailureEvent()
                     .from(TERMINATION_FINISHED_STATE).to(FINAL_STATE).event(TERMINATION_FINALIZED_EVENT).defaultFailureEvent()

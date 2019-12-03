@@ -132,7 +132,7 @@ public class StackUpscaleService {
     public void setupTls(StackContext context) throws CloudbreakException {
         Stack stack = context.getStack();
         for (InstanceMetaData gwInstance : stack.getGatewayInstanceMetadata()) {
-            if (CREATED.equals(gwInstance.getInstanceStatus())) {
+            if (!stack.getTunnel().useCcm() && CREATED.equals(gwInstance.getInstanceStatus())) {
                 tlsSetupService.setupTls(stack, gwInstance);
             }
         }

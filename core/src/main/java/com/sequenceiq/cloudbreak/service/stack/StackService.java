@@ -138,8 +138,6 @@ public class StackService implements ResourceIdProvider {
 
     private static final String SSH_USER_CB = "cloudbreak";
 
-    private static final int CCM_KEY_ID_LENGTH = 36;
-
     @Inject
     private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
 

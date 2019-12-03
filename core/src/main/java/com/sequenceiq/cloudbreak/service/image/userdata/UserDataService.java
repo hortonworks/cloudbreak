@@ -9,7 +9,6 @@ import java.util.concurrent.Future;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,7 @@ import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
+import com.sequenceiq.cloudbreak.ccm.key.CcmResourceUtil;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -104,8 +104,7 @@ public class UserDataService {
 
             String accountId = threadBasedUserCrnProvider.getAccountId();
             String userCrn = threadBasedUserCrnProvider.getUserCrn();
-            // JSA TODO Use stack ID or something else instead?
-            String keyId = StringUtils.right(stack.getResourceCrn(), CCM_KEY_ID_LENGTH);
+            String keyId = CcmResourceUtil.getKeyId(stack.getResourceCrn());
             String actorCrn = Objects.requireNonNull(userCrn, "userCrn is null");
             ccmParameters = ccmParameterSupplier.getCcmParameters(actorCrn, accountId, keyId, tunneledServicePorts).orElse(null);
         }

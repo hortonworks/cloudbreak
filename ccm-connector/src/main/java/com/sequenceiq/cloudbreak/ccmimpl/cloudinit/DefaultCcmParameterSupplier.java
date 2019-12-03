@@ -29,6 +29,8 @@ import com.sequenceiq.cloudbreak.ccm.endpoint.BaseServiceEndpoint;
 import com.sequenceiq.cloudbreak.ccm.endpoint.HostEndpoint;
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.ccmimpl.altus.GrpcMinaSshdManagementClient;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 /**
  * Default supplier of CCM parameters, which:
@@ -53,8 +55,13 @@ public class DefaultCcmParameterSupplier implements CcmParameterSupplier {
         if (grpcMinaSshdManagementClient == null) {
             return Optional.empty();
         }
-        // JSA TODO get request ID from somewhere?
-        String requestId = UUID.randomUUID().toString();
+        String requestId = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()))
+                .orElseGet(() -> {
+                    String s = UUID.randomUUID().toString();
+                    LOGGER.debug("No requestId found. Setting request id to new UUID [{}]", s);
+                    MDCBuilder.addRequestId(s);
+                    return s;
+                });
         try {
             MinaSshdService minaSshdService = grpcMinaSshdManagementClient.acquireMinaSshdServiceAndWaitUntilReady(
                     requestId,

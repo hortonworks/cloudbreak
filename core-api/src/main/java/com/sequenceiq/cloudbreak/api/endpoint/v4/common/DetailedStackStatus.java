@@ -45,6 +45,7 @@ public enum DetailedStackStatus {
     // Termination statuses
     PRE_DELETE_IN_PROGRESS(Status.PRE_DELETE_IN_PROGRESS),
     DELETE_IN_PROGRESS(Status.DELETE_IN_PROGRESS),
+    DEREGISTERING_CCM_KEY(Status.DELETE_IN_PROGRESS),
     DELETE_COMPLETED(Status.DELETE_COMPLETED),
     DELETE_FAILED(Status.DELETE_FAILED),
     // Rollback statuses
