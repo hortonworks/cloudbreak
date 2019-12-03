@@ -37,9 +37,6 @@ public class RecipesV4Controller extends NotificationController implements Recip
     @Inject
     private ConverterUtil converterUtil;
 
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     @Override
     public RecipeViewV4Responses list(Long workspaceId) {
         Set<RecipeView> allViewByWorkspaceId = recipeService.findAllViewByWorkspaceId(workspaceId);
@@ -60,8 +57,8 @@ public class RecipesV4Controller extends NotificationController implements Recip
 
     @Override
     public RecipeV4Response post(Long workspaceId, RecipeV4Request request) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        String creator = threadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String creator = ThreadBasedUserCrnProvider.getUserCrn();
         Recipe recipeToSave = converterUtil.convert(request, Recipe.class);
         Recipe recipe = recipeService.createForLoggedInUser(recipeToSave, workspaceId, accountId, creator);
         notify(ResourceEvent.RECIPE_CREATED);

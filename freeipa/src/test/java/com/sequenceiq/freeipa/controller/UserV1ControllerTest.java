@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,13 +53,14 @@ public class UserV1ControllerTest {
     @Mock
     private OperationStatusService operationStatusService;
 
-    @Mock
-    private ThreadBasedUserCrnProvider threadBaseUserCrnProvider;
+    @BeforeEach
+    public void init() {
+        ThreadBasedUserCrnProvider.removeUserCrn();
+    }
 
     @Test
     void synchronizeUser() {
-        when(threadBaseUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
-        when(threadBaseUserCrnProvider.getAccountId()).thenReturn(ACCOUNT_ID);
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
 
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(userService.synchronizeUsers(any(), any(), any(), any(), any())).thenReturn(status);
@@ -72,8 +74,7 @@ public class UserV1ControllerTest {
 
     @Test
     void synchronizeUserMachineUser() {
-        when(threadBaseUserCrnProvider.getUserCrn()).thenReturn(MACHINE_USER_CRN);
-        when(threadBaseUserCrnProvider.getAccountId()).thenReturn(ACCOUNT_ID);
+        ThreadBasedUserCrnProvider.setUserCrn(MACHINE_USER_CRN);
 
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(userService.synchronizeUsers(any(), any(), any(), any(), any())).thenReturn(status);
@@ -87,8 +88,7 @@ public class UserV1ControllerTest {
 
     @Test
     void synchronizeUserRejected() {
-        when(threadBaseUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
-        when(threadBaseUserCrnProvider.getAccountId()).thenReturn(ACCOUNT_ID);
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
 
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(status.getStatus()).thenReturn(SynchronizationStatus.REJECTED);
@@ -101,8 +101,7 @@ public class UserV1ControllerTest {
 
     @Test
     void synchronizeAllUsers() {
-        when(threadBaseUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
-        when(threadBaseUserCrnProvider.getAccountId()).thenReturn(ACCOUNT_ID);
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
 
         Set<String> environments = Set.of(ENV_CRN);
         Set<String> users = Set.of(USER_CRN);
@@ -122,8 +121,7 @@ public class UserV1ControllerTest {
 
     @Test
     void synchronizeAllUsersRejected() {
-        when(threadBaseUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
-        when(threadBaseUserCrnProvider.getAccountId()).thenReturn(ACCOUNT_ID);
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
 
         Set<String> environments = Set.of(ENV_CRN);
         Set<String> users = Set.of(USER_CRN);
@@ -162,8 +160,7 @@ public class UserV1ControllerTest {
 
     @Test
     void setPassword() {
-        when(threadBaseUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
-        when(threadBaseUserCrnProvider.getAccountId()).thenReturn(ACCOUNT_ID);
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
 
         String password = "password";
         SetPasswordRequest request = mock(SetPasswordRequest.class);
@@ -179,8 +176,7 @@ public class UserV1ControllerTest {
 
     @Test
     void setPasswordRejected() {
-        when(threadBaseUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
-        when(threadBaseUserCrnProvider.getAccountId()).thenReturn(ACCOUNT_ID);
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
 
         String password = "password";
         SetPasswordRequest request = mock(SetPasswordRequest.class);

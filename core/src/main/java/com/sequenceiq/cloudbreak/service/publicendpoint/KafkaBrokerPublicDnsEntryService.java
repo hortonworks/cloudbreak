@@ -32,9 +32,6 @@ public class KafkaBrokerPublicDnsEntryService extends BasePublicEndpointManageme
     private EnvironmentClientService environmentClientService;
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private ComponentLocatorService componentLocatorService;
 
     public Map<String, String> register(Stack stack) {
@@ -90,8 +87,8 @@ public class KafkaBrokerPublicDnsEntryService extends BasePublicEndpointManageme
 
     private Map<String, String> doRegister(Map<String, String> ipsByFqdn, String environmentCrn) {
         LOGGER.info("Register DNS entries for Kafka brokers for FQDNs: '{}'", String.join(",", ipsByFqdn.keySet()));
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(environmentCrn);
 
         return ipsByFqdn
@@ -104,8 +101,8 @@ public class KafkaBrokerPublicDnsEntryService extends BasePublicEndpointManageme
 
     private Map<String, String> doDeregister(Map<String, String> ipsByFqdn, String environmentCrn) {
         LOGGER.info("Deregister DNS entries for Kafka brokers for FQDNs: '{}'", String.join(",", ipsByFqdn.keySet()));
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(environmentCrn);
 
         return ipsByFqdn

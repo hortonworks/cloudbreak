@@ -21,16 +21,13 @@ public class InternalCrnModifier {
     private static final Logger LOGGER = LoggerFactory.getLogger(InternalCrnModifier.class);
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private InternalUserModifier internalUserModifier;
 
     @Inject
     private ReflectionUtil reflectionUtil;
 
     public Object changeInternalCrn(ProceedingJoinPoint proceedingJoinPoint) {
-        String userCrnString = threadBasedUserCrnProvider.getUserCrn();
+        String userCrnString = ThreadBasedUserCrnProvider.getUserCrn();
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
         if (userCrnString != null && InternalCrnBuilder.isInternalCrn(userCrnString)) {
             Optional<Object> resourceCrn = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class);
@@ -45,8 +42,8 @@ public class InternalCrnModifier {
                         .setResource(userCrn.getResource())
                         .build();
                 LOGGER.debug("Changing internal CRN to {}", newUserCrn);
-                threadBasedUserCrnProvider.removeUserCrn();
-                threadBasedUserCrnProvider.setUserCrn(newUserCrn.toString());
+                ThreadBasedUserCrnProvider.removeUserCrn();
+                ThreadBasedUserCrnProvider.setUserCrn(newUserCrn.toString());
                 createNewUser(newUserCrn);
             }
         }

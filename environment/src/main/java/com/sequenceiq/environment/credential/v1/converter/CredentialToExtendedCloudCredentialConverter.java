@@ -12,18 +12,14 @@ public class CredentialToExtendedCloudCredentialConverter {
 
     private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
-    private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    public CredentialToExtendedCloudCredentialConverter(CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
-            ThreadBasedUserCrnProvider threadBasedUserCrnProvider) {
+    public CredentialToExtendedCloudCredentialConverter(CredentialToCloudCredentialConverter credentialToCloudCredentialConverter) {
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
-        this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
     }
 
     public ExtendedCloudCredential convert(Credential credential) {
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return new ExtendedCloudCredential(cloudCredential, credential.getCloudPlatform(), credential.getDescription(), userCrn, accountId);
     }
 }

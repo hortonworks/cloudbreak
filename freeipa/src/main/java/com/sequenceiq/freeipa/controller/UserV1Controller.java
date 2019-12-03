@@ -37,13 +37,10 @@ public class UserV1Controller implements UserV1Endpoint {
     @Inject
     private OperationStatusService operationStatusService;
 
-    @Inject
-    private ThreadBasedUserCrnProvider threadBaseUserCrnProvider;
-
     @Override
     public SyncOperationStatus synchronizeUser(SynchronizeUserRequest request) {
         String userCrn = checkUserCrn();
-        String accountId = threadBaseUserCrnProvider.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         LOGGER.debug("synchronizeUser() requested for user {} in account {}", userCrn, accountId);
         Set<String> environmentCrnFilter = request == null ? Set.of() : nullToEmpty(request.getEnvironments());
         Set<String> userCrnFilter = Set.of();
@@ -66,7 +63,7 @@ public class UserV1Controller implements UserV1Endpoint {
     @Override
     public SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request) {
         String userCrn = checkUserCrn();
-        String accountId = threadBaseUserCrnProvider.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         LOGGER.debug("synchronizeAllUsers() requested for account {}", accountId);
 
         return checkOperationRejected(userService.synchronizeUsers(accountId, userCrn, nullToEmpty(request.getEnvironments()),
@@ -76,7 +73,7 @@ public class UserV1Controller implements UserV1Endpoint {
     @Override
     public SyncOperationStatus setPassword(SetPasswordRequest request) {
         String userCrn = checkUserCrn();
-        String accountId = threadBaseUserCrnProvider.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         LOGGER.debug("setPassword() requested for user {} in account {}", userCrn, accountId);
 
         return checkOperationRejected(passwordService.setPassword(accountId, userCrn, userCrn, request.getPassword(),
@@ -97,7 +94,7 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     private String checkUserCrn() {
-        String userCrn = threadBaseUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         if (userCrn == null) {
             throw new BadRequestException("User CRN must be provided");
         }

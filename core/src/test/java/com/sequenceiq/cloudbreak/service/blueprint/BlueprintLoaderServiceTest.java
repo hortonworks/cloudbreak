@@ -19,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
@@ -62,9 +61,6 @@ public class BlueprintLoaderServiceTest {
 
     @Mock
     private Workspace workspace;
-
-    @Mock
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Test
     public void testWhenUserHaveAllTheDefaultBlueprintThenReturnFalse() {

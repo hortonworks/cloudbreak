@@ -36,45 +36,41 @@ public class ProxyController extends NotificationController implements ProxyEndp
 
     private final ProxyRequestToProxyConfigConverter proxyRequestToProxyConfigConverter;
 
-    private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     public ProxyController(ProxyConfigService proxyConfigService,
             ProxyConfigToProxyRequestConverter proxyConfigToProxyRequestConverter,
             ProxyConfigToProxyResponseConverter proxyConfigToProxyResponseConverter,
-            ProxyRequestToProxyConfigConverter proxyRequestToProxyConfigConverter,
-            ThreadBasedUserCrnProvider threadBasedUserCrnProvider) {
+            ProxyRequestToProxyConfigConverter proxyRequestToProxyConfigConverter) {
         this.proxyConfigService = proxyConfigService;
         this.proxyConfigToProxyRequestConverter = proxyConfigToProxyRequestConverter;
         this.proxyConfigToProxyResponseConverter = proxyConfigToProxyResponseConverter;
         this.proxyRequestToProxyConfigConverter = proxyRequestToProxyConfigConverter;
-        this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
     }
 
     @Override
     public ProxyResponses list() {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Set<ProxyConfig> listInAccount = proxyConfigService.listInAccount(accountId);
         return new ProxyResponses(new HashSet<>(proxyConfigToProxyResponseConverter.convert(listInAccount)));
     }
 
     @Override
     public ProxyResponse getByName(String name) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         ProxyConfig config = proxyConfigService.getByNameForAccountId(name, accountId);
         return proxyConfigToProxyResponseConverter.convert(config);
     }
 
     @Override
     public ProxyResponse getByResourceCrn(String crn) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         ProxyConfig config = proxyConfigService.getByCrnForAccountId(crn, accountId);
         return proxyConfigToProxyResponseConverter.convert(config);
     }
 
     @Override
     public ProxyResponse post(ProxyRequest request) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        String creator = threadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String creator = ThreadBasedUserCrnProvider.getUserCrn();
         ProxyConfig proxyConfig = proxyRequestToProxyConfigConverter.convert(request);
         notify(ResourceEvent.PROXY_CONFIG_CREATED);
         return proxyConfigToProxyResponseConverter
@@ -84,7 +80,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     @Override
     public ProxyResponse deleteByName(String name) {
         ProxyResponse proxyResponse = proxyConfigToProxyResponseConverter.convert(
-                proxyConfigService.deleteByNameInAccount(name, threadBasedUserCrnProvider.getAccountId()));
+                proxyConfigService.deleteByNameInAccount(name, ThreadBasedUserCrnProvider.getAccountId()));
         notify(ResourceEvent.PROXY_CONFIG_DELETED);
         return proxyResponse;
     }
@@ -92,7 +88,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     @Override
     public ProxyResponse deleteByCrn(String crn) {
         ProxyResponse proxyResponse = proxyConfigToProxyResponseConverter.convert(
-                proxyConfigService.deleteByCrnInAccount(crn, threadBasedUserCrnProvider.getAccountId()));
+                proxyConfigService.deleteByCrnInAccount(crn, ThreadBasedUserCrnProvider.getAccountId()));
         notify(ResourceEvent.PROXY_CONFIG_DELETED);
         return proxyResponse;
     }
@@ -100,7 +96,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     @Override
     public ProxyResponses deleteMultiple(Set<String> names) {
         notify(ResourceEvent.PROXY_CONFIG_DELETED);
-        Set<ProxyConfig> responses = proxyConfigService.deleteMultipleInAccount(names, threadBasedUserCrnProvider.getAccountId());
+        Set<ProxyConfig> responses = proxyConfigService.deleteMultipleInAccount(names, ThreadBasedUserCrnProvider.getAccountId());
         return new ProxyResponses(responses
                 .stream()
                 .map(p -> proxyConfigToProxyResponseConverter.convert(p))

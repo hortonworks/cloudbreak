@@ -33,9 +33,6 @@ public class InteractiveCredentialCreationStatusHandler implements EventHandler<
     @Inject
     private NotificationService notificationService;
 
-    @Inject
-    private ThreadBasedUserCrnProvider threadBaseUserCrnProvider;
-
     @Override
     public String selector() {
         return EventSelectorUtil.selector(InteractiveCredentialCreationStatus.class);
@@ -44,7 +41,7 @@ public class InteractiveCredentialCreationStatusHandler implements EventHandler<
     @Override
     public void accept(Event<InteractiveCredentialCreationStatus> interactiveCredentialCreationStatusEvent) {
         InteractiveCredentialCreationStatus interactiveCredentialCreationStatus = interactiveCredentialCreationStatusEvent.getData();
-        threadBaseUserCrnProvider.setUserCrn(interactiveCredentialCreationStatus.getCloudContext().getUserId());
+        ThreadBasedUserCrnProvider.setUserCrn(interactiveCredentialCreationStatus.getCloudContext().getUserId());
         String message = interactiveCredentialCreationStatus.getMessage();
         InteractiveCredentialNotification notification = new InteractiveCredentialNotification()
                 .withEventTimestamp(new Date().getTime())
@@ -61,7 +58,7 @@ public class InteractiveCredentialCreationStatusHandler implements EventHandler<
             notification.withEventType(event.name());
             LOGGER.info("Interactive credential creation success status: {}", new Json(notification).getValue());
         }
-        notificationService.send(event, notification, threadBaseUserCrnProvider.getAccountId());
+        notificationService.send(event, notification, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     static class InteractiveCredentialNotification {

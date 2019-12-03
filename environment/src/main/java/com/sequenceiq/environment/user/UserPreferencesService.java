@@ -17,15 +17,12 @@ public class UserPreferencesService {
 
     private final UserPreferencesRepository userPreferencesRepository;
 
-    private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    public UserPreferencesService(UserPreferencesRepository userPreferencesRepository, ThreadBasedUserCrnProvider threadBasedUserCrnProvider) {
+    public UserPreferencesService(UserPreferencesRepository userPreferencesRepository) {
         this.userPreferencesRepository = userPreferencesRepository;
-        this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
     }
 
     public String getExternalIdForCurrentUser() {
-        return getExternalId(threadBasedUserCrnProvider.getUserCrn());
+        return getExternalId(ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     public String getExternalId(String userCrn) {

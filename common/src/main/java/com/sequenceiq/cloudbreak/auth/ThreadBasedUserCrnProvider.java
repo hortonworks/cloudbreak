@@ -1,30 +1,31 @@
 package com.sequenceiq.cloudbreak.auth;
 
+import java.util.Arrays;
 import java.util.Optional;
-import java.util.Stack;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 
-@Service
 public class ThreadBasedUserCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadBasedUserCrnProvider.class);
 
-    private static final ThreadLocal<Stack<String>> USER_CRN = new ThreadLocal<>();
+    private static final ThreadLocal<String> USER_CRN = new ThreadLocal<>();
 
-    @Nullable
-    public String getUserCrn() {
-        Stack<String> stack = USER_CRN.get();
-        return stack != null ? stack.peek() : null;
+    private ThreadBasedUserCrnProvider() {
     }
 
-    public String getAccountId() {
+    @Nullable
+    public static String getUserCrn() {
+        return USER_CRN.get();
+    }
+
+    public static String getAccountId() {
         String userCrn = getUserCrn();
         if (userCrn != null) {
             return Optional.ofNullable(Crn.fromString(userCrn)).orElseThrow(() -> new IllegalStateException("Unable to obtain crn!")).getAccountId();
@@ -33,27 +34,20 @@ public class ThreadBasedUserCrnProvider {
         }
     }
 
-    public void setUserCrn(String userCrn) {
-        Stack<String> stack = USER_CRN.get();
-        if (stack == null) {
-            stack = new Stack<>();
-            USER_CRN.set(stack);
+    public static void setUserCrn(String userCrn) {
+        if (USER_CRN.get() != null) {
+            String errorMessage = String.format("Trying to set crn %s when it already contains %s, please check where we didn't remove it!",
+                    userCrn, USER_CRN.get());
+            String stackTrace = Arrays.stream(Thread.currentThread().getStackTrace())
+                    .map(StackTraceElement::toString).collect(Collectors.joining("\n", "\n", "\n"));
+            LOGGER.error(errorMessage + " Stack trace on thread: " + stackTrace);
+            throw new IllegalStateException(errorMessage);
+        } else {
+            USER_CRN.set(userCrn);
         }
-        if (!stack.isEmpty() && !stack.peek().equals(userCrn)) {
-            LOGGER.error("Trying to push crn to stack {} when it already contains {}", userCrn, stack.get(0));
-            // REMOVE IT UNTIL WE FIX
-            // throw new IllegalStateException(String.format("Trying to push crn to stack %s when it already contains %s", userCrn, stack.get(0)));
-        }
-        stack.push(userCrn);
     }
 
-    public void removeUserCrn() {
-        Stack<String> stack = USER_CRN.get();
-        if (stack != null) {
-            stack.pop();
-            if (stack.isEmpty()) {
-                USER_CRN.remove();
-            }
-        }
+    public static void removeUserCrn() {
+        USER_CRN.remove();
     }
 }

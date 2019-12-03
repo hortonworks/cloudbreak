@@ -14,17 +14,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CrnFilter extends OncePerRequestFilter {
 
-    private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    public CrnFilter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider) {
-        this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
-    }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String userCrn = request.getHeader("x-cdp-actor-crn");
-        threadBasedUserCrnProvider.setUserCrn(userCrn);
+        ThreadBasedUserCrnProvider.setUserCrn(userCrn);
         filterChain.doFilter(request, response);
-        threadBasedUserCrnProvider.removeUserCrn();
+        ThreadBasedUserCrnProvider.removeUserCrn();
     }
 }

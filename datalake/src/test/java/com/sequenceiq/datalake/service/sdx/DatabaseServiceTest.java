@@ -18,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -41,9 +40,6 @@ public class DatabaseServiceTest {
 
     @Mock
     private RedbeamsServiceCrnClient redbeamsClient;
-
-    @Mock
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Mock
     private SdxNotificationService notificationService;

@@ -19,7 +19,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
@@ -32,9 +31,6 @@ class UsersyncPollerTest {
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
     private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:" + ACCOUNT_ID + ":environment:" + UUID.randomUUID().toString();
-
-    @Mock
-    ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Mock
     StackService stackService;

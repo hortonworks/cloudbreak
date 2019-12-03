@@ -94,9 +94,6 @@ public class SdxService implements ResourceIdProvider {
     private CloudStorageLocationValidator cloudStorageLocationValidator;
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private CloudStorageManifester cloudStorageManifester;
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
@@ -208,13 +205,13 @@ public class SdxService implements ResourceIdProvider {
 
     @Override
     public Long getResourceIdByResourceCrn(String resourceCrn) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return getByCrn(userCrn, resourceCrn).getId();
     }
 
     @Override
     public Long getResourceIdByResourceName(String resourceName) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return getSdxByNameInAccount(userCrn, resourceName).getId();
     }
 

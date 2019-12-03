@@ -55,8 +55,6 @@ public class DefaultServiceEndpointFinder implements ServiceEndpointFinder {
 
     private final ServiceEndpointFinder directServiceEndpointFinder = new DirectServiceEndpointFinder();
 
-    private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider = new ThreadBasedUserCrnProvider();
-
     /**
      * A cache to avoid expensive gRPC calls.
      */
@@ -88,8 +86,8 @@ public class DefaultServiceEndpointFinder implements ServiceEndpointFinder {
             return directServiceEndpointFinder.getServiceEndpoint(serviceEndpointRequest);
         }
 
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        String actorCrn = threadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String actorCrn = ThreadBasedUserCrnProvider.getUserCrn();
         if (actorCrn == null) {
             throw new IllegalStateException("actor CRN unspecified");
         }

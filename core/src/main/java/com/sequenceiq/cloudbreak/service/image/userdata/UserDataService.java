@@ -56,9 +56,6 @@ public class UserDataService {
     private CcmParameterSupplier ccmParameterSupplier;
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private StackService stackService;
 
     @Inject
@@ -66,7 +63,7 @@ public class UserDataService {
 
     public void createUserData(Long stackId) throws CloudbreakImageNotFoundException {
         Stack stack = stackService.getById(stackId);
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Future<PlatformParameters> platformParametersFuture =
                 intermediateBuilderExecutor.submit(() -> connector.getPlatformParameters(stack, userCrn));
         SecurityConfig securityConfig = stack.getSecurityConfig();
@@ -111,8 +108,8 @@ public class UserDataService {
 
             Map<KnownServiceIdentifier, Integer> tunneledServicePorts = builder.build();
 
-            String accountId = threadBasedUserCrnProvider.getAccountId();
-            String userCrn = threadBasedUserCrnProvider.getUserCrn();
+            String accountId = ThreadBasedUserCrnProvider.getAccountId();
+            String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
             String keyId = CcmResourceUtil.getKeyId(stack.getResourceCrn());
             String actorCrn = Objects.requireNonNull(userCrn, "userCrn is null");
             ccmParameters = ccmParameterSupplier.getCcmParameters(actorCrn, accountId, keyId, tunneledServicePorts).orElse(null);

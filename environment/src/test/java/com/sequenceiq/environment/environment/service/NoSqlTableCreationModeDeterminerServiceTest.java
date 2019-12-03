@@ -11,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.NoSqlConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -25,9 +24,6 @@ import com.sequenceiq.environment.parameters.dao.domain.S3GuardTableCreation;
 
 @ExtendWith(MockitoExtension.class)
 class NoSqlTableCreationModeDeterminerServiceTest {
-
-    @Mock
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;

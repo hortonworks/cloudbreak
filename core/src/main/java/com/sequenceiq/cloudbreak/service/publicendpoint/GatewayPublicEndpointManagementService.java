@@ -32,9 +32,6 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     private EnvironmentClientService environmentClientService;
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private SecurityConfigService securityConfigService;
 
     @Inject
@@ -57,8 +54,8 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
 
     public String updateDnsEntry(Stack stack, String gatewayIp) {
         LOGGER.info("Update dns entry");
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
 
         if (StringUtils.isEmpty(gatewayIp)) {
@@ -88,8 +85,8 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     }
 
     public String deleteDnsEntry(Stack stack, String environmentName) {
-        String actorCrn = threadBasedUserCrnProvider.getUserCrn();
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String actorCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         if (StringUtils.isEmpty(environmentName)) {
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
             environmentName = environment.getName();
@@ -110,8 +107,8 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     private boolean generateCertAndSaveForStack(Stack stack) {
         boolean result = false;
         LOGGER.info("Generate cert and save for stack");
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         SecurityConfig securityConfig = stack.getSecurityConfig();
         KeyPair keyPair = getKeyPairForStack(stack);
         try {

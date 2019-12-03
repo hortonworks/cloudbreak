@@ -34,9 +34,6 @@ public class FreeIpaFlowManager {
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private StackService stackService;
 
     private Random random = new Random();
@@ -79,7 +76,7 @@ public class FreeIpaFlowManager {
     }
 
     public Map<String, Object> getHeaderWithUserCrn(Map<String, Object> headers) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Map<String, Object> decoratedHeader;
         decoratedHeader = headers != null ? new HashMap<>(headers) : new HashMap<>();
         if (StringUtils.isNotBlank(userCrn)) {
@@ -96,7 +93,7 @@ public class FreeIpaFlowManager {
     private Map<String, Object> createEventParameters(Long stackId) {
         String userCrn;
         try {
-            userCrn = threadBasedUserCrnProvider.getUserCrn();
+            userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         } catch (RuntimeException ex) {
             userCrn = stackService.getStackById(stackId).getOwner();
         }
