@@ -47,6 +47,9 @@ public abstract class AbstractRdsConfigProvider {
     @Inject
     private SecretService secretService;
 
+    @Inject
+    private DbUsernameConverterService dbUsernameConverterService;
+
     /**
      * Creates a map of database information for this provider's database, suitable for inclusion
      * in a salt pillar. The map usually contains only one key, that being the return value of
@@ -72,7 +75,7 @@ public abstract class AbstractRdsConfigProvider {
                 }
                 String dbName = getDb();
                 postgres.put("database", dbName);
-                postgres.put("user", rdsConfig.getConnectionUserName());
+                postgres.put("user", dbUsernameConverterService.toDatabaseUsername(rdsConfig.getConnectionUserName()));
                 postgres.put("password", rdsConfig.getConnectionPassword());
                 LOGGER.debug("RDS config added to pillar for name: {} databaseEngine: {}", dbName, rdsConfig.getDatabaseEngine());
                 return Collections.singletonMap(getPillarKey(), postgres);
