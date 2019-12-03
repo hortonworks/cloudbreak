@@ -64,7 +64,8 @@ public class AwsCredentialVerifier {
                         .forEach(failedActionList::add);
             }
             if (!failedActionList.isEmpty()) {
-                throw new AwsPermissionMissingException("You don't have permission for these actions which are required: " + failedActionList);
+                throw new AwsPermissionMissingException(String.format("CDP Credential '%s' doesn't have permission for these actions which are required: %s",
+                        awsCredential.getName(), failedActionList));
             }
         } catch (IOException e) {
             throw new IllegalStateException("Can not parse aws policy json", e);
