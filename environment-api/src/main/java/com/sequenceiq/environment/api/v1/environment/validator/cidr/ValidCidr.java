@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.api.v1.environment.validator;
+package com.sequenceiq.environment.api.v1.environment.validator.cidr;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
