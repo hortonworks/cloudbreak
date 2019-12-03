@@ -49,6 +49,7 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
 
         CloudResource volumeSet = buildableResource.stream()
                 .filter(cloudResource -> cloudResource.getType().equals(ResourceType.AZURE_VOLUMESET))
+                .filter(cloudResource -> !instance.getInstanceId().equals(cloudResource.getInstanceId()))
                 .findFirst()
                 .orElseThrow(() -> new AzureResourceException("Volume set resource not found"));
 

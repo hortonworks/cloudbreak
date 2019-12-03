@@ -72,7 +72,7 @@ public class AzureUpscaleService {
             Deployment templateDeployment = azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView);
             LOGGER.info("Created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
             List<CloudResource> newInstances = azureUtils.getInstanceCloudResources(cloudContext, templateDeployment, scaledGroups);
-            List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(resources);
+            List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(resources, newInstances);
             List<CloudResource> networkResources = cloudResourceHelper.getNetworkResources(resources);
             azureComputeResourceService.buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, reattachableVolumeSets, networkResources);
 
@@ -105,10 +105,11 @@ public class AzureUpscaleService {
         return azureStorage.isEncrytionNeeded(stack.getParameters());
     }
 
-    private List<CloudResource> getReattachableVolumeSets(List<CloudResource> resources) {
+    private List<CloudResource> getReattachableVolumeSets(List<CloudResource> resources, List<CloudResource> newInstances) {
         return resources.stream()
                 .filter(cloudResource -> ResourceType.AZURE_VOLUMESET.equals(cloudResource.getType()))
-                .filter(cloudResource -> CommonStatus.DETACHED.equals(cloudResource.getStatus()))
+                .filter(cloudResource -> CommonStatus.DETACHED.equals(cloudResource.getStatus())
+                        || newInstances.stream().anyMatch(inst -> inst.getInstanceId().equals(cloudResource.getInstanceId())))
                 .collect(Collectors.toList());
     }
 }

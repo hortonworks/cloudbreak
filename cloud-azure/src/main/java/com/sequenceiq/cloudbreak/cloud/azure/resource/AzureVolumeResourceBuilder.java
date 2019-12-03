@@ -68,12 +68,14 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         if (Objects.isNull(computeResources) || computeResources.isEmpty()) {
             return null;
         }
-        Optional<CloudResource> reattachableVolumeSet = computeResources.stream()
-                .filter(resource -> ResourceType.AZURE_VOLUMESET.equals(resource.getType()))
-                .findFirst();
-
         CloudResource vm = context.getComputeResources(privateId).stream()
                 .filter(cloudResource -> ResourceType.AZURE_INSTANCE.equals(cloudResource.getType())).findFirst().get();
+
+        Optional<CloudResource> reattachableVolumeSet = computeResources.stream()
+                .filter(resource -> ResourceType.AZURE_VOLUMESET.equals(resource.getType()))
+                .filter(cloudResource -> CommonStatus.DETACHED.equals(cloudResource.getStatus()) || vm.getInstanceId().equals(cloudResource.getInstanceId()))
+                .findFirst();
+
         return List.of(reattachableVolumeSet.orElseGet(createVolumeSet(privateId, auth, group, vm)));
     }
 
@@ -255,7 +257,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         return auth.getParameter(AzureClient.class);
     }
 
-    private VolumeSetAttributes getVolumeSetAttributes(CloudResource volumeSet)  {
+    private VolumeSetAttributes getVolumeSetAttributes(CloudResource volumeSet) {
         return volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
     }
 
