@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow.creation.handler;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.YARN;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_PUBLICKEY_CREATION_EVENT;
@@ -82,6 +83,7 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private boolean hasNetwork(Environment environment) {
         return Objects.nonNull(environment.getNetwork())
                 && !YARN.equalsIgnoreCase(environment.getCloudPlatform())
+                && !MOCK.equalsIgnoreCase(environment.getCloudPlatform())
                 && enabledPlatforms.contains(environment.getCloudPlatform());
     }
 
