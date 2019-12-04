@@ -46,7 +46,6 @@ class CredentialV1ControllerTest {
     @Test
     void testGetPrerequisitesForCloudPlatform() {
         ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
-        ThreadBasedUserCrnProvider.setUserCrn("asd");
         CredentialPrerequisitesResponse credentialPrerequisitesResponse = mock(CredentialPrerequisitesResponse.class);
         when(credentialService.getPrerequisites(PLATFORM, DEPLOYMENT_ADDRESS, USER_CRN)).thenReturn(credentialPrerequisitesResponse);
 
