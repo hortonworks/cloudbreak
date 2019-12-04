@@ -17,11 +17,15 @@ public class TunnelEntry {
     @JsonProperty
     private int port;
 
-    public TunnelEntry(String key, String serviceType, String host, int port) {
+    @JsonProperty
+    private String minaSshdServiceId;
+
+    public TunnelEntry(String key, String serviceType, String host, int port, String minaSshdServiceId) {
         this.key = key;
         this.serviceType = serviceType;
         this.host = host;
         this.port = port;
+        this.minaSshdServiceId = minaSshdServiceId;
     }
 
     @Override
@@ -36,12 +40,13 @@ public class TunnelEntry {
         return port == that.port &&
                 Objects.equals(key, that.key) &&
                 Objects.equals(serviceType, that.serviceType) &&
-                Objects.equals(host, that.host);
+                Objects.equals(host, that.host) &&
+                Objects.equals(minaSshdServiceId, that.minaSshdServiceId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key, serviceType, host, port);
+        return Objects.hash(key, serviceType, host, port, minaSshdServiceId);
     }
 
     @Override
@@ -51,6 +56,7 @@ public class TunnelEntry {
                 ", serviceType='" + serviceType + '\'' +
                 ", host='" + host + '\'' +
                 ", port=" + port +
+                ", minaSshdServiceId=" + minaSshdServiceId +
                 '}';
     }
 }

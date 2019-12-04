@@ -119,7 +119,8 @@ public class DefaultCcmParameterSupplier implements CcmParameterSupplier {
         String ccmHostAddressString = nlbPort.getNlbFqdn();
         int ccmPort = nlbPort.getPort();
         String ccmPublicKey = sshTunnelingConfiguration.getSshdPublicKey().toStringUtf8();
+        String minaSshdServiceId = minaSshdService.getMinaSshdServiceId();
         return new DefaultServerParameters(new BaseServiceEndpoint(new HostEndpoint(ccmHostAddressString), ccmPort, null),
-                "ssh-rsa " + ccmPublicKey + "\n");
+                "ssh-rsa " + ccmPublicKey + "\n", minaSshdServiceId);
     }
 }

@@ -40,8 +40,8 @@ public class DeregisterCcmKeyAction extends AbstractStackTerminationAction<Termi
         String actorCrn = Objects.requireNonNull(userCrn, "userCrn is null");
         String keyId = CcmResourceUtil.getKeyId(stack.getResourceCrn());
 
-        CcmKeyDeregistrationRequest clusterProxyDeregistrationRequest =
-                new CcmKeyDeregistrationRequest(payload.getResourceId(), payload.getForced(), actorCrn, stack.getAccountId(), keyId, stack.getUseCcm());
+        CcmKeyDeregistrationRequest clusterProxyDeregistrationRequest = new CcmKeyDeregistrationRequest(payload.getResourceId(), payload.getForced(), actorCrn,
+                stack.getAccountId(), keyId, stack.getUseCcm(), stack.getMinaSshdServiceId());
 
         sendEvent(context, clusterProxyDeregistrationRequest.selector(), clusterProxyDeregistrationRequest);
     }

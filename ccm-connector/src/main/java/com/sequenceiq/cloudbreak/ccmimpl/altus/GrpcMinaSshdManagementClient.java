@@ -35,11 +35,6 @@ public class GrpcMinaSshdManagementClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcMinaSshdManagementClient.class);
 
-    /**
-     * Dummy minasshd service ID for key deregistration calls.
-     */
-    private static final String DUMMY_MINASSHD_SERVICE_ID = "any";
-
     @VisibleForTesting
     @Autowired(required = false)
     Clock clock = Clock.systemUTC();
@@ -212,12 +207,13 @@ public class GrpcMinaSshdManagementClient {
      * @param actorCrn  the actor CRN
      * @param accountId the account ID
      * @param keyId     the key ID
+     * @param minaSshdServiceId minaSshdServiceId
      * @return the response
      * @throws CcmException         if an exception occurs
      * @throws InterruptedException if the action is interrupted
      */
     public MinaSshdManagementProto.UnregisterSshTunnelingKeyResponse unregisterSshTunnelingKey(
-            String requestId, String actorCrn, String accountId, String keyId) throws CcmException, InterruptedException {
+            String requestId, String actorCrn, String accountId, String keyId, String minaSshdServiceId) throws CcmException, InterruptedException {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             MinaSshdManagementClient client = makeClient(channelWrapper.getChannel(), actorCrn);
 
@@ -228,7 +224,7 @@ public class GrpcMinaSshdManagementClient {
             Supplier<CcmException> timeoutExceptionSupplier = () -> new CcmException(String.format("Timed out while trying to %s", actionDescription), true);
 
             return RetryUtil.performWithRetries(
-                    () -> client.unregisterSshTunnelingKey(requestId, DUMMY_MINASSHD_SERVICE_ID, keyId), actionDescription,
+                    () -> client.unregisterSshTunnelingKey(requestId, minaSshdServiceId, keyId), actionDescription,
                     waitUntilTime, pollingIntervalMillis,
                     CcmException.class, timeoutExceptionSupplier,
                     LOGGER);
