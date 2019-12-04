@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -73,9 +74,12 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -110,6 +114,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -225,6 +230,9 @@ public class ClusterService {
 
     @Inject
     private BlueprintUtils blueprintUtils;
+
+    @Inject
+    private ImageCatalogService imageCatalogService;
 
     @Measure(ClusterService.class)
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
@@ -516,17 +524,17 @@ public class ClusterService {
         Map<String, InstanceMetaData> failedMetaData = new HashMap<>();
         for (String failedNode : failedNodes) {
             instanceMetaDataService.findHostInStack(stack.getId(), failedNode).ifPresentOrElse(instanceMetaData -> {
-                    hostGroupService.getByClusterIdAndName(cluster.getId(), instanceMetaData.getInstanceGroupName()).ifPresent(hostGroup -> {
-                        if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
-                            validateRepair(stack, instanceMetaData);
-                        }
-                        String hostGroupName = hostGroup.getName();
-                        if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
-                            prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryMetadata, failedNode, instanceMetaData, hostGroupName);
-                        } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
-                            failedMetaData.put(failedNode, instanceMetaData);
-                        }
-                    });
+                hostGroupService.getByClusterIdAndName(cluster.getId(), instanceMetaData.getInstanceGroupName()).ifPresent(hostGroup -> {
+                    if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
+                        validateRepair(stack, instanceMetaData);
+                    }
+                    String hostGroupName = hostGroup.getName();
+                    if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
+                        prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryMetadata, failedNode, instanceMetaData, hostGroupName);
+                    } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
+                        failedMetaData.put(failedNode, instanceMetaData);
+                    }
+                });
             }, () -> LOGGER.error("No metadata information for the node: " + failedNode));
         }
         handleChangedHosts(cluster, newHealthyNodes, autoRecoveryNodesMap, autoRecoveryMetadata, failedMetaData);
@@ -610,7 +618,7 @@ public class ClusterService {
     }
 
     private void repairClusterInternal(ManualClusterRepairMode repairMode, Long stackId, List<String> repairedHostGroups,
-        List<String> nodeIds, boolean deleteVolumes, boolean removeOnly, boolean forceRepair) {
+            List<String> nodeIds, boolean deleteVolumes, boolean removeOnly, boolean forceRepair) {
         Map<String, List<String>> failedNodeMap = new HashMap<>();
         try {
             transactionService.required(() -> {
@@ -618,16 +626,20 @@ public class ClusterService {
                     LOGGER.info("Repair cannot be performed, because there is already an active flow. Stack id: {}", stackId);
                     throw new BadRequestException("Repair cannot be performed, because there is already an active flow.");
                 }
-                Stack stack = stackUpdater.updateStackStatus(stackId, DetailedStackStatus.REPAIR_IN_PROGRESS);
-                boolean repairWithReattach = !deleteVolumes;
-                checkReattachSupportedOnProvider(stack, repairWithReattach);
-                failedNodeMap.putAll(collectFailedNodeMap(stack, repairMode, repairWithReattach, repairedHostGroups, nodeIds, forceRepair));
-                if (repairMode == ManualClusterRepairMode.NODE_ID) {
-                    updateNodeVolumeSetsDeleteVolumesFlag(stack, nodeIds, deleteVolumes);
-                } else {
-                    updateIgNodeVolumeSetsDeleteVolumesFlag(stack, repairedHostGroups, deleteVolumes);
+                Stack stack = stackService.getById(stackId);
+                if (createdFromBaseImage(stack)) {
+                    throw new BadRequestException("Repair is not supported when cluster is created from base image.");
                 }
-                return stack;
+                Stack stackInRepair = stackUpdater.updateStackStatus(stackId, DetailedStackStatus.REPAIR_IN_PROGRESS);
+                boolean repairWithReattach = !deleteVolumes;
+                checkReattachSupportedOnProvider(stackInRepair, repairWithReattach);
+                failedNodeMap.putAll(collectFailedNodeMap(stackInRepair, repairMode, repairWithReattach, repairedHostGroups, nodeIds, forceRepair));
+                if (repairMode == ManualClusterRepairMode.NODE_ID) {
+                    updateNodeVolumeSetsDeleteVolumesFlag(stackInRepair, nodeIds, deleteVolumes);
+                } else {
+                    updateIgNodeVolumeSetsDeleteVolumesFlag(stackInRepair, repairedHostGroups, deleteVolumes);
+                }
+                return stackInRepair;
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
@@ -636,7 +648,20 @@ public class ClusterService {
         triggerRepair(stackId, failedNodeMap, removeOnly, repairedEntities);
     }
 
+    private boolean createdFromBaseImage(Stack stack) {
+        try {
+            Image image = componentConfigProviderService.getImage(stack.getId());
+            return !imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId()).getImage().isPrewarmed();
+        } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
     public boolean repairSupported(Stack stack) {
+        if (createdFromBaseImage(stack)) {
+            LOGGER.debug("Repair not supported for cluster {} because it was created from base image", stack.getId());
+            return false;
+        }
         try {
             checkReattachSupportedOnProvider(stack, true);
         } catch (BadRequestException ex) {
@@ -663,7 +688,7 @@ public class ClusterService {
     }
 
     public Map<String, List<String>> collectFailedNodeMap(Stack stack, ManualClusterRepairMode repairMode, boolean repairWithReattach,
-        List<String> repairedHostGroups, List<String> nodeIds, boolean forceRepair) {
+            List<String> repairedHostGroups, List<String> nodeIds, boolean forceRepair) {
         Map<String, List<String>> failedNodeMap = new HashMap<>();
         Cluster cluster = stack.getCluster();
         Set<String> instanceHostNames = getInstanceHostNames(repairMode, stack, nodeIds);
@@ -930,35 +955,58 @@ public class ClusterService {
     public Cluster updateClusterMetadata(Long stackId) {
         Stack stack = stackService.getById(stackId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        Map<String, ClusterManagerState> hostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
         Set<InstanceMetaData> notTerminatedInstanceMetaDatas = instanceMetaDataService.findNotTerminatedForStack(stackId);
-        try {
-            return transactionService.required(() -> {
-                for (InstanceMetaData instanceMetaData : notTerminatedInstanceMetaDatas) {
-                    if (instanceMetaData.getInstanceStatus().equals(InstanceStatus.SERVICES_RUNNING)) {
-                        ClusterManagerState clusterManagerState = hostStatuses.get(instanceMetaData.getDiscoveryFQDN());
-                        InstanceStatus newState = ClusterManagerState.ClusterManagerStatus.HEALTHY.equals(clusterManagerState.getClusterManagerStatus()) ?
-                                InstanceStatus.SERVICES_HEALTHY : InstanceStatus.SERVICES_UNHEALTHY;
-                        instanceMetaData.setInstanceStatus(newState);
-                        instanceMetaData.setStatusReason(clusterManagerState.getStatusReason());
-                        instanceMetaDataService.save(instanceMetaData);
-                        // TODO: don't send events one by one and save all of the instancemetadata with one repo call
-                        eventService.fireCloudbreakEvent(
-                                stack.getId(),
-                                AVAILABLE.name(),
-                                CLUSTER_HOST_STATUS_UPDATED,
-                                Arrays.asList(instanceMetaData.getDiscoveryFQDN(), newState.name()));
-                    }
-                }
-                return stack.getCluster();
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
+        if (!connector.clusterStatusService().isClusterManagerRunning()) {
+            InstanceMetaData cmInstance = updateClusterManagerHostStatus(notTerminatedInstanceMetaDatas);
+            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), CLUSTER_HOST_STATUS_UPDATED,
+                    Arrays.asList(cmInstance.getDiscoveryFQDN(), cmInstance.getInstanceStatus().name()));
+            return stack.getCluster();
+        } else {
+            Map<String, ClusterManagerState> hostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
+            try {
+                return transactionService.required(() -> {
+                    List<InstanceMetaData> updatedInstanceMetaData = updateInstanceStatuses(notTerminatedInstanceMetaDatas, hostStatuses);
+                    instanceMetaDataService.saveAll(updatedInstanceMetaData);
+                    fireHostStatusUpdateNotification(stack, updatedInstanceMetaData);
+                    return stack.getCluster();
+                });
+            } catch (TransactionExecutionException e) {
+                throw new TransactionRuntimeExecutionException(e);
+            }
         }
     }
 
+    private InstanceMetaData updateClusterManagerHostStatus(Set<InstanceMetaData> notTerminatedInstanceMetaDatas) {
+        InstanceMetaData cmInstance = notTerminatedInstanceMetaDatas.stream().filter(InstanceMetaData::getClusterManagerServer).findFirst()
+                .orElseThrow(() -> new CloudbreakServiceException("Cluster manager inaccessible, and the corresponding instance metadata not found."));
+        cmInstance.setInstanceStatus(InstanceStatus.SERVICES_UNHEALTHY);
+        cmInstance.setStatusReason("Cluster manager inaccessible.");
+        instanceMetaDataService.save(cmInstance);
+        return cmInstance;
+    }
+
+    private void fireHostStatusUpdateNotification(Stack stack, List<InstanceMetaData> updatedInstanceMetaData) {
+        updatedInstanceMetaData.forEach(instanceMetaData -> {
+            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), CLUSTER_HOST_STATUS_UPDATED,
+                    Arrays.asList(instanceMetaData.getDiscoveryFQDN(), instanceMetaData.getInstanceStatus().name()));
+        });
+    }
+
+    private List<InstanceMetaData> updateInstanceStatuses(Set<InstanceMetaData> notTerminatedInstanceMetaDatas, Map<String, ClusterManagerState> hostStatuses) {
+        return notTerminatedInstanceMetaDatas.stream()
+                .filter(instanceMetaData -> InstanceStatus.SERVICES_RUNNING.equals(instanceMetaData.getInstanceStatus()))
+                .map(instanceMetaData -> {
+                    ClusterManagerState clusterManagerState = hostStatuses.get(instanceMetaData.getDiscoveryFQDN());
+                    InstanceStatus newState = ClusterManagerStatus.HEALTHY.equals(clusterManagerState.getClusterManagerStatus()) ?
+                            InstanceStatus.SERVICES_HEALTHY : InstanceStatus.SERVICES_UNHEALTHY;
+                    instanceMetaData.setInstanceStatus(newState);
+                    instanceMetaData.setStatusReason(clusterManagerState.getStatusReason());
+                    return instanceMetaData;
+                }).collect(Collectors.toList());
+    }
+
     public Cluster recreate(Stack stack, String blueprintName, Set<HostGroup> hostGroups, boolean validateBlueprint,
-                            StackRepoDetails stackRepoDetails) throws TransactionExecutionException {
+            StackRepoDetails stackRepoDetails) throws TransactionExecutionException {
         return transactionService.required(() -> {
             checkBlueprintIdAndHostGroups(blueprintName, hostGroups);
             Stack stackWithLists = stackService.getByIdWithListsInTransaction(stack.getId());

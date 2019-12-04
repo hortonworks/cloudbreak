@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -11,16 +10,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn.Service;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
-import io.grpc.Status;
+import io.grpc.Status.Code;
 import io.grpc.StatusRuntimeException;
 
 @Component
 public class VirtualGroupService {
     private static final Logger LOGGER = LoggerFactory.getLogger(VirtualGroupService.class);
 
-    private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
+    private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Service.IAM).getInternalCrnForServiceAsString();
 
     @Inject
     private GrpcUmsClient grpcUmsClient;
@@ -49,7 +50,8 @@ public class VirtualGroupService {
         for (UmsRight right : UmsRight.values()) {
             try {
                 LOGGER.debug("Start deleting virtual groups from UMS for environment '{}'", environmentCrn);
-                grpcUmsClient.deleteWorkloadAdministrationGroupName(IAM_INTERNAL_ACTOR_CRN, accountId, Optional.empty(), right.getRight(), environmentCrn);
+                grpcUmsClient.deleteWorkloadAdministrationGroupName(IAM_INTERNAL_ACTOR_CRN, accountId,
+                        MDCUtils.getRequestId(), right.getRight(), environmentCrn);
                 LOGGER.debug("Virtual groups deletion from UMS has been finished successfully for environment '{}'", environmentCrn);
             } catch (RuntimeException ex) {
                 LOGGER.warn("UMS virtualgroup delete failed (this is not critical)", ex);
@@ -60,15 +62,15 @@ public class VirtualGroupService {
     private String createOrGetVirtualGroup(String accountId, String environmentCrn, String right) {
         String virtualGroup = "";
         try {
-            virtualGroup = grpcUmsClient.getWorkloadAdministrationGroupName(IAM_INTERNAL_ACTOR_CRN, accountId, Optional.empty(), right, environmentCrn);
+            virtualGroup = grpcUmsClient.getWorkloadAdministrationGroupName(IAM_INTERNAL_ACTOR_CRN, accountId, MDCUtils.getRequestId(), right, environmentCrn);
         } catch (StatusRuntimeException ex) {
-            if (Status.Code.NOT_FOUND != ex.getStatus().getCode()) {
+            if (Code.NOT_FOUND != ex.getStatus().getCode()) {
                 throw ex;
             }
         }
         if (StringUtils.isEmpty(virtualGroup)) {
             virtualGroup = grpcUmsClient.setWorkloadAdministrationGroupName(IAM_INTERNAL_ACTOR_CRN, accountId,
-                    Optional.empty(), right, environmentCrn);
+                    MDCUtils.getRequestId(), right, environmentCrn);
             LOGGER.info("{} workloadAdministrationGroup is created for {} right on {} environment", virtualGroup, right, environmentCrn);
         } else {
             LOGGER.info("{} workloadAdministrationGroup is used for {} right on {} environment", virtualGroup, right, environmentCrn);

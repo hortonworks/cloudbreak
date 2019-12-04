@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.init;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -13,6 +14,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
@@ -37,12 +39,13 @@ public class ModifyAdminPassordExpiration implements ApplicationListener<Context
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        asyncTaskExecutor.submit(this::modifyPasswordExpirationForAllStack);
+        Optional<String> requestId = MDCUtils.getRequestId();
+        asyncTaskExecutor.submit(() -> modifyPasswordExpirationForAllStack(requestId));
     }
 
-    private void modifyPasswordExpirationForAllStack() {
+    private void modifyPasswordExpirationForAllStack(Optional<String> requestId) {
         try {
-            MDCBuilder.addRequestId(UUID.randomUUID().toString());
+            MDCBuilder.addRequestId(requestId.orElse(UUID.randomUUID().toString()));
             List<Stack> stacks = stackService.findAllRunning();
             for (Stack stack : stacks) {
                 try {

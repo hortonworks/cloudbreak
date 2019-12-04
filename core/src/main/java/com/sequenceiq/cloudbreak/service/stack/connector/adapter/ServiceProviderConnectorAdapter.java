@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
@@ -74,6 +75,9 @@ public class ServiceProviderConnectorAdapter {
 
     @Inject
     private CredentialClientService credentialClientService;
+
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
@@ -174,6 +178,13 @@ public class ServiceProviderConnectorAdapter {
             LOGGER.error("Error while getting template: " + cloudContext, e);
             throw new OperationException(e);
         }
+    }
+
+    public PlatformParameters getPlatformParameters(Stack stack, String userCrn) {
+        threadBasedUserCrnProvider.setUserCrn(userCrn);
+        PlatformParameters platformParameters = getPlatformParameters(stack);
+        threadBasedUserCrnProvider.removeUserCrn();
+        return platformParameters;
     }
 
     public PlatformParameters getPlatformParameters(Stack stack) {

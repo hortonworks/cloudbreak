@@ -18,7 +18,6 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
@@ -55,7 +54,6 @@ public class SdxRepairActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxRepairStartEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Start repair flow for Datalake: {}", payload.getResourceId());
                 repairService.startSdxRepair(payload.getResourceId(), payload.getRepairRequest());
                 sendEvent(context, SDX_REPAIR_IN_PROGRESS_EVENT.event(), payload);
@@ -79,7 +77,6 @@ public class SdxRepairActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Datalake repair in progress: {}", payload.getResourceId());
                 sendEvent(context);
             }
@@ -107,7 +104,6 @@ public class SdxRepairActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxRepairSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Datalake repair finalized: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.SDX_REPAIR_FINISHED, "Repair finished, Datalake is running", payload.getResourceId());
@@ -132,7 +128,6 @@ public class SdxRepairActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxRepairFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake repair failed for datalakeId: {}", payload.getResourceId(), exception);
                 String statusReason = "Datalake stack repair failed";

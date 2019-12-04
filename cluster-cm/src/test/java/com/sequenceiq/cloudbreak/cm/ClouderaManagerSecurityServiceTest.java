@@ -33,7 +33,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ClouderaManagerSecurityServiceTest {
+public class
+ClouderaManagerSecurityServiceTest {
 
     private static final int GATEWAY_PORT = 8080;
 
@@ -79,7 +80,7 @@ public class ClouderaManagerSecurityServiceTest {
         UsersResourceApi usersResourceApi = mock(UsersResourceApi.class);
         ApiUser2List oldUserList = createApiUser2List();
 
-        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, ADMIN, ADMIN)).thenReturn(apiClient);
+        when(clouderaManagerApiClientProvider.getDefaultClient(GATEWAY_PORT, clientConfig)).thenReturn(apiClient);
         when(clouderaManagerApiFactory.getUserResourceApi(any())).thenReturn(usersResourceApi);
         when(usersResourceApi.readUsers2("SUMMARY")).thenReturn(oldUserList);
 
@@ -108,7 +109,7 @@ public class ClouderaManagerSecurityServiceTest {
         ApiClient newApiClient = mock(ApiClient.class);
         ApiUser2List oldUserList = createApiUser2List();
 
-        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, ADMIN, ADMIN)).thenReturn(apiClient);
+        when(clouderaManagerApiClientProvider.getDefaultClient(GATEWAY_PORT, clientConfig)).thenReturn(apiClient);
         when(clouderaManagerApiFactory.getUserResourceApi(apiClient)).thenReturn(usersResourceApi);
 
         when(usersResourceApi.readUsers2("SUMMARY")).thenReturn(oldUserList);
@@ -119,7 +120,7 @@ public class ClouderaManagerSecurityServiceTest {
 
         underTest.changeOriginalCredentialsAndCreateCloudbreakUser(LDAP_DISABLED);
 
-        verify(clouderaManagerApiClientProvider).getClouderaManagerClient(clientConfig, GATEWAY_PORT, ADMIN, ADMIN);
+        verify(clouderaManagerApiClientProvider).getDefaultClient(GATEWAY_PORT, clientConfig);
         verify(usersResourceApi).readUsers2("SUMMARY");
 
         verify(clouderaManagerApiClientProvider).getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
@@ -151,7 +152,7 @@ public class ClouderaManagerSecurityServiceTest {
         ApiClient newApiClient = mock(ApiClient.class);
         ApiUser2List oldUserList = createApiUser2List();
 
-        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, ADMIN, ADMIN)).thenReturn(apiClient);
+        when(clouderaManagerApiClientProvider.getDefaultClient(GATEWAY_PORT, clientConfig)).thenReturn(apiClient);
         when(clouderaManagerApiFactory.getUserResourceApi(apiClient)).thenReturn(usersResourceApi);
 
         when(usersResourceApi.readUsers2("SUMMARY")).thenReturn(oldUserList);
@@ -162,7 +163,7 @@ public class ClouderaManagerSecurityServiceTest {
 
         underTest.changeOriginalCredentialsAndCreateCloudbreakUser(LDAP_ENABLED);
 
-        verify(clouderaManagerApiClientProvider).getClouderaManagerClient(clientConfig, GATEWAY_PORT, ADMIN, ADMIN);
+        verify(clouderaManagerApiClientProvider).getDefaultClient(GATEWAY_PORT, clientConfig);
         verify(usersResourceApi).readUsers2("SUMMARY");
         verify(clouderaManagerApiClientProvider, times(2)).getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
                 stack.getCluster().getCloudbreakAmbariPassword());

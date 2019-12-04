@@ -9,20 +9,16 @@ public class SdxContext extends CommonContext {
 
     private String userId;
 
-    private String requestId;
-
-    public SdxContext(FlowParameters flowParameters, Long sdxId, String userId, String requestId) {
+    public SdxContext(FlowParameters flowParameters, Long sdxId, String userId) {
         super(flowParameters);
         this.sdxId = sdxId;
         this.userId = userId;
-        this.requestId = requestId;
     }
 
     public SdxContext(FlowParameters flowParameters, SdxEvent event) {
         super(flowParameters);
         sdxId = event.getResourceId();
         userId = event.getUserId();
-        requestId = event.getRequestId();
     }
 
     public static SdxContext from(FlowParameters flowParameters, SdxEvent event) {
@@ -43,14 +39,6 @@ public class SdxContext extends CommonContext {
 
     public void setUserId(String userId) {
         this.userId = userId;
-    }
-
-    public String getRequestId() {
-        return requestId;
-    }
-
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
     }
 
 }

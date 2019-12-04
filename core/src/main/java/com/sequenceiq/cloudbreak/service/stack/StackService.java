@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -29,14 +28,12 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.cedarsoftware.util.io.JsonReader;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
@@ -52,11 +49,6 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
-import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
-import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
-import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
-import com.sequenceiq.cloudbreak.ccm.key.CcmResourceUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
@@ -241,9 +233,6 @@ public class StackService implements ResourceIdProvider {
 
     @Inject
     private StackIdViewToStackResponseConverter stackIdViewToStackResponseConverter;
-
-    @Autowired(required = false)
-    private CcmParameterSupplier ccmParameterSupplier;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -514,7 +503,6 @@ public class StackService implements ResourceIdProvider {
         stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
 
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
 
         stack.setResourceCrn(createCRN(accountId));
 
@@ -544,30 +532,8 @@ public class StackService implements ResourceIdProvider {
             securityConfigService.save(securityConfig);
         }, LOGGER, "Security config save took {} ms for stack {}", stackName);
         savedStack.setSecurityConfig(securityConfig);
-
-        CcmParameters ccmParameters = null;
-        if ((ccmParameterSupplier != null) && Boolean.TRUE.equals(stack.getUseCcm())) {
-            ImmutableMap.Builder<KnownServiceIdentifier, Integer> builder = ImmutableMap.builder();
-
-            // Configure a tunnel for nginx
-            int gatewayPort = Optional.ofNullable(stack.getGatewayPort()).orElse(ServiceFamilies.GATEWAY.getDefaultPort());
-            builder.put(KnownServiceIdentifier.GATEWAY, gatewayPort);
-
-            // Optionally configure a tunnel for (nginx fronting) Knox
-            if (stack.getCluster().getGateway() != null) {
-                // JSA TODO Do we support a non-default port for the nginx that fronts Knox?
-                builder.put(KnownServiceIdentifier.KNOX, ServiceFamilies.KNOX.getDefaultPort());
-            }
-
-            Map<KnownServiceIdentifier, Integer> tunneledServicePorts = builder.build();
-
-            String keyId = CcmResourceUtil.getKeyId(stack.getResourceCrn());
-            String actorCrn = Objects.requireNonNull(userCrn, "userCrn is null");
-            ccmParameters = ccmParameterSupplier.getCcmParameters(actorCrn, accountId, keyId, tunneledServicePorts).orElse(null);
-        }
-
         try {
-            imageService.create(savedStack, platformString, connector.getPlatformParameters(savedStack), imgFromCatalog, ccmParameters);
+            imageService.create(savedStack, platformString, imgFromCatalog);
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Cloudbreak Image not found", e);
             throw new CloudbreakApiException(e.getMessage(), e);
@@ -1121,14 +1087,8 @@ public class StackService implements ResourceIdProvider {
         return stackRepository.findEphemeralClusters(stackId);
     }
 
-    public Set<StackListItem> getByWorkspaceId(Long workspaceId, String environmentCrn, StackType stackType) {
-        // we need to add the type explicitly. Because if the stack type is null that stack is WORKLOAD.
-        // The query contains the null check but type check will the same in case of stackType = null
-        StackType s = stackType;
-        if (s == null) {
-            s = StackType.WORKLOAD;
-        }
-        return stackRepository.findByWorkspaceId(workspaceId, environmentCrn, s);
+    public Set<StackListItem> getByWorkspaceId(Long workspaceId, String environmentCrn, List<StackType> stackTypes) {
+        return stackRepository.findByWorkspaceId(workspaceId, environmentCrn, stackTypes);
     }
 
     StackRepository repository() {

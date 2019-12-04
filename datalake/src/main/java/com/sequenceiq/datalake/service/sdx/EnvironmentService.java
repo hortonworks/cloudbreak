@@ -16,7 +16,6 @@ import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
@@ -43,13 +42,13 @@ public class EnvironmentService {
     @Inject
     private EnvironmentClientService environmentClientService;
 
-    public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId, String requestId) {
+    public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId) {
         PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC_FOR_ENV_POLLING, TimeUnit.SECONDS,
                 DURATION_IN_MINUTES_FOR_ENV_POLLING, TimeUnit.MINUTES);
-        return waitAndGetEnvironment(sdxId, pollingConfig, requestId);
+        return waitAndGetEnvironment(sdxId, pollingConfig);
     }
 
-    public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId, PollingConfig pollingConfig, String requestId) {
+    public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId, PollingConfig pollingConfig) {
         Optional<SdxCluster> sdxClusterOptional = sdxClusterRepository.findById(sdxId);
         if (sdxClusterOptional.isPresent()) {
             SdxCluster sdxCluster = sdxClusterOptional.get();
@@ -63,7 +62,6 @@ public class EnvironmentService {
                             LOGGER.info("Environment wait polling cancelled in inmemory store, id: " + sdxCluster.getId());
                             return AttemptResults.breakFor("Environment wait polling cancelled in inmemory store, id: " + sdxCluster.getId());
                         }
-                        MDCBuilder.addRequestId(requestId);
                         LOGGER.info("Creation polling environment for environment status: '{}' in '{}' env",
                                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
                         DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(sdxCluster.getEnvCrn());

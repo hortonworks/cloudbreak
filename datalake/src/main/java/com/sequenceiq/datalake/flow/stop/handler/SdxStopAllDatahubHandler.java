@@ -10,7 +10,6 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartFailedEvent;
 import com.sequenceiq.datalake.flow.stop.SdxStopEvent;
@@ -46,23 +45,21 @@ public class SdxStopAllDatahubHandler implements EventHandler<SdxStopAllDatahubR
         SdxStopAllDatahubRequest stopAllDatahubRequest = event.getData();
         Long sdxId = stopAllDatahubRequest.getResourceId();
         String userId = stopAllDatahubRequest.getUserId();
-        String requestId = stopAllDatahubRequest.getRequestId();
-        MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {
             LOGGER.debug("Polling is started for the operation of stopping all datahubs clusters for sdx with id: {}", sdxId);
             sdxStopService.stopAllDatahub(sdxId);
-            response = new SdxEvent(SdxStopEvent.SDX_STOP_IN_PROGRESS_EVENT.event(), sdxId, userId, requestId);
+            response = new SdxEvent(SdxStopEvent.SDX_STOP_IN_PROGRESS_EVENT.event(), sdxId, userId);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Polling exited before timeout. Cause ", userBreakException);
-            response = new SdxStartFailedEvent(sdxId, userId, requestId, userBreakException);
+            response = new SdxStartFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Poller stopped for stack: " + sdxId, pollerStoppedException);
-            response = new SdxStartFailedEvent(sdxId, userId, requestId,
+            response = new SdxStartFailedEvent(sdxId, userId,
                     new PollerStoppedException("Datalake start timed out after " + DURATION_IN_MINUTES + " minutes", pollerStoppedException));
         } catch (PollerException exception) {
             LOGGER.info("Polling failed for stack: {}", sdxId);
-            response = new SdxStartFailedEvent(sdxId, userId, requestId, exception);
+            response = new SdxStartFailedEvent(sdxId, userId, exception);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

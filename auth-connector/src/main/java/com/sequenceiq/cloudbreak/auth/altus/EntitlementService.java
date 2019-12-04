@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -9,6 +8,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
 @Service
 public class EntitlementService {
@@ -40,7 +40,7 @@ public class EntitlementService {
     }
 
     private UserManagementProto.Account getAccount(String actorCrn, String accountId) {
-        return umsClient.getAccountDetails(actorCrn, accountId, Optional.empty());
+        return umsClient.getAccountDetails(actorCrn, accountId, MDCUtils.getRequestId());
     }
 
     private boolean isEntitlementRegistered(String actorCrn, String accountId, String entitlement) {

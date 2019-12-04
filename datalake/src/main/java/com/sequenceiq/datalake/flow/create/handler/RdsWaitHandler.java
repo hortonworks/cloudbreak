@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -48,7 +47,7 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new SdxCreateFailedEvent(resourceId, null, null, e);
+        return new SdxCreateFailedEvent(resourceId, null, e);
     }
 
     @Override
@@ -61,37 +60,35 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
         RdsWaitRequest rdsWaitRequest = event.getData();
         Long sdxId = rdsWaitRequest.getResourceId();
         String userId = rdsWaitRequest.getUserId();
-        String requestId = rdsWaitRequest.getRequestId();
-        MDCBuilder.addRequestId(requestId);
         DetailedEnvironmentResponse env = rdsWaitRequest.getDetailedEnvironmentResponse();
         try {
             sdxClusterRepository.findById(sdxId).ifPresentOrElse(sdxCluster -> {
                 if (sdxCluster.isCreateDatabase()) {
                     validForDatabaseCreation(sdxId, env);
                     LOGGER.debug("start polling database for sdx: {}", sdxId);
-                    DatabaseServerStatusV4Response db = databaseService.create(sdxCluster, env, requestId);
+                    DatabaseServerStatusV4Response db = databaseService.create(sdxCluster, env);
                     setRdsCreatedStatus(sdxCluster);
-                    sendEvent(new RdsWaitSuccessEvent(sdxId, userId, requestId, env, db), event);
+                    sendEvent(new RdsWaitSuccessEvent(sdxId, userId, env, db), event);
                 } else {
                     LOGGER.debug("skipping creation of database for sdx: {}", sdxId);
-                    sendEvent(new RdsWaitSuccessEvent(sdxId, userId, requestId, env, null), event);
+                    sendEvent(new RdsWaitSuccessEvent(sdxId, userId, env, null), event);
                 }
             }, () -> {
                 throw notFound("SDX cluster", sdxId).get();
             });
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Database polling exited before timeout. Cause: ", userBreakException);
-            sendEvent(new SdxCreateFailedEvent(sdxId, userId, requestId, userBreakException), event);
+            sendEvent(new SdxCreateFailedEvent(sdxId, userId, userBreakException), event);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
-            sendEvent(new SdxCreateFailedEvent(sdxId, userId, requestId,
+            sendEvent(new SdxCreateFailedEvent(sdxId, userId,
                     new PollerStoppedException("Database creation timed out after " + DURATION_IN_MINUTES_FOR_DB_POLLING + " minutes")), event);
         } catch (PollerException exception) {
             LOGGER.info("Database polling failed for sdx: {}", sdxId, exception);
-            sendEvent(new SdxCreateFailedEvent(sdxId, userId, requestId, exception), event);
+            sendEvent(new SdxCreateFailedEvent(sdxId, userId, exception), event);
         } catch (Exception anotherException) {
             LOGGER.error("Something wrong happened in sdx database creation wait phase", anotherException);
-            sendEvent(new SdxCreateFailedEvent(sdxId, userId, requestId, anotherException), event);
+            sendEvent(new SdxCreateFailedEvent(sdxId, userId, anotherException), event);
         }
     }
 

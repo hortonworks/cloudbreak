@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 
-import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCloudbreakClusterStatus.Value.UNSET;
-
 /**
  * Utility class for logging usage events.
  */
@@ -85,7 +83,7 @@ public class UsageLoggingUtil {
         } catch (IllegalArgumentException e) {
             return;
         }
-        if (oldStatusEnum == UNSET || newStatusEnum == UNSET) {
+        if (oldStatusEnum == newStatusEnum) {
             return;
         }
         // Datahub clusters will have datalake resource id set.
@@ -129,8 +127,9 @@ public class UsageLoggingUtil {
         if (stack.getEnvironmentCrn() != null) {
             protoBuilder.setEnvironmentCrn(stack.getEnvironmentCrn());
         }
-        if (cloudPlatformEnum != UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET) {
-            protoBuilder.setEnvironmentType(cloudPlatformEnum);
+        protoBuilder.setEnvironmentType(cloudPlatformEnum);
+        if (cluster.getBlueprint() != null && cluster.getBlueprint().getName() != null) {
+            protoBuilder.setClusterDefinitionName(cluster.getBlueprint().getName());
         }
     }
 
@@ -157,8 +156,9 @@ public class UsageLoggingUtil {
         if (stack.getEnvironmentCrn() != null) {
             protoBuilder.setEnvironmentCrn(stack.getEnvironmentCrn());
         }
-        if (cloudPlatformEnum != UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET) {
-            protoBuilder.setEnvironmentType(cloudPlatformEnum);
+        protoBuilder.setEnvironmentType(cloudPlatformEnum);
+        if (cluster.getBlueprint() != null && cluster.getBlueprint().getName() != null) {
+            protoBuilder.setClusterDefinitionName(cluster.getBlueprint().getName());
         }
     }
 }

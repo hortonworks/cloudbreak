@@ -6,8 +6,8 @@ public class StackDeletionSuccessEvent extends SdxEvent {
 
     private final boolean forced;
 
-    public StackDeletionSuccessEvent(Long sdxId, String userId, String requestId, boolean forced) {
-        super(sdxId, userId, requestId);
+    public StackDeletionSuccessEvent(Long sdxId, String userId, boolean forced) {
+        super(sdxId, userId);
         this.forced = forced;
     }
 

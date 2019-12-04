@@ -29,7 +29,9 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.type.Tunnel;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "environmentcrn", "terminated"}))
@@ -62,7 +64,14 @@ public class Stack {
 
     private Integer gatewayport;
 
+    /**
+     * @deprecated use {@link #tunnel} instead
+     */
+    @Deprecated()
     private Boolean useCcm = Boolean.FALSE;
+
+    @Convert(converter = TunnelConverter.class)
+    private Tunnel tunnel = Tunnel.DIRECT;
 
     private Boolean clusterProxyRegistered = Boolean.FALSE;
 
@@ -169,16 +178,24 @@ public class Stack {
         this.gatewayport = gatewayport;
     }
 
-    public Boolean getUseCcm() {
-        return useCcm;
+    public boolean getUseCcm() {
+        return Boolean.TRUE.equals(useCcm);
     }
 
     public void setUseCcm(Boolean useCcm) {
         this.useCcm = useCcm;
     }
 
-    public Boolean getClusterProxyRegistered() {
-        return clusterProxyRegistered;
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
+    public void setTunnel(Tunnel tunnel) {
+        this.tunnel = tunnel;
+    }
+
+    public boolean isClusterProxyRegistered() {
+        return Boolean.TRUE.equals(clusterProxyRegistered);
     }
 
     public void setClusterProxyRegistered(Boolean clusterProxyRegistered) {

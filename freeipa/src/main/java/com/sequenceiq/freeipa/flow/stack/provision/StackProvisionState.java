@@ -9,6 +9,7 @@ public enum StackProvisionState implements FlowState {
     INIT_STATE,
     STACK_CREATION_FAILED_STATE,
     VALIDATION_STATE,
+    CREATE_USER_DATA_STATE,
     SETUP_STATE,
     IMAGESETUP_STATE,
     IMAGE_CHECK_STATE(CheckImageAction.class),

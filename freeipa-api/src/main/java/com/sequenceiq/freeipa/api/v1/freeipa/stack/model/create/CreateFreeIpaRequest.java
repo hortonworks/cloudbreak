@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
@@ -66,8 +67,15 @@ public class CreateFreeIpaRequest {
     @ApiModelProperty(FreeIpaModelDescriptions.TELEMETRY)
     private TelemetryRequest telemetry;
 
+    /**
+     * @deprecated use {@link #tunnel} instead
+     */
     @ApiModelProperty(value = FreeIpaModelDescriptions.USE_CCM)
+    @Deprecated
     private Boolean useCcm;
+
+    @ApiModelProperty(value = FreeIpaModelDescriptions.TUNNEL)
+    private Tunnel tunnel;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -157,6 +165,14 @@ public class CreateFreeIpaRequest {
         this.useCcm = useCcm;
     }
 
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
+    public void setTunnel(Tunnel tunnel) {
+        this.tunnel = tunnel;
+    }
+
     @Override
     public String toString() {
         return "CreateFreeIpaRequest{"
@@ -168,6 +184,7 @@ public class CreateFreeIpaRequest {
                 + ", network=" + network
                 + ", image=" + image
                 + ", freeIpa=" + freeIpa
+                + ", tunnel=" + tunnel
                 + '}';
     }
 }

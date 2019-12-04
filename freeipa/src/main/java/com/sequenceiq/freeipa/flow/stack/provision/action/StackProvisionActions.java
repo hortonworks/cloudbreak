@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -49,6 +50,8 @@ import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationRequest;
+import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataRequest;
+import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataSuccess;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -95,11 +98,26 @@ public class StackProvisionActions {
         };
     }
 
-    @Bean(name = "SETUP_STATE")
-    public Action<?, ?> provisioningSetupAction() {
+    @Bean(name = "CREATE_USER_DATA_STATE")
+    public Action<?, ?> createUserDataAction() {
         return new AbstractStackProvisionAction<>(ValidationResult.class) {
             @Override
             protected void doExecute(StackContext context, ValidationResult payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new CreateUserDataRequest(context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "SETUP_STATE")
+    public Action<?, ?> provisioningSetupAction() {
+        return new AbstractStackProvisionAction<>(CreateUserDataSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, CreateUserDataSuccess payload, Map<Object, Object> variables) {
                 stackProvisionService.setupProvision(context.getStack());
                 sendEvent(context);
             }
@@ -193,7 +211,12 @@ public class StackProvisionActions {
                 Stack stack = stackProvisionService.setupMetadata(context, payload);
                 StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(),
                         context.getCloudCredential(), context.getCloudStack());
-                sendEvent(newContext);
+                if (newContext.getStack().getTunnel().useCcm()) {
+                    GetTlsInfoResult getTlsInfoResult = new GetTlsInfoResult(context.getCloudContext().getId(), new TlsInfo(true));
+                    sendEvent(newContext, getTlsInfoResult.selector(), getTlsInfoResult);
+                } else {
+                    sendEvent(newContext);
+                }
             }
 
             @Override
@@ -220,7 +243,9 @@ public class StackProvisionActions {
         return new AbstractStackProvisionAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
-                stackProvisionService.setupTls(context);
+                if (!context.getStack().getTunnel().useCcm()) {
+                    stackProvisionService.setupTls(context);
+                }
                 sendEvent(context, new StackEvent(StackProvisionEvent.TLS_SETUP_FINISHED_EVENT.event(), context.getStack().getId()));
             }
         };

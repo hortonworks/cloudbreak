@@ -15,6 +15,7 @@ public class FreeIpaModelDescriptions {
     public static final String CLOUD_STORAGE = "cloud storage details for freeipa server";
     public static final String FREEIPA_APPLICATION_VERSION = "version of the application provisioned FreeIPA";
     public static final String USE_CCM = "whether to use CCM for communicating with the freeipa instance";
+    public static final String TUNNEL = "Configuration that the connection going directly or with cluster proxy or with ccm and cluster proxy.";
 
     private FreeIpaModelDescriptions() {
     }

@@ -15,35 +15,31 @@ public class SdxEvent implements Selectable, Acceptable {
 
     private final String userId;
 
-    private final String requestId;
-
     private final Promise<Boolean> accepted;
 
-    public SdxEvent(Long sdxId, String userId, String requestId) {
-        this(null, sdxId, userId, requestId);
+    public SdxEvent(Long sdxId, String userId) {
+        this(null, sdxId, userId);
     }
 
     public SdxEvent(SdxContext context) {
-        this(null, context.getSdxId(), context.getUserId(), context.getRequestId());
+        this(null, context.getSdxId(), context.getUserId());
     }
 
-    public SdxEvent(String selector, Long sdxId, String userId, String requestId) {
+    public SdxEvent(String selector, Long sdxId, String userId) {
         this.selector = selector;
         this.sdxId = sdxId;
         this.userId = userId;
-        this.requestId = requestId;
         accepted = new Promise<>();
     }
 
     public SdxEvent(String selector, SdxContext context) {
-        this(selector, context.getSdxId(), context.getUserId(), context.getRequestId());
+        this(selector, context.getSdxId(), context.getUserId());
     }
 
-    public SdxEvent(String selector, Long sdxId, String userId, String requestId, Promise<Boolean> accepted) {
+    public SdxEvent(String selector, Long sdxId, String userId, Promise<Boolean> accepted) {
         this.selector = selector;
         this.sdxId = sdxId;
         this.userId = userId;
-        this.requestId = requestId;
         this.accepted = accepted;
     }
 
@@ -54,10 +50,6 @@ public class SdxEvent implements Selectable, Acceptable {
 
     public String getUserId() {
         return userId;
-    }
-
-    public String getRequestId() {
-        return requestId;
     }
 
     @Override

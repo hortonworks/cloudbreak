@@ -50,7 +50,7 @@ public class EnvironmentModelDescription {
     public static final String DEFAULT_SECURITY_GROUP = "Security group where all other hosts are placed.";
     public static final String SECURITY_CIDR = "CIDR range which is allowed for inbound traffic. Either IPv4 or IPv6 is allowed.";
 
-    public static final String TUNNEL = "Configuration that the connection going directly or with ccm.";
+    public static final String TUNNEL = "Configuration that the connection going directly or with cluster proxy or with ccm and cluster proxy.";
 
     public static final String LOG_CLOUD_STORAGE = "Cloud storage configuration for this environment. Service logs will be stored in the defined location.";
 

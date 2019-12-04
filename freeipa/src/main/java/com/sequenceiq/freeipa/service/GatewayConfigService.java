@@ -54,8 +54,7 @@ public class GatewayConfigService {
     }
 
     public GatewayConfig getGatewayConfig(Stack stack, InstanceMetaData gatewayInstance) {
-        return tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance, stack.getGatewayport(), getSaltClientConfig(stack), false,
-                stack.getUseCcm());
+        return tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance, stack.getGatewayport(), getSaltClientConfig(stack), false);
     }
 
     public String getPrimaryGatewayIp(Stack stack) {

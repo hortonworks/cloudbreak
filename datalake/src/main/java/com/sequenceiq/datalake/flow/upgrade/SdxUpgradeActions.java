@@ -18,7 +18,6 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.upgrade.event.SdxChangeImageWaitRequest;
@@ -56,7 +55,6 @@ public class SdxUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxUpgradeStartEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 sdxUpgradeService.changeImage(payload.getResourceId(), payload.getUpgradeOption());
                 sendEvent(context, SdxChangeImageWaitRequest.from(context, payload.getUpgradeOption()));
             }
@@ -79,7 +77,6 @@ public class SdxUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxImageChangedEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 sendEvent(context, SDX_UPGRADE_IN_PROGRESS_EVENT.event(), payload);
             }
 
@@ -101,7 +98,6 @@ public class SdxUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxImageChangedEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 sdxUpgradeService.upgrade(payload.getResourceId());
                 sendEvent(context);
             }
@@ -130,7 +126,6 @@ public class SdxUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxUpgradeSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Sdx upgrade finalized sdxId: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.RUNNING,
@@ -158,7 +153,6 @@ public class SdxUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxUpgradeFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Sdx upgrade failed for sdxId: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.UPGRADE_FAILED,

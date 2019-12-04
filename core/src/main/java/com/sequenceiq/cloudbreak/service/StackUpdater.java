@@ -40,6 +40,11 @@ public class StackUpdater {
         stackService.save(stack);
     }
 
+    public Stack updateClusterProxyRegisteredFlag(Stack stack, boolean registered) {
+        stack.setClusterProxyRegistered(registered);
+        return stackService.save(stack);
+    }
+
     private Stack doUpdateStackStatus(Long stackId, DetailedStackStatus detailedStatus, String statusReason) {
         Stack stack = stackService.getByIdWithTransaction(stackId);
         Status status = detailedStatus.getStatus();

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 
 import java.io.IOException;
@@ -18,7 +17,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +27,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
-import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
-import com.sequenceiq.cloudbreak.certificate.PkiUtil;
-import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
@@ -48,8 +42,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
-import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
-import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -63,9 +55,6 @@ public class ImageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageService.class);
 
     private static final String DEFAULT_REGION = "default";
-
-    @Inject
-    private UserDataBuilder userDataBuilder;
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
@@ -91,20 +80,10 @@ public class ImageService {
     }
 
     @Measure(ImageService.class)
-    public void create(Stack stack, String platformString, PlatformParameters params, StatedImage imgFromCatalog, CcmParameters ccmParameters)
+    public void create(Stack stack, String platformString, StatedImage imgFromCatalog)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         try {
-            Platform platform = platform(stack.cloudPlatform());
             String region = stack.getRegion();
-            SecurityConfig securityConfig = stack.getSecurityConfig();
-            SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
-            String cbPrivKey = saltSecurityConfig.getSaltBootSignPrivateKey();
-            byte[] cbSshKeyDer = PkiUtil.getPublicKeyDer(new String(Base64.decodeBase64(cbPrivKey)));
-            String sshUser = stack.getStackAuthentication().getLoginUserName();
-            String cbCert = securityConfig.getClientCert();
-            String saltBootPassword = saltSecurityConfig.getSaltBootPassword();
-            Map<InstanceGroupType, String> userData =
-                    userDataBuilder.buildUserData(platform, cbSshKeyDer, sshUser, params, saltBootPassword, cbCert, ccmParameters);
 
             LOGGER.debug("Determined image from catalog: {}", imgFromCatalog);
 
@@ -112,7 +91,7 @@ public class ImageService {
             LOGGER.debug("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog",
                     platformString, region, imageName, imgFromCatalog.getImageCatalogUrl());
 
-            List<Component> components = getComponents(stack, userData, imgFromCatalog.getImage(), imageName,
+            List<Component> components = getComponents(stack, Map.of(), imgFromCatalog.getImage(), imageName,
                     imgFromCatalog.getImageCatalogUrl(),
                     imgFromCatalog.getImageCatalogName(),
                     imgFromCatalog.getImage().getUuid());
@@ -280,5 +259,12 @@ public class ImageService {
                 withName(stackInfo.get(StackRepoDetails.REPO_ID_TAG).split("-")[0]).
                 withParcel(stackInfo.get(osType));
         return cmProduct;
+    }
+
+    public void decorateImageWithUserDataForStack(Stack stack, Map<InstanceGroupType, String> userData) throws CloudbreakImageNotFoundException {
+        Image image = componentConfigProviderService.getImage(stack.getId());
+        image.setUserdata(userData);
+        Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
+        componentConfigProviderService.replaceImageComponentWithNew(imageComponent);
     }
 }

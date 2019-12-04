@@ -10,10 +10,10 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.dto.StackAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
@@ -85,17 +85,14 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     public StackViewV4Responses list(String environmentName, String environmentCrn) {
-        if (StringUtils.isNotEmpty(environmentName) && StringUtils.isNotEmpty(environmentCrn)) {
-            return stackOperations.listByEnvironmentCrn(
-                    workspaceService.getForCurrentUser().getId(), environmentCrn, StackType.WORKLOAD);
-        }
-        if (StringUtils.isNotEmpty(environmentName)) {
-            return stackOperations.listByEnvironmentName(
-                    workspaceService.getForCurrentUser().getId(), environmentName, StackType.WORKLOAD);
+        StackViewV4Responses stackViewV4Responses;
+        List<StackType> stackTypes = List.of(StackType.WORKLOAD);
+        if (!Strings.isNullOrEmpty(environmentName)) {
+            stackViewV4Responses = stackOperations.listByEnvironmentName(workspaceService.getForCurrentUser().getId(), environmentName, stackTypes);
         } else {
-            return stackOperations.listByEnvironmentCrn(
-                    workspaceService.getForCurrentUser().getId(), environmentCrn, StackType.WORKLOAD);
+            stackViewV4Responses = stackOperations.listByEnvironmentCrn(workspaceService.getForCurrentUser().getId(), environmentCrn, stackTypes);
         }
+        return stackViewV4Responses;
     }
 
     @Override

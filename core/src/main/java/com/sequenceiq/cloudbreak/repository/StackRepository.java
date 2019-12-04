@@ -235,6 +235,6 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "FROM Stack s LEFT JOIN s.cluster c LEFT JOIN c.blueprint b LEFT JOIN s.stackStatus ss LEFT JOIN s.creator u "
             + "WHERE s.workspace.id= :id AND s.terminated = null "
             + "AND (:environmentCrn IS null OR s.environmentCrn = :environmentCrn) "
-            + "AND (s.type IS null OR s.type = :stackType)")
-    Set<StackListItem> findByWorkspaceId(@Param("id") Long id, @Param("environmentCrn") String environmentCrn, @Param("stackType") StackType stackType);
+            + "AND (s.type IS null OR s.type in :stackTypes)")
+    Set<StackListItem> findByWorkspaceId(@Param("id") Long id, @Param("environmentCrn") String environmentCrn, @Param("stackTypes") List<StackType> stackTypes);
 }

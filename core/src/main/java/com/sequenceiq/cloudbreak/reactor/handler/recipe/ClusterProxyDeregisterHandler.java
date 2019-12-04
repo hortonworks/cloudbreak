@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.recipe;
 
+import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.CLUSTER_PROXY_DEREGISTER_FAILED_EVENT;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -61,7 +63,7 @@ public class ClusterProxyDeregisterHandler implements EventHandler<ClusterProxyD
             result = new ClusterProxyDeregisterSuccess(stack.getId());
         } catch (Exception ex) {
             LOGGER.warn("Cluster proxy deregister failed", ex);
-            result = new StackFailureEvent(request.getResourceId(), ex);
+            result = new StackFailureEvent(CLUSTER_PROXY_DEREGISTER_FAILED_EVENT.event(), request.getResourceId(), ex);
         }
         eventBus.notify(result.selector(), new Event<>(requestEvent.getHeaders(), result));
     }

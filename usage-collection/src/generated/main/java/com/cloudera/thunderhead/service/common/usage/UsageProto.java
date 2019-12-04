@@ -163,6 +163,31 @@ public final class UsageProto {
 
     /**
      * <pre>
+     * An Altus user interactively login failure.
+     * </pre>
+     *
+     * <code>.usage.AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;</code>
+     */
+    boolean hasAltusIamUserInteractiveLoginFailure();
+    /**
+     * <pre>
+     * An Altus user interactively login failure.
+     * </pre>
+     *
+     * <code>.usage.AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure getAltusIamUserInteractiveLoginFailure();
+    /**
+     * <pre>
+     * An Altus user interactively login failure.
+     * </pre>
+     *
+     * <code>.usage.AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailureOrBuilder getAltusIamUserInteractiveLoginFailureOrBuilder();
+
+    /**
+     * <pre>
      * An Altus Data Engineering job was submitted.
      * </pre>
      *
@@ -983,6 +1008,20 @@ public final class UsageProto {
               detailsCase_ = 25;
               break;
             }
+            case 210: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.Builder subBuilder = null;
+              if (detailsCase_ == 26) {
+                subBuilder = ((com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure) details_).toBuilder();
+              }
+              details_ =
+                  input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure) details_);
+                details_ = subBuilder.buildPartial();
+              }
+              detailsCase_ = 26;
+              break;
+            }
             default: {
               if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -1023,6 +1062,7 @@ public final class UsageProto {
       ALTUSIAMUSERCREATED(5),
       ALTUSIAMUSERUPDATED(6),
       ALTUSIAMUSERINTERACTIVELOGIN(7),
+      ALTUSIAMUSERINTERACTIVELOGINFAILURE(26),
       ALTUSDATAENGINEERINGJOBSUBMITTED(8),
       ALTUSDATAENGINEERINGJOBSTATUSCHANGED(9),
       ALTUSDATAENGINEERINGCLUSTERCREATED(10),
@@ -1060,6 +1100,7 @@ public final class UsageProto {
           case 5: return ALTUSIAMUSERCREATED;
           case 6: return ALTUSIAMUSERUPDATED;
           case 7: return ALTUSIAMUSERINTERACTIVELOGIN;
+          case 26: return ALTUSIAMUSERINTERACTIVELOGINFAILURE;
           case 8: return ALTUSDATAENGINEERINGJOBSUBMITTED;
           case 9: return ALTUSDATAENGINEERINGJOBSTATUSCHANGED;
           case 10: return ALTUSDATAENGINEERINGCLUSTERCREATED;
@@ -1318,6 +1359,44 @@ public final class UsageProto {
          return (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLogin) details_;
       }
       return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLogin.getDefaultInstance();
+    }
+
+    public static final int ALTUSIAMUSERINTERACTIVELOGINFAILURE_FIELD_NUMBER = 26;
+    /**
+     * <pre>
+     * An Altus user interactively login failure.
+     * </pre>
+     *
+     * <code>.usage.AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;</code>
+     */
+    public boolean hasAltusIamUserInteractiveLoginFailure() {
+      return detailsCase_ == 26;
+    }
+    /**
+     * <pre>
+     * An Altus user interactively login failure.
+     * </pre>
+     *
+     * <code>.usage.AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure getAltusIamUserInteractiveLoginFailure() {
+      if (detailsCase_ == 26) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * An Altus user interactively login failure.
+     * </pre>
+     *
+     * <code>.usage.AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailureOrBuilder getAltusIamUserInteractiveLoginFailureOrBuilder() {
+      if (detailsCase_ == 26) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.getDefaultInstance();
     }
 
     public static final int ALTUSDATAENGINEERINGJOBSUBMITTED_FIELD_NUMBER = 8;
@@ -2093,6 +2172,9 @@ public final class UsageProto {
       if (detailsCase_ == 25) {
         output.writeMessage(25, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubClusterStatusChanged) details_);
       }
+      if (detailsCase_ == 26) {
+        output.writeMessage(26, (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure) details_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -2201,6 +2283,10 @@ public final class UsageProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(25, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubClusterStatusChanged) details_);
       }
+      if (detailsCase_ == 26) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(26, (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure) details_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -2242,6 +2328,10 @@ public final class UsageProto {
         case 7:
           result = result && getAltusIamUserInteractiveLogin()
               .equals(other.getAltusIamUserInteractiveLogin());
+          break;
+        case 26:
+          result = result && getAltusIamUserInteractiveLoginFailure()
+              .equals(other.getAltusIamUserInteractiveLoginFailure());
           break;
         case 8:
           result = result && getAltusDataEngineeringJobSubmitted()
@@ -2352,6 +2442,10 @@ public final class UsageProto {
         case 7:
           hash = (37 * hash) + ALTUSIAMUSERINTERACTIVELOGIN_FIELD_NUMBER;
           hash = (53 * hash) + getAltusIamUserInteractiveLogin().hashCode();
+          break;
+        case 26:
+          hash = (37 * hash) + ALTUSIAMUSERINTERACTIVELOGINFAILURE_FIELD_NUMBER;
+          hash = (53 * hash) + getAltusIamUserInteractiveLoginFailure().hashCode();
           break;
         case 8:
           hash = (37 * hash) + ALTUSDATAENGINEERINGJOBSUBMITTED_FIELD_NUMBER;
@@ -2630,6 +2724,13 @@ public final class UsageProto {
             result.details_ = altusIamUserInteractiveLoginBuilder_.build();
           }
         }
+        if (detailsCase_ == 26) {
+          if (altusIamUserInteractiveLoginFailureBuilder_ == null) {
+            result.details_ = details_;
+          } else {
+            result.details_ = altusIamUserInteractiveLoginFailureBuilder_.build();
+          }
+        }
         if (detailsCase_ == 8) {
           if (altusDataEngineeringJobSubmittedBuilder_ == null) {
             result.details_ = details_;
@@ -2830,6 +2931,10 @@ public final class UsageProto {
           }
           case ALTUSIAMUSERINTERACTIVELOGIN: {
             mergeAltusIamUserInteractiveLogin(other.getAltusIamUserInteractiveLogin());
+            break;
+          }
+          case ALTUSIAMUSERINTERACTIVELOGINFAILURE: {
+            mergeAltusIamUserInteractiveLoginFailure(other.getAltusIamUserInteractiveLoginFailure());
             break;
           }
           case ALTUSDATAENGINEERINGJOBSUBMITTED: {
@@ -3824,6 +3929,178 @@ public final class UsageProto {
         detailsCase_ = 7;
         onChanged();;
         return altusIamUserInteractiveLoginBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailureOrBuilder> altusIamUserInteractiveLoginFailureBuilder_;
+      /**
+       * <pre>
+       * An Altus user interactively login failure.
+       * </pre>
+       *
+       * <code>.usage.AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;</code>
+       */
+      public boolean hasAltusIamUserInteractiveLoginFailure() {
+        return detailsCase_ == 26;
+      }
+      /**
+       * <pre>
+       * An Altus user interactively login failure.
+       * </pre>
+       *
+       * <code>.usage.AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure getAltusIamUserInteractiveLoginFailure() {
+        if (altusIamUserInteractiveLoginFailureBuilder_ == null) {
+          if (detailsCase_ == 26) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.getDefaultInstance();
+        } else {
+          if (detailsCase_ == 26) {
+            return altusIamUserInteractiveLoginFailureBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * An Altus user interactively login failure.
+       * </pre>
+       *
+       * <code>.usage.AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;</code>
+       */
+      public Builder setAltusIamUserInteractiveLoginFailure(com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure value) {
+        if (altusIamUserInteractiveLoginFailureBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          details_ = value;
+          onChanged();
+        } else {
+          altusIamUserInteractiveLoginFailureBuilder_.setMessage(value);
+        }
+        detailsCase_ = 26;
+        return this;
+      }
+      /**
+       * <pre>
+       * An Altus user interactively login failure.
+       * </pre>
+       *
+       * <code>.usage.AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;</code>
+       */
+      public Builder setAltusIamUserInteractiveLoginFailure(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.Builder builderForValue) {
+        if (altusIamUserInteractiveLoginFailureBuilder_ == null) {
+          details_ = builderForValue.build();
+          onChanged();
+        } else {
+          altusIamUserInteractiveLoginFailureBuilder_.setMessage(builderForValue.build());
+        }
+        detailsCase_ = 26;
+        return this;
+      }
+      /**
+       * <pre>
+       * An Altus user interactively login failure.
+       * </pre>
+       *
+       * <code>.usage.AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;</code>
+       */
+      public Builder mergeAltusIamUserInteractiveLoginFailure(com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure value) {
+        if (altusIamUserInteractiveLoginFailureBuilder_ == null) {
+          if (detailsCase_ == 26 &&
+              details_ != com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.getDefaultInstance()) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.newBuilder((com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure) details_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            details_ = value;
+          }
+          onChanged();
+        } else {
+          if (detailsCase_ == 26) {
+            altusIamUserInteractiveLoginFailureBuilder_.mergeFrom(value);
+          }
+          altusIamUserInteractiveLoginFailureBuilder_.setMessage(value);
+        }
+        detailsCase_ = 26;
+        return this;
+      }
+      /**
+       * <pre>
+       * An Altus user interactively login failure.
+       * </pre>
+       *
+       * <code>.usage.AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;</code>
+       */
+      public Builder clearAltusIamUserInteractiveLoginFailure() {
+        if (altusIamUserInteractiveLoginFailureBuilder_ == null) {
+          if (detailsCase_ == 26) {
+            detailsCase_ = 0;
+            details_ = null;
+            onChanged();
+          }
+        } else {
+          if (detailsCase_ == 26) {
+            detailsCase_ = 0;
+            details_ = null;
+          }
+          altusIamUserInteractiveLoginFailureBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * An Altus user interactively login failure.
+       * </pre>
+       *
+       * <code>.usage.AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.Builder getAltusIamUserInteractiveLoginFailureBuilder() {
+        return getAltusIamUserInteractiveLoginFailureFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * An Altus user interactively login failure.
+       * </pre>
+       *
+       * <code>.usage.AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailureOrBuilder getAltusIamUserInteractiveLoginFailureOrBuilder() {
+        if ((detailsCase_ == 26) && (altusIamUserInteractiveLoginFailureBuilder_ != null)) {
+          return altusIamUserInteractiveLoginFailureBuilder_.getMessageOrBuilder();
+        } else {
+          if (detailsCase_ == 26) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * An Altus user interactively login failure.
+       * </pre>
+       *
+       * <code>.usage.AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailureOrBuilder> 
+          getAltusIamUserInteractiveLoginFailureFieldBuilder() {
+        if (altusIamUserInteractiveLoginFailureBuilder_ == null) {
+          if (!(detailsCase_ == 26)) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.getDefaultInstance();
+          }
+          altusIamUserInteractiveLoginFailureBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailureOrBuilder>(
+                  (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure) details_,
+                  getParentForChildren(),
+                  isClean());
+          details_ = null;
+        }
+        detailsCase_ = 26;
+        onChanged();;
+        return altusIamUserInteractiveLoginFailureBuilder_;
       }
 
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -11654,6 +11931,600 @@ public final class UsageProto {
 
     @java.lang.Override
     public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLogin getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface AltusIamUserInteractiveLoginFailureOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.AltusIamUserInteractiveLoginFailure)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The Altus user ID of the user logging in.
+     * </pre>
+     *
+     * <code>string userId = 1;</code>
+     */
+    java.lang.String getUserId();
+    /**
+     * <pre>
+     * The Altus user ID of the user logging in.
+     * </pre>
+     *
+     * <code>string userId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getUserIdBytes();
+  }
+  /**
+   * <pre>
+   * Generated when an Altus user interactive login fails.
+   * </pre>
+   *
+   * Protobuf type {@code usage.AltusIamUserInteractiveLoginFailure}
+   */
+  public  static final class AltusIamUserInteractiveLoginFailure extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.AltusIamUserInteractiveLoginFailure)
+      AltusIamUserInteractiveLoginFailureOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use AltusIamUserInteractiveLoginFailure.newBuilder() to construct.
+    private AltusIamUserInteractiveLoginFailure(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AltusIamUserInteractiveLoginFailure() {
+      userId_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AltusIamUserInteractiveLoginFailure(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              userId_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AltusIamUserInteractiveLoginFailure_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AltusIamUserInteractiveLoginFailure_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.class, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.Builder.class);
+    }
+
+    public static final int USERID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object userId_;
+    /**
+     * <pre>
+     * The Altus user ID of the user logging in.
+     * </pre>
+     *
+     * <code>string userId = 1;</code>
+     */
+    public java.lang.String getUserId() {
+      java.lang.Object ref = userId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        userId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The Altus user ID of the user logging in.
+     * </pre>
+     *
+     * <code>string userId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getUserIdBytes() {
+      java.lang.Object ref = userId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        userId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getUserIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, userId_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getUserIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, userId_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure other = (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure) obj;
+
+      boolean result = true;
+      result = result && getUserId()
+          .equals(other.getUserId());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + USERID_FIELD_NUMBER;
+      hash = (53 * hash) + getUserId().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Generated when an Altus user interactive login fails.
+     * </pre>
+     *
+     * Protobuf type {@code usage.AltusIamUserInteractiveLoginFailure}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.AltusIamUserInteractiveLoginFailure)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailureOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AltusIamUserInteractiveLoginFailure_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AltusIamUserInteractiveLoginFailure_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.class, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        userId_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AltusIamUserInteractiveLoginFailure_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure result = new com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure(this);
+        result.userId_ = userId_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure.getDefaultInstance()) return this;
+        if (!other.getUserId().isEmpty()) {
+          userId_ = other.userId_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object userId_ = "";
+      /**
+       * <pre>
+       * The Altus user ID of the user logging in.
+       * </pre>
+       *
+       * <code>string userId = 1;</code>
+       */
+      public java.lang.String getUserId() {
+        java.lang.Object ref = userId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          userId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Altus user ID of the user logging in.
+       * </pre>
+       *
+       * <code>string userId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getUserIdBytes() {
+        java.lang.Object ref = userId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          userId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Altus user ID of the user logging in.
+       * </pre>
+       *
+       * <code>string userId = 1;</code>
+       */
+      public Builder setUserId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        userId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Altus user ID of the user logging in.
+       * </pre>
+       *
+       * <code>string userId = 1;</code>
+       */
+      public Builder clearUserId() {
+        
+        userId_ = getDefaultInstance().getUserId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Altus user ID of the user logging in.
+       * </pre>
+       *
+       * <code>string userId = 1;</code>
+       */
+      public Builder setUserIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        userId_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.AltusIamUserInteractiveLoginFailure)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.AltusIamUserInteractiveLoginFailure)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AltusIamUserInteractiveLoginFailure>
+        PARSER = new com.google.protobuf.AbstractParser<AltusIamUserInteractiveLoginFailure>() {
+      @java.lang.Override
+      public AltusIamUserInteractiveLoginFailure parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AltusIamUserInteractiveLoginFailure(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<AltusIamUserInteractiveLoginFailure> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AltusIamUserInteractiveLoginFailure> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamUserInteractiveLoginFailure getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -33843,6 +34714,15 @@ public final class UsageProto {
      */
     com.google.protobuf.ByteString
         getCrnBytes();
+
+    /**
+     * <pre>
+     * Whether the machine user is an internal machine user.
+     * </pre>
+     *
+     * <code>bool internal = 5;</code>
+     */
+    boolean getInternal();
   }
   /**
    * <pre>
@@ -33865,6 +34745,7 @@ public final class UsageProto {
       accountId_ = "";
       machineUserName_ = "";
       crn_ = "";
+      internal_ = false;
     }
 
     @java.lang.Override
@@ -33913,6 +34794,11 @@ public final class UsageProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               crn_ = s;
+              break;
+            }
+            case 40: {
+
+              internal_ = input.readBool();
               break;
             }
             default: {
@@ -34117,6 +35003,19 @@ public final class UsageProto {
       }
     }
 
+    public static final int INTERNAL_FIELD_NUMBER = 5;
+    private boolean internal_;
+    /**
+     * <pre>
+     * Whether the machine user is an internal machine user.
+     * </pre>
+     *
+     * <code>bool internal = 5;</code>
+     */
+    public boolean getInternal() {
+      return internal_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -34143,6 +35042,9 @@ public final class UsageProto {
       if (!getCrnBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, crn_);
       }
+      if (internal_ != false) {
+        output.writeBool(5, internal_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -34163,6 +35065,10 @@ public final class UsageProto {
       }
       if (!getCrnBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, crn_);
+      }
+      if (internal_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(5, internal_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -34188,6 +35094,8 @@ public final class UsageProto {
           .equals(other.getMachineUserName());
       result = result && getCrn()
           .equals(other.getCrn());
+      result = result && (getInternal()
+          == other.getInternal());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -34207,6 +35115,9 @@ public final class UsageProto {
       hash = (53 * hash) + getMachineUserName().hashCode();
       hash = (37 * hash) + CRN_FIELD_NUMBER;
       hash = (53 * hash) + getCrn().hashCode();
+      hash = (37 * hash) + INTERNAL_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getInternal());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -34352,6 +35263,8 @@ public final class UsageProto {
 
         crn_ = "";
 
+        internal_ = false;
+
         return this;
       }
 
@@ -34382,6 +35295,7 @@ public final class UsageProto {
         result.accountId_ = accountId_;
         result.machineUserName_ = machineUserName_;
         result.crn_ = crn_;
+        result.internal_ = internal_;
         onBuilt();
         return result;
       }
@@ -34445,6 +35359,9 @@ public final class UsageProto {
         if (!other.getCrn().isEmpty()) {
           crn_ = other.crn_;
           onChanged();
+        }
+        if (other.getInternal() != false) {
+          setInternal(other.getInternal());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -34832,6 +35749,44 @@ public final class UsageProto {
   checkByteStringIsUtf8(value);
         
         crn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean internal_ ;
+      /**
+       * <pre>
+       * Whether the machine user is an internal machine user.
+       * </pre>
+       *
+       * <code>bool internal = 5;</code>
+       */
+      public boolean getInternal() {
+        return internal_;
+      }
+      /**
+       * <pre>
+       * Whether the machine user is an internal machine user.
+       * </pre>
+       *
+       * <code>bool internal = 5;</code>
+       */
+      public Builder setInternal(boolean value) {
+        
+        internal_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Whether the machine user is an internal machine user.
+       * </pre>
+       *
+       * <code>bool internal = 5;</code>
+       */
+      public Builder clearInternal() {
+        
+        internal_ = false;
         onChanged();
         return this;
       }
@@ -35561,6 +36516,15 @@ public final class UsageProto {
      */
     com.google.protobuf.ByteString
         getCrnBytes();
+
+    /**
+     * <pre>
+     * Whether the access key is an internal access key.
+     * </pre>
+     *
+     * <code>bool internal = 5;</code>
+     */
+    boolean getInternal();
   }
   /**
    * <pre>
@@ -35583,6 +36547,7 @@ public final class UsageProto {
       accountId_ = "";
       actorCrn_ = "";
       crn_ = "";
+      internal_ = false;
     }
 
     @java.lang.Override
@@ -35631,6 +36596,11 @@ public final class UsageProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               crn_ = s;
+              break;
+            }
+            case 40: {
+
+              internal_ = input.readBool();
               break;
             }
             default: {
@@ -35837,6 +36807,19 @@ public final class UsageProto {
       }
     }
 
+    public static final int INTERNAL_FIELD_NUMBER = 5;
+    private boolean internal_;
+    /**
+     * <pre>
+     * Whether the access key is an internal access key.
+     * </pre>
+     *
+     * <code>bool internal = 5;</code>
+     */
+    public boolean getInternal() {
+      return internal_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -35863,6 +36846,9 @@ public final class UsageProto {
       if (!getCrnBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, crn_);
       }
+      if (internal_ != false) {
+        output.writeBool(5, internal_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -35883,6 +36869,10 @@ public final class UsageProto {
       }
       if (!getCrnBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, crn_);
+      }
+      if (internal_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(5, internal_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -35908,6 +36898,8 @@ public final class UsageProto {
           .equals(other.getActorCrn());
       result = result && getCrn()
           .equals(other.getCrn());
+      result = result && (getInternal()
+          == other.getInternal());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -35927,6 +36919,9 @@ public final class UsageProto {
       hash = (53 * hash) + getActorCrn().hashCode();
       hash = (37 * hash) + CRN_FIELD_NUMBER;
       hash = (53 * hash) + getCrn().hashCode();
+      hash = (37 * hash) + INTERNAL_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getInternal());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -36072,6 +37067,8 @@ public final class UsageProto {
 
         crn_ = "";
 
+        internal_ = false;
+
         return this;
       }
 
@@ -36102,6 +37099,7 @@ public final class UsageProto {
         result.accountId_ = accountId_;
         result.actorCrn_ = actorCrn_;
         result.crn_ = crn_;
+        result.internal_ = internal_;
         onBuilt();
         return result;
       }
@@ -36165,6 +37163,9 @@ public final class UsageProto {
         if (!other.getCrn().isEmpty()) {
           crn_ = other.crn_;
           onChanged();
+        }
+        if (other.getInternal() != false) {
+          setInternal(other.getInternal());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -36557,6 +37558,44 @@ public final class UsageProto {
   checkByteStringIsUtf8(value);
         
         crn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean internal_ ;
+      /**
+       * <pre>
+       * Whether the access key is an internal access key.
+       * </pre>
+       *
+       * <code>bool internal = 5;</code>
+       */
+      public boolean getInternal() {
+        return internal_;
+      }
+      /**
+       * <pre>
+       * Whether the access key is an internal access key.
+       * </pre>
+       *
+       * <code>bool internal = 5;</code>
+       */
+      public Builder setInternal(boolean value) {
+        
+        internal_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Whether the access key is an internal access key.
+       * </pre>
+       *
+       * <code>bool internal = 5;</code>
+       */
+      public Builder clearInternal() {
+        
+        internal_ = false;
         onChanged();
         return this;
       }
@@ -38326,7 +39365,7 @@ public final class UsageProto {
   }
   /**
    * <pre>
-   * The status of an Altus Analytic DB cluster.
+   * The status of an Altus SDX namespace.
    * </pre>
    *
    * Protobuf type {@code usage.AltusSdxNamespaceStatus}
@@ -38727,7 +39766,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * The status of an Altus Analytic DB cluster.
+     * The status of an Altus SDX namespace.
      * </pre>
      *
      * Protobuf type {@code usage.AltusSdxNamespaceStatus}
@@ -41381,6 +42420,24 @@ public final class UsageProto {
      */
     com.google.protobuf.ByteString
         getCreatorCrnBytes();
+
+    /**
+     * <pre>
+     * The name of the cluster definition.
+     * </pre>
+     *
+     * <code>string clusterDefinitionName = 9;</code>
+     */
+    java.lang.String getClusterDefinitionName();
+    /**
+     * <pre>
+     * The name of the cluster definition.
+     * </pre>
+     *
+     * <code>string clusterDefinitionName = 9;</code>
+     */
+    com.google.protobuf.ByteString
+        getClusterDefinitionNameBytes();
   }
   /**
    * <pre>
@@ -41408,6 +42465,7 @@ public final class UsageProto {
       cdpdVersion_ = "";
       crn_ = "";
       creatorCrn_ = "";
+      clusterDefinitionName_ = "";
     }
 
     @java.lang.Override
@@ -41480,6 +42538,12 @@ public final class UsageProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               creatorCrn_ = s;
+              break;
+            }
+            case 74: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              clusterDefinitionName_ = s;
               break;
             }
             default: {
@@ -41833,6 +42897,48 @@ public final class UsageProto {
       }
     }
 
+    public static final int CLUSTERDEFINITIONNAME_FIELD_NUMBER = 9;
+    private volatile java.lang.Object clusterDefinitionName_;
+    /**
+     * <pre>
+     * The name of the cluster definition.
+     * </pre>
+     *
+     * <code>string clusterDefinitionName = 9;</code>
+     */
+    public java.lang.String getClusterDefinitionName() {
+      java.lang.Object ref = clusterDefinitionName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clusterDefinitionName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The name of the cluster definition.
+     * </pre>
+     *
+     * <code>string clusterDefinitionName = 9;</code>
+     */
+    public com.google.protobuf.ByteString
+        getClusterDefinitionNameBytes() {
+      java.lang.Object ref = clusterDefinitionName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clusterDefinitionName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -41871,6 +42977,9 @@ public final class UsageProto {
       if (!getCreatorCrnBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, creatorCrn_);
       }
+      if (!getClusterDefinitionNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, clusterDefinitionName_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -41905,6 +43014,9 @@ public final class UsageProto {
       if (!getCreatorCrnBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, creatorCrn_);
       }
+      if (!getClusterDefinitionNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, clusterDefinitionName_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -41936,6 +43048,8 @@ public final class UsageProto {
           .equals(other.getCrn());
       result = result && getCreatorCrn()
           .equals(other.getCreatorCrn());
+      result = result && getClusterDefinitionName()
+          .equals(other.getClusterDefinitionName());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -41963,6 +43077,8 @@ public final class UsageProto {
       hash = (53 * hash) + getCrn().hashCode();
       hash = (37 * hash) + CREATORCRN_FIELD_NUMBER;
       hash = (53 * hash) + getCreatorCrn().hashCode();
+      hash = (37 * hash) + CLUSTERDEFINITIONNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getClusterDefinitionName().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -42117,6 +43233,8 @@ public final class UsageProto {
 
         creatorCrn_ = "";
 
+        clusterDefinitionName_ = "";
+
         return this;
       }
 
@@ -42151,6 +43269,7 @@ public final class UsageProto {
         result.cdpdVersion_ = cdpdVersion_;
         result.crn_ = crn_;
         result.creatorCrn_ = creatorCrn_;
+        result.clusterDefinitionName_ = clusterDefinitionName_;
         onBuilt();
         return result;
       }
@@ -42228,6 +43347,10 @@ public final class UsageProto {
         }
         if (!other.getCreatorCrn().isEmpty()) {
           creatorCrn_ = other.creatorCrn_;
+          onChanged();
+        }
+        if (!other.getClusterDefinitionName().isEmpty()) {
+          clusterDefinitionName_ = other.clusterDefinitionName_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -42943,6 +44066,95 @@ public final class UsageProto {
   checkByteStringIsUtf8(value);
         
         creatorCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object clusterDefinitionName_ = "";
+      /**
+       * <pre>
+       * The name of the cluster definition.
+       * </pre>
+       *
+       * <code>string clusterDefinitionName = 9;</code>
+       */
+      public java.lang.String getClusterDefinitionName() {
+        java.lang.Object ref = clusterDefinitionName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clusterDefinitionName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the cluster definition.
+       * </pre>
+       *
+       * <code>string clusterDefinitionName = 9;</code>
+       */
+      public com.google.protobuf.ByteString
+          getClusterDefinitionNameBytes() {
+        java.lang.Object ref = clusterDefinitionName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clusterDefinitionName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the cluster definition.
+       * </pre>
+       *
+       * <code>string clusterDefinitionName = 9;</code>
+       */
+      public Builder setClusterDefinitionName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        clusterDefinitionName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the cluster definition.
+       * </pre>
+       *
+       * <code>string clusterDefinitionName = 9;</code>
+       */
+      public Builder clearClusterDefinitionName() {
+        
+        clusterDefinitionName_ = getDefaultInstance().getClusterDefinitionName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the cluster definition.
+       * </pre>
+       *
+       * <code>string clusterDefinitionName = 9;</code>
+       */
+      public Builder setClusterDefinitionNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        clusterDefinitionName_ = value;
         onChanged();
         return this;
       }
@@ -44201,6 +45413,24 @@ public final class UsageProto {
      */
     com.google.protobuf.ByteString
         getCreatorCrnBytes();
+
+    /**
+     * <pre>
+     * The name of the cluster definition.
+     * </pre>
+     *
+     * <code>string clusterDefinitionName = 10;</code>
+     */
+    java.lang.String getClusterDefinitionName();
+    /**
+     * <pre>
+     * The name of the cluster definition.
+     * </pre>
+     *
+     * <code>string clusterDefinitionName = 10;</code>
+     */
+    com.google.protobuf.ByteString
+        getClusterDefinitionNameBytes();
   }
   /**
    * <pre>
@@ -44229,6 +45459,7 @@ public final class UsageProto {
       datalakeCrn_ = "";
       crn_ = "";
       creatorCrn_ = "";
+      clusterDefinitionName_ = "";
     }
 
     @java.lang.Override
@@ -44307,6 +45538,12 @@ public final class UsageProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               creatorCrn_ = s;
+              break;
+            }
+            case 82: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              clusterDefinitionName_ = s;
               break;
             }
             default: {
@@ -44704,6 +45941,48 @@ public final class UsageProto {
       }
     }
 
+    public static final int CLUSTERDEFINITIONNAME_FIELD_NUMBER = 10;
+    private volatile java.lang.Object clusterDefinitionName_;
+    /**
+     * <pre>
+     * The name of the cluster definition.
+     * </pre>
+     *
+     * <code>string clusterDefinitionName = 10;</code>
+     */
+    public java.lang.String getClusterDefinitionName() {
+      java.lang.Object ref = clusterDefinitionName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clusterDefinitionName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The name of the cluster definition.
+     * </pre>
+     *
+     * <code>string clusterDefinitionName = 10;</code>
+     */
+    public com.google.protobuf.ByteString
+        getClusterDefinitionNameBytes() {
+      java.lang.Object ref = clusterDefinitionName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clusterDefinitionName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -44745,6 +46024,9 @@ public final class UsageProto {
       if (!getCreatorCrnBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, creatorCrn_);
       }
+      if (!getClusterDefinitionNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 10, clusterDefinitionName_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -44782,6 +46064,9 @@ public final class UsageProto {
       if (!getCreatorCrnBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, creatorCrn_);
       }
+      if (!getClusterDefinitionNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, clusterDefinitionName_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -44815,6 +46100,8 @@ public final class UsageProto {
           .equals(other.getCrn());
       result = result && getCreatorCrn()
           .equals(other.getCreatorCrn());
+      result = result && getClusterDefinitionName()
+          .equals(other.getClusterDefinitionName());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -44844,6 +46131,8 @@ public final class UsageProto {
       hash = (53 * hash) + getCrn().hashCode();
       hash = (37 * hash) + CREATORCRN_FIELD_NUMBER;
       hash = (53 * hash) + getCreatorCrn().hashCode();
+      hash = (37 * hash) + CLUSTERDEFINITIONNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getClusterDefinitionName().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -45000,6 +46289,8 @@ public final class UsageProto {
 
         creatorCrn_ = "";
 
+        clusterDefinitionName_ = "";
+
         return this;
       }
 
@@ -45035,6 +46326,7 @@ public final class UsageProto {
         result.datalakeCrn_ = datalakeCrn_;
         result.crn_ = crn_;
         result.creatorCrn_ = creatorCrn_;
+        result.clusterDefinitionName_ = clusterDefinitionName_;
         onBuilt();
         return result;
       }
@@ -45116,6 +46408,10 @@ public final class UsageProto {
         }
         if (!other.getCreatorCrn().isEmpty()) {
           creatorCrn_ = other.creatorCrn_;
+          onChanged();
+        }
+        if (!other.getClusterDefinitionName().isEmpty()) {
+          clusterDefinitionName_ = other.clusterDefinitionName_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -45925,6 +47221,95 @@ public final class UsageProto {
   checkByteStringIsUtf8(value);
         
         creatorCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object clusterDefinitionName_ = "";
+      /**
+       * <pre>
+       * The name of the cluster definition.
+       * </pre>
+       *
+       * <code>string clusterDefinitionName = 10;</code>
+       */
+      public java.lang.String getClusterDefinitionName() {
+        java.lang.Object ref = clusterDefinitionName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clusterDefinitionName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the cluster definition.
+       * </pre>
+       *
+       * <code>string clusterDefinitionName = 10;</code>
+       */
+      public com.google.protobuf.ByteString
+          getClusterDefinitionNameBytes() {
+        java.lang.Object ref = clusterDefinitionName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clusterDefinitionName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the cluster definition.
+       * </pre>
+       *
+       * <code>string clusterDefinitionName = 10;</code>
+       */
+      public Builder setClusterDefinitionName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        clusterDefinitionName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the cluster definition.
+       * </pre>
+       *
+       * <code>string clusterDefinitionName = 10;</code>
+       */
+      public Builder clearClusterDefinitionName() {
+        
+        clusterDefinitionName_ = getDefaultInstance().getClusterDefinitionName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the cluster definition.
+       * </pre>
+       *
+       * <code>string clusterDefinitionName = 10;</code>
+       */
+      public Builder setClusterDefinitionNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        clusterDefinitionName_ = value;
         onChanged();
         return this;
       }
@@ -47048,6 +48433,11 @@ public final class UsageProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_usage_AltusIamUserInteractiveLogin_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_AltusIamUserInteractiveLoginFailure_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_AltusIamUserInteractiveLoginFailure_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_usage_AltusEnvironmentsEnvironmentType_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -47226,7 +48616,7 @@ public final class UsageProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\013usage.proto\022\005usage\"\200\016\n\005Event\022\n\n\002id\030\001 \001" +
+      "\n\013usage.proto\022\005usage\"\333\016\n\005Event\022\n\n\002id\030\001 \001" +
       "(\t\022\021\n\ttimestamp\030\002 \001(\004\022\017\n\007version\030\003 \001(\r\022?" +
       "\n\026altusIamAccountCreated\030\004 \001(\0132\035.usage.A" +
       "ltusIamAccountCreatedH\000\0229\n\023altusIamUserC" +
@@ -47234,216 +48624,222 @@ public final class UsageProto {
       "H\000\0229\n\023altusIamUserUpdated\030\006 \001(\0132\032.usage." +
       "AltusIamUserUpdatedH\000\022K\n\034altusIamUserInt" +
       "eractiveLogin\030\007 \001(\0132#.usage.AltusIamUser" +
-      "InteractiveLoginH\000\022S\n altusDataEngineeri" +
-      "ngJobSubmitted\030\010 \001(\0132\'.usage.AltusDataEn" +
-      "gineeringJobSubmittedH\000\022[\n$altusDataEngi" +
-      "neeringJobStatusChanged\030\t \001(\0132+.usage.Al" +
-      "tusDataEngineeringJobStatusChangedH\000\022W\n\"" +
-      "altusDataEngineeringClusterCreated\030\n \001(\013" +
-      "2).usage.AltusDataEngineeringClusterCrea" +
-      "tedH\000\022c\n(altusDataEngineeringClusterStat" +
-      "usChanged\030\013 \001(\0132/.usage.AltusDataEnginee" +
-      "ringClusterStatusChangedH\000\022M\n\035altusAnaly" +
-      "ticDbClusterCreated\030\014 \001(\0132$.usage.AltusA" +
-      "nalyticDbClusterCreatedH\000\022Y\n#altusAnalyt" +
-      "icDbClusterStatusChanged\030\r \001(\0132*.usage.A" +
-      "ltusAnalyticDbClusterStatusChangedH\000\022Y\n#" +
-      "altusEnvironmentsEnvironmentCreated\030\016 \001(" +
-      "\0132*.usage.AltusEnvironmentsEnvironmentCr" +
-      "eatedH\000\022Y\n#altusEnvironmentsEnvironmentD" +
-      "eleted\030\017 \001(\0132*.usage.AltusEnvironmentsEn" +
-      "vironmentDeletedH\000\022G\n\032altusIamMachineUse" +
-      "rCreated\030\020 \001(\0132!.usage.AltusIamMachineUs" +
-      "erCreatedH\000\022G\n\032altusIamMachineUserDelete" +
-      "d\030\021 \001(\0132!.usage.AltusIamMachineUserDelet" +
-      "edH\000\022C\n\030altusIamAccessKeyCreated\030\022 \001(\0132\037" +
-      ".usage.AltusIamAccessKeyCreatedH\000\022C\n\030alt" +
-      "usIamAccessKeyDeleted\030\023 \001(\0132\037.usage.Altu" +
-      "sIamAccessKeyDeletedH\000\022C\n\030altusSdxNamesp" +
-      "aceCreated\030\024 \001(\0132\037.usage.AltusSdxNamespa" +
-      "ceCreatedH\000\022O\n\036altusSdxNamespaceStatusCh" +
-      "anged\030\025 \001(\0132%.usage.AltusSdxNamespaceSta" +
-      "tusChangedH\000\022I\n\033cdpDatalakeClusterReques" +
-      "ted\030\026 \001(\0132\".usage.CDPDatalakeClusterRequ" +
-      "estedH\000\022Q\n\037cdpDatalakeClusterStatusChang" +
-      "ed\030\027 \001(\0132&.usage.CDPDatalakeClusterStatu" +
-      "sChangedH\000\022G\n\032cdpDatahubClusterRequested" +
-      "\030\030 \001(\0132!.usage.CDPDatahubClusterRequeste" +
-      "dH\000\022O\n\036cdpDatahubClusterStatusChanged\030\031 " +
-      "\001(\0132%.usage.CDPDatahubClusterStatusChang" +
-      "edH\000B\t\n\007details\"A\n\023AltusIamAccountType\"*" +
-      "\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007REGULAR\020\001\022\t\n\005TRIAL" +
-      "\020\002\"\225\001\n\026AltusIamAccountCreated\022\021\n\taccount" +
-      "Id\030\001 \001(\t\022\032\n\022identifyProviderId\030\003 \001(\t\022\025\n\r" +
-      "sfdcAccountId\030\004 \001(\t\0225\n\013accountType\030\005 \001(\016" +
-      "2 .usage.AltusIamAccountType.Value\"\333\001\n\023A" +
-      "ltusIamUserCreated\022\016\n\006userId\030\001 \001(\t\022\021\n\tac" +
-      "countId\030\003 \001(\t\022\036\n\026identityProviderUserId\030" +
-      "\004 \001(\t\022\025\n\rsfdcContactId\030\005 \001(\t\022\r\n\005admin\030\006 " +
-      "\001(\010\022\013\n\003crn\030\n \001(\t\022\033\n\023identityProviderCrn\030" +
-      "\013 \001(\t\022\031\n\021explicitlyCreated\030\014 \001(\010J\004\010\002\020\003J\004" +
-      "\010\007\020\010J\004\010\010\020\tJ\004\010\t\020\n\"F\n\023AltusIamUserUpdated\022" +
-      "\016\n\006userId\030\001 \001(\t\022\r\n\005admin\030\005 \001(\010J\004\010\002\020\003J\004\010\003" +
-      "\020\004J\004\010\004\020\005\".\n\034AltusIamUserInteractiveLogin" +
-      "\022\016\n\006userId\030\001 \001(\t\"J\n AltusEnvironmentsEnv" +
-      "ironmentType\"&\n\005Value\022\t\n\005UNSET\020\000\022\007\n\003AWS\020" +
-      "\001\022\t\n\005AZURE\020\002\"]\n\033AltusDataEngineeringJobT" +
-      "ype\">\n\005Value\022\t\n\005UNSET\020\000\022\010\n\004HIVE\020\001\022\t\n\005SPA" +
-      "RK\020\002\022\010\n\004YARN\020\003\022\013\n\007PYSPARK\020\004\"]\n$AltusData" +
-      "EngineeringJobFailureAction\"5\n\005Value\022\t\n\005" +
-      "UNSET\020\000\022\010\n\004NONE\020\001\022\027\n\023INTERRUPT_JOB_QUEUE" +
-      "\020\002\"\225\004\n AltusDataEngineeringJobSubmitted\022" +
-      "\r\n\005jobId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\0229\n\007job" +
-      "Type\030\003 \001(\0162(.usage.AltusDataEngineeringJ" +
-      "obType.Value\022\017\n\007jobName\030\004 \001(\t\022\034\n\024jobSubm" +
-      "issionGroupId\030\005 \001(\t\022\036\n\026jobSubmissionGrou" +
-      "pName\030\006 \001(\t\022\037\n\027jobSubmissionGroupIndex\030\007" +
-      " \001(\005\022\036\n\026jobSubmissionGroupSize\030\010 \001(\005\022\026\n\016" +
-      "environmentCrn\030\t \001(\t\022F\n\017environmentType\030" +
-      "\n \001(\0162-.usage.AltusEnvironmentsEnvironme" +
-      "ntType.Value\022\022\n\nclusterCrn\030\013 \001(\t\022\024\n\014subm" +
-      "itterCrn\030\014 \001(\t\022H\n\rfailureAction\030\r \001(\01621." +
-      "usage.AltusDataEngineeringJobFailureActi" +
-      "on.Value\022#\n\033sendDataToWorkloadAnalytics\030" +
-      "\016 \001(\010\022\013\n\003crn\030\017 \001(\t\"\252\001\n\035AltusDataEngineer" +
-      "ingJobStatus\"\210\001\n\005Value\022\t\n\005UNSET\020\000\022\n\n\006QUE" +
-      "UED\020\001\022\016\n\nSUBMITTING\020\002\022\013\n\007RUNNING\020\003\022\r\n\tCO" +
-      "MPLETED\020\004\022\017\n\013TERMINATING\020\005\022\016\n\nTERMINATED" +
-      "\020\006\022\n\n\006FAILED\020\007\022\017\n\013INTERRUPTED\020\010\"\263\001\n$Altu" +
-      "sDataEngineeringJobStatusChanged\022\r\n\005jobI" +
-      "d\030\001 \001(\t\022=\n\toldStatus\030\002 \001(\0162*.usage.Altus" +
-      "DataEngineeringJobStatus.Value\022=\n\tnewSta" +
-      "tus\030\003 \001(\0162*.usage.AltusDataEngineeringJo" +
-      "bStatus.Value\"f\n1AltusDataEngineeringAut" +
-      "omaticTerminationCondition\"1\n\005Value\022\t\n\005U" +
-      "NSET\020\000\022\010\n\004NONE\020\001\022\023\n\017EMPTY_JOB_QUEUE\020\002\"\327\003" +
-      "\n\"AltusDataEngineeringClusterCreated\022\021\n\t" +
-      "clusterId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\023\n\013cl" +
-      "usterName\030\003 \001(\t\022F\n\017environmentType\030\004 \001(\016" +
-      "2-.usage.AltusEnvironmentsEnvironmentTyp" +
-      "e.Value\022\026\n\016environmentCrn\030\005 \001(\t\022\022\n\ncdhVe" +
-      "rsion\030\006 \001(\t\022\023\n\013serviceType\030\007 \001(\t\022\024\n\014inst" +
-      "anceType\030\010 \001(\t\022\032\n\022hasBootstrapScript\030\t \001" +
-      "(\010\022\024\n\014namespaceCrn\030\n \001(\t\022e\n\035automaticTer" +
-      "minationCondition\030\013 \001(\0162>.usage.AltusDat" +
-      "aEngineeringAutomaticTerminationConditio" +
-      "n.Value\022\014\n\004jobs\030\014 \001(\r\022\013\n\003crn\030\r \001(\t\022\022\n\ncr" +
-      "eatorCrn\030\016 \001(\t\022\017\n\007secured\030\017 \001(\010\"\177\n!Altus" +
-      "DataEngineeringClusterStatus\"Z\n\005Value\022\t\n" +
-      "\005UNSET\020\000\022\014\n\010CREATING\020\001\022\013\n\007CREATED\020\002\022\017\n\013T" +
-      "ERMINATING\020\003\022\n\n\006FAILED\020\004\022\016\n\nTERMINATED\020\005" +
-      "\"\360\001\n(AltusDataEngineeringClusterStatusCh" +
-      "anged\022\021\n\tclusterId\030\001 \001(\t\022A\n\toldStatus\030\002 " +
-      "\001(\0162..usage.AltusDataEngineeringClusterS" +
-      "tatus.Value\022A\n\tnewStatus\030\003 \001(\0162..usage.A" +
-      "ltusDataEngineeringClusterStatus.Value\022\024" +
-      "\n\014failureCodes\030\004 \003(\t\022\025\n\rfailureReason\030\005 " +
-      "\001(\t\"\310\002\n\035AltusAnalyticDbClusterCreated\022\021\n" +
-      "\tclusterId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\023\n\013c" +
-      "lusterName\030\003 \001(\t\022F\n\017environmentType\030\004 \001(" +
-      "\0162-.usage.AltusEnvironmentsEnvironmentTy" +
-      "pe.Value\022\026\n\016environmentCrn\030\005 \001(\t\022\022\n\ncdhV" +
-      "ersion\030\006 \001(\t\022\024\n\014instanceType\030\007 \001(\t\022\032\n\022ha" +
-      "sBootstrapScript\030\010 \001(\010\022\024\n\014namespaceCrn\030\t" +
-      " \001(\t\022\013\n\003crn\030\n \001(\t\022\022\n\ncreatorCrn\030\013 \001(\t\022\017\n" +
-      "\007secured\030\014 \001(\010\"z\n\034AltusAnalyticDbCluster" +
-      "Status\"Z\n\005Value\022\t\n\005UNSET\020\000\022\014\n\010CREATING\020\001" +
-      "\022\013\n\007CREATED\020\002\022\017\n\013TERMINATING\020\003\022\n\n\006FAILED" +
-      "\020\004\022\016\n\nTERMINATED\020\005\"\341\001\n#AltusAnalyticDbCl" +
-      "usterStatusChanged\022\021\n\tclusterId\030\001 \001(\t\022<\n" +
-      "\toldStatus\030\002 \001(\0162).usage.AltusAnalyticDb" +
-      "ClusterStatus.Value\022<\n\tnewStatus\030\003 \001(\0162)" +
-      ".usage.AltusAnalyticDbClusterStatus.Valu" +
-      "e\022\024\n\014failureCodes\030\004 \003(\t\022\025\n\rfailureReason" +
-      "\030\005 \001(\t\"\217\001\n&AltusEnvironmentsEnvironmentA" +
-      "wsDetails\022\033\n\023instanceProfileName\030\001 \001(\t\022H" +
-      "\n\007s3Guard\030\002 \001(\01327.usage.AltusEnvironment" +
-      "sEnvironmentS3GuardConfiguration\"*\n(Altu" +
-      "sEnvironmentsEnvironmentAzureDetails\"K\n8" +
-      "AltusEnvironmentsEnvironmentSecuredClust" +
-      "ersConfiguration\022\017\n\007enabled\030\001 \001(\010\"C\n0Alt" +
-      "usEnvironmentsEnvironmentS3GuardConfigur" +
-      "ation\022\017\n\007enabled\030\001 \001(\010\"E\n2AltusEnvironme" +
-      "ntsEnvironmentNavigatorConfiguration\022\017\n\007" +
-      "enabled\030\001 \001(\010\"M\n:AltusEnvironmentsEnviro" +
-      "nmentWorkloadAnalyticsConfiguration\022\017\n\007e" +
-      "nabled\030\001 \001(\010\"\320\005\n#AltusEnvironmentsEnviro" +
-      "nmentCreated\022\025\n\renvironmentId\030\001 \001(\t\022\021\n\ta" +
-      "ccountId\030\002 \001(\t\022\027\n\017environmentName\030\003 \001(\t\022" +
-      "F\n\017environmentType\030\004 \001(\0162-.usage.AltusEn" +
-      "vironmentsEnvironmentType.Value\022\016\n\006regio" +
-      "n\030\005 \001(\t\022\032\n\022logArchiveLocation\030\006 \001(\t\022C\n\na" +
-      "wsDetails\030\007 \001(\0132-.usage.AltusEnvironment" +
-      "sEnvironmentAwsDetailsH\000\022G\n\014azureDetails" +
-      "\030\010 \001(\0132/.usage.AltusEnvironmentsEnvironm" +
-      "entAzureDetailsH\000\022e\n\034securedClustersConf" +
-      "iguration\030\t \001(\0132?.usage.AltusEnvironment" +
-      "sEnvironmentSecuredClustersConfiguration" +
-      "\022Y\n\026navigatorConfiguration\030\n \001(\01329.usage" +
-      ".AltusEnvironmentsEnvironmentNavigatorCo" +
-      "nfiguration\022i\n\036workloadAnalyticsConfigur" +
-      "ation\030\013 \001(\0132A.usage.AltusEnvironmentsEnv" +
-      "ironmentWorkloadAnalyticsConfiguration\022\013" +
-      "\n\003crn\030\014 \001(\t\022\022\n\ncreatorCrn\030\r \001(\tB\026\n\024cloud" +
-      "ProviderDetails\"<\n#AltusEnvironmentsEnvi" +
-      "ronmentDeleted\022\025\n\renvironmentId\030\001 \001(\t\"l\n" +
-      "\032AltusIamMachineUserCreated\022\025\n\rmachineUs" +
-      "erId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\027\n\017machine" +
-      "UserName\030\003 \001(\t\022\013\n\003crn\030\004 \001(\t\"3\n\032AltusIamM" +
-      "achineUserDeleted\022\025\n\rmachineUserId\030\001 \001(\t" +
-      "\"a\n\030AltusIamAccessKeyCreated\022\023\n\013accessKe" +
-      "yId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\020\n\010actorCrn" +
-      "\030\003 \001(\t\022\013\n\003crn\030\004 \001(\t\"/\n\030AltusIamAccessKey" +
-      "Deleted\022\023\n\013accessKeyId\030\001 \001(\t\"f\n\030AltusSdx" +
-      "NamespaceCreated\022\023\n\013namespaceId\030\001 \001(\t\022\021\n" +
-      "\taccountId\030\002 \001(\t\022\025\n\rnamespaceName\030\003 \001(\t\022" +
-      "\013\n\003crn\030\004 \001(\t\"o\n\027AltusSdxNamespaceStatus\"" +
-      "T\n\005Value\022\t\n\005UNSET\020\000\022\014\n\010CREATING\020\001\022\013\n\007CRE" +
-      "ATED\020\002\022\014\n\010DELETING\020\003\022\n\n\006FAILED\020\004\022\013\n\007DELE" +
-      "TED\020\005\"\247\001\n\036AltusSdxNamespaceStatusChanged" +
-      "\022\023\n\013namespaceId\030\001 \001(\t\0227\n\toldStatus\030\002 \001(\016" +
-      "2$.usage.AltusSdxNamespaceStatus.Value\0227" +
-      "\n\tnewStatus\030\003 \001(\0162$.usage.AltusSdxNamesp" +
-      "aceStatus.Value\"[\n\036CDPEnvironmentsEnviro" +
-      "nmentType\"9\n\005Value\022\t\n\005UNSET\020\000\022\007\n\003AWS\020\001\022\t" +
-      "\n\005AZURE\020\002\022\007\n\003GCP\020\003\022\010\n\004YARN\020\004\"\353\003\n\032CDPClou" +
-      "dbreakClusterStatus\"\314\003\n\005Value\022\t\n\005UNSET\020\000" +
-      "\022\r\n\tREQUESTED\020\001\022\026\n\022CREATE_IN_PROGRESS\020\002\022" +
-      "\r\n\tAVAILABLE\020\003\022\026\n\022UPDATE_IN_PROGRESS\020\004\022\024" +
-      "\n\020UPDATE_REQUESTED\020\005\022\021\n\rUPDATE_FAILED\020\006\022" +
-      "\021\n\rCREATE_FAILED\020\007\022\032\n\026ENABLE_SECURITY_FA" +
-      "ILED\020\010\022\032\n\026PRE_DELETE_IN_PROGRESS\020\t\022\026\n\022DE" +
-      "LETE_IN_PROGRESS\020\n\022\021\n\rDELETE_FAILED\020\013\022\024\n" +
-      "\020DELETE_COMPLETED\020\014\022\013\n\007STOPPED\020\r\022\022\n\016STOP" +
-      "_REQUESTED\020\016\022\023\n\017START_REQUESTED\020\017\022\024\n\020STO" +
-      "P_IN_PROGRESS\020\020\022\025\n\021START_IN_PROGRESS\020\021\022\020" +
-      "\n\014START_FAILED\020\022\022\017\n\013STOP_FAILED\020\023\022\021\n\rWAI" +
-      "T_FOR_SYNC\020\024\022\034\n\030MAINTENANCE_MODE_ENABLED" +
-      "\020\025\"\356\001\n\033CDPDatalakeClusterRequested\022\022\n\nda" +
-      "talakeId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\024\n\014dat" +
-      "alakeName\030\003 \001(\t\022D\n\017environmentType\030\004 \001(\016" +
-      "2+.usage.CDPEnvironmentsEnvironmentType." +
-      "Value\022\026\n\016environmentCrn\030\005 \001(\t\022\023\n\013cdpdVer" +
-      "sion\030\006 \001(\t\022\013\n\003crn\030\007 \001(\t\022\022\n\ncreatorCrn\030\010 " +
-      "\001(\t\"\304\001\n\037CDPDatalakeClusterStatusChanged\022" +
-      "\022\n\ndatalakeId\030\001 \001(\t\022:\n\toldStatus\030\002 \001(\0162\'" +
+      "InteractiveLoginH\000\022Y\n#altusIamUserIntera" +
+      "ctiveLoginFailure\030\032 \001(\0132*.usage.AltusIam" +
+      "UserInteractiveLoginFailureH\000\022S\n altusDa" +
+      "taEngineeringJobSubmitted\030\010 \001(\0132\'.usage." +
+      "AltusDataEngineeringJobSubmittedH\000\022[\n$al" +
+      "tusDataEngineeringJobStatusChanged\030\t \001(\013" +
+      "2+.usage.AltusDataEngineeringJobStatusCh" +
+      "angedH\000\022W\n\"altusDataEngineeringClusterCr" +
+      "eated\030\n \001(\0132).usage.AltusDataEngineering" +
+      "ClusterCreatedH\000\022c\n(altusDataEngineering" +
+      "ClusterStatusChanged\030\013 \001(\0132/.usage.Altus" +
+      "DataEngineeringClusterStatusChangedH\000\022M\n" +
+      "\035altusAnalyticDbClusterCreated\030\014 \001(\0132$.u" +
+      "sage.AltusAnalyticDbClusterCreatedH\000\022Y\n#" +
+      "altusAnalyticDbClusterStatusChanged\030\r \001(" +
+      "\0132*.usage.AltusAnalyticDbClusterStatusCh" +
+      "angedH\000\022Y\n#altusEnvironmentsEnvironmentC" +
+      "reated\030\016 \001(\0132*.usage.AltusEnvironmentsEn" +
+      "vironmentCreatedH\000\022Y\n#altusEnvironmentsE" +
+      "nvironmentDeleted\030\017 \001(\0132*.usage.AltusEnv" +
+      "ironmentsEnvironmentDeletedH\000\022G\n\032altusIa" +
+      "mMachineUserCreated\030\020 \001(\0132!.usage.AltusI" +
+      "amMachineUserCreatedH\000\022G\n\032altusIamMachin" +
+      "eUserDeleted\030\021 \001(\0132!.usage.AltusIamMachi" +
+      "neUserDeletedH\000\022C\n\030altusIamAccessKeyCrea" +
+      "ted\030\022 \001(\0132\037.usage.AltusIamAccessKeyCreat" +
+      "edH\000\022C\n\030altusIamAccessKeyDeleted\030\023 \001(\0132\037" +
+      ".usage.AltusIamAccessKeyDeletedH\000\022C\n\030alt" +
+      "usSdxNamespaceCreated\030\024 \001(\0132\037.usage.Altu" +
+      "sSdxNamespaceCreatedH\000\022O\n\036altusSdxNamesp" +
+      "aceStatusChanged\030\025 \001(\0132%.usage.AltusSdxN" +
+      "amespaceStatusChangedH\000\022I\n\033cdpDatalakeCl" +
+      "usterRequested\030\026 \001(\0132\".usage.CDPDatalake" +
+      "ClusterRequestedH\000\022Q\n\037cdpDatalakeCluster" +
+      "StatusChanged\030\027 \001(\0132&.usage.CDPDatalakeC" +
+      "lusterStatusChangedH\000\022G\n\032cdpDatahubClust" +
+      "erRequested\030\030 \001(\0132!.usage.CDPDatahubClus" +
+      "terRequestedH\000\022O\n\036cdpDatahubClusterStatu" +
+      "sChanged\030\031 \001(\0132%.usage.CDPDatahubCluster" +
+      "StatusChangedH\000B\t\n\007details\"A\n\023AltusIamAc" +
+      "countType\"*\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007REGULAR" +
+      "\020\001\022\t\n\005TRIAL\020\002\"\225\001\n\026AltusIamAccountCreated" +
+      "\022\021\n\taccountId\030\001 \001(\t\022\032\n\022identifyProviderI" +
+      "d\030\003 \001(\t\022\025\n\rsfdcAccountId\030\004 \001(\t\0225\n\013accoun" +
+      "tType\030\005 \001(\0162 .usage.AltusIamAccountType." +
+      "Value\"\333\001\n\023AltusIamUserCreated\022\016\n\006userId\030" +
+      "\001 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\036\n\026identityProv" +
+      "iderUserId\030\004 \001(\t\022\025\n\rsfdcContactId\030\005 \001(\t\022" +
+      "\r\n\005admin\030\006 \001(\010\022\013\n\003crn\030\n \001(\t\022\033\n\023identityP" +
+      "roviderCrn\030\013 \001(\t\022\031\n\021explicitlyCreated\030\014 " +
+      "\001(\010J\004\010\002\020\003J\004\010\007\020\010J\004\010\010\020\tJ\004\010\t\020\n\"F\n\023AltusIamU" +
+      "serUpdated\022\016\n\006userId\030\001 \001(\t\022\r\n\005admin\030\005 \001(" +
+      "\010J\004\010\002\020\003J\004\010\003\020\004J\004\010\004\020\005\".\n\034AltusIamUserInter" +
+      "activeLogin\022\016\n\006userId\030\001 \001(\t\"5\n#AltusIamU" +
+      "serInteractiveLoginFailure\022\016\n\006userId\030\001 \001" +
+      "(\t\"J\n AltusEnvironmentsEnvironmentType\"&" +
+      "\n\005Value\022\t\n\005UNSET\020\000\022\007\n\003AWS\020\001\022\t\n\005AZURE\020\002\"]" +
+      "\n\033AltusDataEngineeringJobType\">\n\005Value\022\t" +
+      "\n\005UNSET\020\000\022\010\n\004HIVE\020\001\022\t\n\005SPARK\020\002\022\010\n\004YARN\020\003" +
+      "\022\013\n\007PYSPARK\020\004\"]\n$AltusDataEngineeringJob" +
+      "FailureAction\"5\n\005Value\022\t\n\005UNSET\020\000\022\010\n\004NON" +
+      "E\020\001\022\027\n\023INTERRUPT_JOB_QUEUE\020\002\"\225\004\n AltusDa" +
+      "taEngineeringJobSubmitted\022\r\n\005jobId\030\001 \001(\t" +
+      "\022\021\n\taccountId\030\002 \001(\t\0229\n\007jobType\030\003 \001(\0162(.u" +
+      "sage.AltusDataEngineeringJobType.Value\022\017" +
+      "\n\007jobName\030\004 \001(\t\022\034\n\024jobSubmissionGroupId\030" +
+      "\005 \001(\t\022\036\n\026jobSubmissionGroupName\030\006 \001(\t\022\037\n" +
+      "\027jobSubmissionGroupIndex\030\007 \001(\005\022\036\n\026jobSub" +
+      "missionGroupSize\030\010 \001(\005\022\026\n\016environmentCrn" +
+      "\030\t \001(\t\022F\n\017environmentType\030\n \001(\0162-.usage." +
+      "AltusEnvironmentsEnvironmentType.Value\022\022" +
+      "\n\nclusterCrn\030\013 \001(\t\022\024\n\014submitterCrn\030\014 \001(\t" +
+      "\022H\n\rfailureAction\030\r \001(\01621.usage.AltusDat" +
+      "aEngineeringJobFailureAction.Value\022#\n\033se" +
+      "ndDataToWorkloadAnalytics\030\016 \001(\010\022\013\n\003crn\030\017" +
+      " \001(\t\"\252\001\n\035AltusDataEngineeringJobStatus\"\210" +
+      "\001\n\005Value\022\t\n\005UNSET\020\000\022\n\n\006QUEUED\020\001\022\016\n\nSUBMI" +
+      "TTING\020\002\022\013\n\007RUNNING\020\003\022\r\n\tCOMPLETED\020\004\022\017\n\013T" +
+      "ERMINATING\020\005\022\016\n\nTERMINATED\020\006\022\n\n\006FAILED\020\007" +
+      "\022\017\n\013INTERRUPTED\020\010\"\263\001\n$AltusDataEngineeri" +
+      "ngJobStatusChanged\022\r\n\005jobId\030\001 \001(\t\022=\n\told" +
+      "Status\030\002 \001(\0162*.usage.AltusDataEngineerin" +
+      "gJobStatus.Value\022=\n\tnewStatus\030\003 \001(\0162*.us" +
+      "age.AltusDataEngineeringJobStatus.Value\"" +
+      "f\n1AltusDataEngineeringAutomaticTerminat" +
+      "ionCondition\"1\n\005Value\022\t\n\005UNSET\020\000\022\010\n\004NONE" +
+      "\020\001\022\023\n\017EMPTY_JOB_QUEUE\020\002\"\327\003\n\"AltusDataEng" +
+      "ineeringClusterCreated\022\021\n\tclusterId\030\001 \001(" +
+      "\t\022\021\n\taccountId\030\002 \001(\t\022\023\n\013clusterName\030\003 \001(" +
+      "\t\022F\n\017environmentType\030\004 \001(\0162-.usage.Altus" +
+      "EnvironmentsEnvironmentType.Value\022\026\n\016env" +
+      "ironmentCrn\030\005 \001(\t\022\022\n\ncdhVersion\030\006 \001(\t\022\023\n" +
+      "\013serviceType\030\007 \001(\t\022\024\n\014instanceType\030\010 \001(\t" +
+      "\022\032\n\022hasBootstrapScript\030\t \001(\010\022\024\n\014namespac" +
+      "eCrn\030\n \001(\t\022e\n\035automaticTerminationCondit" +
+      "ion\030\013 \001(\0162>.usage.AltusDataEngineeringAu" +
+      "tomaticTerminationCondition.Value\022\014\n\004job" +
+      "s\030\014 \001(\r\022\013\n\003crn\030\r \001(\t\022\022\n\ncreatorCrn\030\016 \001(\t" +
+      "\022\017\n\007secured\030\017 \001(\010\"\177\n!AltusDataEngineerin" +
+      "gClusterStatus\"Z\n\005Value\022\t\n\005UNSET\020\000\022\014\n\010CR" +
+      "EATING\020\001\022\013\n\007CREATED\020\002\022\017\n\013TERMINATING\020\003\022\n" +
+      "\n\006FAILED\020\004\022\016\n\nTERMINATED\020\005\"\360\001\n(AltusData" +
+      "EngineeringClusterStatusChanged\022\021\n\tclust" +
+      "erId\030\001 \001(\t\022A\n\toldStatus\030\002 \001(\0162..usage.Al" +
+      "tusDataEngineeringClusterStatus.Value\022A\n" +
+      "\tnewStatus\030\003 \001(\0162..usage.AltusDataEngine" +
+      "eringClusterStatus.Value\022\024\n\014failureCodes" +
+      "\030\004 \003(\t\022\025\n\rfailureReason\030\005 \001(\t\"\310\002\n\035AltusA" +
+      "nalyticDbClusterCreated\022\021\n\tclusterId\030\001 \001" +
+      "(\t\022\021\n\taccountId\030\002 \001(\t\022\023\n\013clusterName\030\003 \001" +
+      "(\t\022F\n\017environmentType\030\004 \001(\0162-.usage.Altu" +
+      "sEnvironmentsEnvironmentType.Value\022\026\n\016en" +
+      "vironmentCrn\030\005 \001(\t\022\022\n\ncdhVersion\030\006 \001(\t\022\024" +
+      "\n\014instanceType\030\007 \001(\t\022\032\n\022hasBootstrapScri" +
+      "pt\030\010 \001(\010\022\024\n\014namespaceCrn\030\t \001(\t\022\013\n\003crn\030\n " +
+      "\001(\t\022\022\n\ncreatorCrn\030\013 \001(\t\022\017\n\007secured\030\014 \001(\010" +
+      "\"z\n\034AltusAnalyticDbClusterStatus\"Z\n\005Valu" +
+      "e\022\t\n\005UNSET\020\000\022\014\n\010CREATING\020\001\022\013\n\007CREATED\020\002\022" +
+      "\017\n\013TERMINATING\020\003\022\n\n\006FAILED\020\004\022\016\n\nTERMINAT" +
+      "ED\020\005\"\341\001\n#AltusAnalyticDbClusterStatusCha" +
+      "nged\022\021\n\tclusterId\030\001 \001(\t\022<\n\toldStatus\030\002 \001" +
+      "(\0162).usage.AltusAnalyticDbClusterStatus." +
+      "Value\022<\n\tnewStatus\030\003 \001(\0162).usage.AltusAn" +
+      "alyticDbClusterStatus.Value\022\024\n\014failureCo" +
+      "des\030\004 \003(\t\022\025\n\rfailureReason\030\005 \001(\t\"\217\001\n&Alt" +
+      "usEnvironmentsEnvironmentAwsDetails\022\033\n\023i" +
+      "nstanceProfileName\030\001 \001(\t\022H\n\007s3Guard\030\002 \001(" +
+      "\01327.usage.AltusEnvironmentsEnvironmentS3" +
+      "GuardConfiguration\"*\n(AltusEnvironmentsE" +
+      "nvironmentAzureDetails\"K\n8AltusEnvironme" +
+      "ntsEnvironmentSecuredClustersConfigurati" +
+      "on\022\017\n\007enabled\030\001 \001(\010\"C\n0AltusEnvironments" +
+      "EnvironmentS3GuardConfiguration\022\017\n\007enabl" +
+      "ed\030\001 \001(\010\"E\n2AltusEnvironmentsEnvironment" +
+      "NavigatorConfiguration\022\017\n\007enabled\030\001 \001(\010\"" +
+      "M\n:AltusEnvironmentsEnvironmentWorkloadA" +
+      "nalyticsConfiguration\022\017\n\007enabled\030\001 \001(\010\"\320" +
+      "\005\n#AltusEnvironmentsEnvironmentCreated\022\025" +
+      "\n\renvironmentId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t" +
+      "\022\027\n\017environmentName\030\003 \001(\t\022F\n\017environment" +
+      "Type\030\004 \001(\0162-.usage.AltusEnvironmentsEnvi" +
+      "ronmentType.Value\022\016\n\006region\030\005 \001(\t\022\032\n\022log" +
+      "ArchiveLocation\030\006 \001(\t\022C\n\nawsDetails\030\007 \001(" +
+      "\0132-.usage.AltusEnvironmentsEnvironmentAw" +
+      "sDetailsH\000\022G\n\014azureDetails\030\010 \001(\0132/.usage" +
+      ".AltusEnvironmentsEnvironmentAzureDetail" +
+      "sH\000\022e\n\034securedClustersConfiguration\030\t \001(" +
+      "\0132?.usage.AltusEnvironmentsEnvironmentSe" +
+      "curedClustersConfiguration\022Y\n\026navigatorC" +
+      "onfiguration\030\n \001(\01329.usage.AltusEnvironm" +
+      "entsEnvironmentNavigatorConfiguration\022i\n" +
+      "\036workloadAnalyticsConfiguration\030\013 \001(\0132A." +
+      "usage.AltusEnvironmentsEnvironmentWorklo" +
+      "adAnalyticsConfiguration\022\013\n\003crn\030\014 \001(\t\022\022\n" +
+      "\ncreatorCrn\030\r \001(\tB\026\n\024cloudProviderDetail" +
+      "s\"<\n#AltusEnvironmentsEnvironmentDeleted" +
+      "\022\025\n\renvironmentId\030\001 \001(\t\"~\n\032AltusIamMachi" +
+      "neUserCreated\022\025\n\rmachineUserId\030\001 \001(\t\022\021\n\t" +
+      "accountId\030\002 \001(\t\022\027\n\017machineUserName\030\003 \001(\t" +
+      "\022\013\n\003crn\030\004 \001(\t\022\020\n\010internal\030\005 \001(\010\"3\n\032Altus" +
+      "IamMachineUserDeleted\022\025\n\rmachineUserId\030\001" +
+      " \001(\t\"s\n\030AltusIamAccessKeyCreated\022\023\n\013acce" +
+      "ssKeyId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\020\n\010acto" +
+      "rCrn\030\003 \001(\t\022\013\n\003crn\030\004 \001(\t\022\020\n\010internal\030\005 \001(" +
+      "\010\"/\n\030AltusIamAccessKeyDeleted\022\023\n\013accessK" +
+      "eyId\030\001 \001(\t\"f\n\030AltusSdxNamespaceCreated\022\023" +
+      "\n\013namespaceId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\025" +
+      "\n\rnamespaceName\030\003 \001(\t\022\013\n\003crn\030\004 \001(\t\"o\n\027Al" +
+      "tusSdxNamespaceStatus\"T\n\005Value\022\t\n\005UNSET\020" +
+      "\000\022\014\n\010CREATING\020\001\022\013\n\007CREATED\020\002\022\014\n\010DELETING" +
+      "\020\003\022\n\n\006FAILED\020\004\022\013\n\007DELETED\020\005\"\247\001\n\036AltusSdx" +
+      "NamespaceStatusChanged\022\023\n\013namespaceId\030\001 " +
+      "\001(\t\0227\n\toldStatus\030\002 \001(\0162$.usage.AltusSdxN" +
+      "amespaceStatus.Value\0227\n\tnewStatus\030\003 \001(\0162" +
+      "$.usage.AltusSdxNamespaceStatus.Value\"[\n" +
+      "\036CDPEnvironmentsEnvironmentType\"9\n\005Value" +
+      "\022\t\n\005UNSET\020\000\022\007\n\003AWS\020\001\022\t\n\005AZURE\020\002\022\007\n\003GCP\020\003" +
+      "\022\010\n\004YARN\020\004\"\353\003\n\032CDPCloudbreakClusterStatu" +
+      "s\"\314\003\n\005Value\022\t\n\005UNSET\020\000\022\r\n\tREQUESTED\020\001\022\026\n" +
+      "\022CREATE_IN_PROGRESS\020\002\022\r\n\tAVAILABLE\020\003\022\026\n\022" +
+      "UPDATE_IN_PROGRESS\020\004\022\024\n\020UPDATE_REQUESTED" +
+      "\020\005\022\021\n\rUPDATE_FAILED\020\006\022\021\n\rCREATE_FAILED\020\007" +
+      "\022\032\n\026ENABLE_SECURITY_FAILED\020\010\022\032\n\026PRE_DELE" +
+      "TE_IN_PROGRESS\020\t\022\026\n\022DELETE_IN_PROGRESS\020\n" +
+      "\022\021\n\rDELETE_FAILED\020\013\022\024\n\020DELETE_COMPLETED\020" +
+      "\014\022\013\n\007STOPPED\020\r\022\022\n\016STOP_REQUESTED\020\016\022\023\n\017ST" +
+      "ART_REQUESTED\020\017\022\024\n\020STOP_IN_PROGRESS\020\020\022\025\n" +
+      "\021START_IN_PROGRESS\020\021\022\020\n\014START_FAILED\020\022\022\017" +
+      "\n\013STOP_FAILED\020\023\022\021\n\rWAIT_FOR_SYNC\020\024\022\034\n\030MA" +
+      "INTENANCE_MODE_ENABLED\020\025\"\215\002\n\033CDPDatalake" +
+      "ClusterRequested\022\022\n\ndatalakeId\030\001 \001(\t\022\021\n\t" +
+      "accountId\030\002 \001(\t\022\024\n\014datalakeName\030\003 \001(\t\022D\n" +
+      "\017environmentType\030\004 \001(\0162+.usage.CDPEnviro" +
+      "nmentsEnvironmentType.Value\022\026\n\016environme" +
+      "ntCrn\030\005 \001(\t\022\023\n\013cdpdVersion\030\006 \001(\t\022\013\n\003crn\030" +
+      "\007 \001(\t\022\022\n\ncreatorCrn\030\010 \001(\t\022\035\n\025clusterDefi" +
+      "nitionName\030\t \001(\t\"\304\001\n\037CDPDatalakeClusterS" +
+      "tatusChanged\022\022\n\ndatalakeId\030\001 \001(\t\022:\n\toldS" +
+      "tatus\030\002 \001(\0162\'.usage.CDPCloudbreakCluster" +
+      "Status.Value\022:\n\tnewStatus\030\003 \001(\0162\'.usage." +
+      "CDPCloudbreakClusterStatus.Value\022\025\n\rfail" +
+      "ureReason\030\004 \001(\t\"\237\002\n\032CDPDatahubClusterReq" +
+      "uested\022\021\n\tclusterId\030\001 \001(\t\022\021\n\taccountId\030\002" +
+      " \001(\t\022\023\n\013clusterName\030\003 \001(\t\022D\n\017environment" +
+      "Type\030\004 \001(\0162+.usage.CDPEnvironmentsEnviro" +
+      "nmentType.Value\022\026\n\016environmentCrn\030\005 \001(\t\022" +
+      "\023\n\013cdpdVersion\030\006 \001(\t\022\023\n\013datalakeCrn\030\007 \001(" +
+      "\t\022\013\n\003crn\030\010 \001(\t\022\022\n\ncreatorCrn\030\t \001(\t\022\035\n\025cl" +
+      "usterDefinitionName\030\n \001(\t\"\302\001\n\036CDPDatahub" +
+      "ClusterStatusChanged\022\021\n\tclusterId\030\001 \001(\t\022" +
+      ":\n\toldStatus\030\002 \001(\0162\'.usage.CDPCloudbreak" +
+      "ClusterStatus.Value\022:\n\tnewStatus\030\003 \001(\0162\'" +
       ".usage.CDPCloudbreakClusterStatus.Value\022" +
-      ":\n\tnewStatus\030\003 \001(\0162\'.usage.CDPCloudbreak" +
-      "ClusterStatus.Value\022\025\n\rfailureReason\030\004 \001" +
-      "(\t\"\200\002\n\032CDPDatahubClusterRequested\022\021\n\tclu" +
-      "sterId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\023\n\013clust" +
-      "erName\030\003 \001(\t\022D\n\017environmentType\030\004 \001(\0162+." +
-      "usage.CDPEnvironmentsEnvironmentType.Val" +
-      "ue\022\026\n\016environmentCrn\030\005 \001(\t\022\023\n\013cdpdVersio" +
-      "n\030\006 \001(\t\022\023\n\013datalakeCrn\030\007 \001(\t\022\013\n\003crn\030\010 \001(" +
-      "\t\022\022\n\ncreatorCrn\030\t \001(\t\"\302\001\n\036CDPDatahubClus" +
-      "terStatusChanged\022\021\n\tclusterId\030\001 \001(\t\022:\n\to" +
-      "ldStatus\030\002 \001(\0162\'.usage.CDPCloudbreakClus" +
-      "terStatus.Value\022:\n\tnewStatus\030\003 \001(\0162\'.usa" +
-      "ge.CDPCloudbreakClusterStatus.Value\022\025\n\rf" +
-      "ailureReason\030\004 \001(\tB;\n-com.cloudera.thund" +
-      "erhead.service.common.usageB\nUsageProtob" +
-      "\006proto3"
+      "\025\n\rfailureReason\030\004 \001(\tB;\n-com.cloudera.t" +
+      "hunderhead.service.common.usageB\nUsagePr" +
+      "otob\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -47462,7 +48858,7 @@ public final class UsageProto {
     internal_static_usage_Event_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_Event_descriptor,
-        new java.lang.String[] { "Id", "Timestamp", "Version", "AltusIamAccountCreated", "AltusIamUserCreated", "AltusIamUserUpdated", "AltusIamUserInteractiveLogin", "AltusDataEngineeringJobSubmitted", "AltusDataEngineeringJobStatusChanged", "AltusDataEngineeringClusterCreated", "AltusDataEngineeringClusterStatusChanged", "AltusAnalyticDbClusterCreated", "AltusAnalyticDbClusterStatusChanged", "AltusEnvironmentsEnvironmentCreated", "AltusEnvironmentsEnvironmentDeleted", "AltusIamMachineUserCreated", "AltusIamMachineUserDeleted", "AltusIamAccessKeyCreated", "AltusIamAccessKeyDeleted", "AltusSdxNamespaceCreated", "AltusSdxNamespaceStatusChanged", "CdpDatalakeClusterRequested", "CdpDatalakeClusterStatusChanged", "CdpDatahubClusterRequested", "CdpDatahubClusterStatusChanged", "Details", });
+        new java.lang.String[] { "Id", "Timestamp", "Version", "AltusIamAccountCreated", "AltusIamUserCreated", "AltusIamUserUpdated", "AltusIamUserInteractiveLogin", "AltusIamUserInteractiveLoginFailure", "AltusDataEngineeringJobSubmitted", "AltusDataEngineeringJobStatusChanged", "AltusDataEngineeringClusterCreated", "AltusDataEngineeringClusterStatusChanged", "AltusAnalyticDbClusterCreated", "AltusAnalyticDbClusterStatusChanged", "AltusEnvironmentsEnvironmentCreated", "AltusEnvironmentsEnvironmentDeleted", "AltusIamMachineUserCreated", "AltusIamMachineUserDeleted", "AltusIamAccessKeyCreated", "AltusIamAccessKeyDeleted", "AltusSdxNamespaceCreated", "AltusSdxNamespaceStatusChanged", "CdpDatalakeClusterRequested", "CdpDatalakeClusterStatusChanged", "CdpDatahubClusterRequested", "CdpDatahubClusterStatusChanged", "Details", });
     internal_static_usage_AltusIamAccountType_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_usage_AltusIamAccountType_fieldAccessorTable = new
@@ -47493,206 +48889,212 @@ public final class UsageProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusIamUserInteractiveLogin_descriptor,
         new java.lang.String[] { "UserId", });
-    internal_static_usage_AltusEnvironmentsEnvironmentType_descriptor =
+    internal_static_usage_AltusIamUserInteractiveLoginFailure_descriptor =
       getDescriptor().getMessageTypes().get(6);
+    internal_static_usage_AltusIamUserInteractiveLoginFailure_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_AltusIamUserInteractiveLoginFailure_descriptor,
+        new java.lang.String[] { "UserId", });
+    internal_static_usage_AltusEnvironmentsEnvironmentType_descriptor =
+      getDescriptor().getMessageTypes().get(7);
     internal_static_usage_AltusEnvironmentsEnvironmentType_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusEnvironmentsEnvironmentType_descriptor,
         new java.lang.String[] { });
     internal_static_usage_AltusDataEngineeringJobType_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_usage_AltusDataEngineeringJobType_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusDataEngineeringJobType_descriptor,
         new java.lang.String[] { });
     internal_static_usage_AltusDataEngineeringJobFailureAction_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(9);
     internal_static_usage_AltusDataEngineeringJobFailureAction_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusDataEngineeringJobFailureAction_descriptor,
         new java.lang.String[] { });
     internal_static_usage_AltusDataEngineeringJobSubmitted_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_usage_AltusDataEngineeringJobSubmitted_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusDataEngineeringJobSubmitted_descriptor,
         new java.lang.String[] { "JobId", "AccountId", "JobType", "JobName", "JobSubmissionGroupId", "JobSubmissionGroupName", "JobSubmissionGroupIndex", "JobSubmissionGroupSize", "EnvironmentCrn", "EnvironmentType", "ClusterCrn", "SubmitterCrn", "FailureAction", "SendDataToWorkloadAnalytics", "Crn", });
     internal_static_usage_AltusDataEngineeringJobStatus_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_usage_AltusDataEngineeringJobStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusDataEngineeringJobStatus_descriptor,
         new java.lang.String[] { });
     internal_static_usage_AltusDataEngineeringJobStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_usage_AltusDataEngineeringJobStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusDataEngineeringJobStatusChanged_descriptor,
         new java.lang.String[] { "JobId", "OldStatus", "NewStatus", });
     internal_static_usage_AltusDataEngineeringAutomaticTerminationCondition_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_usage_AltusDataEngineeringAutomaticTerminationCondition_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusDataEngineeringAutomaticTerminationCondition_descriptor,
         new java.lang.String[] { });
     internal_static_usage_AltusDataEngineeringClusterCreated_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_usage_AltusDataEngineeringClusterCreated_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusDataEngineeringClusterCreated_descriptor,
         new java.lang.String[] { "ClusterId", "AccountId", "ClusterName", "EnvironmentType", "EnvironmentCrn", "CdhVersion", "ServiceType", "InstanceType", "HasBootstrapScript", "NamespaceCrn", "AutomaticTerminationCondition", "Jobs", "Crn", "CreatorCrn", "Secured", });
     internal_static_usage_AltusDataEngineeringClusterStatus_descriptor =
-      getDescriptor().getMessageTypes().get(14);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_usage_AltusDataEngineeringClusterStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusDataEngineeringClusterStatus_descriptor,
         new java.lang.String[] { });
     internal_static_usage_AltusDataEngineeringClusterStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_usage_AltusDataEngineeringClusterStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusDataEngineeringClusterStatusChanged_descriptor,
         new java.lang.String[] { "ClusterId", "OldStatus", "NewStatus", "FailureCodes", "FailureReason", });
     internal_static_usage_AltusAnalyticDbClusterCreated_descriptor =
-      getDescriptor().getMessageTypes().get(16);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_usage_AltusAnalyticDbClusterCreated_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusAnalyticDbClusterCreated_descriptor,
         new java.lang.String[] { "ClusterId", "AccountId", "ClusterName", "EnvironmentType", "EnvironmentCrn", "CdhVersion", "InstanceType", "HasBootstrapScript", "NamespaceCrn", "Crn", "CreatorCrn", "Secured", });
     internal_static_usage_AltusAnalyticDbClusterStatus_descriptor =
-      getDescriptor().getMessageTypes().get(17);
+      getDescriptor().getMessageTypes().get(18);
     internal_static_usage_AltusAnalyticDbClusterStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusAnalyticDbClusterStatus_descriptor,
         new java.lang.String[] { });
     internal_static_usage_AltusAnalyticDbClusterStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(18);
+      getDescriptor().getMessageTypes().get(19);
     internal_static_usage_AltusAnalyticDbClusterStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusAnalyticDbClusterStatusChanged_descriptor,
         new java.lang.String[] { "ClusterId", "OldStatus", "NewStatus", "FailureCodes", "FailureReason", });
     internal_static_usage_AltusEnvironmentsEnvironmentAwsDetails_descriptor =
-      getDescriptor().getMessageTypes().get(19);
+      getDescriptor().getMessageTypes().get(20);
     internal_static_usage_AltusEnvironmentsEnvironmentAwsDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusEnvironmentsEnvironmentAwsDetails_descriptor,
         new java.lang.String[] { "InstanceProfileName", "S3Guard", });
     internal_static_usage_AltusEnvironmentsEnvironmentAzureDetails_descriptor =
-      getDescriptor().getMessageTypes().get(20);
+      getDescriptor().getMessageTypes().get(21);
     internal_static_usage_AltusEnvironmentsEnvironmentAzureDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusEnvironmentsEnvironmentAzureDetails_descriptor,
         new java.lang.String[] { });
     internal_static_usage_AltusEnvironmentsEnvironmentSecuredClustersConfiguration_descriptor =
-      getDescriptor().getMessageTypes().get(21);
+      getDescriptor().getMessageTypes().get(22);
     internal_static_usage_AltusEnvironmentsEnvironmentSecuredClustersConfiguration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusEnvironmentsEnvironmentSecuredClustersConfiguration_descriptor,
         new java.lang.String[] { "Enabled", });
     internal_static_usage_AltusEnvironmentsEnvironmentS3GuardConfiguration_descriptor =
-      getDescriptor().getMessageTypes().get(22);
+      getDescriptor().getMessageTypes().get(23);
     internal_static_usage_AltusEnvironmentsEnvironmentS3GuardConfiguration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusEnvironmentsEnvironmentS3GuardConfiguration_descriptor,
         new java.lang.String[] { "Enabled", });
     internal_static_usage_AltusEnvironmentsEnvironmentNavigatorConfiguration_descriptor =
-      getDescriptor().getMessageTypes().get(23);
+      getDescriptor().getMessageTypes().get(24);
     internal_static_usage_AltusEnvironmentsEnvironmentNavigatorConfiguration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusEnvironmentsEnvironmentNavigatorConfiguration_descriptor,
         new java.lang.String[] { "Enabled", });
     internal_static_usage_AltusEnvironmentsEnvironmentWorkloadAnalyticsConfiguration_descriptor =
-      getDescriptor().getMessageTypes().get(24);
+      getDescriptor().getMessageTypes().get(25);
     internal_static_usage_AltusEnvironmentsEnvironmentWorkloadAnalyticsConfiguration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusEnvironmentsEnvironmentWorkloadAnalyticsConfiguration_descriptor,
         new java.lang.String[] { "Enabled", });
     internal_static_usage_AltusEnvironmentsEnvironmentCreated_descriptor =
-      getDescriptor().getMessageTypes().get(25);
+      getDescriptor().getMessageTypes().get(26);
     internal_static_usage_AltusEnvironmentsEnvironmentCreated_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusEnvironmentsEnvironmentCreated_descriptor,
         new java.lang.String[] { "EnvironmentId", "AccountId", "EnvironmentName", "EnvironmentType", "Region", "LogArchiveLocation", "AwsDetails", "AzureDetails", "SecuredClustersConfiguration", "NavigatorConfiguration", "WorkloadAnalyticsConfiguration", "Crn", "CreatorCrn", "CloudProviderDetails", });
     internal_static_usage_AltusEnvironmentsEnvironmentDeleted_descriptor =
-      getDescriptor().getMessageTypes().get(26);
+      getDescriptor().getMessageTypes().get(27);
     internal_static_usage_AltusEnvironmentsEnvironmentDeleted_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusEnvironmentsEnvironmentDeleted_descriptor,
         new java.lang.String[] { "EnvironmentId", });
     internal_static_usage_AltusIamMachineUserCreated_descriptor =
-      getDescriptor().getMessageTypes().get(27);
+      getDescriptor().getMessageTypes().get(28);
     internal_static_usage_AltusIamMachineUserCreated_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusIamMachineUserCreated_descriptor,
-        new java.lang.String[] { "MachineUserId", "AccountId", "MachineUserName", "Crn", });
+        new java.lang.String[] { "MachineUserId", "AccountId", "MachineUserName", "Crn", "Internal", });
     internal_static_usage_AltusIamMachineUserDeleted_descriptor =
-      getDescriptor().getMessageTypes().get(28);
+      getDescriptor().getMessageTypes().get(29);
     internal_static_usage_AltusIamMachineUserDeleted_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusIamMachineUserDeleted_descriptor,
         new java.lang.String[] { "MachineUserId", });
     internal_static_usage_AltusIamAccessKeyCreated_descriptor =
-      getDescriptor().getMessageTypes().get(29);
+      getDescriptor().getMessageTypes().get(30);
     internal_static_usage_AltusIamAccessKeyCreated_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusIamAccessKeyCreated_descriptor,
-        new java.lang.String[] { "AccessKeyId", "AccountId", "ActorCrn", "Crn", });
+        new java.lang.String[] { "AccessKeyId", "AccountId", "ActorCrn", "Crn", "Internal", });
     internal_static_usage_AltusIamAccessKeyDeleted_descriptor =
-      getDescriptor().getMessageTypes().get(30);
+      getDescriptor().getMessageTypes().get(31);
     internal_static_usage_AltusIamAccessKeyDeleted_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusIamAccessKeyDeleted_descriptor,
         new java.lang.String[] { "AccessKeyId", });
     internal_static_usage_AltusSdxNamespaceCreated_descriptor =
-      getDescriptor().getMessageTypes().get(31);
+      getDescriptor().getMessageTypes().get(32);
     internal_static_usage_AltusSdxNamespaceCreated_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusSdxNamespaceCreated_descriptor,
         new java.lang.String[] { "NamespaceId", "AccountId", "NamespaceName", "Crn", });
     internal_static_usage_AltusSdxNamespaceStatus_descriptor =
-      getDescriptor().getMessageTypes().get(32);
+      getDescriptor().getMessageTypes().get(33);
     internal_static_usage_AltusSdxNamespaceStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusSdxNamespaceStatus_descriptor,
         new java.lang.String[] { });
     internal_static_usage_AltusSdxNamespaceStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(33);
+      getDescriptor().getMessageTypes().get(34);
     internal_static_usage_AltusSdxNamespaceStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusSdxNamespaceStatusChanged_descriptor,
         new java.lang.String[] { "NamespaceId", "OldStatus", "NewStatus", });
     internal_static_usage_CDPEnvironmentsEnvironmentType_descriptor =
-      getDescriptor().getMessageTypes().get(34);
+      getDescriptor().getMessageTypes().get(35);
     internal_static_usage_CDPEnvironmentsEnvironmentType_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentsEnvironmentType_descriptor,
         new java.lang.String[] { });
     internal_static_usage_CDPCloudbreakClusterStatus_descriptor =
-      getDescriptor().getMessageTypes().get(35);
+      getDescriptor().getMessageTypes().get(36);
     internal_static_usage_CDPCloudbreakClusterStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPCloudbreakClusterStatus_descriptor,
         new java.lang.String[] { });
     internal_static_usage_CDPDatalakeClusterRequested_descriptor =
-      getDescriptor().getMessageTypes().get(36);
+      getDescriptor().getMessageTypes().get(37);
     internal_static_usage_CDPDatalakeClusterRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatalakeClusterRequested_descriptor,
-        new java.lang.String[] { "DatalakeId", "AccountId", "DatalakeName", "EnvironmentType", "EnvironmentCrn", "CdpdVersion", "Crn", "CreatorCrn", });
+        new java.lang.String[] { "DatalakeId", "AccountId", "DatalakeName", "EnvironmentType", "EnvironmentCrn", "CdpdVersion", "Crn", "CreatorCrn", "ClusterDefinitionName", });
     internal_static_usage_CDPDatalakeClusterStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(37);
+      getDescriptor().getMessageTypes().get(38);
     internal_static_usage_CDPDatalakeClusterStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatalakeClusterStatusChanged_descriptor,
         new java.lang.String[] { "DatalakeId", "OldStatus", "NewStatus", "FailureReason", });
     internal_static_usage_CDPDatahubClusterRequested_descriptor =
-      getDescriptor().getMessageTypes().get(38);
+      getDescriptor().getMessageTypes().get(39);
     internal_static_usage_CDPDatahubClusterRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubClusterRequested_descriptor,
-        new java.lang.String[] { "ClusterId", "AccountId", "ClusterName", "EnvironmentType", "EnvironmentCrn", "CdpdVersion", "DatalakeCrn", "Crn", "CreatorCrn", });
+        new java.lang.String[] { "ClusterId", "AccountId", "ClusterName", "EnvironmentType", "EnvironmentCrn", "CdpdVersion", "DatalakeCrn", "Crn", "CreatorCrn", "ClusterDefinitionName", });
     internal_static_usage_CDPDatahubClusterStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(39);
+      getDescriptor().getMessageTypes().get(40);
     internal_static_usage_CDPDatahubClusterStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubClusterStatusChanged_descriptor,

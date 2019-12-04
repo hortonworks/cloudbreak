@@ -42,6 +42,12 @@ public class MDCBuilder {
         MDC.put(LoggerContextKey.REQUEST_ID.toString(), requestId);
     }
 
+    public static void addRequestId(Optional<String> requestId) {
+        if (requestId.isPresent()) {
+            MDC.put(LoggerContextKey.REQUEST_ID.toString(), requestId.get());
+        }
+    }
+
     public static void addEnvCrn(String env) {
         MDC.put(LoggerContextKey.ENV_CRN.toString(), env);
     }

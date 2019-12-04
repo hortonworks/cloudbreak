@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
-import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.configuration.SupportedPlatforms;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
@@ -246,6 +246,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private void setUseCcm(Tunnel tunnel, CreateFreeIpaRequest createFreeIpaRequest) {
         createFreeIpaRequest.setUseCcm(Tunnel.CCM == tunnel);
+        createFreeIpaRequest.setTunnel(tunnel);
     }
 
     private InstanceGroupRequest createInstanceGroupRequest(SecurityGroupRequest securityGroupRequest) {

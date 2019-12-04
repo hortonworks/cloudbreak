@@ -11,14 +11,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class ClusterProxyConfiguration {
 
-    public static final String FREEIPA_SERVICE_NAME = "freeipa";
-
-    private static final int DEFAULT_CLUSTER_PROXY_PORT = 10080;
-
-    @Value("${clusterProxy.enabled:false}")
+    @Value("${clusterProxy.enabled:}")
     private boolean clusterProxyIntegrationEnabled;
 
-    @Value("${clusterProxy.url:localhost:10080/cluster-proxy}")
+    @Value("${clusterProxy.url:}")
     private String clusterProxyUrl;
 
     @Value("${clusterProxy.registerConfigPath:/rpc/forceRegisterConfig}")
@@ -30,11 +26,13 @@ public class ClusterProxyConfiguration {
     @Value("${clusterProxy.removeConfigPath:/rpc/removeConfig}")
     private String removeConfigPath;
 
-    private String clusterProxyHost = "localhost";
+    private String clusterProxyHost;
 
-    private int clusterProxyPort = DEFAULT_CLUSTER_PROXY_PORT;
+    private int clusterProxyPort;
 
-    private String clusterProxyBasePath = "cluster-proxy";
+    private String clusterProxyBasePath;
+
+    private String clusterProxyProtocol;
 
     @PostConstruct
     private void init() throws IllegalArgumentException {
@@ -44,6 +42,7 @@ public class ClusterProxyConfiguration {
                 clusterProxyHost = url.getHost();
                 clusterProxyPort = url.getPort();
                 clusterProxyBasePath = url.getPath();
+                clusterProxyProtocol = url.getProtocol();
             } catch (MalformedURLException e) {
                 throw new IllegalArgumentException("Configuration `clusterProxy.url` is not a URL.", e);
             }
@@ -100,6 +99,10 @@ public class ClusterProxyConfiguration {
 
     public String getClusterProxyBasePath() {
         return clusterProxyBasePath;
+    }
+
+    public String getClusterProxyProtocol() {
+        return clusterProxyProtocol;
     }
 
     public String getRegisterConfigUrl() {
