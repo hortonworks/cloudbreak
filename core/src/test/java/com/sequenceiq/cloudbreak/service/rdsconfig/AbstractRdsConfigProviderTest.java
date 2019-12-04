@@ -51,6 +51,9 @@ public class AbstractRdsConfigProviderTest {
     @Mock
     private RedbeamsDbServerConfigurer dbServerConfigurer;
 
+    @Mock
+    private DbUsernameConverterService dbUsernameConverterService;
+
     @InjectMocks
     private ClouderaManagerRdsConfigProvider underTest;
 

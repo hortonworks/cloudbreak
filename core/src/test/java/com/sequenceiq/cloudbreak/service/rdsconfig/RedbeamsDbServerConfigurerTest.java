@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
@@ -52,6 +53,9 @@ public class RedbeamsDbServerConfigurerTest {
     @Mock
     private DatabaseCommon dbCommon;
 
+    @Mock
+    private DbUsernameConverterService dbUsernameConverterService;
+
     @InjectMocks
     private RedbeamsDbServerConfigurer underTest;
 
@@ -63,6 +67,7 @@ public class RedbeamsDbServerConfigurerTest {
         resp.setDatabaseVendor("postgres");
         when(redbeamsClientService.getByCrn(DB_SERVER_CRN)).thenReturn(resp);
         when(dbCommon.getJdbcConnectionUrl(any(), any(), anyInt(), any())).thenReturn(EXAMPLE_JDBC_URL);
+        when(dbUsernameConverterService.toConnectionUsername(anyString(), anyString())).thenReturn(DB_USER);
         Stack testStack = TestUtil.stack();
         InstanceMetaData metaData = testStack.getGatewayInstanceMetadata().iterator().next();
         metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
@@ -70,7 +75,9 @@ public class RedbeamsDbServerConfigurerTest {
         Cluster testCluster = TestUtil.cluster();
         testCluster.setDatabaseServerCrn(DB_SERVER_CRN);
         testStack.setCluster(testCluster);
+
         RDSConfig config = underTest.createNewRdsConfig(testStack, testCluster, "clouderamanager", DB_USER, DatabaseType.CLOUDERA_MANAGER);
+
         assertEquals("CLOUDERA_MANAGER_simplestack1", config.getName());
         assertEquals(EXAMPLE_JDBC_URL, config.getConnectionURL());
         assertEquals(DB_USER, config.getConnectionUserName());
@@ -84,6 +91,7 @@ public class RedbeamsDbServerConfigurerTest {
         resp.setDatabaseVendor("postgres");
         when(redbeamsClientService.getByCrn(DB_SERVER_CRN)).thenReturn(resp);
         when(dbCommon.getJdbcConnectionUrl(any(), any(), anyInt(), any())).thenReturn(EXAMPLE_JDBC_URL_AZURE);
+        when(dbUsernameConverterService.toConnectionUsername(anyString(), anyString())).thenReturn("cmuser@" + DB_HOST_SHORT_NAME);
         Stack testStack = TestUtil.stack();
         InstanceMetaData metaData = testStack.getGatewayInstanceMetadata().iterator().next();
         metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
@@ -91,7 +99,9 @@ public class RedbeamsDbServerConfigurerTest {
         Cluster testCluster = TestUtil.cluster();
         testCluster.setDatabaseServerCrn(DB_SERVER_CRN);
         testStack.setCluster(testCluster);
+
         RDSConfig config = underTest.createNewRdsConfig(testStack, testCluster, "clouderamanager", DB_USER, DatabaseType.CLOUDERA_MANAGER);
+
         assertEquals("CLOUDERA_MANAGER_simplestack1", config.getName());
         assertEquals(EXAMPLE_JDBC_URL_AZURE, config.getConnectionURL());
         assertEquals("cmuser@" + DB_HOST_SHORT_NAME, config.getConnectionUserName());
