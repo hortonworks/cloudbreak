@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -19,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
@@ -27,6 +29,8 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintLoaderServiceTest {
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:5678";
 
     private static final String LUCKY_MAN = "lucky_man";
 
@@ -61,6 +65,12 @@ public class BlueprintLoaderServiceTest {
 
     @Mock
     private Workspace workspace;
+
+    @Before
+    public void init() {
+        ThreadBasedUserCrnProvider.removeUserCrn();
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
+    }
 
     @Test
     public void testWhenUserHaveAllTheDefaultBlueprintThenReturnFalse() {
