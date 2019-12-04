@@ -193,9 +193,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public NetworkV4TestDto network(NetworkV4TestDto network) {
-        return network
-                .withSubnetCIDR(getSubnetCIDR())
-                .withMock(networkParameters());
+        return network.withMock(networkParameters());
     }
 
     @Override

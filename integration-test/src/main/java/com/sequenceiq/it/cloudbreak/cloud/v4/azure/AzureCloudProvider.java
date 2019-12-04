@@ -150,9 +150,9 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
-        return network.withNetworkCIDR(getSubnetCIDR())
-                .withSubnetIDs(getSubnetIDs())
-                .withAzure(environmentNetworkParameters());    }
+        return network.withSubnetIDs(getSubnetIDs())
+                .withAzure(environmentNetworkParameters());
+    }
 
     private EnvironmentNetworkAzureParams environmentNetworkParameters() {
         EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();

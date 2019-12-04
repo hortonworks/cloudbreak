@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -100,17 +99,7 @@ public class EnvironmentNetworkProviderValidator {
             } else {
                 resultBuilder.error(String.format("Environment specific network is not supported for cloud platform: '%s'!", cloudPlatform));
             }
-        } else if (networkDto != null && !networkCidrEmpty(networkDto) && !subnetIdsEmpty(networkDto)) {
-            resultBuilder.error("Subnet ids and Network cidr should not be defined in one request.");
         }
-    }
-
-    private boolean subnetIdsEmpty(NetworkDto networkDto) {
-        return CollectionUtils.isEmpty(networkDto.getSubnetIds());
-    }
-
-    private boolean networkCidrEmpty(NetworkDto networkDto) {
-        return Strings.isNullOrEmpty(networkDto.getNetworkCidr());
     }
 
     private boolean isInvalidNetworkMask(String networkCidr) {
