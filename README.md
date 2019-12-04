@@ -51,10 +51,10 @@ export VAULT_AUTO_UNSEAL=true
 export DPS_VERSION=2.0.0.0-142
 ```
 
-If you are using AWS, then also add the following lines, substituting your workload account id, and the AWS credentials that you have created for the CB role.
+If you are using AWS, then also add the following lines, substituting your control plane AWS account id, and the AWS credentials that you have created for the CB role.
 
 ```
-export CB_AWS_ACCOUNT_ID="THE_WORKLOAD_ACCOUNT_ID_PROBABLY_069336058373"
+export CB_AWS_ACCOUNT_ID="YOUR_AWS_ACCOUNT_ID"
 export AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY"
 export AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY"
 
@@ -324,7 +324,7 @@ then run the following Gradle command:
 -Dserver.port=9091 \
 -Daltus.ums.host=localhost
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
--Dspring.config.location=$(pwd)/cloud-common/src/main/resources/application.yml,$(pwd)/core/build/resources/main/application.properties"
+-Dspring.config.location=$(pwd)/core/src/main/resources/application.yml,$(pwd)/core/build/resources/main/application.properties"
 ```
 
 Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
