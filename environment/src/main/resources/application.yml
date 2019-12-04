@@ -29,6 +29,11 @@ management:
       percentiles:
         "[http.server.requests]": "0.5, 0.95"
 
+distrox:
+  restrict:
+    instance:
+      types: true
+
 altus:
   idbmms:
     host: localhost

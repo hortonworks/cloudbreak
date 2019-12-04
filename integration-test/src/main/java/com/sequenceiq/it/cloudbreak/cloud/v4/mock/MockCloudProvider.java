@@ -203,7 +203,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
-        return network.withNetworkCIDR(getSubnetCIDR())
+        return network
                 .withSubnetIDs(getSubnetIDs())
                 .withMock(getMockNetworkParams());
     }
@@ -239,7 +239,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {
         return environmentNetwork
-                .withNetworkCIDR(getSubnetCIDR())
                 .withSubnetIDs(getSubnetIDs())
                 .withMock(environmentNetworkParameters());
     }
