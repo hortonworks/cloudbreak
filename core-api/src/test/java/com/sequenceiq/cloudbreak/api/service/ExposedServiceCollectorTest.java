@@ -102,6 +102,7 @@ class ExposedServiceCollectorTest {
                 "NIFI_NODE",
                 "NIFI_REGISTRY_SERVER",
                 "OOZIE_SERVER",
+                "PHOENIX_QUERY_SERVER",
                 "PROFILER_ADMIN_AGENT",
                 "PROFILER_METRICS_AGENT",
                 "PROFILER_SCHEDULER_AGENT",
@@ -121,6 +122,7 @@ class ExposedServiceCollectorTest {
         underTest.init();
         assertThat(underTest.getAllKnoxExposed()).containsExactlyInAnyOrder(
                 "ATLAS",
+                "AVATICA",
                 "CM-API",
                 "CM-UI",
                 "DAS",
@@ -160,6 +162,7 @@ class ExposedServiceCollectorTest {
         underTest.init();
         assertThat(underTest.getAllServicePorts(false)).containsOnly(
                 Map.entry("ATLAS", 21000),
+                Map.entry("AVATICA", 8765),
                 Map.entry("CM-API", 7180),
                 Map.entry("CM-UI", 7180),
                 Map.entry("DAS", 30800),
@@ -200,6 +203,7 @@ class ExposedServiceCollectorTest {
         underTest.init();
         assertThat(underTest.getAllServicePorts(true)).containsOnly(
                 Map.entry("ATLAS", 31443),
+                Map.entry("AVATICA", 8765),
                 Map.entry("CM-API", 7183),
                 Map.entry("CM-UI", 7183),
                 Map.entry("DAS", 30800),

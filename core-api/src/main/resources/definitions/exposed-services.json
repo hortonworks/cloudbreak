@@ -475,6 +475,19 @@
       "apiIncluded": false,
       "visibleForDatalake": true,
       "visibleForDatahub": true
+    },
+    {
+      "name": "PHOENIX_QUERY_SERVER",
+      "displayName": "Phoenix Query Server",
+      "serviceName": "PHOENIX_QUERY_SERVER",
+      "knoxService": "AVATICA",
+      "knoxUrl": "/avatica/",
+      "ssoSupported": false,
+      "port": 8765,
+      "tlsPort": 8765,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visible": true
     }
   ]
 }
