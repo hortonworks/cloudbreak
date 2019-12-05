@@ -2,6 +2,6 @@ name: "aws-sdx-recipe-tests"
 tests:
   - name: "aws sdx e2e tests"
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.aws.AwsSdxTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.AwsSdxTests
         includedMethods:
           - testSDXMultiRepairIDBRokerAndMasterWithRecipeFile

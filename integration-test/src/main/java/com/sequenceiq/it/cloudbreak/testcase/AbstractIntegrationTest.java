@@ -71,7 +71,7 @@ import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 import com.sequenceiq.it.cloudbreak.mock.ThreadLocalProfiles;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
-import com.sequenceiq.it.cloudbreak.util.azurecloudblob.AzureCloudBlobUtil;
+import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
 

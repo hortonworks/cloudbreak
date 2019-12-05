@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.util.azurecloudblob;
+package com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob;
 
 import java.net.URISyntaxException;
 
@@ -10,7 +10,7 @@ import com.microsoft.azure.storage.StorageException;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
-import com.sequenceiq.it.cloudbreak.util.azurecloudblob.action.AzureCloudBlobClientActions;
+import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.action.AzureCloudBlobClientActions;
 
 @Component
 public class AzureCloudBlobUtil {

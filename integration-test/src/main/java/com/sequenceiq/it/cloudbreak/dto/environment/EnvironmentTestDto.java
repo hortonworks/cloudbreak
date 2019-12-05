@@ -15,6 +15,7 @@ import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
@@ -85,9 +86,9 @@ public class EnvironmentTestDto
         return getCloudProvider()
                 .environment(withName(getResourcePropertyProvider().getEnvironmentName())
                         .withDescription(getResourcePropertyProvider().getDescription("environment")))
-                        .withCredentialName(getTestContext().get(CredentialTestDto.class).getName())
-                        .withAuthentication(DUMMY_SSH_KEY)
-                        .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK);
+                .withCredentialName(getTestContext().get(CredentialTestDto.class).getName())
+                .withAuthentication(DUMMY_SSH_KEY)
+                .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK);
     }
 
     public EnvironmentTestDto withCreateFreeIpa(Boolean create) {
@@ -185,8 +186,12 @@ public class EnvironmentTestDto
     }
 
     public EnvironmentTestDto withS3Guard() {
-        String tableName = dynamoTableName + '-' + UUID.randomUUID().toString();
-        return withS3Guard(tableName);
+        if (CloudPlatform.AWS.equals(getTestContext().getCloudProvider().getCloudPlatform())) {
+            String tableName = dynamoTableName + '-' + UUID.randomUUID().toString();
+            return withS3Guard(tableName);
+        }
+        LOGGER.info("S3guard is ignored on cloudplatform {}.", getTestContext().getCloudProvider().getCloudPlatform());
+        return this;
     }
 
     public Collection<SimpleEnvironmentResponse> getResponseSimpleEnvSet() {

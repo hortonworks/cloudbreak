@@ -1,10 +1,10 @@
-package com.sequenceiq.it.cloudbreak.util.amazons3.action;
+package com.sequenceiq.it.cloudbreak.util.aws.amazons3.action;
 
 import static java.lang.String.format;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Component;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
@@ -19,9 +19,9 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
-import com.sequenceiq.it.cloudbreak.util.amazons3.client.S3Client;
+import com.sequenceiq.it.cloudbreak.util.aws.amazons3.client.S3Client;
 
-@Controller
+@Component
 public class S3ClientActions extends S3Client {
     private static final Logger LOGGER = LoggerFactory.getLogger(S3ClientActions.class);
 
