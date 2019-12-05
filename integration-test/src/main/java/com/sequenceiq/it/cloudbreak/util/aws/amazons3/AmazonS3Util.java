@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.util.amazons3;
+package com.sequenceiq.it.cloudbreak.util.aws.amazons3;
 
 import javax.inject.Inject;
 
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
-import com.sequenceiq.it.cloudbreak.util.amazons3.action.S3ClientActions;
+import com.sequenceiq.it.cloudbreak.util.aws.amazons3.action.S3ClientActions;
 
 @Component
 public class AmazonS3Util {

@@ -1,20 +1,22 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.aws;
+package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static java.lang.String.format;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
@@ -22,7 +24,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
@@ -32,23 +33,28 @@ import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.BasicSdxTests;
-import com.sequenceiq.it.cloudbreak.util.amazonec2.AmazonEC2Util;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.it.util.ResourceUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class AwsSdxTests extends BasicSdxTests {
+public class SdxRepairTests extends BasicSdxTests {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxRepairTests.class);
 
     private static final String CREATE_FILE_RECIPE = "classpath:/recipes/post-install.sh";
 
-    private Map<String, InstanceStatus> instancesDeletedOnProviderSide = new HashMap<String, InstanceStatus>() {{
+    private final Map<String, InstanceStatus> instancesDeletedOnProviderSide = new HashMap<>() {{
         put(MASTER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE);
         put(IDBROKER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE);
     }};
 
-    private Map<String, InstanceStatus> instancesStopped = new HashMap<String, InstanceStatus>() {{
+    private final Map<String, InstanceStatus> instancesStopped = new HashMap<>() {{
         put(MASTER.getName(), InstanceStatus.STOPPED);
         put(IDBROKER.getName(), InstanceStatus.STOPPED);
     }};
@@ -63,16 +69,19 @@ public class AwsSdxTests extends BasicSdxTests {
     private StackTestClient stackTestClient;
 
     @Inject
-    private AmazonEC2Util amazonEC2Util;
-
-    @Inject
     private WaitUtil waitUtil;
 
     @Inject
     private SshJUtil sshJUtil;
 
+    @Inject
+    private SdxUtil sdxUtil;
+
+    private CloudFunctionality cloudFunctionality;
+
     @Override
     protected void setupTest(TestContext testContext) {
+        cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createEnvironmentForSdx(testContext);
@@ -88,47 +97,33 @@ public class AwsSdxTests extends BasicSdxTests {
     public void testSDXMultiRepairIDBRokerAndMasterWithTerminatedEC2Instances(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
 
-        List<String> actualMasterVolumeIds = new ArrayList<>();
-        List<String> actualIDBrokerVolumeIds = new ArrayList<>();
-        List<String> expectedMasterVolumeIds = new ArrayList<>();
-        List<String> expectedIDBrokerVolumeIds = new ArrayList<>();
+        List<String> actualVolumeIds = new ArrayList<>();
+        List<String> expectedVolumeIds = new ArrayList<>();
 
         testContext
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .then((tc, testDto, client) -> waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState()))
                 .then((tc, testDto, client) -> {
-                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
-                })
-                .then((tc, testDto, client) -> {
-                    expectedMasterVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, MASTER.getName()));
-                    expectedIDBrokerVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, IDBROKER.getName()));
+                    List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
+                    expectedVolumeIds.addAll(cloudFunctionality.listInstanceVolumeIds(instancesToDelete));
+                    cloudFunctionality.deleteInstances(instancesToDelete);
                     return testDto;
                 })
-                .then((tc, testDto, client) -> {
-                    amazonEC2Util.deleteHostGroupInstances(tc, testDto, client, MASTER.getName());
-                    amazonEC2Util.deleteHostGroupInstances(tc, testDto, client, IDBROKER.getName());
-                    return testDto;
-                })
-                .then((tc, testDto, client) -> {
-                    return waitUtil.waitForSdxInstancesStatus(testDto, client, instancesDeletedOnProviderSide);
-                })
+                .then((tc, testDto, client) -> waitUtil.waitForSdxInstancesStatus(testDto, client, instancesDeletedOnProviderSide))
                 .when(sdxTestClient.repair(), key(sdx))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .then((tc, testDto, client) -> waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState()))
                 .then((tc, testDto, client) -> {
-                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
-                })
-                .then((tc, testDto, client) -> {
-                    actualMasterVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, MASTER.getName()));
-                    actualIDBrokerVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, IDBROKER.getName()));
+                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
+                    actualVolumeIds.addAll(cloudFunctionality.listInstanceVolumeIds(instanceIds));
                     return testDto;
                 })
-                .then((tc, testDto, client) -> {
-                    return amazonEC2Util.compareVolumeIds(testDto, Stream.concat(actualMasterVolumeIds.stream(), actualIDBrokerVolumeIds.stream())
-                            .collect(Collectors.toList()), Stream.concat(expectedMasterVolumeIds.stream(), expectedIDBrokerVolumeIds.stream())
-                            .collect(Collectors.toList()));
-                })
+                .then((tc, testDto, client) -> compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
                 .validate();
     }
 
@@ -152,11 +147,9 @@ public class AwsSdxTests extends BasicSdxTests {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
                 .then((tc, testDto, client) -> {
-                    expectedIDBrokerVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, IDBROKER.getName()));
-                    return testDto;
-                })
-                .then((tc, testDto, client) -> {
-                    amazonEC2Util.stopHostGroupInstances(tc, testDto, client, IDBROKER.getName());
+                    List<String> instancesToStop = sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName());
+                    expectedIDBrokerVolumeIds.addAll(cloudFunctionality.listInstanceVolumeIds(instancesToStop));
+                    cloudFunctionality.stopInstances(instancesToStop);
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
@@ -169,11 +162,12 @@ public class AwsSdxTests extends BasicSdxTests {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
                 .then((tc, testDto, client) -> {
-                    actualIDBrokerVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, IDBROKER.getName()));
+                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName());
+                    actualIDBrokerVolumeIds.addAll(cloudFunctionality.listInstanceVolumeIds(instanceIds));
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
-                    return amazonEC2Util.compareVolumeIds(testDto, new ArrayList<>(actualIDBrokerVolumeIds),
+                    return compareVolumeIdsAfterRepair(testDto, new ArrayList<>(actualIDBrokerVolumeIds),
                             new ArrayList<>(expectedIDBrokerVolumeIds));
                 })
                 .validate();
@@ -205,11 +199,9 @@ public class AwsSdxTests extends BasicSdxTests {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
                 .then((tc, testDto, client) -> {
-                    expectedMasterVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, MASTER.getName()));
-                    return testDto;
-                })
-                .then((tc, testDto, client) -> {
-                    amazonEC2Util.stopHostGroupInstances(tc, testDto, client, MASTER.getName());
+                    List<String> instancesToStop = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    expectedMasterVolumeIds.addAll(cloudFunctionality.listInstanceVolumeIds(instancesToStop));
+                    cloudFunctionality.stopInstances(instancesToStop);
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
@@ -222,11 +214,12 @@ public class AwsSdxTests extends BasicSdxTests {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
                 .then((tc, testDto, client) -> {
-                    actualMasterVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, MASTER.getName()));
+                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    actualMasterVolumeIds.addAll(cloudFunctionality.listInstanceVolumeIds(instanceIds));
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
-                    return amazonEC2Util.compareVolumeIds(testDto, new ArrayList<>(actualMasterVolumeIds),
+                    return compareVolumeIdsAfterRepair(testDto, new ArrayList<>(actualMasterVolumeIds),
                             new ArrayList<>(expectedMasterVolumeIds));
                 })
                 .validate();
@@ -235,8 +228,8 @@ public class AwsSdxTests extends BasicSdxTests {
     /**
      * This test case is disabled right now, because of [CB-3674 Can’t repair master when idbroker is stopped].
      *
-     * @param testContext   Stores and shares test objects through test execution between individual test cases.
-     * @throws IOException  Throws in case of recipe file stream cannot be written to or closed.
+     * @param testContext Stores and shares test objects through test execution between individual test cases.
+     * @throws IOException Throws in case of recipe file stream cannot be written to or closed.
      *
      * The 'disabled' tag on method name and the '@Test(dataProvider = TEST_CONTEXT)' annotation should be restored in case of resume this test case.
      */
@@ -272,12 +265,13 @@ public class AwsSdxTests extends BasicSdxTests {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
                 .then((tc, testDto, client) -> {
-                    return sshJUtil.checkFilesOnHostByNameAndPath(testDto, client, List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()),
+                    return sshJUtil.checkFilesOnHostByNameAndPath(testDto, client, List.of(MASTER.getName(), IDBROKER.getName()),
                             filePath, fileName, 1);
                 })
                 .then((tc, testDto, client) -> {
-                    amazonEC2Util.stopHostGroupInstances(tc, testDto, client, HostGroupType.MASTER.getName());
-                    amazonEC2Util.stopHostGroupInstances(tc, testDto, client, HostGroupType.IDBROKER.getName());
+                    List<String> instanceIdsToStop = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    instanceIdsToStop.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
+                    cloudFunctionality.stopInstances(instanceIdsToStop);
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
@@ -290,14 +284,29 @@ public class AwsSdxTests extends BasicSdxTests {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
                 .then((tc, testDto, client) -> {
-                    return sshJUtil.checkFilesOnHostByNameAndPath(testDto, client, List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()),
+                    return sshJUtil.checkFilesOnHostByNameAndPath(testDto, client, List.of(MASTER.getName(), IDBROKER.getName()),
                             filePath, fileName, 1);
                 })
                 .validate();
     }
 
     private String generateRecipeContent() throws IOException {
-        String recipeContentFromFile = ResourceUtil.readResourceAsString(applicationContext, AwsSdxTests.CREATE_FILE_RECIPE);
+        String recipeContentFromFile = ResourceUtil.readResourceAsString(applicationContext, CREATE_FILE_RECIPE);
         return Base64.encodeBase64String(recipeContentFromFile.getBytes());
+    }
+
+    private SdxTestDto compareVolumeIdsAfterRepair(SdxTestDto sdxTestDto, List<String> actualVolumeIds, List<String> expectedVolumeIds) {
+        actualVolumeIds.sort(Comparator.naturalOrder());
+        expectedVolumeIds.sort(Comparator.naturalOrder());
+
+        if (!actualVolumeIds.equals(expectedVolumeIds)) {
+            LOGGER.error("Host Group does not have the desired volume IDs!");
+            actualVolumeIds.forEach(volumeid -> Log.log(LOGGER, format(" Actual volume ID: %s ", volumeid)));
+            expectedVolumeIds.forEach(volumeId -> Log.log(LOGGER, format(" Desired volume ID: %s ", volumeId)));
+            throw new TestFailException("Host Group does not have the desired volume IDs!");
+        } else {
+            actualVolumeIds.forEach(volumeId -> Log.log(LOGGER, format(" Before and after SDX repair volume IDs are equal [%s]. ", volumeId)));
+        }
+        return sdxTestDto;
     }
 }

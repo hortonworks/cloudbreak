@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.BasicSdxTests;
-import com.sequenceiq.it.cloudbreak.util.amazons3.AmazonS3Util;
+import com.sequenceiq.it.cloudbreak.util.aws.amazons3.AmazonS3Util;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 

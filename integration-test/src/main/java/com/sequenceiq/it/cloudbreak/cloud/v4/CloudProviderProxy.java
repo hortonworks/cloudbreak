@@ -36,6 +36,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxRepairTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.CloudFunctionality;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Component
@@ -253,5 +254,10 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public StackV4ParameterBase stackParameters() {
         return delegate.stackParameters();
+    }
+
+    @Override
+    public CloudFunctionality getCloudFunctionality() {
+        return delegate.getCloudFunctionality();
     }
 }

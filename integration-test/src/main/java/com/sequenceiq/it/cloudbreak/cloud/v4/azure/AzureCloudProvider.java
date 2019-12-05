@@ -38,6 +38,8 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.azure.AzureCloudFunctionality;
 
 @Component
 public class AzureCloudProvider extends AbstractCloudProvider {
@@ -48,6 +50,9 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Inject
     private AzureProperties azureProperties;
+
+    @Inject
+    private AzureCloudFunctionality azureCloudFunctionality;
 
     @Override
     public CredentialTestDto credential(CredentialTestDto credential) {
@@ -88,6 +93,11 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public AzureStackV4Parameters stackParameters() {
         return new AzureStackV4Parameters();
+    }
+
+    @Override
+    public CloudFunctionality getCloudFunctionality() {
+        return azureCloudFunctionality;
     }
 
     public AzureDistroXV1Parameters distroXParameters() {

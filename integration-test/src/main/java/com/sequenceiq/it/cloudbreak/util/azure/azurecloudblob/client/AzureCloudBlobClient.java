@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.util.azurecloudblob.client;
+package com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.client;
 
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;

@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.util.amazonec2.client;
+package com.sequenceiq.it.cloudbreak.util.aws.amazonec2.client;
 
 import javax.inject.Inject;
 

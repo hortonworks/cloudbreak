@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.util.amazons3.client;
+package com.sequenceiq.it.cloudbreak.util.aws.amazons3.client;
 
 import java.net.URI;
 import java.net.URISyntaxException;

@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.util.azurecloudblob.action;
+package com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.action;
 
 import static java.lang.String.format;
 
@@ -23,7 +23,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
-import com.sequenceiq.it.cloudbreak.util.azurecloudblob.client.AzureCloudBlobClient;
+import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.client.AzureCloudBlobClient;
 
 @Component
 public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
