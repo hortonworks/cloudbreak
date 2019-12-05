@@ -10,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
@@ -31,7 +33,9 @@ public class TelemetryApiConverterTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        underTest = new TelemetryApiConverter(true, "http://mydatabus.endpoint.com");
+        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration("", false, "", null);
+        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true);
+        underTest = new TelemetryApiConverter(telemetryConfiguration);
     }
 
     @Test

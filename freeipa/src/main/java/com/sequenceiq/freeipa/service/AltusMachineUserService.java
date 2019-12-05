@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -24,16 +25,16 @@ public class AltusMachineUserService {
         this.crnService = crnService;
     }
 
-    public Optional<AltusCredential> createMachineUserWithAccessKeys(Stack stack) {
+    public Optional<AltusCredential> createMachineUserWithAccessKeys(Stack stack, Telemetry telemetry) {
         String userCrn = crnService.getUserCrn();
         String machineUserName = getFluentMachineUser(stack);
-        return altusIAMService.generateMachineUserWithAccessKey(machineUserName, userCrn);
+        return altusIAMService.generateMachineUserWithAccessKey(machineUserName, userCrn, telemetry.isUseSharedAltusCredentialEnabled());
     }
 
-    public void cleanupMachineUser(Stack stack) {
+    public void cleanupMachineUser(Stack stack, Telemetry telemetry) {
         String userCrn = crnService.getUserCrn();
         String machineUserName = getFluentMachineUser(stack);
-        altusIAMService.clearMachineUser(machineUserName, userCrn);
+        altusIAMService.clearMachineUser(machineUserName, userCrn, telemetry.isUseSharedAltusCredentialEnabled());
     }
 
     private String getFluentMachineUser(Stack stack) {

@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableJpaRepositories(basePackages = {"com.sequenceiq.redbeams", "com.sequenceiq.flow", "com.sequenceiq.cloudbreak.ha.repository"})
 @SpringBootApplication(scanBasePackages = {"com.sequenceiq.redbeams",
         "com.sequenceiq.authorization",
+        "com.sequenceiq.cloudbreak.altus",
         "com.sequenceiq.cloudbreak.auth",
         "com.sequenceiq.cloudbreak.auth.altus",
         "com.sequenceiq.cloudbreak.auth.filter",

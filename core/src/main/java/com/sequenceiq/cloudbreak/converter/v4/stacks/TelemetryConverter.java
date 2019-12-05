@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
@@ -48,17 +49,17 @@ public class TelemetryConverter {
 
     private final boolean reportDeploymentLogs;
 
-    public TelemetryConverter(
+    private final boolean useSharedAltusCredential;
+
+    public TelemetryConverter(TelemetryConfiguration configuration,
             @Value("${cb.cm.telemetrypublisher.enabled:false}") boolean telemetryPublisherEnabled,
-            @Value("${cb.cm.telemetrypublisher.default:true}") boolean telemetryPublisherDefaultValue,
-            @Value("${metering.enabled:false}") boolean meteringEnabled,
-            @Value("${cluster.deployment.logs.report:false}") boolean reportDeploymentLogs,
-            @Value("${altus.databus.endpoint:}") String databusEndpoint) {
+            @Value("${cb.cm.telemetrypublisher.default:true}") boolean telemetryPublisherDefaultValue) {
         this.telemetryPublisherEnabled = telemetryPublisherEnabled;
         this.telemetryPublisherDefaultValue = telemetryPublisherDefaultValue;
-        this.databusEndpoint = databusEndpoint;
-        this.meteringEnabled = meteringEnabled;
-        this.reportDeploymentLogs = reportDeploymentLogs;
+        this.databusEndpoint = configuration.getAltusDatabusConfiguration().getAltusDatabusEndpoint();
+        this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
+        this.meteringEnabled = configuration.isMeteringEnabled();
+        this.reportDeploymentLogs = configuration.isReportDeploymentLogs();
     }
 
     public TelemetryResponse convert(Telemetry telemetry) {
@@ -86,6 +87,7 @@ public class TelemetryConverter {
             telemetry.setWorkloadAnalytics(workloadAnalytics);
             setWorkloadAnalyticsFeature(telemetry, features);
             setReportDeploymentLogs(request, features);
+            setUseSharedAltusCredential(request, features);
             telemetry.setFluentAttributes(request.getFluentAttributes());
         }
         setMeteringFeature(type, features);
@@ -302,6 +304,7 @@ public class TelemetryConverter {
             featuresResponse.setWorkloadAnalytics(features.getWorkloadAnalytics());
             featuresResponse.setReportDeploymentLogs(features.getReportDeploymentLogs());
             featuresResponse.setMetering(features.getMetering());
+            featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
             response.setFeatures(featuresResponse);
         }
     }
@@ -351,6 +354,13 @@ public class TelemetryConverter {
             FeatureSetting reportDeploymentLogsFeature = new FeatureSetting();
             reportDeploymentLogsFeature.setEnabled(false);
             features.setReportDeploymentLogs(reportDeploymentLogsFeature);
+        }
+    }
+
+    private void setUseSharedAltusCredential(TelemetryRequest request, Features features) {
+        if (useSharedAltusCredential && request.getFeatures() != null && request.getFeatures().getUseSharedAltusCredential() != null) {
+            LOGGER.debug("Fill shared altus credential setting from telemetry feature request");
+            features.setUseSharedAltusCredential(request.getFeatures().getUseSharedAltusCredential());
         }
     }
 }

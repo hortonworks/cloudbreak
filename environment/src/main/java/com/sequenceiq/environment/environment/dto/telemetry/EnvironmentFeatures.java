@@ -14,6 +14,8 @@ public class EnvironmentFeatures implements Serializable {
 
     private FeatureSetting reportDeploymentLogs;
 
+    private FeatureSetting useSharedAltusCredential;
+
     public FeatureSetting getReportDeploymentLogs() {
         return reportDeploymentLogs;
     }
@@ -28,5 +30,13 @@ public class EnvironmentFeatures implements Serializable {
 
     public void setWorkloadAnalytics(FeatureSetting workloadAnalytics) {
         this.workloadAnalytics = workloadAnalytics;
+    }
+
+    public FeatureSetting getUseSharedAltusCredential() {
+        return useSharedAltusCredential;
+    }
+
+    public void setUseSharedAltusCredential(FeatureSetting useSharedAltusCredential) {
+        this.useSharedAltusCredential = useSharedAltusCredential;
     }
 }

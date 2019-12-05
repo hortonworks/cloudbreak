@@ -18,6 +18,10 @@ public abstract class FeaturesBase implements Serializable {
     @ApiModelProperty(TelemetryModelDescription.TELEMETRY_REPORT_DEPLOYMENT_LOGS_ENABLED)
     private FeatureSetting reportDeploymentLogs;
 
+    @JsonProperty("useSharedAltusCredential")
+    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_USE_SHARED_ALTUS_CREDENTIAL_ENABLED)
+    private FeatureSetting useSharedAltusCredential;
+
     public FeatureSetting getWorkloadAnalytics() {
         return workloadAnalytics;
     }
@@ -32,5 +36,13 @@ public abstract class FeaturesBase implements Serializable {
 
     public void setReportDeploymentLogs(FeatureSetting reportDeploymentLogs) {
         this.reportDeploymentLogs = reportDeploymentLogs;
+    }
+
+    public FeatureSetting getUseSharedAltusCredential() {
+        return useSharedAltusCredential;
+    }
+
+    public void setUseSharedAltusCredential(FeatureSetting useSharedAltusCredential) {
+        this.useSharedAltusCredential = useSharedAltusCredential;
     }
 }

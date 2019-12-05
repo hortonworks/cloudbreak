@@ -2,9 +2,9 @@ package com.sequenceiq.environment.environment.v1;
 
 import java.util.HashMap;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
@@ -27,12 +27,11 @@ public class TelemetryApiConverter {
 
     private final boolean reportDeploymentLogs;
 
-    private final String databusEndpoint;
+    private final boolean useSharedAltusCredential;
 
-    public TelemetryApiConverter(@Value("${cluster.deployment.logs.report:false}") boolean reportDeploymentLogs,
-            @Value("${altus.databus.endpoint:}") String databusEndpoint) {
-        this.reportDeploymentLogs = reportDeploymentLogs;
-        this.databusEndpoint = databusEndpoint;
+    public TelemetryApiConverter(TelemetryConfiguration configuration) {
+        this.reportDeploymentLogs = configuration.isReportDeploymentLogs();
+        this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
     }
 
     public EnvironmentTelemetry convert(TelemetryRequest request) {
@@ -87,6 +86,7 @@ public class TelemetryApiConverter {
         if (features != null) {
             featuresRequest = new FeaturesRequest();
             featuresRequest.setReportDeploymentLogs(features.getReportDeploymentLogs());
+            featuresRequest.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
         }
         return featuresRequest;
     }
@@ -97,6 +97,7 @@ public class TelemetryApiConverter {
             featuresResponse = new FeaturesResponse();
             featuresResponse.setReportDeploymentLogs(features.getReportDeploymentLogs());
             featuresResponse.setWorkloadAnalytics(features.getWorkloadAnalytics());
+            featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
         }
         return featuresResponse;
     }
@@ -117,6 +118,9 @@ public class TelemetryApiConverter {
         EnvironmentFeatures features = null;
         if (featuresRequest != null) {
             features = new EnvironmentFeatures();
+            if (useSharedAltusCredential) {
+                features.setUseSharedAltusCredential(featuresRequest.getUseSharedAltusCredential());
+            }
             if (reportDeploymentLogs) {
                 final FeatureSetting reportDeploymentLogs;
                 if (featuresRequest.getReportDeploymentLogs() != null) {

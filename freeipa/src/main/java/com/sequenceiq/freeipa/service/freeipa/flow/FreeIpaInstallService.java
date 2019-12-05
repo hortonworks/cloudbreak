@@ -104,7 +104,7 @@ public class FreeIpaInstallService {
                     databusEnabled, false, telemetry);
             servicePillarConfig.put("fluent", new SaltPillarProperties("/fluent/init.sls", Collections.singletonMap("fluent", fluentConfigView.toMap())));
             if (databusEnabled) {
-                Optional<AltusCredential> credential = altusMachineUserService.createMachineUserWithAccessKeys(stack);
+                Optional<AltusCredential> credential = altusMachineUserService.createMachineUserWithAccessKeys(stack, telemetry);
                 String accessKey = credential.map(AltusCredential::getAccessKey).orElse(null);
                 char[] privateKey = credential.map(AltusCredential::getPrivateKey).orElse(null);
                 DatabusConfigView databusConfigView = databusConfigService.createDatabusConfigs(accessKey, privateKey,
