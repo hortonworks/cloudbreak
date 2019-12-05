@@ -17,12 +17,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -76,6 +78,9 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
 
     @Inject
     private StackToStackV4ResponseConverter stackV4ResponseConverter;
+
+    @Inject
+    private StackResponseDecorator stackResponseDecorator;
 
     @PostConstruct
     public void setup() {
@@ -147,6 +152,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         CloudbreakCompositeEvent compositeEvent = new CloudbreakCompositeEvent(resourceEvent, eventMessageArgs, structuredNotificationEvent);
         if (stackTypeIsDistroX(stack.getType())) {
             StackV4Response stackV4Response = stackV4ResponseConverter.convert(stack);
+            stackV4Response = stackResponseDecorator.decorate(stackV4Response, stack, List.of(StackResponseEntries.HARDWARE_INFO.getEntryName()));
             compositeEvent = new CloudbreakCompositeEvent(
                     resourceEvent,
                     eventMessageArgs,
