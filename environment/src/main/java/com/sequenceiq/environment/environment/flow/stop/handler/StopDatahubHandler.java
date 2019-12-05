@@ -8,7 +8,7 @@ import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopFailedEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopHandlerSelectors;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelectors;
-import com.sequenceiq.environment.environment.service.DatahubService;
+import com.sequenceiq.environment.environment.service.datahub.DatahubPollerService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -17,11 +17,11 @@ import reactor.bus.Event;
 @Component
 public class StopDatahubHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
-    private final DatahubService datahubService;
+    private final DatahubPollerService datahubPollerService;
 
-    protected StopDatahubHandler(EventSender eventSender, DatahubService datahubService) {
+    protected StopDatahubHandler(EventSender eventSender, DatahubPollerService datahubPollerService) {
         super(eventSender);
-        this.datahubService = datahubService;
+        this.datahubPollerService = datahubPollerService;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class StopDatahubHandler extends EventSenderAwareHandler<EnvironmentDto> 
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            datahubService.stopAttachedDatahubClusters(environmentDto.getId(), environmentDto.getResourceCrn());
+            datahubPollerService.stopAttachedDatahubClusters(environmentDto.getId(), environmentDto.getResourceCrn());
             EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
                     .withSelector(EnvStopStateSelectors.ENV_STOP_DATALAKE_EVENT.selector())
                     .withResourceId(environmentDto.getId())

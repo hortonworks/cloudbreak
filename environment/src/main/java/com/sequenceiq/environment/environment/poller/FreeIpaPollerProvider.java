@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.environment.poller;
 
-import javax.ws.rs.NotFoundException;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,8 +10,8 @@ import com.dyngr.core.AttemptMaker;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
@@ -20,10 +20,10 @@ public class FreeIpaPollerProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaPollerProvider.class);
 
-    private final FreeIpaV1Endpoint freeIpaV1Endpoint;
+    private final FreeIpaService freeIpaService;
 
-    public FreeIpaPollerProvider(FreeIpaV1Endpoint freeIpaV1Endpoint) {
-        this.freeIpaV1Endpoint = freeIpaV1Endpoint;
+    public FreeIpaPollerProvider(FreeIpaService freeIpaService) {
+        this.freeIpaService = freeIpaService;
     }
 
     public AttemptMaker<Void> startPoller(Long envId, String envCrn) {
@@ -32,11 +32,11 @@ public class FreeIpaPollerProvider {
                 LOGGER.info("Freeipa polling cancelled in inmemory store, id: " + envId);
                 return AttemptResults.breakFor("Freeipa polling cancelled in inmemory store, id: " + envId);
             }
-            DescribeFreeIpaResponse freeIpaResponse = describe(envCrn);
-            if (freeIpaResponse == null || freeipaAvailable(freeIpaResponse)) {
+            Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(envCrn);
+            if (freeIpaResponse.isEmpty() || freeipaAvailable(freeIpaResponse.get())) {
                 return AttemptResults.finishWith(null);
             } else {
-                return checkStartStatus(freeIpaResponse);
+                return checkStartStatus(freeIpaResponse.get());
             }
         };
     }
@@ -47,22 +47,13 @@ public class FreeIpaPollerProvider {
                 LOGGER.info("Freeipa polling cancelled in inmemory store, id: " + envId);
                 return AttemptResults.breakFor("Freeipa polling cancelled in inmemory store, id: " + envId);
             }
-            DescribeFreeIpaResponse freeIpaResponse = describe(envCrn);
-            if (freeIpaResponse == null || freeipaStopped(freeIpaResponse)) {
+            Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(envCrn);
+            if (freeIpaResponse.isEmpty() || freeipaStopped(freeIpaResponse.get())) {
                 return AttemptResults.finishWith(null);
             } else {
-                return checkStopStatus(freeIpaResponse);
+                return checkStopStatus(freeIpaResponse.get());
             }
         };
-    }
-
-    public DescribeFreeIpaResponse describe(String envCrn) {
-        try {
-            return freeIpaV1Endpoint.describe(envCrn);
-        } catch (NotFoundException e) {
-            LOGGER.info("Could not find freeipa with envCrn: " + envCrn);
-        }
-        return null;
     }
 
     private AttemptResult<Void> checkStopStatus(DescribeFreeIpaResponse freeIpaResponse) {

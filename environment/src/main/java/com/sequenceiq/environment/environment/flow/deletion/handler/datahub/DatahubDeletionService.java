@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.flow.deletion.handler.distrox;
+package com.sequenceiq.environment.environment.flow.deletion.handler.datahub;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -12,40 +12,40 @@ import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.service.datahub.DatahubService;
 import com.sequenceiq.environment.util.PollingConfig;
 
 @Component
-public class DistroXDeleteService {
+public class DatahubDeletionService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXDeleteService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatahubDeletionService.class);
 
-    private final DistroXV1Endpoint distroXV1Endpoint;
+    private final DatahubService datahubService;
 
-    public DistroXDeleteService(DistroXV1Endpoint distroXV1Endpoint) {
-        this.distroXV1Endpoint = distroXV1Endpoint;
+    public DatahubDeletionService(DatahubService datahubService) {
+        this.datahubService = datahubService;
     }
 
-    public void deleteDistroXClustersForEnvironment(PollingConfig pollingConfig, Environment environment) {
-        Collection<StackViewV4Response> list = distroXV1Endpoint.list(null, environment.getResourceCrn()).getResponses();
+    public void deleteDatahubClustersForEnvironment(PollingConfig pollingConfig, Environment environment) {
+        Collection<StackViewV4Response> list = datahubService.list(environment.getResourceCrn()).getResponses();
         LOGGER.info("Found {} Data Hub clusters for environment {}.", list.size(), environment.getName());
         if (list.isEmpty()) {
             LOGGER.info("No Data Hub clusters found for environment.");
         } else {
-            waitDistroXClustersDeletion(pollingConfig, environment, list);
+            waitDatahubClustersDeletion(pollingConfig, environment, list);
             LOGGER.info("Data hub deletion finished.");
         }
     }
 
-    private void waitDistroXClustersDeletion(PollingConfig pollingConfig, Environment environment, Collection<StackViewV4Response> list) {
+    private void waitDatahubClustersDeletion(PollingConfig pollingConfig, Environment environment, Collection<StackViewV4Response> list) {
         DistroXMultiDeleteV1Request multiDeleteRequest = new DistroXMultiDeleteV1Request();
         multiDeleteRequest.setCrns(list.stream().map(StackViewV4Response::getCrn).collect(Collectors.toSet()));
-        LOGGER.debug("Calling distroXV1Endpoint.deleteMultiple with crn [{}]", multiDeleteRequest.getNames());
-        distroXV1Endpoint.deleteMultiple(multiDeleteRequest, true);
+        LOGGER.debug("Calling distroXV1Endpoint.deleteMultiple with crn [{}]", multiDeleteRequest.getCrns());
+        datahubService.deleteMultiple(environment.getResourceCrn(), multiDeleteRequest, true);
 
-        LOGGER.debug("Starting poller to check all DistroX stacks for environment {} is deleted", environment.getName());
+        LOGGER.debug("Starting poller to check all Datahub stacks for environment {} are deleted", environment.getName());
         Polling.stopAfterDelay(pollingConfig.getTimeout(), pollingConfig.getTimeoutTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                 .waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
@@ -53,7 +53,7 @@ public class DistroXDeleteService {
     }
 
     private AttemptResult<Object> periodicCheckForDeletion(Environment environment) {
-        Collection<StackViewV4Response> actualClusterList = distroXV1Endpoint.list(null, environment.getResourceCrn()).getResponses();
+        Collection<StackViewV4Response> actualClusterList = datahubService.list(environment.getResourceCrn()).getResponses();
         if (!actualClusterList.isEmpty()) {
             if (actualClusterList.stream().anyMatch(c -> c.getStatus() == Status.DELETE_FAILED)) {
                 return AttemptResults.breakFor(new IllegalStateException("Found a cluster with delete failed status."));

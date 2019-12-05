@@ -8,7 +8,7 @@ import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopFailedEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopHandlerSelectors;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelectors;
-import com.sequenceiq.environment.environment.service.FreeIpaService;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -17,11 +17,11 @@ import reactor.bus.Event;
 @Component
 public class StopFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
-    private final FreeIpaService freeipaService;
+    private final FreeIpaPollerService freeIpaPollerService;
 
-    protected StopFreeIpaHandler(EventSender eventSender, FreeIpaService freeipaService) {
+    protected StopFreeIpaHandler(EventSender eventSender, FreeIpaPollerService freeIpaPollerService) {
         super(eventSender);
-        this.freeipaService = freeipaService;
+        this.freeIpaPollerService = freeIpaPollerService;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class StopFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto> 
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            freeipaService.stopAttachedFreeipaInstances(environmentDto.getId(), environmentDto.getResourceCrn());
+            freeIpaPollerService.stopAttachedFreeipaInstances(environmentDto.getId(), environmentDto.getResourceCrn());
             EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
                     .withSelector(EnvStopStateSelectors.FINISH_ENV_STOP_EVENT.selector())
                     .withResourceId(environmentDto.getId())

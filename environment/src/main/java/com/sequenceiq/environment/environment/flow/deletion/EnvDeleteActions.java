@@ -33,7 +33,9 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors;
+import com.sequenceiq.environment.environment.flow.start.EnvStartState;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
@@ -51,10 +53,66 @@ public class EnvDeleteActions {
 
     private final EnvironmentApiConverter environmentApiConverter;
 
-    public EnvDeleteActions(EnvironmentService environmentService, NotificationService notificationService, EnvironmentApiConverter environmentApiConverter) {
+    private final EnvironmentStatusUpdateService environmentStatusUpdateService;
+
+    public EnvDeleteActions(EnvironmentService environmentService, NotificationService notificationService,
+            EnvironmentApiConverter environmentApiConverter, EnvironmentStatusUpdateService environmentStatusUpdateService) {
         this.environmentService = environmentService;
         this.notificationService = notificationService;
         this.environmentApiConverter = environmentApiConverter;
+        this.environmentStatusUpdateService = environmentStatusUpdateService;
+    }
+
+    @Bean(name = "FREEIPA_DELETE_STARTED_STATE")
+    public Action<?, ?> freeipaDeleteAction() {
+        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
+                EnvironmentDto envDto = environmentStatusUpdateService
+                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS,
+                                ResourceEvent.ENVIRONMENT_FREEIPA_DELETION_STARTED, EnvDeleteState.FREEIPA_DELETE_STARTED_STATE);
+                sendEvent(context, DELETE_FREEIPA_EVENT.selector(), envDto);
+            }
+        };
+    }
+
+    @Bean(name = "RDBMS_DELETE_STARTED_STATE")
+    public Action<?, ?> rdbmsDeleteAction() {
+        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
+                EnvironmentDto envDto = environmentStatusUpdateService
+                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.RDBMS_DELETE_IN_PROGRESS,
+                                ResourceEvent.ENVIRONMENT_DATABASE_DELETION_STARTED, EnvDeleteState.RDBMS_DELETE_STARTED_STATE);
+                sendEvent(context, DELETE_RDBMS_EVENT.selector(), envDto);
+            }
+        };
+    }
+
+    @Bean(name = "PUBLICKEY_DELETE_STARTED_STATE")
+    public Action<?, ?> publickeyDeleteAction() {
+        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
+                EnvironmentDto envDto = environmentStatusUpdateService
+                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.PUBLICKEY_DELETE_IN_PROGRESS,
+                                ResourceEvent.ENVIRONMENT_PUBLICKEY_DELETION_STARTED, EnvDeleteState.PUBLICKEY_DELETE_STARTED_STATE);
+                sendEvent(context, DELETE_PUBLICKEY_EVENT.selector(), envDto);
+            }
+        };
+    }
+
+    @Bean(name = "NETWORK_DELETE_STARTED_STATE")
+    public Action<?, ?> networkDeleteAction() {
+        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
+                EnvironmentDto envDto = environmentStatusUpdateService
+                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.NETWORK_DELETE_IN_PROGRESS,
+                                ResourceEvent.ENVIRONMENT_NETWORK_DELETION_STARTED, EnvDeleteState.NETWORK_DELETE_STARTED_STATE);
+                sendEvent(context, DELETE_NETWORK_EVENT.selector(), envDto);
+            }
+        };
     }
 
     @Bean(name = "IDBROKER_MAPPINGS_DELETE_STARTED_STATE")
@@ -62,12 +120,9 @@ public class EnvDeleteActions {
         return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
-                EnvironmentStatus environmentStatus = EnvironmentStatus.IDBROKER_MAPPINGS_DELETE_IN_PROGRESS;
-                ResourceEvent resourceEvent = ResourceEvent.ENVIRONMENT_IDBROKER_MAPPINGS_DELETION_STARTED;
-                EnvDeleteState envDeleteState = EnvDeleteState.IDBROKER_MAPPINGS_DELETE_STARTED_STATE;
-                String logDeleteState = "IDBroker mappings";
-
-                EnvironmentDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent, envDeleteState, logDeleteState);
+                EnvironmentDto envDto = environmentStatusUpdateService
+                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.IDBROKER_MAPPINGS_DELETE_IN_PROGRESS,
+                                ResourceEvent.ENVIRONMENT_IDBROKER_MAPPINGS_DELETION_STARTED, EnvDeleteState.IDBROKER_MAPPINGS_DELETE_STARTED_STATE);
                 sendEvent(context, DELETE_IDBROKER_MAPPINGS_EVENT.selector(), envDto);
             }
         };
@@ -78,45 +133,10 @@ public class EnvDeleteActions {
         return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
-                EnvironmentStatus environmentStatus = EnvironmentStatus.S3GUARD_TABLE_DELETE_IN_PROGRESS;
-                ResourceEvent resourceEvent = ResourceEvent.ENVIRONMENT_S3GUARD_TABLE_DELETION_STARTED;
-                EnvDeleteState envDeleteState = EnvDeleteState.S3GUARD_TABLE_DELETE_STARTED_STATE;
-                String logDeleteState = "S3Guard table";
-
-                EnvironmentDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent, envDeleteState, logDeleteState);
+                EnvironmentDto envDto = environmentStatusUpdateService
+                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.S3GUARD_TABLE_DELETE_IN_PROGRESS,
+                                ResourceEvent.ENVIRONMENT_S3GUARD_TABLE_DELETION_STARTED, EnvDeleteState.S3GUARD_TABLE_DELETE_STARTED_STATE);
                 sendEvent(context, DELETE_S3GUARD_TABLE_EVENT.selector(), envDto);
-            }
-        };
-    }
-
-    @Bean(name = "NETWORK_DELETE_STARTED_STATE")
-    public Action<?, ?> networkDeleteAction() {
-        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
-            @Override
-            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
-                EnvironmentStatus environmentStatus = EnvironmentStatus.NETWORK_DELETE_IN_PROGRESS;
-                ResourceEvent resourceEvent = ResourceEvent.ENVIRONMENT_NETWORK_DELETION_STARTED;
-                EnvDeleteState envDeleteState = EnvDeleteState.NETWORK_DELETE_STARTED_STATE;
-                String logDeleteState = "network";
-
-                EnvironmentDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent, envDeleteState, logDeleteState);
-                sendEvent(context, DELETE_NETWORK_EVENT.selector(), envDto);
-            }
-        };
-    }
-
-    @Bean(name = "PUBLICKEY_DELETE_STARTED_STATE")
-    public Action<?, ?> publickeyDeleteAction() {
-        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
-            @Override
-            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
-                EnvironmentStatus environmentStatus = EnvironmentStatus.PUBLICKEY_DELETE_IN_PROGRESS;
-                ResourceEvent resourceEvent = ResourceEvent.ENVIRONMENT_PUBLICKEY_DELETION_STARTED;
-                EnvDeleteState envDeleteState = EnvDeleteState.PUBLICKEY_DELETE_STARTED_STATE;
-                String logDeleteState = "publickey";
-
-                EnvironmentDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent, envDeleteState, logDeleteState);
-                sendEvent(context, DELETE_PUBLICKEY_EVENT.selector(), envDto);
             }
         };
     }
@@ -126,55 +146,24 @@ public class EnvDeleteActions {
         return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
-                environmentService
-                        .findEnvironmentById(payload.getResourceId())
-                        .ifPresentOrElse(environment -> {
-                            environment.setStatus(EnvironmentStatus.CLUSTER_DEFINITION_DELETE_PROGRESS);
-                            Environment env = environmentService.save(environment);
-                            EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
-                            SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
-                            notificationService.send(ResourceEvent.ENVIRONMENT_CLUSTER_DEFINITION_DELETE_STARTED, simpleResponse,
-                                    context.getFlowTriggerUserCrn());
-                        }, () -> LOGGER.error("Cannot delete cluster definition, because the environment does not exist: {}. "
-                                + "The flow will continue.", payload.getResourceId()));
-                EnvironmentDto envDto = new EnvironmentDto();
-                envDto.setId(payload.getResourceId());
-                envDto.setResourceCrn(payload.getResourceCrn());
-                envDto.setName(payload.getResourceName());
-                LOGGER.info("Flow entered into CLUSTER_DEFINITION_DELETE_STARTED_STATE");
+                EnvironmentDto envDto = environmentStatusUpdateService
+                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.CLUSTER_DEFINITION_DELETE_PROGRESS,
+                                ResourceEvent.ENVIRONMENT_CLUSTER_DEFINITION_DELETE_STARTED, EnvDeleteState.CLUSTER_DEFINITION_DELETE_STARTED_STATE);
                 sendEvent(context, DELETE_CLUSTER_DEFINITION_EVENT.selector(), envDto);
             }
         };
     }
 
-    @Bean(name = "RDBMS_DELETE_STARTED_STATE")
-    public Action<?, ?> rdbmsDeleteAction() {
+    @Bean(name = "UMS_RESOURCE_DELETE_STARTED_STATE")
+    public Action<?, ?> umsResourceDeleteAction() {
         return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
+
             @Override
             protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
-                EnvironmentStatus environmentStatus = EnvironmentStatus.RDBMS_DELETE_IN_PROGRESS;
-                ResourceEvent resourceEvent = ResourceEvent.ENVIRONMENT_DATABASE_DELETION_STARTED;
-                EnvDeleteState envDeleteState = EnvDeleteState.RDBMS_DELETE_STARTED_STATE;
-                String logDeleteState = "RDBMS";
-
-                EnvironmentDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent, envDeleteState, logDeleteState);
-                sendEvent(context, DELETE_RDBMS_EVENT.selector(), envDto);
-            }
-        };
-    }
-
-    @Bean(name = "FREEIPA_DELETE_STARTED_STATE")
-    public Action<?, ?> freeipaDeleteAction() {
-        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
-            @Override
-            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
-                EnvironmentStatus environmentStatus = EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS;
-                ResourceEvent resourceEvent = ResourceEvent.ENVIRONMENT_FREEIPA_DELETION_STARTED;
-                EnvDeleteState envDeleteState = EnvDeleteState.FREEIPA_DELETE_STARTED_STATE;
-                String logDeleteState = "FreeIPA";
-
-                EnvironmentDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent, envDeleteState, logDeleteState);
-                sendEvent(context, DELETE_FREEIPA_EVENT.selector(), envDto);
+                EnvironmentDto envDto = environmentStatusUpdateService
+                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.UMS_RESOURCE_DELETE_IN_PROGRESS,
+                                ResourceEvent.ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED, EnvDeleteState.UMS_RESOURCE_DELETE_STARTED_STATE);
+                sendEvent(context, DELETE_UMS_RESOURCE_EVENT.selector(), envDto);
             }
         };
     }
@@ -215,56 +204,14 @@ public class EnvDeleteActions {
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresentOrElse(environment -> {
-                            environment.setStatusReason(payload.getException().getMessage());
-                            environment.setStatus(EnvironmentStatus.DELETE_FAILED);
-                            Environment result = environmentService.save(environment);
-                            EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);
-                            SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
-                            notificationService.send(ResourceEvent.ENVIRONMENT_DELETION_FAILED, simpleResponse, context.getFlowTriggerUserCrn());
+                            environmentStatusUpdateService.updateFailedEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.DELETE_FAILED,
+                                    ResourceEvent.ENVIRONMENT_DELETION_FAILED, EnvStartState.ENV_START_FAILED_STATE);
                         }, () -> LOGGER.error("Cannot set delete failed to env because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 LOGGER.info("Flow entered into ENV_DELETE_FAILED_STATE");
                 sendEvent(context, HANDLED_FAILED_ENV_DELETE_EVENT.event(), payload);
             }
         };
-    }
-
-    @Bean(name = "UMS_RESOURCE_DELETE_STARTED_STATE")
-    public Action<?, ?> umsResourceDeleteAction() {
-        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
-
-            @Override
-            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
-                EnvironmentStatus environmentStatus = EnvironmentStatus.UMS_RESOURCE_DELETE_IN_PROGRESS;
-                ResourceEvent resourceEvent = ResourceEvent.ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED;
-                EnvDeleteState envDeleteState = EnvDeleteState.UMS_RESOURCE_DELETE_STARTED_STATE;
-                String logDeleteState = "assigned UMS resources";
-
-                EnvironmentDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent, envDeleteState, logDeleteState);
-                sendEvent(context, DELETE_UMS_RESOURCE_EVENT.selector(), envDto);
-            }
-        };
-    }
-
-    private EnvironmentDto commonUpdateEnvironmentAndNotify(CommonContext context, EnvDeleteEvent payload,
-            EnvironmentStatus environmentStatus, ResourceEvent resourceEvent, EnvDeleteState envDeleteState, String logDeleteState) {
-
-        environmentService
-                .findEnvironmentById(payload.getResourceId())
-                .ifPresentOrElse(environment -> {
-                    environment.setStatus(environmentStatus);
-                    Environment env = environmentService.save(environment);
-                    EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
-                    SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
-                    notificationService.send(resourceEvent, simpleResponse, context.getFlowTriggerUserCrn());
-                }, () -> LOGGER.error("Cannot delete {} because the environment does not exist: {}. "
-                        + "But the flow will continue, how can this happen?", logDeleteState, payload.getResourceId()));
-        EnvironmentDto envDto = new EnvironmentDto();
-        envDto.setId(payload.getResourceId());
-        envDto.setResourceCrn(payload.getResourceCrn());
-        envDto.setName(payload.getResourceName());
-        LOGGER.info("Flow entered into {}", envDeleteState.name());
-        return envDto;
     }
 
     private abstract static class AbstractEnvDeleteAction<P extends ResourceCrnPayload>

@@ -25,17 +25,17 @@ import com.dyngr.core.AttemptState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
+import com.sequenceiq.environment.environment.service.datahub.DatahubService;
 
 class DatahubPollerProviderTest {
 
     private static final Long ENV_ID = 1000L;
 
-    private final DistroXV1Endpoint distroXV1Endpoint = Mockito.mock(DistroXV1Endpoint.class);
+    private final DatahubService datahubService = Mockito.mock(DatahubService.class);
 
     private final ClusterPollerResultEvaluator clusterPollerResultEvaluator = new ClusterPollerResultEvaluator();
 
-    private final DatahubPollerProvider underTest = new DatahubPollerProvider(distroXV1Endpoint, clusterPollerResultEvaluator);
+    private final DatahubPollerProvider underTest = new DatahubPollerProvider(datahubService, clusterPollerResultEvaluator);
 
     @Test
     void testStopPollerWhenPollerCrnIsEmpty() throws Exception {
@@ -54,8 +54,8 @@ class DatahubPollerProviderTest {
         StackV4Response stack1 = getStackV4Response(s1Status, c1Status, "crn1");
         StackV4Response stack2 = getStackV4Response(s2Status, c2Status, "crn2");
 
-        Mockito.when(distroXV1Endpoint.getByCrn("crn1", Collections.emptySet())).thenReturn(stack1);
-        Mockito.when(distroXV1Endpoint.getByCrn("crn2", Collections.emptySet())).thenReturn(stack2);
+        Mockito.when(datahubService.getByCrn("crn1", Collections.emptySet())).thenReturn(stack1);
+        Mockito.when(datahubService.getByCrn("crn2", Collections.emptySet())).thenReturn(stack2);
 
         AttemptResult<Void> result = underTest.stopDatahubClustersPoller(pollingCrn, ENV_ID).process();
 
@@ -72,8 +72,8 @@ class DatahubPollerProviderTest {
         StackV4Response stack1 = getStackV4Response(s1Status, c1Status, "crn1");
         StackV4Response stack2 = getStackV4Response(s2Status, c2Status, "crn2");
 
-        Mockito.when(distroXV1Endpoint.getByCrn("crn1", Collections.emptySet())).thenReturn(stack1);
-        Mockito.when(distroXV1Endpoint.getByCrn("crn2", Collections.emptySet())).thenReturn(stack2);
+        Mockito.when(datahubService.getByCrn("crn1", Collections.emptySet())).thenReturn(stack1);
+        Mockito.when(datahubService.getByCrn("crn2", Collections.emptySet())).thenReturn(stack2);
 
         AttemptResult<Void> result = underTest.startDatahubClustersPoller(pollingCrn, ENV_ID).process();
 

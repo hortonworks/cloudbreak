@@ -100,7 +100,7 @@ public class EnvStartActions {
             protected void doExecute(CommonContext context, EnvStartFailedEvent payload, Map<Object, Object> variables) {
                 LOGGER.warn(String.format("Failed to start environment '%s'. Status: '%s'.",
                         payload.getEnvironmentDto(), payload.getEnvironmentStatus()), payload.getException());
-                environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload, payload.getEnvironmentStatus(),
+                environmentStatusUpdateService.updateFailedEnvironmentStatusAndNotify(context, payload, payload.getEnvironmentStatus(),
                         convertStatus(payload.getEnvironmentStatus()), EnvStartState.ENV_START_FAILED_STATE);
                 sendEvent(context, HANDLED_FAILED_ENV_START_EVENT.event(), payload);
             }

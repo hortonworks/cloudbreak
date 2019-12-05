@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.flow.deletion.handler.distrox;
+package com.sequenceiq.environment.environment.flow.deletion.handler.datahub;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,7 +33,7 @@ import com.sequenceiq.flow.reactor.api.event.EventSender;
 import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
-class DataHubClustersDeleteHandlerTest {
+class DataHubClusterDeletionHandlerTest {
 
     private static final long ENV_ID = 123L;
 
@@ -48,7 +48,7 @@ class DataHubClustersDeleteHandlerTest {
     private EnvironmentService environmentService;
 
     @Mock
-    private DistroXDeleteService distroXDeleteService;
+    private DatahubDeletionService datahubDeletionService;
 
     @Mock
     private Event<EnvironmentDto> environmentDtoEvent;
@@ -57,7 +57,7 @@ class DataHubClustersDeleteHandlerTest {
     private Event.Headers headers;
 
     @InjectMocks
-    private DataHubClustersDeleteHandler underTest;
+    private DataHubClusterDeletionHandler underTest;
 
     @Captor
     private ArgumentCaptor<BaseNamedFlowEvent> baseNamedFlowEvent;
@@ -79,7 +79,7 @@ class DataHubClustersDeleteHandlerTest {
         Environment environment = new Environment();
         when(environmentService.findEnvironmentById(ENV_ID)).thenReturn(Optional.of(environment));
         underTest.accept(environmentDtoEvent);
-        verify(distroXDeleteService).deleteDistroXClustersForEnvironment(any(PollingConfig.class), eq(environment));
+        verify(datahubDeletionService).deleteDatahubClustersForEnvironment(any(PollingConfig.class), eq(environment));
         verify(eventSender).sendEvent(any(EnvDeleteEvent.class), eq(headers));
         verify(eventSender, never()).sendEvent(any(EnvDeleteFailedEvent.class), any());
         EnvDeleteEvent capturedDeleteEvent = (EnvDeleteEvent) baseNamedFlowEvent.getValue();
@@ -93,7 +93,7 @@ class DataHubClustersDeleteHandlerTest {
     void acceptEnvironmentNotFound() {
         when(environmentService.findEnvironmentById(ENV_ID)).thenReturn(Optional.empty());
         underTest.accept(environmentDtoEvent);
-        verify(distroXDeleteService, never()).deleteDistroXClustersForEnvironment(any(), any());
+        verify(datahubDeletionService, never()).deleteDatahubClustersForEnvironment(any(), any());
         verify(eventSender).sendEvent(any(EnvDeleteEvent.class), eq(headers));
         verify(eventSender, never()).sendEvent(any(EnvDeleteFailedEvent.class), any());
         EnvDeleteEvent capturedDeleteEvent = (EnvDeleteEvent) baseNamedFlowEvent.getValue();
@@ -108,7 +108,7 @@ class DataHubClustersDeleteHandlerTest {
         IllegalStateException error = new IllegalStateException("error");
         when(environmentService.findEnvironmentById(ENV_ID)).thenThrow(error);
         underTest.accept(environmentDtoEvent);
-        verify(distroXDeleteService, never()).deleteDistroXClustersForEnvironment(any(), any());
+        verify(datahubDeletionService, never()).deleteDatahubClustersForEnvironment(any(), any());
         verify(eventSender).sendEvent(any(EnvDeleteFailedEvent.class), eq(headers));
         verify(eventSender, never()).sendEvent(any(EnvDeleteEvent.class), any());
         EnvDeleteFailedEvent capturedDeleteFailedEvent = (EnvDeleteFailedEvent) baseNamedFlowEvent.getValue();

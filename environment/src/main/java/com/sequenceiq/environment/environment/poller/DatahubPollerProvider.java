@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
-import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
+import com.sequenceiq.environment.environment.service.datahub.DatahubService;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
 
 @Component
@@ -25,12 +25,12 @@ public class DatahubPollerProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatahubPollerProvider.class);
 
-    private final DistroXV1Endpoint distroXV1Endpoint;
+    private final DatahubService datahubService;
 
     private final ClusterPollerResultEvaluator clusterPollerResultEvaluator;
 
-    public DatahubPollerProvider(DistroXV1Endpoint distroXV1Endpoint, ClusterPollerResultEvaluator clusterPollerResultEvaluator) {
-        this.distroXV1Endpoint = distroXV1Endpoint;
+    public DatahubPollerProvider(DatahubService datahubService, ClusterPollerResultEvaluator clusterPollerResultEvaluator) {
+        this.datahubService = datahubService;
         this.clusterPollerResultEvaluator = clusterPollerResultEvaluator;
     }
 
@@ -56,7 +56,7 @@ public class DatahubPollerProvider {
     }
 
     private AttemptResult<Void> fetchStartDatahubClustersResult(List<String> remainingCrns, String crn) {
-        StackV4Response stack = distroXV1Endpoint.getByCrn(crn, Collections.emptySet());
+        StackV4Response stack = datahubService.getByCrn(crn, Collections.emptySet());
         if (stackAndClusterAvailable(stack, stack.getCluster())) {
             return AttemptResults.finishWith(null);
         } else {
@@ -88,7 +88,7 @@ public class DatahubPollerProvider {
     }
 
     private AttemptResult<Void> fetchStopDatahubClustersResult(List<String> remainingCrns, String datahubCrn) {
-        StackV4Response stack = distroXV1Endpoint.getByCrn(datahubCrn, Collections.emptySet());
+        StackV4Response stack = datahubService.getByCrn(datahubCrn, Collections.emptySet());
         if (stackAndClusterStopped(stack, stack.getCluster())) {
             return AttemptResults.finishWith(null);
         } else {

@@ -8,7 +8,7 @@ import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopFailedEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopHandlerSelectors;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelectors;
-import com.sequenceiq.environment.environment.service.SdxService;
+import com.sequenceiq.environment.environment.service.sdx.SdxPollerService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -17,11 +17,11 @@ import reactor.bus.Event;
 @Component
 public class StopDatalakeHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
-    private final SdxService sdxService;
+    private final SdxPollerService sdxPollerService;
 
-    protected StopDatalakeHandler(EventSender eventSender, SdxService sdxService) {
+    protected StopDatalakeHandler(EventSender eventSender, SdxPollerService sdxPollerService) {
         super(eventSender);
-        this.sdxService = sdxService;
+        this.sdxPollerService = sdxPollerService;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class StopDatalakeHandler extends EventSenderAwareHandler<EnvironmentDto>
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            sdxService.stopAttachedDatalakeClusters(environmentDto.getId(), environmentDto.getName());
+            sdxPollerService.stopAttachedDatalakeClusters(environmentDto.getId(), environmentDto.getName());
             EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
                     .withSelector(EnvStopStateSelectors.ENV_STOP_FREEIPA_EVENT.selector())
                     .withResourceId(environmentDto.getId())

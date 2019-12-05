@@ -14,7 +14,7 @@ import org.mockito.Mockito;
 
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptState;
-import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
+import com.sequenceiq.environment.environment.service.sdx.SdxService;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -22,11 +22,11 @@ class SdxPollerProviderTest {
 
     private static final Long ENV_ID = 1000L;
 
-    private final SdxEndpoint sdxEndpoint = Mockito.mock(SdxEndpoint.class);
+    private final SdxService sdxService = Mockito.mock(SdxService.class);
 
     private final ClusterPollerResultEvaluator clusterPollerResultEvaluator = new ClusterPollerResultEvaluator();
 
-    private SdxPollerProvider underTest = new SdxPollerProvider(sdxEndpoint, clusterPollerResultEvaluator);
+    private SdxPollerProvider underTest = new SdxPollerProvider(sdxService, clusterPollerResultEvaluator);
 
     @ParameterizedTest
     @MethodSource("datalakeStopStatuses")
@@ -38,8 +38,8 @@ class SdxPollerProviderTest {
         SdxClusterResponse sdx1 = getSdxResponse(s1Status, "crn1");
         SdxClusterResponse sdx2 = getSdxResponse(s2Status, "crn2");
 
-        Mockito.when(sdxEndpoint.getByCrn("crn1")).thenReturn(sdx1);
-        Mockito.when(sdxEndpoint.getByCrn("crn2")).thenReturn(sdx2);
+        Mockito.when(sdxService.getByCrn("crn1")).thenReturn(sdx1);
+        Mockito.when(sdxService.getByCrn("crn2")).thenReturn(sdx2);
 
         AttemptResult<Void> result = underTest.stopSdxClustersPoller(ENV_ID, pollingCrn).process();
 
@@ -56,8 +56,8 @@ class SdxPollerProviderTest {
         SdxClusterResponse sdx1 = getSdxResponse(s1Status, "crn1");
         SdxClusterResponse sdx2 = getSdxResponse(s2Status, "crn2");
 
-        Mockito.when(sdxEndpoint.getByCrn("crn1")).thenReturn(sdx1);
-        Mockito.when(sdxEndpoint.getByCrn("crn2")).thenReturn(sdx2);
+        Mockito.when(sdxService.getByCrn("crn1")).thenReturn(sdx1);
+        Mockito.when(sdxService.getByCrn("crn2")).thenReturn(sdx2);
 
         AttemptResult<Void> result = underTest.startSdxClustersPoller(ENV_ID, pollingCrn).process();
 

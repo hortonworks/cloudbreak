@@ -13,8 +13,8 @@ import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.environment.environment.service.sdx.SdxService;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
-import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -23,12 +23,12 @@ public class SdxPollerProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxPollerProvider.class);
 
-    private final SdxEndpoint sdxEndpoint;
+    private final SdxService sdxService;
 
     private final ClusterPollerResultEvaluator clusterPollerResultEvaluator;
 
-    public SdxPollerProvider(SdxEndpoint sdxEndpoint, ClusterPollerResultEvaluator clusterPollerResultEvaluator) {
-        this.sdxEndpoint = sdxEndpoint;
+    public SdxPollerProvider(SdxService sdxService, ClusterPollerResultEvaluator clusterPollerResultEvaluator) {
+        this.sdxService = sdxService;
         this.clusterPollerResultEvaluator = clusterPollerResultEvaluator;
     }
 
@@ -54,7 +54,7 @@ public class SdxPollerProvider {
     }
 
     private AttemptResult<Void> fetchStartSdxClustersResult(String sdxCrn, List<String> remainingCrns) {
-        SdxClusterResponse sdx = sdxEndpoint.getByCrn(sdxCrn);
+        SdxClusterResponse sdx = sdxService.getByCrn(sdxCrn);
         if (sdxStarted(sdx)) {
             return AttemptResults.finishWith(null);
         } else {
@@ -85,7 +85,7 @@ public class SdxPollerProvider {
     }
 
     private AttemptResult<Void> fetchStopSdxClustersResult(List<String> remainingCrns, String crn) {
-        SdxClusterResponse sdx = sdxEndpoint.getByCrn(crn);
+        SdxClusterResponse sdx = sdxService.getByCrn(crn);
         if (sdxStopped(sdx)) {
             return AttemptResults.finishWith(null);
         } else {

@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.flow.deletion.handler.distrox;
+package com.sequenceiq.environment.environment.flow.deletion.handler.datahub;
 
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.START_DATALAKE_CLUSTERS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_DATAHUB_CLUSTERS_EVENT;
@@ -20,9 +20,9 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import reactor.bus.Event;
 
 @Component
-public class DataHubClustersDeleteHandler extends EventSenderAwareHandler<EnvironmentDto> {
+public class DataHubClusterDeletionHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataHubClustersDeleteHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataHubClusterDeletionHandler.class);
 
     private static final int SLEEP_TIME = 10;
 
@@ -30,12 +30,12 @@ public class DataHubClustersDeleteHandler extends EventSenderAwareHandler<Enviro
 
     private final EnvironmentService environmentService;
 
-    private final DistroXDeleteService distroXDeleteService;
+    private final DatahubDeletionService datahubDeletionService;
 
-    protected DataHubClustersDeleteHandler(EventSender eventSender, EnvironmentService environmentService, DistroXDeleteService distroXDeleteService) {
+    protected DataHubClusterDeletionHandler(EventSender eventSender, EnvironmentService environmentService, DatahubDeletionService datahubDeletionService) {
         super(eventSender);
         this.environmentService = environmentService;
-        this.distroXDeleteService = distroXDeleteService;
+        this.datahubDeletionService = datahubDeletionService;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class DataHubClustersDeleteHandler extends EventSenderAwareHandler<Enviro
         try {
             PollingConfig pollingConfig = getPollingConfig();
             environmentService.findEnvironmentById(environmentDto.getId())
-                    .ifPresent(environment -> distroXDeleteService.deleteDistroXClustersForEnvironment(pollingConfig, environment));
+                    .ifPresent(environment -> datahubDeletionService.deleteDatahubClustersForEnvironment(pollingConfig, environment));
             EnvDeleteEvent envDeleteEvent = getEnvDeleteEvent(environmentDto);
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {

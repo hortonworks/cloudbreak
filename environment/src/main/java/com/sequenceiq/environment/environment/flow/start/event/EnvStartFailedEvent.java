@@ -5,9 +5,9 @@ import static com.sequenceiq.environment.environment.flow.start.event.EnvStartSt
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
+import com.sequenceiq.flow.reactor.api.event.BaseFailedFlowEvent;
 
-public class EnvStartFailedEvent extends BaseNamedFlowEvent implements Selectable {
+public class EnvStartFailedEvent extends BaseFailedFlowEvent implements Selectable {
 
     private final Exception exception;
 
@@ -16,7 +16,8 @@ public class EnvStartFailedEvent extends BaseNamedFlowEvent implements Selectabl
     private final EnvironmentStatus environmentStatus;
 
     public EnvStartFailedEvent(EnvironmentDto environmentDto, Exception exception, EnvironmentStatus environmentStatus) {
-        super(FAILED_ENV_START_EVENT.name(), environmentDto.getResourceId(), null, environmentDto.getName(), environmentDto.getResourceCrn());
+        super(FAILED_ENV_START_EVENT.name(), environmentDto.getResourceId(), null,
+                environmentDto.getName(), environmentDto.getResourceCrn(), exception);
         this.exception = exception;
         this.environmentDto = environmentDto;
         this.environmentStatus = environmentStatus;

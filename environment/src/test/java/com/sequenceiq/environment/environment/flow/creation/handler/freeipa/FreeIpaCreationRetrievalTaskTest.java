@@ -1,45 +1,38 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_IN_PROGRESS;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.Answers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
-@ExtendWith(MockitoExtension.class)
 class FreeIpaCreationRetrievalTaskTest {
-
-    private static final String ENV_CRN = "envCrn";
 
     private static final long ENV_ID = 243_937_713L;
 
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private FreeIpaPollerObject freeIpaPollerObject;
+    private static final String ENV_CRN = "envCrn";
 
-    @InjectMocks
-    private FreeIpaCreationRetrievalTask underTest;
+    private static final String FREE_IPA_NAME = "freeIpaName";
 
-    @BeforeEach
-    void setup() {
-        when(freeIpaPollerObject.getEnvironmentId()).thenReturn(ENV_ID);
-    }
+    private static final String FREE_IPA_CRN = "freeIpaCrn";
+
+    private final FreeIpaService freeIpaService = Mockito.mock(FreeIpaService.class);
+
+    private final FreeIpaCreationRetrievalTask underTest = new FreeIpaCreationRetrievalTask(freeIpaService);
 
     @AfterEach
     void cleanup() {
@@ -49,49 +42,51 @@ class FreeIpaCreationRetrievalTaskTest {
     @Test
     void testExitPollingWhenFreeIpaClusterIsInCreateInProgressState() {
         EnvironmentInMemoryStateStore.put(ENV_ID, PollGroup.CANCELLED);
-        DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
-        describeFreeIpaResponse.setName("aFreeIpaName");
-        describeFreeIpaResponse.setCrn("aFreeIpaCRN");
-        describeFreeIpaResponse.setEnvironmentCrn(ENV_CRN);
-        describeFreeIpaResponse.setStatus(Status.CREATE_IN_PROGRESS);
-
-        when(freeIpaPollerObject.getFreeIpaV1Endpoint().describe(anyString()))
-                .thenReturn(describeFreeIpaResponse);
+        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN);
 
         boolean result = underTest.exitPolling(freeIpaPollerObject);
 
         assertTrue(result);
     }
 
-    @ParameterizedTest
-    @EnumSource(value = Status.class, names = {"DELETE_IN_PROGRESS", "DELETE_COMPLETED"})
-    void testExitPollingWhenFreeIpaClusterIsInDeleteRelatedState(Status deletedStatus) {
-        DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
-        describeFreeIpaResponse.setName("aFreeIpaName");
-        describeFreeIpaResponse.setCrn("aFreeIpaCRN");
-        describeFreeIpaResponse.setStatus(deletedStatus);
-
-        when(freeIpaPollerObject.getFreeIpaV1Endpoint().describe(anyString()))
-                .thenReturn(describeFreeIpaResponse);
+    @Test
+    void testExitPollingWhenFreeIpaClusterIsInDeleteRelatedState() {
+        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN);
 
         boolean result = underTest.exitPolling(freeIpaPollerObject);
 
         assertTrue(result);
     }
 
-    @ParameterizedTest
-    @EnumSource(value = Status.class, names = {"UPDATE_FAILED", "CREATE_FAILED", "ENABLE_SECURITY_FAILED", "DELETE_FAILED", "START_FAILED", "STOP_FAILED"})
-    void testExitPollingWhenFreeIpaClusterIsInFailedState(Status failedStatus) {
-        DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
-        describeFreeIpaResponse.setName("aFreeIpaName");
-        describeFreeIpaResponse.setCrn("aFreeIpaCRN");
-        describeFreeIpaResponse.setStatus(failedStatus);
+    @Test
+    void testCheckStatusWithMissingFreeIpa() {
+        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN);
+        when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.empty());
 
-        when(freeIpaPollerObject.getFreeIpaV1Endpoint().describe(anyString()))
-                .thenReturn(describeFreeIpaResponse);
+        assertThrows(FreeIpaOperationFailedException.class, () -> underTest.checkStatus(freeIpaPollerObject));
+    }
 
-        boolean result = underTest.exitPolling(freeIpaPollerObject);
+    @Test
+    void testCheckStatusWithDeleteInProgressState() {
+        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN);
+        DescribeFreeIpaResponse freeIpa = new DescribeFreeIpaResponse();
+        freeIpa.setStatus(DELETE_IN_PROGRESS);
+        freeIpa.setName(FREE_IPA_NAME);
+        freeIpa.setCrn(FREE_IPA_CRN);
+        when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(freeIpa));
 
-        assertTrue(result);
+        assertThrows(FreeIpaOperationFailedException.class, () -> underTest.checkStatus(freeIpaPollerObject));
+    }
+
+    @Test
+    void testCheckStatusWithFailedState() {
+        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN);
+        DescribeFreeIpaResponse freeIpa = new DescribeFreeIpaResponse();
+        freeIpa.setStatus(DELETE_IN_PROGRESS);
+        freeIpa.setName(FREE_IPA_NAME);
+        freeIpa.setCrn(FREE_IPA_CRN);
+        when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(freeIpa));
+
+        assertThrows(FreeIpaOperationFailedException.class, () -> underTest.checkStatus(freeIpaPollerObject));
     }
 }
