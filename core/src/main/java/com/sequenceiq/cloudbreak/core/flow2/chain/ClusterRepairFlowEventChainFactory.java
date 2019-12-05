@@ -89,7 +89,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                 Optional<String> primaryGatewayHostName = instanceMetaDataService.getPrimaryGatewayDiscoveryFQDNByInstanceGroup(stack.getId(),
                         instanceGroup.getId());
                 boolean primaryGatewayReparaiable = primaryGatewayHostName.isPresent() && hostNames.contains(primaryGatewayHostName.get());
-                boolean singlePrimaryGatewayRepairable = primaryGatewayReparaiable && !clusterService.isMultipleGateway(stack);
+                boolean singlePrimaryGatewayRepairable = primaryGatewayReparaiable && !stack.isMultipleGateway();
                 if (singlePrimaryGatewayRepairable) {
                     repairConfig.setSinglePrimaryGateway(new Repair(instanceGroup.getGroupName(), hostGroup.getName(), hostNames));
                 } else if (primaryGatewayReparaiable) {

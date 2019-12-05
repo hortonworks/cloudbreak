@@ -6,18 +6,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,7 +28,6 @@ import org.mockito.Mock;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -65,9 +61,6 @@ public class RdsConfigServiceTest {
 
     @Mock
     private ClusterService clusterService;
-
-    @Mock
-    private TransactionService transactionService;
 
     @Mock
     private User user;
@@ -176,7 +169,6 @@ public class RdsConfigServiceTest {
     public void testNewRdsConfigCreation() throws TransactionExecutionException {
         when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(Optional.empty());
         when(workspaceService.get(eq(1L), any(User.class))).thenReturn(defaultWorkspace);
-        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
         when(workspaceService.retrieveForUser(any())).thenReturn(Collections.singleton(defaultWorkspace));
         when(rdsConfigRepository.save(any())).thenReturn(testRdsConfig);
 
@@ -192,7 +184,6 @@ public class RdsConfigServiceTest {
         RDSConfig rdsConfig = underTest.createIfNotExists(new User(), testRdsConfig, 1L);
 
         verify(workspaceService, never()).get(anyLong(), any(User.class));
-        verifyZeroInteractions(transactionService);
         assertEquals(testRdsConfig, rdsConfig);
     }
 

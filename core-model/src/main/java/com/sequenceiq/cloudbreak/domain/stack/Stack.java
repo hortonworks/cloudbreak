@@ -599,6 +599,16 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         return reason;
     }
 
+    public boolean isMultipleGateway() {
+        int gatewayCount = 0;
+        for (InstanceGroup ig : instanceGroups) {
+            if (ig.getInstanceGroupType() == InstanceGroupType.GATEWAY) {
+                gatewayCount += ig.getNodeCount();
+            }
+        }
+        return gatewayCount > 1;
+    }
+
     public Long getCreated() {
         return created;
     }

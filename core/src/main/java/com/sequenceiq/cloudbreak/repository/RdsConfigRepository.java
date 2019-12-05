@@ -70,11 +70,6 @@ public interface RdsConfigRepository extends WorkspaceResourceRepository<RDSConf
     Set<RDSConfig> findByClusterId(@Param("clusterId") Long clusterId);
 
     @CheckPermissionsByReturnValue(action = READ)
-    @Query("SELECT r FROM RDSConfig r INNER JOIN r.clusters cluster LEFT JOIN FETCH r.clusters WHERE cluster.id= :clusterId "
-            + "AND r.status = 'USER_MANAGED'")
-    Set<RDSConfig> findUserManagedByClusterId(@Param("clusterId") Long clusterId);
-
-    @CheckPermissionsByReturnValue(action = READ)
     @Query("SELECT r FROM RDSConfig r INNER JOIN r.clusters cluster WHERE cluster.id= :clusterId "
             + "AND r.status <> 'DEFAULT_DELETED' AND r.type= :type")
     RDSConfig findByClusterIdAndType(@Param("clusterId") Long clusterId, @Param("type") String type);

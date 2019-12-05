@@ -51,6 +51,10 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     private static final long CLUSTER_ID = 2L;
 
+    private static final boolean MULTIPLE_GATEWAY = true;
+
+    private static final boolean NOT_MULTIPLE_GATEWAY = false;
+
     private static final StackIdView ATTACHED_WORKLOAD = mock(StackIdView.class);
 
     @Mock
@@ -81,8 +85,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testRepairSingleGatewayWithNoAttached() {
-        Stack stack = getStack();
-        when(clusterService.isMultipleGateway(stack)).thenReturn(false);
+        Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
         setupHostGroup(true);
 
@@ -94,8 +97,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testRepairSingleGatewayWithAttached() {
-        Stack stack = getStack();
-        when(clusterService.isMultipleGateway(stack)).thenReturn(false);
+        Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
         setupHostGroup(true);
 
@@ -107,8 +109,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testRepairSingleGatewayMultipleNodes() {
-        Stack stack = getStack();
-        when(clusterService.isMultipleGateway(stack)).thenReturn(false);
+        Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
 
         HostGroup masterHostGroup = setupHostGroup(setupInstanceGroup(InstanceGroupType.GATEWAY));
@@ -127,8 +128,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testRepairMultipleGatewayWithNoAttached() {
-        Stack stack = getStack();
-        when(clusterService.isMultipleGateway(stack)).thenReturn(true);
+        Stack stack = getStack(MULTIPLE_GATEWAY);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
         setupHostGroup(true);
 
@@ -143,8 +143,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testRepairMultipleGatewayWithAttached() {
-        Stack stack = getStack();
-        when(clusterService.isMultipleGateway(stack)).thenReturn(true);
+        Stack stack = getStack(MULTIPLE_GATEWAY);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
         setupHostGroup(true);
 
@@ -160,8 +159,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testRepairCoreNodes() {
-        Stack stack = getStack();
-        when(clusterService.isMultipleGateway(stack)).thenReturn(false);
+        Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
         setupHostGroup(false);
 
@@ -173,8 +171,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testRepairNotGatewayInstanceGroup() {
-        Stack stack = getStack();
-        when(clusterService.isMultipleGateway(stack)).thenReturn(false);
+        Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
         setupHostGroup(false);
 
@@ -195,8 +192,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
                 .thenReturn(Optional.of(FAILED_NODE_FQDN_PRIMARY_GATEWAY));
     }
 
-    private Stack getStack() {
+    private Stack getStack(boolean multipleGateway) {
         Stack stack = mock(Stack.class);
+        when(stack.isMultipleGateway()).thenReturn(multipleGateway);
         Cluster cluster = mock(Cluster.class);
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getId()).thenReturn(STACK_ID);

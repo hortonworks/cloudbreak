@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
@@ -58,8 +60,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 public class StackCommonService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCommonService.class);
-
-    private static final boolean FORCE_REPAIR = false;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -99,6 +99,9 @@ public class StackCommonService {
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private ClusterRepairService clusterRepairService;
 
     @Inject
     private ConverterUtil converterUtil;
@@ -260,10 +263,12 @@ public class StackCommonService {
         checkUserPermission();
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         if (clusterRepairRequest.getHostGroups() != null) {
-            clusterService.repairCluster(stack.getId(), clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly(), FORCE_REPAIR);
+            clusterRepairService.repairHostGroups(stack.getId(), new HashSet<>(clusterRepairRequest.getHostGroups()), clusterRepairRequest.isRemoveOnly());
         } else {
-            clusterService.repairCluster(stack.getId(), clusterRepairRequest.getNodes().getIds(),
-                    clusterRepairRequest.getNodes().isDeleteVolumes(), clusterRepairRequest.isRemoveOnly(), FORCE_REPAIR);
+            clusterRepairService.repairNodes(stack.getId(),
+                    new HashSet<>(clusterRepairRequest.getNodes().getIds()),
+                    clusterRepairRequest.getNodes().isDeleteVolumes(),
+                    clusterRepairRequest.isRemoveOnly());
         }
     }
 
@@ -271,10 +276,12 @@ public class StackCommonService {
         checkUserPermission();
         Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
         if (clusterRepairRequest.getHostGroups() != null) {
-            clusterService.repairCluster(stack.getId(), clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly(), FORCE_REPAIR);
+            clusterRepairService.repairHostGroups(stack.getId(), new HashSet<>(clusterRepairRequest.getHostGroups()), clusterRepairRequest.isRemoveOnly());
         } else {
-            clusterService.repairCluster(stack.getId(), clusterRepairRequest.getNodes().getIds(),
-                    clusterRepairRequest.getNodes().isDeleteVolumes(), clusterRepairRequest.isRemoveOnly(), FORCE_REPAIR);
+            clusterRepairService.repairNodes(stack.getId(),
+                    new HashSet<>(clusterRepairRequest.getNodes().getIds()),
+                    clusterRepairRequest.getNodes().isDeleteVolumes(),
+                    clusterRepairRequest.isRemoveOnly());
         }
     }
 
