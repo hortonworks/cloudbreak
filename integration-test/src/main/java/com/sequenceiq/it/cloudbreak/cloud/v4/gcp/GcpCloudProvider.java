@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.gcp;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
@@ -28,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.CloudFunctionality;
 
 @Component
 public class GcpCloudProvider extends AbstractCloudProvider {
@@ -126,6 +128,11 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     public GcpStackV4Parameters stackParameters() {
         return new GcpStackV4Parameters();
+    }
+
+    @Override
+    public CloudFunctionality getCloudFunctionality() {
+        throw new NotImplementedException("GCP cloud functionality not implemented yet");
     }
 
     @Override

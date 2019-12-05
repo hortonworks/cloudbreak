@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.openstack;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.OpenStackNetworkV4Parameters;
@@ -26,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.CloudFunctionality;
 
 @Component
 public class OpenStackCloudProvider extends AbstractCloudProvider {
@@ -127,6 +129,11 @@ public class OpenStackCloudProvider extends AbstractCloudProvider {
     @Override
     public OpenStackStackV4Parameters stackParameters() {
         return new OpenStackStackV4Parameters();
+    }
+
+    @Override
+    public CloudFunctionality getCloudFunctionality() {
+        throw new NotImplementedException("Openstack cloudFunctionality not implemented yet");
     }
 
     @Override

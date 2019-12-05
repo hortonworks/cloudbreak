@@ -4,6 +4,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
@@ -37,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.CloudFunctionality;
 
 @Component
 public class MockCloudProvider extends AbstractCloudProvider {
@@ -92,6 +94,11 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public MockStackV4Parameters stackParameters() {
         return new MockStackV4Parameters();
+    }
+
+    @Override
+    public CloudFunctionality getCloudFunctionality() {
+        throw new NotImplementedException("MOCK cloud functionality not implemented yet");
     }
 
     @Override

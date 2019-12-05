@@ -70,6 +70,9 @@ public class EC2ClientActions extends EC2Client {
         return volumeIds;
     }
 
+    /*
+    TODO: this code is provider independent. Move it out from AWS specific code.
+     */
     public SdxTestDto compareVolumeIdsAfterRepair(SdxTestDto sdxTestDto, List<String> actualVolumeIds, List<String> expectedVolumeIds) {
         actualVolumeIds.sort(Comparator.naturalOrder());
         expectedVolumeIds.sort(Comparator.naturalOrder());

@@ -34,6 +34,8 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.aws.AwsCloudFunctionality;
 
 @Component
 public class AwsCloudProvider extends AbstractCloudProvider {
@@ -44,6 +46,9 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Inject
     private AwsProperties awsProperties;
+
+    @Inject
+    private AwsCloudFunctionality awsCloudFunctionality;
 
     @Override
     public InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template) {
@@ -80,6 +85,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public AwsStackV4Parameters stackParameters() {
         return new AwsStackV4Parameters();
+    }
+
+    @Override
+    public CloudFunctionality getCloudFunctionality() {
+        return awsCloudFunctionality;
     }
 
     public AwsDistroXV1Parameters distroXParameters() {
