@@ -48,9 +48,6 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     @Inject
     private ErrorHandlerAwareReactorEventFactory reactorEventFactory;
 
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     private final Class<P> payloadClass;
 
     private List<PayloadConverter<P>> payloadConverters;
@@ -70,8 +67,17 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     @Override
     public void execute(StateContext<S, E> context) {
         FlowParameters flowParameters = (FlowParameters) context.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name());
+        boolean userCrnAddedByAction = false;
         if (flowParameters.getFlowTriggerUserCrn() != null) {
-            threadBasedUserCrnProvider.setUserCrn(flowParameters.getFlowTriggerUserCrn());
+            if (ThreadBasedUserCrnProvider.getUserCrn() == null) {
+                ThreadBasedUserCrnProvider.setUserCrn(flowParameters.getFlowTriggerUserCrn());
+                userCrnAddedByAction = true;
+            } else if (!ThreadBasedUserCrnProvider.getUserCrn().equals(flowParameters.getFlowTriggerUserCrn())) {
+                String errorMessage = String.format("user crn in threadlocal %s differs from crn in flow %s",
+                        ThreadBasedUserCrnProvider.getUserCrn(), flowParameters.getFlowTriggerUserCrn());
+                LOGGER.error(errorMessage);
+                throw new IllegalStateException(errorMessage);
+            }
         }
         MDCBuilder.addFlowId(flowParameters.getFlowId());
         P payload = convertPayload(context.getMessageHeader(MessageFactory.HEADERS.DATA.name()));
@@ -86,7 +92,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                 long flowElapsed = (System.currentTimeMillis() - (long) flowStartTime) / MS_PER_SEC;
                 long execElapsed = (System.currentTimeMillis() - (long) execTime) / MS_PER_SEC;
                 String flowStateName = String.valueOf(variables.get(FLOW_STATE_NAME));
-                long executionTime = execElapsed > flowElapsed ? execElapsed : flowElapsed;
+                long executionTime = Math.max(execElapsed, flowElapsed);
                 LOGGER.debug("Stack: {}, flow state: {}, phase: {}, execution time {} sec", payload.getResourceId(),
                     flowStateName, execElapsed > flowElapsed ? "doExec" : "service", executionTime);
                 metricService.submit(FlowMetricType.FLOW_STEP, executionTime, Map.of("name", flowStateName.toLowerCase()));
@@ -103,7 +109,9 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                 LOGGER.error("Missing error handling for " + getClass().getName());
             }
         } finally {
-            threadBasedUserCrnProvider.removeUserCrn();
+            if (userCrnAddedByAction) {
+                ThreadBasedUserCrnProvider.removeUserCrn();
+            }
         }
     }
 

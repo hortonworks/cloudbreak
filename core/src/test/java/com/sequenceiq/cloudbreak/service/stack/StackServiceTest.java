@@ -196,9 +196,6 @@ public class StackServiceTest {
     @Mock
     private FlowLogService flowLogService;
 
-    @Mock
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     @Before
     public void setup() {
         when(stack.getId()).thenReturn(STACK_ID);
@@ -209,7 +206,8 @@ public class StackServiceTest {
         DatalakeResources datalakeResources = new DatalakeResources();
         datalakeResources.setDatalakeStackId(STACK_ID);
         datalakeResources.setId(DATALAKE_RESOURCE_ID);
-        when(threadBasedUserCrnProvider.getAccountId()).thenReturn("something");
+        ThreadBasedUserCrnProvider.removeUserCrn();
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
         when(datalakeResourcesService.findByDatalakeStackId(anyLong())).thenReturn(Optional.of(datalakeResources));
     }
 
@@ -678,7 +676,7 @@ public class StackServiceTest {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(stack).setResourceCrn(crnCaptor.capture());
             String resourceCrn = crnCaptor.getValue();
-            assertTrue(resourceCrn.matches("crn:cdp:datahub:us-west-1:something:cluster:.*"));
+            assertTrue(resourceCrn.matches("crn:cdp:datahub:us-west-1:1234:cluster:.*"));
             verify(securityConfig, times(1)).setStack(stack);
             verify(securityConfigService, times(1)).save(securityConfig);
 

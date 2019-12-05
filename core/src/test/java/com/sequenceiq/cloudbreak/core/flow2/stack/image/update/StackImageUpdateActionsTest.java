@@ -144,9 +144,6 @@ public class StackImageUpdateActionsTest {
     @Mock
     private StackFailureContext failureContext;
 
-    @Mock
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     @InjectMocks
     private final AbstractStackImageUpdateAction<?> checkImageAction = spy(new StackImageUpdateActions().checkImageVersion());
 
@@ -198,6 +195,7 @@ public class StackImageUpdateActionsTest {
         when(stackService.getById(anyLong())).thenReturn(stack);
         when(stackUtil.getCloudCredential(stack)).thenReturn(cloudCredential);
 
+        ThreadBasedUserCrnProvider.removeUserCrn();
         variables.clear();
     }
 

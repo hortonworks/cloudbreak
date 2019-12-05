@@ -21,20 +21,21 @@ import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 @ExtendWith(MockitoExtension.class)
 class PlatformResourceControllerTest {
 
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:123:user:123";
+
     @Mock
     private ConversionService convertersionService;
 
     @Mock
     private PlatformParameterService platformParameterService;
 
-    @Mock
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     @InjectMocks
     private PlatformResourceController underTest;
 
     @Test
     void getNoSqlTables() {
+        ThreadBasedUserCrnProvider.removeUserCrn();
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
         CloudNoSqlTables noSqlTables = new CloudNoSqlTables();
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
         PlatformNoSqlTablesResponse response = new PlatformNoSqlTablesResponse();

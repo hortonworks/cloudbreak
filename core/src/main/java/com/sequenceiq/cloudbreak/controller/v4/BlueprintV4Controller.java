@@ -38,9 +38,6 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     @Inject
     private ConverterUtil converterUtil;
 
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     @Override
     public BlueprintV4ViewResponses list(Long workspaceId, Boolean withSdx) {
         Set<BlueprintView> allAvailableViewInWorkspace = blueprintService.getAllAvailableViewInWorkspaceAndFilterBySdxReady(workspaceId, withSdx);
@@ -61,8 +58,8 @@ public class BlueprintV4Controller extends NotificationController implements Blu
 
     @Override
     public BlueprintV4Response post(Long workspaceId, BlueprintV4Request request) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        String creator = threadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String creator = ThreadBasedUserCrnProvider.getUserCrn();
         Blueprint toSave = converterUtil.convert(request, Blueprint.class);
         Blueprint blueprint = blueprintService.createForLoggedInUser(toSave, workspaceId, accountId, creator);
         notify(ResourceEvent.BLUEPRINT_CREATED);

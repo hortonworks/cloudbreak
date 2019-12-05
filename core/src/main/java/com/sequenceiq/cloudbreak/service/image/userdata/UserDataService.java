@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,9 +56,6 @@ public class UserDataService {
     private CcmParameterSupplier ccmParameterSupplier;
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private StackService stackService;
 
     @Inject
@@ -65,7 +63,7 @@ public class UserDataService {
 
     public void createUserData(Long stackId) throws CloudbreakImageNotFoundException {
         Stack stack = stackService.getById(stackId);
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Future<PlatformParameters> platformParametersFuture =
                 intermediateBuilderExecutor.submit(() -> connector.getPlatformParameters(stack, userCrn));
         SecurityConfig securityConfig = stack.getSecurityConfig();
@@ -81,6 +79,14 @@ public class UserDataService {
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(Platform.platform(stack.getCloudPlatform()), cbSshKeyDer,
                     sshUser, platformParameters, saltBootPassword, cbCert, ccmParameters);
             imageService.decorateImageWithUserDataForStack(stack, userData);
+            if (ccmParameters != null) {
+                String minaSshdServiceId = ccmParameters.getServerParameters().getMinaSshdServiceId();
+                if (StringUtils.isNotBlank(minaSshdServiceId)) {
+                    LOGGER.debug("Add Minasshdserviceid [{}] to stack [{}]", minaSshdServiceId, stack.getResourceCrn());
+                    stack.setMinaSshdServiceId(minaSshdServiceId);
+                    stackService.save(stack);
+                }
+            }
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Failed to get Platform parmaters", e);
             throw new GetCloudParameterException("Failed to get Platform parmaters", e);
@@ -102,8 +108,8 @@ public class UserDataService {
 
             Map<KnownServiceIdentifier, Integer> tunneledServicePorts = builder.build();
 
-            String accountId = threadBasedUserCrnProvider.getAccountId();
-            String userCrn = threadBasedUserCrnProvider.getUserCrn();
+            String accountId = ThreadBasedUserCrnProvider.getAccountId();
+            String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
             String keyId = CcmResourceUtil.getKeyId(stack.getResourceCrn());
             String actorCrn = Objects.requireNonNull(userCrn, "userCrn is null");
             ccmParameters = ccmParameterSupplier.getCcmParameters(actorCrn, accountId, keyId, tunneledServicePorts).orElse(null);

@@ -14,7 +14,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableJpaRepositories(basePackages = "com.sequenceiq")
 @SpringBootApplication(scanBasePackages = "com.sequenceiq", exclude = WebMvcMetricsAutoConfiguration.class)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-public class EnvironmentApplication {
+public class    EnvironmentApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(EnvironmentApplication.class, args);

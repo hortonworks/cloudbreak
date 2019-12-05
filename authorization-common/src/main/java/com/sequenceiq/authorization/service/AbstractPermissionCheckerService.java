@@ -36,9 +36,6 @@ public abstract class AbstractPermissionCheckerService {
     @Inject
     private List<PermissionChecker<? extends Annotation>> permissionCheckers;
 
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     private final Map<Class<? extends Annotation>, PermissionChecker<? extends Annotation>> permissionCheckerMap = new HashMap<>();
 
     @PostConstruct
@@ -83,7 +80,7 @@ public abstract class AbstractPermissionCheckerService {
             return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
         }
 
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         PermissionChecker<? extends Annotation> permissionChecker = permissionCheckerMap.get(methodAnnotation.annotationType());
         AuthorizationResource resource = classAuthorizationResourceType.resource();
         return permissionChecker.checkPermissions(methodAnnotation, resource, userCrn, proceedingJoinPoint, methodSignature);

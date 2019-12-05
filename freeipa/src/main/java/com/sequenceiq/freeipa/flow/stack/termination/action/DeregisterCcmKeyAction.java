@@ -22,9 +22,6 @@ public class DeregisterCcmKeyAction extends AbstractStackTerminationAction<Termi
     @Inject
     private StackUpdater stackUpdater;
 
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     public DeregisterCcmKeyAction() {
         super(TerminationEvent.class);
     }
@@ -36,12 +33,12 @@ public class DeregisterCcmKeyAction extends AbstractStackTerminationAction<Termi
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DEREGISTERING_CCM_KEY,
                 "Deregistering CCM key.");
 
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String actorCrn = Objects.requireNonNull(userCrn, "userCrn is null");
         String keyId = CcmResourceUtil.getKeyId(stack.getResourceCrn());
 
-        CcmKeyDeregistrationRequest clusterProxyDeregistrationRequest =
-                new CcmKeyDeregistrationRequest(payload.getResourceId(), payload.getForced(), actorCrn, stack.getAccountId(), keyId, stack.getUseCcm());
+        CcmKeyDeregistrationRequest clusterProxyDeregistrationRequest = new CcmKeyDeregistrationRequest(payload.getResourceId(), payload.getForced(), actorCrn,
+                stack.getAccountId(), keyId, stack.getUseCcm(), stack.getMinaSshdServiceId());
 
         sendEvent(context, clusterProxyDeregistrationRequest.selector(), clusterProxyDeregistrationRequest);
     }

@@ -16,13 +16,10 @@ import com.sequenceiq.redbeams.service.UuidGeneratorService;
 public class CrnService {
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private UuidGeneratorService uuidGeneratorService;
 
     public String getCurrentAccountId() {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         if (userCrn == null) {
             throw new CrnParseException("Current user CRN is not set");
         }
@@ -31,7 +28,7 @@ public class CrnService {
     }
 
     public String getCurrentUserId() {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         if (userCrn == null) {
             throw new CrnParseException("Current user CRN is not set");
         }

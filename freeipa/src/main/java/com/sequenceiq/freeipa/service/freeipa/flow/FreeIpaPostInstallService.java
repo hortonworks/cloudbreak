@@ -53,9 +53,6 @@ public class FreeIpaPostInstallService {
     private StackService stackService;
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private PasswordPolicyService passwordPolicyService;
 
     @Inject
@@ -78,7 +75,7 @@ public class FreeIpaPostInstallService {
         passwordPolicyService.updatePasswordPolicy(freeIpaClient);
         modifyAdminPasswordExpirationIfNeeded(freeIpaClient);
         userService.synchronizeUsers(
-                threadBasedUserCrnProvider.getAccountId(), threadBasedUserCrnProvider.getUserCrn(), Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
+                ThreadBasedUserCrnProvider.getAccountId(), ThreadBasedUserCrnProvider.getUserCrn(), Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
     }
 
     public void modifyAdminPasswordExpirationIfNeeded(FreeIpaClient client) throws FreeIpaClientException {

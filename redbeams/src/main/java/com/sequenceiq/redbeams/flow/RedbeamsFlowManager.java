@@ -44,9 +44,6 @@ public class RedbeamsFlowManager {
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private FlowLogService flowLogService;
 
     @Inject
@@ -97,7 +94,7 @@ public class RedbeamsFlowManager {
     }
 
     private Map<String, Object> getHeaderWithUserCrn(Map<String, Object> headers) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Map<String, Object> decoratedHeader;
         decoratedHeader = headers != null ? new HashMap<>(headers) : new HashMap<>();
         if (StringUtils.isNotBlank(userCrn)) {

@@ -20,9 +20,6 @@ public class NotificationAssemblingService {
     @Inject
     private CloudbreakMessagesService messagesService;
 
-    @Inject
-    private ThreadBasedUserCrnProvider threadBaseUserCrnProvider;
-
     public Notification<CloudbreakNotification> createNotification(CloudbreakNotification notification) {
         return new Notification<>(notification);
     }
@@ -33,7 +30,7 @@ public class NotificationAssemblingService {
         notification.setEventType(resourceEvent.name());
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage(), messageArgs));
         notification.setTenantName(getAccountId());
-        notification.setUserId(threadBaseUserCrnProvider.getUserCrn());
+        notification.setUserId(ThreadBasedUserCrnProvider.getUserCrn());
         if (payload != null) {
             notification.setPayload(JsonUtil.convertToTree(payload));
             notification.setPayloadType(payload.getClass().getSimpleName());
@@ -56,7 +53,7 @@ public class NotificationAssemblingService {
 
     private String getAccountId() {
         try {
-            return threadBaseUserCrnProvider.getAccountId();
+            return ThreadBasedUserCrnProvider.getAccountId();
         } catch (RuntimeException e) {
             return null;
         }

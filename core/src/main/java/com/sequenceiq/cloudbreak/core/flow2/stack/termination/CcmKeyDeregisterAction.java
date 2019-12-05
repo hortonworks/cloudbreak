@@ -20,9 +20,6 @@ public class CcmKeyDeregisterAction extends AbstractStackTerminationAction<Clust
     @Inject
     private StackUpdater stackUpdater;
 
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     public CcmKeyDeregisterAction() {
         super(ClusterProxyDeregisterSuccess.class);
     }
@@ -37,9 +34,9 @@ public class CcmKeyDeregisterAction extends AbstractStackTerminationAction<Clust
     protected CcmKeyDeregisterRequest createRequest(StackTerminationContext context) {
         Stack stack = context.getStack();
 
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String actorCrn = Objects.requireNonNull(userCrn, "userCrn is null");
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String keyId = CcmResourceUtil.getKeyId(stack.getResourceCrn());
 
         return new CcmKeyDeregisterRequest(stack.getId(), actorCrn, accountId, keyId, stack.getUseCcm());

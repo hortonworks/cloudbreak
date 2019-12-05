@@ -16,12 +16,10 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.exception.UnableToDeleteClusterDefinitionException;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
-import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
@@ -36,19 +34,13 @@ public class EnvironmentResourceDeletionService {
 
     private final DistroXV1Endpoint distroXV1Endpoint;
 
-    private final ThreadBasedUserCrnProvider userCrnProvider;
-
-    private final EventSender eventSender;
-
     private final ClusterTemplateV4Endpoint clusterTemplateV4Endpoint;
 
     public EnvironmentResourceDeletionService(SdxEndpoint sdxEndpoint, DatalakeV4Endpoint datalakeV4Endpoint, DistroXV1Endpoint distroXV1Endpoint,
-            ThreadBasedUserCrnProvider userCrnProvider, EventSender eventSender, ClusterTemplateV4Endpoint clusterTemplateV4Endpoint) {
+            ClusterTemplateV4Endpoint clusterTemplateV4Endpoint) {
         this.sdxEndpoint = sdxEndpoint;
         this.datalakeV4Endpoint = datalakeV4Endpoint;
         this.distroXV1Endpoint = distroXV1Endpoint;
-        this.userCrnProvider = userCrnProvider;
-        this.eventSender = eventSender;
         this.clusterTemplateV4Endpoint = clusterTemplateV4Endpoint;
     }
 

@@ -15,12 +15,16 @@ public class CcmKeyDeregistrationRequest extends TerminationEvent {
 
     private final Boolean useCcm;
 
-    public CcmKeyDeregistrationRequest(Long stackId, Boolean forced, String actorCrn, String accountId, String keyId, Boolean useCcm) {
+    private final String minaSshdServiceId;
+
+    public CcmKeyDeregistrationRequest(Long stackId, Boolean forced, String actorCrn, String accountId, String keyId, Boolean useCcm,
+            String minaSshdServiceId) {
         super(EventSelectorUtil.selector(CcmKeyDeregistrationRequest.class), stackId, forced);
         this.actorCrn = Objects.requireNonNull(actorCrn, "actorCrn is null");
         this.accountId = Objects.requireNonNull(accountId, "accountId is null");
         this.keyId = Objects.requireNonNull(keyId, "keyId is null");
         this.useCcm = useCcm;
+        this.minaSshdServiceId = minaSshdServiceId;
     }
 
     public String getActorCrn() {
@@ -37,5 +41,9 @@ public class CcmKeyDeregistrationRequest extends TerminationEvent {
 
     public Boolean getUseCcm() {
         return useCcm;
+    }
+
+    public String getMinaSshdServiceId() {
+        return minaSshdServiceId;
     }
 }

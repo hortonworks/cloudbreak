@@ -94,9 +94,6 @@ class EnvClustersDeleteActionsTest {
     private State state;
 
     @Mock
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Mock
     private Environment environment;
 
     @Mock
@@ -151,6 +148,7 @@ class EnvClustersDeleteActionsTest {
         when(context.getStateMachine()).thenReturn(stateMachine);
         when(stateMachine.getState()).thenReturn(state);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
+        ThreadBasedUserCrnProvider.removeUserCrn();
     }
 
     @Test
@@ -270,7 +268,6 @@ class EnvClustersDeleteActionsTest {
     }
 
     private void setActionPrivateFields(Action<?, ?> action) {
-        ReflectionTestUtils.setField(action, null, threadBasedUserCrnProvider, ThreadBasedUserCrnProvider.class);
         ReflectionTestUtils.setField(action, null, runningFlows, FlowRegister.class);
         ReflectionTestUtils.setField(action, null, eventBus, EventBus.class);
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);

@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
@@ -37,9 +36,9 @@ import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.KeytabCreationException;
+import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtRoleComponent;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtV1Service;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtVaultComponent;
-import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtRoleComponent;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -92,9 +91,6 @@ public class KerberosMgmtV1ServiceTest {
 
     @Mock
     private FreeIpaClientFactory freeIpaClientFactory;
-
-    @Mock
-    private ThreadBasedUserCrnProvider threadBaseUserCrnProvider;
 
     @Mock
     private StringToSecretResponseConverter stringToSecretResponseConverter;

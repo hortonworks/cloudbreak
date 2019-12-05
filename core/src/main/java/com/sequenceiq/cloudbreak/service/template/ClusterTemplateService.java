@@ -97,9 +97,6 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private EnvironmentClientService environmentClientService;
 
     @Inject
@@ -157,7 +154,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
             clusterService.saveWithRef(cluster);
         }
 
-        stackTemplate.setResourceCrn(createCRN(threadBasedUserCrnProvider.getAccountId()));
+        stackTemplate.setResourceCrn(createCRN(ThreadBasedUserCrnProvider.getAccountId()));
 
         stackTemplate = stackTemplateService.pureSave(stackTemplate);
 
@@ -237,7 +234,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @VisibleForTesting
     boolean isClusterTemplateHasValidCloudPlatform(ClusterTemplateViewV4Response response) {
-        return cloudPlatformValidator.isClusterTemplateCloudPlatformValid(response.getCloudPlatform(), threadBasedUserCrnProvider.getAccountId());
+        return cloudPlatformValidator.isClusterTemplateCloudPlatformValid(response.getCloudPlatform(), ThreadBasedUserCrnProvider.getAccountId());
     }
 
     public void updateDefaultClusterTemplates(long workspaceId) {

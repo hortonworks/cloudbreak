@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -28,6 +29,8 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintLoaderServiceTest {
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:5678";
 
     private static final String LUCKY_MAN = "lucky_man";
 
@@ -63,8 +66,11 @@ public class BlueprintLoaderServiceTest {
     @Mock
     private Workspace workspace;
 
-    @Mock
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+    @Before
+    public void init() {
+        ThreadBasedUserCrnProvider.removeUserCrn();
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
+    }
 
     @Test
     public void testWhenUserHaveAllTheDefaultBlueprintThenReturnFalse() {

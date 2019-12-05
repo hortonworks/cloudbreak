@@ -2,8 +2,6 @@ package com.sequenceiq.freeipa.util;
 
 import java.util.UUID;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,11 +16,8 @@ public class CrnService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CrnService.class);
 
-    @Inject
-    private ThreadBasedUserCrnProvider threadBaseUserCrnProvider;
-
     public String getCurrentAccountId() {
-        String userCrn = threadBaseUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Crn crn = null;
         try {
             crn = Crn.fromString(userCrn);
@@ -38,7 +33,7 @@ public class CrnService {
     }
 
     public String getCurrentUserId() {
-        String userCrn = threadBaseUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Crn crn = null;
         try {
             crn = Crn.fromString(userCrn);
@@ -58,7 +53,7 @@ public class CrnService {
     }
 
     public String getUserCrn() {
-        return threadBaseUserCrnProvider.getUserCrn();
+        return ThreadBasedUserCrnProvider.getUserCrn();
     }
 
     public String createCrn(String accountId, Crn.ResourceType resourceType) {

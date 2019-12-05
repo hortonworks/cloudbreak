@@ -34,9 +34,6 @@ public class BlueprintLoaderService {
     @Inject
     private BlueprintService blueprintService;
 
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     public boolean isAddingDefaultBlueprintsNecessaryForTheUser(Collection<Blueprint> blueprints) {
         Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
         for (Blueprint blueprintFromDatabase : blueprints) {
@@ -94,8 +91,8 @@ public class BlueprintLoaderService {
             LOGGER.debug("Default blueprint '{}' needs to be added for the '{}' workspace because the default validation missing.",
                     diffBlueprint.getKey(), workspace.getId());
             Blueprint bp = setupBlueprint(diffBlueprint.getValue(), workspace);
-            String accountId = threadBasedUserCrnProvider.getAccountId();
-            String creator = threadBasedUserCrnProvider.getUserCrn();
+            String accountId = ThreadBasedUserCrnProvider.getAccountId();
+            String creator = ThreadBasedUserCrnProvider.getUserCrn();
             blueprintService.decorateWithCrn(bp, accountId, creator);
             resultList.add(bp);
         }

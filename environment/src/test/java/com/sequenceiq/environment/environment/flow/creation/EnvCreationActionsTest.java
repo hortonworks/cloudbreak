@@ -95,9 +95,6 @@ class EnvCreationActionsTest {
     private State state;
 
     @Mock
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Mock
     private FlowRegister runningFlows;
 
     @Mock
@@ -140,6 +137,7 @@ class EnvCreationActionsTest {
         when(context.getStateMachine()).thenReturn(stateMachine);
         when(stateMachine.getState()).thenReturn(state);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
+        ThreadBasedUserCrnProvider.removeUserCrn();
     }
 
     @Test
@@ -232,7 +230,6 @@ class EnvCreationActionsTest {
     }
 
     private void setActionPrivateFields(Action<?, ?> action) {
-        ReflectionTestUtils.setField(action, null, threadBasedUserCrnProvider, ThreadBasedUserCrnProvider.class);
         ReflectionTestUtils.setField(action, null, runningFlows, FlowRegister.class);
         ReflectionTestUtils.setField(action, null, eventBus, EventBus.class);
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);

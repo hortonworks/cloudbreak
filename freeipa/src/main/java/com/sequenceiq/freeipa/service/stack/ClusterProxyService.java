@@ -153,7 +153,7 @@ public class ClusterProxyService {
             String tunnelKey = primaryGatewayConfig.getInstanceId();
             String tunnelHost = primaryGatewayConfig.getPrivateAddress();
             Integer tunnelPort = primaryGatewayConfig.getGatewayPort();
-            return List.of(new TunnelEntry(tunnelKey, GATEWAY_SERVICE_TYPE, tunnelHost, tunnelPort));
+            return List.of(new TunnelEntry(tunnelKey, GATEWAY_SERVICE_TYPE, tunnelHost, tunnelPort, stack.getMinaSshdServiceId()));
         } else {
             return List.of();
         }

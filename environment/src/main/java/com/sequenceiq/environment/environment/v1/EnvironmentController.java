@@ -51,8 +51,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentDeletionService environmentDeletionService;
 
-    private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     private final EnvironmentModificationService environmentModificationService;
 
     private final EnvironmentStartService environmentStartService;
@@ -66,7 +64,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentService environmentService,
             EnvironmentCreationService environmentCreationService,
             EnvironmentDeletionService environmentDeletionService,
-            ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
             EnvironmentModificationService environmentModificationService,
             EnvironmentStartService environmentStartService,
             EnvironmentStopService environmentStopService,
@@ -75,7 +72,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.environmentService = environmentService;
         this.environmentCreationService = environmentCreationService;
         this.environmentDeletionService = environmentDeletionService;
-        this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.environmentModificationService = environmentModificationService;
         this.environmentStartService = environmentStartService;
         this.environmentStopService = environmentStopService;
@@ -91,45 +87,45 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     public DetailedEnvironmentResponse getByName(String environmentName) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByNameAndAccountId(environmentName, accountId);
         return environmentApiConverter.dtoToDetailedResponse(environmentDto);
     }
 
     @Override
     public EnvironmentCrnResponse getCrnByName(String environmentName) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String crn = environmentService.getCrnByNameAndAccountId(environmentName, accountId);
         return environmentApiConverter.crnResponse(environmentName, crn);
     }
 
     @Override
     public DetailedEnvironmentResponse getByCrn(@ResourceCrn String crn) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
         return environmentApiConverter.dtoToDetailedResponse(environmentDto);
     }
 
     @Override
     public SimpleEnvironmentResponse deleteByName(String environmentName, boolean forced) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        String actualUserCrn = threadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         EnvironmentDto environmentDto = environmentDeletionService.deleteByNameAndAccountId(environmentName, accountId, actualUserCrn, forced);
         return environmentApiConverter.dtoToSimpleResponse(environmentDto);
     }
 
     @Override
     public SimpleEnvironmentResponse deleteByCrn(String crn, boolean forced) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        String actualUserCrn = threadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         EnvironmentDto environmentDto = environmentDeletionService.deleteByCrnAndAccountId(crn, accountId, actualUserCrn, forced);
         return environmentApiConverter.dtoToSimpleResponse(environmentDto);
     }
 
     @Override
     public SimpleEnvironmentResponses deleteMultipleByNames(Set<String> environmentNames, boolean forced) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        String actualUserCrn = threadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         List<EnvironmentDto> environmentDtos = environmentDeletionService.deleteMultipleByNames(environmentNames, accountId, actualUserCrn, forced);
         Set<SimpleEnvironmentResponse> responses = environmentDtos.stream()
                 .map(environmentApiConverter::dtoToSimpleResponse).collect(Collectors.toSet());
@@ -138,8 +134,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     public SimpleEnvironmentResponses deleteMultipleByCrns(Set<String> crns, boolean forced) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        String actualUserCrn = threadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         List<EnvironmentDto> environmentDtos = environmentDeletionService.deleteMultipleByCrns(crns, accountId, actualUserCrn, forced);
         Set<SimpleEnvironmentResponse> responses = environmentDtos.stream()
                 .map(environmentApiConverter::dtoToSimpleResponse).collect(Collectors.toSet());
@@ -162,7 +158,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     public SimpleEnvironmentResponses list() {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         List<EnvironmentDto> environmentDtos = environmentService.listByAccountId(accountId);
         List<SimpleEnvironmentResponse> responses = environmentDtos.stream().map(environmentApiConverter::dtoToSimpleResponse)
                 .collect(Collectors.toList());
@@ -171,7 +167,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     public DetailedEnvironmentResponse changeCredentialByEnvironmentName(String environmentName, @Valid EnvironmentChangeCredentialRequest request) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentChangeCredentialDto dto = environmentApiConverter.convertEnvironmentChangeCredentialDto(request);
         EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentName(accountId, environmentName, dto);
         return environmentApiConverter.dtoToDetailedResponse(result);
@@ -179,7 +175,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     public DetailedEnvironmentResponse changeCredentialByEnvironmentCrn(String crn, @Valid EnvironmentChangeCredentialRequest request) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentCrn(accountId, crn,
                 environmentApiConverter.convertEnvironmentChangeCredentialDto(request));
         return environmentApiConverter.dtoToDetailedResponse(result);
@@ -207,7 +203,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     public Object getCreateEnvironmentForCliByName(String environmentName) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByNameAndAccountId(environmentName, accountId);
         if (!AWS.equalsIgnoreCase(environmentDto.getCloudPlatform())) {
             return new EmptyResponse();
@@ -217,7 +213,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     public Object getCreateEnvironmentForCliByCrn(String crn) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
         if (!AWS.equalsIgnoreCase(environmentDto.getCloudPlatform())) {
             return new EmptyResponse();
@@ -227,7 +223,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     public Object getCreateEnvironmentForCli(EnvironmentRequest environmentRequest) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByNameForAccountId(environmentRequest.getCredentialName(), accountId);
         if (!AWS.equalsIgnoreCase(credential.getCloudPlatform())) {
             return new EmptyResponse();

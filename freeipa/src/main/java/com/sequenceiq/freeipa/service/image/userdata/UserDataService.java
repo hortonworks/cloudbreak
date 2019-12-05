@@ -10,6 +10,7 @@ import java.util.concurrent.Future;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,14 @@ public class UserDataService {
             String userData = userDataBuilder.buildUserData(Platform.platform(stack.getCloudPlatform()), cbSshKeyDer, sshUser, platformParameters,
                     saltBootPassword, cbCert, ccmParameters);
             imageService.decorateImageWithUserDataForStack(stack, userData);
+            if (ccmParameters != null) {
+                String minaSshdServiceId = ccmParameters.getServerParameters().getMinaSshdServiceId();
+                if (StringUtils.isNotBlank(minaSshdServiceId)) {
+                    LOGGER.debug("Add Minasshdserviceid [{}] to stack [{}]", minaSshdServiceId, stack.getResourceCrn());
+                    stack.setMinaSshdServiceId(minaSshdServiceId);
+                    stackService.save(stack);
+                }
+            }
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Failed to get Platform parmaters", e);
             throw new GetCloudParameterException("Failed to get Platform parmaters", e);

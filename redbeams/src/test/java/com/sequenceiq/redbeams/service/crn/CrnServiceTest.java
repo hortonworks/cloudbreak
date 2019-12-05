@@ -32,9 +32,6 @@ public class CrnServiceTest {
     private CrnService crnService;
 
     @Mock
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Mock
     private UuidGeneratorService uuidGeneratorService;
 
     @Before
@@ -42,7 +39,8 @@ public class CrnServiceTest {
         initMocks(this);
 
         // the provider should really store this as a CRN
-        when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(CRN.toString());
+        ThreadBasedUserCrnProvider.removeUserCrn();
+        ThreadBasedUserCrnProvider.setUserCrn(CRN.toString());
 
         when(uuidGeneratorService.randomUuid()).thenReturn("uuid");
     }

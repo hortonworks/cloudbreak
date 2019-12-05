@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.auth.security.internal;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -36,9 +36,6 @@ public class InternalCrnModifierTest {
     private static final String EXPECTED_INTERNAL_CRN = "crn:cdp:iam:us-west-1:1234:user:__internal__actor__";
 
     @Mock
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Mock
     private ReflectionUtil reflectionUtil;
 
     @Mock
@@ -56,69 +53,68 @@ public class InternalCrnModifierTest {
     @Before
     public void before() {
         when(proceedingJoinPoint.getSignature()).thenReturn(methodSignature);
+        ThreadBasedUserCrnProvider.removeUserCrn();
     }
 
     @Test
     public void testModificationIfUserCrnIsRealUser() {
-        when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
 
         underTest.changeInternalCrn(proceedingJoinPoint);
 
         verify(reflectionUtil, times(0)).getParameter(any(), any(), any());
-        verify(threadBasedUserCrnProvider, times(0)).setUserCrn(anyString());
+        assertEquals(USER_CRN, ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     @Test
     public void testModificationIfUserCrnIsNull() {
-        when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(null);
+        ThreadBasedUserCrnProvider.setUserCrn(null);
 
         underTest.changeInternalCrn(proceedingJoinPoint);
 
         verify(reflectionUtil, times(0)).getParameter(any(), any(), any());
-        verify(threadBasedUserCrnProvider, times(0)).setUserCrn(anyString());
+        assertNull(ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     @Test
     public void testModificationIfUserCrnIsInternalButThereIsNoResourceCrnParameter() {
-        when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(INTERNAL_CRN);
+        ThreadBasedUserCrnProvider.setUserCrn(INTERNAL_CRN);
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.empty());
 
         underTest.changeInternalCrn(proceedingJoinPoint);
 
-        verify(threadBasedUserCrnProvider, times(0)).setUserCrn(anyString());
+        assertEquals(INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     @Test
     public void testModificationIfUserCrnIsInternalButResourceCrnParameterIsNotString() {
-        when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(INTERNAL_CRN);
+        ThreadBasedUserCrnProvider.setUserCrn(INTERNAL_CRN);
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.of(2));
 
         underTest.changeInternalCrn(proceedingJoinPoint);
 
-        verify(threadBasedUserCrnProvider, times(0)).setUserCrn(anyString());
+        assertEquals(INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     @Test
     public void testModificationIfUserCrnIsInternalButResourceCrnParameterIsNotCrn() {
-        when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(INTERNAL_CRN);
+        ThreadBasedUserCrnProvider.setUserCrn(INTERNAL_CRN);
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.of("not_crn"));
 
         underTest.changeInternalCrn(proceedingJoinPoint);
 
-        verify(threadBasedUserCrnProvider, times(0)).setUserCrn(anyString());
+        assertEquals(INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     @Test
     public void testModificationIfUserCrnIsInternal() {
-        when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(INTERNAL_CRN);
+        ThreadBasedUserCrnProvider.setUserCrn(INTERNAL_CRN);
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.of(STACK_CRN));
         doNothing().when(internalUserModifier).persistModifiedInternalUser(any());
 
         underTest.changeInternalCrn(proceedingJoinPoint);
 
-        ArgumentCaptor<String> newCrnCaptor = ArgumentCaptor.forClass(String.class);
-        verify(threadBasedUserCrnProvider, times(1)).setUserCrn(newCrnCaptor.capture());
-        assertEquals(EXPECTED_INTERNAL_CRN, newCrnCaptor.getValue());
+        assertEquals(EXPECTED_INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
         ArgumentCaptor<CrnUser> newUserCaptor = ArgumentCaptor.forClass(CrnUser.class);
         verify(internalUserModifier, times(1)).persistModifiedInternalUser(newUserCaptor.capture());
         assertEquals("1234", newUserCaptor.getValue().getTenant());

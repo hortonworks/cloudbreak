@@ -28,7 +28,7 @@ public class DefaultCcmResourceTerminationListener implements CcmResourceTermina
     private GrpcMinaSshdManagementClient grpcMinaSshdManagementClient;
 
     @Override
-    public void deregisterCcmSshTunnelingKey(@Nonnull String actorCrn, @Nonnull String accountId, @Nonnull String keyId) {
+    public void deregisterCcmSshTunnelingKey(@Nonnull String actorCrn, @Nonnull String accountId, @Nonnull String keyId, String minaSshdServiceId) {
         String requestId = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()))
                 .orElseGet(() -> {
                     String s = UUID.randomUUID().toString();
@@ -37,7 +37,7 @@ public class DefaultCcmResourceTerminationListener implements CcmResourceTermina
                     return s;
                 });
         try {
-            grpcMinaSshdManagementClient.unregisterSshTunnelingKey(requestId, actorCrn, accountId, keyId);
+            grpcMinaSshdManagementClient.unregisterSshTunnelingKey(requestId, actorCrn, accountId, keyId, minaSshdServiceId);
         } catch (Exception e) {
             Throwables.throwIfUnchecked(e);
             throw new RuntimeException(e);

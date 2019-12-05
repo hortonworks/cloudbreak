@@ -87,6 +87,18 @@
     {
       "name": "NIFIREGISTRY",
       "version": "0.4.0"
+    },
+    {
+      "name": "SCHEMAREGISTRY",
+      "version": "4.0.0"
+    },
+    {
+      "name": "STREAMS_MESSAGING_MANAGER",
+      "version": "1.0.0"
+    },
+    {
+      "name": "DAS",
+      "version": "1.4.2"
     }
   ],
   "version": "7.1.0",
