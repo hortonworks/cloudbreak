@@ -12,5 +12,6 @@ public enum ClusterTemplateV4Type {
     DATAENGINEERING_HA,
     STREAMING,
     STREAMING_HA,
+    OPERATIONALDATABASE,
     OTHER
 }
