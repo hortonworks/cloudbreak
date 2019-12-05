@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.aws;
 
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -9,6 +11,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.amazonec2.AmazonEC2Util;
 
+@Component
 public class AwsCloudFunctionality implements CloudFunctionality {
 
     private AmazonEC2Util amazonEC2Util;

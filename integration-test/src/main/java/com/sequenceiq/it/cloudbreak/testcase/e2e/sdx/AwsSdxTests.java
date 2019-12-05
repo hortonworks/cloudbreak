@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.aws;
+package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
