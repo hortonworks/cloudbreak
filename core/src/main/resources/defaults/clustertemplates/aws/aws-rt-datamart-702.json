@@ -86,8 +86,8 @@
         "template": {
           "attachedVolumes": [
             {
-              "count": 1,
-              "size": 7500,
+              "count": 2,
+              "size": 1900,
               "type": "ephemeral"
             }
           ],
@@ -96,7 +96,7 @@
               "type": "NONE"
             }
           },
-          "instanceType": "i3en.3xlarge",
+          "instanceType": "i3.4xlarge",
           "rootVolume": {
             "size": 50
           }
@@ -110,8 +110,8 @@
         "template": {
           "attachedVolumes": [
             {
-              "count": 1,
-              "size": 7500,
+              "count": 2,
+              "size": 1900,
               "type": "ephemeral"
             }
           ],
@@ -120,7 +120,7 @@
               "type": "NONE"
             }
           },
-          "instanceType": "i3en.3xlarge",
+          "instanceType": "i3.4xlarge",
           "rootVolume": {
             "size": 50
           }
