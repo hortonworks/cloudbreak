@@ -38,6 +38,11 @@ import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.it.util.ResourceUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
+/**
+ * REFACTOR NOTE:
+ * Test case classes would now come under their domain (here sdx) and not the cloud provider (aws or azure). Tests should be written
+ * in cloud-vendor-agnostic mode, relying solely on CloudFunctionality interface.
+ */
 public class AwsSdxTests extends BasicSdxTests {
 
     private static final String CREATE_FILE_RECIPE = "classpath:/recipes/post-install.sh";
