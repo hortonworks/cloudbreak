@@ -12,9 +12,7 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.client.internal.CloudbreakApiClientParams;
-import com.sequenceiq.datalake.logger.ThreadBasedRequestIdProvider;
 import com.sequenceiq.environment.client.internal.EnvironmentApiClientParams;
 import com.sequenceiq.freeipa.api.client.internal.FreeIpaApiClientParams;
 import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
@@ -50,12 +48,6 @@ public class AppConfig implements AsyncConfigurer {
     @Inject
     @Named("freeIpaServerUrl")
     private String freeIpaServerUrl;
-
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
-    private ThreadBasedRequestIdProvider threadBasedRequestIdProvider;
 
     @Bean
     public CloudbreakApiClientParams cloudbreakApiClientParams() {

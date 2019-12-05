@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.util;
 
+import static com.sequenceiq.common.api.util.versionchecker.VersionCheckerModelDescription.CHECK_CLIENT_VERSION;
+
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -18,14 +20,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValida
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ResourceEventResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
-import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.AccountPreferencesDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.RepositoryConfigsValidationOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.SecurityRuleOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
+import com.sequenceiq.common.api.util.UtilControllerDescription;
+import com.sequenceiq.common.api.util.versionchecker.VersionCheckResult;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,16 +35,14 @@ import io.swagger.annotations.ApiOperation;
 @Path("/v4/utils")
 @RetryingRestClient
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/utils", description = ControllerDescription.UTIL_V4_DESCRIPTION, protocols = "http,https",
-        consumes = MediaType.APPLICATION_JSON)
+@Api(value = "/v4/utils", description = UtilControllerDescription.UTIL_DESCRIPTION, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface UtilV4Endpoint {
 
     @GET
     @Path("client")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.CHECK_CLIENT_VERSION, produces = MediaType.APPLICATION_JSON,
-            nickname = "checkClientVersionV4")
-    VersionCheckV4Result checkClientVersion(@QueryParam("version") String version);
+    @ApiOperation(value = CHECK_CLIENT_VERSION, produces = MediaType.APPLICATION_JSON, nickname = "checkClientVersionV4")
+    VersionCheckResult checkClientVersion(@QueryParam("version") String version);
 
     @GET
     @Path("stack_matrix")

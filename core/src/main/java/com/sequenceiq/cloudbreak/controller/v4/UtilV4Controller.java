@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ResourceEventRes
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SupportedExternalDatabaseServiceEntryV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -31,9 +30,10 @@ import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.cluster.RepositoryConfigValidationService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
-import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseProvider;
 import com.sequenceiq.cloudbreak.workspace.authorization.UmsWorkspaceAuthorizationService;
+import com.sequenceiq.common.api.util.versionchecker.ClientVersionUtil;
+import com.sequenceiq.common.api.util.versionchecker.VersionCheckResult;
 
 @Controller
 public class UtilV4Controller extends NotificationController implements UtilV4Endpoint {
@@ -69,12 +69,8 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     private String cbVersion;
 
     @Override
-    public VersionCheckV4Result checkClientVersion(String version) {
-        boolean compatible = ClientVersionUtil.checkVersion(cbVersion, version);
-        if (compatible) {
-            return new VersionCheckV4Result(true);
-        }
-        return new VersionCheckV4Result(false, String.format("Versions not compatible: [server: '%s', client: '%s']", cbVersion, version));
+    public VersionCheckResult checkClientVersion(String version) {
+        return ClientVersionUtil.checkClientVersion(cbVersion, version);
     }
 
     @Override

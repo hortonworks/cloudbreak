@@ -5,6 +5,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,27 +47,27 @@ class DistroXV1ControllerTest {
     void testListWithBothParamsNull() {
         distroXV1Controller.list(null, null);
 
-        verify(stackOperations, times(1)).listByEnvironmentCrn(WORKSPACE_ID, null, WORKLOAD);
+        verify(stackOperations, times(1)).listByEnvironmentCrn(WORKSPACE_ID, null, List.of(WORKLOAD));
     }
 
     @Test
     void testListWithBothParamsSet() {
         distroXV1Controller.list(NAME, CRN);
 
-        verify(stackOperations, times(1)).listByEnvironmentCrn(WORKSPACE_ID, CRN, WORKLOAD);
+        verify(stackOperations, times(1)).listByEnvironmentName(WORKSPACE_ID, NAME, List.of(WORKLOAD));
     }
 
     @Test
     void testListWithNameSetAndCrnIsNull() {
         distroXV1Controller.list(NAME, null);
 
-        verify(stackOperations, times(1)).listByEnvironmentName(WORKSPACE_ID, NAME, WORKLOAD);
+        verify(stackOperations, times(1)).listByEnvironmentName(WORKSPACE_ID, NAME, List.of(WORKLOAD));
     }
 
     @Test
     void testListWithCrnSetAndNameIsNull() {
         distroXV1Controller.list(null, CRN);
 
-        verify(stackOperations, times(1)).listByEnvironmentCrn(WORKSPACE_ID, CRN, WORKLOAD);
+        verify(stackOperations, times(1)).listByEnvironmentCrn(WORKSPACE_ID, CRN, List.of(WORKLOAD));
     }
 }

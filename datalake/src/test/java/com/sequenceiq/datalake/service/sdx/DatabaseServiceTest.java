@@ -75,7 +75,7 @@ public class DatabaseServiceTest {
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.create(cluster, env, "ID");
+            underTest.create(cluster, env);
         });
 
         verify(databaseServerV4Endpoint).create(captor.capture());

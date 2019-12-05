@@ -44,8 +44,10 @@ public class ConfigRegistrationRequestBuilder {
     }
 
     public ConfigRegistrationRequestBuilder withTunnelEntries(List<TunnelEntry> tunnelEntries) {
-        this.useTunnel = true;
-        this.tunnels = tunnelEntries;
+        if (tunnelEntries != null && !tunnelEntries.isEmpty()) {
+            this.useTunnel = true;
+            this.tunnels = tunnelEntries;
+        }
         return this;
     }
 

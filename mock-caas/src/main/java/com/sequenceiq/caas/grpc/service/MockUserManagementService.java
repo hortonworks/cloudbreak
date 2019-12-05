@@ -105,7 +105,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final String ALL_RIGHTS_AND_RESOURCES = "*";
 
-    private static final String NO_TUNNEL_PROVISIONING = "NO_TUNNEL_PROVISIONING";
+    private static final String REVERSE_SSH_TUNNEL = "CDP_REVERSE_SSH_TUNNEL";
 
     private static final String CDP_AZURE = "CDP_AZURE";
 
@@ -137,6 +137,9 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Value("${auth.databus.credential.fluent.profile:default}")
     private String databusFluentCredentialProfile;
+
+    @Value("${auth.mock.ccm.enable}")
+    private boolean enableCcm;
 
     private String cbLicense;
 
@@ -312,12 +315,15 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Override
     public void getAccount(GetAccountRequest request, StreamObserver<GetAccountResponse> responseObserver) {
+        UserManagementProto.Account.Builder builder = UserManagementProto.Account.newBuilder();
+        if (enableCcm) {
+            builder.addEntitlements(createEntitlement(REVERSE_SSH_TUNNEL));
+        }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
-                        .setAccount(UserManagementProto.Account.newBuilder()
+                        .setAccount(builder
                                 .setClouderaManagerLicenseKey(cbLicense)
                                 .setWorkloadSubdomain(ACCOUNT_SUBDOMAIN)
-                                .addEntitlements(createEntitlement(NO_TUNNEL_PROVISIONING))
                                 .addEntitlements(createEntitlement(CDP_AZURE))
                                 .addEntitlements(createEntitlement(CDP_AUTOMATIC_USERSYNC_POLLER))
                                 .build())

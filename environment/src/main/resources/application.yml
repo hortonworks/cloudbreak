@@ -84,6 +84,7 @@ environment:
   enabledplatforms: AWS, AZURE, YARN
   tunnel:
     default: DIRECT
+    ccm.validate.entitlement: false
   admin.group.default.prefix: cdp_
 
 cb:

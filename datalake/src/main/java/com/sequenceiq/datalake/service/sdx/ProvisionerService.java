@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
@@ -81,7 +80,7 @@ public class ProvisionerService {
         });
     }
 
-    public void waitCloudbreakClusterDeletion(Long id, PollingConfig pollingConfig, String requestId) {
+    public void waitCloudbreakClusterDeletion(Long id, PollingConfig pollingConfig) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                     .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
@@ -89,7 +88,6 @@ public class ProvisionerService {
                     .run(() -> {
                         LOGGER.info("Deletion polling cloudbreak for stack status: '{}' in '{}' env", sdxCluster.getClusterName(), sdxCluster.getEnvName());
                         try {
-                            MDCBuilder.addRequestId(requestId);
                             if (cloudbreakFlowService.isLastKnownFlowRunning(sdxCluster)) {
                                 LOGGER.info("Deletion polling will continue, cluster has an active flow in Cloudbreak, id: {}", sdxCluster.getId());
                                 return AttemptResults.justContinue();
@@ -144,7 +142,7 @@ public class ProvisionerService {
         });
     }
 
-    public void waitCloudbreakClusterCreation(Long id, PollingConfig pollingConfig, String requestId) {
+    public void waitCloudbreakClusterCreation(Long id, PollingConfig pollingConfig) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS,
                     ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, "Datalake stack creation in progress", sdxCluster);
@@ -158,7 +156,6 @@ public class ProvisionerService {
                                 LOGGER.info("Cloudbreak stack polling cancelled in inmemory store, id: " + sdxCluster.getId());
                                 return AttemptResults.breakFor("Cloudbreak stack polling cancelled in inmemory store, id: " + sdxCluster.getId());
                             }
-                            MDCBuilder.addRequestId(requestId);
                             StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet());
                             LOGGER.info("Stack status of SDX {} by response from cloudbreak: {}", sdxCluster.getClusterName(),
                                     stackV4Response.getStatus().name());

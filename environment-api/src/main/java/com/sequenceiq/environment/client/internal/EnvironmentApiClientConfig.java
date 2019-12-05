@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
-import com.sequenceiq.cloudbreak.client.UserCrnClientRequestFilter;
+import com.sequenceiq.cloudbreak.client.ApiClientRequestFilter;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.environment.api.EnvironmentApi;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
@@ -20,12 +20,12 @@ import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 @Configuration
 public class EnvironmentApiClientConfig {
 
-    private final UserCrnClientRequestFilter userCrnClientRequestFilter;
+    private final ApiClientRequestFilter apiClientRequestFilter;
 
     private final ClientTracingFeature clientTracingFeature;
 
-    public EnvironmentApiClientConfig(UserCrnClientRequestFilter userCrnClientRequestFilter, ClientTracingFeature clientTracingFeature) {
-        this.userCrnClientRequestFilter = userCrnClientRequestFilter;
+    public EnvironmentApiClientConfig(ApiClientRequestFilter apiClientRequestFilter, ClientTracingFeature clientTracingFeature) {
+        this.apiClientRequestFilter = apiClientRequestFilter;
         this.clientTracingFeature = clientTracingFeature;
     }
 
@@ -36,7 +36,7 @@ public class EnvironmentApiClientConfig {
                 .withCertificateValidation(environmentApiClientParams.isCertificateValidation())
                 .withIgnorePreValidation(environmentApiClientParams.isIgnorePreValidation())
                 .withDebug(environmentApiClientParams.isRestDebug())
-                .withClientRequestFilter(userCrnClientRequestFilter)
+                .withClientRequestFilter(apiClientRequestFilter)
                 .withApiRoot(EnvironmentApi.API_ROOT_CONTEXT)
                 .withTracer(clientTracingFeature)
                 .build();

@@ -4,12 +4,10 @@ import java.io.IOException;
 import java.security.Security;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,11 +16,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
-import com.sequenceiq.redbeams.filter.RequestIdFilter;
-import com.sequenceiq.redbeams.filter.RequestIdGeneratingFilter;
-import com.sequenceiq.redbeams.service.ThreadBasedRequestIdProvider;
 
 @Configuration
 @EnableRetry
@@ -83,35 +77,11 @@ public class AppConfig implements ResourceLoaderAware {
     @Value("${caas.cert.ignorePreValidation:false}")
     private boolean caasIgnorePreValidation;
 
-    @Inject
-    private ThreadBasedRequestIdProvider threadBasedRequestIdProvider;
-
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     private ResourceLoader resourceLoader;
 
     @PostConstruct
     public void init() throws IOException {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-    }
-
-    @Bean
-    public FilterRegistrationBean<RequestIdGeneratingFilter> requestIdGeneratingFilterRegistrationBean() {
-        FilterRegistrationBean<RequestIdGeneratingFilter> registrationBean = new FilterRegistrationBean<>();
-        RequestIdGeneratingFilter filter = new RequestIdGeneratingFilter();
-        registrationBean.setFilter(filter);
-        registrationBean.setOrder(BEAN_ORDER_REQUEST_ID_GENERATING_FILTER);
-        return registrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<RequestIdFilter> requestIdFilterRegistrationBean() {
-        FilterRegistrationBean<RequestIdFilter> registrationBean = new FilterRegistrationBean<>();
-        RequestIdFilter filter = new RequestIdFilter(threadBasedRequestIdProvider);
-        registrationBean.setFilter(filter);
-        registrationBean.setOrder(BEAN_ORDER_REQUEST_ID_FILTER);
-        return registrationBean;
     }
 
     @Bean

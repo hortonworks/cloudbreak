@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.start.event.SdxStartFailedEvent;
@@ -73,8 +72,6 @@ public class SdxSyncHandler implements EventHandler<SdxSyncWaitRequest> {
         SdxSyncWaitRequest waitRequest = event.getData();
         Long sdxId = waitRequest.getResourceId();
         String userId = waitRequest.getUserId();
-        String requestId = waitRequest.getRequestId();
-        MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {
             LOGGER.debug("Polling stack sync process for id: {}", sdxId);
@@ -83,17 +80,17 @@ public class SdxSyncHandler implements EventHandler<SdxSyncWaitRequest> {
             cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(sdxCluster);
             StackV4Response stackV4Response = pollingSync(sdxCluster);
             updateSdxStatus(sdxCluster, stackV4Response);
-            response = new SdxSyncSuccessEvent(sdxId, userId, requestId);
+            response = new SdxSyncSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Sync polling exited before timeout. Cause: ", userBreakException);
-            response = new SdxStartFailedEvent(sdxId, userId, requestId, userBreakException);
+            response = new SdxStartFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Sync poller stopped for stack: {}", sdxId);
-            response = new SdxStartFailedEvent(sdxId, userId, requestId,
+            response = new SdxStartFailedEvent(sdxId, userId,
                     new PollerStoppedException("Datalake sync timed out after " + DURATION_IN_MINUTES + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Sync polling failed for stack: {}", sdxId);
-            response = new SdxStartFailedEvent(sdxId, userId, requestId, exception);
+            response = new SdxStartFailedEvent(sdxId, userId, exception);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

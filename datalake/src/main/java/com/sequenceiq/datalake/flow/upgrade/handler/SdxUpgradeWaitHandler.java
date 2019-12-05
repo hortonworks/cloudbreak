@@ -12,7 +12,6 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.flow.upgrade.event.SdxUpgradeFailedEvent;
 import com.sequenceiq.datalake.flow.upgrade.event.SdxUpgradeSuccessEvent;
 import com.sequenceiq.datalake.flow.upgrade.event.SdxUpgradeWaitRequest;
@@ -46,26 +45,24 @@ public class SdxUpgradeWaitHandler implements EventHandler<SdxUpgradeWaitRequest
     @Override
     public void accept(Event<SdxUpgradeWaitRequest> event) {
         SdxUpgradeWaitRequest request = event.getData();
-        MDCBuilder.addRequestId(request.getRequestId());
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
-        String requestId = request.getRequestId();
         Selectable response;
         try {
             LOGGER.info("Start polling cluster upgrade process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
             upgradeService.waitCloudbreakFlow(sdxId, pollingConfig, "Upgrade");
-            response = new SdxUpgradeSuccessEvent(sdxId, userId, requestId);
+            response = new SdxUpgradeSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Upgrade polling exited before timeout. Cause: ", userBreakException);
-            response = new SdxUpgradeFailedEvent(sdxId, userId, requestId, userBreakException);
+            response = new SdxUpgradeFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Upgrade poller stopped for cluster: {}", sdxId);
-            response = new SdxUpgradeFailedEvent(sdxId, userId, requestId,
+            response = new SdxUpgradeFailedEvent(sdxId, userId,
                     new PollerStoppedException("Datalake repair timed out after " + DURATION_IN_MINUTES + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Upgrade polling failed for cluster: {}", sdxId);
-            response = new SdxUpgradeFailedEvent(sdxId, userId, requestId, exception);
+            response = new SdxUpgradeFailedEvent(sdxId, userId, exception);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

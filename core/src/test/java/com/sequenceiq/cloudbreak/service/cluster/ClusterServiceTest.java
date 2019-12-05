@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -47,6 +48,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
@@ -54,6 +56,8 @@ import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -67,9 +71,12 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -138,6 +145,12 @@ public class ClusterServiceTest {
     @Mock
     private ClusterModificationService clusterModificationService;
 
+    @Mock
+    private ImageCatalogService imageCatalogService;
+
+    @Mock
+    private ComponentConfigProviderService componentConfigProviderService;
+
     private Cluster cluster;
 
     private Stack stack;
@@ -164,7 +177,7 @@ public class ClusterServiceTest {
     }
 
     @Test
-    public void repairClusterHostGroupsHappyPath() {
+    public void repairClusterHostGroupsHappyPath() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
 
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
@@ -175,6 +188,11 @@ public class ClusterServiceTest {
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
         when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(Collections.emptyList());
         when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
+        when(stackService.getById(1L)).thenReturn(stack);
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(mock(Image.class));
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        when(image.isPrewarmed()).thenReturn(true);
+        when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
 
         underTest.repairCluster(1L, List.of("hostGroup1"), false, false);
 
@@ -183,7 +201,7 @@ public class ClusterServiceTest {
     }
 
     @Test
-    public void repairClusterNodeIdsHappyPath() {
+    public void repairClusterNodeIdsHappyPath() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceGroupType(InstanceGroupType.CORE);
 
@@ -215,6 +233,11 @@ public class ClusterServiceTest {
         flowLog.setStateStatus(StateStatus.SUCCESSFUL);
         when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(List.of(flowLog));
         when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
+        when(stackService.getById(1L)).thenReturn(stack);
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(mock(Image.class));
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        when(image.isPrewarmed()).thenReturn(true);
+        when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
 
         underTest.repairCluster(1L, List.of("instanceId1"), false, false, false);
         verify(stack).getInstanceMetaDataAsList();

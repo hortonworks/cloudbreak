@@ -90,11 +90,11 @@ public class StackOperations {
     @Inject
     private UpgradeService upgradeService;
 
-    public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, StackType stackType) {
+    public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
         LOGGER.info("List for Stack in workspace {} and environmentName {}.", workspaceId, environmentName);
         stackViewResponses = converterUtil.convertAllAsSet(
-                stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentName(workspaceId, environmentName, stackType),
+                stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentName(workspaceId, environmentName, stackTypes),
                 StackViewV4Response.class);
         LOGGER.info("Adding environment name and credential to the responses.");
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses);
@@ -103,11 +103,11 @@ public class StackOperations {
         return new StackViewV4Responses(stackViewResponses);
     }
 
-    public StackViewV4Responses listByEnvironmentCrn(Long workspaceId, String environmentCrn, StackType stackType) {
+    public StackViewV4Responses listByEnvironmentCrn(Long workspaceId, String environmentCrn, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
         LOGGER.info("List for Stack in workspace {} and environmentCrn {}.", workspaceId, environmentCrn);
         stackViewResponses = converterUtil.convertAllAsSet(
-                stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, environmentCrn, stackType),
+                stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, environmentCrn, stackTypes),
                 StackViewV4Response.class);
         LOGGER.info("Adding environment name and credential to the responses.");
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses);

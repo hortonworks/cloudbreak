@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
@@ -62,7 +61,7 @@ public class DatabaseService {
     @Inject
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;
 
-    public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env, String requestId) {
+    public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env) {
         LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxCluster.getClusterName());
         String dbResourceCrn;
         if (dbHasBeenCreatedPreviously(sdxCluster)) {
@@ -81,21 +80,21 @@ public class DatabaseService {
                 throw badRequestException;
             }
         }
-        return waitAndGetDatabase(sdxCluster, dbResourceCrn, SdxDatabaseOperation.CREATION, requestId, true);
+        return waitAndGetDatabase(sdxCluster, dbResourceCrn, SdxDatabaseOperation.CREATION, true);
     }
 
     private boolean dbHasBeenCreatedPreviously(SdxCluster sdxCluster) {
         return Strings.isNotEmpty(sdxCluster.getDatabaseCrn());
     }
 
-    public void terminate(SdxCluster sdxCluster, String requestId, boolean forced) {
+    public void terminate(SdxCluster sdxCluster, boolean forced) {
         LOGGER.info("Terminating databaseServer of SDX {}", sdxCluster.getClusterName());
         try {
             DatabaseServerV4Response resp = databaseServerV4Endpoint.deleteByCrn(sdxCluster.getDatabaseCrn(), forced);
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
                     ResourceEvent.SDX_RDS_DELETION_STARTED,
                     "External database deletion in progress", sdxCluster);
-            waitAndGetDatabase(sdxCluster, resp.getCrn(), SdxDatabaseOperation.DELETION, requestId, false);
+            waitAndGetDatabase(sdxCluster, resp.getCrn(), SdxDatabaseOperation.DELETION, false);
         } catch (NotFoundException notFoundException) {
             LOGGER.info("Database server is deleted on redbeams side {}", sdxCluster.getDatabaseCrn());
         }
@@ -130,14 +129,14 @@ public class DatabaseService {
     }
 
     public DatabaseServerStatusV4Response waitAndGetDatabase(SdxCluster sdxCluster, String databaseCrn,
-            SdxDatabaseOperation sdxDatabaseOperation, String requestId, boolean cancellable) {
+            SdxDatabaseOperation sdxDatabaseOperation, boolean cancellable) {
         PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC_FOR_DB_POLLING, TimeUnit.SECONDS,
                 DURATION_IN_MINUTES_FOR_DB_POLLING, TimeUnit.MINUTES);
-        return waitAndGetDatabase(sdxCluster, databaseCrn, pollingConfig, sdxDatabaseOperation, requestId, cancellable);
+        return waitAndGetDatabase(sdxCluster, databaseCrn, pollingConfig, sdxDatabaseOperation, cancellable);
     }
 
     public DatabaseServerStatusV4Response waitAndGetDatabase(SdxCluster sdxCluster, String databaseCrn, PollingConfig pollingConfig,
-            SdxDatabaseOperation sdxDatabaseOperation, String requestId, boolean cancellable) {
+            SdxDatabaseOperation sdxDatabaseOperation, boolean cancellable) {
         DatabaseServerStatusV4Response response = Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
@@ -147,7 +146,6 @@ public class DatabaseService {
                         return AttemptResults.breakFor("Database wait polling cancelled in inmemory store, id: " + sdxCluster.getId());
                     }
                     try {
-                        MDCBuilder.addRequestId(requestId);
                         LOGGER.info("Creation polling redbeams for database status: '{}' in '{}' env",
                                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
                         DatabaseServerStatusV4Response rdsStatus = getDatabaseStatus(databaseCrn);

@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -68,6 +69,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.api.type.Tunnel;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
@@ -86,7 +88,14 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     private Integer gatewayPort;
 
-    private Boolean useCcm;
+    /**
+     * @deprecated use {@link #tunnel} instead
+     */
+    @Deprecated
+    private Boolean useCcm = Boolean.FALSE;
+
+    @Convert(converter = TunnelConverter.class)
+    private Tunnel tunnel = Tunnel.DIRECT;
 
     private int consulServers;
 
@@ -180,6 +189,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     @Enumerated(EnumType.STRING)
     private StackType type;
+
+    private boolean clusterProxyRegistered;
 
     public String getResourceCrn() {
         return resourceCrn;
@@ -333,12 +344,20 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         this.gatewayPort = gatewayPort;
     }
 
-    public Boolean getUseCcm() {
-        return useCcm;
+    public boolean getUseCcm() {
+        return Boolean.TRUE.equals(useCcm);
     }
 
     public void setUseCcm(Boolean useCcm) {
         this.useCcm = useCcm;
+    }
+
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
+    public void setTunnel(Tunnel tunnel) {
+        this.tunnel = tunnel;
     }
 
     public String getPlatformVariant() {
@@ -704,5 +723,13 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public boolean hasCustomHostname() {
         return !StringUtils.isEmpty(customHostname) || hostgroupNameAsHostname;
+    }
+
+    public boolean isClusterProxyRegistered() {
+        return clusterProxyRegistered;
+    }
+
+    public void setClusterProxyRegistered(boolean clusterProxyRegistered) {
+        this.clusterProxyRegistered = clusterProxyRegistered;
     }
 }

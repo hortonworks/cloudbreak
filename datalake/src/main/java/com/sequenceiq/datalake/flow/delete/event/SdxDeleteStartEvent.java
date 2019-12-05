@@ -6,8 +6,8 @@ public class SdxDeleteStartEvent extends SdxEvent {
 
     private final boolean forced;
 
-    public SdxDeleteStartEvent(String selector, Long sdxId, String userId, String requestId, boolean forced) {
-        super(selector, sdxId, userId, requestId);
+    public SdxDeleteStartEvent(String selector, Long sdxId, String userId, boolean forced) {
+        super(selector, sdxId, userId);
         this.forced = forced;
     }
 

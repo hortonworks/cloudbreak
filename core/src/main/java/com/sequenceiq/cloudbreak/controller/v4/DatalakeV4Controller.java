@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,10 +28,10 @@ public class DatalakeV4Controller implements DatalakeV4Endpoint {
     @Override
     public StackViewV4Responses list(String environmentName, String environmentCrn) {
         if (StringUtils.isNotEmpty(environmentCrn)) {
-            return stackOperations.listByEnvironmentCrn(workspaceService.getForCurrentUser().getId(), environmentCrn, StackType.DATALAKE);
+            return stackOperations.listByEnvironmentCrn(workspaceService.getForCurrentUser().getId(), environmentCrn, List.of(StackType.DATALAKE));
         }
         if (StringUtils.isNotEmpty(environmentName)) {
-            return stackOperations.listByEnvironmentName(workspaceService.getForCurrentUser().getId(), environmentName, StackType.DATALAKE);
+            return stackOperations.listByEnvironmentName(workspaceService.getForCurrentUser().getId(), environmentName, List.of(StackType.DATALAKE));
         }
         throw new BadRequestException("Either environment or environmentCrn query parameter should be set.");
     }

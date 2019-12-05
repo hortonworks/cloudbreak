@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.ccm.termination.CcmResourceTerminationListener;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.CcmKeyDeregisterRequest;
@@ -54,7 +55,7 @@ public class CcmKeyDeregisterHandler implements EventHandler<CcmKeyDeregisterReq
             result = new CcmKeyDeregisterSuccess(stack.getId());
         } catch (Exception ex) {
             LOGGER.error("Stack retrieval for CCM key deregistration failed", ex);
-            result = new StackFailureEvent(request.getResourceId(), ex);
+            result = new StackFailureEvent(StackTerminationEvent.CCM_KEY_DEREGISTER_FAILED_EVENT.event(), request.getResourceId(), ex);
         }
         eventBus.notify(result.selector(), new Event<>(requestEvent.getHeaders(), result));
     }

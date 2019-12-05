@@ -18,7 +18,7 @@ public class Image {
 
     private final String imageName;
 
-    private final Map<InstanceGroupType, String> userdata;
+    private Map<InstanceGroupType, String> userdata;
 
     private final String os;
 
@@ -60,6 +60,10 @@ public class Image {
 
     public Map<InstanceGroupType, String> getUserdata() {
         return userdata;
+    }
+
+    public void setUserdata(Map<InstanceGroupType, String> userdata) {
+        this.userdata = userdata;
     }
 
     public String getOsType() {

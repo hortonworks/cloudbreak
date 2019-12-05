@@ -6,13 +6,13 @@ public class SdxStartFailedEvent extends SdxEvent {
 
     private Exception exception;
 
-    public SdxStartFailedEvent(Long sdxId, String userId, String requestId, Exception exception) {
-        super(sdxId, userId, requestId);
+    public SdxStartFailedEvent(Long sdxId, String userId, Exception exception) {
+        super(sdxId, userId);
         this.exception = exception;
     }
 
     public static SdxStartFailedEvent from(SdxEvent event, Exception exception) {
-        return new SdxStartFailedEvent(event.getResourceId(), event.getUserId(), event.getRequestId(), exception);
+        return new SdxStartFailedEvent(event.getResourceId(), event.getUserId(), exception);
     }
 
     @Override

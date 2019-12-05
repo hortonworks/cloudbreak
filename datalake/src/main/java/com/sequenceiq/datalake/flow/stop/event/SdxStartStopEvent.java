@@ -4,8 +4,8 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class SdxStartStopEvent extends SdxEvent {
 
-    public SdxStartStopEvent(String selector, Long sdxId, String userId, String requestId) {
-        super(selector, sdxId, userId, requestId);
+    public SdxStartStopEvent(String selector, Long sdxId, String userId) {
+        super(selector, sdxId, userId);
     }
 
     @Override

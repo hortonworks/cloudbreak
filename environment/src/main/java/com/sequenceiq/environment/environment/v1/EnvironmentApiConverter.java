@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -196,11 +197,12 @@ public class EnvironmentApiConverter {
 
     private AuthenticationDto authenticationRequestToDto(EnvironmentAuthenticationRequest authentication) {
         AuthenticationDto.Builder builder = AuthenticationDto.builder();
-        if (authentication != null) {
+        if (authentication != null && (StringUtils.hasLength(authentication.getPublicKey()) || StringUtils.hasLength(authentication.getPublicKeyId()))) {
+            String publicKey = nullIfBlank(authentication.getPublicKey());
             builder.withLoginUserName(authentication.getLoginUserName())
-                    .withPublicKey(authentication.getPublicKey())
-                    .withPublicKeyId(authentication.getPublicKeyId())
-                    .withManagedKey(Objects.nonNull(authentication.getPublicKey()));
+                    .withPublicKey(publicKey)
+                    .withPublicKeyId(nullIfBlank(authentication.getPublicKeyId()))
+                    .withManagedKey(Objects.nonNull(publicKey));
         } else {
             builder.withLoginUserName(DEFAULT_USER_NAME)
                     .withPublicKey(DUMMY_SSH_KEY)
@@ -208,6 +210,13 @@ public class EnvironmentApiConverter {
                     .withPublicKeyId(null);
         }
         return builder.build();
+    }
+
+    private String nullIfBlank(String value) {
+        if (StringUtils.hasLength(value)) {
+            return value;
+        }
+        return null;
     }
 
     private SecurityAccessDto securityAccessRequestToDto(SecurityAccessRequest securityAccess) {
