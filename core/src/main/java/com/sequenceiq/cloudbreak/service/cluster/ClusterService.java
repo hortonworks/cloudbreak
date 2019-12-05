@@ -9,7 +9,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.R
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AUTORECOVERY_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_HOST_STATUS_UPDATED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PRIMARY_GATEWAY_UNHEALTHY_SYNC_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NODES_REPORTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_IGNORED;
@@ -38,12 +37,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -52,12 +49,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -77,18 +71,12 @@ import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
-import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
-import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
-import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -100,13 +88,11 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
-import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
@@ -114,7 +100,6 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -127,9 +112,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.flow.core.FlowLogService;
-import com.sequenceiq.flow.domain.FlowLog;
-import com.sequenceiq.flow.domain.StateStatus;
 
 @Service
 public class ClusterService {
@@ -139,10 +121,6 @@ public class ClusterService {
     private static final String MASTER_CATEGORY = "MASTER";
 
     private static final String RECOVERY = "RECOVERY";
-
-    private static final List<String> REATTACH_NOT_SUPPORTED_VOLUME_TYPES = List.of("ephemeral");
-
-    private static final Long REQUIRED_CM_DATABASE_COUNT = 2L;
 
     @Inject
     private StackService stackService;
@@ -160,9 +138,6 @@ public class ClusterService {
     private FileSystemConfigService fileSystemConfigService;
 
     @Inject
-    private KerberosConfigService kerberosConfigService;
-
-    @Inject
     private ReactorFlowManager flowManager;
 
     @Inject
@@ -173,12 +148,6 @@ public class ClusterService {
 
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
-
-    @Inject
-    private GatewayConvertUtil gateWayUtil;
-
-    @Inject
-    private ConverterUtil converterUtil;
 
     @Inject
     private ClusterTerminationService clusterTerminationService;
@@ -223,16 +192,7 @@ public class ClusterService {
     private UsageLoggingUtil usageLoggingUtil;
 
     @Inject
-    private FlowLogService flowLogService;
-
-    @Inject
-    private StackUpdater stackUpdater;
-
-    @Inject
     private BlueprintUtils blueprintUtils;
-
-    @Inject
-    private ImageCatalogService imageCatalogService;
 
     @Measure(ClusterService.class)
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
@@ -345,16 +305,6 @@ public class ClusterService {
         return savedCluster;
     }
 
-    public boolean isMultipleGateway(Stack stack) {
-        int gatewayCount = 0;
-        for (InstanceGroup ig : stack.getInstanceGroups()) {
-            if (ig.getInstanceGroupType() == InstanceGroupType.GATEWAY) {
-                gatewayCount += ig.getNodeCount();
-            }
-        }
-        return gatewayCount > 1;
-    }
-
     public boolean isSingleNode(Stack stack) {
         int nodeCount = 0;
         for (InstanceGroup ig : stack.getInstanceGroups()) {
@@ -397,11 +347,6 @@ public class ClusterService {
 
     public Optional<Cluster> retrieveClusterByStackIdWithoutAuth(Long stackId) {
         return repository.findOneByStackId(stackId);
-    }
-
-    public ClusterV4Response retrieveClusterForCurrentUser(Long stackId) {
-        Stack stack = stackService.getById(stackId);
-        return converterUtil.convert(stack.getCluster(), ClusterV4Response.class);
     }
 
     public Cluster updateAmbariClientConfig(Long clusterId, HttpClientConfig ambariClientConfig) {
@@ -609,199 +554,10 @@ public class ClusterService {
         }
     }
 
-    public void repairCluster(Long stackId, List<String> repairedHostGroups, boolean removeOnly, boolean forceRepair) {
-        repairClusterInternal(ManualClusterRepairMode.HOST_GROUP, stackId, repairedHostGroups, null, false, removeOnly, forceRepair);
-    }
-
-    public void repairCluster(Long stackId, List<String> nodeIds, boolean deleteVolumes, boolean removeOnly, boolean forceRepair) {
-        repairClusterInternal(ManualClusterRepairMode.NODE_ID, stackId, null, nodeIds, deleteVolumes, removeOnly, forceRepair);
-    }
-
-    private void repairClusterInternal(ManualClusterRepairMode repairMode, Long stackId, List<String> repairedHostGroups,
-            List<String> nodeIds, boolean deleteVolumes, boolean removeOnly, boolean forceRepair) {
-        Map<String, List<String>> failedNodeMap = new HashMap<>();
-        try {
-            transactionService.required(() -> {
-                if (hasPendingFlow(stackId)) {
-                    LOGGER.info("Repair cannot be performed, because there is already an active flow. Stack id: {}", stackId);
-                    throw new BadRequestException("Repair cannot be performed, because there is already an active flow.");
-                }
-                Stack stack = stackService.getById(stackId);
-                if (createdFromBaseImage(stack)) {
-                    throw new BadRequestException("Repair is not supported when cluster is created from base image.");
-                }
-                Stack stackInRepair = stackUpdater.updateStackStatus(stackId, DetailedStackStatus.REPAIR_IN_PROGRESS);
-                boolean repairWithReattach = !deleteVolumes;
-                checkReattachSupportedOnProvider(stackInRepair, repairWithReattach);
-                failedNodeMap.putAll(collectFailedNodeMap(stackInRepair, repairMode, repairWithReattach, repairedHostGroups, nodeIds, forceRepair));
-                if (repairMode == ManualClusterRepairMode.NODE_ID) {
-                    updateNodeVolumeSetsDeleteVolumesFlag(stackInRepair, nodeIds, deleteVolumes);
-                } else {
-                    updateIgNodeVolumeSetsDeleteVolumesFlag(stackInRepair, repairedHostGroups, deleteVolumes);
-                }
-                return stackInRepair;
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
-        List<String> repairedEntities = CollectionUtils.isEmpty(repairedHostGroups) ? nodeIds : repairedHostGroups;
-        triggerRepair(stackId, failedNodeMap, removeOnly, repairedEntities);
-    }
-
-    private boolean createdFromBaseImage(Stack stack) {
-        try {
-            Image image = componentConfigProviderService.getImage(stack.getId());
-            return !imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId()).getImage().isPrewarmed();
-        } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
-            throw new BadRequestException(e.getMessage());
-        }
-    }
-
-    public boolean repairSupported(Stack stack) {
-        if (createdFromBaseImage(stack)) {
-            LOGGER.debug("Repair not supported for cluster {} because it was created from base image", stack.getId());
-            return false;
-        }
-        try {
-            checkReattachSupportedOnProvider(stack, true);
-        } catch (BadRequestException ex) {
-            LOGGER.debug("Repair not supported {}", ex.getMessage());
-            return false;
-        }
-        Cluster cluster = stack.getCluster();
-        Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
-        for (HostGroup hg : hostGroups) {
-            if (hg.getRecoveryMode() == RecoveryMode.MANUAL) {
-                for (InstanceMetaData instanceMetaData : hg.getInstanceGroup().getNotTerminatedInstanceMetaDataSet()) {
-                    try {
-                        checkReattachSupportForGateways(stack, true, cluster, instanceMetaData);
-                        checkDiskTypeSupported(stack, true, hg);
-                        validateRepair(stack, instanceMetaData);
-                    } catch (BadRequestException ex) {
-                        LOGGER.debug("Repair not supported {}", ex.getMessage());
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
-    public Map<String, List<String>> collectFailedNodeMap(Stack stack, ManualClusterRepairMode repairMode, boolean repairWithReattach,
-            List<String> repairedHostGroups, List<String> nodeIds, boolean forceRepair) {
-        Map<String, List<String>> failedNodeMap = new HashMap<>();
-        Cluster cluster = stack.getCluster();
-        Set<String> instanceHostNames = getInstanceHostNames(repairMode, stack, nodeIds);
-        Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
-        for (HostGroup hg : hostGroups) {
-            List<String> nodesToRepair = new ArrayList<>();
-            if (hg.getRecoveryMode() == RecoveryMode.MANUAL
-                    && (repairMode == ManualClusterRepairMode.NODE_ID || repairedHostGroups.contains(hg.getName()))) {
-                for (InstanceMetaData instanceMetaData : hg.getInstanceGroup().getNotTerminatedInstanceMetaDataSet()) {
-                    if (isRepairNeededForHost(repairMode, instanceHostNames, instanceMetaData) || forceRepair) {
-                        checkReattachSupportForGateways(stack, repairWithReattach, cluster, instanceMetaData);
-                        checkDiskTypeSupported(stack, repairWithReattach, hg);
-                        validateRepair(stack, instanceMetaData);
-                        failedNodeMap.putIfAbsent(hg.getName(), nodesToRepair);
-                        nodesToRepair.add(instanceMetaData.getDiscoveryFQDN());
-                    }
-                }
-            }
-        }
-        return failedNodeMap;
-    }
-
-    private boolean hasPendingFlow(Long stackId) {
-        List<FlowLog> flowLogs = flowLogService.findAllByResourceIdOrderByCreatedDesc(stackId);
-        return flowLogs.stream().anyMatch(fl -> StateStatus.PENDING.equals(fl.getStateStatus()));
-    }
-
-    private void checkReattachSupportForGateways(Stack inTransactionStack, boolean repairWithReattach, Cluster cluster, InstanceMetaData instanceMetaData) {
-        boolean requiredDatabaseAvailable = gatewayDatabaseAvailable(cluster);
-        boolean singleNodeGateway = isGateway(instanceMetaData) && !isMultipleGateway(inTransactionStack);
-        if (repairWithReattach && !requiredDatabaseAvailable && singleNodeGateway) {
-            throw new BadRequestException("Repair with disk reattach not supported on single node gateway without external RDS.");
-        }
-    }
-
-    private boolean gatewayDatabaseAvailable(Cluster cluster) {
-        long cmRdsCount = cluster.getRdsConfigs().stream()
-                .filter(rds -> rds.getStatus() == ResourceStatus.USER_MANAGED)
-                .map(RDSConfig::getType)
-                .filter(type -> DatabaseType.CLOUDERA_MANAGER.name().equals(type)
-                        || DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER.name().equals(type))
-                .distinct()
-                .count();
-        return cmRdsCount == REQUIRED_CM_DATABASE_COUNT || cluster.getDatabaseServerCrn() != null;
-    }
-
-    private void checkReattachSupportedOnProvider(Stack inTransactionStack, boolean repairWithReattach) {
-        if (repairWithReattach && !StackService.REATTACH_COMPATIBLE_PLATFORMS.contains(inTransactionStack.getPlatformVariant())) {
-            throw new BadRequestException("Volume reattach currently not supported!");
-        }
-    }
-
-    private void checkDiskTypeSupported(Stack inTransactionStack, boolean repairWithReattach, HostGroup hg) {
-        if (repairWithReattach
-                && inTransactionStack.getInstanceGroupsAsList().stream()
-                .filter(instanceGroup -> hg.getName().equalsIgnoreCase(instanceGroup.getGroupName()))
-                .map(InstanceGroup::getTemplate)
-                .map(Template::getVolumeTemplates)
-                .anyMatch(volumes -> volumes.stream()
-                        .map(VolumeTemplate::getVolumeType).anyMatch(REATTACH_NOT_SUPPORTED_VOLUME_TYPES::contains))) {
-            throw new BadRequestException("Reattach not supported for this disk type.");
-        }
-    }
-
-    private boolean isRepairNeededForHost(ManualClusterRepairMode repairMode, Set<String> instanceHostNames, InstanceMetaData instanceMetaData) {
-        return repairMode == ManualClusterRepairMode.HOST_GROUP
-                ? isUnhealthy(instanceMetaData)
-                : instanceHostNames.contains(instanceMetaData.getDiscoveryFQDN());
-    }
-
-    private boolean isUnhealthy(InstanceMetaData instanceMetaData) {
-        return instanceMetaData.getInstanceStatus() == InstanceStatus.SERVICES_UNHEALTHY ||
-                instanceMetaData.getInstanceStatus() == InstanceStatus.DELETED_ON_PROVIDER_SIDE;
-    }
-
-    private Set<String> getInstanceHostNames(ManualClusterRepairMode repairMode, Stack stack, List<String> nodeIds) {
-        if (repairMode == ManualClusterRepairMode.HOST_GROUP) {
-            return Set.of();
-        }
-        Set<String> instanceHostNames = stack.getInstanceMetaDataAsList()
-                .stream()
-                .filter(md -> nodeIds.contains(md.getInstanceId()))
-                .map(InstanceMetaData::getDiscoveryFQDN)
-                .collect(Collectors.toSet());
-        validateRepairNodeIdUniqueness(nodeIds, instanceHostNames);
-        return instanceHostNames;
-    }
-
-    private void validateRepairNodeIdUniqueness(List<String> nodeIds, Set<String> instanceHostNames) {
-        long distinctNodeIdCount = nodeIds.stream().distinct().count();
-        if (distinctNodeIdCount != instanceHostNames.size()) {
-            throw new BadRequestException(String.format("Node ID list is not valid: [%s]", String.join(", ", nodeIds)));
-        }
-    }
-
     private void validateRepair(Stack stack, InstanceMetaData instanceMetaData) {
         if (isGateway(instanceMetaData) && withEmbeddedClusterManagerDB(stack.getCluster())) {
             throw new BadRequestException("Cluster manager server failure with embedded database cannot be repaired!");
         }
-    }
-
-    private void updateNodeVolumeSetsDeleteVolumesFlag(Stack stack, List<String> nodeIds, boolean deleteVolumes) {
-        resourceService.saveAll(stack.getDiskResources().stream()
-                .filter(resource -> nodeIds.contains(resource.getInstanceId()))
-                .map(volumeSet -> updateDeleteVolumesFlag(deleteVolumes, volumeSet))
-                .collect(Collectors.toList()));
-    }
-
-    private void updateIgNodeVolumeSetsDeleteVolumesFlag(Stack stack, List<String> instanceGroups, boolean deleteVolumes) {
-        resourceService.saveAll(stack.getDiskResources().stream()
-                .filter(resource -> instanceGroups.contains(resource.getInstanceGroup()))
-                .map(volumeSet -> updateDeleteVolumesFlag(deleteVolumes, volumeSet))
-                .collect(Collectors.toList()));
     }
 
     private Resource updateDeleteVolumesFlag(boolean deleteVolumes, Resource volumeSet) {
@@ -811,15 +567,6 @@ public class ClusterService {
             resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
         });
         return volumeSet;
-    }
-
-    private void triggerRepair(Long stackId, Map<String, List<String>> failedNodeMap, boolean removeOnly, List<String> recoveryMessageArgument) {
-        if (!failedNodeMap.isEmpty()) {
-            flowManager.triggerClusterRepairFlow(stackId, failedNodeMap, removeOnly);
-            eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_REQUESTED, recoveryMessageArgument);
-        } else {
-            throw new BadRequestException(String.format("Could not trigger cluster repair  for stack %s, because node list is incorrect", stackId));
-        }
     }
 
     private boolean isGateway(InstanceMetaData instanceMetaData) {
@@ -1030,7 +777,7 @@ public class ClusterService {
             }
 
             try {
-                cluster = prepareCluster(hostGroups, stackRepoDetails, blueprint, stackWithLists, cluster);
+                cluster = prepareCluster(hostGroups, blueprint, stackWithLists, cluster);
                 triggerClusterInstall(stackWithLists, cluster);
             } catch (CloudbreakException e) {
                 throw new CloudbreakServiceException(e);
@@ -1045,7 +792,7 @@ public class ClusterService {
         }
     }
 
-    private Cluster prepareCluster(Collection<HostGroup> hostGroups, StackRepoDetails stackRepoDetails, Blueprint blueprint, Stack stack,
+    private Cluster prepareCluster(Collection<HostGroup> hostGroups, Blueprint blueprint, Stack stack,
             Cluster cluster) {
         cluster.setBlueprint(blueprint);
         cluster.getHostGroups().clear();

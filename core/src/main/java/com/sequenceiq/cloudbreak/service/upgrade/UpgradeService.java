@@ -1,11 +1,9 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFoundException;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,11 +30,9 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
@@ -48,10 +44,6 @@ import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 public class UpgradeService {
 
     private static final Set<Status> UPGRADEABLE_ATTACHED_DISTRO_X_STATES = Sets.immutableEnumSet(Status.STOPPED, Status.DELETE_COMPLETED);
-
-    private static final boolean FORCE_REPAIR = true;
-
-    private static final boolean REMOVE_ONLY = false;
 
     private static final boolean NOT_BASE_IMAGE = false;
 
@@ -73,16 +65,13 @@ public class UpgradeService {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
-    private ClusterService clusterService;
+    private ClusterRepairService clusterRepairService;
 
     @Inject
     private DistroXV1Endpoint distroXV1Endpoint;
 
     @Inject
     private TransactionService transactionService;
-
-    @Inject
-    private HostGroupService hostGroupService;
 
     public UpgradeOptionV4Response getUpgradeOptionByStackName(Long workspaceId, String stackName, User user) {
         try {
@@ -108,11 +97,7 @@ public class UpgradeService {
             transactionService.required(() -> {
                 Optional<Stack> stack = stackService.findStackByNameAndWorkspaceId(stackName, workspaceId);
                 if (stack.isPresent()) {
-                    List<String> hostGroupNames = hostGroupService.getByCluster(stack.get().getCluster().getId())
-                            .stream()
-                            .map(HostGroup::getName)
-                            .collect(toList());
-                    clusterService.repairCluster(stack.get().getId(), hostGroupNames, REMOVE_ONLY, FORCE_REPAIR);
+                    clusterRepairService.repairAll(stack.get().getId());
                     return null;
                 } else {
                     throw notFoundException("Stack", stackName);
@@ -126,7 +111,7 @@ public class UpgradeService {
     private UpgradeOptionV4Response getUpgradeOption(Stack stack, Long workspaceId, User user)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image image = componentConfigProviderService.getImage(stack.getId());
-        if (clusterService.repairSupported(stack) && attachedClustersStoppedOrDeleted(stack)) {
+        if (clusterRepairService.canRepairAll(stack) && attachedClustersStoppedOrDeleted(stack)) {
             StatedImage latestImage = getLatestImage(workspaceId, stack, image, user);
             if (!Objects.equals(image.getImageId(), latestImage.getImage().getUuid())) {
                 return upgradeable(image, latestImage, stack);

@@ -18,7 +18,6 @@ import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -39,9 +38,6 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
 
     @Inject
     private ClusterService clusterService;
-
-    @Inject
-    private TransactionService transactionService;
 
     public Set<RDSConfig> findByNamesInWorkspace(Set<String> names, @NotNull Long workspaceId) {
         return CollectionUtils.isEmpty(names) ? new HashSet<>() : rdsConfigRepository.findAllByNameInAndWorkspaceId(names, workspaceId);
@@ -89,10 +85,6 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
 
     public RDSConfig findByClusterIdAndType(Long clusterId, DatabaseType databaseType) {
         return rdsConfigRepository.findByClusterIdAndType(clusterId, databaseType.name());
-    }
-
-    public Set<RDSConfig> findUserManagedByClusterId(Long clusterId) {
-        return rdsConfigRepository.findUserManagedByClusterId(clusterId);
     }
 
     public void deleteDefaultRdsConfigs(Set<RDSConfig> rdsConfigs) {

@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
@@ -73,7 +73,7 @@ public class UpgradeServiceTest {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Mock
-    private ClusterService clusterService;
+    private ClusterRepairService clusterRepairService;
 
     @Mock
     private DistroXV1Endpoint distroXV1Endpoint;
@@ -108,7 +108,7 @@ public class UpgradeServiceTest {
         UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackName(WORKSPACE_ID, CLUSTER_NAME, user);
 
         verify(stackService).findStackByNameAndWorkspaceId(eq(CLUSTER_NAME), eq(WORKSPACE_ID));
-        verify(clusterService).repairSupported(eq(stack));
+        verify(clusterRepairService).canRepairAll(eq(stack));
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
@@ -128,7 +128,7 @@ public class UpgradeServiceTest {
         UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackName(WORKSPACE_ID, CLUSTER_NAME, user);
 
         verify(stackService).findStackByNameAndWorkspaceId(eq(CLUSTER_NAME), eq(WORKSPACE_ID));
-        verify(clusterService).repairSupported(stack);
+        verify(clusterRepairService).canRepairAll(stack);
         verifyNoMoreInteractions(distroXV1Endpoint);
         verifyZeroInteractions(componentConfigProviderService);
         verifyZeroInteractions(imageService);
@@ -137,7 +137,7 @@ public class UpgradeServiceTest {
 
     private void setUpMocks(Stack stack, Image image, boolean prewarmedImage, String oldImage, String newImage)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        when(clusterService.repairSupported(stack)).thenReturn(true);
+        when(clusterRepairService.canRepairAll(stack)).thenReturn(true);
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses();
         stackViewV4Responses.setResponses(List.of());
         when(distroXV1Endpoint.list(eq(null), anyString())).thenReturn(stackViewV4Responses);
