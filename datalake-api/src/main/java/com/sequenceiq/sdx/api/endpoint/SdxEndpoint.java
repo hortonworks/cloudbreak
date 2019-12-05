@@ -45,29 +45,11 @@ public interface SdxEndpoint {
     SdxClusterResponse create(@ValidStackNameFormat @ValidStackNameLength @PathParam("name") String name,
             @Valid SdxClusterRequest createSdxClusterRequest);
 
-    @DELETE
-    @Path("{name}")
+    @GET
+    @Path("list")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "delete SDX cluster", produces = "application/json", nickname = "deleteSdx")
-    void delete(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced);
-
-    @DELETE
-    @Path("/crn/{clusterCrn}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "delete SDX cluster by crn", produces = "application/json", nickname = "deleteSdxByCrn")
-    void deleteByCrn(@PathParam("clusterCrn") String clusterCrn, @QueryParam("forced") @DefaultValue("false") Boolean forced);
-
-    @POST
-    @Path("{name}/redeploy")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "redeploy SDX cluster", produces = MediaType.APPLICATION_JSON, nickname = "redeploySdx")
-    void redeploy(@PathParam("name") String name, @Valid RedeploySdxClusterRequest redeploySdxClusterRequest);
-
-    @POST
-    @Path("/crn/{clusterCrn}/redeploy")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "redeploy SDX cluster by crn", produces = MediaType.APPLICATION_JSON, nickname = "redeploySdxByCrn")
-    void redeployByCrn(@PathParam("clusterCrn") String clusterCrn, @Valid RedeploySdxClusterRequest redeploySdxClusterRequest);
+    @ApiOperation(value = "list SDX clusters", produces = MediaType.APPLICATION_JSON, nickname = "listSdx")
+    List<SdxClusterResponse> list(@QueryParam("envName") String envName);
 
     @GET
     @Path("{name}")
@@ -98,6 +80,30 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "get SDX cluster detail by crn", produces = MediaType.APPLICATION_JSON, nickname = "getSdxDetailByCrn")
     SdxClusterDetailResponse getDetailByCrn(@PathParam("clusterCrn") String clusterCrn, @QueryParam("entries") Set<String> entries);
+
+    @DELETE
+    @Path("{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "delete SDX cluster", produces = "application/json", nickname = "deleteSdx")
+    void delete(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced);
+
+    @DELETE
+    @Path("/crn/{clusterCrn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "delete SDX cluster by crn", produces = "application/json", nickname = "deleteSdxByCrn")
+    void deleteByCrn(@PathParam("clusterCrn") String clusterCrn, @QueryParam("forced") @DefaultValue("false") Boolean forced);
+
+    @POST
+    @Path("{name}/redeploy")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "redeploy SDX cluster", produces = MediaType.APPLICATION_JSON, nickname = "redeploySdx")
+    void redeploy(@PathParam("name") String name, @Valid RedeploySdxClusterRequest redeploySdxClusterRequest);
+
+    @POST
+    @Path("/crn/{clusterCrn}/redeploy")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "redeploy SDX cluster by crn", produces = MediaType.APPLICATION_JSON, nickname = "redeploySdxByCrn")
+    void redeployByCrn(@PathParam("clusterCrn") String clusterCrn, @Valid RedeploySdxClusterRequest redeploySdxClusterRequest);
 
     @POST
     @Path("{name}/manual_repair")
@@ -134,12 +140,6 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "upgrades the datalake cluster to the latest images", nickname = "upgradeDatalakeClusterByCrn")
     void upgradeClusterByCrn(@PathParam("crn") String crn);
-
-    @GET
-    @Path("list")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "list SDX clusters", produces = MediaType.APPLICATION_JSON, nickname = "listSdx")
-    List<SdxClusterResponse> list(@QueryParam("envName") String envName);
 
     @POST
     @Path("{name}/sync")

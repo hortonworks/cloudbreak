@@ -8,7 +8,7 @@ import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartFailedEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartHandlerSelectors;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSelectors;
-import com.sequenceiq.environment.environment.service.DatahubService;
+import com.sequenceiq.environment.environment.service.datahub.DatahubPollerService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -17,11 +17,11 @@ import reactor.bus.Event;
 @Component
 public class StartDatahubHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
-    private final DatahubService datahubService;
+    private final DatahubPollerService datahubPollerService;
 
-    protected StartDatahubHandler(EventSender eventSender, DatahubService datahubService) {
+    protected StartDatahubHandler(EventSender eventSender, DatahubPollerService datahubPollerService) {
         super(eventSender);
-        this.datahubService = datahubService;
+        this.datahubPollerService = datahubPollerService;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class StartDatahubHandler extends EventSenderAwareHandler<EnvironmentDto>
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            datahubService.startAttachedDatahubClusters(environmentDto.getId(), environmentDto.getResourceCrn());
+            datahubPollerService.startAttachedDatahubClusters(environmentDto.getId(), environmentDto.getResourceCrn());
             EnvStartEvent envStartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
                     .withSelector(EnvStartStateSelectors.FINISH_ENV_START_EVENT.selector())
                     .withResourceId(environmentDto.getId())

@@ -8,7 +8,7 @@ import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartFailedEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartHandlerSelectors;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSelectors;
-import com.sequenceiq.environment.environment.service.SdxService;
+import com.sequenceiq.environment.environment.service.sdx.SdxPollerService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -17,11 +17,11 @@ import reactor.bus.Event;
 @Component
 public class StartDatalakeHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
-    private final SdxService sdxService;
+    private final SdxPollerService sdxPollerService;
 
-    protected StartDatalakeHandler(EventSender eventSender, SdxService sdxService) {
+    protected StartDatalakeHandler(EventSender eventSender, SdxPollerService sdxPollerService) {
         super(eventSender);
-        this.sdxService = sdxService;
+        this.sdxPollerService = sdxPollerService;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class StartDatalakeHandler extends EventSenderAwareHandler<EnvironmentDto
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            sdxService.startAttachedDatalake(environmentDto.getId(), environmentDto.getName());
+            sdxPollerService.startAttachedDatalake(environmentDto.getId(), environmentDto.getName());
             EnvStartEvent envStartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
                     .withSelector(EnvStartStateSelectors.ENV_START_DATAHUB_EVENT.selector())
                     .withResourceId(environmentDto.getId())

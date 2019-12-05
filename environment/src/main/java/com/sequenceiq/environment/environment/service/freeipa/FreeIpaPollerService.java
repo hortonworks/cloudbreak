@@ -1,0 +1,51 @@
+package com.sequenceiq.environment.environment.service.freeipa;
+
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.dyngr.Polling;
+import com.dyngr.core.AttemptMaker;
+import com.sequenceiq.environment.environment.poller.FreeIpaPollerProvider;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+
+@Service
+public class FreeIpaPollerService {
+
+    @Value("${env.stop.polling.attempt:90}")
+    private Integer attempt;
+
+    @Value("${env.stop.polling.sleep.time:5}")
+    private Integer sleeptime;
+
+    private final FreeIpaService freeIpaService;
+
+    private final FreeIpaPollerProvider freeipaPollerProvider;
+
+    public FreeIpaPollerService(FreeIpaService freeIpaService, FreeIpaPollerProvider freeipaPollerProvider) {
+        this.freeIpaService = freeIpaService;
+        this.freeipaPollerProvider = freeipaPollerProvider;
+    }
+
+    public void startAttachedFreeipaInstances(Long envId, String envCrn) {
+        executeFreeIpaOperationAndStartPolling(envCrn, freeIpaService::startFreeIpa, freeipaPollerProvider.startPoller(envId, envCrn));
+    }
+
+    public void stopAttachedFreeipaInstances(Long envId, String envCrn) {
+        executeFreeIpaOperationAndStartPolling(envCrn, freeIpaService::stopFreeIpa, freeipaPollerProvider.stopPoller(envId, envCrn));
+    }
+
+    private void executeFreeIpaOperationAndStartPolling(String envCrn, Consumer<String> freeIpaOperation, AttemptMaker<Void> attemptMaker) {
+        Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(envCrn);
+        if (freeIpaResponse.isPresent() && !freeIpaResponse.get().getStatus().isAvailable()) {
+            freeIpaOperation.accept(envCrn);
+            Polling.stopAfterAttempt(attempt)
+                    .stopIfException(true)
+                    .waitPeriodly(sleeptime, TimeUnit.SECONDS)
+                    .run(attemptMaker);
+        }
+    }
+}

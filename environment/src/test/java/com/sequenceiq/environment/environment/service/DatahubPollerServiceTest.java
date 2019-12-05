@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.service;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,15 +22,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.poller.ClusterPollerResultEvaluator;
 import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
+import com.sequenceiq.environment.environment.service.datahub.DatahubPollerService;
+import com.sequenceiq.environment.environment.service.datahub.DatahubService;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
 
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
-class DatahubServiceTest {
+class DatahubPollerServiceTest {
 
     private static final long ENV_ID = 165_343_536L;
 
@@ -37,11 +39,11 @@ class DatahubServiceTest {
 
     private static final String STACK_CRN = "stackCrn";
 
-    private DistroXV1Endpoint distroXV1Endpoint = Mockito.mock(DistroXV1Endpoint.class);
+    private DatahubService datahubService = Mockito.mock(DatahubService.class);
 
-    private DatahubPollerProvider datahubPollerProvider = new DatahubPollerProvider(distroXV1Endpoint, new ClusterPollerResultEvaluator());
+    private DatahubPollerProvider datahubPollerProvider = new DatahubPollerProvider(datahubService, new ClusterPollerResultEvaluator());
 
-    private DatahubService underTest = new DatahubService(distroXV1Endpoint, datahubPollerProvider, new WebApplicationExceptionMessageExtractor());
+    private DatahubPollerService underTest = new DatahubPollerService(datahubService, datahubPollerProvider, new WebApplicationExceptionMessageExtractor());
 
     @BeforeEach
     void setup() {
@@ -52,44 +54,44 @@ class DatahubServiceTest {
 
     @Test
     void testStopAttachedDatahubWhenNoAttachedDatahub() {
-        when(distroXV1Endpoint.list(null, ENV_CRN)).thenReturn(new StackViewV4Responses(Collections.emptySet()));
+        when(datahubService.list(ENV_CRN)).thenReturn(new StackViewV4Responses(Collections.emptySet()));
 
         underTest.stopAttachedDatahubClusters(ENV_ID, ENV_CRN);
 
-        verify(distroXV1Endpoint, times(0)).putStopByCrns(anyList());
+        verify(datahubService, times(0)).putStopByCrns(eq(ENV_CRN), anyList());
     }
 
     @Test
     void testStopAttachedDatahubWhenDatahubIsAvailable() {
         StackViewV4Response stackView = getStackView(Status.AVAILABLE);
-        when(distroXV1Endpoint.list(null, ENV_CRN)).thenReturn(new StackViewV4Responses(Set.of(stackView)));
-        when(distroXV1Endpoint.getByCrn(anyString(), anySet()))
+        when(datahubService.list(ENV_CRN)).thenReturn(new StackViewV4Responses(Set.of(stackView)));
+        when(datahubService.getByCrn(anyString(), anySet()))
                 .thenReturn(getStack(Status.AVAILABLE), getStack(Status.AVAILABLE), getStack(Status.STOPPED));
 
         underTest.stopAttachedDatahubClusters(ENV_ID, ENV_CRN);
 
-        verify(distroXV1Endpoint, times(1)).putStopByCrns(anyList());
+        verify(datahubService, times(1)).putStopByCrns(eq(ENV_CRN), anyList());
     }
 
     @Test
     void testStartAttachedDatahubWhenNoAttachedDatahub() {
-        when(distroXV1Endpoint.list(null, ENV_CRN)).thenReturn(new StackViewV4Responses(Collections.emptySet()));
+        when(datahubService.list(ENV_CRN)).thenReturn(new StackViewV4Responses(Collections.emptySet()));
 
         underTest.startAttachedDatahubClusters(ENV_ID, ENV_CRN);
 
-        verify(distroXV1Endpoint, times(0)).putStartByCrns(anyList());
+        verify(datahubService, times(0)).putStartByCrns(eq(ENV_CRN), anyList());
     }
 
     @Test
     void testStartAttachedDatahubWhenDatahubIsStopped() {
         StackViewV4Response stackView = getStackView(Status.STOPPED);
-        when(distroXV1Endpoint.list(null, ENV_CRN)).thenReturn(new StackViewV4Responses(Set.of(stackView)));
-        when(distroXV1Endpoint.getByCrn(anyString(), anySet()))
+        when(datahubService.list(ENV_CRN)).thenReturn(new StackViewV4Responses(Set.of(stackView)));
+        when(datahubService.getByCrn(anyString(), anySet()))
                 .thenReturn(getStack(Status.STOPPED), getStack(Status.STOPPED), getStack(Status.AVAILABLE));
 
         underTest.startAttachedDatahubClusters(ENV_ID, ENV_CRN);
 
-        verify(distroXV1Endpoint, times(1)).putStartByCrns(anyList());
+        verify(datahubService, times(1)).putStartByCrns(eq(ENV_CRN), anyList());
     }
 
     private StackV4Response getStack(Status status) {

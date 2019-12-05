@@ -1,7 +1,5 @@
 package com.sequenceiq.environment.environment.service;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,6 +12,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
 import com.sequenceiq.flow.core.CommonContext;
+import com.sequenceiq.flow.reactor.api.event.BaseFailedFlowEvent;
 import com.sequenceiq.notification.NotificationService;
 
 @Service
@@ -37,19 +36,36 @@ public class EnvironmentStatusUpdateService {
 
     public EnvironmentDto updateEnvironmentStatusAndNotify(CommonContext context, Payload payload, EnvironmentStatus environmentStatus,
             ResourceEvent resourceEvent, Enum envState) {
-        AtomicReference<EnvironmentDto> envDto = new AtomicReference<>();
-        environmentService
+        LOGGER.info("Flow entered into {}", envState.name());
+        return environmentService
                 .findEnvironmentById(payload.getResourceId())
-                .ifPresentOrElse(environment -> {
+                .map(environment -> {
                     environment.setStatus(environmentStatus);
                     Environment env = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
-                    envDto.set(environmentDto);
                     SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
                     notificationService.send(resourceEvent, simpleResponse, context.getFlowTriggerUserCrn());
-                }, () -> LOGGER.error("Cannot update status of environment, because it does not exist: {}. "
-                        + "But the flow will continue, how can this happen?", payload.getResourceId()));
+                    return environmentDto;
+                }).orElseThrow(() -> new IllegalStateException(
+                        String.format("Cannot update status of environment, because it does not exist: %s. ", payload.getResourceId())
+                ));
+    }
+
+    public EnvironmentDto updateFailedEnvironmentStatusAndNotify(CommonContext context, BaseFailedFlowEvent failedFlowEvent,
+            EnvironmentStatus environmentStatus, ResourceEvent resourceEvent, Enum envState) {
         LOGGER.info("Flow entered into {}", envState.name());
-        return envDto.get();
+        return environmentService
+                .findEnvironmentById(failedFlowEvent.getResourceId())
+                .map(environment -> {
+                    environment.setStatus(environmentStatus);
+                    environment.setStatusReason(failedFlowEvent.getException().getMessage());
+                    Environment env = environmentService.save(environment);
+                    EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
+                    SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                    notificationService.send(resourceEvent, simpleResponse, context.getFlowTriggerUserCrn());
+                    return environmentDto;
+                }).orElseThrow(() -> new IllegalStateException(
+                        String.format("Cannot update status of environment, because it does not exist: %s. ", failedFlowEvent.getResourceId())
+                ));
     }
 }

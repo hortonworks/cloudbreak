@@ -7,35 +7,29 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.ST
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UPDATE_IN_PROGRESS;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptState;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
-@ExtendWith(MockitoExtension.class)
 class FreeIpaPollerProviderTest {
 
     private static final Long ENV_ID = 1000L;
 
-    @Mock
-    private FreeIpaV1Endpoint freeIpaV1Endpoint;
+    private final FreeIpaService freeIpaService = Mockito.mock(FreeIpaService.class);
 
-    @InjectMocks
-    private FreeIpaPollerProvider underTest;
+    private final FreeIpaPollerProvider underTest = new FreeIpaPollerProvider(freeIpaService);
 
     @ParameterizedTest
     @MethodSource("freeipaStopStatuses")
@@ -43,7 +37,7 @@ class FreeIpaPollerProviderTest {
         String crn = "crn";
         DescribeFreeIpaResponse stack1 = getDescribeFreeIpaResponse(s1Status, crn);
 
-        Mockito.when(freeIpaV1Endpoint.describe(crn)).thenReturn(stack1);
+        Mockito.when(freeIpaService.describe(crn)).thenReturn(Optional.ofNullable(stack1));
 
         AttemptResult<Void> result = underTest.stopPoller(ENV_ID, crn).process();
 
@@ -57,7 +51,7 @@ class FreeIpaPollerProviderTest {
         String crn = "crn";
         DescribeFreeIpaResponse stack1 = getDescribeFreeIpaResponse(s1Status, crn);
 
-        Mockito.when(freeIpaV1Endpoint.describe(crn)).thenReturn(stack1);
+        Mockito.when(freeIpaService.describe(crn)).thenReturn(Optional.ofNullable(stack1));
 
         AttemptResult<Void> result = underTest.startPoller(ENV_ID, crn).process();
 
@@ -68,7 +62,7 @@ class FreeIpaPollerProviderTest {
     @Test
     void testStartPollerWhenFreeipaNull() throws Exception {
         String crn = "crn";
-        Mockito.when(freeIpaV1Endpoint.describe(crn)).thenReturn(null);
+        Mockito.when(freeIpaService.describe(crn)).thenReturn(Optional.empty());
 
         AttemptResult<Void> result = underTest.startPoller(ENV_ID, crn).process();
 

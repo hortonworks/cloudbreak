@@ -7,14 +7,11 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 
 import java.util.Optional;
 
-import javax.ws.rs.NotFoundException;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -23,35 +20,33 @@ import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.Free
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 import reactor.bus.Event;
 
 @Component
-public class FreeIpaDeleteHandler extends EventSenderAwareHandler<EnvironmentDto> {
+public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaDeleteHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaDeletionHandler.class);
 
     private static final int SINGLE_FAILURE = 1;
 
     private final EnvironmentService environmentService;
 
-    private final FreeIpaV1Endpoint freeIpaV1Endpoint;
+    private final FreeIpaService freeIpaService;
 
     private final PollingService<FreeIpaPollerObject> freeIpaPollingService;
 
-    private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
-
-    protected FreeIpaDeleteHandler(EventSender eventSender, EnvironmentService environmentService, FreeIpaV1Endpoint freeIpaV1Endpoint,
-            PollingService<FreeIpaPollerObject> freeIpaPollingService, WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
+    protected FreeIpaDeletionHandler(EventSender eventSender, EnvironmentService environmentService, FreeIpaService freeIpaService,
+            PollingService<FreeIpaPollerObject> freeIpaPollingService) {
         super(eventSender);
         this.environmentService = environmentService;
-        this.freeIpaV1Endpoint = freeIpaV1Endpoint;
+        this.freeIpaService = freeIpaService;
         this.freeIpaPollingService = freeIpaPollingService;
-        this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
     }
 
     @Override
@@ -59,13 +54,13 @@ public class FreeIpaDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         Optional<Environment> env = environmentService.findEnvironmentById(environmentDto.getId());
         try {
-            if (env.isPresent() && isFreeIpaExistsForEnvironment(env.get())) {
-                freeIpaV1Endpoint.delete(env.get().getResourceCrn());
+            if (env.isPresent() && freeIpaExistsForEnvironment(env.get())) {
+                freeIpaService.delete(env.get().getResourceCrn());
                 Pair<PollingResult, Exception> result = freeIpaPollingService.pollWithTimeout(
-                        new FreeIpaDeleteRetrievalTask(webApplicationExceptionMessageExtractor),
-                        new FreeIpaPollerObject(env.get().getId(), env.get().getResourceCrn(), freeIpaV1Endpoint),
-                        FreeIpaDeleteRetrievalTask.FREEIPA_RETRYING_INTERVAL,
-                        FreeIpaDeleteRetrievalTask.FREEIPA_RETRYING_COUNT,
+                        new FreeIpaDeletionRetrievalTask(freeIpaService),
+                        new FreeIpaPollerObject(env.get().getId(), env.get().getResourceCrn()),
+                        FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_INTERVAL,
+                        FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_COUNT,
                         SINGLE_FAILURE);
                 if (isSuccess(result.getLeft())) {
                     eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
@@ -100,15 +95,13 @@ public class FreeIpaDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
                 .build();
     }
 
-    private boolean isFreeIpaExistsForEnvironment(Environment env) {
-        try {
-            LOGGER.debug("About to call freeipa describe with env crn '{}'.", env.getResourceCrn());
-            freeIpaV1Endpoint.describe(env.getResourceCrn());
-            return true;
-        } catch (NotFoundException probablyResourceDoesNotExists) {
-            LOGGER.debug("Exception occurred during freeipa describe. Probably the resource does not exists, but worth a check", probablyResourceDoesNotExists);
+    private boolean freeIpaExistsForEnvironment(Environment env) {
+        LOGGER.debug("About to call freeipa describe with env crn '{}'.", env.getResourceCrn());
+        Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(env.getResourceCrn());
+        if (freeIpaResponse.isEmpty()) {
+            LOGGER.debug("Exception occurred during freeipa describe. Probably the resource does not exists, but worth a check.");
             return false;
         }
+        return true;
     }
-
 }

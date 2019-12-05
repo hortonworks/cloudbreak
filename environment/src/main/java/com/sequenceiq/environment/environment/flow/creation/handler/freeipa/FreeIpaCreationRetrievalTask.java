@@ -1,10 +1,13 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.polling.SimpleStatusCheckerTask;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -19,34 +22,42 @@ public class FreeIpaCreationRetrievalTask extends SimpleStatusCheckerTask<FreeIp
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaCreationRetrievalTask.class);
 
+    private final FreeIpaService freeIpaService;
+
+    public FreeIpaCreationRetrievalTask(FreeIpaService freeIpaService) {
+        this.freeIpaService = freeIpaService;
+    }
+
     @Override
     public boolean checkStatus(FreeIpaPollerObject freeIpaPollerObject) {
         String environmentCrn = freeIpaPollerObject.getEnvironmentCrn();
         try {
             LOGGER.info("Checking the state of FreeIpa creation progress for environment: '{}'", environmentCrn);
-            DescribeFreeIpaResponse freeIpa = freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn);
-            if (freeIpa == null) {
-                throw new FreeIpaOperationFailedException("FreeIpa instance does not exist.");
-            } else if (freeIpa.getStatus().isDeletionInProgress() || freeIpa.getStatus().isSuccessfullyDeleted()) {
-                LOGGER.info("FreeIpa '{}' '{}' is getting terminated (status:'{}'), polling is cancelled.",
+            Optional<DescribeFreeIpaResponse> freeIpaOptional = freeIpaService.describe(environmentCrn);
+            if (freeIpaOptional.isEmpty()) {
+                throw new FreeIpaOperationFailedException("FreeIpa cluster not found for environment: " + environmentCrn);
+            }
+            DescribeFreeIpaResponse freeIpa = freeIpaOptional.get();
+            if (freeIpa.getStatus().isDeletionInProgress() || freeIpa.getStatus().isSuccessfullyDeleted()) {
+                LOGGER.error("FreeIpa '{}' '{}' is getting terminated (status:'{}'), polling is cancelled.",
                         freeIpa.getName(),
                         freeIpa.getCrn(),
                         freeIpa.getStatus());
                 throw new FreeIpaOperationFailedException("FreeIpa instance deleted under the creation process.");
-            } else if (freeIpa.getStatus().isFailed()) {
-                LOGGER.info("FreeIpa '{}' '{}' is in failed state (status:'{}'), polling is cancelled.",
+            }
+            if (freeIpa.getStatus().isFailed()) {
+                LOGGER.error("FreeIpa '{}' '{}' is in failed state (status:'{}'), polling is cancelled.",
                         freeIpa.getName(),
                         freeIpa.getCrn(),
                         freeIpa.getStatus());
                 throw new FreeIpaOperationFailedException(String.format("FreeIpa creation failed. Status: '%s' statusReason: '%s'",
                         freeIpa.getStatus(), freeIpa.getStatusReason()));
-            } else if (freeIpa.getStatus().isAvailable()) {
+            }
+            if (freeIpa.getStatus().isAvailable()) {
                 return true;
             }
-        } catch (FreeIpaOperationFailedException e) {
-            throw e;
         } catch (Exception e) {
-            throw new FreeIpaOperationFailedException(e.getMessage(), e);
+            throw new FreeIpaOperationFailedException("FreeIpa creation operation failed. " + e.getMessage(), e);
         }
         return false;
     }
@@ -54,9 +65,13 @@ public class FreeIpaCreationRetrievalTask extends SimpleStatusCheckerTask<FreeIp
     @Override
     public void handleTimeout(FreeIpaPollerObject freeIpaPollerObject) {
         try {
-            DescribeFreeIpaResponse freeIpa = freeIpaPollerObject.getFreeIpaV1Endpoint().describe(freeIpaPollerObject.getEnvironmentCrn());
+            Optional<DescribeFreeIpaResponse> freeIpa = freeIpaService.describe(freeIpaPollerObject.getEnvironmentCrn());
+            if (freeIpa.isEmpty()) {
+                throw new FreeIpaOperationFailedException("FreeIpa cluster was not found for environment: "
+                        + freeIpaPollerObject.getEnvironmentCrn());
+            }
             throw new FreeIpaOperationFailedException(String.format("Polling operation timed out, FreeIpa creation failed. FreeIpa status: '%s' "
-                    + "statusReason: '%s'", freeIpa.getStatus(), freeIpa.getStatusReason()));
+                    + "statusReason: '%s'", freeIpa.get().getStatus(), freeIpa.get().getStatusReason()));
         } catch (Exception e) {
             throw new FreeIpaOperationFailedException("Polling operation timed out, FreeIpa creation failed. Also failed to get FreeIpa status: "
                     + e.getMessage(), e);

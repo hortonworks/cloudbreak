@@ -13,9 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.WebApplicationException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -23,11 +20,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.util.CidrUtil;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.configuration.SupportedPlatforms;
@@ -38,15 +35,14 @@ import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.v1.TelemetryApiConverter;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
-import com.sequenceiq.cloudbreak.util.CidrUtil;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneNetwork;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
@@ -74,7 +70,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final EnvironmentService environmentService;
 
-    private final FreeIpaV1Endpoint freeIpaV1Endpoint;
+    private final FreeIpaService freeIpaService;
 
     private final DnsV1Endpoint dnsV1Endpoint;
 
@@ -86,30 +82,26 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final FreeIpaServerRequestProvider freeIpaServerRequestProvider;
 
-    private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
-
     private final TelemetryApiConverter telemetryApiConverter;
 
     public FreeIpaCreationHandler(
             EventSender eventSender,
             EnvironmentService environmentService,
-            FreeIpaV1Endpoint freeIpaV1Endpoint,
+            FreeIpaService freeIpaService,
             DnsV1Endpoint dnsV1Endpoint,
             SupportedPlatforms supportedPlatforms,
             Map<CloudPlatform, FreeIpaNetworkProvider> freeIpaNetworkProviderMapByCloudPlatform,
             PollingService<FreeIpaPollerObject> freeIpaPollingService,
             FreeIpaServerRequestProvider freeIpaServerRequestProvider,
-            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor,
             TelemetryApiConverter telemetryApiConverter) {
         super(eventSender);
         this.environmentService = environmentService;
-        this.freeIpaV1Endpoint = freeIpaV1Endpoint;
+        this.freeIpaService = freeIpaService;
         this.dnsV1Endpoint = dnsV1Endpoint;
         this.supportedPlatforms = supportedPlatforms;
         this.freeIpaNetworkProviderMapByCloudPlatform = freeIpaNetworkProviderMapByCloudPlatform;
         this.freeIpaPollingService = freeIpaPollingService;
         this.freeIpaServerRequestProvider = freeIpaServerRequestProvider;
-        this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
         this.telemetryApiConverter = telemetryApiConverter;
     }
 
@@ -135,26 +127,25 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private void createFreeIpa(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environmentDto, Environment environment) throws Exception {
         try {
-            DescribeFreeIpaResponse freeIpa = freeIpaV1Endpoint.describe(environment.getResourceCrn());
-            LOGGER.info("FreeIpa for environmentCrn '{}' already exists. Using this one.", environment.getResourceCrn());
-            if (CREATE_IN_PROGRESS == freeIpa.getStatus()) {
+            Optional<DescribeFreeIpaResponse> freeIpa = freeIpaService.describe(environment.getResourceCrn());
+            if (freeIpa.isEmpty()) {
+                LOGGER.info("FreeIpa for environmentCrn '{}' was not found, creating a new one.", environment.getResourceCrn());
+                CreateFreeIpaRequest createFreeIpaRequest = createFreeIpaRequest(environmentDto);
+                freeIpaService.create(createFreeIpaRequest);
                 awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
+                AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(environmentDto);
+                if (shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
+                    dnsV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
+                }
+            } else {
+                LOGGER.info("FreeIpa for environmentCrn '{}' already exists. Using this one.", environment.getResourceCrn());
+                if (CREATE_IN_PROGRESS == freeIpa.get().getStatus()) {
+                    awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
+                }
             }
-        } catch (NotFoundException nfe) {
-            LOGGER.info("FreeIpa for environmentCrn '{}' was not found, creating a new one. Message: {}", environment.getResourceCrn(), nfe.getMessage());
-            CreateFreeIpaRequest createFreeIpaRequest = createFreeIpaRequest(environmentDto);
-            freeIpaV1Endpoint.create(createFreeIpaRequest);
-            awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
-            AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(environmentDto);
-            if (shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
-                dnsV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
-            }
-        } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.info("Can not start FreeIPA provisioning: {}", errorMessage, e);
-            throw new CloudbreakException("Can not start FreeIPA provisioning, client error happened on FreeIPA side: " + errorMessage, e);
         } catch (Exception e) {
-            throw new CloudbreakException("Failed to create FreeIpa instance.", e);
+            LOGGER.error("Can not start FreeIPA provisioning: {}", e.getMessage(), e);
+            throw new CloudbreakException("Failed to create FreeIpa cluster.", e);
         }
     }
 
@@ -269,8 +260,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private void awaitFreeIpaCreation(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environment) {
         Pair<PollingResult, Exception> pollWithTimeout = freeIpaPollingService.pollWithTimeout(
-                new FreeIpaCreationRetrievalTask(),
-                new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn(), freeIpaV1Endpoint),
+                new FreeIpaCreationRetrievalTask(freeIpaService),
+                new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn()),
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_INTERVAL,
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_COUNT,
                 FreeIpaCreationRetrievalTask.FREEIPA_FAILURE_COUNT);

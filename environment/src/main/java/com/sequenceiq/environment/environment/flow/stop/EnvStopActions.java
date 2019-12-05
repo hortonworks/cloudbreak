@@ -100,7 +100,7 @@ public class EnvStopActions {
             protected void doExecute(CommonContext context, EnvStopFailedEvent payload, Map<Object, Object> variables) {
                 LOGGER.warn(String.format("Failed to stop environment '%s'. Status: '%s'.",
                         payload.getEnvironmentDto(), payload.getEnvironmentStatus()), payload.getException());
-                environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload, payload.getEnvironmentStatus(),
+                environmentStatusUpdateService.updateFailedEnvironmentStatusAndNotify(context, payload, payload.getEnvironmentStatus(),
                         convertStatus(payload.getEnvironmentStatus()), EnvStopState.ENV_STOP_FAILED_STATE);
                 sendEvent(context, HANDLED_FAILED_ENV_STOP_EVENT.event(), payload);
             }
