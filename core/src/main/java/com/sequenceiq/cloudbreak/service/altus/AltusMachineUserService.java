@@ -28,7 +28,8 @@ public class AltusMachineUserService {
     public Optional<AltusCredential> generateDatabusMachineUserForFluent(Stack stack, Telemetry telemetry) {
         if (isMeteringOrDeploymentReportingSupported(stack, telemetry)) {
             return altusIAMService.generateMachineUserWithAccessKey(
-                    getFluentDatabusMachineUserName(stack), stack.getCreator().getUserCrn());
+                    getFluentDatabusMachineUserName(stack), stack.getCreator().getUserCrn(),
+                    telemetry.isUseSharedAltusCredentialEnabled());
         }
         return Optional.empty();
     }
@@ -40,7 +41,7 @@ public class AltusMachineUserService {
         if (isMeteringOrDeploymentReportingSupported(stack, telemetry)) {
             String machineUserName = getFluentDatabusMachineUserName(stack);
             String userCrn = stack.getCreator().getUserCrn();
-            altusIAMService.clearMachineUser(machineUserName, userCrn);
+            altusIAMService.clearMachineUser(machineUserName, userCrn, telemetry.isUseSharedAltusCredentialEnabled());
         }
     }
 

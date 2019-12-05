@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.altus;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -62,24 +63,24 @@ public class AltusMachineUserServiceTest {
     public void testCreateMachineUserAndGenerateKeys() {
         // GIVEN
         Optional<AltusCredential> altusCredential = Optional.of(new AltusCredential("accessKey", "secretKey".toCharArray()));
-        when(altusIAMService.generateMachineUserWithAccessKey(any(), any())).thenReturn(altusCredential);
+        when(altusIAMService.generateMachineUserWithAccessKey(any(), any(), anyBoolean())).thenReturn(altusCredential);
 
         // WHEN
         underTest.generateDatabusMachineUserForFluent(stack, telemetry);
 
         // THEN
         assertEquals("secretKey", new String(altusCredential.get().getPrivateKey()));
-        verify(altusIAMService, times(1)).generateMachineUserWithAccessKey(any(), any());
+        verify(altusIAMService, times(1)).generateMachineUserWithAccessKey(any(), any(), anyBoolean());
     }
 
     @Test
     public void testCleanupMachineUser() {
         // GIVEN
-        doNothing().when(altusIAMService).clearMachineUser(any(), any());
+        doNothing().when(altusIAMService).clearMachineUser(any(), any(), anyBoolean());
         // WHEN
         underTest.clearFluentMachineUser(stack, telemetry);
 
         // THEN
-        verify(altusIAMService, times(1)).clearMachineUser(any(), any());
+        verify(altusIAMService, times(1)).clearMachineUser(any(), any(), anyBoolean());
     }
 }

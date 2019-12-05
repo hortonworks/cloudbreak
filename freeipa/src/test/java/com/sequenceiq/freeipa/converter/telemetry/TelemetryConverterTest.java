@@ -7,6 +7,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -26,7 +28,9 @@ public class TelemetryConverterTest {
 
     @BeforeEach
     public void setUp() {
-        underTest = new TelemetryConverter(true, true, DATABUS_ENDPOINT);
+        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, false, "", null);
+        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true);
+        underTest = new TelemetryConverter(telemetryConfiguration, true);
     }
 
     @Test

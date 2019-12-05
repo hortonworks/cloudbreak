@@ -80,4 +80,10 @@ public class Telemetry implements Serializable {
                 && features.getReportDeploymentLogs().isEnabled();
     }
 
+    @JsonIgnore
+    public boolean isUseSharedAltusCredentialEnabled() {
+        return features != null && features.getUseSharedAltusCredential() != null
+                && features.getUseSharedAltusCredential().isEnabled();
+    }
+
 }

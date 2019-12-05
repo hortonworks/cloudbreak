@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
@@ -28,14 +29,16 @@ public class TelemetryConverter {
 
     private final boolean reportDeplymentLogs;
 
+    private final boolean useSharedAltusCredential;
+
     private final String databusEndpoint;
 
-    public TelemetryConverter(@Value("${freeipa.telemetry.enabled:true}") boolean freeIpaTelemetryEnabled,
-            @Value("${cluster.deployment.logs.report:false}") boolean reportDeplymentLogs,
-            @Value("${altus.databus.endpoint:}") String databusEndpoint) {
+    public TelemetryConverter(TelemetryConfiguration configuration,
+            @Value("${freeipa.telemetry.enabled:true}") boolean freeIpaTelemetryEnabled) {
         this.freeIpaTelemetryEnabled = freeIpaTelemetryEnabled;
-        this.reportDeplymentLogs = reportDeplymentLogs;
-        this.databusEndpoint = databusEndpoint;
+        this.reportDeplymentLogs = configuration.isReportDeploymentLogs();
+        this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
+        this.databusEndpoint = configuration.getAltusDatabusConfiguration().getAltusDatabusEndpoint();
     }
 
     public Telemetry convert(TelemetryRequest request) {
@@ -109,9 +112,8 @@ public class TelemetryConverter {
     }
 
     private Features createFeaturesFromRequest(FeaturesRequest featuresRequest) {
-        Features features = null;
+        Features features = new Features();
         if (reportDeplymentLogs) {
-            features = new Features();
             if (featuresRequest != null && featuresRequest.getReportDeploymentLogs() != null) {
                 features.setReportDeploymentLogs(featuresRequest.getReportDeploymentLogs());
                 LOGGER.debug("Fill report deployment log settings from feature request");
@@ -122,6 +124,10 @@ public class TelemetryConverter {
                 features.setReportDeploymentLogs(reportDeploymentLogsFeature);
             }
         }
+        if (useSharedAltusCredential && featuresRequest != null
+                && featuresRequest.getUseSharedAltusCredential() != null) {
+            features.setUseSharedAltusCredential(featuresRequest.getUseSharedAltusCredential());
+        }
         return features;
     }
 
@@ -130,6 +136,7 @@ public class TelemetryConverter {
         if (features != null && features.getReportDeploymentLogs() != null) {
             featuresResponse = new FeaturesResponse();
             featuresResponse.setReportDeploymentLogs(features.getReportDeploymentLogs());
+            featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
         }
         return featuresResponse;
     }
