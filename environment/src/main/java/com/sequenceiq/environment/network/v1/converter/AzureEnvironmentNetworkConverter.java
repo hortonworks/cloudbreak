@@ -29,7 +29,6 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
             azureNetwork.setNetworkId(azureParams.getNetworkId());
             azureNetwork.setResourceGroupName(azureParams.getResourceGroupName());
             azureNetwork.setNoPublicIp(azureParams.isNoPublicIp());
-            azureNetwork.setNoFirewallRules(azureParams.isNoFirewallRules());
         }
         return azureNetwork;
     }
@@ -64,7 +63,6 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                     .anAzureParams()
                     .withNetworkId(azureNetwork.getNetworkId())
                     .withResourceGroupName(azureNetwork.getResourceGroupName())
-                    .withNoFirewallRules(azureNetwork.getNoFirewallRules())
                     .withNoPublicIp(azureNetwork.getNoPublicIp())
                     .build())
                 .build();

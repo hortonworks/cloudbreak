@@ -65,8 +65,6 @@ public class AzureUtils {
 
     private static final String NO_PUBLIC_IP = "noPublicIp";
 
-    private static final String NO_FIREWALL_RULES = "noFirewallRules";
-
     private static final int HOST_GROUP_LENGTH = 3;
 
     private static final String MICROSOFT_COMPUTE_VIRTUAL_MACHINES = "Microsoft.Compute/virtualMachines";
@@ -175,7 +173,7 @@ public class AzureUtils {
     }
 
     public boolean isNoSecurityGroups(Network network) {
-        return network.getParameters().containsKey(NO_FIREWALL_RULES) ? network.getParameter(NO_FIREWALL_RULES, Boolean.class) : false;
+        return false;
     }
 
     public static List<CloudInstance> getInstanceList(CloudStack stack) {

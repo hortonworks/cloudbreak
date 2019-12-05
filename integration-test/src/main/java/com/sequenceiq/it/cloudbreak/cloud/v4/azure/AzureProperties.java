@@ -254,8 +254,6 @@ public class AzureProperties {
 
         private String resourceGroupName;
 
-        private Boolean noFirewallRules;
-
         private Boolean noPublicIp;
 
         private Set<String> subnetIds;
@@ -282,14 +280,6 @@ public class AzureProperties {
 
         public void setResourceGroupName(String resourceGroupName) {
             this.resourceGroupName = resourceGroupName;
-        }
-
-        public Boolean getNoFirewallRules() {
-            return noFirewallRules;
-        }
-
-        public void setNoFirewallRules(Boolean noFirewallRules) {
-            this.noFirewallRules = noFirewallRules;
         }
 
         public Boolean getNoPublicIp() {

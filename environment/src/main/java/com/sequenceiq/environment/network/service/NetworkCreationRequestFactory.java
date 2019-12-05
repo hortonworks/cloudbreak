@@ -40,7 +40,6 @@ public class NetworkCreationRequestFactory {
                 .withPrivateSubnetEnabled(getPrivateSubnetEnabled(environment))
                 .withSubnetCidrs(getSubNetCidrs(networkDto.getNetworkCidr()));
         getNoPublicIp(networkDto).ifPresent(builder::withNoPublicIp);
-        getNoFirewallRules(networkDto).ifPresent(builder::withNoFirewallRules);
         return builder.build();
     }
 
@@ -62,9 +61,5 @@ public class NetworkCreationRequestFactory {
 
     private Optional<Boolean> getNoPublicIp(NetworkDto networkDto) {
         return Optional.of(networkDto).map(NetworkDto::getAzure).map(AzureParams::isNoPublicIp);
-    }
-
-    private Optional<Boolean> getNoFirewallRules(NetworkDto networkDto) {
-        return Optional.of(networkDto).map(NetworkDto::getAzure).map(AzureParams::isNoFirewallRules);
     }
 }

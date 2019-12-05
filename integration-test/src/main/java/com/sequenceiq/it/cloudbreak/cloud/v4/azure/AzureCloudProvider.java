@@ -137,7 +137,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     public NetworkV4TestDto network(NetworkV4TestDto network) {
         AzureNetworkV4Parameters parameters = new AzureNetworkV4Parameters();
         parameters.setNoPublicIp(false);
-        parameters.setNoFirewallRules(false);
         return network.withAzure(parameters)
                 .withSubnetCIDR(getSubnetCIDR());
     }
@@ -157,7 +156,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     private EnvironmentNetworkAzureParams environmentNetworkParameters() {
         EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
         environmentNetworkAzureParams.setNetworkId(getNetworkId());
-        environmentNetworkAzureParams.setNoFirewallRules(getNoFirewallRules());
         environmentNetworkAzureParams.setNoPublicIp(getNoPublicIp());
         environmentNetworkAzureParams.setResourceGroupName(getResourceGroupName());
         return environmentNetworkAzureParams;
@@ -185,10 +183,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     public Set<String> getSubnetIDs() {
         return azureProperties.getNetwork().getSubnetIds();
-    }
-
-    public Boolean getNoFirewallRules() {
-        return azureProperties.getNetwork().getNoFirewallRules();
     }
 
     public Boolean getNoPublicIp() {

@@ -55,19 +55,7 @@ public class NetworkCreationValidator {
             }
         }
             validateNetworkAndCidr(environment, network, resultBuilder);
-            validateCidrAndNoFirewallRules(environment, network, resultBuilder);
         return resultBuilder;
-    }
-
-    private void validateCidrAndNoFirewallRules(Environment environment, NetworkDto network, ValidationResultBuilder resultBuilder) {
-        if (StringUtils.isNotEmpty(environment.getCidr())
-                && Objects.nonNull(network)
-                && Objects.nonNull(network.getAzure())
-                && network.getAzure().isNoFirewallRules()) {
-            String message = String.format("You must not set both the security access cidr (%s) and noFirewallRules simultaneously!", environment.getCidr());
-            LOGGER.info(message);
-            resultBuilder.error(message);
-        }
     }
 
     private void validateNetworkAndCidr(Environment environment, NetworkDto network, ValidationResultBuilder resultBuilder) {

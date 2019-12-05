@@ -66,7 +66,7 @@ public class AzureNetworkTemplateBuilder {
         model.put("subnetPrefixList", networkRequest.getSubnetCidrs());
         model.put("resourceGroupName", networkRequest.getEnvName());
         model.put("noPublicIp", networkRequest.isNoPublicIp());
-        model.put("noFirewallRules", networkRequest.isNoFirewallRules());
+        model.put("noFirewallRules", false);
         model.putAll(defaultCostTaggingService.prepareNetworkTagging());
         model.put("network_resource", CloudbreakResourceType.NETWORK);
         return model;

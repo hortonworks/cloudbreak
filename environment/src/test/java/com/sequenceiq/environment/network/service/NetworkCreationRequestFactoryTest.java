@@ -65,7 +65,6 @@ class NetworkCreationRequestFactoryTest {
         assertEquals(REGION, actual.getRegion().value());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(SUBNET_CIDRS, actual.getSubnetCidrs());
-        assertFalse(actual.isNoFirewallRules());
         assertFalse(actual.isNoPublicIp());
     }
 
@@ -89,7 +88,6 @@ class NetworkCreationRequestFactoryTest {
         assertEquals(REGION, actual.getRegion().value());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(SUBNET_CIDRS, actual.getSubnetCidrs());
-        assertTrue(actual.isNoFirewallRules());
         assertTrue(actual.isNoPublicIp());
     }
 
@@ -108,7 +106,6 @@ class NetworkCreationRequestFactoryTest {
                 .withId(NETWORK_ID)
                 .withNetworkCidr(NETWORK_CIDR)
                 .withAzure(AzureParams.AzureParamsBuilder.anAzureParams()
-                        .withNoFirewallRules(true)
                         .withNoPublicIp(true)
                         .build())
                 .build());

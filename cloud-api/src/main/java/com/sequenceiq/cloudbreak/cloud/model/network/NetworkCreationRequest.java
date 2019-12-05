@@ -23,8 +23,6 @@ public class NetworkCreationRequest {
 
     private final boolean noPublicIp;
 
-    private final boolean noFirewallRules;
-
     private final String stackName;
 
     private final boolean privateSubnetEnabled;
@@ -38,7 +36,6 @@ public class NetworkCreationRequest {
         this.networkCidr = builder.networkCidr;
         this.subnetCidrs = builder.subnetCidrs;
         this.noPublicIp = builder.noPublicIp;
-        this.noFirewallRules = builder.noFirewallRules;
         this.stackName = builder.stackName;
         this.privateSubnetEnabled = builder.privateSubnetEnabled;
     }
@@ -71,10 +68,6 @@ public class NetworkCreationRequest {
         return noPublicIp;
     }
 
-    public boolean isNoFirewallRules() {
-        return noFirewallRules;
-    }
-
     public String getStackName() {
         return stackName;
     }
@@ -103,8 +96,6 @@ public class NetworkCreationRequest {
         private Set<String> subnetCidrs;
 
         private boolean noPublicIp;
-
-        private boolean noFirewallRules;
 
         private String stackName;
 
@@ -147,11 +138,6 @@ public class NetworkCreationRequest {
 
         public Builder withNoPublicIp(boolean noPublicIp) {
             this.noPublicIp = noPublicIp;
-            return this;
-        }
-
-        public Builder withNoFirewallRules(boolean noFirewallRules) {
-            this.noFirewallRules = noFirewallRules;
             return this;
         }
 

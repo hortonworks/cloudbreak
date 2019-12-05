@@ -28,10 +28,6 @@ public class EnvironmentNetworkAzureParams {
     @ApiModelProperty(EnvironmentModelDescription.AZURE_NO_PUBLIC_IP)
     private Boolean noPublicIp;
 
-    @NotNull
-    @ApiModelProperty(EnvironmentModelDescription.AZURE_NO_FIREWALL_RULES)
-    private Boolean noFirewallRules;
-
     public String getNetworkId() {
         return networkId;
     }
@@ -56,22 +52,12 @@ public class EnvironmentNetworkAzureParams {
         this.noPublicIp = noPublicIp;
     }
 
-    public Boolean getNoFirewallRules() {
-        return noFirewallRules;
-    }
-
-    public void setNoFirewallRules(Boolean noFirewallRules) {
-        this.noFirewallRules = noFirewallRules;
-    }
-
     public static final class EnvironmentNetworkAzureParamsBuilder {
         private String networkId;
 
         private String resourceGroupName;
 
         private Boolean noPublicIp;
-
-        private Boolean noFirewallRules;
 
         private EnvironmentNetworkAzureParamsBuilder() {
         }
@@ -95,17 +81,11 @@ public class EnvironmentNetworkAzureParams {
             return this;
         }
 
-        public EnvironmentNetworkAzureParamsBuilder withNoFirewallRules(Boolean noFirewallRules) {
-            this.noFirewallRules = noFirewallRules;
-            return this;
-        }
-
         public EnvironmentNetworkAzureParams build() {
             EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
             environmentNetworkAzureParams.setNetworkId(networkId);
             environmentNetworkAzureParams.setResourceGroupName(resourceGroupName);
             environmentNetworkAzureParams.setNoPublicIp(noPublicIp);
-            environmentNetworkAzureParams.setNoFirewallRules(noFirewallRules);
             return environmentNetworkAzureParams;
         }
     }

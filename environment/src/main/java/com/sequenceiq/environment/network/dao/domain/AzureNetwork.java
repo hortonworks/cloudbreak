@@ -12,8 +12,6 @@ public class AzureNetwork extends BaseNetwork {
 
     private Boolean noPublicIp;
 
-    private Boolean noFirewallRules;
-
     public String getNetworkId() {
         return networkId;
     }
@@ -36,13 +34,5 @@ public class AzureNetwork extends BaseNetwork {
 
     public void setNoPublicIp(Boolean noPublicIp) {
         this.noPublicIp = noPublicIp;
-    }
-
-    public Boolean getNoFirewallRules() {
-        return noFirewallRules == null ? Boolean.FALSE : noFirewallRules;
-    }
-
-    public void setNoFirewallRules(Boolean noFirewallRules) {
-        this.noFirewallRules = noFirewallRules;
     }
 }

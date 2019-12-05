@@ -17,8 +17,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
         return Map.of(
                 "networkId", azure.getNetworkId(),
                 "resourceGroupName", azure.getResourceGroupName(),
-                "noPublicIp", azure.getNoPublicIp(),
-                "noFirewallRules", azure.getNoFirewallRules());
+                "noPublicIp", azure.getNoPublicIp());
     }
 
     @Override
