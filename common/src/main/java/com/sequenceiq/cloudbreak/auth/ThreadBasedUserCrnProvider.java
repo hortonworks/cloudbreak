@@ -36,8 +36,7 @@ public class ThreadBasedUserCrnProvider {
 
     public static void setUserCrn(String userCrn) {
         if (USER_CRN.get() != null) {
-            String errorMessage = String.format("Trying to set crn %s when it already contains %s, please check where we didn't remove it!",
-                    userCrn, USER_CRN.get());
+            String errorMessage = String.format("Trying to set crn %s when it already contains %s!", userCrn, USER_CRN.get());
             String stackTrace = Arrays.stream(Thread.currentThread().getStackTrace())
                     .map(StackTraceElement::toString).collect(Collectors.joining("\n", "\n", "\n"));
             LOGGER.error(errorMessage + " Stack trace on thread: " + stackTrace);
