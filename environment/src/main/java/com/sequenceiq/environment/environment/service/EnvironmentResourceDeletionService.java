@@ -54,25 +54,25 @@ public class EnvironmentResourceDeletionService {
         }
     }
 
-    Set<String> getAttachedSdxClusterNames(Environment environment) {
-        Set<String> clusterNames = new HashSet<>();
+    public Set<String> getAttachedSdxClusterCrns(Environment environment) {
+        Set<String> clusterCrns = new HashSet<>();
         LOGGER.debug("Get SDX clusters of the environment: '{}'", environment.getName());
         try {
-            Set<String> sdxClusterNames = sdxEndpoint
+            Set<String> sdxClusterCrns = sdxEndpoint
                     .list(environment.getName())
                     .stream()
-                    .map(SdxClusterResponse::getName)
+                    .map(SdxClusterResponse::getCrn)
                     .collect(Collectors.toSet());
-            clusterNames.addAll(sdxClusterNames);
+            clusterCrns.addAll(sdxClusterCrns);
         } catch (WebApplicationException e) {
             propagateException("Failed to get SDX clusters from SDX service due to:", e);
         } catch (ProcessingException e) {
             propagateException("Failed to get SDX clusters from SDX service due to:", e);
         }
-        return clusterNames;
+        return clusterCrns;
     }
 
-    Set<String> getDatalakeClusterNames(Environment environment) {
+    public Set<String> getDatalakeClusterNames(Environment environment) {
         Set<String> clusterNames = new HashSet<>();
         LOGGER.debug("Get Datalake clusters of the environment: '{}'", environment.getName());
         try {
