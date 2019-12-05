@@ -1,7 +1,7 @@
 {
   "name": "Operational Database for Azure",
   "description": "",
-  "type": "OTHER",
+  "type": "OPERATIONALDATABASE",
   "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {
