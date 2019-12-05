@@ -76,9 +76,6 @@ public class DatabaseServerV4ControllerTest {
     private AllocateDatabaseServerV4RequestToDBStackConverter dbStackConverter;
 
     @Mock
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Mock
     private ConverterUtil converterUtil;
 
     private DatabaseServerConfig server;
@@ -128,6 +125,7 @@ public class DatabaseServerV4ControllerTest {
         allocateResponse = new DatabaseServerStatusV4Response();
 
         dbStack = new DBStack();
+        ThreadBasedUserCrnProvider.removeUserCrn();
     }
 
     @Test
@@ -166,7 +164,7 @@ public class DatabaseServerV4ControllerTest {
     @Test
     public void testCreate() {
         String userCrn = USER_CRN;
-        when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(userCrn);
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
         when(dbStackConverter.convert(allocateRequest, userCrn)).thenReturn(dbStack);
         DBStack savedDBStack = new DBStack();
         when(creationService.launchDatabaseServer(dbStack)).thenReturn(savedDBStack);

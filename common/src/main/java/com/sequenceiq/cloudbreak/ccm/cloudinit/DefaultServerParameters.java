@@ -24,15 +24,18 @@ public class DefaultServerParameters implements ServerParameters, Serializable {
      */
     private final String ccmPublicKey;
 
+    private final String minaSshdServiceId;
+
     /**
      * Creates default server parameters with the specified parameters.
-     *
-     * @param ccmSshServiceEndpoint the SSH service endpoint for connecting to CCM
-     * @param ccmPublicKey          tthe public key for CCM, which allows the client to verify that it is talking to a valid CCM
+     *  @param ccmSshServiceEndpoint the SSH service endpoint for connecting to CCM
+     * @param ccmPublicKey          the public key for CCM, which allows the client to verify that it is talking to a valid CCM
+     * @param minaSshdServiceId     minaSshdServiceId
      */
-    public DefaultServerParameters(ServiceEndpoint ccmSshServiceEndpoint, String ccmPublicKey) {
+    public DefaultServerParameters(ServiceEndpoint ccmSshServiceEndpoint, String ccmPublicKey, String minaSshdServiceId) {
         this.ccmSshServiceEndpoint = Objects.requireNonNull(ccmSshServiceEndpoint, "ccmSshServiceEndpoint is null");
         this.ccmPublicKey = Objects.requireNonNull(ccmPublicKey, "ccmPublicKey is null");
+        this.minaSshdServiceId = minaSshdServiceId;
     }
 
     @Nonnull
@@ -45,5 +48,11 @@ public class DefaultServerParameters implements ServerParameters, Serializable {
     @Override
     public String getCcmPublicKey() {
         return ccmPublicKey;
+    }
+
+    @Nonnull
+    @Override
+    public String getMinaSshdServiceId() {
+        return minaSshdServiceId;
     }
 }

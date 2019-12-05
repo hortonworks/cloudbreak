@@ -170,9 +170,6 @@ public class ClusterHostServiceRunner {
     private KerberosConfigService kerberosConfigService;
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private TelemetryDecorator telemetryDecorator;
 
     @Inject
@@ -521,8 +518,8 @@ public class ClusterHostServiceRunner {
                 gateway.put("protocol", autoTlsEnabled ? "https" : "http");
             }
             if (SSOType.SSO_PROVIDER_FROM_UMS.equals(clusterGateway.getSsoType())) {
-                String accountId = threadBasedUserCrnProvider.getAccountId();
-                String actorCrn = threadBasedUserCrnProvider.getUserCrn();
+                String accountId = ThreadBasedUserCrnProvider.getAccountId();
+                String actorCrn = ThreadBasedUserCrnProvider.getUserCrn();
                 try {
                     String metadataXml = umsClient.getIdentityProviderMetadataXml(accountId, actorCrn);
                     gateway.put("saml", metadataXml);

@@ -36,9 +36,6 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Inject
     private ConverterUtil converterUtil;
 
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     @Override
     public ImageCatalogV4Responses list(Long workspaceId) {
         Set<ImageCatalog> allByWorkspaceId = imageCatalogService.findAllByWorkspaceId(workspaceId);
@@ -69,8 +66,8 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Override
     public ImageCatalogV4Response create(Long workspaceId, ImageCatalogV4Request request) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        String creator = threadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String creator = ThreadBasedUserCrnProvider.getUserCrn();
         ImageCatalog catalogToSave = converterUtil.convert(request, ImageCatalog.class);
         ImageCatalog imageCatalog = imageCatalogService.createForLoggedInUser(catalogToSave, workspaceId, accountId, creator);
         notify(ResourceEvent.IMAGE_CATALOG_CREATED);

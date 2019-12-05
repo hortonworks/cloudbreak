@@ -51,18 +51,15 @@ public class SdxReactorFlowManager {
     @Inject
     private SdxService sdxService;
 
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     public void triggerSdxCreation(Long sdxId) {
         String selector = ENV_WAIT_EVENT.event();
-        String userId = threadBasedUserCrnProvider.getUserCrn();
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
         notify(selector, new SdxEvent(selector, sdxId, userId));
     }
 
     public void triggerSdxDeletion(Long sdxId, boolean forced) {
         String selector = SDX_DELETE_EVENT.event();
-        String userId = threadBasedUserCrnProvider.getUserCrn();
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
         notify(selector, new SdxDeleteStartEvent(selector, sdxId, userId, forced));
     }
 
@@ -72,30 +69,30 @@ public class SdxReactorFlowManager {
                     "or multiple hostGroups in the 'hostGroupNames' fields");
         }
         String selector = SDX_REPAIR_EVENT.event();
-        String userId = threadBasedUserCrnProvider.getUserCrn();
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
         notify(selector, new SdxRepairStartEvent(selector, sdxId, userId, repairRequest));
     }
 
     public void triggerDatalakeUpgradeFlow(Long sdxId, UpgradeOptionV4Response upgradeOption) {
         String selector = SDX_UPGRADE_EVENT.event();
-        String userId = threadBasedUserCrnProvider.getUserCrn();
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
         notify(selector, new SdxUpgradeStartEvent(selector, sdxId, userId, upgradeOption));
     }
 
     public void triggerSdxStartFlow(Long sdxId) {
         String selector = SDX_START_EVENT.event();
-        String userId = threadBasedUserCrnProvider.getUserCrn();
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
         notify(selector, new SdxStartStartEvent(selector, sdxId, userId));
     }
 
     public void triggerSdxStopFlow(Long sdxId) {
         String selector = SDX_STOP_EVENT.event();
-        String userId = threadBasedUserCrnProvider.getUserCrn();
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
         notify(selector, new SdxStartStopEvent(selector, sdxId, userId));
     }
 
     public void cancelRunningFlows(Long sdxId) {
-        String userId = threadBasedUserCrnProvider.getUserCrn();
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
         SdxEvent cancelEvent = new SdxEvent(Flow2Handler.FLOW_CANCEL, sdxId, userId);
         reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancelEvent));
     }

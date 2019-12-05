@@ -30,17 +30,14 @@ public class MDCContextFilter extends OncePerRequestFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MDCContextFilter.class);
 
-    private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     private final Runnable mdcAppender;
 
-    public MDCContextFilter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider, Runnable mdcAppender) {
-        this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
+    public MDCContextFilter(Runnable mdcAppender) {
         this.mdcAppender = mdcAppender;
     }
 
-    public MDCContextFilter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider) {
-        this(threadBasedUserCrnProvider, () -> {
+    public MDCContextFilter() {
+        this(() -> {
         });
     }
 
@@ -49,7 +46,7 @@ public class MDCContextFilter extends OncePerRequestFilter {
         MDCBuilder.cleanupMdc();
         HttpServletRequestWrapper wrapper = new RequestIdHeaderInjectingHttpRequestWrapper(request);
         Builder builder = MdcContext.builder().requestId(wrapper.getHeader(REQUEST_ID_HEADER));
-        doIfNotNull(threadBasedUserCrnProvider.getUserCrn(), crn -> builder.userCrn(crn).tenant(threadBasedUserCrnProvider.getAccountId()));
+        doIfNotNull(ThreadBasedUserCrnProvider.getUserCrn(), crn -> builder.userCrn(crn).tenant(ThreadBasedUserCrnProvider.getAccountId()));
         builder.buildMdc();
         LOGGER.trace("Request id has been added to MDC context for request, method: {}, path: {}",
                 request.getMethod().toUpperCase(),

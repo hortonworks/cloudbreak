@@ -192,6 +192,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     private boolean clusterProxyRegistered;
 
+    private String minaSshdServiceId;
+
     public String getResourceCrn() {
         return resourceCrn;
     }
@@ -731,5 +733,13 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setClusterProxyRegistered(boolean clusterProxyRegistered) {
         this.clusterProxyRegistered = clusterProxyRegistered;
+    }
+
+    public String getMinaSshdServiceId() {
+        return minaSshdServiceId;
+    }
+
+    public void setMinaSshdServiceId(String minaSshdServiceId) {
+        this.minaSshdServiceId = minaSshdServiceId;
     }
 }

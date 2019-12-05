@@ -40,9 +40,6 @@ class SdxControllerTest {
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:test@test.com";
 
     @Mock
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Mock
     private SdxStatusService sdxStatusService;
 
     @Spy
@@ -59,7 +56,8 @@ class SdxControllerTest {
 
     @BeforeEach
     void init() {
-        when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
+        ThreadBasedUserCrnProvider.removeUserCrn();
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
     }
 
     @Test

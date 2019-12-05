@@ -108,8 +108,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public NetworkV4TestDto network(NetworkV4TestDto network) {
-        return network.withSubnetCIDR(getSubnetCIDR())
-                .withAws(networkParameters());
+        return network.withAws(networkParameters());
     }
 
     public AwsNetworkV4Parameters networkParameters() {

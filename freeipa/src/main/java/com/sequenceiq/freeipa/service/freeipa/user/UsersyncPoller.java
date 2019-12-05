@@ -34,9 +34,6 @@ public class UsersyncPoller {
     private static final Logger LOGGER = LoggerFactory.getLogger(UsersyncPoller.class);
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private StackService stackService;
 
     @Inject
@@ -68,7 +65,7 @@ public class UsersyncPoller {
 
     @VisibleForTesting
     void syncFreeIpaStacks() {
-        threadBasedUserCrnProvider.setUserCrn(INTERNAL_ACTOR_CRN);
+        ThreadBasedUserCrnProvider.setUserCrn(INTERNAL_ACTOR_CRN);
         Optional<String> requestId = Optional.of(UUID.randomUUID().toString());
         LOGGER.debug("Setting request id = {} for this poll", requestId);
         MDCBuilder.addRequestId(requestId.get());
@@ -106,7 +103,7 @@ public class UsersyncPoller {
                                 });
                     });
         } finally {
-            threadBasedUserCrnProvider.removeUserCrn();
+            ThreadBasedUserCrnProvider.removeUserCrn();
             MDCBuilder.cleanupMdc();
         }
     }

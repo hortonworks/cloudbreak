@@ -16,9 +16,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 public class SdxInternalController implements SdxInternalEndpoint {
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private SdxService sdxService;
 
     @Inject
@@ -26,7 +23,7 @@ public class SdxInternalController implements SdxInternalEndpoint {
 
     @Override
     public SdxClusterResponse create(String name, @Valid SdxInternalClusterRequest createSdxClusterRequest) {
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.createSdx(userCrn, name, createSdxClusterRequest, createSdxClusterRequest.getStackV4Request());
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         sdxClusterResponse.setName(sdxCluster.getClusterName());

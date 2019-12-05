@@ -69,8 +69,6 @@ public class EnvironmentApiConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentApiConverter.class);
 
-    private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
     private final RegionConverter regionConverter;
 
     private final CredentialToCredentialV1ResponseConverter credentialConverter;
@@ -81,13 +79,11 @@ public class EnvironmentApiConverter {
 
     private final TunnelConverter tunnelConverter;
 
-    public EnvironmentApiConverter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
-            RegionConverter regionConverter,
+    public EnvironmentApiConverter(RegionConverter regionConverter,
             CredentialToCredentialV1ResponseConverter credentialConverter,
             CredentialViewConverter credentialViewConverter,
             TelemetryApiConverter telemetryApiConverter,
             TunnelConverter tunnelConverter) {
-        this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.regionConverter = regionConverter;
         this.credentialConverter = credentialConverter;
         this.credentialViewConverter = credentialViewConverter;
@@ -97,8 +93,8 @@ public class EnvironmentApiConverter {
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
         EnvironmentCreationDto.Builder builder = EnvironmentCreationDto.builder()
-                .withAccountId(threadBasedUserCrnProvider.getAccountId())
-                .withCreator(threadBasedUserCrnProvider.getUserCrn())
+                .withAccountId(ThreadBasedUserCrnProvider.getAccountId())
+                .withCreator(ThreadBasedUserCrnProvider.getUserCrn())
                 .withName(request.getName())
                 .withDescription(request.getDescription())
                 .withCloudPlatform(request.getCloudPlatform())
@@ -330,7 +326,7 @@ public class EnvironmentApiConverter {
     public EnvironmentEditDto initEditDto(EnvironmentEditRequest request) {
         EnvironmentEditDto.EnvironmentEditDtoBuilder builder = EnvironmentEditDto.builder()
                 .withDescription(request.getDescription())
-                .withAccountId(threadBasedUserCrnProvider.getAccountId())
+                .withAccountId(ThreadBasedUserCrnProvider.getAccountId())
                 .withRegions(request.getRegions())
                 .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
                 .withAdminGroupName(request.getAdminGroupName());

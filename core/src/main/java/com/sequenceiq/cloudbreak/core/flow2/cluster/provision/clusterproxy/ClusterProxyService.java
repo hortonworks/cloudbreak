@@ -137,9 +137,9 @@ public class ClusterProxyService {
         InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String gatewayIp = stack.getPrimaryGatewayInstance().getPublicIpWrapper();
         TunnelEntry gatewayTunnel = new TunnelEntry(primaryGatewayInstance.getInstanceId(), KnownServiceIdentifier.GATEWAY.name(),
-                gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort());
+                gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort(), stack.getMinaSshdServiceId());
         TunnelEntry knoxTunnel = new TunnelEntry(primaryGatewayInstance.getInstanceId(), KnownServiceIdentifier.KNOX.name(),
-                gatewayIp, ServiceFamilies.KNOX.getDefaultPort());
+                gatewayIp, ServiceFamilies.KNOX.getDefaultPort(), stack.getMinaSshdServiceId());
         return asList(gatewayTunnel, knoxTunnel);
     }
 

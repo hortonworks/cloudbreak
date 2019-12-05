@@ -150,6 +150,9 @@ public class AwsPlatformResources implements PlatformResources {
     @Value("#{'${cb.aws.distrox.enabled.instance.types:}'.split(',')}")
     private List<String> enabledDistroxInstanceTypes;
 
+    @Value("${distrox.restrict.instance.types:true}")
+    private boolean restrictInstanceTypes;
+
     private final Predicate<VmType> enabledInstanceTypeFilter = vmt -> disabledInstanceTypes.stream()
             .filter(it -> !it.isEmpty())
             .noneMatch(di -> vmt.value().startsWith(di));
@@ -221,9 +224,15 @@ public class AwsPlatformResources implements PlatformResources {
                 Optional.ofNullable(vmTypeMap.get(zvs.getDefaultVmType()))
                         .filter(enabledInstanceTypeFilter)
                         .ifPresent(vmType -> defaultVmTypes.put(region(zvs.getZone()), vmType));
-                Optional.ofNullable(vmTypeMap.get(zvs.getDefaultVmType()))
-                        .filter(enabledDistroxInstanceTypeFilter)
-                        .ifPresent(vmType -> defaultDistroxVmTypes.put(region(zvs.getZone()), vmType));
+                if (restrictInstanceTypes) {
+                    Optional.ofNullable(vmTypeMap.get(zvs.getDefaultVmType()))
+                            .filter(enabledDistroxInstanceTypeFilter)
+                            .ifPresent(vmType -> defaultDistroxVmTypes.put(region(zvs.getZone()), vmType));
+                } else {
+                    Optional.ofNullable(vmTypeMap.get(zvs.getDefaultVmType()))
+                            .filter(enabledInstanceTypeFilter)
+                            .ifPresent(vmType -> defaultDistroxVmTypes.put(region(zvs.getZone()), vmType));
+                }
             }
         } catch (IOException e) {
             LOGGER.error("Cannot initialize platform parameters for aws", e);
@@ -574,7 +583,11 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + 'distrox'")
     public CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        return getCloudVmTypes(cloudCredential, region, filters, enabledDistroxInstanceTypeFilter);
+        if (restrictInstanceTypes) {
+            return getCloudVmTypes(cloudCredential, region, filters, enabledDistroxInstanceTypeFilter);
+        } else {
+            return getCloudVmTypes(cloudCredential, region, filters, enabledInstanceTypeFilter);
+        }
     }
 
     private CloudVmTypes getCloudVmTypes(CloudCredential cloudCredential, Region region, Map<String, String> filters,

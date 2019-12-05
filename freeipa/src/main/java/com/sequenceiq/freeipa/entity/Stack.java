@@ -106,6 +106,8 @@ public class Stack {
 
     private String appVersion;
 
+    private String minaSshdServiceId;
+
     public Long getId() {
         return id;
     }
@@ -345,5 +347,13 @@ public class Stack {
 
     public boolean isStopFailed() {
         return STOP_FAILED.equals(stackStatus.getStatus());
+    }
+
+    public String getMinaSshdServiceId() {
+        return minaSshdServiceId;
+    }
+
+    public void setMinaSshdServiceId(String minaSshdServiceId) {
+        this.minaSshdServiceId = minaSshdServiceId;
     }
 }

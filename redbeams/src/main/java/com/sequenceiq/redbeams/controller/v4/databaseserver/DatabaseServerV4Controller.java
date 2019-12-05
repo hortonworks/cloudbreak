@@ -47,9 +47,6 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     private AllocateDatabaseServerV4RequestToDBStackConverter dbStackConverter;
 
     @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
     private ConverterUtil converterUtil;
 
     @Override
@@ -72,7 +69,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     public DatabaseServerStatusV4Response create(AllocateDatabaseServerV4Request request) {
-        DBStack dbStack = dbStackConverter.convert(request, threadBasedUserCrnProvider.getUserCrn());
+        DBStack dbStack = dbStackConverter.convert(request, ThreadBasedUserCrnProvider.getUserCrn());
         DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack);
         return converterUtil.convert(savedDBStack, DatabaseServerStatusV4Response.class);
     }

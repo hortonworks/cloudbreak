@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,6 +33,8 @@ class ClusterTemplateServiceFilterTest {
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
+    private static final String USER_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
+
     private static final String AWS = "AWS";
 
     private static final String AZURE = "AZURE";
@@ -48,9 +51,6 @@ class ClusterTemplateServiceFilterTest {
     private ClusterTemplateViewService clusterTemplateViewService;
 
     @Mock
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Mock
     private TransactionService transactionService;
 
     @Mock
@@ -65,6 +65,41 @@ class ClusterTemplateServiceFilterTest {
     @InjectMocks
     private ClusterTemplateService underTest;
 
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    static Object[][] validateClusterTemplateCloudPlatformDataProvider() {
+        return new Object[][]{
+                // testCaseName         cloudPlatformValid
+                {"invalid platform", false},
+                {"valid platform", true},
+        };
+    }
+
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    static Object[][] listInWorkspaceAndCleanUpInvalidsDataProvider() {
+        return new Object[][]{
+                // testCaseName                 awsEnabled  azureEnabled    expectedResult
+                {"AWS invalid, AZURE invalid", false, false, Set.of()},
+                {"AWS valid, AZURE invalid", true, false, Set.of(CLUSTER_TEMPLATE_VIEW_V4_RESPONSE_AWS)},
+                {"AWS invalid, AZURE valid", false, true, Set.of(CLUSTER_TEMPLATE_VIEW_V4_RESPONSE_AZURE)},
+                {"AWS valid, AZURE valid", true, true, Set.of(CLUSTER_TEMPLATE_VIEW_V4_RESPONSE_AWS, CLUSTER_TEMPLATE_VIEW_V4_RESPONSE_AZURE)},
+        };
+    }
+
+    private static ClusterTemplateViewV4Response createClusterTemplateViewV4Response(String cloudPlatform) {
+        ClusterTemplateViewV4Response response = new ClusterTemplateViewV4Response();
+        response.setName(TEMPLATE_NAME + cloudPlatform);
+        response.setCloudPlatform(cloudPlatform);
+        response.setStatus(ResourceStatus.DEFAULT);
+        return response;
+    }
+
+    @BeforeEach
+    public void init() {
+        ThreadBasedUserCrnProvider.removeUserCrn();
+    }
+
     @Test
     void testIfGettingUsableTemplateWhenTemplateIsDefaultThenTrueShouldCome() {
         ClusterTemplateViewV4Response templateViewV4Response = new ClusterTemplateViewV4Response();
@@ -74,6 +109,8 @@ class ClusterTemplateServiceFilterTest {
 
         assertTrue(result);
     }
+    // CHECKSTYLE:ON
+    // @formatter:on
 
     @Test
     void testIfGettingUsableTemplateWhenTemplateIsUserManagedAndHasEnvironmentNameInItThenTrueShouldCome() {
@@ -96,16 +133,6 @@ class ClusterTemplateServiceFilterTest {
 
         assertFalse(result);
     }
-
-    // @formatter:off
-    // CHECKSTYLE:OFF
-    static Object[][] validateClusterTemplateCloudPlatformDataProvider() {
-        return new Object[][] {
-                // testCaseName         cloudPlatformValid
-                { "invalid platform",   false },
-                { "valid platform",     true },
-        };
-    }
     // CHECKSTYLE:ON
     // @formatter:on
 
@@ -115,27 +142,13 @@ class ClusterTemplateServiceFilterTest {
         ClusterTemplateViewV4Response response = new ClusterTemplateViewV4Response();
         response.setCloudPlatform(AWS);
 
-        when(threadBasedUserCrnProvider.getAccountId()).thenReturn(ACCOUNT_ID);
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
         when(cloudPlatformValidator.isClusterTemplateCloudPlatformValid(AWS, ACCOUNT_ID)).thenReturn(cloudPlatformValid);
 
         boolean result = underTest.isClusterTemplateHasValidCloudPlatform(response);
 
         assertThat(result).isEqualTo(cloudPlatformValid);
     }
-
-    // @formatter:off
-    // CHECKSTYLE:OFF
-    static Object[][] listInWorkspaceAndCleanUpInvalidsDataProvider() {
-        return new Object[][] {
-                // testCaseName                 awsEnabled  azureEnabled    expectedResult
-                { "AWS invalid, AZURE invalid", false,      false,          Set.of() },
-                { "AWS valid, AZURE invalid",   true,       false,          Set.of(CLUSTER_TEMPLATE_VIEW_V4_RESPONSE_AWS) },
-                { "AWS invalid, AZURE valid",   false,      true,           Set.of(CLUSTER_TEMPLATE_VIEW_V4_RESPONSE_AZURE) },
-                { "AWS valid, AZURE valid",     true,       true,           Set.of(CLUSTER_TEMPLATE_VIEW_V4_RESPONSE_AWS, CLUSTER_TEMPLATE_VIEW_V4_RESPONSE_AZURE) },
-        };
-    }
-    // CHECKSTYLE:ON
-    // @formatter:on
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("listInWorkspaceAndCleanUpInvalidsDataProvider")
@@ -147,7 +160,7 @@ class ClusterTemplateServiceFilterTest {
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         when(clusterTemplateViewService.findAllActive(WORKSPACE_ID)).thenReturn(views);
         when(converterUtil.convertAllAsSet(views, ClusterTemplateViewV4Response.class)).thenReturn(responses);
-        when(threadBasedUserCrnProvider.getAccountId()).thenReturn(ACCOUNT_ID);
+        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
         when(cloudPlatformValidator.isClusterTemplateCloudPlatformValid(AWS, ACCOUNT_ID)).thenReturn(awsEnabled);
         when(cloudPlatformValidator.isClusterTemplateCloudPlatformValid(AZURE, ACCOUNT_ID)).thenReturn(azureEnabled);
 
@@ -155,14 +168,6 @@ class ClusterTemplateServiceFilterTest {
 
         assertThat(result).isEqualTo(expectedResult);
         verify(environmentServiceDecorator).prepareEnvironments(responses);
-    }
-
-    private static ClusterTemplateViewV4Response createClusterTemplateViewV4Response(String cloudPlatform) {
-        ClusterTemplateViewV4Response response = new ClusterTemplateViewV4Response();
-        response.setName(TEMPLATE_NAME + cloudPlatform);
-        response.setCloudPlatform(cloudPlatform);
-        response.setStatus(ResourceStatus.DEFAULT);
-        return response;
     }
 
 }
