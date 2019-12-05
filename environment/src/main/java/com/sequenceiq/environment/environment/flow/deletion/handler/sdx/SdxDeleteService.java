@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler.sdx;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.service.EnvironmentResourceDeletionService;
 import com.sequenceiq.environment.util.PollingConfig;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -23,27 +25,43 @@ public class SdxDeleteService {
 
     private final SdxEndpoint sdxEndpoint;
 
-    public SdxDeleteService(SdxEndpoint sdxEndpoint) {
+    private final StackV4Endpoint stackV4Endpoint;
+
+    private final EnvironmentResourceDeletionService environmentResourceDeletionService;
+
+    public SdxDeleteService(SdxEndpoint sdxEndpoint, StackV4Endpoint stackV4Endpoint, EnvironmentResourceDeletionService environmentResourceDeletionService) {
         this.sdxEndpoint = sdxEndpoint;
+        this.stackV4Endpoint = stackV4Endpoint;
+        this.environmentResourceDeletionService = environmentResourceDeletionService;
     }
 
     public void deleteSdxClustersForEnvironment(PollingConfig pollingConfig, Environment environment) {
-        List<SdxClusterResponse> list = sdxEndpoint.list(environment.getName());
+        Set<String> sdxCrnsOrDatalakeName = environmentResourceDeletionService.getAttachedSdxClusterCrns(environment);
+        boolean legacySdxEndpoint = false;
+        // if someone use create the clusters via internal cluster API, in this case the SDX service does not know about these clusters,
+        // so we need to check against legacy DL API from Core service
+        if (sdxCrnsOrDatalakeName.isEmpty()) {
+            sdxCrnsOrDatalakeName = environmentResourceDeletionService.getDatalakeClusterNames(environment);
+            legacySdxEndpoint = true;
+        }
 
-        LOGGER.info("Found {} Data Lake clusters for environment {}.", list.size(), environment.getName());
-        if (list.isEmpty()) {
+        LOGGER.info("Found {} Data Lake clusters for environment {}.", sdxCrnsOrDatalakeName.size(), environment.getName());
+        if (sdxCrnsOrDatalakeName.isEmpty()) {
             LOGGER.info("No Data Lake clusters found for environment.");
         } else {
-            waitSdxClustersDeletion(pollingConfig, environment, list);
+            waitSdxClustersDeletion(pollingConfig, environment, sdxCrnsOrDatalakeName, legacySdxEndpoint);
             LOGGER.info("Data Lake deletion finished.");
         }
     }
 
-    private void waitSdxClustersDeletion(PollingConfig pollingConfig, Environment environment, List<SdxClusterResponse> list) {
-        LOGGER.debug("Calling sdxEndpoint.deleteByCrn for all data lakes [{}]",
-                list.stream().map(SdxClusterResponse::getCrn).collect(Collectors.joining(", ")));
+    private void waitSdxClustersDeletion(PollingConfig pollingConfig, Environment environment, Set<String> sdxCrnsOrDatalakeName, boolean legacySdxEndpoint) {
+        LOGGER.debug("Calling sdxEndpoint.deleteByCrn for all data lakes [{}]", String.join(", ", sdxCrnsOrDatalakeName));
 
-        list.forEach(s -> sdxEndpoint.deleteByCrn(s.getCrn(), true));
+        if (legacySdxEndpoint) {
+            sdxCrnsOrDatalakeName.forEach(name -> stackV4Endpoint.delete(0L, name, true));
+        } else {
+            sdxCrnsOrDatalakeName.forEach(crn -> sdxEndpoint.deleteByCrn(crn, true));
+        }
 
         LOGGER.debug("Starting poller to check all Data Lake stacks for environment {} is deleted", environment.getName());
         Polling.stopAfterDelay(pollingConfig.getTimeout(), pollingConfig.getTimeoutTimeUnit())
