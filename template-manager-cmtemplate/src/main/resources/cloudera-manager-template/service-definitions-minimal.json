@@ -467,6 +467,18 @@
         }
       ],
       "dependencies": ["ZOOKEEPER"]
+    },
+    {
+      "name": "PHOENIX",
+      "displayName": "Phoenix",
+      "components": [
+        {
+          "name": "PHOENIX_QUERY_SERVER",
+          "groups": ["worker"],
+          "base" : true
+        }
+      ],
+      "dependencies": ["ZOOKEEPER", "HDFS", "HBASE"]
     }
   ]
 }
