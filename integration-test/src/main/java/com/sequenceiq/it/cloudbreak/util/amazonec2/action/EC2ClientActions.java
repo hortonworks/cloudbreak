@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
@@ -43,7 +43,7 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.amazonec2.client.EC2Client;
 
-@Controller
+@Component
 public class EC2ClientActions extends EC2Client {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EC2ClientActions.class);
