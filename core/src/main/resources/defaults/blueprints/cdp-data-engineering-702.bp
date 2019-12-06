@@ -121,11 +121,11 @@
           },
           {
             "name": "tez.am.container.reuse.non-local-fallback.enabled",
-            "ref": "true"
+            "value": "true"
           },
           {
             "name": "tez.am.container.reuse.locality.delay-allocation-millis",
-            "ref": "0"
+            "value": "0"
           }
         ],
         "roleConfigGroups": [
