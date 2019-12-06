@@ -6,7 +6,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 public class MDCCleanerThreadPoolExecutor extends ThreadPoolExecutor {
@@ -24,7 +23,6 @@ public class MDCCleanerThreadPoolExecutor extends ThreadPoolExecutor {
     @Override
     protected void afterExecute(Runnable r, Throwable t) {
         super.afterExecute(r, t);
-        ThreadBasedUserCrnProvider.removeUserCrn();
         MDCBuilder.cleanupMdc();
     }
 }

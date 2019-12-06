@@ -13,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
@@ -42,7 +41,6 @@ class StackServiceTest {
         stack = new Stack();
         stack.setId(STACK_ID);
         stack.setName(STACK_NAME);
-        ThreadBasedUserCrnProvider.removeUserCrn();
     }
 
     @Test

@@ -42,9 +42,9 @@ public class InternalCrnModifier {
                         .setResource(userCrn.getResource())
                         .build();
                 LOGGER.debug("Changing internal CRN to {}", newUserCrn);
-                ThreadBasedUserCrnProvider.removeUserCrn();
-                ThreadBasedUserCrnProvider.setUserCrn(newUserCrn.toString());
                 createNewUser(newUserCrn);
+                return ThreadBasedUserCrnProvider.doAs(newUserCrn.toString(),
+                        () -> reflectionUtil.proceed(proceedingJoinPoint, methodSignature));
             }
         }
         return reflectionUtil.proceed(proceedingJoinPoint, methodSignature);

@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
@@ -40,21 +39,15 @@ class FreeIpaServerRequestProviderTest {
     @InjectMocks
     private FreeIpaServerRequestProvider underTest;
 
-    @BeforeEach
-    public void init() {
-        ThreadBasedUserCrnProvider.removeUserCrn();
-    }
-
     @Test
     void testCreateWithLegacyDomain() {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder().build();
-        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
         when(grpcUmsClient.getAccountDetails(USER_CRN, ACCOUNT_ID, Optional.empty())).thenReturn(account);
         when(environmentBasedDomainNameProvider.getDomainName(ENV_NAME, "internal")).thenReturn("mydomain");
 
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setName(ENV_NAME);
-        FreeIpaServerRequest freeIpaServerRequest = underTest.create(environmentDto);
+        FreeIpaServerRequest freeIpaServerRequest = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(environmentDto));
 
         assertEquals("mydomain", freeIpaServerRequest.getDomain());
     }
@@ -62,13 +55,12 @@ class FreeIpaServerRequestProviderTest {
     @Test
     void testCreateWithDomainReturnedFromUms() {
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder().setWorkloadSubdomain("checkme").build();
-        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
         when(grpcUmsClient.getAccountDetails(USER_CRN, ACCOUNT_ID, Optional.empty())).thenReturn(account);
         when(environmentBasedDomainNameProvider.getDomainName(ENV_NAME, "checkme")).thenReturn("checkme.mydomain");
 
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setName(ENV_NAME);
-        FreeIpaServerRequest freeIpaServerRequest = underTest.create(environmentDto);
+        FreeIpaServerRequest freeIpaServerRequest = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(environmentDto));
 
         assertEquals("checkme.mydomain", freeIpaServerRequest.getDomain());
     }

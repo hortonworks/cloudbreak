@@ -26,27 +26,19 @@ public class FlowParametersAspects {
 
     @Around("com.sequenceiq.flow.reactor.FlowParametersAspects.interceptReactorConsumersAcceptMethod()")
     public Object setFlowTriggerUserCrnForReactorHandler(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-        String flowTriggerUserCrn = null;
-        try {
-            Event<?> event = (Event<?>) proceedingJoinPoint.getArgs()[0];
-            flowTriggerUserCrn = event.getHeaders().get(FlowConstants.FLOW_TRIGGER_USERCRN);
+        Event<?> event = (Event<?>) proceedingJoinPoint.getArgs()[0];
+        String flowTriggerUserCrn = event.getHeaders().get(FlowConstants.FLOW_TRIGGER_USERCRN);
+        return ThreadBasedUserCrnProvider.doAsAndThrow(flowTriggerUserCrn, () -> {
             if (flowTriggerUserCrn != null) {
-                ThreadBasedUserCrnProvider.setUserCrn(flowTriggerUserCrn);
                 try {
                     MDCBuilder.buildMdcContextFromCrn(Crn.fromString(flowTriggerUserCrn));
                 } catch (Exception e) {
                     LOGGER.debug("Couldn't set MDCContext from crn: [{}]", flowTriggerUserCrn, e);
                 }
-                LOGGER.debug("A Reactor event handler's 'accept' method has been intercepted: {}, FlowTriggerUserCrn set to threadlocal.",
-                        proceedingJoinPoint.toShortString());
             }
+            LOGGER.debug("A Reactor event handler's 'accept' method has been intercepted: {}, user crn on thread local is: {}",
+                    proceedingJoinPoint.toShortString(), flowTriggerUserCrn);
             return proceedingJoinPoint.proceed();
-        } finally {
-            if (flowTriggerUserCrn != null) {
-                LOGGER.debug("FlowTriggerUserCrn remove from threadlocal on {}.",
-                        proceedingJoinPoint.toShortString());
-                ThreadBasedUserCrnProvider.removeUserCrn();
-            }
-        }
+        });
     }
 }

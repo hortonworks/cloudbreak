@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.auth.security.internal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -10,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -53,70 +56,119 @@ public class InternalCrnModifierTest {
     @Before
     public void before() {
         when(proceedingJoinPoint.getSignature()).thenReturn(methodSignature);
-        ThreadBasedUserCrnProvider.removeUserCrn();
     }
 
     @Test
     public void testModificationIfUserCrnIsRealUser() {
-        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
+        AtomicBoolean assertationHappened = new AtomicBoolean(false);
+        when(reflectionUtil.proceed(any(), any())).thenAnswer(invocation -> {
+            assertEquals(USER_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+            assertationHappened.set(true);
+            return null;
+        });
 
-        underTest.changeInternalCrn(proceedingJoinPoint);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            underTest.changeInternalCrn(proceedingJoinPoint);
+        });
 
         verify(reflectionUtil, times(0)).getParameter(any(), any(), any());
-        assertEquals(USER_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+        assertTrue("Assertation must happen!", assertationHappened.get());
     }
 
     @Test
     public void testModificationIfUserCrnIsNull() {
-        ThreadBasedUserCrnProvider.setUserCrn(null);
+        AtomicBoolean assertationHappened = new AtomicBoolean(false);
+        when(reflectionUtil.proceed(any(), any())).thenAnswer(invocation -> {
+            assertNull(ThreadBasedUserCrnProvider.getUserCrn());
+            assertationHappened.set(true);
+            return null;
+        });
 
-        underTest.changeInternalCrn(proceedingJoinPoint);
+        ThreadBasedUserCrnProvider.doAs(null, () -> {
+            underTest.changeInternalCrn(proceedingJoinPoint);
+        });
 
         verify(reflectionUtil, times(0)).getParameter(any(), any(), any());
-        assertNull(ThreadBasedUserCrnProvider.getUserCrn());
+        assertTrue("Assertation must happen!", assertationHappened.get());
     }
 
     @Test
     public void testModificationIfUserCrnIsInternalButThereIsNoResourceCrnParameter() {
-        ThreadBasedUserCrnProvider.setUserCrn(INTERNAL_CRN);
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.empty());
 
-        underTest.changeInternalCrn(proceedingJoinPoint);
+        AtomicBoolean assertationHappened = new AtomicBoolean(false);
+        when(reflectionUtil.proceed(any(), any())).thenAnswer(invocation -> {
+            assertEquals(INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+            assertationHappened.set(true);
+            return null;
+        });
 
-        assertEquals(INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+        ThreadBasedUserCrnProvider.doAs(INTERNAL_CRN, () -> {
+            underTest.changeInternalCrn(proceedingJoinPoint);
+        });
+
+        verify(reflectionUtil, times(1)).proceed(any(), any());
+        assertTrue("Assertation must happen!", assertationHappened.get());
     }
 
     @Test
     public void testModificationIfUserCrnIsInternalButResourceCrnParameterIsNotString() {
-        ThreadBasedUserCrnProvider.setUserCrn(INTERNAL_CRN);
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.of(2));
 
-        underTest.changeInternalCrn(proceedingJoinPoint);
+        AtomicBoolean assertationHappened = new AtomicBoolean(false);
+        when(reflectionUtil.proceed(any(), any())).thenAnswer(invocation -> {
+            assertEquals(INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+            assertationHappened.set(true);
+            return null;
+        });
 
-        assertEquals(INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+        ThreadBasedUserCrnProvider.doAs(INTERNAL_CRN, () -> {
+            underTest.changeInternalCrn(proceedingJoinPoint);
+        });
+
+        verify(reflectionUtil, times(1)).proceed(any(), any());
+        assertTrue("Assertation must happen!", assertationHappened.get());
     }
 
     @Test
     public void testModificationIfUserCrnIsInternalButResourceCrnParameterIsNotCrn() {
-        ThreadBasedUserCrnProvider.setUserCrn(INTERNAL_CRN);
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.of("not_crn"));
 
-        underTest.changeInternalCrn(proceedingJoinPoint);
+        AtomicBoolean assertationHappened = new AtomicBoolean(false);
+        when(reflectionUtil.proceed(any(), any())).thenAnswer(invocation -> {
+            assertEquals(INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+            assertationHappened.set(true);
+            return null;
+        });
 
-        assertEquals(INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+        ThreadBasedUserCrnProvider.doAs(INTERNAL_CRN, () -> {
+            underTest.changeInternalCrn(proceedingJoinPoint);
+        });
+
+        verify(reflectionUtil, times(1)).proceed(any(), any());
+        assertTrue("Assertation must happen!", assertationHappened.get());
     }
 
     @Test
     public void testModificationIfUserCrnIsInternal() {
-        ThreadBasedUserCrnProvider.setUserCrn(INTERNAL_CRN);
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.of(STACK_CRN));
         doNothing().when(internalUserModifier).persistModifiedInternalUser(any());
 
-        underTest.changeInternalCrn(proceedingJoinPoint);
+        AtomicBoolean assertationHappened = new AtomicBoolean(false);
+        when(reflectionUtil.proceed(any(), any())).thenAnswer(invocation -> {
+            assertEquals(EXPECTED_INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+            assertationHappened.set(true);
+            return null;
+        });
 
-        assertEquals(EXPECTED_INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+        ThreadBasedUserCrnProvider.doAs(INTERNAL_CRN, () -> {
+            underTest.changeInternalCrn(proceedingJoinPoint);
+        });
+
         ArgumentCaptor<CrnUser> newUserCaptor = ArgumentCaptor.forClass(CrnUser.class);
         verify(internalUserModifier, times(1)).persistModifiedInternalUser(newUserCaptor.capture());
         assertEquals("1234", newUserCaptor.getValue().getTenant());
+        verify(reflectionUtil, times(1)).proceed(any(), any());
+        assertTrue("Assertation must happen!", assertationHappened.get());
     }
 }
