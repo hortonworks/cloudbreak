@@ -71,7 +71,7 @@
     {
       "name": "idbroker",
       "template": {
-        "instanceType": "m5.2xlarge",
+        "instanceType": "t3.medium",
         "attachedVolumes": [
           {
             "count": 1,
