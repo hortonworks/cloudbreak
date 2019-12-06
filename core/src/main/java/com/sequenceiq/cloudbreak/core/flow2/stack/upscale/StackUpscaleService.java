@@ -109,6 +109,11 @@ public class StackUpscaleService {
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
     }
 
+    void reRegisterWithClusterProxy(long stackId) {
+        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Re-registering with Cluster Proxy service.");
+        flowMessageService.fireEventAndLog(stackId, Msg.RE_REGISTER_WITH_CLUSTER_PROXY, UPDATE_IN_PROGRESS.name());
+    }
+
     public Set<String> finishExtendMetadata(Stack stack, Integer scalingAdjustment, CollectMetadataResult payload) throws TransactionExecutionException {
         return transactionService.required(() -> {
             List<CloudVmMetaDataStatus> coreInstanceMetaData = payload.getResults();

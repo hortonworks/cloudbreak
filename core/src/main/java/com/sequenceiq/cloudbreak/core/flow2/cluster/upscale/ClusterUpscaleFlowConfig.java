@@ -21,8 +21,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscal
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.AMBARI_STOP_SERVER_AGENT_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.CHECK_HOST_METADATA_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.CHECK_HOST_METADATA_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.CLUSTER_PROXY_RE_REGISTRATION_FAILED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.CLUSTER_REPAIR_SINGLE_MASTER_START_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.CLUSTER_UPSCALE_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.CLUSTER_UPSCALE_FINISHED_EVENT;
@@ -57,7 +55,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscal
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.RECONFIGURE_KEYTABS_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.RE_REGISTER_WITH_CLUSTER_PROXY_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.UPLOAD_UPSCALE_RECIPES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.UPSCALING_AMBARI_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.UPSCALING_CLUSTER_MANAGER_STATE;
@@ -76,9 +73,7 @@ public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterU
     private static final List<Transition<ClusterUpscaleState, ClusterUpscaleEvent>> TRANSITIONS =
             new Builder<ClusterUpscaleState, ClusterUpscaleEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
-                    .from(INIT_STATE).to(RE_REGISTER_WITH_CLUSTER_PROXY_STATE).event(CLUSTER_UPSCALE_TRIGGER_EVENT).noFailureEvent()
-                    .from(RE_REGISTER_WITH_CLUSTER_PROXY_STATE).to(UPLOAD_UPSCALE_RECIPES_STATE).event(CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT)
-                    .failureEvent(CLUSTER_PROXY_RE_REGISTRATION_FAILED_EVENT)
+                    .from(INIT_STATE).to(UPLOAD_UPSCALE_RECIPES_STATE).event(CLUSTER_UPSCALE_TRIGGER_EVENT).noFailureEvent()
                     .from(UPLOAD_UPSCALE_RECIPES_STATE).to(RECONFIGURE_KEYTABS_STATE).event(UPLOAD_UPSCALE_RECIPES_FINISHED_EVENT)
                         .failureEvent(UPLOAD_UPSCALE_RECIPES_FAILED_EVENT)
                     .from(RECONFIGURE_KEYTABS_STATE).to(CHECK_HOST_METADATA_STATE).event(RECONFIGURE_KEYTABS_FINISHED_EVENT)
