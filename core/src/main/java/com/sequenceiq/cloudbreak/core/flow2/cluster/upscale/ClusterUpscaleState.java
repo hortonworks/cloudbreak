@@ -6,7 +6,6 @@ import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestar
 
 enum ClusterUpscaleState implements FlowState {
     INIT_STATE,
-    RE_REGISTER_WITH_CLUSTER_PROXY_STATE,
     UPLOAD_UPSCALE_RECIPES_STATE,
     CHECK_HOST_METADATA_STATE,
     RECONFIGURE_KEYTABS_STATE,

@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReRegistrationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRequest;
@@ -215,7 +216,7 @@ public class StackUpscaleActions {
                             context.getCloudCredential(), gatewayInstance);
                     sendEvent(context, sshFingerPrintReq);
                 } else {
-                    BootstrapNewNodesEvent bootstrapPayload = new BootstrapNewNodesEvent(context.getStack().getId(), upscaleCandidateAddresses);
+                    BootstrapNewNodesEvent bootstrapPayload = new BootstrapNewNodesEvent(context.getStack().getId());
                     sendEvent(context, StackUpscaleEvent.BOOTSTRAP_NEW_NODES_EVENT.event(), bootstrapPayload);
                 }
             }
@@ -228,9 +229,26 @@ public class StackUpscaleActions {
             @Override
             protected void doExecute(StackScalingFlowContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws Exception {
                 stackUpscaleService.setupTls(context);
-                BootstrapNewNodesEvent bootstrapNewNodesEvent =
-                        new BootstrapNewNodesEvent(payload.getResourceId(), (Set<String>) variables.get(UPSCALE_CANDIDATE_ADDRESSES));
-                sendEvent(context, StackCreationEvent.TLS_SETUP_FINISHED_EVENT.event(), bootstrapNewNodesEvent);
+                StackEvent event =
+                        new StackEvent(payload.getResourceId());
+                sendEvent(context, StackCreationEvent.TLS_SETUP_FINISHED_EVENT.event(), event);
+            }
+        };
+    }
+
+    @Bean(name = "RE_REGISTER_WITH_CLUSTER_PROXY_STATE")
+    public Action<?, ?> reRegisterWithClusterProxy() {
+        return new AbstractStackUpscaleAction<>(StackEvent.class) {
+
+            @Override
+            protected void doExecute(StackScalingFlowContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+                stackUpscaleService.reRegisterWithClusterProxy(context.getStack().getId());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackScalingFlowContext context) {
+                return new ClusterProxyReRegistrationRequest(context.getStack().getId(), context.getInstanceGroupName());
             }
         };
     }
@@ -242,7 +260,7 @@ public class StackUpscaleActions {
             protected void doExecute(StackScalingFlowContext context, BootstrapNewNodesEvent payload, Map<Object, Object> variables) {
                 stackUpscaleService.bootstrappingNewNodes(context.getStack());
                 Selectable request = new BootstrapNewNodesRequest(context.getStack().getId(),
-                        payload.getUpscaleCandidateAddresses(), context.getHostNames());
+                        (Set<String>) variables.get(UPSCALE_CANDIDATE_ADDRESSES), context.getHostNames());
                 sendEvent(context, request);
             }
         };
