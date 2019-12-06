@@ -41,24 +41,26 @@ public class InteractiveCredentialCreationStatusHandler implements EventHandler<
     @Override
     public void accept(Event<InteractiveCredentialCreationStatus> interactiveCredentialCreationStatusEvent) {
         InteractiveCredentialCreationStatus interactiveCredentialCreationStatus = interactiveCredentialCreationStatusEvent.getData();
-        ThreadBasedUserCrnProvider.setUserCrn(interactiveCredentialCreationStatus.getCloudContext().getUserId());
-        String message = interactiveCredentialCreationStatus.getMessage();
-        InteractiveCredentialNotification notification = new InteractiveCredentialNotification()
-                .withEventTimestamp(new Date().getTime())
-                .withUserId(interactiveCredentialCreationStatus.getCloudContext().getUserId())
-                .withCloud(interactiveCredentialCreationStatus.getExtendedCloudCredential().getCloudPlatform())
-                .withEventMessage(message);
-        ResourceEvent event;
-        if (interactiveCredentialCreationStatus.isError()) {
-            event = CREDENTIAL_AZURE_INTERACTIVE_FAILED;
-            notification.withEventType(event.name());
-            LOGGER.info("Interactive credential creation failed status: {}", new Json(notification).getValue());
-        } else {
-            event = CREDENTIAL_AZURE_INTERACTIVE_STATUS;
-            notification.withEventType(event.name());
-            LOGGER.info("Interactive credential creation success status: {}", new Json(notification).getValue());
-        }
-        notificationService.send(event, notification, ThreadBasedUserCrnProvider.getUserCrn());
+        String userCrn = interactiveCredentialCreationStatus.getCloudContext().getUserId();
+        ThreadBasedUserCrnProvider.doAs(userCrn, () -> {
+            String message = interactiveCredentialCreationStatus.getMessage();
+            InteractiveCredentialNotification notification = new InteractiveCredentialNotification()
+                    .withEventTimestamp(new Date().getTime())
+                    .withUserId(interactiveCredentialCreationStatus.getCloudContext().getUserId())
+                    .withCloud(interactiveCredentialCreationStatus.getExtendedCloudCredential().getCloudPlatform())
+                    .withEventMessage(message);
+            ResourceEvent event;
+            if (interactiveCredentialCreationStatus.isError()) {
+                event = CREDENTIAL_AZURE_INTERACTIVE_FAILED;
+                notification.withEventType(event.name());
+                LOGGER.info("Interactive credential creation failed status: {}", new Json(notification).getValue());
+            } else {
+                event = CREDENTIAL_AZURE_INTERACTIVE_STATUS;
+                notification.withEventType(event.name());
+                LOGGER.info("Interactive credential creation success status: {}", new Json(notification).getValue());
+            }
+            notificationService.send(event, notification, ThreadBasedUserCrnProvider.getUserCrn());
+        });
     }
 
     static class InteractiveCredentialNotification {

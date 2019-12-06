@@ -17,9 +17,6 @@ public class CrnFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String userCrn = request.getHeader("x-cdp-actor-crn");
-        ThreadBasedUserCrnProvider.removeUserCrn();
-        ThreadBasedUserCrnProvider.setUserCrn(userCrn);
-        filterChain.doFilter(request, response);
-        ThreadBasedUserCrnProvider.removeUserCrn();
+        ThreadBasedUserCrnProvider.doAsForServlet(userCrn, () -> filterChain.doFilter(request, response));
     }
 }

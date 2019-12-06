@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -66,10 +65,20 @@ public class BlueprintLoaderServiceTest {
     @Mock
     private Workspace workspace;
 
-    @Before
-    public void init() {
-        ThreadBasedUserCrnProvider.removeUserCrn();
-        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
+    public static Blueprint createBlueprint(ResourceStatus resourceStatus, int index) {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setId((long) index);
+        blueprint.setStackName("test-validation" + index);
+        blueprint.setBlueprintText(JSON + index);
+        blueprint.setHostGroupCount(3);
+        blueprint.setStatus(resourceStatus);
+        blueprint.setDescription("test validation" + index);
+        blueprint.setName("multi-node-hdfs-yarn" + index);
+        return blueprint;
+    }
+
+    public static CloudbreakUser identityUser() {
+        return new CloudbreakUser(LUCKY_MAN, LUCKY_MAN, LUCKY_MAN, LUCKY_MAN, LOTTERY_WINNERS);
     }
 
     @Test
@@ -147,8 +156,8 @@ public class BlueprintLoaderServiceTest {
         Map<String, Blueprint> defaultBlueprints = generateCacheData(3, 1);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
-
+        Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
         Assert.assertEquals(4L, resultSet.size());
     }
 
@@ -158,8 +167,8 @@ public class BlueprintLoaderServiceTest {
         Map<String, Blueprint> defaultBlueprints = generateCacheData(3);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
-
+        Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
         Assert.assertEquals(3L, resultSet.size());
     }
 
@@ -170,7 +179,6 @@ public class BlueprintLoaderServiceTest {
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
-
         Assert.assertEquals(3L, resultSet.size());
     }
 
@@ -197,8 +205,8 @@ public class BlueprintLoaderServiceTest {
         Map<String, Blueprint> defaultBlueprints = generateCacheData(1);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
-
+        Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
         Assert.assertTrue(resultSet.stream().findFirst().isPresent());
         Assert.assertEquals(resultSet.stream().findFirst().get().getStatus(), DEFAULT);
         Assert.assertEquals(blueprint.getStatus(), USER_MANAGED);
@@ -228,21 +236,5 @@ public class BlueprintLoaderServiceTest {
             blueprintData.add(blueprint);
         }
         return blueprintData;
-    }
-
-    public static Blueprint createBlueprint(ResourceStatus resourceStatus, int index) {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setId((long) index);
-        blueprint.setStackName("test-validation" + index);
-        blueprint.setBlueprintText(JSON + index);
-        blueprint.setHostGroupCount(3);
-        blueprint.setStatus(resourceStatus);
-        blueprint.setDescription("test validation" + index);
-        blueprint.setName("multi-node-hdfs-yarn" + index);
-        return blueprint;
-    }
-
-    public static CloudbreakUser identityUser() {
-        return new CloudbreakUser(LUCKY_MAN, LUCKY_MAN, LUCKY_MAN, LUCKY_MAN, LOTTERY_WINNERS);
     }
 }

@@ -37,28 +37,23 @@ public class CrnServiceTest {
     @Before
     public void setUp() {
         initMocks(this);
-
-        // the provider should really store this as a CRN
-        ThreadBasedUserCrnProvider.removeUserCrn();
-        ThreadBasedUserCrnProvider.setUserCrn(CRN.toString());
-
         when(uuidGeneratorService.randomUuid()).thenReturn("uuid");
     }
 
     @Test
     public void testGetCurrentAccountId() {
-        assertEquals(TEST_ACCOUNT_ID, crnService.getCurrentAccountId());
+        assertEquals(TEST_ACCOUNT_ID, ThreadBasedUserCrnProvider.doAs(CRN.toString(), () -> crnService.getCurrentAccountId()));
     }
 
     @Test
     public void testGetCurrentUserId() {
-        assertEquals(TEST_USER_ID, crnService.getCurrentUserId());
+        assertEquals(TEST_USER_ID, ThreadBasedUserCrnProvider.doAs(CRN.toString(), () -> crnService.getCurrentUserId()));
     }
 
     @Test
     public void testCreateCrnDatabaseConfig() {
         DatabaseConfig resource = new DatabaseConfig();
-        Crn crn = crnService.createCrn(resource);
+        Crn crn = ThreadBasedUserCrnProvider.doAs(CRN.toString(), () -> crnService.createCrn(resource));
 
         assertEquals(Crn.Service.REDBEAMS, crn.getService());
         assertEquals(CRN.getAccountId(), crn.getAccountId());
@@ -69,7 +64,7 @@ public class CrnServiceTest {
     @Test
     public void testCreateCrnDatabaseServerConfig() {
         DatabaseServerConfig resource = new DatabaseServerConfig();
-        Crn crn = crnService.createCrn(resource);
+        Crn crn = ThreadBasedUserCrnProvider.doAs(CRN.toString(), () -> crnService.createCrn(resource));
 
         assertEquals(Crn.Service.REDBEAMS, crn.getService());
         assertEquals(CRN.getAccountId(), crn.getAccountId());

@@ -25,7 +25,6 @@ import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.state.State;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateImageRequest;
@@ -195,7 +194,6 @@ public class StackImageUpdateActionsTest {
         when(stackService.getById(anyLong())).thenReturn(stack);
         when(stackUtil.getCloudCredential(stack)).thenReturn(cloudCredential);
 
-        ThreadBasedUserCrnProvider.removeUserCrn();
         variables.clear();
     }
 
