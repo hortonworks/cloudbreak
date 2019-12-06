@@ -21,10 +21,8 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
-// import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
-// import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
 import com.sequenceiq.redbeams.converter.stack.AllocateDatabaseServerV4RequestToDBStackConverter;
@@ -33,6 +31,9 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
+
+// import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
+// import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 
 public class DatabaseServerV4ControllerTest {
 
@@ -125,7 +126,6 @@ public class DatabaseServerV4ControllerTest {
         allocateResponse = new DatabaseServerStatusV4Response();
 
         dbStack = new DBStack();
-        ThreadBasedUserCrnProvider.removeUserCrn();
     }
 
     @Test
@@ -163,15 +163,13 @@ public class DatabaseServerV4ControllerTest {
 
     @Test
     public void testCreate() {
-        String userCrn = USER_CRN;
-        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
-        when(dbStackConverter.convert(allocateRequest, userCrn)).thenReturn(dbStack);
+        when(dbStackConverter.convert(allocateRequest, USER_CRN)).thenReturn(dbStack);
         DBStack savedDBStack = new DBStack();
         when(creationService.launchDatabaseServer(dbStack)).thenReturn(savedDBStack);
         when(converterUtil.convert(savedDBStack, DatabaseServerStatusV4Response.class))
             .thenReturn(allocateResponse);
 
-        DatabaseServerStatusV4Response response = underTest.create(allocateRequest);
+        DatabaseServerStatusV4Response response = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->  underTest.create(allocateRequest));
 
         assertEquals(allocateResponse, response);
         verify(creationService).launchDatabaseServer(dbStack);

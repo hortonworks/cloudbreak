@@ -34,8 +34,6 @@ class PlatformResourceControllerTest {
 
     @Test
     void getNoSqlTables() {
-        ThreadBasedUserCrnProvider.removeUserCrn();
-        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
         CloudNoSqlTables noSqlTables = new CloudNoSqlTables();
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
         PlatformNoSqlTablesResponse response = new PlatformNoSqlTablesResponse();
@@ -43,11 +41,12 @@ class PlatformResourceControllerTest {
         when(platformParameterService.getNoSqlTables(any(PlatformResourceRequest.class))).thenReturn(noSqlTables);
         when(convertersionService.convert(noSqlTables, PlatformNoSqlTablesResponse.class)).thenReturn(response);
 
-        PlatformNoSqlTablesResponse result = underTest.getNoSqlTables("cred",
-                "crn", "region", "aws", "az");
+        PlatformNoSqlTablesResponse result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getNoSqlTables("cred",
+                    "crn", "region", "aws", "az"));
 
         verify(platformParameterService).getNoSqlTables(platformResourceRequest);
         verify(convertersionService).convert(noSqlTables, PlatformNoSqlTablesResponse.class);
         assertEquals(response, result);
+
     }
 }

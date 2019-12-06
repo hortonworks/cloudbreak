@@ -178,10 +178,7 @@ public class ServiceProviderConnectorAdapter {
     }
 
     public PlatformParameters getPlatformParameters(Stack stack, String userCrn) {
-        ThreadBasedUserCrnProvider.setUserCrn(userCrn);
-        PlatformParameters platformParameters = getPlatformParameters(stack);
-        ThreadBasedUserCrnProvider.removeUserCrn();
-        return platformParameters;
+        return ThreadBasedUserCrnProvider.doAs(userCrn, () -> getPlatformParameters(stack));
     }
 
     public PlatformParameters getPlatformParameters(Stack stack) {
