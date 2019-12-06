@@ -125,7 +125,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public NetworkV4TestDto network(NetworkV4TestDto network) {
-        return network.withYarn(networkParameters()).withSubnetCIDR(getSubnetCIDR());
+        return network.withYarn(networkParameters());
     }
 
     @Override
@@ -135,8 +135,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
-        return network.withNetworkCIDR(getSubnetCIDR())
-                .withYarn(environmentNetworkParameters());
+        return network.withYarn(environmentNetworkParameters());
     }
 
     @Override
