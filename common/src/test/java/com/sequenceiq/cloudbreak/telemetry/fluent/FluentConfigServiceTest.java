@@ -23,6 +23,9 @@ public class FluentConfigServiceTest {
 
     private static final String PLATFORM_DEFAULT = "AWS";
 
+    private static final FluentClusterDetails DEFAULT_FLUENT_CLUSTER_DETAILS =
+            FluentClusterDetails.Builder.builder().withType(CLUSTER_TYPE_DEFAULT).withPlatform(PLATFORM_DEFAULT).build();
+
     private FluentConfigService underTest;
 
     @Before
@@ -39,8 +42,8 @@ public class FluentConfigServiceTest {
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN
-        FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
-                false, false, telemetry);
+        FluentConfigView result = underTest.createFluentConfigs(
+                DEFAULT_FLUENT_CLUSTER_DETAILS, false, false, telemetry);
         // THEN
         assertTrue(result.isEnabled());
         assertTrue(result.isCloudStorageLoggingEnabled());
@@ -57,8 +60,8 @@ public class FluentConfigServiceTest {
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN
-        FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
-                false, false, telemetry);
+        FluentConfigView result = underTest.createFluentConfigs(
+                DEFAULT_FLUENT_CLUSTER_DETAILS, false, false, telemetry);
         // THEN
         assertTrue(result.isEnabled());
         assertTrue(result.isCloudStorageLoggingEnabled());
@@ -75,8 +78,8 @@ public class FluentConfigServiceTest {
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN
-        FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
-                false, false, telemetry);
+        FluentConfigView result = underTest.createFluentConfigs(
+                DEFAULT_FLUENT_CLUSTER_DETAILS, false, false, telemetry);
         // THEN
         assertTrue(result.isEnabled());
         assertTrue(result.isCloudStorageLoggingEnabled());
@@ -93,8 +96,8 @@ public class FluentConfigServiceTest {
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN
-        FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
-                false, false, telemetry);
+        FluentConfigView result = underTest.createFluentConfigs(
+                DEFAULT_FLUENT_CLUSTER_DETAILS, false, false, telemetry);
         // THEN
         assertTrue(result.isEnabled());
         assertTrue(result.isCloudStorageLoggingEnabled());
@@ -113,8 +116,8 @@ public class FluentConfigServiceTest {
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN
-        FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
-                false, false, telemetry);
+        FluentConfigView result = underTest.createFluentConfigs(
+                DEFAULT_FLUENT_CLUSTER_DETAILS, false, false, telemetry);
         // THEN
         assertTrue(result.isEnabled());
         assertTrue(result.isCloudStorageLoggingEnabled());
@@ -135,8 +138,8 @@ public class FluentConfigServiceTest {
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN
-        FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
-                false, false, telemetry);
+        FluentConfigView result = underTest.createFluentConfigs(
+                DEFAULT_FLUENT_CLUSTER_DETAILS, false, false, telemetry);
         // THEN
         assertTrue(result.isEnabled());
         assertEquals("myAccountKey", result.getAzureStorageAccessKey());
@@ -156,8 +159,8 @@ public class FluentConfigServiceTest {
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN
-        FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
-                false, false, telemetry);
+        FluentConfigView result = underTest.createFluentConfigs(
+                DEFAULT_FLUENT_CLUSTER_DETAILS, false, false, telemetry);
         // THEN
         assertTrue(result.isEnabled());
         assertEquals("myAccountKey", result.getAzureStorageAccessKey());
@@ -176,8 +179,8 @@ public class FluentConfigServiceTest {
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN
-        FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
-                false, false, telemetry);
+        FluentConfigView result = underTest.createFluentConfigs(
+                DEFAULT_FLUENT_CLUSTER_DETAILS, false, false, telemetry);
         // THEN
         assertTrue(result.isEnabled());
         assertEquals("myAccountKey", result.getAzureStorageAccessKey());
@@ -192,8 +195,8 @@ public class FluentConfigServiceTest {
         setMetering(telemetry);
         telemetry.setDatabusEndpoint("myEndpoint");
         // WHEN
-        FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
-                true, true, telemetry);
+        FluentConfigView result = underTest.createFluentConfigs(
+                DEFAULT_FLUENT_CLUSTER_DETAILS, true, true, telemetry);
         // THEN
         assertTrue(result.isEnabled());
         assertTrue(result.isMeteringEnabled());
@@ -205,8 +208,8 @@ public class FluentConfigServiceTest {
         Telemetry telemetry = new Telemetry();
         setMetering(telemetry);
         // WHEN
-        FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
-                false, false, telemetry);
+        FluentConfigView result = underTest.createFluentConfigs(
+                DEFAULT_FLUENT_CLUSTER_DETAILS, false, false, telemetry);
         // THEN
         assertFalse(result.isEnabled());
         assertFalse(result.isMeteringEnabled());
@@ -218,8 +221,7 @@ public class FluentConfigServiceTest {
         Telemetry telemetry = new Telemetry();
         setMetering(telemetry);
         // WHEN
-        FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
-                false, false, telemetry);
+        FluentConfigView result = underTest.createFluentConfigs(DEFAULT_FLUENT_CLUSTER_DETAILS, false, false, telemetry);
         // THEN
         assertFalse(result.isEnabled());
         assertFalse(result.isMeteringEnabled());
@@ -231,8 +233,7 @@ public class FluentConfigServiceTest {
         Telemetry telemetry = new Telemetry();
         setReportDeploymentLogs(telemetry);
         // WHEN
-        FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
-                true, false, telemetry);
+        FluentConfigView result = underTest.createFluentConfigs(DEFAULT_FLUENT_CLUSTER_DETAILS, true, false, telemetry);
         // THEN
         assertTrue(result.isEnabled());
         assertTrue(result.isReportClusterDeploymentLogs());
@@ -244,8 +245,8 @@ public class FluentConfigServiceTest {
         Telemetry telemetry = new Telemetry();
         setReportDeploymentLogs(telemetry);
         // WHEN
-        FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
-                false, true, telemetry);
+        FluentConfigView result = underTest.createFluentConfigs(
+                DEFAULT_FLUENT_CLUSTER_DETAILS, false, true, telemetry);
         // THEN
         assertFalse(result.isEnabled());
         assertFalse(result.isReportClusterDeploymentLogs());
@@ -260,8 +261,7 @@ public class FluentConfigServiceTest {
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN
-        underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
-                false, false, telemetry);
+        underTest.createFluentConfigs(DEFAULT_FLUENT_CLUSTER_DETAILS, false, false, telemetry);
     }
 
     @Test(expected = CloudbreakServiceException.class)
@@ -275,8 +275,7 @@ public class FluentConfigServiceTest {
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN
-        underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
-                false, false, telemetry);
+        underTest.createFluentConfigs(DEFAULT_FLUENT_CLUSTER_DETAILS, false, false, telemetry);
     }
 
     private void setMetering(Telemetry telemetry) {

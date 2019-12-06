@@ -39,7 +39,7 @@ public class CloudStorageFolderResolverService {
                         clusterType, clusterName, clusterCrn);
             } else {
                 LOGGER.warn("None of the telemetry logging storage location was resolved, "
-                        + "make sure storage type is set properly (currently supported: s3, wasb)");
+                        + "make sure storage type is set properly (currently supported: s3, abfs)");
             }
             logging.setStorageLocation(storageLocation);
         } else {

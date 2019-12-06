@@ -15,6 +15,8 @@ public class Logging implements Serializable {
 
     private AdlsGen2CloudStorageV1Parameters adlsGen2;
 
+    private CloudwatchParams cloudwatch;
+
     public String getStorageLocation() {
         return storageLocation;
     }
@@ -37,5 +39,13 @@ public class Logging implements Serializable {
 
     public void setAdlsGen2(AdlsGen2CloudStorageV1Parameters adlsGen2) {
         this.adlsGen2 = adlsGen2;
+    }
+
+    public CloudwatchParams getCloudwatch() {
+        return cloudwatch;
+    }
+
+    public void setCloudwatch(CloudwatchParams cloudwatch) {
+        this.cloudwatch = cloudwatch;
     }
 }

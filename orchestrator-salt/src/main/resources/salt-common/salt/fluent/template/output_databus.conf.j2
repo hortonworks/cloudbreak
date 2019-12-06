@@ -1,7 +1,7 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {%- from 'databus/settings.sls' import databus with context %}
 {%- if databus.valid and fluent.dbusReportDeploymentLogs %}
-<match databus**>
+<match processed.databus**>
   @type copy
   <store ignore_error>
     @type                            databus
@@ -10,14 +10,13 @@
     credential_file_reload_interval  60
     debug                            false
     endpoint                         "{{ databus.endpoint }}"
-    event_message_field              message
-    headers                          app:{{ fluent.dbusAppName }}
+    headers                          app:{{ fluent.clusterType }}
     stream_name                      LogCollection
     partition_key                    "#{Socket.gethostname}"
 
     <buffer tag,time>
       @type file
-      path /var/log/td-agent/databus_metering
+      path /var/log/td-agent/databus_service_logs
       timekey 1m
       timekey_wait 0s
       chunk_limit_size 600k

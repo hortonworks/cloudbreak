@@ -1,16 +1,20 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 # CONFIGURED BY SALT - do not edit
 {% if databusReportDeploymentLogs == "true" %}# DATABUS - CLUSTER BUNDLE LOGS ENABLED - do not edit{% endif %}
-{% if fluent.cloudStorageLoggingEnabled %}
+{% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
 @include input.conf
 {% endif %}
 {% if databusReportDeploymentLogs == "true" %}
 @include input_databus.conf
 {% endif %}
 @include databus_metering.conf
+{% if fluent.cloudLoggingServiceEnabled %}
+@include filter.conf
+{% endif %}
 {% if databusReportDeploymentLogs == "true" %}
+@include filter_databus.conf
 @include output_databus.conf
 {% endif %}
-{% if fluent.cloudStorageLoggingEnabled %}
+{% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
 @include output.conf
 {% endif %}

@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
+import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
@@ -91,9 +92,16 @@ public class TelemetryDecorator {
         boolean meteringFeatureEnabled = telemetry.isMeteringFeatureEnabled();
         // for datalake - metering is not enabled yet
         boolean meteringEnabled = meteringFeatureEnabled && !StackType.DATALAKE.equals(stack.getType());
-
-        FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterType,
-                stack.getCloudPlatform(), databusConfigView.isEnabled(), meteringEnabled, telemetry);
+        final FluentClusterDetails clusterDetails = FluentClusterDetails.Builder.builder()
+                .withOwner(stack.getCreator().getUserCrn())
+                .withName(stack.getName())
+                .withType(clusterType)
+                .withCrn(stack.getResourceCrn())
+                .withPlatform(stack.getCloudPlatform())
+                .withVersion(version)
+                .build();
+        FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterDetails,
+                databusConfigView.isEnabled(), meteringEnabled, telemetry);
         if (fluentConfigView.isEnabled()) {
             Map<String, Object> fluentConfig = fluentConfigView.toMap();
             servicePillar.put("fluent",

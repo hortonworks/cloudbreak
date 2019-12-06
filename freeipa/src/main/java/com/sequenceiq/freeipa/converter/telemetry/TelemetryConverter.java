@@ -1,10 +1,13 @@
 package com.sequenceiq.freeipa.converter.telemetry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -18,6 +21,8 @@ import com.sequenceiq.common.api.type.FeatureSetting;
 
 @Component
 public class TelemetryConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TelemetryConverter.class);
 
     private final boolean freeIpaTelemetryEnabled;
 
@@ -73,6 +78,8 @@ public class TelemetryConverter {
                 adlsGen2Params.setSecure(adlsGen2FromRequest.isSecure());
                 adlsGen2Params.setManagedIdentity(adlsGen2FromRequest.getManagedIdentity());
                 logging.setAdlsGen2(adlsGen2Params);
+            } else if (loggingRequest.getCloudwatch() != null) {
+                logging.setCloudwatch(CloudwatchParams.copy(loggingRequest.getCloudwatch()));
             }
         }
         return logging;
@@ -94,6 +101,8 @@ public class TelemetryConverter {
                 adlsGen2Params.setSecure(logging.getAdlsGen2().isSecure());
                 adlsGen2Params.setManagedIdentity(logging.getAdlsGen2().getManagedIdentity());
                 loggingResponse.setAdlsGen2(adlsGen2Params);
+            } else if (logging.getCloudwatch() != null) {
+                loggingResponse.setCloudwatch(CloudwatchParams.copy(logging.getCloudwatch()));
             }
         }
         return loggingResponse;
@@ -105,9 +114,11 @@ public class TelemetryConverter {
             features = new Features();
             if (featuresRequest != null && featuresRequest.getReportDeploymentLogs() != null) {
                 features.setReportDeploymentLogs(featuresRequest.getReportDeploymentLogs());
+                LOGGER.debug("Fill report deployment log settings from feature request");
             } else {
+                LOGGER.debug("Auto-fill report deployment logs settings with defaults. (disabled)");
                 FeatureSetting reportDeploymentLogsFeature = new FeatureSetting();
-                reportDeploymentLogsFeature.setEnabled(true);
+                reportDeploymentLogsFeature.setEnabled(false);
                 features.setReportDeploymentLogs(reportDeploymentLogsFeature);
             }
         }

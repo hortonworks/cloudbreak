@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
+import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
@@ -36,6 +38,9 @@ import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Service
 public class FreeIpaInstallService {
+
+    @Value("${info.app.version:}")
+    private String version;
 
     @Inject
     private HostOrchestrator hostOrchestrator;
@@ -86,8 +91,17 @@ public class FreeIpaInstallService {
         Telemetry telemetry = stack.getTelemetry();
         if (telemetry != null) {
             boolean databusEnabled = telemetry.isReportDeploymentLogsFeatureEnabled();
-            FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(
-                    FluentClusterType.FREEIPA.value(), stack.getCloudPlatform(), databusEnabled, false, telemetry);
+            final FluentClusterDetails clusterDetails = FluentClusterDetails.Builder.builder()
+                    .withOwner(stack.getOwner())
+                    .withName(stack.getName())
+                    .withType(FluentClusterType.FREEIPA.value())
+                    .withCrn(stack.getResourceCrn())
+                    .withPlatform(stack.getCloudPlatform())
+                    .withVersion(version)
+                    .build();
+
+            FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterDetails,
+                    databusEnabled, false, telemetry);
             servicePillarConfig.put("fluent", new SaltPillarProperties("/fluent/init.sls", Collections.singletonMap("fluent", fluentConfigView.toMap())));
             if (databusEnabled) {
                 Optional<AltusCredential> credential = altusMachineUserService.createMachineUserWithAccessKeys(stack);

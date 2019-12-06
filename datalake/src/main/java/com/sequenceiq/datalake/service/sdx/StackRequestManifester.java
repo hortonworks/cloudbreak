@@ -35,12 +35,15 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
 import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
+import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterDetails;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
+import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -118,7 +121,7 @@ public class StackRequestManifester {
             setupAuthentication(environment, stackRequest);
             setupSecurityAccess(environment, stackRequest);
             setupClusterRequest(stackRequest);
-            prepareTelemetryForStack(stackRequest, environment);
+            prepareTelemetryForStack(stackRequest, environment, sdxCluster);
             setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
             cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment);
             return stackRequest;
@@ -223,20 +226,31 @@ public class StackRequestManifester {
         }
     }
 
-    private void prepareTelemetryForStack(StackV4Request stackV4Request, DetailedEnvironmentResponse environment) {
-        if (environment.getTelemetry() != null && environment.getTelemetry().getLogging() != null) {
+    private void prepareTelemetryForStack(StackV4Request stackV4Request,
+            DetailedEnvironmentResponse environment, SdxCluster sdxCluster) {
+        TelemetryResponse envTelemetry = environment.getTelemetry();
+        if (envTelemetry != null && envTelemetry.getLogging() != null) {
             TelemetryRequest telemetryRequest = new TelemetryRequest();
             LoggingRequest loggingRequest = new LoggingRequest();
-            loggingRequest.setS3(environment.getTelemetry().getLogging().getS3());
-            loggingRequest.setAdlsGen2(environment.getTelemetry().getLogging().getAdlsGen2());
-            loggingRequest.setStorageLocation(environment.getTelemetry().getLogging().getStorageLocation());
+            LoggingResponse envLogging =  envTelemetry.getLogging();
+            loggingRequest.setS3(envLogging.getS3());
+            loggingRequest.setAdlsGen2(envLogging.getAdlsGen2());
+            loggingRequest.setCloudwatch(envLogging.getCloudwatch());
+            loggingRequest.setStorageLocation(envLogging.getStorageLocation());
             telemetryRequest.setLogging(loggingRequest);
-            if (environment.getTelemetry().getFeatures() != null
-                    && environment.getTelemetry().getFeatures().getReportDeploymentLogs() != null) {
+            if (envTelemetry.getFeatures() != null
+                    && envTelemetry.getFeatures().getReportDeploymentLogs() != null) {
                 FeaturesRequest featuresRequest = new FeaturesRequest();
                 featuresRequest.setReportDeploymentLogs(
                         environment.getTelemetry().getFeatures().getReportDeploymentLogs());
                 telemetryRequest.setFeatures(featuresRequest);
+            }
+            if (envTelemetry.getFluentAttributes() != null) {
+                Map<String, Object> fluentAttributes = envTelemetry.getFluentAttributes();
+                if (!fluentAttributes.containsKey(FluentClusterDetails.CLUSTER_CRN_KEY)) {
+                    fluentAttributes.put(FluentClusterDetails.CLUSTER_CRN_KEY, sdxCluster.getCrn());
+                }
+                telemetryRequest.setFluentAttributes(fluentAttributes);
             }
             stackV4Request.setTelemetry(telemetryRequest);
         }

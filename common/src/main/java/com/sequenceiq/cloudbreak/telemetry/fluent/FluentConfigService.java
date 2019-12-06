@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.telemetry.fluent;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -12,6 +13,8 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
+import com.sequenceiq.common.api.telemetry.model.CloudwatchStreamKey;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -24,6 +27,8 @@ public class FluentConfigService {
 
     private static final String ADLS_GEN2_PROVIDER_PREFIX = "abfs";
 
+    private static final String CLOUDWATCH_PROVIDER_PREFIX = "cloudwatch";
+
     private static final String DEFAULT_PROVIDER_PREFIX = "stdout";
 
     private final S3ConfigGenerator s3ConfigGenerator;
@@ -35,32 +40,17 @@ public class FluentConfigService {
         this.adlsGen2ConfigGenerator = adlsGen2ConfigGenerator;
     }
 
-    public FluentConfigView createFluentConfigs(String clusterType, String platform,
+    public FluentConfigView createFluentConfigs(FluentClusterDetails clusterDetails,
             boolean databusEnabled, boolean meteringEnabled, Telemetry telemetry) {
         final FluentConfigView.Builder builder = new FluentConfigView.Builder();
         boolean enabled = false;
-        boolean cloudStorageLoggingEnabled = false;
         if (telemetry != null) {
             if (telemetry.getFluentAttributes() != null) {
                 builder.withOverrideAttributes(
                         telemetry.getFluentAttributes() != null ? new HashMap<>(telemetry.getFluentAttributes()) : new HashMap<>()
                 );
             }
-            if (telemetry.getLogging() != null) {
-                Logging logging = telemetry.getLogging();
-                if (logging.getS3() != null) {
-                    fillS3Configs(builder, logging.getStorageLocation());
-                    LOGGER.debug("Fluent will be configured to use S3 output.");
-                    cloudStorageLoggingEnabled = true;
-                } else if (logging.getAdlsGen2() != null) {
-                    fillAdlsGen2Configs(builder, logging.getStorageLocation(), logging.getAdlsGen2());
-                    LOGGER.debug("Fluent will be configured to use ADLS Gen2 output.");
-                    cloudStorageLoggingEnabled = true;
-                }
-                builder.withCloudStorageLoggingEnabled(cloudStorageLoggingEnabled);
-            }
-            boolean databusLogEnabled = fillMeteringAndDeploymentReportConfigs(telemetry, databusEnabled, meteringEnabled, builder);
-            enabled = cloudStorageLoggingEnabled || databusLogEnabled;
+            enabled = determineAndSetLogging(builder, telemetry, databusEnabled, meteringEnabled);
         }
         if (!enabled) {
             LOGGER.debug("Fluent based logging is disabled");
@@ -68,8 +58,34 @@ public class FluentConfigService {
 
         return builder
                 .withEnabled(enabled)
-                .withDatabusAppName(clusterType)
+                .withClusterDetails(clusterDetails)
                 .build();
+    }
+
+    private boolean determineAndSetLogging(FluentConfigView.Builder builder, Telemetry telemetry, boolean databusEnabled,
+            boolean meteringEnabled) {
+        boolean cloudStorageLoggingEnabled = false;
+        boolean cloudLogServiceLoggingEnabled = false;
+        if (telemetry.getLogging() != null) {
+            Logging logging = telemetry.getLogging();
+            if (logging.getS3() != null) {
+                fillS3Configs(builder, logging.getStorageLocation());
+                LOGGER.debug("Fluent will be configured to use S3 output.");
+                cloudStorageLoggingEnabled = true;
+            } else if (logging.getAdlsGen2() != null) {
+                fillAdlsGen2Configs(builder, logging.getStorageLocation(), logging.getAdlsGen2());
+                LOGGER.debug("Fluent will be configured to use ADLS Gen2 output.");
+                cloudStorageLoggingEnabled = true;
+            } else if (logging.getCloudwatch() != null) {
+                fillCloudwatchConfigs(builder, logging.getStorageLocation(), logging.getCloudwatch());
+                LOGGER.debug("Fluent will be configured to use Cloudwatch output.");
+                cloudLogServiceLoggingEnabled = true;
+            }
+        }
+        builder.withCloudStorageLoggingEnabled(cloudStorageLoggingEnabled)
+                .withCloudLoggingServiceEnabled(cloudLogServiceLoggingEnabled);
+        boolean databusLogEnabled = fillMeteringAndDeploymentReportConfigs(telemetry, databusEnabled, meteringEnabled, builder);
+        return cloudStorageLoggingEnabled || databusLogEnabled || cloudLogServiceLoggingEnabled;
     }
 
     private boolean fillMeteringAndDeploymentReportConfigs(Telemetry telemetry, boolean databusEnabled,
@@ -114,5 +130,14 @@ public class FluentConfigService {
                 .withAzureContainer(adlsGen2Config.getFileSystem())
                 .withAzureStorageAccount(storageAccount)
                 .withLogFolderName(adlsGen2Config.getFolderPrefix());
+    }
+
+    private void fillCloudwatchConfigs(FluentConfigView.Builder builder,
+            String storageLocation, CloudwatchParams cloudwatchParams) {
+        Optional<CloudwatchStreamKey> cloudwatchStreamKey = Optional.ofNullable(cloudwatchParams.getStreamKey());
+        builder.withProviderPrefix(CLOUDWATCH_PROVIDER_PREFIX)
+                .withRegion(cloudwatchParams.getRegion())
+                .withCloudwatchStreamKey(cloudwatchStreamKey.orElse(CloudwatchStreamKey.HOSTNAME).value())
+                .withLogFolderName(storageLocation);
     }
 }

@@ -28,10 +28,12 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
+import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfigService;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfigView;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public class TelemetryDecoratorTest {
@@ -64,8 +66,9 @@ public class TelemetryDecoratorTest {
     public void testS3DecorateWithDefaultPath() {
         // GIVEN
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+        FluentClusterDetails clusterDetails = FluentClusterDetails.Builder.builder().withPlatform("AWS").build();
         FluentConfigView fluentConfigView = new FluentConfigView.Builder()
-                .withPlatform("AWS")
+                .withClusterDetails(clusterDetails)
                 .withEnabled(true)
                 .withS3LogArchiveBucketName("mybucket")
                 .withLogFolderName("cluster-logs/datahub/cl1")
@@ -86,7 +89,7 @@ public class TelemetryDecoratorTest {
         assertEquals(results.get("enabled"), true);
         assertEquals(results.get("platform"), CloudPlatform.AWS.name());
         assertEquals(results.get("user"), "root");
-        verify(fluentConfigService, times(1)).createFluentConfigs(anyString(), anyString(),
+        verify(fluentConfigService, times(1)).createFluentConfigs(any(FluentClusterDetails.class),
                 anyBoolean(), anyBoolean(), any(Telemetry.class));
         verify(meteringConfigService, times(1)).createMeteringConfigs(anyBoolean(), anyString(), anyString(), anyString(),
                 anyString());
@@ -98,8 +101,9 @@ public class TelemetryDecoratorTest {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         Map<String, Object> overrides = new HashMap<>();
         overrides.put("providerPrefix", "s3a");
+        FluentClusterDetails clusterDetails = FluentClusterDetails.Builder.builder().withPlatform("AWS").build();
         FluentConfigView fluentConfigView = new FluentConfigView.Builder()
-                .withPlatform("AWS")
+                .withClusterDetails(clusterDetails)
                 .withEnabled(true)
                 .withS3LogArchiveBucketName("mybucket")
                 .withLogFolderName("cluster-logs/datahub/cl1")
@@ -195,6 +199,9 @@ public class TelemetryDecoratorTest {
         Cluster cluster = new Cluster();
         cluster.setName("cl1");
         stack.setCluster(cluster);
+        User creator = new User();
+        creator.setUserCrn("userCrn");
+        stack.setCreator(creator);
         stack.setResourceCrn("crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         return stack;
     }
@@ -203,7 +210,7 @@ public class TelemetryDecoratorTest {
             MeteringConfigView meteringConfigView) {
         given(databusConfigService.createDatabusConfigs(anyString(), any(), isNull(), isNull()))
                 .willReturn(databusConfigView);
-        given(fluentConfigService.createFluentConfigs(anyString(), anyString(),
+        given(fluentConfigService.createFluentConfigs(any(FluentClusterDetails.class),
                 anyBoolean(), anyBoolean(), any(Telemetry.class)))
                 .willReturn(fluentConfigView);
         given(meteringConfigService.createMeteringConfigs(anyBoolean(), anyString(), anyString(), anyString(),

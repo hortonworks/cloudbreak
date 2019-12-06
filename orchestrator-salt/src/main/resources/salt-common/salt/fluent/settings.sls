@@ -9,6 +9,17 @@
 {% else %}
     {% set cloud_storage_logging_enabled = False %}
 {% endif %}
+{% if salt['pillar.get']('fluent:cloudLoggingServiceEnabled') %}
+    {% set cloud_logging_service_enabled = True %}
+    {% if salt['pillar.get']('fluent:platform') == "AWS" %}
+      {%- set instanceDetails = salt.cmd.run('curl -s http://169.254.169.254/latest/dynamic/instance-identity/document') | load_json %}
+      {%- set region = instanceDetails['region'] %}
+    {% else %}
+      {%- set region = salt['pillar.get']('fluent:region') %}
+    {% endif %}
+{% else %}
+    {% set cloud_logging_service_enabled = False %}
+{% endif %}
 {% if grains['init'] == 'upstart' %}
     {% set is_systemd = False %}
 {% else %}
@@ -21,6 +32,7 @@
 {% set service_log_folder_prefix = salt['pillar.get']('fluent:serviceLogFolderPrefix') %}
 {% set provider_prefix = salt['pillar.get']('fluent:providerPrefix') %}
 {% set log_folder = salt['pillar.get']('fluent:logFolderName') %}
+{% set cloudwatch_stream_key = salt['pillar.get']('fluent:cloudwatchStreamKey') %}
 {% set s3_log_bucket = salt['pillar.get']('fluent:s3LogArchiveBucketName') %}
 {% set azure_container = salt['pillar.get']('fluent:azureContainer') %}
 {% set azure_storage_instance_msi = salt['pillar.get']('fluent:azureInstanceMsi') %}
@@ -44,12 +56,17 @@
 {% else %}
     {% set dbus_metering_enabled = False %}
 {% endif %}
-{% set dbus_app_name = salt['pillar.get']('fluent:dbusAppName')%}
+
+{% set cluster_name = salt['pillar.get']('fluent:clusterName') %}
+{% set cluster_type = salt['pillar.get']('fluent:clusterType')%}
+{% set cluster_crn = salt['pillar.get']('fluent:clusterCrn')%}
+{% set cluster_owner = salt['pillar.get']('fluent:clusterOwner')%}
+{% set cluster_version = salt['pillar.get']('fluent:clusterVersion')%}
 
 {% set partition_interval = salt['pillar.get']('fluent:partitionIntervalMin') %}
 {% set cloudera_public_gem_repo = 'https://repository.cloudera.com/cloudera/api/gems/cloudera-gems/' %}
 {% set cloudera_azure_plugin_version = '1.0.1' %}
-{% set cloudera_databus_plugin_version = '1.0.2' %}
+{% set cloudera_databus_plugin_version = '1.0.3' %}
 {% set platform = salt['pillar.get']('fluent:platform') %}
 
 {% set service_path_log_suffix = '%Y-%m-%d/%H/\${tag[1]}-#{Socket.gethostname}-%M' %}
@@ -68,18 +85,25 @@
     "providerPrefix": provider_prefix,
     "partitionIntervalMin": partition_interval,
     "logFolderName": log_folder,
+    "clusterName": cluster_name,
+    "clusterType": cluster_type,
+    "clusterCrn": cluster_crn,
+    "clusterOwner": cluster_owner,
+    "clusterVersion": cluster_version,
     "cloudStorageLoggingEnabled": cloud_storage_logging_enabled,
+    "cloudLoggingServiceEnabled": cloud_logging_service_enabled,
+    "cloudwatchStreamKey": cloudwatch_stream_key,
     "s3LogArchiveBucketName" : s3_log_bucket,
     "azureStorageAccount": azore_storage_account,
     "azureContainer": azure_container,
     "azureInstanceMsi": azure_storage_instance_msi,
     "azureStorageAccessKey": azure_storage_access_key,
-    "dbusAppName": dbus_app_name,
     "dbusReportDeploymentLogs": dbus_report_deployment_logs_enabled,
     "dbusReportDeploymentLogsDisableStop": dbus_report_deployment_logs_disable_stop,
     "dbusMeteringEnabled": dbus_metering_enabled,
     "clouderaPublicGemRepo": cloudera_public_gem_repo,
     "clouderaAzurePluginVersion": cloudera_azure_plugin_version,
     "clouderaDatabusPluginVersion": cloudera_databus_plugin_version,
+    "region": region,
     "platform": platform
 }) %}

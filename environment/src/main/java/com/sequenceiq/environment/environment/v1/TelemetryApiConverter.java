@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -74,14 +75,9 @@ public class TelemetryApiConverter {
         if (logging != null) {
             loggingRequest = new LoggingRequest();
             loggingRequest.setStorageLocation(logging.getStorageLocation());
-            if (logging.getS3() != null) {
-                S3CloudStorageV1Parameters s3Params = convertS3(logging.getS3());
-                loggingRequest.setS3(s3Params);
-            }
-            if (logging.getAdlsGen2() != null) {
-                AdlsGen2CloudStorageV1Parameters adlsGen2Params = convertAdlsV2(logging.getAdlsGen2());
-                loggingRequest.setAdlsGen2(adlsGen2Params);
-            }
+            loggingRequest.setS3(convertS3(logging.getS3()));
+            loggingRequest.setAdlsGen2(convertAdlsV2(logging.getAdlsGen2()));
+            loggingRequest.setCloudwatch(CloudwatchParams.copy(logging.getCloudwatch()));
         }
         return loggingRequest;
     }
@@ -112,6 +108,7 @@ public class TelemetryApiConverter {
             logging.setStorageLocation(loggingRequest.getStorageLocation());
             logging.setS3(convertS3(loggingRequest.getS3()));
             logging.setAdlsGen2(convertAdlsV2(loggingRequest.getAdlsGen2()));
+            logging.setCloudwatch(CloudwatchParams.copy(loggingRequest.getCloudwatch()));
         }
         return logging;
     }
@@ -163,6 +160,7 @@ public class TelemetryApiConverter {
             loggingResponse.setStorageLocation(logging.getStorageLocation());
             loggingResponse.setS3(convertS3(logging.getS3()));
             loggingResponse.setAdlsGen2(convertAdlsV2(logging.getAdlsGen2()));
+            loggingResponse.setCloudwatch(CloudwatchParams.copy(logging.getCloudwatch()));
         }
         return loggingResponse;
     }

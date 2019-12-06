@@ -65,7 +65,7 @@ install_fluentd_plugins:
   cmd.run:
     - names:
       - /opt/td-agent/embedded/bin/fluent-gem source -a {{ fluent.clouderaPublicGemRepo }}
-      - /opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-cloudwatch-logs
+      - /opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-cloudwatch-logs fluent-plugin-detect-exceptions
       - /opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-databus -v {{ fluent.clouderaDatabusPluginVersion }}
       {% if fluent.platform == 'AZURE' %}
       - /opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-azurestorage -v {{ fluent.clouderaAzurePluginVersion }} -s {{ fluent.clouderaPublicGemRepo }}
@@ -83,6 +83,18 @@ install_fluentd_plugins:
       - user
       - group
       - mode
+
+/etc/td-agent/check_fluent_plugins.sh:
+   file.managed:
+    - source: salt://fluent/template/check_fluent_plugins.sh.j2
+    - template: jinja
+    - user: "{{ fluent.user }}"
+    - group: "{{ fluent.group }}"
+    - file_mode: 750
+
+check_fluentd_plugins:
+   cmd.run:
+    - name: sh /etc/td-agent/check_fluent_plugins.sh
 
 {%- if fluent.is_systemd %}
 fluent_systemd_stop:
@@ -127,7 +139,7 @@ copy_td_agent_conf:
     - onlyif: "! diff /etc/td-agent/td-agent_bundle_profile.conf /etc/td-agent/td-agent.conf"
 {% endif %}
 
-{% if fluent.cloudStorageLoggingEnabled %}
+{% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
 /etc/td-agent/input.conf:
   file.managed:
     - source: salt://fluent/template/input.conf.j2
@@ -157,6 +169,17 @@ copy_td_agent_conf:
     - context:
         providerPrefix: "databus"
 
+/etc/td-agent/filter_databus.conf:
+  file.managed:
+    - name: /etc/td-agent/filter_databus.conf
+    - source: salt://fluent/template/filter.conf.j2
+    - template: jinja
+    - user: "{{ fluent.user }}"
+    - group: "{{ fluent.group }}"
+    - file_mode: 640
+    - context:
+        providerPrefix: "databus"
+
 /etc/td-agent/output_databus.conf:
   file.managed:
     - source: salt://fluent/template/output_databus.conf.j2
@@ -165,7 +188,20 @@ copy_td_agent_conf:
     - group: "{{ fluent.group }}"
     - file_mode: 640
 
-{% if fluent.cloudStorageLoggingEnabled %}
+{% if fluent.cloudLoggingServiceEnabled %}
+/etc/td-agent/filter.conf:
+  file.managed:
+    - name: /etc/td-agent/filter.conf
+    - source: salt://fluent/template/filter.conf.j2
+    - template: jinja
+    - user: "{{ fluent.user }}"
+    - group: "{{ fluent.group }}"
+    - file_mode: 640
+    - context:
+        providerPrefix: {{ fluent.providerPrefix }}
+{% endif %}
+
+{% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
 /etc/td-agent/output.conf:
   file.managed:
     - name: /etc/td-agent/output.conf
@@ -244,7 +280,7 @@ fluentd_delalyed_restart:
    cmd.run:
     - names:
        - "nohup sh /etc/td-agent/delayed_restart.sh > /etc/td-agent/delayed_restart.out 2>&1 &"
-       - "cp /etc/td-agent/td-agent_simple_profile.conf /etc/td-agent/td-agent.conf"
+       - "nohup sleep 30; cp /etc/td-agent/td-agent_simple_profile.conf /etc/td-agent/td-agent.conf &"
     - onlyif: "test -f /etc/td-agent/td-agent.conf && grep -q 'CLUSTER BUNDLE LOGS ENABLED' /etc/td-agent/td-agent.conf"
 {% endif %}
 
