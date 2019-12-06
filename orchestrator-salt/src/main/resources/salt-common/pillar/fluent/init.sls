@@ -6,16 +6,23 @@ fluent:
   agentLogFolderPrefix: /var/log
   serviceLogFolderPrefix: /var/log
   platform:
+  region:
   providerPrefix: "stdout"
   partitionIntervalMin: 5
   logFolderName: cluster-logs
+  clusterName:
+  clusterType: datahub
+  clusterCrn:
+  clusterOwner:
+  clusterVersion:
   cloudStorageLoggingEnabled: false
+  cloudLoggingServiceEnabled: false
   s3LogArchiveBucketName:
+  cloudwatchStreamKey: hostname
   azureStorageAccount:
   azureContainer:
   azureInstanceMsi:
   azureStorageAccessKey:
-  dbusAppName: datahub
   dbusReportDeploymentLogs: false
   dbusReportDeploymentLogsDisableStop: false
   dbusMeteringEnabled: false

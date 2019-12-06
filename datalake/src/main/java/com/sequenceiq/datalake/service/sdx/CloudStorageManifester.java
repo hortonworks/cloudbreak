@@ -21,6 +21,7 @@ import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.S3Guard;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
+import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.CloudStorageCdpService;
@@ -96,6 +97,11 @@ public class CloudStorageManifester {
                 log.setS3(logging.getS3());
             } else if (logging.getAdlsGen2() != null) {
                 log.setAdlsGen2(logging.getAdlsGen2());
+            } else if (logging.getCloudwatch() != null) {
+                LOGGER.debug("Cloudwatch will act as s3 storage identity!");
+                S3CloudStorageV1Parameters s3CloudwatchParams = new S3CloudStorageV1Parameters();
+                s3CloudwatchParams.setInstanceProfile(logging.getCloudwatch().getInstanceProfile());
+                log.setS3(s3CloudwatchParams);
             }
             cloudStorageRequest.getIdentities().add(log);
         }

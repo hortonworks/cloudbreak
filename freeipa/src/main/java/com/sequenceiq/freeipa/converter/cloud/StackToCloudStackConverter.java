@@ -265,6 +265,10 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                     adlsGen2View.setSecure(adlsGen2Params.isSecure());
                     adlsGen2View.setManagedIdentity(adlsGen2Params.getManagedIdentity());
                     return Optional.of(adlsGen2View);
+                } else if (logging.getCloudwatch() != null) {
+                    CloudS3View s3View = new CloudS3View(CloudIdentityType.LOG);
+                    s3View.setInstanceProfile(logging.getCloudwatch().getInstanceProfile());
+                    return Optional.of(s3View);
                 }
             }
         }

@@ -1,0 +1,60 @@
+{%- from 'fluent/settings.sls' import fluent with context %}
+
+<match **fluent**>
+   @type null
+</match>
+
+<filter {{providerPrefix}}**>
+    @type record_transformer
+    <record>
+      raw_tag ${tag}
+    </record>
+</filter>
+
+<match {{providerPrefix}}**>
+   @type rewrite_tag_filter
+   <rule>
+      key raw_tag
+      pattern ^(.+)$
+      tag raw.processed.$1
+   </rule>
+</match>
+
+# try to catch exceptions for non custom logs
+<match raw.processed.{{providerPrefix}}**>
+   @type detect_exceptions
+   remove_tag_prefix raw
+   message message
+   multiline_flush_interval 0.1
+</match>
+<filter processed.{{providerPrefix}}.**>
+  @type record_transformer
+  enable_ruby true
+  <record>
+    component ${tag.split(".")[2].downcase}
+  </record>
+</filter>
+<filter processed.{{providerPrefix}}_CM_COMMAND.**>
+  @type record_transformer
+  enable_ruby true
+  <record>
+    component cm_agent_command
+    cm_agent_command_id ${tag.split(".")[7]}
+  </record>
+</filter>
+<filter processed.{{providerPrefix}}**>
+  @type record_transformer
+  enable_ruby true
+  <record>
+    context {"clusterName": "{{ fluent.clusterName }}", "clusterType": "{{ fluent.clusterType }}", "clusterCrn": "{{ fluent.clusterCrn }}", "clusterOwner": "{{ fluent.clusterOwner }}", "clusterVersion": "{{ fluent.clusterVersion }}" }
+    hostname "#{Socket.gethostname}"
+    @message ${record['message']}
+    {% if providerPrefix == "databus" %}
+    @timestamp ${time.to_datetime.strftime("%Y-%m-%dT%H:%M:%S.%NZ")}
+    {% endif %}
+  </record>
+</filter>
+<filter processed.{{providerPrefix}}**>
+   @type record_transformer
+   remove_keys {% if providerPrefix != "databus" %}time,{% endif %}timestamp,message,raw_tag
+</filter>

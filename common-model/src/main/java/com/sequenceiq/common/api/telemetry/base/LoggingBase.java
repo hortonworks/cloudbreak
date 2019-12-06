@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.doc.TelemetryModelDescription;
+import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -27,6 +28,9 @@ public abstract class LoggingBase implements Serializable {
 
     @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING_ADLS_GEN_2_ATTRIBUTES)
     private AdlsGen2CloudStorageV1Parameters adlsGen2;
+
+    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING_CLOUDWATCH_ATTRIBUTES)
+    private CloudwatchParams cloudwatch;
 
     public String getStorageLocation() {
         return storageLocation;
@@ -50,5 +54,13 @@ public abstract class LoggingBase implements Serializable {
 
     public void setAdlsGen2(AdlsGen2CloudStorageV1Parameters adlsGen2) {
         this.adlsGen2 = adlsGen2;
+    }
+
+    public CloudwatchParams getCloudwatch() {
+        return cloudwatch;
+    }
+
+    public void setCloudwatch(CloudwatchParams cloudwatch) {
+        this.cloudwatch = cloudwatch;
     }
 }

@@ -17,8 +17,6 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private static final String PROVIDER_PREFIX_DEFAULT = "stdout";
 
-    private static final String DBUS_APP_NAME_DEFAULT = "datahub";
-
     private static final String EMPTY_CONFIG_DEFAULT = "";
 
     private static final Integer PARTITION_INTERVAL_DEFAULT = 5;
@@ -27,11 +25,13 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private final boolean cloudStorageLoggingEnabled;
 
+    private final boolean cloudLoggingServiceEnabled;
+
     private final boolean reportClusterDeploymentLogs;
 
     private final boolean meteringEnabled;
 
-    private final String databusAppName;
+    private final FluentClusterDetails clusterDetails;
 
     private final String user;
 
@@ -43,7 +43,7 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private final String serviceLogFolderPrefix;
 
-    private final String platform;
+    private final String region;
 
     private final String providerPrefix;
 
@@ -59,6 +59,8 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private final String s3LogArchiveBucketName;
 
+    private final String cloudwatchStreamKey;
+
     private final String logFolderName;
 
     private final Map<String, Object> overrideAttributes;
@@ -66,19 +68,21 @@ public class FluentConfigView implements TelemetryConfigView {
     private FluentConfigView(Builder builder) {
         this.enabled = builder.enabled;
         this.cloudStorageLoggingEnabled = builder.cloudStorageLoggingEnabled;
+        this.cloudLoggingServiceEnabled = builder.cloudLoggingServiceEnabled;
         this.reportClusterDeploymentLogs = builder.reportClusterDeploymentLogs;
         this.meteringEnabled = builder.meteringEnabled;
-        this.databusAppName = builder.databusAppName;
+        this.clusterDetails = builder.clusterDetails;
         this.user = builder.user;
         this.group = builder.group;
         this.serverLogFolderPrefix = builder.serverLogFolderPrefix;
         this.agentLogFolderPrefix = builder.agentLogFolderPrefix;
         this.serviceLogFolderPrefix = builder.serviceLogFolderPrefix;
-        this.platform = builder.platform;
+        this.region = builder.region;
         this.providerPrefix = builder.providerPrefix;
         this.partitionIntervalMin = builder.partitionIntervalMin;
         this.logFolderName = builder.logFolderName;
         this.s3LogArchiveBucketName = builder.s3LogArchiveBucketName;
+        this.cloudwatchStreamKey = builder.cloudwatchStreamKey;
         this.azureContainer = builder.azureContainer;
         this.azureStorageAccount = builder.azureStorageAccount;
         this.azureInstanceMsi = builder.azureInstanceMsi;
@@ -106,8 +110,12 @@ public class FluentConfigView implements TelemetryConfigView {
         return serviceLogFolderPrefix;
     }
 
-    public String getPlatform() {
-        return platform;
+    public String getRegion() {
+        return region;
+    }
+
+    public FluentClusterDetails getClusterDetails() {
+        return clusterDetails;
     }
 
     public String getProviderPrefix() {
@@ -124,6 +132,10 @@ public class FluentConfigView implements TelemetryConfigView {
 
     public String getS3LogArchiveBucketName() {
         return s3LogArchiveBucketName;
+    }
+
+    public String getCloudwatchStreamKey() {
+        return cloudwatchStreamKey;
     }
 
     public String getAzureStorageAccount() {
@@ -150,16 +162,16 @@ public class FluentConfigView implements TelemetryConfigView {
         return cloudStorageLoggingEnabled;
     }
 
+    public boolean isCloudLoggingServiceEnabled() {
+        return cloudLoggingServiceEnabled;
+    }
+
     public boolean isReportClusterDeploymentLogs() {
         return reportClusterDeploymentLogs;
     }
 
     public boolean isMeteringEnabled() {
         return meteringEnabled;
-    }
-
-    public String getDatabusAppName() {
-        return databusAppName;
     }
 
     public Map<String, Object> getOverrideAttributes() {
@@ -171,24 +183,27 @@ public class FluentConfigView implements TelemetryConfigView {
         Map<String, Object> map = new HashMap<>();
         map.put("enabled", this.enabled);
         map.put("cloudStorageLoggingEnabled", this.cloudStorageLoggingEnabled);
+        map.put("cloudLoggingServiceEnabled", this.cloudLoggingServiceEnabled);
         map.put("dbusMeteringEnabled", this.meteringEnabled);
-        map.put("dbusAppName", ObjectUtils.defaultIfNull(
-                this.databusAppName, DBUS_APP_NAME_DEFAULT));
         map.put("dbusReportDeploymentLogs", this.reportClusterDeploymentLogs);
         map.put("user", ObjectUtils.defaultIfNull(this.user, TD_AGENT_USER_DEFAULT));
         map.put("group", ObjectUtils.defaultIfNull(this.group, TD_AGENT_GROUP_DEFAULT));
         map.put("providerPrefix", ObjectUtils.defaultIfNull(this.providerPrefix, PROVIDER_PREFIX_DEFAULT));
-        map.put("platform", ObjectUtils.defaultIfNull(this.platform, EMPTY_CONFIG_DEFAULT));
+        map.put("region", ObjectUtils.defaultIfNull(this.region, EMPTY_CONFIG_DEFAULT));
         map.put("serverLogFolderPrefix", ObjectUtils.defaultIfNull(this.serverLogFolderPrefix, LOG_FOLDER_DEFAULT));
         map.put("agentLogFolderPrefix", ObjectUtils.defaultIfNull(this.agentLogFolderPrefix, LOG_FOLDER_DEFAULT));
         map.put("serviceLogFolderPrefix", ObjectUtils.defaultIfNull(this.serviceLogFolderPrefix, LOG_FOLDER_DEFAULT));
         map.put("partitionIntervalMin", ObjectUtils.defaultIfNull(this.partitionIntervalMin, PARTITION_INTERVAL_DEFAULT));
         map.put("logFolderName", ObjectUtils.defaultIfNull(this.logFolderName, EMPTY_CONFIG_DEFAULT));
         map.put("s3LogArchiveBucketName", ObjectUtils.defaultIfNull(this.s3LogArchiveBucketName, EMPTY_CONFIG_DEFAULT));
+        map.put("cloudwatchStreamKey", ObjectUtils.defaultIfNull(this.cloudwatchStreamKey, EMPTY_CONFIG_DEFAULT));
         map.put("azureContainer", ObjectUtils.defaultIfNull(this.azureContainer, EMPTY_CONFIG_DEFAULT));
         map.put("azureStorageAccount", ObjectUtils.defaultIfNull(this.azureStorageAccount, EMPTY_CONFIG_DEFAULT));
         map.put("azureStorageAccessKey", ObjectUtils.defaultIfNull(this.azureStorageAccessKey, EMPTY_CONFIG_DEFAULT));
         map.put("azureInstanceMsi", ObjectUtils.defaultIfNull(this.azureInstanceMsi, EMPTY_CONFIG_DEFAULT));
+        if (this.clusterDetails != null) {
+            map.putAll(clusterDetails.toMap());
+        }
         if (this.overrideAttributes != null) {
             for (Map.Entry<String, Object> entry : this.overrideAttributes.entrySet()) {
                 if (!"enabled".equalsIgnoreCase(entry.getKey())
@@ -207,11 +222,13 @@ public class FluentConfigView implements TelemetryConfigView {
 
         private boolean cloudStorageLoggingEnabled;
 
+        private boolean cloudLoggingServiceEnabled;
+
         private boolean reportClusterDeploymentLogs;
 
         private boolean meteringEnabled;
 
-        private String databusAppName;
+        private FluentClusterDetails clusterDetails;
 
         private String user;
 
@@ -223,7 +240,7 @@ public class FluentConfigView implements TelemetryConfigView {
 
         private String serviceLogFolderPrefix;
 
-        private String platform;
+        private String region;
 
         private String providerPrefix;
 
@@ -232,6 +249,8 @@ public class FluentConfigView implements TelemetryConfigView {
         private String logFolderName;
 
         private String s3LogArchiveBucketName;
+
+        private String cloudwatchStreamKey;
 
         private String azureStorageAccount;
 
@@ -277,8 +296,8 @@ public class FluentConfigView implements TelemetryConfigView {
             return this;
         }
 
-        public Builder withPlatform(String platform) {
-            this.platform = platform;
+        public Builder withRegion(String region) {
+            this.region = region;
             return this;
         }
 
@@ -299,6 +318,11 @@ public class FluentConfigView implements TelemetryConfigView {
 
         public Builder withS3LogArchiveBucketName(String s3LogArchiveBucketName) {
             this.s3LogArchiveBucketName = s3LogArchiveBucketName;
+            return this;
+        }
+
+        public Builder withCloudwatchStreamKey(String cloudwatchStreamKey) {
+            this.cloudwatchStreamKey = cloudwatchStreamKey;
             return this;
         }
 
@@ -342,8 +366,13 @@ public class FluentConfigView implements TelemetryConfigView {
             return this;
         }
 
-        public Builder withDatabusAppName(String databusAppName) {
-            this.databusAppName = databusAppName;
+        public Builder withCloudLoggingServiceEnabled(boolean cloudLoggingServiceEnabled) {
+            this.cloudLoggingServiceEnabled = cloudLoggingServiceEnabled;
+            return this;
+        }
+
+        public Builder withClusterDetails(FluentClusterDetails clusterDetails) {
+            this.clusterDetails = clusterDetails;
             return this;
         }
     }

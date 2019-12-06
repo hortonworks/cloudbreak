@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -219,6 +220,7 @@ public class TelemetryConverter {
             loggingRequest = new LoggingRequest();
             loggingRequest.setS3(logging.getS3());
             loggingRequest.setAdlsGen2(logging.getAdlsGen2());
+            loggingRequest.setCloudwatch(CloudwatchParams.copy(logging.getCloudwatch()));
             loggingRequest.setStorageLocation(logging.getStorageLocation());
         }
         return loggingRequest;
@@ -251,6 +253,7 @@ public class TelemetryConverter {
             logging.setStorageLocation(loggingRequest.getStorageLocation());
             logging.setS3(loggingRequest.getS3());
             logging.setAdlsGen2(loggingRequest.getAdlsGen2());
+            logging.setCloudwatch(CloudwatchParams.copy(loggingRequest.getCloudwatch()));
         }
         return logging;
     }
@@ -276,6 +279,7 @@ public class TelemetryConverter {
             loggingResponse.setStorageLocation(logging.getStorageLocation());
             loggingResponse.setS3(logging.getS3());
             loggingResponse.setAdlsGen2(logging.getAdlsGen2());
+            loggingResponse.setCloudwatch(CloudwatchParams.copy(logging.getCloudwatch()));
         }
         return loggingResponse;
     }
@@ -311,6 +315,7 @@ public class TelemetryConverter {
             loggingRequest.setStorageLocation(loggingResponse.getStorageLocation());
             loggingRequest.setS3(loggingResponse.getS3());
             loggingRequest.setAdlsGen2(loggingResponse.getAdlsGen2());
+            loggingRequest.setCloudwatch(loggingResponse.getCloudwatch());
         }
         return loggingRequest;
     }
@@ -336,9 +341,9 @@ public class TelemetryConverter {
                 LOGGER.debug("Fill report deployment logs setting from telemetry feature request");
                 features.setReportDeploymentLogs(request.getFeatures().getReportDeploymentLogs());
             } else {
-                LOGGER.debug("Auto-fill report deployment logs telemetry settings as it is set, but missing from the request.");
+                LOGGER.debug("Auto-filling report deployment logs telemetry settings as it is set, but missing from the request.");
                 FeatureSetting reportDeploymentLogsFeature = new FeatureSetting();
-                reportDeploymentLogsFeature.setEnabled(true);
+                reportDeploymentLogsFeature.setEnabled(false);
                 features.setReportDeploymentLogs(reportDeploymentLogsFeature);
             }
         } else {

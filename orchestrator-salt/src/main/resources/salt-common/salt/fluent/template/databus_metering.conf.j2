@@ -20,7 +20,7 @@
     debug                            false
     endpoint                         "{{ databus.endpoint }}"
     event_message_field              message
-    headers                          app:{{ fluent.dbusAppName }}
+    headers                          app:{{ fluent.clusterType }}
     stream_name                      Metering
     partition_key                    "#{Socket.gethostname}"
 

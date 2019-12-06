@@ -19,10 +19,15 @@ public class EnvironmentLogStorageLocationValidator {
         this.cloudStorageLocationValidator = cloudStorageLocationValidator;
     }
 
+    /**
+     * Validate telemetry related logging storage location.
+     * Currently, filter out cloudwatch (or any other cloud logging service) related validations
+     */
     public ValidationResult validateTelemetryLoggingStorageLocation(Environment environment) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         Optional.ofNullable(environment.getTelemetry())
                 .map(EnvironmentTelemetry::getLogging)
+                .filter(logging -> logging.getCloudwatch() == null)
                 .map(EnvironmentLogging::getStorageLocation)
                 .ifPresent(location -> cloudStorageLocationValidator.validate(location, environment, resultBuilder));
         return resultBuilder.build();

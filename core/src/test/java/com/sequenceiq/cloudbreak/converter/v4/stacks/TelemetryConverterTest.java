@@ -125,6 +125,22 @@ public class TelemetryConverterTest {
         // WHEN
         Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD);
         // THEN
+        assertFalse(result.getFeatures().getReportDeploymentLogs().isEnabled());
+        assertTrue(result.getFeatures().getMetering().isEnabled());
+    }
+
+    @Test
+    public void testConvertFromRequestWithFeatures() {
+        // GIVEN
+        TelemetryRequest telemetryRequest = new TelemetryRequest();
+        FeatureSetting reportDeploymentLog = new FeatureSetting();
+        reportDeploymentLog.setEnabled(true);
+        FeaturesRequest features = new FeaturesRequest();
+        features.setReportDeploymentLogs(reportDeploymentLog);
+        telemetryRequest.setFeatures(features);
+        // WHEN
+        Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD);
+        // THEN
         assertTrue(result.getFeatures().getReportDeploymentLogs().isEnabled());
         assertTrue(result.getFeatures().getMetering().isEnabled());
     }
@@ -136,7 +152,7 @@ public class TelemetryConverterTest {
         // WHEN
         Telemetry result = underTest.convert(telemetryRequest, StackType.DATALAKE);
         // THEN
-        assertTrue(result.getFeatures().getReportDeploymentLogs().isEnabled());
+        assertFalse(result.getFeatures().getReportDeploymentLogs().isEnabled());
         assertNull(result.getFeatures().getMetering());
     }
 
