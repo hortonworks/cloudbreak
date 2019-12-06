@@ -56,8 +56,6 @@ class SdxControllerTest {
 
     @BeforeEach
     void init() {
-        ThreadBasedUserCrnProvider.removeUserCrn();
-        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
     }
 
     @Test
@@ -77,7 +75,8 @@ class SdxControllerTest {
         sdxStatusEntity.setCreated(1L);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
         FieldSetter.setField(sdxClusterConverter, SdxClusterConverter.class.getDeclaredField("sdxStatusService"), sdxStatusService);
-        SdxClusterResponse sdxClusterResponse = sdxController.create("test-sdx-cluster", createSdxClusterRequest);
+        SdxClusterResponse sdxClusterResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> sdxController.create("test-sdx-cluster", createSdxClusterRequest));
         verify(sdxService).createSdx(eq(USER_CRN), eq("test-sdx-cluster"), eq(createSdxClusterRequest), nullable(StackV4Request.class));
         verify(sdxStatusService, times(1)).getActualStatusForSdx(sdxCluster);
         assertEquals("test-sdx-cluster", sdxClusterResponse.getName());
@@ -99,7 +98,7 @@ class SdxControllerTest {
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
         FieldSetter.setField(sdxClusterConverter, SdxClusterConverter.class.getDeclaredField("sdxStatusService"), sdxStatusService);
 
-        SdxClusterResponse sdxClusterResponse = sdxController.get("test-sdx-cluster");
+        SdxClusterResponse sdxClusterResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.get("test-sdx-cluster"));
         assertEquals("test-sdx-cluster", sdxClusterResponse.getName());
         assertEquals("test-env", sdxClusterResponse.getEnvironmentName());
         assertEquals("crn:sdxcluster", sdxClusterResponse.getCrn());

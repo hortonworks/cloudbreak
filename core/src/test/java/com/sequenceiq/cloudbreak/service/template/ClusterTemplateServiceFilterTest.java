@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -95,11 +94,6 @@ class ClusterTemplateServiceFilterTest {
         return response;
     }
 
-    @BeforeEach
-    public void init() {
-        ThreadBasedUserCrnProvider.removeUserCrn();
-    }
-
     @Test
     void testIfGettingUsableTemplateWhenTemplateIsDefaultThenTrueShouldCome() {
         ClusterTemplateViewV4Response templateViewV4Response = new ClusterTemplateViewV4Response();
@@ -142,10 +136,9 @@ class ClusterTemplateServiceFilterTest {
         ClusterTemplateViewV4Response response = new ClusterTemplateViewV4Response();
         response.setCloudPlatform(AWS);
 
-        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
         when(cloudPlatformValidator.isClusterTemplateCloudPlatformValid(AWS, ACCOUNT_ID)).thenReturn(cloudPlatformValid);
 
-        boolean result = underTest.isClusterTemplateHasValidCloudPlatform(response);
+        boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.isClusterTemplateHasValidCloudPlatform(response));
 
         assertThat(result).isEqualTo(cloudPlatformValid);
     }
@@ -160,11 +153,12 @@ class ClusterTemplateServiceFilterTest {
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         when(clusterTemplateViewService.findAllActive(WORKSPACE_ID)).thenReturn(views);
         when(converterUtil.convertAllAsSet(views, ClusterTemplateViewV4Response.class)).thenReturn(responses);
-        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
+
         when(cloudPlatformValidator.isClusterTemplateCloudPlatformValid(AWS, ACCOUNT_ID)).thenReturn(awsEnabled);
         when(cloudPlatformValidator.isClusterTemplateCloudPlatformValid(AZURE, ACCOUNT_ID)).thenReturn(azureEnabled);
 
-        Set<ClusterTemplateViewV4Response> result = underTest.listInWorkspaceAndCleanUpInvalids(WORKSPACE_ID);
+        Set<ClusterTemplateViewV4Response> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.listInWorkspaceAndCleanUpInvalids(WORKSPACE_ID));
 
         assertThat(result).isEqualTo(expectedResult);
         verify(environmentServiceDecorator).prepareEnvironments(responses);

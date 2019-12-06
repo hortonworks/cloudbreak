@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,18 +37,13 @@ class CredentialV1ControllerTest {
     @InjectMocks
     private CredentialV1Controller underTest;
 
-    @BeforeEach
-    public void init() {
-        ThreadBasedUserCrnProvider.removeUserCrn();
-    }
-
     @Test
     void testGetPrerequisitesForCloudPlatform() {
-        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
         CredentialPrerequisitesResponse credentialPrerequisitesResponse = mock(CredentialPrerequisitesResponse.class);
         when(credentialService.getPrerequisites(PLATFORM, DEPLOYMENT_ADDRESS, USER_CRN)).thenReturn(credentialPrerequisitesResponse);
 
-        CredentialPrerequisitesResponse response = underTest.getPrerequisitesForCloudPlatform(PLATFORM, DEPLOYMENT_ADDRESS);
+        CredentialPrerequisitesResponse response = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getPrerequisitesForCloudPlatform(PLATFORM, DEPLOYMENT_ADDRESS));
         assertThat(response).isEqualTo(credentialPrerequisitesResponse);
     }
 

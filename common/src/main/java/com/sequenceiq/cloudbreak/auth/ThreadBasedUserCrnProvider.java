@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.auth;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
+import javax.servlet.ServletException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +37,7 @@ public class ThreadBasedUserCrnProvider {
         }
     }
 
-    public static void setUserCrn(String userCrn) {
+    private static void setUserCrn(String userCrn) {
         if (USER_CRN.get() != null) {
             String errorMessage = String.format("Trying to set crn %s when it already contains %s!", userCrn, USER_CRN.get());
             String stackTrace = Arrays.stream(Thread.currentThread().getStackTrace())
@@ -46,7 +49,61 @@ public class ThreadBasedUserCrnProvider {
         }
     }
 
-    public static void removeUserCrn() {
+    private static void removeUserCrn() {
         USER_CRN.remove();
+    }
+
+    public static void doAsForServlet(String userCrn, ServletRunnable runnable) throws ServletException, IOException {
+        removeUserCrn();
+        setUserCrn(userCrn);
+        try {
+            runnable.run();
+        } finally {
+            removeUserCrn();
+        }
+    }
+
+    // CHECKSTYLE:OFF
+    public static <T, W extends Throwable> T doAsAndThrow(String userCrn, ThrowableCallable<T, W> callable) throws Throwable {
+        // CHECKSTYLE:ON
+        String previousUserCrn = getUserCrn();
+        removeUserCrn();
+        setUserCrn(userCrn);
+        try {
+            return callable.call();
+        } finally {
+            removeUserCrn();
+            if (previousUserCrn != null) {
+                setUserCrn(previousUserCrn);
+            }
+        }
+    }
+
+    public static <T> T doAs(String userCrn, Supplier<T> callable) {
+        String previousUserCrn = getUserCrn();
+        removeUserCrn();
+        setUserCrn(userCrn);
+        try {
+            return callable.get();
+        } finally {
+            removeUserCrn();
+            if (previousUserCrn != null) {
+                setUserCrn(previousUserCrn);
+            }
+        }
+    }
+
+    public static void doAs(String userCrn, Runnable runnable) {
+        String previousUserCrn = getUserCrn();
+        removeUserCrn();
+        setUserCrn(userCrn);
+        try {
+            runnable.run();
+        } finally {
+            removeUserCrn();
+            if (previousUserCrn != null) {
+                setUserCrn(previousUserCrn);
+            }
+        }
     }
 }

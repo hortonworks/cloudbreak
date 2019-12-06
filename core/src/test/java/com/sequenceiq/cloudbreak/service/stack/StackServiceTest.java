@@ -206,8 +206,6 @@ public class StackServiceTest {
         DatalakeResources datalakeResources = new DatalakeResources();
         datalakeResources.setDatalakeStackId(STACK_ID);
         datalakeResources.setId(DATALAKE_RESOURCE_ID);
-        ThreadBasedUserCrnProvider.removeUserCrn();
-        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
         when(datalakeResourcesService.findByDatalakeStackId(anyLong())).thenReturn(Optional.of(datalakeResources));
     }
 
@@ -555,7 +553,6 @@ public class StackServiceTest {
         when(stack.isDeleteInProgress()).thenReturn(Boolean.TRUE);
         when(stack.isDeleteCompleted()).thenReturn(Boolean.FALSE);
         when(stack.getId()).thenReturn(STACK_ID);
-        when(stack.getWorkspace()).thenReturn(workspace);
 
         underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, user);
 
@@ -571,7 +568,6 @@ public class StackServiceTest {
         FlowLog flowLog = new FlowLog();
         flowLog.setVariables("{\"FORCEDTERMINATION\":false}");
         flowLog.setCurrentState(StackTerminationState.PRE_TERMINATION_STATE.name());
-        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(STACK_ID)).thenReturn(Collections.singletonList(flowLog));
 
         underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, user);
 
@@ -585,7 +581,6 @@ public class StackServiceTest {
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         when(stack.isDeleteInProgress()).thenReturn(Boolean.TRUE);
         when(stack.getId()).thenReturn(STACK_ID);
-        when(stack.getWorkspace()).thenReturn(workspace);
         FlowLog flowLog = new FlowLog();
         flowLog.setVariables("{\"FORCEDTERMINATION\":true}");
         flowLog.setCurrentState(StackTerminationState.PRE_TERMINATION_STATE.name());
@@ -604,7 +599,6 @@ public class StackServiceTest {
         when(stack.isDeleteInProgress()).thenReturn(Boolean.FALSE);
         when(stack.isDeleteCompleted()).thenReturn(Boolean.TRUE);
         when(stack.getId()).thenReturn(STACK_ID);
-        when(stack.getWorkspace()).thenReturn(workspace);
 
         underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, user);
 
@@ -620,7 +614,6 @@ public class StackServiceTest {
         when(stack.isDeleteInProgress()).thenReturn(Boolean.FALSE);
         when(stack.isDeleteCompleted()).thenReturn(Boolean.TRUE);
         when(stack.getId()).thenReturn(STACK_ID);
-        when(stack.getWorkspace()).thenReturn(workspace);
 
         underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, user);
 
@@ -639,7 +632,6 @@ public class StackServiceTest {
         when(stackRepository.save(stack)).thenReturn(stack);
 
         when(tlsSecurityService.generateSecurityKeys(any(Workspace.class))).thenReturn(securityConfig);
-        when(connector.getPlatformParameters(stack)).thenReturn(parameters);
 
         expectedException.expectCause(org.hamcrest.Matchers.any(CloudbreakImageNotFoundException.class));
 
@@ -649,7 +641,8 @@ public class StackServiceTest {
                 .create(eq(stack), eq(platformString), nullable(StatedImage.class));
 
         try {
-            stack = underTest.create(stack, platformString, mock(StatedImage.class), user, workspace);
+            stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                    () -> underTest.create(stack, platformString, mock(StatedImage.class), user, workspace));
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(securityConfig, times(1)).setStack(stack);
@@ -668,10 +661,10 @@ public class StackServiceTest {
         when(stackRepository.save(stack)).thenReturn(stack);
 
         when(tlsSecurityService.generateSecurityKeys(any(Workspace.class))).thenReturn(securityConfig);
-        when(connector.getPlatformParameters(stack)).thenReturn(parameters);
 
         try {
-            stack = underTest.create(stack, "AWS", mock(StatedImage.class), user, workspace);
+            stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                    () -> underTest.create(stack, "AWS", mock(StatedImage.class), user, workspace));
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(stack).setResourceCrn(crnCaptor.capture());

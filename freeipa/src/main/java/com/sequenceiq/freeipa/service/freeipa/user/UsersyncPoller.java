@@ -65,45 +65,45 @@ public class UsersyncPoller {
 
     @VisibleForTesting
     void syncFreeIpaStacks() {
-        ThreadBasedUserCrnProvider.setUserCrn(INTERNAL_ACTOR_CRN);
         Optional<String> requestId = Optional.of(UUID.randomUUID().toString());
         LOGGER.debug("Setting request id = {} for this poll", requestId);
         MDCBuilder.addRequestId(requestId.get());
         try {
-            LOGGER.debug("Attempting to sync users to FreeIPA stacks");
-            List<Stack> stackList = stackService.findAllRunning();
-            LOGGER.debug("Found {} active stacks", stackList.size());
+            ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> {
+                LOGGER.debug("Attempting to sync users to FreeIPA stacks");
+                List<Stack> stackList = stackService.findAllRunning();
+                LOGGER.debug("Found {} active stacks", stackList.size());
 
-            stackList.stream()
-                    .collect(Collectors.groupingBy(Stack::getAccountId))
-                    .entrySet().stream()
-                    .filter(stringListEntry -> {
-                        String accountId = stringListEntry.getKey();
-                        boolean entitled = entitlementService.automaticUsersyncPollerEnabled(INTERNAL_ACTOR_CRN, accountId);
-                        if (!entitled) {
-                            LOGGER.debug("Usersync polling is not entitled in accout {}. skipping", accountId);
-                        }
-                        return entitled;
-                    })
-                    .forEach(stringListEntry -> {
-                        String accountId = stringListEntry.getKey();
-                        LOGGER.debug("Usersync polling is entitled in account {}", accountId);
-                        UmsEventGenerationIds currentGeneration =
-                                umsEventGenerationIdsProvider.getEventGenerationIds(accountId, requestId);
-                        stringListEntry.getValue().stream()
-                                .forEach(stack -> {
-                                    if (isStale(stack, currentGeneration)) {
-                                        LOGGER.debug("Environment {} in Account {} is stale.", stack.getEnvironmentCrn(), stack.getAccountId());
-                                        SyncOperationStatus status = userService.synchronizeUsers(stack.getAccountId(), INTERNAL_ACTOR_CRN,
-                                                Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
-                                        LOGGER.debug("Sync request resulted in operation {}", status);
-                                    } else {
-                                        LOGGER.debug("Environment {} in Account {} is up-to-date.", stack.getEnvironmentCrn(), stack.getAccountId());
-                                    }
-                                });
-                    });
+                stackList.stream()
+                        .collect(Collectors.groupingBy(Stack::getAccountId))
+                        .entrySet().stream()
+                        .filter(stringListEntry -> {
+                            String accountId = stringListEntry.getKey();
+                            boolean entitled = entitlementService.automaticUsersyncPollerEnabled(INTERNAL_ACTOR_CRN, accountId);
+                            if (!entitled) {
+                                LOGGER.debug("Usersync polling is not entitled in accout {}. skipping", accountId);
+                            }
+                            return entitled;
+                        })
+                        .forEach(stringListEntry -> {
+                            String accountId = stringListEntry.getKey();
+                            LOGGER.debug("Usersync polling is entitled in account {}", accountId);
+                            UmsEventGenerationIds currentGeneration =
+                                    umsEventGenerationIdsProvider.getEventGenerationIds(accountId, requestId);
+                            stringListEntry.getValue()
+                                    .forEach(stack -> {
+                                        if (isStale(stack, currentGeneration)) {
+                                            LOGGER.debug("Environment {} in Account {} is stale.", stack.getEnvironmentCrn(), stack.getAccountId());
+                                            SyncOperationStatus status = userService.synchronizeUsers(stack.getAccountId(), INTERNAL_ACTOR_CRN,
+                                                    Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
+                                            LOGGER.debug("Sync request resulted in operation {}", status);
+                                        } else {
+                                            LOGGER.debug("Environment {} in Account {} is up-to-date.", stack.getEnvironmentCrn(), stack.getAccountId());
+                                        }
+                                    });
+                        });
+            });
         } finally {
-            ThreadBasedUserCrnProvider.removeUserCrn();
             MDCBuilder.cleanupMdc();
         }
     }
