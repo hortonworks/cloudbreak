@@ -18,12 +18,25 @@ public class JaxRSUtil {
     public static <T> T response(Response response, Class<T> clazz) {
         if (Family.SUCCESSFUL != response.getStatusInfo().getFamily()) {
             if (!response.getMediaType().isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
-                String errormsg = "Status: " + response.getStatusInfo().getStatusCode() + ' ' + response.getStatusInfo().getReasonPhrase();
-                String textResponse = response.readEntity(String.class);
-                LOGGER.debug("Received error: {}", textResponse);
-                throw new WebApplicationException(errormsg);
+                throw handleUnexpectedError(response);
             }
         }
-        return response.readEntity(clazz);
+        try {
+            response.bufferEntity();
+            return response.readEntity(clazz);
+        } catch (Exception e) {
+            LOGGER.warn("Couldn't parse response: [{}]", response, e);
+            throw handleUnexpectedError(response);
+        } finally {
+            response.close();
+        }
+    }
+
+    private static WebApplicationException handleUnexpectedError(Response response) {
+        String textResponse = response.readEntity(String.class);
+        LOGGER.debug("Received error: {}", textResponse);
+        String errormsg = "Status: " + response.getStatusInfo().getStatusCode() + ' ' + response.getStatusInfo().getReasonPhrase()
+                + " Response: " + textResponse;
+        return new WebApplicationException(errormsg);
     }
 }
