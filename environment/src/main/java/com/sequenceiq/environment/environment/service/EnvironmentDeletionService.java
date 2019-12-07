@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -93,10 +94,16 @@ public class EnvironmentDeletionService {
                 .collect(Collectors.toList());
     }
 
-    private void checkIsEnvironmentDeletable(Environment env) {
+    @VisibleForTesting
+    void checkIsEnvironmentDeletable(Environment env) {
         LOGGER.info("Checking if environment [name: {}] is deletable", env.getName());
 
-        Set<String> datalakes = environmentResourceDeletionService.getDatalakeClusterNames(env);
+        Set<String> datalakes = environmentResourceDeletionService.getAttachedSdxClusterCrns(env);
+        // if someone use create the clusters via internal cluster API, in this case the SDX service does not know about these clusters,
+        // so we need to check against legacy DL API from Core service
+        if (datalakes.isEmpty()) {
+            datalakes = environmentResourceDeletionService.getDatalakeClusterNames(env);
+        }
         if (!datalakes.isEmpty()) {
             throw new BadRequestException(String.format("The following Data Lake cluster(s) must be terminated before Environment deletion [%s]",
                     String.join(", ", datalakes)));

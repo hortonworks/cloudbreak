@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.OperationException;
@@ -110,6 +111,11 @@ public class StackUpscaleService {
     public void extendingMetadata(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.EXTENDING_METADATA);
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
+    }
+
+    void reRegisterWithClusterProxy(long stackId) {
+        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Re-registering with Cluster Proxy service.");
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_RE_REGISTER_WITH_CLUSTER_PROXY);
     }
 
     public Set<String> finishExtendMetadata(Stack stack, Integer scalingAdjustment, CollectMetadataResult payload) throws TransactionExecutionException {
