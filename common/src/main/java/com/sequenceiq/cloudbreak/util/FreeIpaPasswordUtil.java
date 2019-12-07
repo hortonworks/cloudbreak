@@ -8,7 +8,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 public class FreeIpaPasswordUtil {
 
-    private static final int PWD_PREFIX_LENGTH = 2;
+    private static final int PWD_PREFIX_LENGTH = 3;
 
     private static final int PWD_PART_LENGTH = 8;
 
@@ -25,6 +25,6 @@ public class FreeIpaPasswordUtil {
         String raw = upperCaseLetters.concat(lowerCaseLetters).concat(numbers).concat(SPECIAL_CHARS);
         List<String> list = Arrays.asList(raw.split(""));
         Collections.shuffle(list);
-        return pwdPrefix.concat(list.toString());
+        return pwdPrefix.concat(String.join("", list));
     }
 }
