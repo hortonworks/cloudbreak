@@ -1,0 +1,6 @@
+name: "aws-image-validation-tests"
+tests:
+  - name: "aws image validation e2e tests"
+    classes:
+      - com.sequenceiq.it.cloudbreak.testcase.e2e.azure.AzureDistroXTest
+      - com.sequenceiq.it.cloudbreak.testcase.e2e.azure.AzureInternalSdxTests
