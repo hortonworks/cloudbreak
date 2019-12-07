@@ -9,16 +9,14 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
+import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.BootstrapNewNodesEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReRegistrationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReRegistrationResult;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -62,23 +60,13 @@ public class ClusterProxyReRegistrationHandler implements EventHandler<ClusterPr
     private Selectable registerCluster(ClusterProxyReRegistrationRequest request) {
         if (!clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
             LOGGER.info("Cluster Proxy integration is DISABLED, skipping re-registering with Cluster Proxy service");
-            return new ClusterProxyReRegistrationResult(request);
+            return new BootstrapNewNodesEvent(StackUpscaleEvent.CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT.event(), request.getResourceId());
         }
 
         Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
         try {
-            String hostGroupName = request.getHostGroupName();
-            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupName)
-                    .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
-            InstanceGroup instanceGroup = hostGroup.getInstanceGroup();
-            boolean gatewayInstanceGroup = InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType());
-
-            if (!gatewayInstanceGroup) {
-                LOGGER.info("Not re-registering with Cluster Proxy as this is not a gateway host group. stack crn: {}", stack.getResourceCrn());
-                return new ClusterProxyReRegistrationResult(request);
-            }
             clusterProxyService.reRegisterCluster(stack);
-            return new ClusterProxyReRegistrationResult(request);
+            return new BootstrapNewNodesEvent(StackUpscaleEvent.CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT.event(), stack.getId());
         } catch (Exception e) {
             LOGGER.error("Error occurred re-registering cluster {} in environment {} to cluster proxy",
                     stack.getCluster().getId(), stack.getEnvironmentCrn(), e);

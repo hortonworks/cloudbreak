@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEve
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.ADD_INSTANCES_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.ADD_INSTANCES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.ADD_INSTANCES_FINISHED_FAILURE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.CLUSTER_PROXY_RE_REGISTRATION_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.EXTEND_METADATA_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.EXTEND_METADATA_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.EXTEND_METADATA_FINISHED_EVENT;
@@ -21,6 +23,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleSta
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.GATEWAY_TLS_SETUP_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.RE_REGISTER_WITH_CLUSTER_PROXY_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_PREVALIDATION_STATE;
 
@@ -49,8 +52,10 @@ public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleSt
                                     .failureEvent(StackUpscaleEvent.EXTEND_METADATA_FINISHED_FAILURE_EVENT)
                     .from(EXTEND_METADATA_FINISHED_STATE).to(GATEWAY_TLS_SETUP_STATE).event(StackUpscaleEvent.SSHFINGERPRINTS_EVENT)
                                     .failureEvent(StackUpscaleEvent.EXTEND_METADATA_FINISHED_FAILURE_EVENT)
-                    .from(GATEWAY_TLS_SETUP_STATE).to(BOOTSTRAP_NEW_NODES_STATE).event(StackUpscaleEvent.TLS_SETUP_FINISHED_EVENT)
+                    .from(GATEWAY_TLS_SETUP_STATE).to(RE_REGISTER_WITH_CLUSTER_PROXY_STATE).event(StackUpscaleEvent.TLS_SETUP_FINISHED_EVENT)
                                     .failureEvent(StackUpscaleEvent.TLS_SETUP_FINISHED_FAILED_EVENT)
+                    .from(RE_REGISTER_WITH_CLUSTER_PROXY_STATE).to(BOOTSTRAP_NEW_NODES_STATE).event(CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT)
+                    .failureEvent(CLUSTER_PROXY_RE_REGISTRATION_FAILED_EVENT)
                     .from(BOOTSTRAP_NEW_NODES_STATE).to(EXTEND_HOST_METADATA_STATE).event(StackUpscaleEvent.EXTEND_HOST_METADATA_EVENT)
                                     .failureEvent(StackUpscaleEvent.BOOTSTRAP_NEW_NODES_FAILURE_EVENT)
                     .from(EXTEND_HOST_METADATA_STATE).to(EXTEND_HOST_METADATA_FINISHED_STATE).event(StackUpscaleEvent.EXTEND_HOST_METADATA_FINISHED_EVENT)

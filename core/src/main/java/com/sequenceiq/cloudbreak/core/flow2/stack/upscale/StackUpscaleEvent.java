@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReRegistrationResult;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesResult;
@@ -25,6 +26,8 @@ public enum StackUpscaleEvent implements FlowEvent {
     SSHFINGERPRINTS_FAILED_EVENT(CloudPlatformResult.failureSelector(GetSSHFingerprintsResult.class)),
     TLS_SETUP_FINISHED_EVENT("TLS_SETUP_FINISHED_EVENT"),
     TLS_SETUP_FINISHED_FAILED_EVENT("TLS_SETUP_FINISHED_EVENT"),
+    CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT(EventSelectorUtil.selector(ClusterProxyReRegistrationResult.class)),
+    CLUSTER_PROXY_RE_REGISTRATION_FAILED_EVENT(EventSelectorUtil.failureSelector(ClusterProxyReRegistrationResult.class)),
     BOOTSTRAP_NEW_NODES_EVENT("BOOTSTRAP_NEW_NODES"),
     BOOTSTRAP_NEW_NODES_FAILURE_EVENT(EventSelectorUtil.failureSelector(BootstrapNewNodesResult.class)),
     EXTEND_HOST_METADATA_EVENT(EventSelectorUtil.selector(BootstrapNewNodesResult.class)),

@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.service;
 
+import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -146,7 +147,7 @@ public class EnvironmentDeletionServiceTest {
 
     @Test
     public void deleteFailedDataLakesAreAttached() {
-        when(environmentResourceDeletionService.getDatalakeClusterNames(eq(environment))).thenReturn(Set.of("notempty"));
+        when(environmentResourceDeletionService.getAttachedSdxClusterCrns(eq(environment))).thenReturn(Set.of("notempty"));
         assertThrows(BadRequestException.class, () -> environmentDeletionService.delete(environment, TestConstants.USER, false));
         verify(reactorFlowManager, never()).triggerDeleteFlow(eq(environment), eq(TestConstants.USER));
     }
@@ -180,5 +181,23 @@ public class EnvironmentDeletionServiceTest {
         assertEquals(expected, environmentDeletionServiceWired.deleteMultipleByCrns(names, TestConstants.ACCOUNT_ID, TestConstants.USER,
                 false).size());
         verify(environmentDeletionServiceWired, times(expected)).delete(any(), eq(TestConstants.USER), anyBoolean());
+    }
+
+    @Test
+    public void testCheckIsEnvironmentDeletableWhenSdxAndDatalakeAreEmpty() {
+        when(environmentResourceDeletionService.getAttachedSdxClusterCrns(environment)).thenReturn(emptySet());
+        when(environmentResourceDeletionService.getDatalakeClusterNames(environment)).thenReturn(emptySet());
+
+        environmentDeletionService.checkIsEnvironmentDeletable(environment);
+        verify(environmentResourceDeletionService).getAttachedDistroXClusterNames(environment);
+    }
+
+    @Test
+    public void testCheckIsEnvironmentDeletableWhenSdxIsEmptyButDatalakeIsNot() {
+        when(environmentResourceDeletionService.getAttachedSdxClusterCrns(environment)).thenReturn(emptySet());
+        when(environmentResourceDeletionService.getDatalakeClusterNames(environment)).thenReturn(Set.of("name"));
+
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> environmentDeletionService.checkIsEnvironmentDeletable(environment));
+        assertEquals("The following Data Lake cluster(s) must be terminated before Environment deletion [name]", actual.getMessage());
     }
 }

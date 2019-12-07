@@ -1,7 +1,7 @@
 {
   "name": "Operational Database for AWS",
   "description": "",
-  "type": "OTHER",
+  "type": "OPERATIONALDATABASE",
   "featureState": "RELEASED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
