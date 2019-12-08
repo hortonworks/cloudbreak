@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import static com.sequenceiq.cloudbreak.service.image.ImageCatalogService.CLOUDBREAK_DEFAULT_CATALOG_NAME;
+import static com.sequenceiq.cloudbreak.service.image.ImageCatalogService.CDP_DEFAULT_CATALOG_NAME;
 
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +42,7 @@ public class StackImageFilterService {
     private ComponentConfigProviderService componentConfigProviderService;
 
     public Images getApplicableImages(Long workspaceId, String stackName) throws CloudbreakImageCatalogException {
-        return getApplicableImages(workspaceId, CLOUDBREAK_DEFAULT_CATALOG_NAME, stackName);
+        return getApplicableImages(workspaceId, CDP_DEFAULT_CATALOG_NAME, stackName);
     }
 
     public Images getApplicableImages(Long workspaceId, String imageCatalogName, String stackName) throws CloudbreakImageCatalogException {

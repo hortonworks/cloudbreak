@@ -65,6 +65,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     static final String CLOUDBREAK_DEFAULT_CATALOG_NAME = "cloudbreak-default";
 
+    static final String CDP_DEFAULT_CATALOG_NAME = "cdp-default";
+
     private static final String SALT_BOOTSTRAP = "salt-bootstrap";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogService.class);
@@ -74,6 +76,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     @Value("${cb.image.catalog.url}")
     private String defaultCatalogUrl;
+
+    @Value("${cb.image.catalog.legacy.enabled}")
+    private boolean legacyCatalogEnabled;
 
     @Inject
     private ImageCatalogProvider imageCatalogProvider;
@@ -100,6 +105,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     public Set<ImageCatalog> findAllByWorkspaceId(Long workspaceId) {
         Set<ImageCatalog> imageCatalogs = imageCatalogRepository.findAllByWorkspaceIdAndArchived(workspaceId, false);
         imageCatalogs.add(getCloudbreakDefaultImageCatalog());
+        if (legacyCatalogEnabled) {
+            imageCatalogs.add(getCloudbreakLegacyDefaultImageCatalog());
+        }
         return imageCatalogs;
     }
 
@@ -113,6 +121,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     public Set<ImageCatalog> findAllByWorkspace(Workspace workspace) {
         Set<ImageCatalog> imageCatalogs = repository().findAllByWorkspace(workspace);
         imageCatalogs.add(getCloudbreakDefaultImageCatalog());
+        if (legacyCatalogEnabled) {
+            imageCatalogs.add(getCloudbreakLegacyDefaultImageCatalog());
+        }
         return imageCatalogs;
     }
 
@@ -234,7 +245,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     public StatedImage getImage(String imageId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        return getImage(defaultCatalogUrl, CLOUDBREAK_DEFAULT_CATALOG_NAME, imageId);
+        return getImage(defaultCatalogUrl, CDP_DEFAULT_CATALOG_NAME, imageId);
     }
 
     public StatedImage getImage(String catalogUrl, String catalogName, String imageId) throws CloudbreakImageNotFoundException,
@@ -313,7 +324,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     public boolean isEnvDefault(String name) {
-        return CLOUDBREAK_DEFAULT_CATALOG_NAME.equals(name);
+        return CDP_DEFAULT_CATALOG_NAME.equals(name)
+                || (legacyCatalogEnabled && CLOUDBREAK_DEFAULT_CATALOG_NAME.equals(name));
     }
 
     private void setImageCatalogAsDefault(ImageCatalog imageCatalog, User user) {
@@ -342,6 +354,13 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     private ImageCatalog getCloudbreakDefaultImageCatalog() {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setName(CDP_DEFAULT_CATALOG_NAME);
+        imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
+        return imageCatalog;
+    }
+
+    private ImageCatalog getCloudbreakLegacyDefaultImageCatalog() {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setName(CLOUDBREAK_DEFAULT_CATALOG_NAME);
         imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
@@ -537,7 +556,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     private void removeDefaultFlag(User user) {
         ImageCatalog imageCatalog = getDefaultImageCatalog(user);
-        if (imageCatalog.getName() != null && !CLOUDBREAK_DEFAULT_CATALOG_NAME.equalsIgnoreCase(imageCatalog.getName())) {
+        if (imageCatalog.getName() != null && !CDP_DEFAULT_CATALOG_NAME.equalsIgnoreCase(imageCatalog.getName())) {
             setImageCatalogAsDefault(null, user);
             imageCatalogRepository.save(imageCatalog);
         }
@@ -549,7 +568,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         if (imageCatalog == null) {
             imageCatalog = new ImageCatalog();
             imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
-            imageCatalog.setName(CLOUDBREAK_DEFAULT_CATALOG_NAME);
+            imageCatalog.setName(CDP_DEFAULT_CATALOG_NAME);
         }
         return imageCatalog;
     }

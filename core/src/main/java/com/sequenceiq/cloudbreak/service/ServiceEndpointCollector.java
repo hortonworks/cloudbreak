@@ -249,9 +249,6 @@ public class ServiceEndpointCollector {
                 case KUDU:
                     addKuduUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls);
                     break;
-                case SCHEMA_REGISTRY:
-                    addSchemaRegistry(managerIp, gateway, topologyName, exposedService, urls);
-                    break;
                 case KUDU_TABLET_SERVER:
                     // skipping kudu tablet server url because this is not required
                     break;
