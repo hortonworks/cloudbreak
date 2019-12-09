@@ -1,12 +1,10 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_2;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import org.springframework.stereotype.Component;
 
@@ -29,34 +27,36 @@ public class KafkaAuthConfigProvider implements CmTemplateComponentConfigProvide
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
-        String cdhVersion = templateProcessor.getVersion().orElse("");
+        KafkaConfigProviderUtils.CdhVersionForStreaming cdhVersion = KafkaConfigProviderUtils.getCdhVersionForStreaming(source);
         LdapView ldapView = source.getLdapConfig().get();
-
-        return supportsPam(cdhVersion) ? ldapAndPamConfig(ldapView) :
-                supportsLdap(cdhVersion) ? ldapConfig(ldapView) : List.of();
-    }
-
-    private boolean supportsLdap(String cdhVersion) {
-        return isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_0_2);
-    }
-
-    private boolean supportsPam(String cdhVersion) {
-        return isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0);
+        switch (cdhVersion) {
+            case VERSION_7_0_2:
+                return ldapConfig(ldapView);
+            case VERSION_7_0_2_2_OR_LATER:
+                return ldapAndPamConfig(ldapView);
+            case VERSION_7_0_2_CANNOT_DETERMINE_PATCH:
+                return generalAuthConfig(ldapView);
+            default:
+                return List.of();
+        }
     }
 
     private List<ApiClusterTemplateConfig> ldapConfig(LdapView ldapView) {
-        return generalLdapConfig(ldapView, config(LDAP_AUTH_ENABLE, "true"));
+        List<ApiClusterTemplateConfig> config = generalAuthConfig(ldapView);
+        config.add(config(LDAP_AUTH_ENABLE, "true"));
+        return config;
     }
 
     private List<ApiClusterTemplateConfig> ldapAndPamConfig(LdapView ldapView) {
-        return generalLdapConfig(ldapView, config(SASL_AUTH_METHOD, "PAM"));
+        List<ApiClusterTemplateConfig> config = generalAuthConfig(ldapView);
+        config.add(config(SASL_AUTH_METHOD, "PAM"));
+        return config;
     }
 
-    private List<ApiClusterTemplateConfig> generalLdapConfig(LdapView ldapView, ApiClusterTemplateConfig additionalConfig) {
-        return List.of(
-            config(LDAP_AUTH_URL, ldapView.getConnectionURL()),
-            config(LDAP_AUTH_USER_DN_TEMPLATE, ldapView.getUserDnPattern()),
-            additionalConfig);
+    private List<ApiClusterTemplateConfig> generalAuthConfig(LdapView ldapView) {
+        return Lists.newArrayList(
+                config(LDAP_AUTH_URL, ldapView.getConnectionURL()),
+                config(LDAP_AUTH_USER_DN_TEMPLATE, ldapView.getUserDnPattern()));
     }
 
     @Override
