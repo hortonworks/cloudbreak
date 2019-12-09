@@ -15,14 +15,14 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
-import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.repository.ComponentRepository;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Service
 public class ComponentConfigProviderService {
@@ -123,9 +123,8 @@ public class ComponentConfigProviderService {
     }
 
     public List<Component> store(List<Component> components) {
-        for (Component component : components) {
-            store(component);
-        }
+        componentRepository.saveAll(components);
+        LOGGER.debug("Components saved: {}", components);
         return components;
     }
 
