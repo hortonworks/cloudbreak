@@ -14,10 +14,10 @@ import javax.persistence.NamedEntityGraph;
 import javax.persistence.NamedSubgraph;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @NamedEntityGraph(name = "ClusterComponent.cluster.rdsConfig",
         attributeNodes = @NamedAttributeNode(value = "cluster", subgraph = "rdsConfig"),
@@ -27,7 +27,7 @@ public class ClusterComponent implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "component_generator")
-    @SequenceGenerator(name = "component_generator", sequenceName = "component_id_seq", allocationSize = 1)
+    @SequenceGenerator(name = "component_generator", sequenceName = "component_id_seq", allocationSize = 20)
     private Long id;
 
     @Enumerated(EnumType.STRING)
