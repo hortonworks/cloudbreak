@@ -78,7 +78,7 @@ public class FreeIpaPostInstallService {
                 ThreadBasedUserCrnProvider.getAccountId(), ThreadBasedUserCrnProvider.getUserCrn(), Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
     }
 
-    public void modifyAdminPasswordExpirationIfNeeded(FreeIpaClient client) throws FreeIpaClientException {
+    private void modifyAdminPasswordExpirationIfNeeded(FreeIpaClient client) throws FreeIpaClientException {
         Optional<User> user = client.userFind(freeIpaClientFactory.getAdminUser());
         if (user.isPresent() && !FreeIpaClient.PASSWORD_EXPIRATION_DATETIME.equals(user.get().getKrbPasswordExpiration())) {
             User actualUser = user.get();
