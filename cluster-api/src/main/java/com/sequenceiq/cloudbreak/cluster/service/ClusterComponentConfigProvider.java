@@ -120,9 +120,10 @@ public class ClusterComponentConfigProvider {
 
     public List<ClusterComponent> store(Collection<ClusterComponent> components, Cluster cluster) {
         List<ClusterComponent> ret = new ArrayList<>();
-        components.forEach(comp -> comp.setCluster(cluster));
-        componentRepository.saveAll(components).forEach(ret::add);
-        LOGGER.debug("Components saved: stackId: {}, components: {}", cluster.getId(), ret);
+        for (ClusterComponent component : components) {
+            component.setCluster(cluster);
+            ret.add(store(component));
+        }
         return ret;
     }
 
