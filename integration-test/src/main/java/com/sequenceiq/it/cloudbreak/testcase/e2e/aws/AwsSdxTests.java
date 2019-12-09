@@ -44,13 +44,13 @@ public class AwsSdxTests extends BasicSdxTests {
     private static final String CREATE_FILE_RECIPE = "classpath:/recipes/post-install.sh";
 
     private Map<String, InstanceStatus> instancesDeletedOnProviderSide = new HashMap<String, InstanceStatus>() {{
-        put(HostGroupType.MASTER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE);
-        put(HostGroupType.IDBROKER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE);
+        put(MASTER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE);
+        put(IDBROKER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE);
     }};
 
     private Map<String, InstanceStatus> instancesStopped = new HashMap<String, InstanceStatus>() {{
-        put(HostGroupType.MASTER.getName(), InstanceStatus.STOPPED);
-        put(HostGroupType.IDBROKER.getName(), InstanceStatus.STOPPED);
+        put(MASTER.getName(), InstanceStatus.STOPPED);
+        put(IDBROKER.getName(), InstanceStatus.STOPPED);
     }};
 
     @Inject
@@ -85,7 +85,7 @@ public class AwsSdxTests extends BasicSdxTests {
             when = "recovery called on the IDBROKER and MASTER host group, where the EC2 instance had been terminated",
             then = "SDX recovery should be successful, the cluster should be up and running"
     )
-    public void testSDXMultiRepairIDBRokerAndMasterWithTerminatedECInstances(TestContext testContext) {
+    public void testSDXMultiRepairIDBRokerAndMasterWithTerminatedEC2Instances(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
 
         List<String> actualMasterVolumeIds = new ArrayList<>();
@@ -101,13 +101,13 @@ public class AwsSdxTests extends BasicSdxTests {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
                 .then((tc, testDto, client) -> {
-                    expectedMasterVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, HostGroupType.MASTER.getName()));
-                    expectedIDBrokerVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, HostGroupType.IDBROKER.getName()));
+                    expectedMasterVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, MASTER.getName()));
+                    expectedIDBrokerVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, IDBROKER.getName()));
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
-                    amazonEC2Util.deleteHostGroupInstances(tc, testDto, client, HostGroupType.MASTER.getName());
-                    amazonEC2Util.deleteHostGroupInstances(tc, testDto, client, HostGroupType.IDBROKER.getName());
+                    amazonEC2Util.deleteHostGroupInstances(tc, testDto, client, MASTER.getName());
+                    amazonEC2Util.deleteHostGroupInstances(tc, testDto, client, IDBROKER.getName());
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
@@ -120,14 +120,114 @@ public class AwsSdxTests extends BasicSdxTests {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
                 .then((tc, testDto, client) -> {
-                    actualMasterVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, HostGroupType.MASTER.getName()));
-                    actualIDBrokerVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, HostGroupType.IDBROKER.getName()));
+                    actualMasterVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, MASTER.getName()));
+                    actualIDBrokerVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, IDBROKER.getName()));
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
                     return amazonEC2Util.compareVolumeIds(testDto, Stream.concat(actualMasterVolumeIds.stream(), actualIDBrokerVolumeIds.stream())
                             .collect(Collectors.toList()), Stream.concat(expectedMasterVolumeIds.stream(), expectedIDBrokerVolumeIds.stream())
                             .collect(Collectors.toList()));
+                })
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            when = "recovery called on the IDBROKER host group, where the EC2 instance had been stopped",
+            then = "SDX recovery should be successful, the cluster should be up and running"
+    )
+    public void testSDXRepairIDBRokerWithStoppedEC2Instance(TestContext testContext) {
+        String sdx = resourcePropertyProvider().getName();
+
+        List<String> actualIDBrokerVolumeIds = new ArrayList<>();
+        List<String> expectedIDBrokerVolumeIds = new ArrayList<>();
+
+        testContext
+                .given(sdx, SdxTestDto.class).withCloudStorage()
+                .when(sdxTestClient.create(), key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .then((tc, testDto, client) -> {
+                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
+                })
+                .then((tc, testDto, client) -> {
+                    expectedIDBrokerVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, IDBROKER.getName()));
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> {
+                    amazonEC2Util.stopHostGroupInstances(tc, testDto, client, IDBROKER.getName());
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> {
+                    return waitUtil.waitForSdxInstanceStatus(testDto, client, IDBROKER.getName(), InstanceStatus.SERVICES_UNHEALTHY);
+                })
+                .when(sdxTestClient.repair(), key(sdx))
+                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .then((tc, testDto, client) -> {
+                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
+                })
+                .then((tc, testDto, client) -> {
+                    actualIDBrokerVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, IDBROKER.getName()));
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> {
+                    return amazonEC2Util.compareVolumeIds(testDto, new ArrayList<>(actualIDBrokerVolumeIds),
+                            new ArrayList<>(expectedIDBrokerVolumeIds));
+                })
+                .validate();
+    }
+
+    /**
+     * This test case is disabled right now, because of [CB-4176 [Repair] Data Lake Cluster repair fails for master node when stopped from AWS].
+     *
+     * @param testContext   Stores and shares test objects through test execution between individual test cases.
+     *
+     * The 'disabled' tag on method name and the '@Test(dataProvider = TEST_CONTEXT)' annotation should be restored in case of resume this test case.
+     */
+    @Description(
+            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            when = "recovery called on the MASTER host group, where the EC2 instance had been stopped",
+            then = "SDX recovery should be successful, the cluster should be up and running"
+    )
+    public void disbaledTestSDXRepairMasterWithStoppedEC2Instance(TestContext testContext) {
+        String sdx = resourcePropertyProvider().getName();
+
+        List<String> actualMasterVolumeIds = new ArrayList<>();
+        List<String> expectedMasterVolumeIds = new ArrayList<>();
+
+        testContext
+                .given(sdx, SdxTestDto.class).withCloudStorage()
+                .when(sdxTestClient.create(), key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .then((tc, testDto, client) -> {
+                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
+                })
+                .then((tc, testDto, client) -> {
+                    expectedMasterVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, MASTER.getName()));
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> {
+                    amazonEC2Util.stopHostGroupInstances(tc, testDto, client, MASTER.getName());
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> {
+                    return waitUtil.waitForSdxInstanceStatus(testDto, client, MASTER.getName(), InstanceStatus.STOPPED);
+                })
+                .when(sdxTestClient.repair(), key(sdx))
+                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .then((tc, testDto, client) -> {
+                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
+                })
+                .then((tc, testDto, client) -> {
+                    actualMasterVolumeIds.addAll(amazonEC2Util.listHostGroupVolumeIds(tc, testDto, client, MASTER.getName()));
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> {
+                    return amazonEC2Util.compareVolumeIds(testDto, new ArrayList<>(actualMasterVolumeIds),
+                            new ArrayList<>(expectedMasterVolumeIds));
                 })
                 .validate();
     }
