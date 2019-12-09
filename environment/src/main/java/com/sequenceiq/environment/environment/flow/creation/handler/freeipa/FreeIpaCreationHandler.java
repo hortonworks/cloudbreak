@@ -23,7 +23,6 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.util.CidrUtil;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -126,26 +125,21 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private void createFreeIpa(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environmentDto, Environment environment) throws Exception {
-        try {
-            Optional<DescribeFreeIpaResponse> freeIpa = freeIpaService.describe(environment.getResourceCrn());
-            if (freeIpa.isEmpty()) {
-                LOGGER.info("FreeIpa for environmentCrn '{}' was not found, creating a new one.", environment.getResourceCrn());
-                CreateFreeIpaRequest createFreeIpaRequest = createFreeIpaRequest(environmentDto);
-                freeIpaService.create(createFreeIpaRequest);
-                awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
-                AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(environmentDto);
-                if (shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
-                    dnsV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
-                }
-            } else {
-                LOGGER.info("FreeIpa for environmentCrn '{}' already exists. Using this one.", environment.getResourceCrn());
-                if (CREATE_IN_PROGRESS == freeIpa.get().getStatus()) {
-                    awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
-                }
+        Optional<DescribeFreeIpaResponse> freeIpa = freeIpaService.describe(environment.getResourceCrn());
+        if (freeIpa.isEmpty()) {
+            LOGGER.info("FreeIpa for environmentCrn '{}' was not found, creating a new one.", environment.getResourceCrn());
+            CreateFreeIpaRequest createFreeIpaRequest = createFreeIpaRequest(environmentDto);
+            freeIpaService.create(createFreeIpaRequest);
+            awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
+            AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(environmentDto);
+            if (shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
+                dnsV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
             }
-        } catch (Exception e) {
-            LOGGER.error("Can not start FreeIPA provisioning: {}", e.getMessage(), e);
-            throw new CloudbreakException("Failed to create FreeIpa cluster.", e);
+        } else {
+            LOGGER.info("FreeIpa for environmentCrn '{}' already exists. Using this one.", environment.getResourceCrn());
+            if (CREATE_IN_PROGRESS == freeIpa.get().getStatus()) {
+                awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
+            }
         }
     }
 
