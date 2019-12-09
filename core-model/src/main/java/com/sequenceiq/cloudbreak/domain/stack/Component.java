@@ -94,6 +94,7 @@ public class Component implements ProvisionEntity {
                 + "id=" + id
                 + ", componentType=" + componentType
                 + ", name='" + name + '\''
+                + ", stackId=" + stack.getId()
                 + '}';
     }
 }
