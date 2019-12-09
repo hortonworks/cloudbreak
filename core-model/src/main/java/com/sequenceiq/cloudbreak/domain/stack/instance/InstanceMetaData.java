@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 public class InstanceMetaData implements ProvisionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "instancemetadata_generator")
-    @SequenceGenerator(name = "instancemetadata_generator", sequenceName = "instancemetadata_id_seq", allocationSize = 50)
+    @SequenceGenerator(name = "instancemetadata_generator", sequenceName = "instancemetadata_id_seq", allocationSize = 1)
     private Long id;
 
     private Long privateId;
