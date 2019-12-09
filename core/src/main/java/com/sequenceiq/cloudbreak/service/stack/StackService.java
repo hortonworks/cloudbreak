@@ -68,7 +68,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationSt
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
@@ -521,16 +520,6 @@ public class StackService implements ResourceIdProvider {
 
         measure(() -> instanceMetaDataService.saveAll(savedStack.getInstanceMetaDataAsList()),
                 LOGGER, "Instance metadatas saved in {} ms for stack {}", stackName);
-
-        SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys(workspace);
-
-        securityConfig.setStack(savedStack);
-
-        measure(() -> {
-            saltSecurityConfigService.save(securityConfig.getSaltSecurityConfig());
-            securityConfigService.save(securityConfig);
-        }, LOGGER, "Security config save took {} ms for stack {}", stackName);
-        savedStack.setSecurityConfig(securityConfig);
 
         try {
             imageService.create(savedStack, platformString, imgFromCatalog);
@@ -1037,27 +1026,28 @@ public class StackService implements ResourceIdProvider {
     }
 
     private void storeTelemetryForStack(Stack stack) {
-        try {
-            for (Component component : stack.getComponents()) {
-                if (ComponentType.TELEMETRY.equals(component.getComponentType())) {
-                    if (stack.getCluster() != null && StringUtils.isNoneEmpty(
-                            stack.getType().name(), stack.getResourceCrn(), stack.getCluster().getName())) {
-                        LOGGER.debug("Found TELEMETRY component for stack, will enrich that "
-                                + "with cluster data before saving it.");
-                        FluentClusterType fluentClusterType = StackType.DATALAKE.equals(stack.getType())
-                                ? FluentClusterType.DATALAKE : FluentClusterType.DATAHUB;
+        if (stack.getCluster() == null || StringUtils.isAnyEmpty(stack.getType().name(), stack.getResourceCrn(), stack.getCluster().getName())) {
+            return;
+        }
+        List<Component> enrichedComponents = stack.getComponents().stream()
+                .filter(component -> ComponentType.TELEMETRY.equals(component.getComponentType()))
+                .map(component -> {
+                    LOGGER.debug("Found TELEMETRY component for stack, will enrich that with cluster data before saving it.");
+                    FluentClusterType fluentClusterType = StackType.DATALAKE.equals(stack.getType())
+                            ? FluentClusterType.DATALAKE : FluentClusterType.DATAHUB;
+                    try {
                         Telemetry telemetry = component.getAttributes().get(Telemetry.class);
                         cloudStorageFolderResolverService.updateStorageLocation(telemetry,
                                 fluentClusterType.value(),
                                 stack.getCluster().getName(), stack.getResourceCrn());
                         component.setAttributes(Json.silent(telemetry));
+                    } catch (IOException e) {
+                        LOGGER.info("Could not create Cloudbreak telemetry component.", e);
                     }
-                    componentConfigProviderService.store(component);
-                }
-            }
-        } catch (IllegalArgumentException | IOException e) {
-            LOGGER.info("Could not create Cloudbreak telemetry component.", e);
-        }
+                    return component;
+                })
+                .collect(Collectors.toList());
+        componentConfigProviderService.store(enrichedComponents);
     }
 
     private String createCRN(String accountId) {
