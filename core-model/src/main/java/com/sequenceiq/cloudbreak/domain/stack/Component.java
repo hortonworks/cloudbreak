@@ -11,17 +11,17 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonToString;
 
 @Entity
 public class Component implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "component_generator")
-    @SequenceGenerator(name = "component_generator", sequenceName = "component_id_seq", allocationSize = 20)
+    @SequenceGenerator(name = "component_generator", sequenceName = "component_id_seq", allocationSize = 1)
     private Long id;
 
     @Enumerated(EnumType.STRING)
