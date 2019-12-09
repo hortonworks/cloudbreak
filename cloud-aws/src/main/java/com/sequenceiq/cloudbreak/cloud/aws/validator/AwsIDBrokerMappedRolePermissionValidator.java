@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.auth.policy.Policy;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
+import com.amazonaws.services.identitymanagement.model.AmazonIdentityManagementException;
 import com.amazonaws.services.identitymanagement.model.EvaluationResult;
 import com.amazonaws.services.identitymanagement.model.Role;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsIamService;
@@ -85,9 +86,16 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator {
                     Map<String, String> replacements = getPolicyJsonReplacements(location, cloudFileSystem);
                     List<Policy> policies = getPolicies(policyFileNames, replacements);
                     for (Role role : roles) {
-                        List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam,
-                                role, policies);
-                        failedActions.addAll(getFailedActions(role, evaluationResults));
+                        try {
+                            List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam,
+                                    role, policies);
+                            failedActions.addAll(getFailedActions(role, evaluationResults));
+                        } catch (AmazonIdentityManagementException e) {
+                            // Only log the error and keep processing. Failed actions won't be added, but
+                            // processing doesn't get stopped either. This can happen due to rate limiting.
+                            LOGGER.error("Unable to validate role policies for role {} due to {}", role.getArn(),
+                                    e.getMessage(), e);
+                        }
                     }
                 }
             }
