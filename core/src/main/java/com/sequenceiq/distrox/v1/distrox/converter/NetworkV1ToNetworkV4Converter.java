@@ -94,7 +94,6 @@ public class NetworkV1ToNetworkV4Converter {
 
         if (key != null) {
             response.setNetworkId(value.getAzure().getNetworkId());
-            response.setNoFirewallRules(value.getAzure().getNoFirewallRules());
             response.setNoPublicIp(value.getAzure().getNoPublicIp());
             response.setResourceGroupName(value.getAzure().getResourceGroupName());
 

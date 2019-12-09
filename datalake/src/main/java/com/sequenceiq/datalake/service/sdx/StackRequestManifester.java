@@ -176,7 +176,6 @@ public class StackRequestManifester {
     private AzureNetworkV4Parameters convertToAzureNetwork(EnvironmentNetworkResponse source, CloudSubnet cloudSubnet) {
         AzureNetworkV4Parameters response = new AzureNetworkV4Parameters();
         response.setNetworkId(source.getAzure().getNetworkId());
-        response.setNoFirewallRules(source.getAzure().getNoFirewallRules());
         response.setNoPublicIp(source.getAzure().getNoPublicIp());
         response.setResourceGroupName(source.getAzure().getResourceGroupName());
         response.setSubnetId(cloudSubnet.getId());

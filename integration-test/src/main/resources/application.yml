@@ -154,7 +154,6 @@ integrationtest:
     location: West US
     network:
       networkId: CDP-Build-US-W
-      noFirewallRules: false
       noPublicIp: false
       resourceGroupName: CDP-Build
       subnetIds:

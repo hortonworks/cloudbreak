@@ -116,7 +116,7 @@ public class AzureEnvironmentSecurityGroupValidatorTest {
         EnvironmentDto environmentDto = EnvironmentDto.builder()
                 .withRegions(Set.of(region))
                 .withSecurityAccess(getNewSecurityAccessDto())
-                .withNetwork(getNewNetworkDto(false, false))
+                .withNetwork(getNewNetworkDto(false))
                 .withCredential(getCredential())
                 .build();
 
@@ -146,19 +146,18 @@ public class AzureEnvironmentSecurityGroupValidatorTest {
                 .build();
     }
 
-    private NetworkDto getNewNetworkDto(boolean noFirewallRules, boolean noPublicIp) {
+    private NetworkDto getNewNetworkDto(boolean noPublicIp) {
         return NetworkDto.builder()
                 .withNetworkCidr("0.0.0.0/0")
-                .withAzure(getAzureParams(noFirewallRules, noPublicIp))
+                .withAzure(getAzureParams(noPublicIp))
                 .build();
     }
 
-    private AzureParams getAzureParams(boolean noFirewallRules, boolean noPublicIp) {
+    private AzureParams getAzureParams(boolean noPublicIp) {
         return AzureParams.AzureParamsBuilder
                 .anAzureParams()
                 .withNetworkId("aNetworkId")
                 .withResourceGroupName("aResourceGroupId")
-                .withNoFirewallRules(noFirewallRules)
                 .withNoPublicIp(noPublicIp)
                 .build();
     }

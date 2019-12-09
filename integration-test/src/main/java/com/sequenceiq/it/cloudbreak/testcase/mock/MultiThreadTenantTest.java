@@ -146,7 +146,7 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
                 {prepareTestContext(getBean(MockedTestContext.class), "hw", "userhw")},
                 {prepareTestContext(getBean(MockedTestContext.class), "bm", "userbm")},
                 {prepareTestContext(getBean(MockedTestContext.class), "pm", "userpm")},
-                {prepareTestContext(getBean(MockedTestContext.class), "cldr", "usercldr")}
+                {prepareTestContext(getBean(MockedTestContext.class), "pm1", "userpm")},
         };
     }
 

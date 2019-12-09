@@ -20,9 +20,6 @@ public class AzureNetworkParameters extends MappableBase {
     private Boolean noPublicIp;
 
     @ApiModelProperty
-    private Boolean noFirewallRules;
-
-    @ApiModelProperty
     private String resourceGroupName;
 
     @ApiModelProperty
@@ -37,14 +34,6 @@ public class AzureNetworkParameters extends MappableBase {
 
     public void setNoPublicIp(Boolean noPublicIp) {
         this.noPublicIp = noPublicIp;
-    }
-
-    public Boolean getNoFirewallRules() {
-        return noFirewallRules;
-    }
-
-    public void setNoFirewallRules(Boolean noFirewallRules) {
-        this.noFirewallRules = noFirewallRules;
     }
 
     public String getResourceGroupName() {
@@ -75,7 +64,6 @@ public class AzureNetworkParameters extends MappableBase {
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         putIfValueNotNull(map, "noPublicIp", noPublicIp);
-        putIfValueNotNull(map, "noFirewallRules", noFirewallRules);
         putIfValueNotNull(map, "resourceGroupName", resourceGroupName);
         putIfValueNotNull(map, "networkId", networkId);
         putIfValueNotNull(map, "subnetId", subnetId);
@@ -92,7 +80,6 @@ public class AzureNetworkParameters extends MappableBase {
     @Override
     public void parse(Map<String, Object> parameters) {
         noPublicIp = getBoolean(parameters, "noPublicIp");
-        noFirewallRules = getBoolean(parameters, "noFirewallRules");
         resourceGroupName = getParameterOrNull(parameters, "resourceGroupName");
         networkId = getParameterOrNull(parameters, "networkId");
         subnetId = getParameterOrNull(parameters, "subnetId");
@@ -102,7 +89,6 @@ public class AzureNetworkParameters extends MappableBase {
     public String toString() {
         return "AzureNetworkParameters{"
                 + "noPublicIp=" + noPublicIp
-                + ", noFirewallRules=" + noFirewallRules
                 + ", resourceGroupName='" + resourceGroupName + '\''
                 + ", networkId='" + networkId + '\''
                 + ", subnetId='" + subnetId + '\''

@@ -65,12 +65,12 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.Version;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 import freemarker.template.Configuration;
 
@@ -211,40 +211,11 @@ public class AzureTemplateBuilderTest {
     }
 
     @Test
-    public void buildNoPublicIpNoFirewall() {
+    public void buildNoPublicIpFirewallWithTags() throws IOException {
         //GIVEN
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
-        when(azureUtils.isNoSecurityGroups(any())).then(invocation -> true);
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("persistentStorage", "persistentStorageTest");
-        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
-        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
-
-        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
-
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
-        //WHEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
-        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
-        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
-        String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
-        //THEN
-        gson.fromJson(templateString, Map.class);
-        assertFalse(templateString.contains("publicIPAddress"));
-        assertFalse(templateString.contains("networkSecurityGroups"));
-    }
-
-    @Test
-    public void buildNoPublicIpNoFirewallWithTags() throws IOException {
-        //GIVEN
-        Network network = new Network(new Subnet("testSubnet"));
-        when(azureUtils.isPrivateIp(any())).then(invocation -> true);
-        when(azureUtils.isNoSecurityGroups(any())).then(invocation -> true);
+        when(azureUtils.isNoSecurityGroups(any())).then(invocation -> false);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -268,7 +239,6 @@ public class AzureTemplateBuilderTest {
         //THEN
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("publicIPAddress"));
-        assertFalse(templateString.contains("networkSecurityGroups"));
         assertTrue(templateString.contains("\"testtagkey1\": \"testtagvalue1\""));
         assertTrue(templateString.contains("\"testtagkey2\": \"testtagvalue2\""));
         // Only 2.x version have cb-resource-type
@@ -292,7 +262,7 @@ public class AzureTemplateBuilderTest {
 
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
-        when(azureUtils.isNoSecurityGroups(any())).then(invocation -> true);
+        when(azureUtils.isNoSecurityGroups(any())).then(invocation -> false);
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -311,7 +281,7 @@ public class AzureTemplateBuilderTest {
         //THEN
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("publicIPAddress"));
-        assertFalse(templateString.contains("networkSecurityGroups"));
+        assertTrue(templateString.contains("existingNetworkName"));
     }
 
     @Test

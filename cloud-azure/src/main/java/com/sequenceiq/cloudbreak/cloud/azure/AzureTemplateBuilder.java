@@ -106,7 +106,7 @@ public class AzureTemplateBuilder {
             model.put("resourceGroupName", azureUtils.getCustomResourceGroupName(network));
             model.put("existingVNETName", azureUtils.getCustomNetworkId(network));
             model.put("noPublicIp", azureUtils.isPrivateIp(network));
-            model.put("noFirewallRules", azureUtils.isNoSecurityGroups(network));
+            model.put("noFirewallRules", false);
             model.put("userDefinedTags", cloudStack.getTags());
             model.put("acceleratedNetworkEnabled", azureAcceleratedNetworkValidator.validate(getVmTypes(armStack)));
             model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());

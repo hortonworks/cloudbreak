@@ -41,45 +41,8 @@ public class NetworkCreationValidatorTest {
     }
 
     @Test
-    void testValidateWhenCidrAndNoFirewallRulesOnAzure() {
-        AzureParams azureParams = getAzureParams(true, true);
-        NetworkDto networkDto = getNetworkDto(azureParams);
-        environment.setCloudPlatform(CloudPlatform.AZURE.name());
-
-        ValidationResult.ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto, null);
-        ValidationResult validationResult = resultBuilder.build();
-        assertTrue(validationResult.hasError());
-        assertEquals(1, validationResult.getErrors().size());
-        String actual = validationResult.getErrors().get(0);
-        assertEquals("You must not set both the security access cidr (cidr) and noFirewallRules simultaneously!", actual);
-    }
-
-    @Test
-    void testValidateWhenCidrAndNoNoFirewallRulesOnAzure() {
-        AzureParams azureParams = getAzureParams(false, false);
-        NetworkDto networkDto = getNetworkDto(azureParams);
-        environment.setCloudPlatform(CloudPlatform.AZURE.name());
-
-        ValidationResult.ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto, null);
-        ValidationResult validationResult = resultBuilder.build();
-        assertFalse(validationResult.hasError());
-    }
-
-    @Test
-    void testValidateWhenNoCidrAndNoFirewallRulesOnAzure() {
-        AzureParams azureParams = getAzureParams(true, true);
-        NetworkDto networkDto = getNetworkDto(azureParams);
-        environment.setCloudPlatform(CloudPlatform.AZURE.name());
-        environment.setCidr(null);
-
-        ValidationResult.ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto, null);
-        ValidationResult validationResult = resultBuilder.build();
-        assertFalse(validationResult.hasError());
-    }
-
-    @Test
     void testValidateWhenNetworkCidrAndNetworkIdOnAzure() {
-        AzureParams azureParams = getAzureParams(true, true);
+        AzureParams azureParams = getAzureParams(true);
         NetworkDto networkDto = getNetworkDto(azureParams, null, "aNetworkId", "0.0.0.0/0", 1);
         environment.setCloudPlatform(CloudPlatform.AZURE.name());
         environment.setCidr(null);
@@ -94,7 +57,7 @@ public class NetworkCreationValidatorTest {
 
     @Test
     void testValidateWhenNoNetworkCidrAndNetworkIdOnAzure() {
-        AzureParams azureParams = getAzureParams(true, true);
+        AzureParams azureParams = getAzureParams(true);
         NetworkDto networkDto = getNetworkDto(azureParams, null, "aNetworkId", null, 1);
 
         environment.setCloudPlatform(CloudPlatform.AZURE.name());
@@ -107,7 +70,7 @@ public class NetworkCreationValidatorTest {
 
     @Test
     void testValidateWhenNetworkCidrAndNoNetworkIdOnAzure() {
-        AzureParams azureParams = getAzureParams(true, true);
+        AzureParams azureParams = getAzureParams(true);
         NetworkDto networkDto = getNetworkDto(azureParams, null, null, "0.0.0.0/0", 1);
         environment.setCloudPlatform(CloudPlatform.AZURE.name());
         environment.setCidr(null);
@@ -175,10 +138,6 @@ public class NetworkCreationValidatorTest {
         assertEquals("Cannot create environment, the subnets in the vpc should be present at least in two different availability zones", actual);
     }
 
-    private NetworkDto getNetworkDto(AzureParams azureParams) {
-        return getNetworkDto(azureParams, null, null, null, 1);
-    }
-
     private NetworkDto getNetworkDto(AzureParams azureParams, AwsParams awsParams, String networkId, String networkCidr, int numberOfSubnets) {
         return NetworkDto.builder()
                 .withId(1L)
@@ -192,12 +151,11 @@ public class NetworkCreationValidatorTest {
                 .build();
     }
 
-    private AzureParams getAzureParams(boolean noFirewallRules, boolean noPublicIp) {
+    private AzureParams getAzureParams(boolean noPublicIp) {
         return AzureParams.AzureParamsBuilder
                 .anAzureParams()
                 .withNetworkId("aNetworkId")
                 .withResourceGroupName("aResourceGroupId")
-                .withNoFirewallRules(noFirewallRules)
                 .withNoPublicIp(noPublicIp)
                 .build();
     }

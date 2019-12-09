@@ -79,7 +79,6 @@ class AzureEnvironmentNetworkConverterTest {
                         .withNetworkId(NETWORK_ID)
                         .withResourceGroupName(RESOURCE_GROUP_NAME)
                         .withNoPublicIp(true)
-                        .withNoFirewallRules(true)
                         .build())
                 .withName(NETWORK_NAME)
                 .withNetworkCidr(NETWORK_CIDR)
@@ -91,7 +90,6 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(NETWORK_NAME, actual.getName());
         assertEquals(NETWORK_ID, actual.getNetworkId());
         assertEquals(RESOURCE_GROUP_NAME, actual.getResourceGroupName());
-        assertTrue(actual.getNoFirewallRules());
         assertTrue(actual.getNoPublicIp());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(RegistrationType.EXISTING, actual.getRegistrationType());
@@ -113,7 +111,6 @@ class AzureEnvironmentNetworkConverterTest {
         assertNull(actual.getNetworkId());
         assertNull(actual.getResourceGroupName());
         assertFalse(actual.getNoPublicIp());
-        assertFalse(actual.getNoFirewallRules());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(RegistrationType.CREATE_NEW, actual.getRegistrationType());
         assertTrue(SUBNET_IDS.containsAll(actual.getSubnetMetas().keySet()));
@@ -212,7 +209,6 @@ class AzureEnvironmentNetworkConverterTest {
         azureNetwork.setResourceCrn("crn");
         azureNetwork.setNetworkId(NETWORK_ID);
         azureNetwork.setResourceGroupName(RESOURCE_GROUP_NAME);
-        azureNetwork.setNoFirewallRules(true);
         azureNetwork.setNoPublicIp(true);
         return azureNetwork;
     }

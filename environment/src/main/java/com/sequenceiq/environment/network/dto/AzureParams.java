@@ -8,8 +8,6 @@ public class AzureParams {
 
     private boolean noPublicIp;
 
-    private boolean noFirewallRules;
-
     public String getNetworkId() {
         return networkId;
     }
@@ -34,21 +32,12 @@ public class AzureParams {
         this.noPublicIp = noPublicIp;
     }
 
-    public boolean isNoFirewallRules() {
-        return noFirewallRules;
-    }
-
-    public void setNoFirewallRules(boolean noFirewallRules) {
-        this.noFirewallRules = noFirewallRules;
-    }
-
     @Override
     public String toString() {
         return "AzureParams{" +
                 "networkId='" + networkId + '\'' +
                 ", resourceGroupName='" + resourceGroupName + '\'' +
                 ", noPublicIp=" + noPublicIp +
-                ", noFirewallRules=" + noFirewallRules +
                 '}';
     }
 
@@ -58,8 +47,6 @@ public class AzureParams {
         private String resourceGroupName;
 
         private boolean noPublicIp;
-
-        private boolean noFirewallRules;
 
         private AzureParamsBuilder() {
         }
@@ -83,17 +70,11 @@ public class AzureParams {
             return this;
         }
 
-        public AzureParamsBuilder withNoFirewallRules(boolean noFirewallRules) {
-            this.noFirewallRules = noFirewallRules;
-            return this;
-        }
-
         public AzureParams build() {
             AzureParams azureParams = new AzureParams();
             azureParams.setNetworkId(networkId);
             azureParams.setResourceGroupName(resourceGroupName);
             azureParams.setNoPublicIp(noPublicIp);
-            azureParams.setNoFirewallRules(noFirewallRules);
             return azureParams;
         }
     }

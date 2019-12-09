@@ -22,9 +22,6 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
     private Boolean noPublicIp;
 
     @ApiModelProperty
-    private Boolean noFirewallRules;
-
-    @ApiModelProperty
     private String resourceGroupName;
 
     @ApiModelProperty
@@ -39,14 +36,6 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
 
     public void setNoPublicIp(Boolean noPublicIp) {
         this.noPublicIp = noPublicIp;
-    }
-
-    public Boolean getNoFirewallRules() {
-        return noFirewallRules;
-    }
-
-    public void setNoFirewallRules(Boolean noFirewallRules) {
-        this.noFirewallRules = noFirewallRules;
     }
 
     public String getResourceGroupName() {
@@ -77,7 +66,6 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         putIfValueNotNull(map, "noPublicIp", noPublicIp);
-        putIfValueNotNull(map, "noFirewallRules", noFirewallRules);
         putIfValueNotNull(map, "resourceGroupName", resourceGroupName);
         putIfValueNotNull(map, "networkId", networkId);
         putIfValueNotNull(map, "subnetId", subnetId);
@@ -94,7 +82,6 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
     @Override
     public void parse(Map<String, Object> parameters) {
         noPublicIp = getBoolean(parameters, "noPublicIp");
-        noFirewallRules = getBoolean(parameters, "noFirewallRules");
         resourceGroupName = getParameterOrNull(parameters, "resourceGroupName");
         networkId = getParameterOrNull(parameters, "networkId");
         subnetId = getParameterOrNull(parameters, "subnetId");
