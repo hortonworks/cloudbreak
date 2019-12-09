@@ -1,20 +1,13 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -75,8 +68,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-
-import static java.util.stream.Collectors.toList;
 
 @Component
 public class StackV4RequestToTemplatePreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV4Request, TemplatePreparationObject> {
@@ -171,7 +162,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                 gatewaySignKey = gateway.getSignKey();
             }
             VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(source.getEnvironmentCrn(), ldapConfig != null ? ldapConfig.getAdminGroup() : "");
-
             Builder builder = Builder.builder()
                     .withCloudPlatform(source.getCloudPlatform())
                     .withRdsConfigs(rdsConfigs)
@@ -201,7 +191,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             }
             decorateBuilderWithPlacement(source, builder);
             decorateBuilderWithAccountMapping(source, environment, credential, builder);
-            decorateBuilderWithProductDetails(source, builder);
 
             return builder.build();
         } catch (BlueprintProcessingException | IOException e) {
@@ -291,32 +280,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                 builder.withAccountMappingView(new AccountMappingView(groupMappings, userMappings));
             }
         }
-    }
-
-    private void decorateBuilderWithProductDetails(StackV4Request source, TemplatePreparationObject.Builder builder) {
-        // base image
-        if (source.getCluster() != null && source.getCluster().getCm() != null && source.getCluster().getCm().getRepository() != null) {
-            ClouderaManagerV4Request cm = source.getCluster().getCm();
-            ClouderaManagerRepositoryV4Request repository = cm.getRepository();
-            ClouderaManagerRepo cmRepo = new ClouderaManagerRepo()
-                    .withBaseUrl(repository.getBaseUrl())
-                    .withGpgKeyUrl(repository.getGpgKeyUrl())
-                    .withVersion(repository.getVersion());
-            List<ClouderaManagerProduct> products = null != cm.getProducts()
-                    ? cm.getProducts().stream().map(StackV4RequestToTemplatePreparationObjectConverter::convertProduct).collect(toList())
-                    : new ArrayList<>();
-            builder.withProductDetails(cmRepo, products);
-            // prewarm image
-        }
-        // TODO: implement else {} branch for prewarm images
-    }
-
-    private static ClouderaManagerProduct convertProduct(ClouderaManagerProductV4Request productRequest) {
-        return new ClouderaManagerProduct()
-                .withName(productRequest.getName())
-                .withVersion(productRequest.getVersion())
-                .withParcel(productRequest.getParcel())
-                .withCsd(productRequest.getCsd());
     }
 
     private boolean isCloudStorageConfigured(StackV4Request source) {
