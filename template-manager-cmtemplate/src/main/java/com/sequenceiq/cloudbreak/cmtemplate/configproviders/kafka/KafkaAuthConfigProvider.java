@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 
 import java.util.List;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -60,7 +61,9 @@ public class KafkaAuthConfigProvider implements CmTemplateComponentConfigProvide
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return source.getLdapConfig().isPresent() && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
+        return StackType.WORKLOAD.equals(source.getStackType())
+                && source.getLdapConfig().isPresent()
+                && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
     }
 
     @Override

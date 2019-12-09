@@ -10,11 +10,17 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.dto.LdapView;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -65,14 +71,19 @@ class KafkaAuthConfigProviderTest {
         underTest = new KafkaAuthConfigProvider();
     }
 
-    private static TemplatePreparationObject createTemplatePreparationObject() {
+    private static TemplatePreparationObject createTemplatePreparationObject(StackType stackType, boolean addLdapView) {
         return Builder.builder()
-                .withLdapConfig(LdapViewBuilder.aLdapView()
-                        .withProtocol("protocol")
-                        .withServerPort(1234)
-                        .withServerHost("host")
-                        .withUserDnPattern("pattern")
-                        .build())
+                .withLdapConfig(addLdapView ? ldapView() : null)
+                .withStackType(stackType)
+                .build();
+    }
+
+    private static LdapView ldapView() {
+        return LdapViewBuilder.aLdapView()
+                .withProtocol("protocol")
+                .withServerPort(1234)
+                .withServerHost("host")
+                .withUserDnPattern("pattern")
                 .build();
     }
 
@@ -94,36 +105,37 @@ class KafkaAuthConfigProviderTest {
     private void testGetServiceConfigs(Iterable<String> versions, Iterable<ApiClusterTemplateConfig> expectedConfigs) {
         for (String version: versions) {
             when(cmTemplateProcessor.getVersion()).thenReturn(Optional.ofNullable(version));
-            TemplatePreparationObject tpo = createTemplatePreparationObject();
+            TemplatePreparationObject tpo = createTemplatePreparationObject(StackType.WORKLOAD, true);
             List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, tpo);
             assertThat(serviceConfigs).as("Expected configs for cdh version: %s", version).hasSameElementsAs(expectedConfigs);
         }
     }
 
-    @Test
-    void isConfigurationNeeded() {
-        when(cmTemplateProcessor.isRoleTypePresentInService(anyString(), anyList())).thenReturn(true);
-        TemplatePreparationObject tpo = Builder.builder()
-                .withLdapConfig(LdapViewBuilder.aLdapView().build())
-                .build();
-        assertThat(underTest.isConfigurationNeeded(cmTemplateProcessor, tpo)).isTrue();
+    @ParameterizedTest
+    @MethodSource("testArgsForIsConfigurationNeeded")
+    void isConfigurationNeeded(StackType stackType, Boolean ldapConfigPresent, Boolean stackContainsKafkaBroker, Boolean expectedResult) {
+        TemplatePreparationObject tpo = createTemplatePreparationObject(stackType, ldapConfigPresent);
+        lenient().when(cmTemplateProcessor.isRoleTypePresentInService(anyString(), anyList())).thenReturn(stackContainsKafkaBroker);
+        assertThat(underTest.isConfigurationNeeded(cmTemplateProcessor, tpo))
+                .as("Configuration should %sbe needed for stack type: %s, LDAP configPresent: %s, Kafka in stack: %s",
+                        expectedResult ? "" : "NOT ", stackType, ldapConfigPresent, stackContainsKafkaBroker)
+                .isEqualTo(expectedResult);
     }
 
-    @Test
-    void isConfigurationNotNeededWithRoleTypeNotPresent() {
-        when(cmTemplateProcessor.isRoleTypePresentInService(anyString(), anyList())).thenReturn(false);
-        TemplatePreparationObject tpo = Builder.builder()
-                .withLdapConfig(LdapViewBuilder.aLdapView().build())
-                .build();
-        assertThat(underTest.isConfigurationNeeded(cmTemplateProcessor, tpo)).isFalse();
-    }
-
-    @Test
-    void isConfigurationNotNeededWithRoleTypePresent() {
-        lenient().when(cmTemplateProcessor.isRoleTypePresentInService(anyString(), anyList())).thenReturn(true);
-        TemplatePreparationObject tpo = Builder.builder()
-                .build();
-        assertThat(underTest.isConfigurationNeeded(cmTemplateProcessor, tpo)).isFalse();
+    static Stream<Arguments> testArgsForIsConfigurationNeeded() {
+        return Stream.of(
+                Arguments.of(StackType.DATALAKE, true, true, false),
+                Arguments.of(StackType.DATALAKE, false, true, false),
+                Arguments.of(StackType.DATALAKE, true, false, false),
+                Arguments.of(StackType.DATALAKE, false, false, false),
+                Arguments.of(StackType.TEMPLATE, true, true, false),
+                Arguments.of(StackType.TEMPLATE, false, true, false),
+                Arguments.of(StackType.TEMPLATE, true, false, false),
+                Arguments.of(StackType.TEMPLATE, false, false, false),
+                Arguments.of(StackType.WORKLOAD, true, true, true),
+                Arguments.of(StackType.WORKLOAD, false, true, false),
+                Arguments.of(StackType.WORKLOAD, true, false, false),
+                Arguments.of(StackType.WORKLOAD, false, false, false));
     }
 
     @Test
