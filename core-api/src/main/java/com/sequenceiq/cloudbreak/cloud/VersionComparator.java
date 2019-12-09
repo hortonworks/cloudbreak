@@ -20,8 +20,9 @@ public class VersionComparator implements Comparator<Versioned>, Serializable {
             i++;
         }
         // compare first non-equal ordinal number
+        int diff;
         if (i < vals1.length && i < vals2.length) {
-            int diff = StringUtils.isNumeric(vals1[i]) && StringUtils.isNumeric(vals2[i]) ? Integer.valueOf(vals1[i]).compareTo(Integer.valueOf(vals2[i]))
+            diff = StringUtils.isNumeric(vals1[i]) && StringUtils.isNumeric(vals2[i]) ? Integer.valueOf(vals1[i]).compareTo(Integer.valueOf(vals2[i]))
                     : vals1[i].compareTo(vals2[i]);
             return Integer.signum(diff);
         }

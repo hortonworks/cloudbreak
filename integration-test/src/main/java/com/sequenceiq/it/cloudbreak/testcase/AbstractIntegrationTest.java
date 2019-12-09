@@ -65,7 +65,6 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
-import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestCaseDescriptionMissingException;
 import com.sequenceiq.it.cloudbreak.mock.ITResponse;
@@ -303,15 +302,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
                 .when(new ImageCatalogCreateRetryAction());
     }
 
-    protected Set<String> createDefaultProxyConfig(TestContext testContext) {
-        testContext
-                .given(ProxyTestDto.class)
-                .when(proxyTestClient.createIfNotExist());
-        Set<String> validProxy = new HashSet<>();
-        validProxy.add(testContext.get(ProxyTestDto.class).getName());
-        return validProxy;
-    }
-
     protected Set<String> createDefaultLdapConfig(TestContext testContext) {
         testContext
                 .given(LdapTestDto.class)
@@ -343,15 +333,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         return validRds;
     }
 
-    protected void createEnvironmentWithNetwork(TestContext testContext) {
-        testContext.given(EnvironmentTestDto.class)
-                .withNetwork()
-                .withCreateFreeIpa(Boolean.FALSE)
-                .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .when(environmentTestClient.describe());
-    }
-
     protected void createEnvironmentWithNetworkAndFreeIPA(TestContext testContext) {
         testContext
                 .given("telemetry", TelemetryTestDto.class)
@@ -359,6 +340,18 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
                 .given(EnvironmentTestDto.class)
                 .withNetwork()
                 .withTelemetry("telemetry")
+                .withCreateFreeIpa(Boolean.TRUE)
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .when(environmentTestClient.describe());
+    }
+
+    protected void createEnvironmentWithoutTelemetry(TestContext testContext) {
+        testContext
+                .given("telemetry", TelemetryTestDto.class)
+                .withLogging()
+                .given(EnvironmentTestDto.class)
+                .withNetwork()
                 .withCreateFreeIpa(Boolean.TRUE)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)

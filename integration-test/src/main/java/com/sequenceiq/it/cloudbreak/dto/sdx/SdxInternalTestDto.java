@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.dto.sdx;
 
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
@@ -18,16 +16,12 @@ import javax.inject.Inject;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
-import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.mock.MockCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
@@ -38,7 +32,6 @@ import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
-import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -164,7 +157,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
                 .withInstanceGroupsEntity(InstanceGroupTestDto.sdxHostGroup(getTestContext()))
                 .withInstanceGroups(MASTER.getName(), IDBROKER.getName())
-                .withNetwork(getCloudProvider().network(getTestContext().given(NetworkV4TestDto.class)))
                 .withStackAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
                 .withGatewayPort(getCloudProvider().gatewayPort(stack))
                 .withCluster(cluster);
@@ -185,7 +177,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
                 .withInstanceGroupsEntity(InstanceGroupTestDto.sdxHostGroup(getTestContext()))
                 .withInstanceGroups(MASTER.getName(), IDBROKER.getName())
-                .withNetwork(getNetwork(getTestContext().given(NetworkV4TestDto.class), templateJson, getCloudProvider().getCloudPlatform()))
                 .withStackAuthentication(getAuthentication(getTestContext().given(StackAuthenticationTestDto.class), templateJson))
                 .withGatewayPort(getGatewayPort(stack, templateJson))
                 .withCluster(cluster);
@@ -274,59 +265,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return SdxClient.class;
     }
 
-    private NetworkV4TestDto getNetwork(NetworkV4TestDto network, JSONObject templateJson, CloudPlatform cloudPlatform) {
-        return cloudPlatform == MOCK ? mockNetwork(network, templateJson) : awsNetwork(network, templateJson);
-    }
-
-    private String getSubnetCidr(JSONObject templateJson) {
-        try {
-            return templateJson.getJSONObject("network").getString("subnetCIDR");
-        } catch (JSONException e) {
-            LOGGER.error("Cannot get Subnet CIDR from template: {}", templateJson, e);
-            String subnetCIDR = commonCloudProperties.getSubnetCidr();
-            return subnetCIDR == null ? DEFAULT_SUBNET_CIDR : subnetCIDR;
-        }
-    }
-
-    private MockNetworkV4Parameters getMockNetworkParameters(JSONObject templateJson) {
-        MockCloudProvider provider = new MockCloudProvider();
-        var parameters = new MockNetworkV4Parameters();
-
-        String gateway = getInternetGatewayId(MOCK, templateJson);
-        parameters.setInternetGatewayId(gateway == null ? provider.getInternetGatewayId() : gateway);
-
-        String vpc = getVpcId(MOCK, templateJson);
-        parameters.setVpcId(vpc == null ? provider.getVpcId() : vpc);
-
-        String subnet = getSubnetId(MOCK, templateJson);
-        parameters.setSubnetId(subnet == null ? provider.getSubnetId() : subnet);
-
-        return parameters;
-    }
-
-    private NetworkV4TestDto mockNetwork(NetworkV4TestDto network, JSONObject templateJson) {
-        return network.withSubnetCIDR(getSubnetCidr(templateJson))
-                .withMock(getMockNetworkParameters(templateJson));
-    }
-
-    private AwsNetworkV4Parameters getAwsNetworkParameters(JSONObject templateJson) {
-        AwsCloudProvider provider = new AwsCloudProvider();
-        var parameters = new AwsNetworkV4Parameters();
-
-        String vpc = getVpcId(AWS, templateJson);
-        parameters.setVpcId(vpc == null ? provider.getVpcId() : vpc);
-
-        String subnet = getSubnetId(AWS, templateJson);
-        parameters.setSubnetId(subnet == null ? provider.getSubnetId() : subnet);
-
-        return parameters;
-    }
-
-    private NetworkV4TestDto awsNetwork(NetworkV4TestDto network, JSONObject templateJson) {
-        return network.withSubnetCIDR(getSubnetCidr(templateJson))
-                .withAws(getAwsNetworkParameters(templateJson));
-    }
-
     private ImageSettingsTestDto getImageCatalog(ImageSettingsTestDto image, JSONObject templateJson) {
         try {
             return image
@@ -344,33 +282,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         } catch (JSONException e) {
             LOGGER.error("Cannot get Authentication from template: {}", templateJson, e);
             return getCloudProvider().stackAuthentication(getTestContext().get(StackAuthenticationTestDto.class));
-        }
-    }
-
-    private String getVpcId(CloudPlatform cloudPlatform, JSONObject templateJson) {
-        try {
-            return templateJson.getJSONObject("network").getJSONObject(cloudPlatform.name().toLowerCase()).getString("vpcId");
-        } catch (JSONException e) {
-            LOGGER.error("Cannot get VPC ID from template: {}", templateJson, e);
-            return null;
-        }
-    }
-
-    private String getInternetGatewayId(CloudPlatform cloudPlatform, JSONObject templateJson) {
-        try {
-            return templateJson.getJSONObject("network").getJSONObject(cloudPlatform.name().toLowerCase()).getString("internetGatewayId");
-        } catch (JSONException e) {
-            LOGGER.error("Cannot get Internet Gateway ID from template: {}", templateJson, e);
-            return null;
-        }
-    }
-
-    private String getSubnetId(CloudPlatform cloudPlatform, JSONObject templateJson) {
-        try {
-            return templateJson.getJSONObject("network").getJSONObject(cloudPlatform.name().toLowerCase()).getString("subnetId");
-        } catch (JSONException e) {
-            LOGGER.error("Cannot get Subnet ID from template: {}", templateJson, e);
-            return null;
         }
     }
 
