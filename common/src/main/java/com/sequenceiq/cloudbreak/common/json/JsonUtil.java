@@ -83,6 +83,10 @@ public class JsonUtil {
         return writeValueAsStringSilent(object, false);
     }
 
+    public static String writeValueAsStringSilentSafe(Object object) {
+        return String.valueOf(writeValueAsStringSilent(object, true));
+    }
+
     public static String writeValueAsStringSilent(Object object, boolean ignoreNull) {
         if (object != null) {
             try {
