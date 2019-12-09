@@ -39,6 +39,11 @@ spring:
     prefer-file-system-access: false
   datasource:
     maxActive: 30
+  jpa:
+    properties:
+      hibernate:
+        jdbc.batch_size: 50
+        order_inserts: true
 
 rest:
   debug: false
