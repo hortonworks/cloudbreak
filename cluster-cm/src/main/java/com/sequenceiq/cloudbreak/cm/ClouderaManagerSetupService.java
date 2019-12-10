@@ -105,6 +105,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     @Inject
     private ClouderaManagerMgmtLaunchService clouderaManagerMgmtLaunchService;
 
+    @Inject
+    private ClouderaManagerSupportSetupService clouderaManagerSupportSetupService;
+
     private final Stack stack;
 
     private final HttpClientConfig clientConfig;
@@ -190,7 +193,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             String sdxContextName = Optional.ofNullable(sdxContext).map(this::createDataContext).orElse(null);
 
             configureCmMgmtServices(templatePreparationObject, sdxStackCrn, telemetry, sdxContextName);
-
+            configureCmSupportTag(templatePreparationObject);
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
             ApiClusterTemplate apiClusterTemplate = JsonUtil.readValue(template, ApiClusterTemplate.class);
             cluster.setExtendedBlueprintText(getExtendedBlueprintText(apiClusterTemplate));
@@ -246,6 +249,15 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             mgmtSetupService.setupMgmtServices(stack, apiClient, cmHostRef, templatePreparationObject.getRdsConfigs(), telemetry, sdxContextName, sdxCrn);
         } else {
             LOGGER.warn("Unable to determine Cloudera Manager host. Skipping management services installation.");
+        }
+    }
+
+    private void configureCmSupportTag(TemplatePreparationObject templatePreparationObject) throws ApiException {
+        Optional<ApiHost> optionalCmHost = getCmHost(templatePreparationObject, apiClient);
+        if (optionalCmHost.isPresent()) {
+            clouderaManagerSupportSetupService.prepareSupportRole(apiClient, templatePreparationObject);
+        } else {
+            LOGGER.warn("Unable to determine Cloudera Manager host. Skipping support tag setup.");
         }
     }
 
