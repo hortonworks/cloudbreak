@@ -12,7 +12,7 @@ join_ipa:
   cmd.run:
 {% if not salt['file.directory_exists']('/yarn-private') %}
     - name: |
-        ipa-client-install --server={{salt['pillar.get']('sssd-ipa:server')}} --realm={{salt['pillar.get']('sssd-ipa:realm')}} \
+        ipa-client-install --realm={{salt['pillar.get']('sssd-ipa:realm')}} \
           --domain={{salt['pillar.get']('sssd-ipa:domain')}} --mkhomedir --principal={{salt['pillar.get']('sssd-ipa:principal')}} \
           --password $PW --unattended --force-join --ssh-trust-dns --no-ntp
 {% else %}
@@ -23,6 +23,7 @@ join_ipa:
 {% endif%}
     - unless: ipa env
     - runas: root
+    - failhard: True
     - env:
         - PW: "{{salt['pillar.get']('sssd-ipa:password')}}"
 
