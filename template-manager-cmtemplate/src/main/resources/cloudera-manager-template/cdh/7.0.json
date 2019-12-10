@@ -14,11 +14,11 @@
     },
     {
       "name": "ZOOKEEPER",
-      "version": "3.4.5"
+      "version": "3.4.6"
     },
     {
       "name": "HBASE",
-      "version": "2.2.2"
+      "version": "2.2.0"
     },
     {
       "name": "YARN",
