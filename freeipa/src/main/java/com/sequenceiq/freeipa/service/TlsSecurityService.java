@@ -65,10 +65,8 @@ public class TlsSecurityService {
         String clientCert = PkiUtil.convert(cert);
 
         String clientKeyEncoded = BaseEncoding.base64().encode(clientPrivateKey.getBytes());
-        securityConfig.setClientKey(clientKeyEncoded);
         securityConfig.setClientKeyVault(clientKeyEncoded);
         String clientCertEncoded = BaseEncoding.base64().encode(clientCert.getBytes());
-        securityConfig.setClientCert(clientCertEncoded);
         securityConfig.setClientCertVault(clientCertEncoded);
     }
 
@@ -77,7 +75,9 @@ public class TlsSecurityService {
         String privateKey = PkiUtil.convert(keyPair.getPrivate());
         String publicKey = PkiUtil.convertOpenSshPublicKey(keyPair.getPublic());
         saltSecurityConfig.setSaltBootSignPublicKey(BaseEncoding.base64().encode(publicKey.getBytes()));
-        saltSecurityConfig.setSaltBootSignPrivateKey(BaseEncoding.base64().encode(privateKey.getBytes()));
+        String saltBootSignPrivateKey = BaseEncoding.base64().encode(privateKey.getBytes());
+        saltSecurityConfig.setSaltBootSignPrivateKey(saltBootSignPrivateKey);
+        saltSecurityConfig.setSaltBootSignPrivateKeyVault(saltBootSignPrivateKey);
     }
 
     private void generateSaltSignKeypair(SecurityConfig securityConfig) {
@@ -86,15 +86,21 @@ public class TlsSecurityService {
         String publicKey = PkiUtil.convertOpenSshPublicKey(keyPair.getPublic());
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
         saltSecurityConfig.setSaltSignPublicKey(BaseEncoding.base64().encode(publicKey.getBytes()));
-        saltSecurityConfig.setSaltSignPrivateKey(BaseEncoding.base64().encode(privateKey.getBytes()));
+        String saltSignPrivateKey = BaseEncoding.base64().encode(privateKey.getBytes());
+        saltSecurityConfig.setSaltSignPrivateKey(saltSignPrivateKey);
+        saltSecurityConfig.setSaltSignPrivateKeyVault(saltSignPrivateKey);
     }
 
     private void generateSaltBootPassword(SaltSecurityConfig saltSecurityConfig) {
-        saltSecurityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
+        String saltBootPassword = PasswordUtil.generatePassword();
+        saltSecurityConfig.setSaltBootPassword(saltBootPassword);
+        saltSecurityConfig.setSaltBootPasswordVault(saltBootPassword);
     }
 
     private void generateSaltPassword(SaltSecurityConfig saltSecurityConfig) {
-        saltSecurityConfig.setSaltPassword(PasswordUtil.generatePassword());
+        String saltPassword = PasswordUtil.generatePassword();
+        saltSecurityConfig.setSaltPassword(saltPassword);
+        saltSecurityConfig.setSaltPasswordVault(saltPassword);
     }
 
     public GatewayConfig buildGatewayConfig(Long stackId, InstanceMetaData gatewayInstance, Integer gatewayPort,
@@ -104,7 +110,7 @@ public class TlsSecurityService {
         String connectionIp = getGatewayIp(securityConfig, gatewayInstance, stack);
         HttpClientConfig conf = buildTLSClientConfig(stack, connectionIp, gatewayInstance);
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
-        String saltSignPrivateKeyB64 = saltSecurityConfig.getSaltSignPrivateKey();
+        String saltSignPrivateKeyB64 = saltSecurityConfig.getSaltSignPrivateKeyVault();
         GatewayConfig gatewayConfig =
                 new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
                         getGatewayPort(gatewayPort, stack), gatewayInstance.getInstanceId(), conf.getServerCert(),

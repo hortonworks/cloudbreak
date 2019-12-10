@@ -22,15 +22,9 @@ public class SecurityConfig implements AccountIdAwareResource {
     @SequenceGenerator(name = "securityconfig_generator", sequenceName = "securityconfig_id_seq", allocationSize = 1)
     private Long id;
 
-    @Column(columnDefinition = "TEXT")
-    private String clientKey;
-
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret clientKeyVault = Secret.EMPTY;
-
-    @Column(columnDefinition = "TEXT")
-    private String clientCert;
 
     @Convert(converter = SecretToString.class)
     @SecretValue
@@ -50,22 +44,6 @@ public class SecurityConfig implements AccountIdAwareResource {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public void setClientKey(String clientKey) {
-        this.clientKey = clientKey;
-    }
-
-    public String getClientKey() {
-        return clientKey;
-    }
-
-    public String getClientCert() {
-        return clientCert;
-    }
-
-    public void setClientCert(String clientCert) {
-        this.clientCert = clientCert;
     }
 
     public SaltSecurityConfig getSaltSecurityConfig() {
@@ -88,7 +66,7 @@ public class SecurityConfig implements AccountIdAwareResource {
         return clientKeyVault.getSecret();
     }
 
-    public String getClientKeyVault() {
+    public String getClientKey() {
         return clientKeyVault.getRaw();
     }
 
@@ -104,7 +82,7 @@ public class SecurityConfig implements AccountIdAwareResource {
         return clientCertVault.getSecret();
     }
 
-    public String getClientCertVault() {
+    public String getClientCert() {
         return clientCertVault.getRaw();
     }
 
