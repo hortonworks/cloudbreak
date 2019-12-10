@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STARTING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_FAILED;
 
 import java.util.Date;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -16,10 +17,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
@@ -38,6 +41,9 @@ public class ClusterStartService {
     @Inject
     private StackUtil stackUtil;
 
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
+
     public void startingCluster(StackView stack) {
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.START_IN_PROGRESS);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION, String.format("Starting the cluster. Cluster manager ip: %s",
@@ -51,6 +57,7 @@ public class ClusterStartService {
         String clusterManagerIp = stackUtil.extractClusterManagerIp(stack);
         cluster.setUpSince(new Date().getTime());
         clusterService.updateCluster(cluster);
+        updateInstancesToHealthy(stack);
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Cluster started.");
         flowMessageService.fireEventAndLog(stack.getId(), Status.AVAILABLE.name(), CLUSTER_STARTED, clusterManagerIp);
@@ -60,5 +67,13 @@ public class ClusterStartService {
         clusterService.updateClusterStatusByStackId(stackView.getId(), Status.START_FAILED);
         stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Cluster could not be started: " + errorReason);
         flowMessageService.fireEventAndLog(stackView.getId(), Status.START_FAILED.name(), CLUSTER_START_FAILED, errorReason);
+    }
+
+    private void updateInstancesToHealthy(StackView stack) {
+        Set<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
+        for (InstanceMetaData metaData : instances) {
+            metaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY);
+        }
+        instanceMetaDataService.saveAll(instances);
     }
 }

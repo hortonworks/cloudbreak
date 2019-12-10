@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.start;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_STARTING;
@@ -9,7 +10,9 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_STOPPING;
 import static java.lang.String.format;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -29,12 +32,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 
 @Service
@@ -52,6 +57,9 @@ public class StackStartStopService {
 
     @Inject
     private MetadataSetupService metadatSetupService;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
 
     public void startStackStart(StackStartStopContext context) {
         Stack stack = context.getStack();
@@ -89,10 +97,28 @@ public class StackStartStopService {
 
     public void finishStackStop(StackStartStopContext context, StopInstancesResult stopInstancesResult) {
         Stack stack = context.getStack();
+        updateInstancesToStopped(stack, stack.getInstanceMetaDataAsList(), stopInstancesResult.getResults().getResults());
         validateResourceResults(context.getCloudContext(), stopInstancesResult.getErrorDetails(), stopInstancesResult.getResults(), false);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOPPED, "Cluster infrastructure stopped successfully.");
 
         flowMessageService.fireEventAndLog(stack.getId(), STOPPED.name(), STACK_INFRASTRUCTURE_STOPPED);
+    }
+
+    private void updateInstancesToStopped(Stack stack, Iterable<InstanceMetaData> instanceMetaDataList, Collection<CloudVmInstanceStatus> instanceStatuses) {
+        for (InstanceMetaData metaData : instanceMetaDataList) {
+            Optional<CloudVmInstanceStatus> status = instanceStatuses.stream()
+                    .filter(is -> is != null && is.getCloudInstance().getInstanceId() != null
+                            && is.getCloudInstance().getInstanceId().equals(metaData.getInstanceId()))
+                    .findFirst();
+
+            if (status.isPresent()) {
+                CloudVmInstanceStatus cloudVmInstanceStatus = status.get();
+                com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus state = cloudVmInstanceStatus.getStatus() == InstanceStatus.STOPPED ?
+                        com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.STOPPED : FAILED;
+                metaData.setInstanceStatus(state);
+            }
+        }
+        instanceMetaDataService.saveAll(instanceMetaDataList);
     }
 
     public void handleStackStopError(StackView stack, StackFailureEvent payload) {
