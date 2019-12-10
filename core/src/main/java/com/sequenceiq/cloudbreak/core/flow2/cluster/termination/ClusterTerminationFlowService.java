@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_DELETE_STARTED;
 
 import java.util.Optional;
 
@@ -41,6 +42,7 @@ public class ClusterTerminationFlowService {
 
     public void terminateCluster(ClusterViewContext context) {
         clusterService.updateClusterStatusByStackId(context.getStackId(), Status.DELETE_IN_PROGRESS);
+        flowMessageService.fireEventAndLog(context.getStackId(), Status.DELETE_IN_PROGRESS.name(), CLUSTER_DELETE_STARTED);
         LOGGER.debug("Cluster delete started.");
     }
 

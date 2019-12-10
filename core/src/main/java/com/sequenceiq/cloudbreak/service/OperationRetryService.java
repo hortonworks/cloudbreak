@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.FLOW_RETRY_FLOW_START;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_RETRY_FLOW_START;
 
 import java.util.Collections;
 import java.util.List;
@@ -64,7 +64,7 @@ public class OperationRetryService {
         }
 
         String name = retryableFlows.get(0).getName();
-        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), FLOW_RETRY_FLOW_START, List.of(name));
+        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), STACK_RETRY_FLOW_START, List.of(name));
 
         Optional<FlowLog> failedFlowLog = getMostRecentFailedLog(flowLogs);
         failedFlowLog.map(log -> getLastSuccessfulStateLog(log.getCurrentState(), flowLogs))

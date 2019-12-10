@@ -182,6 +182,7 @@ public enum ResourceEvent {
     CLUSTER_RESET("cluster.reset"),
     CLUSTER_BUILT("cluster.built"),
     CLUSTER_DELETE_FAILED("ambari.cluster.delete.failed"),
+    CLUSTER_DELETE_STARTED("cluster.termination.started"),
     CLUSTER_CHANGING_CREDENTIAL("cluster.changing.credential"),
     CLUSTER_CHANGED_CREDENTIAL("cluster.changed.credential"),
     CLUSTER_CREATE_FAILED("cluster.create.failed"),
@@ -250,9 +251,9 @@ public enum ResourceEvent {
     CLUSTER_CERTIFICATE_RENEWAL_FINISHED("cluster.certificate.renewal.finished"),
     CLUSTER_CERTIFICATE_RENEWAL_FAILED("cluster.certificate.renewal.failed"),
 
-    FLOW_STACK_METADATA_COLLECTED("stack.metadata.collected"),
-    FLOW_STACK_PROVISIONED("flow.stack.provisioned"),
-    FLOW_RETRY_FLOW_START("retry.flow.start"),
+    STACK_METADATA_COLLECTED("stack.metadata.collected"),
+    STACK_PROVISIONED("stack.provisioned"),
+    STACK_RETRY_FLOW_START("retry.flow.start"),
 
     MAINTENANCE_MODE_VALIDATION_STARTED("maintenance.mode.validation.started"),
     MAINTENANCE_MODE_VALIDATION_FINISHED_FOUND_WARNINGS("maintenance.mode.validation.finished.warn"),
