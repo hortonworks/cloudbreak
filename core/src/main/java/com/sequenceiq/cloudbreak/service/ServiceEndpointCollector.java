@@ -307,10 +307,6 @@ public class ServiceEndpointCollector {
         urls.add(buildKnoxUrl(managerIp, gateway, knoxUrl, topology));
     }
 
-    private void addSchemaRegistry(String managerIp, Gateway gateway, String topologyName, ExposedService exposedService, List<String> urls) {
-        urls.add(buildKnoxUrl(managerIp, gateway, exposedService.getKnoxUrl(), topologyName));
-    }
-
     private void addImplaDebugUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, boolean autoTlsEnabled, List<String> urls) {
         Optional<String> coordinatorUrl = privateIps.get(ExposedService.IMPALA_DEBUG_UI.getServiceName())
                 .stream()
