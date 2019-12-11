@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.domain.stack;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_FAILED;
@@ -490,6 +491,10 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public boolean isStackInDeletionPhase() {
         return DELETE_COMPLETED.equals(getStatus()) || DELETE_IN_PROGRESS.equals(getStatus());
+    }
+
+    public boolean isStackInDeletionOrFailedPhase() {
+        return isStackInDeletionPhase() || DELETE_FAILED.equals(getStatus());
     }
 
     public boolean isStopFailed() {

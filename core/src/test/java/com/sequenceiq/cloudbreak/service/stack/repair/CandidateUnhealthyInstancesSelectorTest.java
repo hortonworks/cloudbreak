@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.repair;
 
+import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -17,12 +18,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CandidateUnhealthyInstancesSelectorTest {
@@ -46,11 +48,11 @@ public class CandidateUnhealthyInstancesSelectorTest {
 
     @Test
     public void shouldSelectInstancesWithUnknownStatus() {
-        Map<String, String> hostStatuses = new HashMap<>();
-        hostStatuses.put("ip-10-0-0-1.ec2.internal", "HEALTHY");
-        hostStatuses.put("ip-10-0-0-2.ec2.internal", "UNKNOWN");
-        hostStatuses.put("ip-10-0-0-3.ec2.internal", "HEALTHY");
-        hostStatuses.put("ip-10-0-0-4.ec2.internal", "UNKNOWN");
+        Map<HostName, String> hostStatuses = new HashMap<>();
+        hostStatuses.put(hostName("ip-10-0-0-1.ec2.internal"), "HEALTHY");
+        hostStatuses.put(hostName("ip-10-0-0-2.ec2.internal"), "UNKNOWN");
+        hostStatuses.put(hostName("ip-10-0-0-3.ec2.internal"), "HEALTHY");
+        hostStatuses.put(hostName("ip-10-0-0-4.ec2.internal"), "UNKNOWN");
 
         when(clusterService.getHostStatuses(stack.getId())).thenReturn(hostStatuses);
         InstanceGroup slaveGroup = setupInstanceGroup(InstanceGroupType.CORE);
@@ -67,9 +69,9 @@ public class CandidateUnhealthyInstancesSelectorTest {
 
     @Test
     public void shouldReturnEmptyListIfAllInstancesHealthy() {
-        Map<String, String> hostStatuses = new HashMap<>();
-        hostStatuses.put("ip-10-0-0-1.ec2.internal", "HEALTHY");
-        hostStatuses.put("ip-10-0-0-3.ec2.internal", "HEALTHY");
+        Map<HostName, String> hostStatuses = new HashMap<>();
+        hostStatuses.put(hostName("ip-10-0-0-1.ec2.internal"), "HEALTHY");
+        hostStatuses.put(hostName("ip-10-0-0-3.ec2.internal"), "HEALTHY");
 
         when(clusterService.getHostStatuses(stack.getId())).thenReturn(hostStatuses);
 
@@ -80,11 +82,11 @@ public class CandidateUnhealthyInstancesSelectorTest {
 
     @Test
     public void shouldRemoveNonCoreGroupNodes() {
-        Map<String, String> hostStatuses = new HashMap<>();
-        hostStatuses.put("ip-10-0-0-1.ec2.internal", "HEALTHY");
-        hostStatuses.put("ip-10-0-0-2.ec2.internal", "UNKNOWN");
-        hostStatuses.put("ip-10-0-0-3.ec2.internal", "UNKNOWN");
-        hostStatuses.put("ip-10-0-0-4.ec2.internal", "UNKNOWN");
+        Map<HostName, String> hostStatuses = new HashMap<>();
+        hostStatuses.put(hostName("ip-10-0-0-1.ec2.internal"), "HEALTHY");
+        hostStatuses.put(hostName("ip-10-0-0-2.ec2.internal"), "UNKNOWN");
+        hostStatuses.put(hostName("ip-10-0-0-3.ec2.internal"), "UNKNOWN");
+        hostStatuses.put(hostName("ip-10-0-0-4.ec2.internal"), "UNKNOWN");
 
         when(clusterService.getHostStatuses(stack.getId())).thenReturn(hostStatuses);
 

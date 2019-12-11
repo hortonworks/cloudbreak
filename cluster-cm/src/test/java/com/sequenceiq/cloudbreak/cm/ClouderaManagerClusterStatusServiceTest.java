@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.FULL_VIEW;
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.FULL_WITH_EXPLANATION_VIEW;
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.HOST_SCM_HEALTH;
@@ -41,11 +42,12 @@ import com.cloudera.api.swagger.model.ApiServiceState;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
-import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -216,12 +218,12 @@ public class ClouderaManagerClusterStatusServiceTest {
                 new ApiHost().hostname("host6").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.DISABLED))
         );
 
-        Map<String, ClusterManagerState.ClusterManagerStatus> expected = ImmutableMap.of(
-                "host1", ClusterManagerState.ClusterManagerStatus.HEALTHY,
-                "host2", ClusterManagerState.ClusterManagerStatus.HEALTHY,
-                "host3", ClusterManagerState.ClusterManagerStatus.UNHEALTHY
+        Map<HostName, ClusterManagerState.ClusterManagerStatus> expected = ImmutableMap.of(
+                hostName("host1"), ClusterManagerState.ClusterManagerStatus.HEALTHY,
+                hostName("host2"), ClusterManagerState.ClusterManagerStatus.HEALTHY,
+                hostName("host3"), ClusterManagerState.ClusterManagerStatus.UNHEALTHY
         );
-        Map<String, ClusterManagerState.ClusterManagerStatus> actual = new TreeMap<>(subject.getHostStatuses());
+        Map<HostName, ClusterManagerState.ClusterManagerStatus> actual = new TreeMap<>(subject.getHostStatuses());
         assertEquals(expected, actual);
     }
 
@@ -237,17 +239,17 @@ public class ClouderaManagerClusterStatusServiceTest {
                 new ApiHost().hostname("host6").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.DISABLED))
         );
 
-        Map<String, ClusterManagerState.ClusterManagerStatus> expected = ImmutableMap.of(
-                "host1", ClusterManagerState.ClusterManagerStatus.HEALTHY,
-                "host2", ClusterManagerState.ClusterManagerStatus.HEALTHY,
-                "host3", ClusterManagerState.ClusterManagerStatus.UNHEALTHY
+        Map<HostName, ClusterManagerState.ClusterManagerStatus> expected = ImmutableMap.of(
+                hostName("host1"), ClusterManagerState.ClusterManagerStatus.HEALTHY,
+                hostName("host2"), ClusterManagerState.ClusterManagerStatus.HEALTHY,
+                hostName("host3"), ClusterManagerState.ClusterManagerStatus.UNHEALTHY
         );
-        Map<String, ClusterManagerState> extendedStateMap = subject.getExtendedHostStatuses();
-        Map<String, ClusterManagerState.ClusterManagerStatus> actual = new TreeMap<>(extendedStateMap.entrySet().stream()
+        Map<HostName, ClusterManagerState> extendedStateMap = subject.getExtendedHostStatuses();
+        Map<HostName, ClusterManagerState.ClusterManagerStatus> actual = new TreeMap<>(extendedStateMap.entrySet().stream()
                 .map(e -> Pair.of(e.getKey(), e.getValue().getClusterManagerStatus()))
                 .collect(Collectors.toMap(Pair::getLeft, Pair::getRight)));
         assertEquals(expected, actual);
-        assertEquals("HOST_SCM_HEALTH: BAD. Reason: explanation", extendedStateMap.get("host3").getStatusReason());
+        assertEquals("HOST_SCM_HEALTH: BAD. Reason: explanation", extendedStateMap.get(hostName("host3")).getStatusReason());
     }
 
     @Test
@@ -259,7 +261,8 @@ public class ClouderaManagerClusterStatusServiceTest {
                         .addHealthChecksItem(new ApiHealthCheck().name("another").summary(ApiHealthSummary.BAD))
         );
 
-        Map<String, ClusterManagerState.ClusterManagerStatus> expected = Collections.singletonMap("host", ClusterManagerState.ClusterManagerStatus.HEALTHY);
+        Map<HostName, ClusterManagerState.ClusterManagerStatus> expected = Collections.singletonMap(hostName("host"),
+                ClusterManagerState.ClusterManagerStatus.HEALTHY);
         assertEquals(expected, subject.getHostStatuses());
     }
 

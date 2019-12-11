@@ -27,5 +27,6 @@ public enum SdxClusterStatusResponse {
     STOP_REQUESTED,
     STOP_IN_PROGRESS,
     STOP_FAILED,
-    STOPPED
+    STOPPED,
+    CLUSTER_AMBIGUOUS
 }

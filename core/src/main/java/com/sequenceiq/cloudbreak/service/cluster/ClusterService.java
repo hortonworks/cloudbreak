@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPO_ID_TAG;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AUTORECOVERY_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED;
@@ -52,6 +53,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePassword
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -654,27 +656,31 @@ public class ClusterService {
         LOGGER.debug("Updating cluster status. stackId: {}, status: {}, statusReason: {}", stackId, status, statusReason);
         StackStatus stackStatus = stackService.getCurrentStatusByStackId(stackId);
         Optional<Cluster> cluster = retrieveClusterByStackIdWithoutAuth(stackId);
-        if (cluster.isPresent()) {
-            Status clusterOldStatus = cluster.get().getStatus();
-            cluster.get().setStatus(status);
-            cluster.get().setStatusReason(statusReason);
-            cluster = Optional.ofNullable(repository.save(cluster.get()));
-            if (cluster.isPresent()) {
-                usageLoggingUtil.logClusterStatusChangeUsageEvent(clusterOldStatus, cluster.get());
-            }
-            if (status.isRemovableStatus()) {
-                InMemoryStateStore.deleteCluster(cluster.get().getId());
+        Optional<Status> clusterOldStatus = cluster.map(Cluster::getStatus);
+        cluster = cluster.map(c -> {
+            c.setStatus(status);
+            c.setStatusReason(statusReason);
+            return c;
+        }).map(repository::save);
+        handleInMemoryState(stackId, stackStatus, cluster, clusterOldStatus);
+        return cluster.orElse(null);
+    }
+
+    private void handleInMemoryState(Long stackId, StackStatus stackStatus, Optional<Cluster> cluster, Optional<Status> clusterOldStatus) {
+        cluster.ifPresent(c -> {
+            clusterOldStatus.ifPresent(oldstatus -> usageLoggingUtil.logClusterStatusChangeUsageEvent(oldstatus, c));
+            if (c.getStatus().isRemovableStatus()) {
+                InMemoryStateStore.deleteCluster(c.getId());
                 if (stackStatus.getStatus().isRemovableStatus()) {
                     InMemoryStateStore.deleteStack(stackId);
                 }
             } else {
-                InMemoryStateStore.putCluster(cluster.get().getId(), statusToPollGroupConverter.convert(status));
+                InMemoryStateStore.putCluster(c.getId(), statusToPollGroupConverter.convert(c.getStatus()));
                 if (InMemoryStateStore.getStack(stackId) == null) {
                     InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(stackStatus.getStatus()));
                 }
             }
-        }
-        return cluster.orElse(null);
+        });
     }
 
     public Cluster updateClusterStatusByStackId(Long stackId, Status status) {
@@ -709,7 +715,7 @@ public class ClusterService {
                     Arrays.asList(cmInstance.getDiscoveryFQDN(), cmInstance.getInstanceStatus().name()));
             return stack.getCluster();
         } else {
-            Map<String, ClusterManagerState> hostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
+            Map<HostName, ClusterManagerState> hostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
             try {
                 return transactionService.required(() -> {
                     List<InstanceMetaData> updatedInstanceMetaData = updateInstanceStatuses(notTerminatedInstanceMetaDatas, hostStatuses);
@@ -739,11 +745,12 @@ public class ClusterService {
         });
     }
 
-    private List<InstanceMetaData> updateInstanceStatuses(Set<InstanceMetaData> notTerminatedInstanceMetaDatas, Map<String, ClusterManagerState> hostStatuses) {
+    private List<InstanceMetaData> updateInstanceStatuses(Set<InstanceMetaData> notTerminatedInstanceMetaDatas, Map<HostName,
+            ClusterManagerState> hostStatuses) {
         return notTerminatedInstanceMetaDatas.stream()
                 .filter(instanceMetaData -> InstanceStatus.SERVICES_RUNNING.equals(instanceMetaData.getInstanceStatus()))
                 .map(instanceMetaData -> {
-                    ClusterManagerState clusterManagerState = hostStatuses.get(instanceMetaData.getDiscoveryFQDN());
+                    ClusterManagerState clusterManagerState = hostStatuses.get(hostName(instanceMetaData.getDiscoveryFQDN()));
                     InstanceStatus newState = ClusterManagerStatus.HEALTHY.equals(clusterManagerState.getClusterManagerStatus()) ?
                             InstanceStatus.SERVICES_HEALTHY : InstanceStatus.SERVICES_UNHEALTHY;
                     instanceMetaData.setInstanceStatus(newState);
@@ -908,7 +915,7 @@ public class ClusterService {
         return repository.findOneWithLists(id).orElseThrow(() -> new NotFoundException(String.format("Cluster '%s' not found", id)));
     }
 
-    public Map<String, String> getHostStatuses(Long stackId) {
+    public Map<HostName, String> getHostStatuses(Long stackId) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         return clusterApiConnectors.getConnector(stack).clusterStatusService().getHostStatusesRaw();
     }

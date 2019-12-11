@@ -45,20 +45,52 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
         Optional<SdxCluster> cluster = sdxClusterRepository.findById(Long.valueOf(getLocalId()));
         cluster.ifPresent(sdx -> {
             SdxStatusEntity status = sdxStatusService.getActualStatusForSdx(sdx);
-            if (status.getStatus() == DatalakeStatusEnum.RUNNING && stack.getStatus().isStopped()) {
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, ResourceEvent.SDX_STOP_FINISHED, "", sdx);
-                logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.STOPPED);
+            if (status.getStatus() == DatalakeStatusEnum.RUNNING) {
+                handleRunningSdx(stack, sdx);
             }
-            if (status.getStatus() == DatalakeStatusEnum.RUNNING && stack.getStatus().equals(Status.DELETE_COMPLETED)) {
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETED, ResourceEvent.SDX_CLUSTER_DELETION_FINISHED, "", sdx);
-                jobService.unschedule(String.valueOf(sdx.getId()));
-                logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.STACK_DELETED);
+            if (status.getStatus() == DatalakeStatusEnum.STOPPED) {
+                handleStoppedSdx(stack, sdx);
             }
-            if (status.getStatus() == DatalakeStatusEnum.STOPPED && stack.getStatus().isAvailable() && stack.getClusterStatus().isAvailable()) {
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.SDX_STOP_FINISHED, "", sdx);
-                logStateChange(DatalakeStatusEnum.STOPPED, DatalakeStatusEnum.RUNNING);
+            if (status.getStatus() == DatalakeStatusEnum.CLUSTER_AMBIGUOUS) {
+                handleAmbiguousSdx(stack, sdx);
             }
         });
+    }
+
+    private void handleAmbiguousSdx(StackStatusV4Response stack, SdxCluster sdx) {
+        if (stack.getStatus().equals(Status.AVAILABLE) && stack.getClusterStatus() == Status.AVAILABLE) {
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED, "", sdx);
+            logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.STACK_DELETED);
+        }
+    }
+
+    private void handleStoppedSdx(StackStatusV4Response stack, SdxCluster sdx) {
+        if (stack.getStatus().isAvailable() && stack.getClusterStatus().isAvailable()) {
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.SDX_STOP_FINISHED, "", sdx);
+            logStateChange(DatalakeStatusEnum.STOPPED, DatalakeStatusEnum.RUNNING);
+        }
+    }
+
+    private void handleRunningSdx(StackStatusV4Response stack, SdxCluster sdx) {
+        if (stack.getStatus().isStopped()) {
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, ResourceEvent.SDX_STOP_FINISHED, "", sdx);
+            logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.STOPPED);
+        }
+        if (stack.getStatus().equals(Status.DELETE_COMPLETED)) {
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETED, ResourceEvent.SDX_CLUSTER_DELETION_FINISHED, "", sdx);
+            jobService.unschedule(String.valueOf(sdx.getId()));
+            logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.STACK_DELETED);
+        }
+        if (stack.getStatus().equals(Status.DELETE_FAILED)) {
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_FAILED, ResourceEvent.SDX_CLUSTER_DELETION_FAILED, "", sdx);
+            jobService.unschedule(String.valueOf(sdx.getId()));
+            logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.DELETE_FAILED);
+        }
+        if (stack.getStatus().equals(Status.AVAILABLE) && stack.getClusterStatus() == Status.AMBIGUOUS) {
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CLUSTER_AMBIGUOUS, ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED,
+                    "", sdx);
+            logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.STACK_DELETED);
+        }
     }
 
     private void logStateChange(DatalakeStatusEnum from, DatalakeStatusEnum to) {

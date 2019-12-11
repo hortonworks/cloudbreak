@@ -24,17 +24,22 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTermina
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTerminationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
+import com.sequenceiq.statuschecker.service.JobService;
 
 @Configuration
 public class ClusterTerminationActions {
     @Inject
     private ClusterTerminationFlowService clusterTerminationFlowService;
 
+    @Inject
+    private JobService jobService;
+
     @Bean(name = "PREPARE_CLUSTER_STATE")
     public Action<?, ?> prepareCluster() {
         return new AbstractClusterAction<>(StackEvent.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
+                jobService.unschedule(String.valueOf(context.getStackId()));
                 clusterTerminationFlowService.terminateCluster(context);
                 sendEvent(context);
             }
