@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
@@ -37,6 +38,7 @@ import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceState;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
@@ -182,8 +184,8 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         }
     }
 
-    private static <T> Map<String, T> convertHealthSummary(Map<String, ApiHealthSummary> hostHealth, Function<ApiHealthSummary, T> converter) {
-        Map<String, T> result = new HashMap<>();
+    private static <T> Map<HostName, T> convertHealthSummary(Map<HostName, ApiHealthSummary> hostHealth, Function<ApiHealthSummary, T> converter) {
+        Map<HostName, T> result = new HashMap<>();
         hostHealth.forEach((hostname, healthSummary) -> result.put(hostname, converter.apply(healthSummary)));
         return result;
     }
@@ -213,8 +215,8 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     }
 
     @Override
-    public Map<String, ClusterManagerState> getExtendedHostStatuses() {
-        Map<String, ClusterManagerState> result = new HashMap<>();
+    public Map<HostName, ClusterManagerState> getExtendedHostStatuses() {
+        Map<HostName, ClusterManagerState> result = new HashMap<>();
         getHostHealth().forEach((hostname, health) ->
                 result.put(hostname, new ClusterManagerState(healthSummaryToState(health.getSummary()),
                         getHostHealthMessage(health.getSummary(), health.getExplanation()))));
@@ -229,12 +231,12 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     }
 
     @Override
-    public Map<String, ClusterManagerState.ClusterManagerStatus> getHostStatuses() {
+    public Map<HostName, ClusterManagerState.ClusterManagerStatus> getHostStatuses() {
         return convertHealthSummary(getHostHealthSummary(), ClouderaManagerClusterStatusService::healthSummaryToState);
     }
 
     @Override
-    public Map<String, String> getHostStatusesRaw() {
+    public Map<HostName, String> getHostStatusesRaw() {
         return convertHealthSummary(getHostHealthSummary(), ApiHealthSummary::getValue);
     }
 
@@ -311,7 +313,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
      * Collects summary of HOST_SCM_HEALTH check for each host.
      * Currently this is the best indicator of host availability.
      */
-    private Map<String, ApiHealthSummary> getHostHealthSummary() {
+    private Map<HostName, ApiHealthSummary> getHostHealthSummary() {
         HostsResourceApi api = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
             return api.readHosts(FULL_VIEW).getItems().stream()
@@ -320,7 +322,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
                             .filter(check -> HOST_SCM_HEALTH.equals(check.getName()))
                             .map(ApiHealthCheck::getSummary)
                             .filter(healthSummary -> !IGNORED_HEALTH_SUMMARIES.contains(healthSummary))
-                            .map(healthSummary -> Pair.of(host.getHostname(), healthSummary))
+                            .map(healthSummary -> Pair.of(hostName(host.getHostname()), healthSummary))
                     )
                     .collect(toMap(Pair::getLeft, Pair::getRight));
         } catch (ApiException e) {
@@ -329,7 +331,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         }
     }
 
-    private Map<String, ApiHealthCheck> getHostHealth() {
+    private Map<HostName, ApiHealthCheck> getHostHealth() {
         HostsResourceApi api = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
             return api.readHosts(FULL_WITH_EXPLANATION_VIEW).getItems().stream()
@@ -337,7 +339,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
                     .flatMap(host -> host.getHealthChecks().stream()
                             .filter(check -> HOST_SCM_HEALTH.equals(check.getName()))
                             .filter(check -> !IGNORED_HEALTH_SUMMARIES.contains(check.getSummary()))
-                            .map(check -> Pair.of(host.getHostname(), check))
+                            .map(check -> Pair.of(hostName(host.getHostname()), check))
                     )
                     .collect(toMap(Pair::getLeft, Pair::getRight));
         } catch (ApiException e) {

@@ -175,6 +175,7 @@ dependencies {
   compile group: 'org.springframework.boot',           name: 'spring-boot-starter-freemarker'
   compile group: 'org.springframework.boot',           name: 'spring-boot-starter-security'
   compile group: 'org.springframework.boot',           name: 'spring-boot-starter-jersey'
+  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-quartz'
 
   compile group: 'org.springframework.kafka',          name: 'spring-kafka'
   compile group: 'org.springframework.retry',          name: 'spring-retry'
@@ -241,6 +242,7 @@ dependencies {
   compile project(':usage-collection')
   compile project(':cluster-dns-connector')
   compile project(':cluster-proxy')
+  compile project(':status-checker')
 
   implementation project(":notification-sender")
 

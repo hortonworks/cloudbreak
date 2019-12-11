@@ -12,6 +12,7 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.resource.ResourceAction;
@@ -80,6 +81,9 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Inject
     private ClusterProxyService clusterProxyService;
 
+    @Value("${cb.changednodesreport.disabled:false}")
+    private boolean changedNodedReportDisabled;
+
     @Override
     public void putStack(@ResourceCrn String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
         setupIdentityForAutoscale(crn, userId);
@@ -112,7 +116,9 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     public void changedNodesReport(@ResourceCrn String crn, ChangedNodesReportV4Request changedNodesReport) {
-        clusterService.reportHealthChange(crn, Set.copyOf(changedNodesReport.getNewFailedNodes()), Set.copyOf(changedNodesReport.getNewHealthyNodes()));
+        if (!changedNodedReportDisabled) {
+            clusterService.reportHealthChange(crn, Set.copyOf(changedNodesReport.getNewFailedNodes()), Set.copyOf(changedNodesReport.getNewHealthyNodes()));
+        }
     }
 
     @Override

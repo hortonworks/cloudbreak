@@ -16,9 +16,11 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -136,6 +138,27 @@ public class StackSyncService {
         instanceMetaDataService.save(instanceMetaData);
     }
 
+    public void autoSync(Stack stack, List<CloudVmInstanceStatus> instanceStatuses, boolean stackStatusUpdateEnabled, InstanceSyncState defaultState) {
+        Set<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
+        Map<String, InstanceSyncState> instaceSyncStates = instanceStatuses.stream()
+                .collect(Collectors.toMap(i -> i.getCloudInstance().getInstanceId(), i -> InstanceSyncState.getInstanceSyncState(i.getStatus())));
+        Map<InstanceSyncState, Integer> instanceStateCounts = initInstanceStateCounts();
+
+        for (InstanceMetaData instance : instances) {
+            try {
+                syncInstanceStatusByState(stack, instanceStateCounts, instance,
+                        instaceSyncStates.getOrDefault(instance.getInstanceId(), defaultState));
+            } catch (CloudConnectorException e) {
+                LOGGER.warn(e.getMessage(), e);
+                eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+                        STACK_SYNC_INSTANCE_STATUS_RETRIEVAL_FAILED,
+                        Collections.singletonList(instance.getInstanceId()));
+                instanceStateCounts.put(InstanceSyncState.UNKNOWN, instanceStateCounts.get(InstanceSyncState.UNKNOWN) + 1);
+            }
+        }
+        handleSyncResult(stack, instanceStateCounts, stackStatusUpdateEnabled);
+    }
+
     private void syncInstanceStatusByState(Stack stack, Map<InstanceSyncState, Integer> counts, InstanceMetaData metaData, InstanceSyncState state) {
         if (InstanceSyncState.DELETED.equals(state) || InstanceSyncState.DELETED_ON_PROVIDER_SIDE.equals(state)) {
             syncDeletedInstance(stack, counts, metaData);
@@ -144,7 +167,7 @@ public class StackSyncService {
         } else if (InstanceSyncState.STOPPED.equals(state)) {
             syncStoppedInstance(stack, counts, metaData);
         } else {
-            counts.put(state, counts.get(state) + 1);
+            counts.put(state, counts.getOrDefault(state, 0) + 1);
         }
     }
 
@@ -201,7 +224,7 @@ public class StackSyncService {
         } else if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0) {
             updateStackStatusIfEnabled(stack.getId(), DetailedStackStatus.AVAILABLE, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_SYNC_INSTANCE_STATE_SYNCED);
-        } else if (instanceStateCounts.get(InstanceSyncState.STOPPED).equals(instances.size())) {
+        } else if (instanceStateCounts.get(InstanceSyncState.STOPPED).equals(instances.size()) && instances.size() > 0) {
             updateStackStatusIfEnabled(stack.getId(), DetailedStackStatus.STOPPED, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
             eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), STACK_SYNC_INSTANCE_STATE_SYNCED);
         } else {

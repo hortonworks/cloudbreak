@@ -29,6 +29,7 @@ public enum DatalakeStatusEnum {
     STOP_IN_PROGRESS,
     STOP_FAILED,
     STOPPED,
+    CLUSTER_AMBIGUOUS,
 
     SYNC_FAILED;
 

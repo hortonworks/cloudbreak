@@ -25,7 +25,8 @@ public enum Status {
     START_FAILED(StatusKind.FINAL),
     STOP_FAILED(StatusKind.FINAL),
     WAIT_FOR_SYNC(StatusKind.PROGRESS),
-    MAINTENANCE_MODE_ENABLED(StatusKind.FINAL);
+    MAINTENANCE_MODE_ENABLED(StatusKind.FINAL),
+    AMBIGUOUS(StatusKind.FINAL);
 
     private StatusKind statusKind;
 
