@@ -86,5 +86,9 @@
   </table>
 #end
 
+#if ($keyPerformanceIndicator)
+  $keyPerformanceIndicator.print()
+#end
+
 </body>
 </html>
