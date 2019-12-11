@@ -1,5 +1,4 @@
 #!/bin/bash -e
-: ${WORKSPACE=.}
 set -x
 
 echo "Build version: $VERSION"
