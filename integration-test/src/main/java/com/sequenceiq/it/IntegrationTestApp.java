@@ -123,8 +123,8 @@ public class IntegrationTestApp implements CommandLineRunner {
         setupSuites(testng);
         if (!CLEANUP_COMMAND.equals(itCommand)) {
             testng.run();
-            LOG.info("Html result of test run: file://{}/test-output/index.html", System.getProperty("user.dir"));
-            LOG.info("Text based result of test run: file://{}/test-output/emailable-report.html", System.getProperty("user.dir"));
+            LOG.info("Html result of test run: file://{}/test-output/index.html", outputDirectory);
+            LOG.info("Text based result of test run: file://{}/test-output/emailable-report.html", outputDirectory);
         }
     }
 

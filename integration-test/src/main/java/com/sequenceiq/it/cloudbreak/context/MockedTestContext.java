@@ -17,7 +17,7 @@ import com.sequenceiq.it.cloudbreak.spark.SparkServer;
 import com.sequenceiq.it.cloudbreak.spark.SparkServerFactory;
 
 @Prototype
-public class MockedTestContext extends TestContext implements AutoCloseable {
+public class MockedTestContext extends TestContext implements AutoCloseable, MockTestContext {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockedTestContext.class);
 
@@ -38,27 +38,31 @@ public class MockedTestContext extends TestContext implements AutoCloseable {
     private DefaultModel model;
 
     @PostConstruct
-    private void init() throws InterruptedException {
-        LOGGER.info("Creating mocked TestContext");
+    void init() throws InterruptedException {
+        MockedTestContext.LOGGER.info("Creating mocked TestContext");
         sparkServer = sparkServerFactory.construct();
-        LOGGER.info("MockedTestContext got spark server: {}", sparkServer);
+        MockedTestContext.LOGGER.info("MockedTestContext got spark server: {}", sparkServer);
         imageCatalogMockServerSetup.configureImgCatalogWithExistingSparkServer(sparkServer);
         model = new DefaultModel();
         model.startModel(sparkServer.getSparkService(), mockServerAddress, ThreadLocalProfiles.getActiveProfiles());
     }
 
+    @Override
     public DefaultModel getModel() {
         return model;
     }
 
+    @Override
     public SparkServer getSparkServer() {
         return sparkServer;
     }
 
+    @Override
     public ImageCatalogMockServerSetup getImageCatalogMockServerSetup() {
         return imageCatalogMockServerSetup;
     }
 
+    @Override
     public DynamicRouteStack dynamicRouteStack() {
         return model.getAmbariMock().getDynamicRouteStack();
     }

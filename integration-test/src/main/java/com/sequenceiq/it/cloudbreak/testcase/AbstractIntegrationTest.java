@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase;
 
+import static com.sequenceiq.it.cloudbreak.context.MeasuredTestContext.createMeasuredTestContext;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.lang.reflect.Method;
@@ -49,6 +50,7 @@ import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.MeasuredTestContext;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.PurgeGarbageService;
 import com.sequenceiq.it.cloudbreak.context.SparklessTestContext;
@@ -225,8 +227,8 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @DataProvider(name = TEST_CONTEXT_WITH_MOCK)
     public Object[][] testContextWithMock() {
-        MockedTestContext bean = getBean(MockedTestContext.class);
-        return new Object[][]{{bean}};
+        MeasuredTestContext tc = createMeasuredTestContext(getBean(MockedTestContext.class));
+        return new Object[][]{{tc}};
     }
 
     @DataProvider(name = TEST_CONTEXT)

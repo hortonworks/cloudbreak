@@ -8,6 +8,8 @@ logging:
     path: ${integrationtest.outputdir}
 
 integrationtest:
+  spark:
+    sparkPoolSize: 8
   command: suiteurls
   outputdir: .
   publicKeyFile:

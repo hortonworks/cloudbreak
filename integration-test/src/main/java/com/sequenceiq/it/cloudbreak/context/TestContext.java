@@ -79,6 +79,8 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private Map<String, Object> contextParameters = new HashMap<>();
 
+    private TestContext testContext;
+
     @Inject
     private WaitUtilForMultipleStatuses waitUtil;
 
@@ -152,7 +154,7 @@ public abstract class TestContext implements ApplicationContextAware {
             key = action.getClass().getSimpleName();
         }
 
-        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             LOGGER.info("Should be skipped beacause of previous error. when [{}]", key);
             return entity;
         }
@@ -161,14 +163,31 @@ public abstract class TestContext implements ApplicationContextAware {
 
         LOGGER.info("when {} action on {} by {}, name: {}", key, entity, who, entity.getName());
         try {
-            return action.action(this, entity, getMicroserviceClient(clientClass, who.getAccessKey()));
+            return doAction(entity, clientClass, action, who.getAccessKey());
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
                 LOGGER.error("when [{}] action is failed: {}, name: {}", key, ResponseUtil.getErrorMessage(e), entity.getName(), e);
             }
-            exceptionMap.put(key, e);
+            getExceptionMap().put(key, e);
         }
         return entity;
+    }
+
+    protected TestContext getTestContext() {
+        if (testContext == null) {
+            return this;
+        } else {
+            return testContext;
+        }
+    }
+
+    protected void setTestContext(TestContext testContext) {
+        this.testContext = testContext;
+    }
+
+    protected <T extends CloudbreakTestDto, U extends MicroserviceClient>
+    T doAction(T entity, Class<? extends MicroserviceClient> clientClass, Action<T, U> action, String who) throws Exception {
+        return action.action(getTestContext(), entity, getMicroserviceClient(clientClass, who));
     }
 
     public <T extends CloudbreakTestDto> T then(Class<T> entityClass, Class<? extends MicroserviceClient> clientClass,
@@ -191,7 +210,7 @@ public abstract class TestContext implements ApplicationContextAware {
         checkShutdown();
         String key = getKey(assertion.getClass(), runningParameter);
 
-        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             LOGGER.info("Should be skipped beacause of previous error. when [{}]", key);
             return entity;
         }
@@ -210,7 +229,7 @@ public abstract class TestContext implements ApplicationContextAware {
             if (runningParameter.isLogError()) {
                 LOGGER.error("then [{}] assertion is failed: {}, name: {}", key, ResponseUtil.getErrorMessage(e), entity.getName(), e);
             }
-            exceptionMap.put(key, e);
+            getExceptionMap().put(key, e);
         }
         return entity;
     }
@@ -275,7 +294,7 @@ public abstract class TestContext implements ApplicationContextAware {
     public <O extends CloudbreakTestDto> O init(Class<O> clss) {
         checkShutdown();
         Log.log(LOGGER, "init " + clss.getSimpleName());
-        CloudbreakTestDto bean = applicationContext.getBean(clss, this);
+        CloudbreakTestDto bean = applicationContext.getBean(clss, getTestContext());
         initialized = true;
         return (O) bean.valid();
     }
@@ -485,7 +504,7 @@ public abstract class TestContext implements ApplicationContextAware {
             CloudbreakClient cloudbreakClient = getCloudbreakClient(getWho(runningParameter).getAccessKey());
             statuses.putAll(waitUtil.waitAndCheckStatuses(cloudbreakClient, awaitEntity.getName(), desiredStatuses, pollingInterval));
             if (!desiredStatuses.containsValue(Status.DELETE_COMPLETED)) {
-                awaitEntity.refresh(this, cloudbreakClient);
+                awaitEntity.refresh(getTestContext(), cloudbreakClient);
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
@@ -521,7 +540,7 @@ public abstract class TestContext implements ApplicationContextAware {
             String environmentCrn = awaitEntity.getRequest().getEnvironmentCrn();
             statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(freeIPAClient, environmentCrn, desiredStatuses, pollingInterval));
             if (!desiredStatuses.equals(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED)) {
-                awaitEntity.refresh(this, null);
+                awaitEntity.refresh(getTestContext(), null);
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
@@ -557,7 +576,7 @@ public abstract class TestContext implements ApplicationContextAware {
             String environmentName = awaitEntity.getResponse().getName();
             statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(environmentClient, environmentName, desiredStatuses, pollingInterval));
             if (!desiredStatuses.equals(EnvironmentStatus.ARCHIVED)) {
-                awaitEntity.refresh(this, null);
+                awaitEntity.refresh(getTestContext(), null);
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
@@ -593,7 +612,7 @@ public abstract class TestContext implements ApplicationContextAware {
             String sdxName = entity.getName();
             statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(sdxClient, sdxName, desiredStatuses, pollingInterval));
             if (!desiredStatuses.equals(SdxClusterStatusResponse.DELETED)) {
-                awaitEntity.refresh(this, (CloudbreakClient) null);
+                awaitEntity.refresh(getTestContext(), (CloudbreakClient) null);
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
@@ -629,7 +648,7 @@ public abstract class TestContext implements ApplicationContextAware {
             String sdxName = entity.getName();
             statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(sdxClient, sdxName, desiredStatuses, pollingInterval));
             if (!desiredStatuses.equals(SdxClusterStatusResponse.DELETED)) {
-                awaitEntity.refresh(this, (CloudbreakClient) null);
+                awaitEntity.refresh(getTestContext(), (CloudbreakClient) null);
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
@@ -665,7 +684,7 @@ public abstract class TestContext implements ApplicationContextAware {
             String sdxName = entity.getName();
             statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(sdxClient, sdxName, desiredStatuses, pollingInterval));
             if (!desiredStatuses.equals(SdxClusterStatusResponse.DELETED)) {
-                awaitEntity.refresh(this, (CloudbreakClient) null);
+                awaitEntity.refresh(getTestContext(), (CloudbreakClient) null);
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
@@ -728,7 +747,7 @@ public abstract class TestContext implements ApplicationContextAware {
         investigables.forEach(dto -> builder.append(dto.investigate()).append(System.lineSeparator()));
     }
 
-    private <T extends CloudbreakTestDto> T getEntityFromEntityClass(Class<T> entityClass, RunningParameter runningParameter) {
+    protected  <T extends CloudbreakTestDto> T getEntityFromEntityClass(Class<T> entityClass, RunningParameter runningParameter) {
         String key = getKey(entityClass, runningParameter);
         T entity = (T) resources.get(key);
         if (entity == null) {

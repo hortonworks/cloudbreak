@@ -80,6 +80,23 @@
     </div>
     #end
     #set ($id = $id + 1)
+    #set ($measurePostFix="measurements")
+    #set ($measure = $testResult.getAttribute("$testResult.name$measurePostFix"))
+    #if ($measure)
+      <table style="border: 1px solid black;">
+        <caption>Measurements</caption>
+          <tr style="border: 1px solid black;">
+            <th style="border: 1px solid black;">Action</th>
+            <th style="border: 1px solid black;">Duration</th>
+          </tr>
+      #foreach ($pi in $measure.getAll())
+        <tr style="border: 1px solid black;">
+          <td style="border: 1px solid black;">$pi.getAction()</td>
+          <td style="border: 1px solid black;">$pi.getDuration()ms</td>
+        </tr>
+      #end
+      </table>
+    #end
   </td>
 </tr>
 #end
