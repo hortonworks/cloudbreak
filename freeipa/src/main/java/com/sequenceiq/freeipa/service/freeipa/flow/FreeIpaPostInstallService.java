@@ -17,7 +17,7 @@ import com.sequenceiq.freeipa.client.model.Permission;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
-import com.sequenceiq.freeipa.service.freeipa.user.UserService;
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -47,7 +47,7 @@ public class FreeIpaPostInstallService {
     private FreeIpaClientFactory freeIpaClientFactory;
 
     @Inject
-    private UserService userService;
+    private UserSyncService userSyncService;
 
     @Inject
     private StackService stackService;
@@ -78,7 +78,7 @@ public class FreeIpaPostInstallService {
         }
         passwordPolicyService.updatePasswordPolicy(freeIpaClient);
         modifyAdminPasswordExpirationIfNeeded(freeIpaClient);
-        userService.synchronizeUsers(
+        userSyncService.synchronizeUsers(
                 ThreadBasedUserCrnProvider.getAccountId(), ThreadBasedUserCrnProvider.getUserCrn(), Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
     }
 

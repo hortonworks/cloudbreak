@@ -5,12 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
-import com.sequenceiq.cloudbreak.common.service.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,7 +18,9 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.service.OperationException;
@@ -82,7 +81,8 @@ public class PasswordService {
         LOGGER.debug("setting password for user {} in account {}", userCrn, accountId);
         freeIpaPasswordValidator.validate(password);
 
-        List<Stack> stacks = getStacks(accountId, environmentCrnFilter);
+        List<Stack> stacks = stackService.getMultipleByEnvironmentCrnAndAccountId(environmentCrnFilter, accountId);
+
         if (stacks.isEmpty()) {
             LOGGER.warn("No stacks found for accountId {}", accountId);
             throw new NotFoundException("No matching FreeIPA stacks found for accountId " + accountId);
@@ -92,18 +92,19 @@ public class PasswordService {
         Operation operation = operationStatusService.startOperation(accountId, OperationType.SET_PASSWORD,
                 environmentCrnFilter, List.of(userCrn));
         if (operation.getStatus() == OperationState.RUNNING) {
-            MDCBuilder.addFlowId(operation.getOperationId());
-            Optional<String> requestId = MDCUtils.getRequestId();
-            asyncTaskExecutor.submit(() -> asyncSetPasswords(requestId, operation.getOperationId(), accountId, actorCrn, userCrn, password, stacks));
+            asyncSetPasswords(operation.getOperationId(), accountId, actorCrn, userCrn, password, stacks);
         }
 
         return operationToSyncOperationStatus.convert(operation);
     }
 
-    private void asyncSetPasswords(Optional<String> requestId, String operationId,
-            String accountId, String actorCrn, String userCrn, String password, List<Stack> stacks) {
+    private void asyncSetPasswords(String operationId, String accountId, String actorCrn, String userCrn, String password, List<Stack> stacks) {
+        MDCBuilder.addFlowId(operationId);
+        asyncTaskExecutor.submit(() -> internalSetPasswords(operationId, accountId, actorCrn, userCrn, password, stacks));
+    }
+
+    private void internalSetPasswords(String operationId, String accountId, String actorCrn, String userCrn, String password, List<Stack> stacks) {
         try {
-            MDCBuilder.addRequestId(requestId.orElse(UUID.randomUUID().toString()));
             String userId = getUserIdFromUserCrn(actorCrn, userCrn);
 
             Optional<Instant> expirationInstant = calculateExpirationTime(actorCrn, accountId);
@@ -178,16 +179,6 @@ public class PasswordService {
         SetPasswordResult result = request.await();
         if (result.getStatus().equals(EventStatus.FAILED)) {
             throw new OperationException(result.getErrorDetails());
-        }
-    }
-
-    private List<Stack> getStacks(String accountId, Set<String> environmentCrnFilter) {
-        if (environmentCrnFilter.isEmpty()) {
-            LOGGER.debug("Retrieving all stacks for account {}", accountId);
-            return stackService.getAllByAccountId(accountId);
-        } else {
-            LOGGER.debug("Retrieving stacks for account {} that match environment crns {}", accountId, environmentCrnFilter);
-            return stackService.getMultipleByEnvironmentCrnAndAccountId(environmentCrnFilter, accountId);
         }
     }
 }

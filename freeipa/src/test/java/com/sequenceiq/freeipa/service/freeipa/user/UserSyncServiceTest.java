@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +30,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceTest {
+class UserSyncServiceTest {
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
     private static final String NOT_CRN = "not:a:crn:";
@@ -46,11 +47,18 @@ class UserServiceTest {
     private static final String MACHINE_USER_CRN = "crn:cdp:iam:us-west-1:"
             + ACCOUNT_ID + ":machineUser:" + UUID.randomUUID().toString();
 
+    private static final int MAX_SUBJECTS_PER_REQUEST = 10;
+
     @Mock
     FreeIpaUsersStateProvider freeIpaUsersStateProvider;
 
     @InjectMocks
-    UserService underTest;
+    UserSyncService underTest;
+
+    @BeforeEach
+    void setUp() {
+        underTest.maxSubjectsPerRequest = MAX_SUBJECTS_PER_REQUEST;
+    }
 
     @Test
     void testValidateParameters() {
@@ -101,7 +109,7 @@ class UserServiceTest {
     void testFullSyncRetrievesFullIpaState() throws Exception {
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
         UmsUsersState umsUsersState = mock(UmsUsersState.class);
-        underTest.getIpaUserState(freeIpaClient, umsUsersState, Set.of(), Set.of());
+        underTest.getIpaUserState(freeIpaClient, umsUsersState, true);
         verify(freeIpaUsersStateProvider).getUsersState(any());
     }
 
@@ -111,7 +119,7 @@ class UserServiceTest {
         UmsUsersState umsUsersState = mock(UmsUsersState.class);
         ImmutableSet<FmsUser> workloadUsers = mock(ImmutableSet.class);
         when(umsUsersState.getRequestedWorkloadUsers()).thenReturn(workloadUsers);
-        underTest.getIpaUserState(freeIpaClient, umsUsersState, Set.of(USER_CRN), Set.of(MACHINE_USER_CRN));
+        underTest.getIpaUserState(freeIpaClient, umsUsersState, false);
         verify(freeIpaUsersStateProvider).getFilteredFreeIPAState(any(), eq(workloadUsers));
     }
 

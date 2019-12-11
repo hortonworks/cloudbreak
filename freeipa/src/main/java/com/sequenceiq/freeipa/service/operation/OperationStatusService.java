@@ -74,22 +74,22 @@ public class OperationStatusService {
         return operationRepository.save(operation);
     }
 
-    public Operation completeOperation(String operationId, List<SuccessDetails> success, List<FailureDetails> failure) {
+    public Operation completeOperation(String operationId, Collection<SuccessDetails> success, Collection<FailureDetails> failure) {
         Operation operation = getOperationForOperationId(operationId);
         operation.setStatus(OperationState.COMPLETED);
-        operation.setSuccessList(success);
-        operation.setFailureList(failure);
+        operation.setSuccessList(List.copyOf(success));
+        operation.setFailureList(List.copyOf(failure));
         operation.setEndTime(System.currentTimeMillis());
         return operationRepository.save(operation);
     }
 
-    public Operation failOperation(String operationId, String failureMessage, List<SuccessDetails> success, List<FailureDetails> failure) {
+    public Operation failOperation(String operationId, String failureMessage, Collection<SuccessDetails> success, Collection<FailureDetails> failure) {
         Operation operation = getOperationForOperationId(operationId);
         operation.setStatus(OperationState.FAILED);
         operation.setError(failureMessage);
         operation.setEndTime(System.currentTimeMillis());
-        operation.setSuccessList(success);
-        operation.setFailureList(failure);
+        operation.setSuccessList(List.copyOf(success));
+        operation.setFailureList(List.copyOf(failure));
         return operationRepository.save(operation);
     }
 

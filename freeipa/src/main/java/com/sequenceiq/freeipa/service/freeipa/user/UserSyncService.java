@@ -3,13 +3,13 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
@@ -54,6 +55,7 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
@@ -63,15 +65,13 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.KrbKeySetEncoder;
 
 @Service
-public class UserService {
+public class UserSyncService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
-
-    private static final int DEFAULT_MAX_SUBJECTS_PER_REQUEST = 10;
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserSyncService.class);
 
     @VisibleForTesting
     @Value("${freeipa.usersync.max-subjects-per-request}")
-    int maxSubjectsPerRequest = DEFAULT_MAX_SUBJECTS_PER_REQUEST;
+    int maxSubjectsPerRequest;
 
     @Inject
     private StackService stackService;
@@ -108,81 +108,84 @@ public class UserService {
         LOGGER.debug("Synchronizing users in account {} for environmentCrns {}, userCrns {}, and machineUserCrns {}",
                 accountId, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
 
-        List<Stack> stacks = getStacks(accountId, environmentCrnFilter);
+        List<Stack> stacks = stackService.getMultipleByEnvironmentCrnAndAccountId(environmentCrnFilter, accountId);
         LOGGER.debug("Found {} stacks", stacks.size());
         if (stacks.isEmpty()) {
             throw new NotFoundException(String.format("No matching FreeIPA stacks found for account %s with environment crn filter %s",
                     accountId, environmentCrnFilter));
         }
 
+        Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
         Operation operation = operationStatusService
-                .startOperation(accountId, OperationType.USER_SYNC, environmentCrnFilter, union(userCrnFilter, machineUserCrnFilter));
+                .startOperation(accountId, OperationType.USER_SYNC, environmentCrns, union(userCrnFilter, machineUserCrnFilter));
 
         LOGGER.info("Starting operation [{}] with status [{}]", operation.getOperationId(), operation.getStatus());
 
         if (operation.getStatus() == OperationState.RUNNING) {
-            MDCBuilder.addFlowId(operation.getOperationId());
-            Optional<String> requestId = MDCUtils.getRequestId();
-            asyncTaskExecutor.submit(() -> asyncSynchronizeUsers(requestId, operation.getOperationId(),
-                    accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter));
+            boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
+            if (fullSync) {
+                long currentTime = Instant.now().toEpochMilli();
+                stacks.forEach(stack -> {
+                    UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
+                    userSyncStatus.setLastFullSyncStartTime(currentTime);
+                    userSyncStatusService.save(userSyncStatus);
+                });
+            }
+            asyncSynchronizeUsers(operation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter, fullSync);
         }
 
         return operationToSyncOperationStatus.convert(operation);
     }
 
-    private void asyncSynchronizeUsers(
-            Optional<String> requestId, String operationId, String accountId, String actorCrn, List<Stack> stacks,
-            Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+    private void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks,
+            Set<String> userCrnFilter, Set<String> machineUserCrnFilter, boolean fullSync) {
+
+        MDCBuilder.addFlowId(operationId);
+        asyncTaskExecutor.submit(() -> internalSynchronizeUsers(
+                operationId, accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter, fullSync));
+
+    }
+
+    private void internalSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks,
+            Set<String> userCrnFilter, Set<String> machineUserCrnFilter, boolean fullSync) {
         try {
             Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
 
-            MDCBuilder.addRequestId(requestId.orElse(UUID.randomUUID().toString()));
+            Optional<String> requestId = MDCUtils.getRequestId();
 
-            boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
-            Json umsEventGenerationIdsJson = fullSync ?
-                    new Json(umsEventGenerationIdsProvider.getEventGenerationIds(accountId, requestId)) :
+            UmsEventGenerationIds umsEventGenerationIds = fullSync ?
+                    umsEventGenerationIdsProvider.getEventGenerationIds(accountId, requestId) :
                     null;
 
             Map<String, UmsUsersState> envToUmsStateMap = umsUsersStateProvider
                     .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userCrnFilter, machineUserCrnFilter, requestId);
 
-            Collection<SuccessDetails> success = new ConcurrentLinkedQueue<>();
-            Collection<FailureDetails> failure = new ConcurrentLinkedQueue<>();
+            List<SuccessDetails> success = new ArrayList<>();
+            List<FailureDetails> failure = new ArrayList<>();
 
             Map<String, Future<SyncStatusDetail>> statusFutures = stacks.stream()
                     .collect(Collectors.toMap(Stack::getEnvironmentCrn,
-                            stack -> asyncTaskExecutor.submit(() -> {
-                                MDCBuilder.buildMdcContext(stack);
-                                String envCrn = stack.getEnvironmentCrn();
-                                SyncStatusDetail statusDetail =
-                                        synchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), userCrnFilter, machineUserCrnFilter);
-                                switch (statusDetail.getStatus()) {
-                                    case COMPLETED:
-                                        success.add(new SuccessDetails(envCrn));
-                                        if (umsEventGenerationIdsJson != null) {
-                                            UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
-                                            userSyncStatus.setUmsEventGenerationIds(umsEventGenerationIdsJson);
-                                            userSyncStatusService.save(userSyncStatus);
-                                        }
-                                        break;
-                                    case FAILED:
-                                        failure.add(new FailureDetails(envCrn, statusDetail.getDetails()));
-                                        break;
-                                    default:
-                                        failure.add(new FailureDetails(envCrn, "Unknown status"));
-                                        break;
-                                }
-                                return statusDetail;
-                            })));
+                            stack -> asyncSynchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), umsEventGenerationIds, fullSync)));
 
             statusFutures.forEach((envCrn, statusFuture) -> {
                 try {
-                    statusFuture.get();
+                    SyncStatusDetail statusDetail = statusFuture.get();
+                    switch (statusDetail.getStatus()) {
+                        case COMPLETED:
+                            success.add(new SuccessDetails(envCrn));
+                            break;
+                        case FAILED:
+                            failure.add(new FailureDetails(envCrn, statusDetail.getDetails()));
+                            break;
+                        default:
+                            failure.add(new FailureDetails(envCrn, "Unexpected status: " + statusDetail.getStatus()));
+                            break;
+                    }
                 } catch (InterruptedException | ExecutionException e) {
                     failure.add(new FailureDetails(envCrn, e.getLocalizedMessage()));
                 }
             });
-            operationStatusService.completeOperation(operationId, List.copyOf(success), List.copyOf(failure));
+            operationStatusService.completeOperation(operationId, success, failure);
         } catch (RuntimeException e) {
             LOGGER.error("User sync operation {} failed with error:", operationId, e);
             operationStatusService.failOperation(operationId, e.getLocalizedMessage());
@@ -190,11 +193,27 @@ public class UserService {
         }
     }
 
-    private SyncStatusDetail synchronizeStack(Stack stack, UmsUsersState umsUsersState, Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+    private Future<SyncStatusDetail> asyncSynchronizeStack(Stack stack, UmsUsersState umsUsersState, UmsEventGenerationIds umsEventGenerationIds,
+            boolean fullSync) {
+        return asyncTaskExecutor.submit(() -> {
+            SyncStatusDetail statusDetail = internalSynchronizeStack(stack, umsUsersState, fullSync);
+            if (fullSync && statusDetail.getStatus() == SynchronizationStatus.COMPLETED) {
+                UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
+                userSyncStatus.setUmsEventGenerationIds(new Json(umsEventGenerationIds));
+                userSyncStatus.setLastFullSyncEndTime(Instant.now().toEpochMilli());
+                userSyncStatusService.save(userSyncStatus);
+            }
+            return statusDetail;
+        });
+
+    }
+
+    private SyncStatusDetail internalSynchronizeStack(Stack stack, UmsUsersState umsUsersState, boolean fullSync) {
+        MDCBuilder.buildMdcContext(stack);
         String environmentCrn = stack.getEnvironmentCrn();
         try {
             FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-            UsersState ipaUsersState = getIpaUserState(freeIpaClient, umsUsersState, userCrnFilter, machineUserCrnFilter);
+            UsersState ipaUsersState = getIpaUserState(freeIpaClient, umsUsersState, fullSync);
             LOGGER.debug("IPA UsersState, found {} users and {} groups", ipaUsersState.getUsers().size(), ipaUsersState.getGroups().size());
 
             applyStateDifferenceToIpa(stack.getEnvironmentCrn(), freeIpaClient,
@@ -211,9 +230,8 @@ public class UserService {
     }
 
     @VisibleForTesting
-    UsersState getIpaUserState(FreeIpaClient freeIpaClient, UmsUsersState umsUsersState, Set<String> userCrnFilter, Set<String> machineUserCrnFilter)
+    UsersState getIpaUserState(FreeIpaClient freeIpaClient, UmsUsersState umsUsersState, boolean fullSync)
             throws FreeIpaClientException {
-        boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
         return fullSync ? freeIpaUsersStateProvider.getUsersState(freeIpaClient) :
                 freeIpaUsersStateProvider.getFilteredFreeIPAState(freeIpaClient, umsUsersState.getRequestedWorkloadUsers());
     }
@@ -351,16 +369,6 @@ public class UserService {
                     LOGGER.error("Failed to add [{}] to group [{}]", users, group, e);
                 }
             });
-        }
-    }
-
-    private List<Stack> getStacks(String accountId, Set<String> environmentCrnFilter) {
-        if (environmentCrnFilter.isEmpty()) {
-            LOGGER.debug("Retrieving all stacks for account {}", accountId);
-            return stackService.getAllByAccountId(accountId);
-        } else {
-            LOGGER.debug("Retrieving stacks for account {} that match environment crns {}", accountId, environmentCrnFilter);
-            return stackService.getMultipleByEnvironmentCrnAndAccountId(environmentCrnFilter, accountId);
         }
     }
 

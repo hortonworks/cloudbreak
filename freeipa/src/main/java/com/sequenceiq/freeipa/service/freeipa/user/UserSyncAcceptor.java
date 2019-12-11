@@ -10,9 +10,9 @@ import com.sequenceiq.freeipa.repository.OperationRepository;
 import com.sequenceiq.freeipa.service.operation.OperationAcceptor;
 
 @Component
-public class UserAcceptor extends OperationAcceptor {
+public class UserSyncAcceptor extends OperationAcceptor {
     @Inject
-    public UserAcceptor(OperationRepository operationRepository) {
+    public UserSyncAcceptor(OperationRepository operationRepository) {
         super(operationRepository);
     }
 
