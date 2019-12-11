@@ -374,4 +374,15 @@
     {%- endif %}
     {%- endif %}
 
+    {% if 'SCHEMA_REGISTRY_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'SCHEMA-REGISTRY' in exposed -%}
+        <service>
+            <role>SCHEMA-REGISTRY</role>
+            {% for hostloc in salt['pillar.get']('gateway:location')['SCHEMA_REGISTRY_SERVER'] -%}
+            <url>{{ protocol }}://{{ hostloc }}:{{ ports['SCHEMA-REGISTRY'] }}</url>
+            {%- endfor %}
+        </service>
+    {%- endif %}
+    {%- endif %}
+
 </topology>

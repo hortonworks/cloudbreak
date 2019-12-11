@@ -603,7 +603,7 @@
     {%- endif %}
     {%- endif %}
 
-     {% if 'STREAMS_MESSAGING_MANAGER_UI' in salt['pillar.get']('gateway:location') -%}
+    {% if 'STREAMS_MESSAGING_MANAGER_UI' in salt['pillar.get']('gateway:location') -%}
         {% if 'SMM-UI' in exposed -%}
             <service>
                 <role>SMM-UI</role>

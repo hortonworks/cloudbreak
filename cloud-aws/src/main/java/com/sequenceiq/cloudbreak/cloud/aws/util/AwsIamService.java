@@ -25,6 +25,7 @@ import com.amazonaws.auth.policy.Policy;
 import com.amazonaws.auth.policy.Resource;
 import com.amazonaws.auth.policy.Statement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
+import com.amazonaws.services.identitymanagement.model.AmazonIdentityManagementException;
 import com.amazonaws.services.identitymanagement.model.EvaluationResult;
 import com.amazonaws.services.identitymanagement.model.GetInstanceProfileRequest;
 import com.amazonaws.services.identitymanagement.model.GetRoleRequest;
@@ -213,9 +214,8 @@ public class AwsIamService {
      * @return List of evaluation results
      */
     public List<EvaluationResult> simulatePrincipalPolicy(AmazonIdentityManagement iam,
-            String policySourceArn,
-            Collection<String> actionNames,
-            Collection<String> resourceArns) {
+            String policySourceArn, Collection<String> actionNames, Collection<String> resourceArns)
+            throws AmazonIdentityManagementException {
         SimulatePrincipalPolicyRequest simulatePrincipalPolicyRequest =
                 new SimulatePrincipalPolicyRequest()
                         .withPolicySourceArn(policySourceArn)
@@ -235,14 +235,14 @@ public class AwsIamService {
      * @return list of evaluation results
      */
     public List<EvaluationResult> validateRolePolicies(AmazonIdentityManagement iam, Role role,
-            Collection<Policy> policies) {
+            Collection<Policy> policies) throws AmazonIdentityManagementException {
         List<EvaluationResult> evaluationResults = new ArrayList<>();
         for (Policy policy : policies) {
             for (Statement statement : policy.getStatements()) {
                 SortedSet<String> actions = getStatementActions(statement);
                 SortedSet<String> resources = getStatementResources(statement);
-                evaluationResults.addAll(simulatePrincipalPolicy(iam, role.getArn(),
-                        actions, resources));
+                List<EvaluationResult> results = simulatePrincipalPolicy(iam, role.getArn(), actions, resources);
+                evaluationResults.addAll(results);
             }
         }
         return evaluationResults;

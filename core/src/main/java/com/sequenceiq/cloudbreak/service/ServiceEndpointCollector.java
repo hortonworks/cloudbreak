@@ -249,9 +249,6 @@ public class ServiceEndpointCollector {
                 case KUDU:
                     addKuduUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls);
                     break;
-                case SCHEMA_REGISTRY:
-                    addSchemaRegistry(managerIp, gateway, topologyName, exposedService, urls);
-                    break;
                 case KUDU_TABLET_SERVER:
                     // skipping kudu tablet server url because this is not required
                     break;
@@ -308,10 +305,6 @@ public class ServiceEndpointCollector {
         String knoxUrl = api ? "/resourcemanager/" : exposedService.getKnoxUrl();
         String topology = api ? topologyName + API_TOPOLOGY_POSTFIX : topologyName;
         urls.add(buildKnoxUrl(managerIp, gateway, knoxUrl, topology));
-    }
-
-    private void addSchemaRegistry(String managerIp, Gateway gateway, String topologyName, ExposedService exposedService, List<String> urls) {
-        urls.add(buildKnoxUrl(managerIp, gateway, exposedService.getKnoxUrl(), topologyName));
     }
 
     private void addImplaDebugUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, boolean autoTlsEnabled, List<String> urls) {

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.policy.Policy;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
+import com.amazonaws.services.identitymanagement.model.AmazonIdentityManagementException;
 import com.amazonaws.services.identitymanagement.model.EvaluationResult;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.Role;
@@ -43,9 +44,16 @@ public class AwsLogRolePermissionValidator {
         List<Role> roles = instanceProfile.getRoles();
         List<Policy> policies = Collections.singletonList(policy);
         for (Role role : roles) {
-            List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam, role,
-                    policies);
-            failedActions.addAll(getFailedActions(role, evaluationResults));
+            try {
+                List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam,
+                        role, policies);
+                failedActions.addAll(getFailedActions(role, evaluationResults));
+            } catch (AmazonIdentityManagementException e) {
+                // Only log the error and keep processing. Failed actions won't be added, but
+                // processing doesn't get stopped either. This can happen due to rate limiting.
+                LOGGER.error("Unable to validate role policies for role {} due to {}", role.getArn(),
+                        e.getMessage(), e);
+            }
         }
 
         if (!failedActions.isEmpty()) {

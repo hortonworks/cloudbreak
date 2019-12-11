@@ -1,6 +1,23 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 
 
+import static com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock.PROFILE_RETURN_HTTP_500;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiHost;
@@ -27,21 +44,6 @@ import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.util.HostNameUtil;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock.PROFILE_RETURN_HTTP_500;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
 
 public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTest {
 
@@ -142,7 +144,7 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
                                 .pathVariableMapping(":clusterName", clusterName)
                                 .resolve())
                         .exactTimes(1))
-                .then(MockVerification.verify(GET, READ_HOSTS).exactTimes(5))
+                .then(MockVerification.verify(GET, READ_HOSTS).exactTimes(6))
                 .then(MockVerification.verify(POST, new ClouderaManagerPathResolver(ADD_HOSTS)
                         .pathVariableMapping(":clusterName", clusterName)
                         .resolve())
