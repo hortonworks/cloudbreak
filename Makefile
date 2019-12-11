@@ -49,3 +49,6 @@ build-freeipa-dockerhub:
 
 create-rc-version-tag:
 	 ./scripts/create-rc-version-tag.sh
+
+create-dev-version-tag:
+	 ./scripts/create-dev-version-tag.sh

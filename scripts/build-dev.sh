@@ -1,28 +1,14 @@
 #!/bin/bash -e
 : ${WORKSPACE=.}
-
 set -x
 
-LATEST_RC_BRANCH=$(git branch --sort=-refname -r | grep 'origin/rc' | sort -V -r| head -n 1)
-LATEST_RC_MAJOR_MINOR_VERSION=$(echo "$LATEST_RC_BRANCH" | cut -d'-' -f 2)
-LATEST_RC_MAJOR=$(echo $LATEST_RC_MAJOR_MINOR_VERSION | cut -d'.' -f 1)
-LATEST_RC_MINOR=$(echo $LATEST_RC_MAJOR_MINOR_VERSION | cut -d'.' -f 2)
-INCREASED_MINOR=$((LATEST_RC_MINOR+1))
-ACTUAL_VERSION="$LATEST_RC_MAJOR.$INCREASED_MINOR"
-
-if [ "$(git tag -l $ACTUAL_VERSION.0-dev.1)" == '' ]; then
-    echo "no dev version found: $ACTUAL_VERSION"
-    VERSION=$ACTUAL_VERSION.0-dev.1
-else
-    LATEST_DEV_VERSION=$(echo $(git tag -l --sort=-v:refname | grep "$ACTUAL_VERSION\\.0-dev" | head -n 1))
-    LATEST_DEV_NUMBER=$(echo $LATEST_DEV_VERSION | cut -d'.' -f 4)
-    VERSION=$ACTUAL_VERSION.0-dev.$((LATEST_DEV_NUMBER+1))
-fi;
-
-git tag -a $VERSION -m "$VERSION"
-git push origin $VERSION
+echo "Build version: $VERSION"
 
 ./gradlew -Penv=jenkins -b build.gradle build uploadArchives -Pversion=$VERSION --info --stacktrace --parallel -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
 
-echo "Computed next dev version: $VERSION"
-echo VERSION=$VERSION > $WORKSPACE/version
+aws s3 cp ./core/build/swagger/cb.json "s3://cloudbreak-swagger/swagger-${VERSION}.json" --acl public-read
+aws s3 cp ./environment/build/swagger/environment.json "s3://environment-swagger/swagger-${VERSION}.json" --acl public-read
+aws s3 cp ./freeipa/build/swagger/freeipa.json "s3://freeipa-swagger/swagger-${VERSION}.json" --acl public-read
+aws s3 cp ./redbeams/build/swagger/redbeams.json "s3://redbeams-swagger/swagger-${VERSION}.json" --acl public-read
+aws s3 cp ./datalake/build/swagger/datalake.json "s3://datalake-swagger/swagger-${VERSION}.json" --acl public-read
+aws s3 cp ./autoscale/build/swagger/autoscale.json "s3://autoscale-swagger/swagger-${VERSION}.json" --acl public-read
