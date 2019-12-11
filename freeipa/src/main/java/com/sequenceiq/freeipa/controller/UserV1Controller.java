@@ -20,8 +20,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.exception.SyncOperationAlreadyRunningException;
 import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.operation.OperationStatusService;
-import com.sequenceiq.freeipa.service.freeipa.user.UserService;
 
 @Controller
 public class UserV1Controller implements UserV1Endpoint {
@@ -29,7 +29,7 @@ public class UserV1Controller implements UserV1Endpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserV1Controller.class);
 
     @Inject
-    private UserService userService;
+    private UserSyncService userSyncService;
 
     @Inject
     private PasswordService passwordService;
@@ -56,7 +56,7 @@ public class UserV1Controller implements UserV1Endpoint {
             default:
                 throw new BadRequestException(String.format("UserCrn %s is not of resoure type USER or MACHINE_USER", userCrn));
         }
-        return checkOperationRejected(userService.synchronizeUsers(accountId, userCrn, environmentCrnFilter,
+        return checkOperationRejected(userSyncService.synchronizeUsers(accountId, userCrn, environmentCrnFilter,
                 userCrnFilter, machineUserCrnFilter));
     }
 
@@ -66,7 +66,7 @@ public class UserV1Controller implements UserV1Endpoint {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         LOGGER.debug("synchronizeAllUsers() requested for account {}", accountId);
 
-        return checkOperationRejected(userService.synchronizeUsers(accountId, userCrn, nullToEmpty(request.getEnvironments()),
+        return checkOperationRejected(userSyncService.synchronizeUsers(accountId, userCrn, nullToEmpty(request.getEnvironments()),
                 nullToEmpty(request.getUsers()), nullToEmpty(request.getMachineUsers())));
     }
 

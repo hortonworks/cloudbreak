@@ -76,6 +76,7 @@ freeipa:
       enabled: true
       initial-delay-millis: 60000
       fixed-delay-millis: 300000
+      cooldown-duration: PT10M
     threadpool:
       core.size: 100
       capacity.size: 4000
