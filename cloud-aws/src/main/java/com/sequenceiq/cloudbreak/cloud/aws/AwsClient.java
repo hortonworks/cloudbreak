@@ -99,6 +99,7 @@ public class AwsClient {
 
     public AmazonIdentityManagement createAmazonIdentityManagement(AwsCredentialView awsCredential) {
         return AmazonIdentityManagementClientBuilder.standard()
+                .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
                 .withClientConfiguration(getDefaultClientConfiguration())
                 .withCredentials(getCredentialProvider(awsCredential))
                 .build();
