@@ -1,30 +1,25 @@
 #!/bin/bash -e
 set -x
 : ${WORKSPACE=.}
-: ${BRANCH=rc-$(git describe --abbrev=0 --tags | cut -d '-' -f 1 | cut -d '.' -f 1,2)}
 
-MINOR_VERSION=$(echo "$BRANCH" | cut -d'-' -f 2)
-LATEST_RELEASED_TAG_ON_BRANCH=$(git tag -l --sort=-v:refname | grep ^$MINOR_VERSION | awk '!/rc/ && !/dev/' | head -n 1)
-LATEST_RC_TAG_ON_BRANCH=$(git tag -l --sort=-v:refname | grep ^$MINOR_VERSION | grep 'rc' | head -n 1)
+LATEST_RC_BRANCH=$(git branch --sort=-refname -r | grep 'origin/rc' | sort -V -r| head -n 1)
+LATEST_RC_MAJOR_MINOR_VERSION=$(echo "$LATEST_RC_BRANCH" | cut -d'-' -f 2)
+LATEST_RC_MAJOR=$(echo $LATEST_RC_MAJOR_MINOR_VERSION | cut -d'.' -f 1)
+LATEST_RC_MINOR=$(echo $LATEST_RC_MAJOR_MINOR_VERSION | cut -d'.' -f 2)
+INCREASED_MINOR=$((LATEST_RC_MINOR+1))
+ACTUAL_VERSION="$LATEST_RC_MAJOR.$INCREASED_MINOR"
 
-echo "$LATEST_RC_TAG_ON_BRANCH"
-if [[ -z $LATEST_RC_TAG_ON_BRANCH ]]; then
-    echo "no '-rc' tag found on branch $BRANCH"
-    echo "need to add '-rc.1'"
-    VERSION=$MINOR_VERSION.0-rc.1
+if [ "$(git tag -l $ACTUAL_VERSION.0-dev.1)" == '' ]; then
+    echo "no dev version found: $ACTUAL_VERSION"
+    VERSION=$ACTUAL_VERSION.0-dev.1
 else
-    if [[ $LATEST_RELEASED_TAG_ON_BRANCH = $(echo $LATEST_RC_TAG_ON_BRANCH | cut -d'-' -f 1) ]]; then
-        echo "need to increase version with reckon from $LATEST_RELEASED_TAG_ON_BRANCH"
-        RECKONED_VERSION=$(./gradlew -Penv=jenkins -b build.gradle buildInfo -Preckon.scope=patch -Preckon.stage=rc | grep Reckoned)
-        VERSION=${RECKONED_VERSION#Reckoned version: }
-    else
-        LATEST_RC_NUMBER=$(echo $LATEST_RC_TAG_ON_BRANCH | cut -d'.' -f 4)
-        VERSION=$(echo $LATEST_RC_TAG_ON_BRANCH | cut -d'-' -f 1)-rc.$((LATEST_RC_NUMBER+1))
-    fi;
+    LATEST_DEV_VERSION=$(echo $(git tag -l --sort=-v:refname | grep "$ACTUAL_VERSION\\.0-dev" | head -n 1))
+    LATEST_DEV_NUMBER=$(echo $LATEST_DEV_VERSION | cut -d'.' -f 4)
+    VERSION=$ACTUAL_VERSION.0-dev.$((LATEST_DEV_NUMBER+1))
 fi;
 
 git tag -a $VERSION -m "$VERSION"
 git push origin $VERSION
 
-echo "Computed next rc version: $VERSION"
+echo "Computed next dev version: $VERSION"
 echo VERSION=$VERSION > $WORKSPACE/version
