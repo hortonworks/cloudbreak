@@ -419,9 +419,9 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testDeleteImageCatalogWhenEnvDefault() {
-        String name = "cloudbreak-default";
+        String name = "cdp-default";
 
-        thrown.expectMessage("cloudbreak-default cannot be deleted because it is an environment default image catalog.");
+        thrown.expectMessage("cdp-default cannot be deleted because it is an environment default image catalog.");
         thrown.expect(BadRequestException.class);
 
         underTest.delete(ORG_ID, name);
@@ -439,7 +439,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetWhenEnvDefault() {
-        String name = "cloudbreak-default";
+        String name = "cdp-default";
         ImageCatalog actual = underTest.get(ORG_ID, name);
 
         verify(imageCatalogRepository, times(0)).findByNameAndWorkspace(eq(name), any(Workspace.class));
