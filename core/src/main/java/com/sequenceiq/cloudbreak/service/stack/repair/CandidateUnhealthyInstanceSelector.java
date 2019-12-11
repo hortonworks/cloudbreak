@@ -12,10 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Component
 public class CandidateUnhealthyInstanceSelector {
@@ -29,11 +30,12 @@ public class CandidateUnhealthyInstanceSelector {
     private InstanceMetaDataService instanceMetaDataService;
 
     public Set<InstanceMetaData> selectCandidateUnhealthyInstances(long stackId) {
-        Map<String, String> hostStatuses = clusterService.getHostStatuses(stackId);
+        Map<HostName, String> hostStatuses = clusterService.getHostStatuses(stackId);
         LOGGER.debug("HostStatuses: {}", hostStatuses);
         Set<InstanceMetaData> candidateUnhealthyInstances = hostStatuses.entrySet().stream()
                 .filter(entry -> isUnhealthyStatus(entry.getValue()))
                 .map(Map.Entry::getKey)
+                .map(HostName::value)
                 .filter(Objects::nonNull)
                 .map(hostName -> instanceMetaDataService.findHostInStack(stackId, hostName))
                 .filter(Optional::isPresent)
