@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.cloud.service.CloudParameterService.ACCESS_CONFIG_TYPE;
 import static java.util.Collections.singletonList;
 
 import java.io.IOException;
@@ -62,6 +63,9 @@ import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesRequest;
 import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesResult;
+import com.amazonaws.services.identitymanagement.model.ListRolesRequest;
+import com.amazonaws.services.identitymanagement.model.ListRolesResult;
+import com.amazonaws.services.identitymanagement.model.Role;
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.model.AliasListEntry;
 import com.amazonaws.services.kms.model.DescribeKeyRequest;
@@ -591,7 +595,7 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     private CloudVmTypes getCloudVmTypes(CloudCredential cloudCredential, Region region, Map<String, String> filters,
-        Predicate<VmType> enabledInstanceTypeFilter) {
+            Predicate<VmType> enabledInstanceTypeFilter) {
         CloudRegions regions = regions(cloudCredential, region, filters);
 
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
@@ -651,42 +655,17 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Override
     public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        String queryFailedMessage = "Could not get instance profile roles from Amazon: ";
-
         CloudAccessConfigs cloudAccessConfigs = new CloudAccessConfigs(new HashSet<>());
         AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
         AmazonIdentityManagement client = awsClient.createAmazonIdentityManagement(awsCredentialView);
-        try {
-            ListInstanceProfilesRequest listInstanceProfilesRequest = new ListInstanceProfilesRequest();
-            listInstanceProfilesRequest.setMaxItems(MAX_ITEMS);
-            ListInstanceProfilesResult listRolesResult = client.listInstanceProfiles(listInstanceProfilesRequest);
-            for (InstanceProfile instanceProfile : listRolesResult.getInstanceProfiles()) {
-                Map<String, Object> properties = new HashMap<>();
-                properties.put("arn", instanceProfile.getArn());
-                properties.put("creationDate", instanceProfile.getCreateDate().toString());
-                if (!instanceProfile.getRoles().isEmpty()) {
-                    String roleName = instanceProfile.getRoles().get(0).getArn();
-                    properties.put("roleArn", Strings.isNullOrEmpty(roleName) ? instanceProfile.getArn() : roleName);
-                }
-                cloudAccessConfigs.getCloudAccessConfigs().add(
-                        new CloudAccessConfig(
-                                instanceProfile.getInstanceProfileName(),
-                                instanceProfile.getInstanceProfileId(),
-                                properties));
-            }
-        } catch (AmazonServiceException ase) {
-            if (ase.getStatusCode() == UNAUTHORIZED) {
-                String policyMessage = "Could not get instance profile roles because the user does not have enough permission.";
-                LOGGER.error(policyMessage + ase);
-                throw new CloudConnectorException(policyMessage, ase);
-            } else {
-                LOGGER.info(queryFailedMessage, ase);
-                throw new CloudConnectorException(queryFailedMessage + ase.getMessage(), ase);
-            }
-        } catch (Exception e) {
-            LOGGER.warn(queryFailedMessage, e);
-            throw new CloudConnectorException(queryFailedMessage + e.getMessage(), e);
+        String accessConfigType = filters.get(ACCESS_CONFIG_TYPE);
+        Set<CloudAccessConfig> cloudAccessConfigSet;
+        if (AwsAccessConfigType.ROLE.name().equals(accessConfigType)) {
+            cloudAccessConfigSet = getAccessConfigByRole(client);
+        } else {
+            cloudAccessConfigSet = getAccessConfigByInstanceProfile(client);
         }
+        cloudAccessConfigs.getCloudAccessConfigs().addAll(cloudAccessConfigSet);
         return cloudAccessConfigs;
     }
 
@@ -778,5 +757,72 @@ public class AwsPlatformResources implements PlatformResources {
     private AmazonDynamoDB getAmazonDynamoDB(CloudCredential cloudCredential, Region region) {
         AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
         return awsClient.createDynamoDbClient(awsCredentialView, region.value());
+    }
+
+    private Set<CloudAccessConfig> getAccessConfigByInstanceProfile(AmazonIdentityManagement client) {
+        LOGGER.info("Get all Instance profiles from Amazon");
+        String queryFailedMessage = "Could not get instance profiles from Amazon: ";
+        try {
+            ListInstanceProfilesRequest listInstanceProfilesRequest = new ListInstanceProfilesRequest();
+            listInstanceProfilesRequest.setMaxItems(MAX_ITEMS);
+            ListInstanceProfilesResult listInstanceProfilesResult = client.listInstanceProfiles(listInstanceProfilesRequest);
+            return listInstanceProfilesResult.getInstanceProfiles().stream().map(this::instanceProfileToCloudAccessConfig).collect(Collectors.toSet());
+        } catch (AmazonServiceException ase) {
+            if (ase.getStatusCode() == UNAUTHORIZED) {
+                LOGGER.error("Could not get instance profiles because the user does not have enough permission.", ase);
+                throw new CloudConnectorException(ase.getMessage(), ase);
+            } else {
+                LOGGER.info(queryFailedMessage, ase);
+                throw new CloudConnectorException(ase.getMessage(), ase);
+            }
+        } catch (Exception e) {
+            LOGGER.warn(queryFailedMessage, e);
+            throw new CloudConnectorException(queryFailedMessage + e.getMessage(), e);
+        }
+    }
+
+    private Set<CloudAccessConfig> getAccessConfigByRole(AmazonIdentityManagement client) {
+        LOGGER.info("Get all Roles from Amazon");
+        String queryFailedMessage = "Could not get roles from Amazon: ";
+        try {
+            ListRolesRequest listRolesRequest = new ListRolesRequest();
+            listRolesRequest.setMaxItems(MAX_ITEMS);
+            ListRolesResult listRolesResult = client.listRoles(listRolesRequest);
+            return listRolesResult.getRoles().stream().map(this::roleToCloudAccessConfig).collect(Collectors.toSet());
+        } catch (AmazonServiceException ase) {
+            if (ase.getStatusCode() == UNAUTHORIZED) {
+                String policyMessage = "Could not get roles because the user does not have enough permission.";
+                LOGGER.error(policyMessage + ase.getMessage(), ase);
+                throw new CloudConnectorException(policyMessage, ase);
+            } else {
+                LOGGER.info(queryFailedMessage + ase.getMessage(), ase);
+                throw new CloudConnectorException(ase.getMessage(), ase);
+            }
+        } catch (Exception e) {
+            LOGGER.warn(queryFailedMessage + e.getMessage(), e);
+            throw new CloudConnectorException(e.getMessage(), e);
+        }
+    }
+
+    private CloudAccessConfig roleToCloudAccessConfig(Role role) {
+        Map<String, Object> properties = getCloudAccessConfigProperties(role.getArn(), role.getCreateDate().toString(), role.getArn());
+        return new CloudAccessConfig(role.getRoleName(), role.getRoleId(), properties);
+    }
+
+    private CloudAccessConfig instanceProfileToCloudAccessConfig(InstanceProfile instanceProfile) {
+        String roleName = instanceProfile.getArn();
+        if (!instanceProfile.getRoles().isEmpty()) {
+            roleName = instanceProfile.getRoles().get(0).getArn();
+        }
+        Map<String, Object> properties = getCloudAccessConfigProperties(instanceProfile.getArn(), instanceProfile.getCreateDate().toString(), roleName);
+        return new CloudAccessConfig(instanceProfile.getArn(), instanceProfile.getInstanceProfileId(), properties);
+    }
+
+    private Map<String, Object> getCloudAccessConfigProperties(String arn, String creationDate, String roleArn) {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("arn", arn);
+        properties.put("creationDate", creationDate);
+        properties.put("roleArn", roleArn);
+        return properties;
     }
 }

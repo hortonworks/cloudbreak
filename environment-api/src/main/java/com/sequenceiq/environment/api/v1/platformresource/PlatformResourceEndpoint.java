@@ -4,6 +4,7 @@ import static com.sequenceiq.environment.api.doc.ModelDescriptions.CONNECTOR_NOT
 
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -13,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceModelDescription.OpDescription;
+import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDisksResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformEncryptionKeysResponse;
@@ -150,7 +152,8 @@ public interface PlatformResourceEndpoint {
             @QueryParam("credentialCrn") String credentialCrn,
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
-            @QueryParam("availabilityZone") String availabilityZone);
+            @QueryParam("availabilityZone") String availabilityZone,
+            @QueryParam("accessConfigType") @DefaultValue("INSTANCE_PROFILE") AccessConfigTypeQueryParam accessConfigType);
 
     @GET
     @Path("tag_specifications")
