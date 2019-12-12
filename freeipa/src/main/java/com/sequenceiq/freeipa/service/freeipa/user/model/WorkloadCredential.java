@@ -1,9 +1,11 @@
 package com.sequenceiq.freeipa.service.freeipa.user.model;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
 import com.google.common.collect.ImmutableList;
-
-import java.util.List;
 
 public class WorkloadCredential {
 
@@ -11,9 +13,12 @@ public class WorkloadCredential {
 
     private final ImmutableList<ActorKerberosKey> keys;
 
-    public WorkloadCredential(String hashedPassword, List<ActorKerberosKey> keys) {
+    private final Optional<Instant> expirationDate;
+
+    public WorkloadCredential(String hashedPassword, List<ActorKerberosKey> keys, Optional<Instant> expirationDate) {
         this.hashedPassword = hashedPassword;
         this.keys = ImmutableList.copyOf(keys);
+        this.expirationDate = expirationDate;
     }
 
     public String getHashedPassword() {
@@ -24,4 +29,7 @@ public class WorkloadCredential {
         return keys;
     }
 
+    public Optional<Instant> getExpirationDate() {
+        return expirationDate;
+    }
 }

@@ -3,8 +3,10 @@
 
 <module name="Checker">
     <property name="severity" value="error" />
+    <module name="SuppressWarningsFilter" />
     <module name="TreeWalker">
         <property name="tabWidth" value="4" />
+        <module name="SuppressWarningsHolder" />
 
         <!-- Format -->
         <module name="EmptyForIteratorPad" />

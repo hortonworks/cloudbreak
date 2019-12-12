@@ -2,6 +2,10 @@ package com.sequenceiq.freeipa.client;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,7 +38,9 @@ import com.sequenceiq.freeipa.client.model.User;
 
 public class FreeIpaClient {
 
-    public static final String PASSWORD_EXPIRATION_DATETIME = "20380101000000Z";
+    public static final String MAX_PASSWORD_EXPIRATION_DATETIME = "20380101000000Z";
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssVV");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaClient.class);
 
@@ -150,7 +156,7 @@ public class FreeIpaClient {
                 "sn", lastName,
                 "loginshell", "/bin/bash",
                 "random", true,
-                "setattr", "krbPasswordExpiration=" + PASSWORD_EXPIRATION_DATETIME
+                "setattr", "krbPasswordExpiration=" + MAX_PASSWORD_EXPIRATION_DATETIME
         );
         return (User) invoke("user_add", flags, params, User.class).getResult();
     }
@@ -159,11 +165,35 @@ public class FreeIpaClient {
         // FreeIPA expires any password that is set by another user. Work around this by
         // performing a separate API call to set the password expiration into the future
         userMod(user, "userpassword", password);
-        updateUserPasswordExpiration(user);
+        updateUserPasswordMaxExpiration(user);
     }
 
-    public void updateUserPasswordExpiration(String user) throws FreeIpaClientException {
-        userMod(user, "setattr", "krbPasswordExpiration=" + PASSWORD_EXPIRATION_DATETIME);
+    public void updateUserPasswordExpiration(String user, Optional<Instant> expiration) throws FreeIpaClientException {
+        String passwordExpirationDate = formatDate(expiration);
+        userMod(user, "setattr", "krbPasswordExpiration=" + passwordExpirationDate);
+    }
+
+    public void updateUserPasswordMaxExpiration(String user) throws FreeIpaClientException {
+        updateUserPasswordExpiration(user, Optional.empty());
+    }
+
+    public User userSetPasswordHash(String user, String hashedPassword,
+            String unencryptedKrbPrincipalKey, Optional<Instant> expiration) throws FreeIpaClientException {
+        String passwordExpirationDate = formatDate(expiration);
+        Map<String, Object> params =
+                Map.of("setattr", List.of(
+                        "cdpHashedPassword=" + hashedPassword,
+                        "cdpUnencryptedKrbPrincipalKey=" + unencryptedKrbPrincipalKey,
+                        "krbPasswordExpiration=" + passwordExpirationDate));
+        return userMod(user, params);
+    }
+
+    String formatDate(Optional<Instant> instant) {
+        if (instant.isPresent()) {
+            return DATE_TIME_FORMATTER.format(ZonedDateTime.ofInstant(instant.get(), ZoneOffset.UTC));
+        } else {
+            return MAX_PASSWORD_EXPIRATION_DATETIME;
+        }
     }
 
     public User userMod(String user, String key, Object value) throws FreeIpaClientException {
