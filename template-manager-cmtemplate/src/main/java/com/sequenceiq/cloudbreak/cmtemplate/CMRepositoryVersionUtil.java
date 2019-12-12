@@ -37,12 +37,12 @@ public class CMRepositoryVersionUtil {
     }
 
     public static boolean isKnoxGatewaySupported(ClouderaManagerRepo clouderaManagerRepoDetails) {
-        LOGGER.info("ClouderaManagerRepo is compared for knox gateway support");
+        LOGGER.info("ClouderaManagerRepo is compared for Knox Gateway support");
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_6_4_0);
     }
 
     public static boolean isIdBrokerManagedIdentitySupported(ClouderaManagerRepo clouderaManagerRepoDetails) {
-        LOGGER.info("ClouderaManagerRepo is compared for id broker managed identity support");
+        LOGGER.info("ClouderaManagerRepo is compared for ID Broker managed identity support");
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_0_2);
     }
 
