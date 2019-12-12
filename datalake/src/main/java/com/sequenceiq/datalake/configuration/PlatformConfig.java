@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +20,9 @@ import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.datalake.service.sdx.DatabaseConfig;
-import com.sequenceiq.datalake.service.sdx.DatabaseConfigKey;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseConfig;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseConfigKey;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseServerParameterSetter;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Configuration
@@ -33,6 +35,9 @@ public class PlatformConfig {
 
     @Value("${datalake.experimental.externaldb.platform:AZURE,MOCK}")
     private Set<CloudPlatform> dbServiceExperimentalPlatforms;
+
+    @Inject
+    private Set<DatabaseServerParameterSetter> databaseServerParameterSetters;
 
     private Set<CloudPlatform> allPossibleExternalDbPlatforms;
 
@@ -60,12 +65,22 @@ public class PlatformConfig {
     }
 
     @Bean
-    public Map<DatabaseConfigKey, com.sequenceiq.datalake.service.sdx.DatabaseConfig> databaseConfigs() throws IOException {
-        ImmutableMap.Builder<DatabaseConfigKey, com.sequenceiq.datalake.service.sdx.DatabaseConfig> builder = new ImmutableMap.Builder<>();
+    public Map<CloudPlatform, DatabaseServerParameterSetter> databaseParameterSetters() throws IOException {
+        ImmutableMap.Builder<CloudPlatform, DatabaseServerParameterSetter> builder = new ImmutableMap.Builder<>();
+
+        for (DatabaseServerParameterSetter databaseServerParameterSetter : databaseServerParameterSetters) {
+                    builder.put(databaseServerParameterSetter.getCloudPlatform(), databaseServerParameterSetter);
+        }
+        return builder.build();
+    }
+
+    @Bean
+    public Map<DatabaseConfigKey, DatabaseConfig> databaseConfigs() throws IOException {
+        ImmutableMap.Builder<DatabaseConfigKey, DatabaseConfig> builder = new ImmutableMap.Builder<>();
 
         for (CloudPlatform cloudPlatform : allPossibleExternalDbPlatforms) {
             for (SdxClusterShape sdxClusterShape : SdxClusterShape.values()) {
-                Optional<com.sequenceiq.datalake.service.sdx.DatabaseConfig> dbConfig = readDbConfig(cloudPlatform, sdxClusterShape);
+                Optional<DatabaseConfig> dbConfig = readDbConfig(cloudPlatform, sdxClusterShape);
                 if (dbConfig.isPresent()) {
                     builder.put(new DatabaseConfigKey(cloudPlatform, sdxClusterShape), dbConfig.get());
                 }
@@ -74,7 +89,7 @@ public class PlatformConfig {
         return builder.build();
     }
 
-    private Optional<com.sequenceiq.datalake.service.sdx.DatabaseConfig> readDbConfig(CloudPlatform cloudPlatform, SdxClusterShape sdxClusterShape)
+    private Optional<DatabaseConfig> readDbConfig(CloudPlatform cloudPlatform, SdxClusterShape sdxClusterShape)
             throws IOException {
         String resourcePath = String.format("sdx/%s/database-%s-template.json",
                 cloudPlatform.toString().toLowerCase(Locale.US),

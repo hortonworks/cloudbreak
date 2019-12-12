@@ -1,9 +1,9 @@
-package com.sequenceiq.datalake.service.sdx;
+package com.sequenceiq.datalake.service.sdx.database;
+
+import java.util.Objects;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
-
-import java.util.Objects;
 
 public class DatabaseConfigKey {
 
