@@ -24,7 +24,7 @@ public class UserFindResponse extends AbstractFreeIpaResponse<Set<User>> {
         user.setDn("admin");
         user.setUid("admin");
         user.setMemberOfGroup(List.of("admins"));
-        user.setKrbPasswordExpiration(FreeIpaClient.PASSWORD_EXPIRATION_DATETIME);
+        user.setKrbPasswordExpiration(FreeIpaClient.MAX_PASSWORD_EXPIRATION_DATETIME);
         return Set.of(user);
     }
 }

@@ -111,6 +111,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final String CDP_AUTOMATIC_USERSYNC_POLLER = "CDP_AUTOMATIC_USERSYNC_POLLER";
 
+    private static final long PASSWORD_EXPIRATION_DURATION = 31449600000L;
+
     @Inject
     private JsonUtil jsonUtil;
 
@@ -522,7 +524,10 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
             io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement
                     .UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
 
-        responseObserver.onNext(actorWorkloadCredentialsResponse);
+        GetActorWorkloadCredentialsResponse.Builder builder = GetActorWorkloadCredentialsResponse.newBuilder(actorWorkloadCredentialsResponse);
+        builder.setPasswordHashExpirationDate(System.currentTimeMillis() + PASSWORD_EXPIRATION_DURATION);
+
+        responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
 
