@@ -36,7 +36,7 @@ public class TlsSetupService {
 
     private static final int POLLING_INTERVAL = 5000;
 
-    private static final long FIVE_MIN = 5 * 60;
+    private static final long TEN_MIN = 10 * 60;
 
     private static final int MAX_FAILURE = 1;
 
@@ -64,7 +64,7 @@ public class TlsSetupService {
             LOGGER.debug("Trying to fetch the server's certificate: {}:{}", ip, gatewayPort);
             nginxPollerService.pollWithAbsoluteTimeout(
                     nginxCertListenerTask, new NginxPollerObject(client, ip, gatewayPort, x509TrustManager),
-                    POLLING_INTERVAL, FIVE_MIN, MAX_FAILURE);
+                    POLLING_INTERVAL, TEN_MIN, MAX_FAILURE);
             WebTarget nginxTarget = client.target(String.format("https://%s:%d", ip, gatewayPort));
             nginxTarget.path("/").request().get().close();
             X509Certificate[] chain = x509TrustManager.getChain();

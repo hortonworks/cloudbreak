@@ -130,7 +130,7 @@ public class ImageService {
                 operatingSystems = operatingSystems.stream().filter(os -> os.equalsIgnoreCase(imageSettins.getOs())).collect(Collectors.toSet());
             }
         }
-        if (imageSettins != null && imageSettins.getId() != null) {
+        if (imageSettins != null && StringUtils.isNotEmpty(imageSettins.getId())) {
             return imageCatalogService.getImageByCatalogName(workspaceId, imageSettins.getId(), imageSettins.getCatalog());
         }
         ImageCatalog imageCatalog = getImageCatalogFromRequestOrDefault(workspaceId, imageSettins, user);
