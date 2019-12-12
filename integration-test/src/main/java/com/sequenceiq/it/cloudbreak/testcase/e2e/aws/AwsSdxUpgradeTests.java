@@ -9,7 +9,10 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -23,10 +26,14 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.BasicSdxTests;
+import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class AwsSdxUpgradeTests extends BasicSdxTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsSdxUpgradeTests.class);
+
+    @Inject
+    private ImageCatalogTestClient imageCatalogTestClient;
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -34,37 +41,48 @@ public class AwsSdxUpgradeTests extends BasicSdxTests {
     @Inject
     private AwsCloudProvider awsCloudProvider;
 
+    @Inject
+    private WaitUtil waitUtil;
+
+    @Value("sdx-upgrade-test-catalog")
+    private String imageCatalogName;
+
+    @Value("https://cb-group.s3.eu-central-1.amazonaws.com/test/imagecatalog/sdx-upgrade-test-catalog.json")
+    private String imageCatalogUrl;
+
+    @Value("9a72c4a6-fe05-4b41-62f3-cc0a1ed35df4")
+    private String imageId;
+
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createEnvironmentForSdx(testContext);
         initializeDefaultBlueprints(testContext);
+
+        awsCloudProvider.setImageCatalogName(imageCatalogName);
+        awsCloudProvider.setImageCatalogUrl(imageCatalogUrl);
+        awsCloudProvider.setImageId(imageId);
     }
 
-    /**
-     * This test case is disabled right now.
-     *
-     * @param testContext   Stores and shares test objects through test execution between individual test cases.
-     *
-     * The 'disabled' tag on method name and the '@Test(dataProvider = TEST_CONTEXT)' annotation should be restored in case of resume this test case.
-     */
+    @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running Cloudbreak, and an SDX cluster in available state",
-            when = "a newer image is available for CentOS7 on AWS in eu-west-1",
-            then = "image upgrade notification should be available"
+            when = "a newer AWS image is available with same package versions for SDX",
+            then = "image upgrade should be successful and SDX should be in RUNNING state again"
     )
-    public void disabledTestSDXWithOlderImageCanBeCreatedSuccessfully(TestContext testContext) {
+    public void testSDXCanBeUpgradedSuccessfully(TestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();
         String cluster = resourcePropertyProvider().getName();
         String clouderaManager = resourcePropertyProvider().getName();
         String imageSettings = resourcePropertyProvider().getName();
-        String imageCatalog = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
         AtomicReference<String> selectedImageID = new AtomicReference<>();
 
         testContext
-                .given(imageCatalog, ImageCatalogTestDto.class)
+                .given(awsCloudProvider.getImageCatalogName(), ImageCatalogTestDto.class)
+                .withName(awsCloudProvider.getImageCatalogName()).withUrl(awsCloudProvider.getImageCatalogUrl())
+                .when(imageCatalogTestClient.createV4(), key(awsCloudProvider.getImageCatalogName()))
                 .when((tc, dto, client) -> {
                     selectedImageID.set(awsCloudProvider.getPreviousAWSPreWarmedImageID(tc, dto, client));
                     return dto;
@@ -75,13 +93,27 @@ public class AwsSdxUpgradeTests extends BasicSdxTests {
                 .given(stack, StackTestDto.class).withCluster(cluster).withImageSettings(imageSettings)
                 .given(sdxInternal, SdxInternalTestDto.class).withStackRequest(stack, cluster)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .await(SdxClusterStatusResponse.RUNNING)
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
+                .then((tc, testDto, client) -> {
+                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
+                })
+                .when((tc, testDto, client) -> {
+                    return sdxTestClient.checkForUpgrade().action(tc, testDto, client);
+                })
+                .when((tc, testDto, client) -> {
+                    return sdxTestClient.upgrade().action(tc, testDto, client);
+                })
+                .await(SdxClusterStatusResponse.UPGRADE_IN_PROGRESS, key(sdxInternal))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
+                .then((tc, testDto, client) -> {
+                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
+                })
                 .then((tc, dto, client) -> {
                     Log.log(LOGGER, format(" Image Catalog Name: %s ", dto.getResponse().getStackV4Response().getImage().getCatalogName()));
                     Log.log(LOGGER, format(" Image Catalog URL: %s ", dto.getResponse().getStackV4Response().getImage().getCatalogUrl()));
-                    Log.log(LOGGER, format(" Image ID: %s ", dto.getResponse().getStackV4Response().getImage().getId()));
+                    Log.log(LOGGER, format(" Image ID after SDX Upgrade: %s ", dto.getResponse().getStackV4Response().getImage().getId()));
 
-                    if (!dto.getResponse().getStackV4Response().getImage().getId().equals(selectedImageID.get())) {
+                    if (dto.getResponse().getStackV4Response().getImage().getId().equals(selectedImageID.get())) {
                         throw new TestFailException(" The selected image ID is: " + dto.getResponse().getStackV4Response().getImage().getId() + " instead of: "
                                 + selectedImageID.get());
                     }

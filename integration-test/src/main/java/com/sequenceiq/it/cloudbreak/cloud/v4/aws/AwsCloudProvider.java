@@ -304,6 +304,8 @@ public class AwsCloudProvider extends AbstractCloudProvider {
                                 CloudPlatform.AWS.name()).getCdhImages();
 
                 ImageV4Response olderImage = images.get(images.size() - 2);
+                Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
+                Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
                 Log.log(LOGGER, format(" Selected Pre-warmed Image Date: %s | ID: %s | Description: %s | Stack Version: %s ", olderImage.getDate(),
                         olderImage.getUuid(), olderImage.getStackDetails().getVersion(), olderImage.getDescription()));
                 awsProperties.getBaseimage().setImageId(olderImage.getUuid());
@@ -314,6 +316,9 @@ public class AwsCloudProvider extends AbstractCloudProvider {
                 throw new TestFailException(" Cannot fetch pre-warmed images of " + imageCatalogTestDto.getRequest().getName() + " image catalog!");
             }
         } else {
+            Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
+            Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
+            Log.log(LOGGER, format(" Image ID for SDX create: %s ", awsProperties.getBaseimage().getImageId()));
             return awsProperties.getBaseimage().getImageId();
         }
     }
@@ -330,6 +335,8 @@ public class AwsCloudProvider extends AbstractCloudProvider {
                                 CloudPlatform.AWS.name()).getBaseImages();
 
                 BaseImageV4Response baseImage = images.get(images.size() - 1);
+                Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
+                Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
                 Log.log(LOGGER, format(" Selected Base Image Date: %s | ID: %s | Description: %s ", baseImage.getDate(),
                         baseImage.getUuid(), baseImage.getDescription()));
                 awsProperties.getBaseimage().setImageId(baseImage.getUuid());
@@ -340,11 +347,30 @@ public class AwsCloudProvider extends AbstractCloudProvider {
                 throw new TestFailException(" Cannot fetch base images of " + imageCatalogTestDto.getRequest().getName() + " image catalog, because of " + e);
             }
         } else {
+            Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
+            Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
+            Log.log(LOGGER, format(" Image ID for SDX create: %s ", awsProperties.getBaseimage().getImageId()));
             return awsProperties.getBaseimage().getImageId();
         }
     }
 
     public String getImageCatalogName() {
         return commonCloudProperties().getImageCatalogName();
+    }
+
+    public String getImageCatalogUrl() {
+        return commonCloudProperties().getImageCatalogUrl();
+    }
+
+    public void setImageCatalogName(String name) {
+        commonCloudProperties().setImageCatalogName(name);
+    }
+
+    public void setImageCatalogUrl(String url) {
+        commonCloudProperties().setImageCatalogUrl(url);
+    }
+
+    public void setImageId(String id) {
+        awsProperties.getBaseimage().setImageId(id);
     }
 }
