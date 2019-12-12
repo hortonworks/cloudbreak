@@ -4,12 +4,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckRightV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RenewCertificateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckRightV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckRightV4SingleResponse;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.cluster.RepositoryConfigValidationService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseProvider;
 import com.sequenceiq.cloudbreak.workspace.authorization.UmsWorkspaceAuthorizationService;
 import com.sequenceiq.common.api.util.versionchecker.ClientVersionUtil;
@@ -64,6 +67,9 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Inject
     private UmsWorkspaceAuthorizationService umsAuthorizationService;
+
+    @Inject
+    private StackService stackService;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -121,5 +127,11 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
                 .map(rightReq -> new CheckRightV4SingleResponse(rightReq,
                         umsAuthorizationService.hasRightOfUserForResource(userCrn, rightReq.getResource(), rightReq.getAction())))
                 .collect(Collectors.toList()));
+    }
+
+    @Override
+    public Response renewCertificate(RenewCertificateV4Request renewCertificateV4Request) {
+        stackService.renewCertificate(renewCertificateV4Request.getStackName());
+        return Response.ok().build();
     }
 }

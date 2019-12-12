@@ -72,12 +72,16 @@ update_nginx_conf_manager_port:
     - contents_pillar: gateway:userfacingkey
     - makedirs: True
     - mode: 777
+    - require_in:
+      - service: restart_nginx_after_ssl_reconfig_with_user_facing
 
 /etc/certs-user-facing/server.pem:
   file.managed:
     - contents_pillar: gateway:userfacingcert
     - makedirs: True
     - mode: 777
+    - require_in:
+      - service: restart_nginx_after_ssl_reconfig_with_user_facing
 
 {% else %}
 
@@ -93,6 +97,8 @@ generate_user_facing_cert:
   cmd.run:
     - name: /opt/salt/scripts/create-user-facing-cert.sh 2>&1 | tee -a /var/log/generate-user-facing-cert.log && exit ${PIPESTATUS[0]}
     - unless: test -f /etc/certs-user-facing/server.pem
+    - require_in:
+      - service: restart_nginx_after_ssl_reconfig_with_user_facing
 
 {% endif %}
 
@@ -116,5 +122,7 @@ restart_nginx_after_ssl_reconfig_with_user_facing:
     - watch:
       - file: /etc/nginx/sites-enabled/ssl.conf
       - file: /etc/nginx/sites-enabled/ssl-user-facing.conf
+      {% if gateway.userfacingcert_configured is defined and gateway.userfacingcert_configured == True %}
       - file: /etc/certs-user-facing/server-key.pem
       - file: /etc/certs-user-facing/server.pem
+      {% endif %}

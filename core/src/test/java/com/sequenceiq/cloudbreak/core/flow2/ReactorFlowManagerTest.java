@@ -88,7 +88,8 @@ public class ReactorFlowManagerTest {
     }
 
     @Test
-    public void shouldReturnTheNextFailureTransition() {
+    public void
+    shouldReturnTheNextFailureTransition() {
         InstanceGroupAdjustmentV4Request instanceGroupAdjustment = new InstanceGroupAdjustmentV4Request();
         HostGroupAdjustmentV4Request hostGroupAdjustment = new HostGroupAdjustmentV4Request();
         Map<String, Set<Long>> instanceIdsByHostgroup = new HashMap<>();
@@ -126,6 +127,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerEphemeralUpdate(STACK_ID);
         underTest.triggerStackImageUpdate(STACK_ID, "asdf", null, null);
         underTest.triggerMaintenanceModeValidationFlow(STACK_ID);
+        underTest.triggerClusterCertificationRenewal(STACK_ID);
 
         // Not start from 0 because flow cancellations
         int count = 6;

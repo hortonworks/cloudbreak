@@ -101,7 +101,12 @@ public enum Msg {
     MAINTENANCE_MODE_VALIDATION_FINISHED_FOUND_WARNINGS("maintenance.mode.validation.finished.warn"),
     MAINTENANCE_MODE_VALIDATION_FINISHED_NO_WARNINGS("maintenance.mode.validation.finished.nowarn"),
     MAINTENANCE_MODE_VALIDATION_FAILED("maintenance.mode.validation.failed"),
-    STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.failed");
+    STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.failed"),
+
+    CLUSTER_CERTIFICATE_REISSUE("cluster.certificate.reissue"),
+    CLUSTER_CERTIFICATE_REDEPLOY("cluster.certificate.redeploy"),
+    CLUSTER_CERTIFICATE_RENEWAL_FINISHED("cluster.certificate.renewal.finished"),
+    CLUSTER_CERTIFICATE_RENEWAL_FAILED("cluster.certificate.renewal.failed");
 
     private final String code;
 

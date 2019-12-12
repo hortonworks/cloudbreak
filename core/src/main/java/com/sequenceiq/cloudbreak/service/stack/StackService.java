@@ -1094,6 +1094,12 @@ public class StackService implements ResourceIdProvider {
         return stackRepository.setMinaSshdServiceIdByStackId(id, minaSshdServiceId);
     }
 
+    public void renewCertificate(String stackName) {
+        Workspace workspace = workspaceService.getForCurrentUser();
+        Stack stack = getByNameInWorkspace(stackName, workspace.getId());
+        flowManager.triggerClusterCertificationRenewal(stack.getId());
+    }
+
     private enum Msg {
         STACK_STOP_IGNORED("stack.stop.ignored"),
         STACK_START_IGNORED("stack.start.ignored"),
