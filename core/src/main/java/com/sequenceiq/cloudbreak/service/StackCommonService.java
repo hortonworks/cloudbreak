@@ -116,14 +116,6 @@ public class StackCommonService {
         return stackCreatorService.createStack(user, workspace, stackRequest);
     }
 
-    public void deleteByNameInWorkspace(String name, Long workspaceId, boolean forced, User user) {
-        stackService.deleteByName(name, workspaceId, forced, user);
-    }
-
-    public void deleteByCrnInWorkspace(String crn, Long workspaceId, boolean forced, User user) {
-        stackService.deleteByCrn(crn, workspaceId, forced, user);
-    }
-
     public StackV4Response get(Long id, Set<String> entries) {
         return stackService.getJsonById(id, entries);
     }

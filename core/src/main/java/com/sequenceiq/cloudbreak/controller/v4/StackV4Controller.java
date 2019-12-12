@@ -124,7 +124,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     public void deleteWithKerberos(Long workspaceId, String name, boolean forced) {
-        stackOperations.deleteWithKerberos(StackAccessDto.builder().withName(name).build(), workspaceId, forced);
+        stackOperations.delete(StackAccessDto.builder().withName(name).build(), workspaceId, forced);
     }
 
     @Override

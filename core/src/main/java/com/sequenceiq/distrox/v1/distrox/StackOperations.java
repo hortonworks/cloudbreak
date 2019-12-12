@@ -162,18 +162,6 @@ public class StackOperations {
         return stackViewV4Response;
     }
 
-    public void delete(StackAccessDto stackAccessDto, Long workspaceId, boolean forced) {
-        validateAccessDto(stackAccessDto);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        if (isNotEmpty(stackAccessDto.getName())) {
-            LOGGER.info("Delete Stack in workspace {} with name {}.", workspaceId, stackAccessDto.getName());
-            stackCommonService.deleteByNameInWorkspace(stackAccessDto.getName(), workspaceId, forced, user);
-        } else {
-            LOGGER.info("Delete Stack in workspace {} with crn {}.", workspaceId, stackAccessDto.getCrn());
-            stackCommonService.deleteByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, forced, user);
-        }
-    }
-
     public void deleteInstance(@NotNull StackAccessDto stackAccessDto, Long workspaceId, boolean forced, String instanceId) {
         if (isNotEmpty(stackAccessDto.getName())) {
             stackCommonService.deleteInstanceByNameInWorkspace(stackAccessDto.getName(), workspaceId, instanceId, forced);
@@ -263,7 +251,8 @@ public class StackOperations {
         }
     }
 
-    public void deleteWithKerberos(@NotNull StackAccessDto stackAccessDto, Long workspaceId, boolean forced) {
+    public void delete(@NotNull StackAccessDto stackAccessDto, Long workspaceId, boolean forced) {
+        validateAccessDto(stackAccessDto);
         if (isNotEmpty(stackAccessDto.getName())) {
             stackCommonService.deleteWithKerberosByNameInWorkspace(stackAccessDto.getName(), workspaceId, forced);
         } else {
