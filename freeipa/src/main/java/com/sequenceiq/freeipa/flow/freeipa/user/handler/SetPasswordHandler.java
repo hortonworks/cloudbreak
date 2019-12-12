@@ -43,7 +43,7 @@ public class SetPasswordHandler implements EventHandler<SetPasswordRequest> {
             MDCBuilder.buildMdcContext(stack);
 
             FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-            freeIpaClient.userSetPassword(request.getUsername(), request.getPassword());
+            freeIpaClient.userSetPasswordWithExpiration(request.getUsername(), request.getPassword(), request.getExpirationInstant());
             SetPasswordResult result = new SetPasswordResult(request);
             request.getResult().onNext(result);
         } catch (Exception e) {

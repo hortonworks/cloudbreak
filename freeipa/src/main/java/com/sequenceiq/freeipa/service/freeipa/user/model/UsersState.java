@@ -11,11 +11,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
 public class UsersState {
-    private Set<FmsGroup> groups;
+    private ImmutableSet<FmsGroup> groups;
 
-    private Set<FmsUser> users;
+    private ImmutableSet<FmsUser> users;
 
-    private Multimap<String, String> groupMembership;
+    private ImmutableMultimap<String, String> groupMembership;
 
     public UsersState(
         Set<FmsGroup> groups, Set<FmsUser> users, Multimap<String, String> groupMembership) {
@@ -24,15 +24,15 @@ public class UsersState {
         this.groupMembership = ImmutableMultimap.copyOf(requireNonNull(groupMembership, "group membership is null"));
     }
 
-    public Set<FmsGroup> getGroups() {
+    public ImmutableSet<FmsGroup> getGroups() {
         return groups;
     }
 
-    public Set<FmsUser> getUsers() {
+    public ImmutableSet<FmsUser> getUsers() {
         return users;
     }
 
-    public Multimap<String, String> getGroupMembership() {
+    public ImmutableMultimap<String, String> getGroupMembership() {
         return groupMembership;
     }
 

@@ -103,7 +103,7 @@ public class KerberosConfigV1Service {
                 Optional<User> existinguser = freeIpaClient.userFind(bindUser);
                 User user = existinguser.isPresent() ? existinguser.get() : freeIpaClient.userAdd(bindUser, "service", "account");
                 String password = PasswordUtil.generatePassword();
-                freeIpaClient.userSetPassword(user.getUid(), password);
+                freeIpaClient.userSetPasswordWithExpiration(user.getUid(), password, Optional.empty());
                 freeIpaClient.addRoleMember("Enrollment Administrator", Set.of(user.getUid()), null, null, null, null);
                 freeIpaPermissionService.setPermissions(freeIpaClient);
                 kerberosConfig = kerberosConfigRegisterService.createKerberosConfig(stack.get().getId(), user.getUid(), password, clusterName);
