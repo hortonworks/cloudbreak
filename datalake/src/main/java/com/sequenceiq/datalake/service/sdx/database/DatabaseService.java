@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.service.sdx;
+package com.sequenceiq.datalake.service.sdx.database;
 
 import java.util.Locale;
 import java.util.Map;
@@ -24,6 +24,8 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.sdx.PollingConfig;
+import com.sequenceiq.datalake.service.sdx.SdxDatabaseOperation;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
@@ -31,7 +33,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateD
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
@@ -57,6 +58,9 @@ public class DatabaseService {
 
     @Inject
     private Map<DatabaseConfigKey, DatabaseConfig> dbConfigs;
+
+    @Inject
+    private Map<CloudPlatform, DatabaseServerParameterSetter> databaseServerParameterSetterMap;
 
     @Inject
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;
@@ -116,16 +120,8 @@ public class DatabaseService {
         req.setInstanceType(databaseConfig.getInstanceType());
         req.setDatabaseVendor(databaseConfig.getVendor());
         req.setStorageSize(databaseConfig.getVolumeSize());
-        req.setAws(getAwsDatabaseServerParameters());
+        databaseServerParameterSetterMap.get(cloudPlatform).setParameters(req);
         return req;
-    }
-
-    private AwsDatabaseServerV4Parameters getAwsDatabaseServerParameters() {
-        AwsDatabaseServerV4Parameters params = new AwsDatabaseServerV4Parameters();
-        params.setBackupRetentionPeriod(retentionPeriod);
-        params.setEngineVersion("10.6");
-        params.setMultiAZ(multiAz);
-        return params;
     }
 
     public DatabaseServerStatusV4Response waitAndGetDatabase(SdxCluster sdxCluster, String databaseCrn,
