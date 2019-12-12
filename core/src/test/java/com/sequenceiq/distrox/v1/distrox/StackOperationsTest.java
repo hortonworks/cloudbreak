@@ -115,44 +115,36 @@ public class StackOperationsTest {
     public void testDeleteWhenDtoNameFilledAndForcedTrueThenDeleteCalled() {
         underTest.delete(StackAccessDto.builder().withName(stack.getName()).build(), stack.getWorkspace().getId(), true);
 
-        verify(userService, times(1)).getOrCreate(any());
-        verify(userService, times(1)).getOrCreate(cloudbreakUser);
-        verify(stackCommonService, times(1)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), any());
-        verify(stackCommonService, times(1)).deleteByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), true, user);
-        verify(stackCommonService, times(0)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteWithKerberosByNameInWorkspace(anyString(), anyLong(), anyBoolean());
+        verify(stackCommonService, times(1)).deleteWithKerberosByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), true);
+        verify(stackCommonService, times(0)).deleteWithKerberosByCrnInWorkspace(anyString(), anyLong(), anyBoolean());
     }
 
     @Test
     public void testDeleteWhenDtoNameFilledAndForcedFalseThenDeleteCalled() {
         underTest.delete(StackAccessDto.builder().withName(stack.getName()).build(), stack.getWorkspace().getId(), false);
 
-        verify(userService, times(1)).getOrCreate(any());
-        verify(userService, times(1)).getOrCreate(cloudbreakUser);
-        verify(stackCommonService, times(1)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), any());
-        verify(stackCommonService, times(1)).deleteByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), false, user);
-        verify(stackCommonService, times(0)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteWithKerberosByNameInWorkspace(anyString(), anyLong(), anyBoolean());
+        verify(stackCommonService, times(1)).deleteWithKerberosByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), false);
+        verify(stackCommonService, times(0)).deleteWithKerberosByCrnInWorkspace(anyString(), anyLong(), anyBoolean());
     }
 
     @Test
     public void testDeleteWhenDtoCrnFilledAndForcedTrueThenDeleteCalled() {
         underTest.delete(StackAccessDto.builder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(), true);
 
-        verify(userService, times(1)).getOrCreate(any());
-        verify(userService, times(1)).getOrCreate(cloudbreakUser);
-        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), any());
-        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), true, user);
-        verify(stackCommonService, times(0)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteWithKerberosByCrnInWorkspace(anyString(), anyLong(), anyBoolean());
+        verify(stackCommonService, times(1)).deleteWithKerberosByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), true);
+        verify(stackCommonService, times(0)).deleteWithKerberosByNameInWorkspace(anyString(), anyLong(), anyBoolean());
     }
 
     @Test
     public void testDeleteWhenDtoCrnFilledAndForcedFalseThenDeleteCalled() {
         underTest.delete(StackAccessDto.builder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(), false);
 
-        verify(userService, times(1)).getOrCreate(any());
-        verify(userService, times(1)).getOrCreate(cloudbreakUser);
-        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), any());
-        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), false, user);
-        verify(stackCommonService, times(0)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteWithKerberosByCrnInWorkspace(anyString(), anyLong(), anyBoolean());
+        verify(stackCommonService, times(1)).deleteWithKerberosByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), false);
+        verify(stackCommonService, times(0)).deleteWithKerberosByNameInWorkspace(anyString(), anyLong(), anyBoolean());
     }
 
     @Test
