@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
@@ -94,7 +95,7 @@ public class UsersyncPoller {
                             LOGGER.debug("Usersync polling is entitled in account {}", accountId);
                             UmsEventGenerationIds currentGeneration =
                                     umsEventGenerationIdsProvider.getEventGenerationIds(accountId, requestId);
-                            stringListEntry.getValue().stream()
+                            stringListEntry.getValue()
                                     .forEach(stack -> {
                                         if (isStale(stack, currentGeneration)) {
                                             LOGGER.debug("Environment {} in Account {} is stale.", stack.getEnvironmentCrn(), stack.getAccountId());

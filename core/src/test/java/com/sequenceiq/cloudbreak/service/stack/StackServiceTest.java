@@ -645,8 +645,6 @@ public class StackServiceTest {
                     () -> underTest.create(stack, platformString, mock(StatedImage.class), user, workspace));
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
-            verify(securityConfig, times(1)).setStack(stack);
-            verify(securityConfigService, times(1)).save(securityConfig);
         }
     }
 
@@ -670,8 +668,6 @@ public class StackServiceTest {
             verify(stack).setResourceCrn(crnCaptor.capture());
             String resourceCrn = crnCaptor.getValue();
             assertTrue(resourceCrn.matches("crn:cdp:datahub:us-west-1:1234:cluster:.*"));
-            verify(securityConfig, times(1)).setStack(stack);
-            verify(securityConfigService, times(1)).save(securityConfig);
 
             verify(stackUpdater, times(0)).updateStackStatus(eq(Long.MAX_VALUE), eq(DetailedStackStatus.PROVISION_FAILED), anyString());
         }

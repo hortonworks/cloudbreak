@@ -27,11 +27,15 @@ import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
+import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -59,14 +63,28 @@ public class UserDataService {
     private StackService stackService;
 
     @Inject
+    private SaltSecurityConfigService saltSecurityConfigService;
+
+    @Inject
+    private TlsSecurityService tlsSecurityService;
+
+    @Inject
+    private SecurityConfigService securityConfigService;
+
+    @Inject
     private ImageService imageService;
+
+    @Inject
+    private TransactionService transactionService;
 
     public void createUserData(Long stackId) throws CloudbreakImageNotFoundException {
         Stack stack = stackService.getById(stackId);
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Future<PlatformParameters> platformParametersFuture =
                 intermediateBuilderExecutor.submit(() -> connector.getPlatformParameters(stack, userCrn));
-        SecurityConfig securityConfig = stack.getSecurityConfig();
+
+        SecurityConfig securityConfig = generateAndSaveSecurityConfig(stack);
+
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
         String cbPrivKey = saltSecurityConfig.getSaltBootSignPrivateKey();
         byte[] cbSshKeyDer = PkiUtil.getPublicKeyDer(new String(Base64.decodeBase64(cbPrivKey)));
@@ -90,6 +108,24 @@ public class UserDataService {
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Failed to get Platform parmaters", e);
             throw new GetCloudParameterException("Failed to get Platform parmaters", e);
+        }
+    }
+
+    private SecurityConfig generateAndSaveSecurityConfig(Stack stack) {
+        try {
+            SecurityConfig securityConfig = transactionService.required(() -> {
+                SecurityConfig config = tlsSecurityService.generateSecurityKeys(stack.getWorkspace());
+                config.setStack(stack);
+                saltSecurityConfigService.save(config.getSaltSecurityConfig());
+                return securityConfigService.save(config);
+            });
+
+            stack.setSecurityConfig(securityConfig);
+
+            stackService.save(stack);
+            return securityConfig;
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw e.getCause();
         }
     }
 

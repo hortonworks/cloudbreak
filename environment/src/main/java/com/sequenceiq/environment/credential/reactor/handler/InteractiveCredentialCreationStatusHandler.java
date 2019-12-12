@@ -43,10 +43,11 @@ public class InteractiveCredentialCreationStatusHandler implements EventHandler<
         InteractiveCredentialCreationStatus interactiveCredentialCreationStatus = interactiveCredentialCreationStatusEvent.getData();
         String userCrn = interactiveCredentialCreationStatus.getCloudContext().getUserId();
         ThreadBasedUserCrnProvider.doAs(userCrn, () -> {
+            ThreadBasedUserCrnProvider.doAs(userCrn, () -> {
             String message = interactiveCredentialCreationStatus.getMessage();
             InteractiveCredentialNotification notification = new InteractiveCredentialNotification()
                     .withEventTimestamp(new Date().getTime())
-                    .withUserId(interactiveCredentialCreationStatus.getCloudContext().getUserId())
+                    .withUserId(userCrn)
                     .withCloud(interactiveCredentialCreationStatus.getExtendedCloudCredential().getCloudPlatform())
                     .withEventMessage(message);
             ResourceEvent event;
@@ -60,6 +61,7 @@ public class InteractiveCredentialCreationStatusHandler implements EventHandler<
                 LOGGER.info("Interactive credential creation success status: {}", new Json(notification).getValue());
             }
             notificationService.send(event, notification, ThreadBasedUserCrnProvider.getUserCrn());
+        });
         });
     }
 

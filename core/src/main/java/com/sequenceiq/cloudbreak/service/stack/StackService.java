@@ -1024,27 +1024,28 @@ public class StackService implements ResourceIdProvider {
     }
 
     private void storeTelemetryForStack(Stack stack) {
-        try {
-            for (Component component : stack.getComponents()) {
-                if (ComponentType.TELEMETRY.equals(component.getComponentType())) {
-                    if (stack.getCluster() != null && StringUtils.isNoneEmpty(
-                            stack.getType().name(), stack.getResourceCrn(), stack.getCluster().getName())) {
-                        LOGGER.debug("Found TELEMETRY component for stack, will enrich that "
-                                + "with cluster data before saving it.");
-                        FluentClusterType fluentClusterType = StackType.DATALAKE.equals(stack.getType())
-                                ? FluentClusterType.DATALAKE : FluentClusterType.DATAHUB;
+        if (stack.getCluster() == null || StringUtils.isAnyEmpty(stack.getType().name(), stack.getResourceCrn(), stack.getCluster().getName())) {
+            return;
+        }
+        List<Component> enrichedComponents = stack.getComponents().stream()
+                .filter(component -> ComponentType.TELEMETRY.equals(component.getComponentType()))
+                .map(component -> {
+                    LOGGER.debug("Found TELEMETRY component for stack, will enrich that with cluster data before saving it.");
+                    FluentClusterType fluentClusterType = StackType.DATALAKE.equals(stack.getType())
+                            ? FluentClusterType.DATALAKE : FluentClusterType.DATAHUB;
+                    try {
                         Telemetry telemetry = component.getAttributes().get(Telemetry.class);
                         cloudStorageFolderResolverService.updateStorageLocation(telemetry,
                                 fluentClusterType.value(),
                                 stack.getCluster().getName(), stack.getResourceCrn());
                         component.setAttributes(Json.silent(telemetry));
+                    } catch (IOException e) {
+                        LOGGER.info("Could not create Cloudbreak telemetry component.", e);
                     }
-                    componentConfigProviderService.store(component);
-                }
-            }
-        } catch (IllegalArgumentException | IOException e) {
-            LOGGER.info("Could not create Cloudbreak telemetry component.", e);
-        }
+                    return component;
+                })
+                .collect(Collectors.toList());
+        componentConfigProviderService.store(enrichedComponents);
     }
 
     private String createCRN(String accountId) {

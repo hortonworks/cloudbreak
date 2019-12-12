@@ -18,12 +18,6 @@
          </param>
       </provider>
 
-      <provider>
-         <role>identity-assertion</role>
-         <name>Default</name>
-         <enabled>true</enabled>
-      </provider>
-
 {% if salt['pillar.get']('gateway:envAccessGroup') is defined and salt['pillar.get']('gateway:envAccessGroup') | length > 0 %}
       <provider>
          <role>identity-assertion</role>
