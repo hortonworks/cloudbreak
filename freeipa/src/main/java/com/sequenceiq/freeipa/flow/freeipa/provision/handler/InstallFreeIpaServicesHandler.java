@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.flow.freeipa.provision.handler;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -18,6 +20,8 @@ import reactor.bus.EventBus;
 
 @Component
 public class InstallFreeIpaServicesHandler implements EventHandler<InstallFreeIpaServicesRequest> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstallFreeIpaServicesHandler.class);
+
     @Inject
     private EventBus eventBus;
 
@@ -37,6 +41,7 @@ public class InstallFreeIpaServicesHandler implements EventHandler<InstallFreeIp
             freeIpaInstallService.installFreeIpa(request.getResourceId());
             response = new InstallFreeIpaServicesSuccess(request.getResourceId());
         } catch (Exception e) {
+            LOGGER.error("FreeIPA service install failed", e);
             response = new InstallFreeIpaServicesFailed(request.getResourceId(), e);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
