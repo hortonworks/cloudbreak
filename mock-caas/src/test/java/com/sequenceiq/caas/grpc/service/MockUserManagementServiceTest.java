@@ -14,8 +14,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadPasswordPolicy;
 import com.sequenceiq.caas.util.JsonUtil;
 
 import io.grpc.internal.testing.StreamRecorder;
@@ -70,6 +74,8 @@ public class MockUserManagementServiceTest {
     public void testGetWorkloadCredentials() {
         underTest.initializeActorWorkloadCredentials();
 
+        long currentTime = System.currentTimeMillis();
+
         GetActorWorkloadCredentialsRequest req = GetActorWorkloadCredentialsRequest.getDefaultInstance();
         StreamRecorder<GetActorWorkloadCredentialsResponse> observer = StreamRecorder.create();
         underTest.getActorWorkloadCredentials(req, observer);
@@ -79,5 +85,25 @@ public class MockUserManagementServiceTest {
         Assert.assertNotNull(res.getPasswordHash());
         Assert.assertNotNull(res.getKerberosKeysList());
         Assert.assertEquals(2, res.getKerberosKeysList().size());
+        Assert.assertTrue(res.getPasswordHashExpirationDate() > currentTime);
+    }
+
+    @Test
+    public void testGetAccountIncludesPasswordPolicy() throws IOException {
+        Path licenseFilePath = Files.createTempFile("license", "txt");
+        Files.writeString(licenseFilePath, VALID_LICENSE);
+        ReflectionTestUtils.setField(underTest, "cmLicenseFilePath", licenseFilePath.toString());
+        underTest.init();
+
+        GetAccountRequest req = GetAccountRequest.getDefaultInstance();
+        StreamRecorder<GetAccountResponse> observer = StreamRecorder.create();
+        underTest.getAccount(req, observer);
+        Assert.assertEquals(1, observer.getValues().size());
+        GetAccountResponse res = observer.getValues().get(0);
+        Assert.assertTrue(res.hasAccount());
+        Account account = res.getAccount();
+        Assert.assertTrue(account.hasPasswordPolicy());
+        WorkloadPasswordPolicy passwordPolicy = account.getPasswordPolicy();
+        Assert.assertEquals(MockUserManagementService.PASSWORD_LIFETIME, passwordPolicy.getWorkloadPasswordMaxLifetime());
     }
 }

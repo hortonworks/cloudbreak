@@ -161,11 +161,18 @@ public class FreeIpaClient {
         return (User) invoke("user_add", flags, params, User.class).getResult();
     }
 
-    public void userSetPassword(String user, String password) throws FreeIpaClientException {
+    /**
+     * Updates the password and password expiration time for the specified user
+     *
+     * @param user the user
+     * @param password the password
+     * @param expiration Optional of the expiration instant. An empty optional implies the max expiration time
+     */
+    public void userSetPasswordWithExpiration(String user, String password, Optional<Instant> expiration) throws FreeIpaClientException {
         // FreeIPA expires any password that is set by another user. Work around this by
         // performing a separate API call to set the password expiration into the future
         userMod(user, "userpassword", password);
-        updateUserPasswordMaxExpiration(user);
+        updateUserPasswordExpiration(user, expiration);
     }
 
     public void updateUserPasswordExpiration(String user, Optional<Instant> expiration) throws FreeIpaClientException {

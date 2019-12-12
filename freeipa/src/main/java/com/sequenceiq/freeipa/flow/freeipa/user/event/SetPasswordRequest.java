@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.user.event;
 
+import java.time.Instant;
+import java.util.Optional;
+
 public class SetPasswordRequest extends FreeIpaClientRequest<SetPasswordResult> {
 
     private final String environment;
@@ -8,11 +11,14 @@ public class SetPasswordRequest extends FreeIpaClientRequest<SetPasswordResult> 
 
     private final String password;
 
-    public SetPasswordRequest(Long stackId, String environment, String username, String password) {
+    private final Optional<Instant> expirationInstant;
+
+    public SetPasswordRequest(Long stackId, String environment, String username, String password, Optional<Instant> expirationInstant) {
         super(stackId);
         this.environment = environment;
         this.username = username;
         this.password = password;
+        this.expirationInstant = expirationInstant;
     }
 
     public String getEnvironment() {
@@ -27,12 +33,17 @@ public class SetPasswordRequest extends FreeIpaClientRequest<SetPasswordResult> 
         return password;
     }
 
+    public Optional<Instant> getExpirationInstant() {
+        return expirationInstant;
+    }
+
     @Override
     public String toString() {
         return "SetPasswordRequest{"
                 + "stackId='" + getResourceId() + '\''
                 + "environment='" + environment + '\''
                 + "username='" + username + '\''
+                + "expirationInstant=" + expirationInstant
                 + '}';
     }
 }

@@ -14,9 +14,9 @@ public class UmsUsersState {
 
     private final UsersState usersState;
 
-    private final Map<String, WorkloadCredential> usersWorkloadCredentialMap;
+    private final ImmutableMap<String, WorkloadCredential> usersWorkloadCredentialMap;
 
-    private final Set<FmsUser> requestedWorkloadUsers;
+    private final ImmutableSet<FmsUser> requestedWorkloadUsers;
 
     public UmsUsersState(UsersState usersState, Map<String, WorkloadCredential> usersWorkloadCredentialMap, Set<FmsUser> requestedWorkloadUsers) {
         this.usersState = requireNonNull(usersState, "UsersState is null");
@@ -28,11 +28,11 @@ public class UmsUsersState {
         return usersState;
     }
 
-    public Map<String, WorkloadCredential> getUsersWorkloadCredentialMap() {
+    public ImmutableMap<String, WorkloadCredential> getUsersWorkloadCredentialMap() {
         return usersWorkloadCredentialMap;
     }
 
-    public Set<FmsUser> getRequestedWorkloadUsers() {
+    public ImmutableSet<FmsUser> getRequestedWorkloadUsers() {
         return requestedWorkloadUsers;
     }
 

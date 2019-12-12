@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
@@ -108,7 +109,7 @@ class UserServiceTest {
     void testFilteredSyncRetrievesFilteredIpaState() throws Exception {
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
         UmsUsersState umsUsersState = mock(UmsUsersState.class);
-        Set<FmsUser> workloadUsers = mock(Set.class);
+        ImmutableSet<FmsUser> workloadUsers = mock(ImmutableSet.class);
         when(umsUsersState.getRequestedWorkloadUsers()).thenReturn(workloadUsers);
         underTest.getIpaUserState(freeIpaClient, umsUsersState, Set.of(USER_CRN), Set.of(MACHINE_USER_CRN));
         verify(freeIpaUsersStateProvider).getFilteredFreeIPAState(any(), eq(workloadUsers));
