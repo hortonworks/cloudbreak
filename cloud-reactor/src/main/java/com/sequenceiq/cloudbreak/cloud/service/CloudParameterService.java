@@ -80,6 +80,9 @@ import reactor.bus.EventBus;
 
 @Service
 public class CloudParameterService {
+
+    public static final String ACCESS_CONFIG_TYPE = "accessConfigType";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudParameterService.class);
 
     @Inject
@@ -286,7 +289,7 @@ public class CloudParameterService {
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudVmTypes getVmTypesV2(ExtendedCloudCredential cloudCredential, String region, String variant,
-        CdpResourceType stackType, Map<String, String> filters) {
+            CdpResourceType stackType, Map<String, String> filters) {
         LOGGER.debug("Get platform vmtypes");
         GetPlatformVmTypesRequest getPlatformVmTypesRequest =
                 new GetPlatformVmTypesRequest(cloudCredential, cloudCredential, variant, region, stackType, filters);
