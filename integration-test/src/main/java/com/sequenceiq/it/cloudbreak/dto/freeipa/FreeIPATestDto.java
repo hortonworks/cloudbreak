@@ -20,6 +20,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AwsNetworkParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.MockNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityGroupRequest;
@@ -155,6 +156,12 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
             params.setSubnetId(request.getAws().getSubnetId());
             params.setVpcId(request.getAws().getVpcId());
             networkRequest.setAws(params);
+        } else if (request.getMock() != null) {
+            MockNetworkParameters parameters = new MockNetworkParameters();
+            parameters.setSubnetId(request.getMock().getSubnetId());
+            parameters.setVpcId(request.getMock().getVpcId());
+            parameters.setInternetGatewayId(request.getMock().getInternetGatewayId());
+            networkRequest.setMock(parameters);
         }
         getRequest().setNetwork(networkRequest);
         return this;
