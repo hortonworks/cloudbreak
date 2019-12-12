@@ -433,6 +433,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public int setMinaSshdServiceIdByStackId(Long id, String minaSshdServiceId) {
+            return 0;
+        }
+
+        @Override
         public <S extends Stack> S save(S entity) {
             return entity;
         }

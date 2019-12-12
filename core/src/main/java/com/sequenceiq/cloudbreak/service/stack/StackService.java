@@ -1090,6 +1090,10 @@ public class StackService implements ResourceIdProvider {
         return stackRepository.findByWorkspaceId(workspaceId, environmentCrn, stackTypes);
     }
 
+    public int setMinaSshdServiceIdByStackId(Long id, String minaSshdServiceId) {
+        return stackRepository.setMinaSshdServiceIdByStackId(id, minaSshdServiceId);
+    }
+
     private enum Msg {
         STACK_STOP_IGNORED("stack.stop.ignored"),
         STACK_START_IGNORED("stack.start.ignored"),
