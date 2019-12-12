@@ -142,6 +142,10 @@ cb:
                               m5.2xlarge,
                               m5.4xlarge,
                               m5.8xlarge,
+                              d2.xlarge,
+                              d2.2xlarge,
+                              d2.4xlarge,
+                              d2.8xlarge,
                               r5.2xlarge,
                               r5.4xlarge,
                               r5.8xlarge,
@@ -185,7 +189,8 @@ cb:
                               Standard_L16s,
                               Standard_L32s,
                               Standard_NC6,
-                              Standard_NC24r
+                              Standard_NC24r,
+                              Standard_L48s_v2
 
   os:
     enable.autoimport: true
