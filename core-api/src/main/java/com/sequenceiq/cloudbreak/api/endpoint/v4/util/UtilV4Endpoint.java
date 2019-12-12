@@ -10,8 +10,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckRightV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RenewCertificateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckRightV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Responses;
@@ -92,4 +94,10 @@ public interface UtilV4Endpoint {
             nickname = "checkRight")
     CheckRightV4Response checkRight(CheckRightV4Request checkRightV4Request);
 
+    @POST
+    @Path("renew_certificate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UtilityOpDescription.RENEW_CERTIFICATE, produces = MediaType.APPLICATION_JSON, notes = Notes.RENEW_CERTIFICATE_NOTES,
+            nickname = "renewCertificate")
+    Response renewCertificate(RenewCertificateV4Request renewCertificateV4Request);
 }

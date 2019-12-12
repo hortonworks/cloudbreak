@@ -51,6 +51,14 @@ public class ClusterPublicEndpointManagementService {
         return StringUtils.isNoneEmpty(result);
     }
 
+    public boolean renewCertificate(Stack stack) {
+        boolean result = false;
+        if (gatewayPublicEndpointManagementService.isCertGenerationEnabled()) {
+            result = gatewayPublicEndpointManagementService.renewCertificate(stack);
+        }
+        return result;
+    }
+
     private void changeGatewayAddress(Stack stack, Map<String, String> newAddressesByFqdn) {
         InstanceMetaData gatewayInstanceMetadata = stack.getPrimaryGatewayInstance();
         String ipWrapper = gatewayInstanceMetadata.getPublicIpWrapper();
