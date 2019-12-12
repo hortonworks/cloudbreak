@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -22,10 +23,16 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseConfig;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseConfigKey;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseServerParameterSetter;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.client.RedbeamsServiceCrnClient;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
@@ -50,11 +57,14 @@ public class DatabaseServiceTest {
     @Mock
     private Map<DatabaseConfigKey, DatabaseConfig> dbConfigs;
 
-    @InjectMocks
-    private DatabaseService underTest;
-
     @Mock
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;
+
+    @Mock
+    private Map<CloudPlatform, DatabaseServerParameterSetter> databaseParameterSetterMap;
+
+    @InjectMocks
+    private DatabaseService underTest;
 
     @Test
     public void shouldSetDbConfigBasedOnClusterShape() {
@@ -69,6 +79,7 @@ public class DatabaseServiceTest {
         when(databaseServerV4Endpoint.create(any())).thenThrow(BadRequestException.class);
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
+        when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
 
         Assertions.assertThrows(BadRequestException.class, () -> {
             underTest.create(cluster, env);
@@ -79,6 +90,7 @@ public class DatabaseServiceTest {
         assertThat(dbRequest.getDatabaseServer().getInstanceType(), is("instanceType"));
         assertThat(dbRequest.getDatabaseServer().getDatabaseVendor(), is("vendor"));
         assertThat(dbRequest.getDatabaseServer().getStorageSize(), is(100L));
+        assertNotNull(dbRequest.getDatabaseServer().getAws());
         verifyZeroInteractions(sdxClusterRepository);
         verifyZeroInteractions(sdxStatusService);
         verifyZeroInteractions(notificationService);
@@ -88,4 +100,17 @@ public class DatabaseServiceTest {
         return new DatabaseConfig("instanceType", "vendor", 100);
     }
 
+    private DatabaseServerParameterSetter getDatabaseParameterSetter() {
+        return new DatabaseServerParameterSetter() {
+            @Override
+            public void setParameters(DatabaseServerV4StackRequest request) {
+                request.setAws(new AwsDatabaseServerV4Parameters());
+            }
+
+            @Override
+            public CloudPlatform getCloudPlatform() {
+                return CloudPlatform.AWS;
+            }
+        };
+    }
 }

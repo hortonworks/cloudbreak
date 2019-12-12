@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.service.sdx;
+package com.sequenceiq.datalake.service.sdx.database;
 
 import static org.apache.commons.lang3.Validate.notBlank;
 
