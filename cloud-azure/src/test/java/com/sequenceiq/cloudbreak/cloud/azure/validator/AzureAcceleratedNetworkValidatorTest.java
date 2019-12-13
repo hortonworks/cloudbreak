@@ -1,25 +1,42 @@
 package com.sequenceiq.cloudbreak.cloud.azure.validator;
 
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureVirtualMachineTypeProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
+@RunWith(MockitoJUnitRunner.class)
 public class AzureAcceleratedNetworkValidatorTest {
 
-    private AzureAcceleratedNetworkValidator underTest = new AzureAcceleratedNetworkValidator();
+    @Mock
+    private AzureVirtualMachineTypeProvider azureVirtualMachineTypeProvider;
+
+    @Mock
+    private AzureStackView azureStackView;
+
+    @InjectMocks
+    private AzureAcceleratedNetworkValidator underTest;
 
     @Test
     public void testIsvSupportedForVmShouldReturnsWithTrueForTheGivenVmTypes() throws IOException {
         Set<String> supportedVmTypes = getSupportedVmTypes();
+        when(azureVirtualMachineTypeProvider.getVmTypes(azureStackView)).thenReturn(supportedVmTypes);
 
-        Map<String, Boolean> actual = underTest.validate(supportedVmTypes);
+        Map<String, Boolean> actual = underTest.validate(azureStackView);
 
         actual.forEach((key, value) -> Assert.assertTrue(value));
     }
@@ -27,8 +44,9 @@ public class AzureAcceleratedNetworkValidatorTest {
     @Test
     public void testValidateShouldReturnsWithFalseForTheGivenVmTypesWhenOnlyTwoCoreAvailable() {
         Set<String> supportedVmTypes = getVmsWithTwoCore();
+        when(azureVirtualMachineTypeProvider.getVmTypes(azureStackView)).thenReturn(supportedVmTypes);
 
-        Map<String, Boolean> actual = underTest.validate(supportedVmTypes);
+        Map<String, Boolean> actual = underTest.validate(azureStackView);
 
         actual.forEach((key, value) -> Assert.assertFalse(value));
     }
@@ -36,8 +54,9 @@ public class AzureAcceleratedNetworkValidatorTest {
     @Test
     public void testValidateShouldReturnsWithFalseForTheGivenVmTypesWhenCoreNumberIsNotFound() {
         Set<String> supportedVmTypes = getVmsWithoutCpuCoreInfo();
+        when(azureVirtualMachineTypeProvider.getVmTypes(azureStackView)).thenReturn(supportedVmTypes);
 
-        Map<String, Boolean> actual = underTest.validate(supportedVmTypes);
+        Map<String, Boolean> actual = underTest.validate(azureStackView);
 
         actual.forEach((key, value) -> Assert.assertFalse(value));
     }
@@ -45,8 +64,9 @@ public class AzureAcceleratedNetworkValidatorTest {
     @Test
     public void testValidateShouldReturnsWithFalseForOtherVmTypes() {
         Set<String> supportedVmTypes = getOtherVms();
+        when(azureVirtualMachineTypeProvider.getVmTypes(azureStackView)).thenReturn(supportedVmTypes);
 
-        Map<String, Boolean> actual = underTest.validate(supportedVmTypes);
+        Map<String, Boolean> actual = underTest.validate(azureStackView);
 
         actual.forEach((key, value) -> Assert.assertFalse(value));
     }
