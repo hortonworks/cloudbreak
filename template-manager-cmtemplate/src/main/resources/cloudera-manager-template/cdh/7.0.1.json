@@ -82,11 +82,11 @@
     },
     {
       "name": "NIFI",
-      "version": "0.7.0"
+      "version": "1.10.0"
     },
     {
       "name": "NIFIREGISTRY",
-      "version": "0.4.0"
+      "version": "0.5.0"
     },
     {
       "name": "SCHEMAREGISTRY",
