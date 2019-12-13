@@ -77,6 +77,7 @@ public class TelemetryConverter {
     public Telemetry convert(TelemetryRequest request, StackType type) {
         Telemetry telemetry = new Telemetry();
         Features features = new Features();
+        LOGGER.debug("Converting telemetry request to telemetry object");
         if (request != null) {
             Logging logging = createLoggingFromRequest(request);
             WorkloadAnalytics workloadAnalytics = createWorkloadAnalyticsFromRequest(request);
@@ -139,6 +140,8 @@ public class TelemetryConverter {
         if (waRequest != null) {
             waFeatureEnabled = true;
             LOGGER.debug("Workload analytics feature (enable) because workload analytics request has been set already.");
+        } else {
+            LOGGER.debug("Workload analytics feature disabled because workload analytics request has not been set.");
         }
         FeatureSetting waFeatureSetting = new FeatureSetting();
         waFeatureSetting.setEnabled(waFeatureEnabled);
@@ -230,6 +233,8 @@ public class TelemetryConverter {
             FeatureSetting metering = new FeatureSetting();
             metering.setEnabled(true);
             features.setMetering(metering);
+        } else {
+            LOGGER.debug("Metering feature is disabled - global setting; {}, stack type: {}", meteringEnabled, type);
         }
     }
 
@@ -239,6 +244,8 @@ public class TelemetryConverter {
             FeatureSetting waFeature = new FeatureSetting();
             waFeature.setEnabled(true);
             features.setWorkloadAnalytics(waFeature);
+        } else {
+            LOGGER.debug("Workload analytics feature is not enabled.");
         }
     }
 
