@@ -72,14 +72,12 @@ update_nginx_conf_manager_port:
     - contents_pillar: gateway:userfacingkey
     - makedirs: True
     - mode: 777
-    - unless: test -f /etc/certs-user-facing/server-key.pem
 
 /etc/certs-user-facing/server.pem:
   file.managed:
     - contents_pillar: gateway:userfacingcert
     - makedirs: True
     - mode: 777
-    - unless: test -f /etc/certs-user-facing/server.pem
 
 {% else %}
 
@@ -118,3 +116,5 @@ restart_nginx_after_ssl_reconfig_with_user_facing:
     - watch:
       - file: /etc/nginx/sites-enabled/ssl.conf
       - file: /etc/nginx/sites-enabled/ssl-user-facing.conf
+      - file: /etc/certs-user-facing/server-key.pem
+      - file: /etc/certs-user-facing/server.pem
