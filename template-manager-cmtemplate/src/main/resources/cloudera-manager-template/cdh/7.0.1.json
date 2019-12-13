@@ -90,11 +90,11 @@
     },
     {
       "name": "SCHEMAREGISTRY",
-      "version": "4.0.0"
+      "version": "0.8.1"
     },
     {
       "name": "STREAMS_MESSAGING_MANAGER",
-      "version": "1.0.0"
+      "version": "2.1.0"
     }
   ],
   "version": "7.0.1",
