@@ -29,11 +29,6 @@ The next step is to download the latest cloudbreak-deployer onto your machine:
 curl -s https://raw.githubusercontent.com/hortonworks/cloudbreak-deployer/master/install-dev | sh && cbd --version
 ```
 
-Run the following command in the `cbd-local` directory:
-```
-cbd init
-```
-
 Add the following to the file named `Profile` under the `cbd-local` directory you have just created. Please note, when a `cbd` command is executed you should go to the deployment's directory where your `Profile` file is found (`cbd-local` in our example). The `CB_SCHEMA_SCRIPTS_LOCATION` environment variable configures the location of SQL scripts that are in the `core/src/main/resources/schema` directory in the cloned Cloudbreak git repository.
 
 Please note that the full path needs to be configured and env variables like `$USER` cannot be used. You also have to set a password for your local Cloudbreak in `UAA_DEFAULT_USER_PW`:
@@ -60,7 +55,7 @@ export AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY"
 
 ```
 
-At first, yous should every service from cbd to check your that your cloud environment is set up correctly.
+At first, you should start every service from cbd to check your that your cloud environment is set up correctly.
 ```
 export CB_LOCAL_DEV_LIST=
 ```
@@ -118,6 +113,10 @@ If everything went well then Cloudbreak will be available on https://localhost. 
 The deployer has generated a `certs` directory under `cbd-local` directory which will be needed later on to set up IDEA properly.
 
 If not already present, you shall create an `etc` directory under `cbd-local` directory and place your Cloudera Manager license file `license.txt` there. This is essential for Auth Mock to start successfully. (Request a licence from us)
+
+### Cloudbreak service ports
+
+When cloudbreak is started in a container, the port it listens on is 8080.  If "cloudbreak" is added to the CB_LOCAL_DEV_LIST variable, all services expect the cloudbreak port to be 9091.
 
 ### Linux difference
 
@@ -209,11 +208,11 @@ In order to be able to determine the local Cloudbreak version automatically, a `
 ### Running Periscope in IDEA
 
 After importing the `cloudbreak` repo root, launch the Periscope application by executing the `com.sequenceiq.periscope.PeriscopeApplication` class (set `Use classpath of module` to `cloudbreak.autoscale.main`) with the following JVM options:
-
+* Note: If cloudbreak is in the CB_LOCAL_DEV_LIST variable, the periscope.cloudbreak.url should be http://localhost:9091
 ````
 -Dperiscope.db.port.5432.tcp.addr=localhost
 -Dperiscope.db.port.5432.tcp.port=5432
--Dperiscope.cloudbreak.url=http://localhost:9091
+-Dperiscope.cloudbreak.url=http://localhost:8080
 -Dserver.port=8085
 -Daltus.ums.host=localhost
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
@@ -224,10 +223,11 @@ Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Prof
 ### Running Datalake in IDEA
 
 After importing the `cloudbreak` repo root, launch the Datalake application by executing the `com.sequenceiq.datalake.DatalakeApplication` class (set `Use classpath of module` to `cloudbreak.datalake.main`) with the following JVM options:
-
+* Note: If cloudbreak is in the CB_LOCAL_DEV_LIST variable, the datalake.cloudbreak.url should be http://localhost:9091
 ````
 -Dserver.port=8086
 -Dcb.enabledplatforms=AWS,AZURE,MOCK
+-Ddatalake.cloudbreak.url=http://localhost:8080
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 -Dvault.addr=localhost
 ````
@@ -256,7 +256,7 @@ CB_AWS_ACCOUNT_ID=
 ### Running Redbeams in IDEA
 
 After importing the `cloudbreak` repo root, launch the Redbeams application by executing the `com.sequenceiq.redbeams.RedbeamsApplication` class (set `Use classpath of module` to `cloudbreak.redbeams.main`) with the following JVM options:
-
+* Note: If cloudbreak is in the CB_LOCAL_DEV_LIST variable, the redbeams.cloudbreak.url should be http://localhost:9091
 ```
 -Dredbeams.db.port.5432.tcp.addr=localhost
 -Dredbeams.db.port.5432.tcp.port=5432
@@ -279,9 +279,10 @@ CB_AWS_ACCOUNT_ID=
 ### Running the Environment service in IDEA
 
 After importing the `cloudbreak` repo root, launch the Environment application by executing the `com.sequenceiq.environment.EnvironmentApplication` class (set `Use classpath of module` to `cloudbreak.environment.main`) with the following JVM options:
-
+* Note: If cloudbreak is in the CB_LOCAL_DEV_LIST variable, the environment.cloudbreak.url should be http://localhost:9091
 ```
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
+-Denvironment.cloudbreak.url=http://localhost:8080
 -Denvironment.enabledplatforms="YARN,YCLOUD,AWS,AZURE,MOCK"
 ```
 
@@ -334,7 +335,7 @@ The database migration scripts are run automatically by Cloudbreak, this migrati
 
 ### Running Periscope from the Command Line
 To run Periscope from the command line, run the following Gradle command:
-
+* Note: If cloudbreak is in the CB_LOCAL_DEV_LIST variable, the periscope.cloudbreak.url should be http://localhost:9091
 ````
 ./gradlew :autoscale:bootRun -PjvmArgs="-Dperiscope.db.port.5432.tcp.addr=localhost \
 -Dperiscope.db.port.5432.tcp.port=5432 \
@@ -350,10 +351,11 @@ Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Prof
 
 ### Running Datalake from the Command Line
 To run Datalake from the command line, run the following Gradle command:
-
+* Note: If cloudbreak is in the CB_LOCAL_DEV_LIST variable, the datalake.cloudbreak.url should be http://localhost:9091
 ````
 ./gradlew :datalake:bootRun -PjvmArgs="-Dvault.root.token=<VAULT_ROOT_TOKEN> \
 -Dserver.port=8086 \
+-Ddatalake.cloudbreak.url=http://localhost:8080
 -Dspring.config.location=$(pwd)/datalake/src/main/resources/application.yml,$(pwd)/datalake/build/resources/main/application.properties"
 ````
 
@@ -389,7 +391,7 @@ export CB_AWS_ACCOUNT_ID=...
 ```
 
 then run the following Gradle command:
-
+* Note: If cloudbreak is in the CB_LOCAL_DEV_LIST variable, the redbeams.cloudbreak.url should be http://localhost:9091
 ```
 ./gradlew :redbeams:bootRun --no-daemon -PjvmArgs="-Dredbeams.db.port.5432.tcp.addr=localhost \
 -Dredbeams.db.port.5432.tcp.port=5432 \
@@ -413,7 +415,7 @@ export CB_AWS_ACCOUNT_ID=...
 ```
 
 then run the following Gradle command:
-
+* Note: If cloudbreak is in the CB_LOCAL_DEV_LIST variable, the environment.cloudbreak.url should be http://localhost:9091
 ```
 ./gradlew :environment:bootRun -PjvmArgs="\
 -Denvironment.cloudbreak.url=http://localhost:8080 \
