@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,10 +25,13 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.service.NoSqlTableCreationModeDeterminerService;
 import com.sequenceiq.environment.parameters.dao.domain.S3GuardTableCreation;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @ExtendWith(MockitoExtension.class)
-class AwsParameterValidatorTest {
+class AwsParameterProcessorTest {
+
+    private static final Long ENV_ID = 1L;
 
     @Mock
     private NoSqlTableCreationModeDeterminerService noSqlTableCreationModeDeterminerService;
@@ -36,7 +40,7 @@ class AwsParameterValidatorTest {
     private ParametersService parametersService;
 
     @InjectMocks
-    private AwsParameterValidator underTest;
+    private AwsParameterProcessor underTest;
 
     private EnvironmentDto environmentDto;
 
@@ -45,6 +49,7 @@ class AwsParameterValidatorTest {
         Credential credential = new Credential();
         credential.setCloudPlatform("platform");
         environmentDto = new EnvironmentDto();
+        environmentDto.setId(ENV_ID);
         environmentDto.setLocation(new LocationDto("location", "location", 1.0, 1.0));
         environmentDto.setCredential(credential);
     }
@@ -54,8 +59,13 @@ class AwsParameterValidatorTest {
         AwsParametersDto awsParameters = AwsParametersDto.builder()
                 .withDynamoDbTableName("tablename")
                 .build();
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAwsParameters(awsParameters)
+                .build();
         when(parametersService.isS3GuardTableUsed(any(), any(), any(), any())).thenReturn(true);
-        ValidationResult validationResult = underTest.validateAndDetermineAwsParameters(environmentDto, awsParameters);
+
+        ValidationResult validationResult = underTest.processAwsParameters(environmentDto, parametersDto);
+
         assertTrue(validationResult.hasError());
         assertEquals(1L, validationResult.getErrors().size());
         assertEquals("S3Guard table 'tablename' is already attached to another active environment. "
@@ -69,11 +79,17 @@ class AwsParameterValidatorTest {
         AwsParametersDto awsParameters = AwsParametersDto.builder()
                 .withDynamoDbTableName("tablename")
                 .build();
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAwsParameters(awsParameters)
+                .build();
         when(parametersService.isS3GuardTableUsed(any(), any(), any(), any())).thenReturn(false);
         when(noSqlTableCreationModeDeterminerService.determineCreationMode(any(), any())).thenReturn(creation);
-        ValidationResult validationResult = underTest.validateAndDetermineAwsParameters(environmentDto, awsParameters);
+
+        ValidationResult validationResult = underTest.processAwsParameters(environmentDto, parametersDto);
+
         assertFalse(validationResult.hasError());
         verify(noSqlTableCreationModeDeterminerService).determineCreationMode(any(), any());
         assertEquals(creation, awsParameters.getDynamoDbTableCreation());
+        verify(parametersService, times(1)).saveParameters(ENV_ID, parametersDto);
     }
 }

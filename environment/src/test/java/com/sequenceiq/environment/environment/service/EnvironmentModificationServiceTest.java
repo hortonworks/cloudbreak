@@ -339,7 +339,7 @@ class EnvironmentModificationServiceTest {
         awsParameters.setS3guardTableName("existingTable");
         BaseParameters baseParameters = awsParameters;
         when(environmentService.getValidatorService()).thenReturn(validatorService);
-        when(environmentFlowValidatorService.validateAndDetermineAwsParameters(any(), any())).thenReturn(validationResult);
+        when(environmentFlowValidatorService.processAwsParameters(any(), any())).thenReturn(validationResult);
         when(validationResult.hasError()).thenReturn(false);
         when(parametersService.findByEnvironment(any())).thenReturn(Optional.of(baseParameters));
         when(environmentService
@@ -371,7 +371,7 @@ class EnvironmentModificationServiceTest {
         awsParameters.setS3guardTableName("existingTable");
         BaseParameters baseParameters = awsParameters;
         when(environmentService.getValidatorService()).thenReturn(validatorService);
-        when(environmentFlowValidatorService.validateAndDetermineAwsParameters(any(), any())).thenReturn(validationResult);
+        when(environmentFlowValidatorService.processAwsParameters(any(), any())).thenReturn(validationResult);
         when(validationResult.hasError()).thenReturn(true);
         when(parametersService.findByEnvironment(any())).thenReturn(Optional.of(baseParameters));
         when(environmentService
