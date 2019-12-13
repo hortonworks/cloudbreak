@@ -97,9 +97,8 @@ public class ComponentConfigProviderService {
     }
 
     public List<Component> store(List<Component> components) {
-        for (Component component : components) {
-            store(component);
-        }
+        componentRepository.saveAll(components);
+        LOGGER.debug("Components saved: {}", components);
         return components;
     }
 

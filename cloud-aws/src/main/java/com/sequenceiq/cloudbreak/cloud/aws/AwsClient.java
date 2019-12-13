@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static com.amazonaws.retry.PredefinedRetryPolicies.DEFAULT_RETRY_CONDITION;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -15,19 +14,19 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.regions.RegionUtils;
-import com.amazonaws.retry.PredefinedBackoffStrategies.EqualJitterBackoffStrategy;
-import com.amazonaws.retry.RetryPolicy;
+import com.amazonaws.retry.PredefinedRetryPolicies;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient;
+import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
@@ -36,7 +35,6 @@ import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -49,6 +47,9 @@ import com.sequenceiq.cloudbreak.service.Retry;
 public class AwsClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsClient.class);
+
+    // Default retries is 3. This allows for more time for backoff during throttling
+    private static final int MAX_CLIENT_RETRIES = 30;
 
     @Inject
     private AwsSessionCredentialClient credentialClient;
@@ -96,27 +97,19 @@ public class AwsClient {
                 : new AWSSecurityTokenServiceClient(createAwsCredentials(awsCredential));
     }
 
-    public AmazonIdentityManagementRetryClient createAmazonIdentityManagementRetryClient(AwsCredentialView awsCredential) {
-        return new AmazonIdentityManagementRetryClient(createAmazonIdentityManagement(awsCredential), retry);
-    }
-
     public AmazonIdentityManagement createAmazonIdentityManagement(AwsCredentialView awsCredential) {
-        return isRoleAssumeRequired(awsCredential)
-                ? new AmazonIdentityManagementClient(createAwsSessionCredentialProvider(awsCredential))
-                : new AmazonIdentityManagementClient(createAwsCredentials(awsCredential));
+        return AmazonIdentityManagementClientBuilder.standard()
+                .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
+                .withClientConfiguration(getDefaultClientConfiguration())
+                .withCredentials(getCredentialProvider(awsCredential))
+                .build();
     }
 
     public AWSKMS createAWSKMS(AwsCredentialView awsCredential, String regionName) {
         return AWSKMSClientBuilder.standard()
-                .withCredentials(getAwsStaticCredentialsProvider(awsCredential))
+                .withCredentials(getCredentialProvider(awsCredential))
                 .withRegion(regionName)
                 .build();
-    }
-
-    public AWSStaticCredentialsProvider getAwsStaticCredentialsProvider(AwsCredentialView awsCredential) {
-        return isRoleAssumeRequired(awsCredential)
-                ? new AWSStaticCredentialsProvider(credentialClient.retrieveCachedSessionCredentials(awsCredential))
-                : new AWSStaticCredentialsProvider(createAwsCredentials(awsCredential));
     }
 
     public AmazonCloudFormationClient createCloudFormationClient(AwsCredentialView awsCredential, String regionName) {
@@ -145,24 +138,27 @@ public class AwsClient {
 
     public AmazonS3 createS3Client(AwsCredentialView awsCredential) {
         return AmazonS3ClientBuilder.standard()
-                .withCredentials(getAwsStaticCredentialsProvider(awsCredential))
+                .withCredentials(getCredentialProvider(awsCredential))
                 .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
                 .build();
     }
 
     public AmazonDynamoDB createDynamoDbClient(AwsCredentialView awsCredential, String region) {
-        final int baseDelay = 100;
-        final int maxDelay = 2000;
-        final int maxRetries = 30;
-        EqualJitterBackoffStrategy backoffStrategy = new EqualJitterBackoffStrategy(baseDelay, maxDelay);
-        ClientConfiguration clientConfig = new ClientConfiguration()
-                .withRetryPolicy(new RetryPolicy(DEFAULT_RETRY_CONDITION, backoffStrategy, maxRetries, true))
-                .withMaxErrorRetry(maxRetries);
         return AmazonDynamoDBClientBuilder.standard()
-                .withCredentials(getAwsStaticCredentialsProvider(awsCredential))
+                .withClientConfiguration(getDynamoDbClientConfiguration())
+                .withCredentials(getCredentialProvider(awsCredential))
                 .withRegion(region)
-                .withClientConfiguration(clientConfig)
                 .build();
+    }
+
+    private ClientConfiguration getDefaultClientConfiguration() {
+        return new ClientConfiguration()
+                .withRetryPolicy(PredefinedRetryPolicies.getDefaultRetryPolicyWithCustomMaxRetries(MAX_CLIENT_RETRIES));
+    }
+
+    private ClientConfiguration getDynamoDbClientConfiguration() {
+        return new ClientConfiguration()
+                .withRetryPolicy(PredefinedRetryPolicies.getDynamoDBDefaultRetryPolicyWithCustomMaxRetries(MAX_CLIENT_RETRIES));
     }
 
     public String getCbName(String groupName, Long number) {
@@ -223,6 +219,12 @@ public class AwsClient {
 
     private boolean isRoleAssumeRequired(AwsCredentialView awsCredential) {
         return isNotEmpty(awsCredential.getRoleArn()) && isEmpty(awsCredential.getAccessKey()) && isEmpty(awsCredential.getSecretKey());
+    }
+
+    private AWSCredentialsProvider getCredentialProvider(AwsCredentialView awsCredential) {
+        return isRoleAssumeRequired(awsCredential) ?
+                createAwsSessionCredentialProvider(awsCredential)
+                : new AWSStaticCredentialsProvider(createAwsCredentials(awsCredential));
     }
 
     private BasicAWSCredentials createAwsCredentials(AwsCredentialView credentialView) {

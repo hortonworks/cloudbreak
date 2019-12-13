@@ -24,6 +24,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.template.views.ProductDetailsView;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -392,6 +397,47 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     public void testConvertCloudPlatformMatches() {
         TemplatePreparationObject result = underTest.convert(source);
         assertEquals(CloudPlatform.AWS, result.getCloudPlatform());
+    }
+
+    @Test
+    public void testConvertWhenCmAndProductDetailsPresent() {
+        final String cmBaseUrl = "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1677091/cm7/7.0.2/redhat7/yum/";
+        final String cmGpgUrl = "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1677091/cm7/7.0.2/redhat7/yum/RPM-GPG-KEY-cloudera";
+        final String cmVersion = "7.0.2";
+        ClouderaManagerRepositoryV4Request cmRepo = new ClouderaManagerRepositoryV4Request()
+                .withBaseUrl(cmBaseUrl)
+                .withGpgKeyUrl(cmGpgUrl)
+                .withVersion(cmVersion);
+
+        final String smmName = "STREAMS_MESSAGING_MANAGER";
+        final String smmVersion = "2.1.0.3.0.0.0-97";
+        final String smmParcel = "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-97/tars/parcel/";
+        final String smmCsd = "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-97/tars/parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar";
+        ClouderaManagerProductV4Request smm = new ClouderaManagerProductV4Request()
+                .withName(smmName)
+                .withVersion(smmVersion)
+                .withParcel(smmParcel)
+                .withCsd(List.of(smmCsd));
+
+        ClouderaManagerV4Request cm = new ClouderaManagerV4Request()
+                .withEnableAutoTls(true)
+                .withRepository(cmRepo)
+                .withProducts(List.of(smm));
+
+        when(cluster.getCm()).thenReturn(cm);
+        TemplatePreparationObject result = underTest.convert(source);
+
+        ProductDetailsView products = result.getProductDetailsView();
+        assertNotNull(products);
+        assertEquals(cmBaseUrl, products.getCm().getBaseUrl());
+        assertEquals(cmVersion, products.getCm().getVersion());
+        assertEquals(cmGpgUrl, products.getCm().getGpgKeyUrl());
+        assertEquals(1, products.getProducts().size());
+        ClouderaManagerProduct smmResult = products.getProducts().get(0);
+        assertEquals(smmName, smmResult.getName());
+        assertEquals(smmVersion, smmResult.getVersion());
+        assertEquals(smmParcel, smmResult.getParcel());
+        assertEquals(List.of(smmCsd), smmResult.getCsd());
     }
 
     @Test

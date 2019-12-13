@@ -39,6 +39,11 @@ spring:
     prefer-file-system-access: false
   datasource:
     maxActive: 30
+  jpa:
+    properties:
+      hibernate:
+        jdbc.batch_size: 50
+        order_inserts: true
 
 rest:
   debug: false
@@ -137,6 +142,10 @@ cb:
                               m5.2xlarge,
                               m5.4xlarge,
                               m5.8xlarge,
+                              d2.xlarge,
+                              d2.2xlarge,
+                              d2.4xlarge,
+                              d2.8xlarge,
                               r5.2xlarge,
                               r5.4xlarge,
                               r5.8xlarge,
@@ -180,7 +189,8 @@ cb:
                               Standard_L16s,
                               Standard_L32s,
                               Standard_NC6,
-                              Standard_NC24r
+                              Standard_NC24r,
+                              Standard_L48s_v2
 
   os:
     enable.autoimport: true
@@ -207,8 +217,8 @@ cb:
                 CDP 1.2 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-702;
                 CDP 1.2 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-702;
                 CDP 1.2 - Data Engineering Hue HA: Apache Spark, Apache Hive, Hue, Apache Oozie=cdp-data-engineering-hueha-702;
-                CDP 1.2 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-710;
-                CDP 1.2 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small-710;
+                CDP 1.2 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-702;
+                CDP 1.2 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small-702;
 
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws

@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.DisableProxyAuthFeature;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.client.SetProxyTimeoutFeature;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -64,6 +65,8 @@ public class SaltConnector implements Closeable {
 
     private static final List<Integer> ACCEPTED_STATUSES = Arrays.asList(HttpStatus.SC_OK, HttpStatus.SC_CREATED, HttpStatus.SC_ACCEPTED);
 
+    private static final int PROXY_TIMEOUT = 90000;
+
     private final Client restClient;
 
     private final WebTarget saltTarget;
@@ -77,8 +80,10 @@ public class SaltConnector implements Closeable {
             restClient = RestClientUtil.createClient(
                     gatewayConfig.getServerCert(), gatewayConfig.getClientCert(), gatewayConfig.getClientKey(), debug);
             String saltBootPasswd = Optional.ofNullable(gatewayConfig.getSaltBootPassword()).orElse(SALT_BOOT_PASSWORD);
-            HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(SALT_BOOT_USER, saltBootPasswd);
-            saltTarget = restClient.target(gatewayConfig.getGatewayUrl()).register(feature).register(new DisableProxyAuthFeature());
+            saltTarget = restClient.target(gatewayConfig.getGatewayUrl())
+                    .register(HttpAuthenticationFeature.basic(SALT_BOOT_USER, saltBootPasswd))
+                    .register(new DisableProxyAuthFeature())
+                    .register(new SetProxyTimeoutFeature(PROXY_TIMEOUT));
             saltPassword = Optional.ofNullable(gatewayConfig.getSaltPassword()).orElse(SALT_PASSWORD);
             signatureKey = gatewayConfig.getSignatureKey();
         } catch (Exception e) {
