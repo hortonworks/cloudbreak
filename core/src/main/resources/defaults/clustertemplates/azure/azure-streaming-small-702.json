@@ -3,6 +3,7 @@
   "description": "",
   "type": "STREAMING",
   "cloudPlatform": "AZURE",
+  "featureState": "PREVIEW",
   "distroXTemplate": {
     "cluster": {
       "blueprintName": "CDP 1.2 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager"
