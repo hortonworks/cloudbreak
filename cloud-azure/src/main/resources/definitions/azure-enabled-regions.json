@@ -169,6 +169,16 @@
       "name": "South Africa West",
       "latitude": "-34.075691",
       "longitude": "18.843266"
+    },
+    {
+      "name": "Switzerland North",
+      "latitude": "47.451542",
+      "longitude": "8.564572"
+    },
+    {
+      "name": "Switzerland West",
+      "latitude": "46.204391",
+      "longitude": "6.143158"
     }
   ]
 }
