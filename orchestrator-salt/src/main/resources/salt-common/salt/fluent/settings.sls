@@ -55,6 +55,23 @@
 {% set service_path_log_suffix = '%Y-%m-%d/%H/\${tag[1]}-#{Socket.gethostname}-%M' %}
 {% set cm_command_path_log_suffix = '%Y-%m-%d/%H/CM_COMMAND-\${tag[6]}-\${tag[1]}-#{Socket.gethostname}-%M' %}
 
+{% set number_of_workers=0 %}
+{% set cloud_storage_worker_index=0 %}
+{% set metering_worker_index=0 %}
+{% set report_deployment_logs_worker_index=0 %}
+{% if cloud_storage_logging_enabled %}
+{%   set cloud_storage_worker_index=number_of_workers %}
+{%   set number_of_workers=number_of_workers+1 %}
+{% endif %}
+{% if dbus_metering_enabled %}
+{%   set metering_worker_index=number_of_workers %}
+{%   set number_of_workers=number_of_workers+1 %}
+{% endif %}
+{% if dbus_report_deployment_logs_enabled %}
+{%   set report_deployment_logs_worker_index=number_of_workers %}
+{%   set number_of_workers=number_of_workers+1 %}
+{% endif %}
+
 {% do fluent.update({
     "enabled": fluent_enabled,
     "is_systemd" : is_systemd,
@@ -81,5 +98,9 @@
     "clouderaPublicGemRepo": cloudera_public_gem_repo,
     "clouderaAzurePluginVersion": cloudera_azure_plugin_version,
     "clouderaDatabusPluginVersion": cloudera_databus_plugin_version,
+    "numberOfWorkers": number_of_workers,
+    "cloudStorageWorkerIndex": cloud_storage_worker_index,
+    "meteringWorkerIndex": metering_worker_index,
+    "reportDeploymentLogsWorkerIndex": report_deployment_logs_worker_index,
     "platform": platform
 }) %}

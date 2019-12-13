@@ -1,6 +1,7 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {%- from 'databus/settings.sls' import databus with context %}
 {%- if databus.valid and fluent.dbusMeteringEnabled %}
+<worker {{ fluent.meteringWorkerIndex }}>
 <source>
   @type tail
   format none
@@ -34,6 +35,7 @@
     </buffer>
   </store>
 </match>
+</worker>
 {% elif fluent.dbusMeteringEnabled %}
 # DBUS settings are not valid - check dbus credentials file
 {% else %}

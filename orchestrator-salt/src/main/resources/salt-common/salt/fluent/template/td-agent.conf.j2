@@ -1,5 +1,8 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 # CONFIGURED BY SALT - do not edit
+<system>
+  workers {{ numberOfWorkers }}
+</system>
 {% if databusReportDeploymentLogs == "true" %}# DATABUS - CLUSTER BUNDLE LOGS ENABLED - do not edit{% endif %}
 {% if fluent.cloudStorageLoggingEnabled %}
 @include input.conf
