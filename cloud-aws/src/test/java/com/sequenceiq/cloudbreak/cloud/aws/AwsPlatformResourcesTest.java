@@ -134,7 +134,7 @@ public class AwsPlatformResourcesTest {
         when(amazonCFClient.listInstanceProfiles(any(ListInstanceProfilesRequest.class))).thenThrow(amazonServiceException);
 
         thrown.expect(CloudConnectorException.class);
-        thrown.expectMessage("Could not get instance profile roles because the user does not have enough permission.");
+        thrown.expectMessage("unauthorized.");
 
         CloudAccessConfigs cloudAccessConfigs =
                 underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), new HashMap<>());
@@ -152,7 +152,7 @@ public class AwsPlatformResourcesTest {
         when(amazonCFClient.listInstanceProfiles(any(ListInstanceProfilesRequest.class))).thenThrow(amazonServiceException);
 
         thrown.expect(CloudConnectorException.class);
-        thrown.expectMessage("Could not get instance profile roles from Amazon: Amazon problem.");
+        thrown.expectMessage("Amazon problem.");
 
         CloudAccessConfigs cloudAccessConfigs =
                 underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());
@@ -168,7 +168,7 @@ public class AwsPlatformResourcesTest {
         when(amazonCFClient.listInstanceProfiles(any(ListInstanceProfilesRequest.class))).thenThrow(badRequestException);
 
         thrown.expect(CloudConnectorException.class);
-        thrown.expectMessage("Could not get instance profile roles from Amazon: BadRequestException problem.");
+        thrown.expectMessage("BadRequestException problem.");
 
         CloudAccessConfigs cloudAccessConfigs =
                 underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());

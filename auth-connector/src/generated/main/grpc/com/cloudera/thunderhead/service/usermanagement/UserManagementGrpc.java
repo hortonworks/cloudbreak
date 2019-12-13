@@ -957,6 +957,43 @@ public final class UserManagementGrpc {
      return getCreateAccountMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getCreateTrialAccountMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> METHOD_CREATE_TRIAL_ACCOUNT = getCreateTrialAccountMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> getCreateTrialAccountMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> getCreateTrialAccountMethod() {
+    return getCreateTrialAccountMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> getCreateTrialAccountMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> getCreateTrialAccountMethod;
+    if ((getCreateTrialAccountMethod = UserManagementGrpc.getCreateTrialAccountMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getCreateTrialAccountMethod = UserManagementGrpc.getCreateTrialAccountMethod) == null) {
+          UserManagementGrpc.getCreateTrialAccountMethod = getCreateTrialAccountMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "CreateTrialAccount"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateTrialAccount"))
+                  .build();
+          }
+        }
+     }
+     return getCreateTrialAccountMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getGrantEntitlementMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse> METHOD_GRANT_ENTITLEMENT = getGrantEntitlementMethodHelper();
@@ -3028,6 +3065,191 @@ public final class UserManagementGrpc {
      }
      return getGetEventGenerationIdsMethod;
   }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getAddActorSshPublicKeyMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> METHOD_ADD_ACTOR_SSH_PUBLIC_KEY = getAddActorSshPublicKeyMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> getAddActorSshPublicKeyMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> getAddActorSshPublicKeyMethod() {
+    return getAddActorSshPublicKeyMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> getAddActorSshPublicKeyMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> getAddActorSshPublicKeyMethod;
+    if ((getAddActorSshPublicKeyMethod = UserManagementGrpc.getAddActorSshPublicKeyMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getAddActorSshPublicKeyMethod = UserManagementGrpc.getAddActorSshPublicKeyMethod) == null) {
+          UserManagementGrpc.getAddActorSshPublicKeyMethod = getAddActorSshPublicKeyMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "AddActorSshPublicKey"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AddActorSshPublicKey"))
+                  .build();
+          }
+        }
+     }
+     return getAddActorSshPublicKeyMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getListActorSshPublicKeysMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> METHOD_LIST_ACTOR_SSH_PUBLIC_KEYS = getListActorSshPublicKeysMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> getListActorSshPublicKeysMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> getListActorSshPublicKeysMethod() {
+    return getListActorSshPublicKeysMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> getListActorSshPublicKeysMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> getListActorSshPublicKeysMethod;
+    if ((getListActorSshPublicKeysMethod = UserManagementGrpc.getListActorSshPublicKeysMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getListActorSshPublicKeysMethod = UserManagementGrpc.getListActorSshPublicKeysMethod) == null) {
+          UserManagementGrpc.getListActorSshPublicKeysMethod = getListActorSshPublicKeysMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "ListActorSshPublicKeys"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListActorSshPublicKeys"))
+                  .build();
+          }
+        }
+     }
+     return getListActorSshPublicKeysMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getDescribeActorSshPublicKeyMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> METHOD_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = getDescribeActorSshPublicKeyMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> getDescribeActorSshPublicKeyMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> getDescribeActorSshPublicKeyMethod() {
+    return getDescribeActorSshPublicKeyMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> getDescribeActorSshPublicKeyMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> getDescribeActorSshPublicKeyMethod;
+    if ((getDescribeActorSshPublicKeyMethod = UserManagementGrpc.getDescribeActorSshPublicKeyMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getDescribeActorSshPublicKeyMethod = UserManagementGrpc.getDescribeActorSshPublicKeyMethod) == null) {
+          UserManagementGrpc.getDescribeActorSshPublicKeyMethod = getDescribeActorSshPublicKeyMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "DescribeActorSshPublicKey"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DescribeActorSshPublicKey"))
+                  .build();
+          }
+        }
+     }
+     return getDescribeActorSshPublicKeyMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getDeleteActorSshPublicKeyMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> METHOD_DELETE_ACTOR_SSH_PUBLIC_KEY = getDeleteActorSshPublicKeyMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> getDeleteActorSshPublicKeyMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> getDeleteActorSshPublicKeyMethod() {
+    return getDeleteActorSshPublicKeyMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> getDeleteActorSshPublicKeyMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> getDeleteActorSshPublicKeyMethod;
+    if ((getDeleteActorSshPublicKeyMethod = UserManagementGrpc.getDeleteActorSshPublicKeyMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getDeleteActorSshPublicKeyMethod = UserManagementGrpc.getDeleteActorSshPublicKeyMethod) == null) {
+          UserManagementGrpc.getDeleteActorSshPublicKeyMethod = getDeleteActorSshPublicKeyMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "DeleteActorSshPublicKey"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteActorSshPublicKey"))
+                  .build();
+          }
+        }
+     }
+     return getDeleteActorSshPublicKeyMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getSetWorkloadPasswordPolicyMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> METHOD_SET_WORKLOAD_PASSWORD_POLICY = getSetWorkloadPasswordPolicyMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> getSetWorkloadPasswordPolicyMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> getSetWorkloadPasswordPolicyMethod() {
+    return getSetWorkloadPasswordPolicyMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> getSetWorkloadPasswordPolicyMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> getSetWorkloadPasswordPolicyMethod;
+    if ((getSetWorkloadPasswordPolicyMethod = UserManagementGrpc.getSetWorkloadPasswordPolicyMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getSetWorkloadPasswordPolicyMethod = UserManagementGrpc.getSetWorkloadPasswordPolicyMethod) == null) {
+          UserManagementGrpc.getSetWorkloadPasswordPolicyMethod = getSetWorkloadPasswordPolicyMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "SetWorkloadPasswordPolicy"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetWorkloadPasswordPolicy"))
+                  .build();
+          }
+        }
+     }
+     return getSetWorkloadPasswordPolicyMethod;
+  }
 
   /**
    * Creates a new async stub that supports all call types for the service
@@ -3313,12 +3535,22 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Create an account.
+     * Create a regular account.
      * </pre>
      */
     public void createAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getCreateAccountMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Create a trial account.
+     * </pre>
+     */
+    public void createTrialAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getCreateTrialAccountMethodHelper(), responseObserver);
     }
 
     /**
@@ -3907,6 +4139,56 @@ public final class UserManagementGrpc {
       asyncUnimplementedUnaryCall(getGetEventGenerationIdsMethodHelper(), responseObserver);
     }
 
+    /**
+     * <pre>
+     * Adds an SSH public key for an actor.
+     * </pre>
+     */
+    public void addActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getAddActorSshPublicKeyMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Lists the SSH public keys for an actor.
+     * </pre>
+     */
+    public void listActorSshPublicKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getListActorSshPublicKeysMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Describes an SSH public key.
+     * </pre>
+     */
+    public void describeActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getDescribeActorSshPublicKeyMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Deletes an SSH public key for an actor.
+     * </pre>
+     */
+    public void deleteActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getDeleteActorSshPublicKeyMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Sets the workload password policy for an account.
+     * </pre>
+     */
+    public void setWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetWorkloadPasswordPolicyMethodHelper(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -4084,6 +4366,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse>(
                   this, METHODID_CREATE_ACCOUNT)))
+          .addMethod(
+            getCreateTrialAccountMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse>(
+                  this, METHODID_CREATE_TRIAL_ACCOUNT)))
           .addMethod(
             getGrantEntitlementMethodHelper(),
             asyncUnaryCall(
@@ -4476,6 +4765,41 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse>(
                   this, METHODID_GET_EVENT_GENERATION_IDS)))
+          .addMethod(
+            getAddActorSshPublicKeyMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse>(
+                  this, METHODID_ADD_ACTOR_SSH_PUBLIC_KEY)))
+          .addMethod(
+            getListActorSshPublicKeysMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse>(
+                  this, METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS)))
+          .addMethod(
+            getDescribeActorSshPublicKeyMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse>(
+                  this, METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY)))
+          .addMethod(
+            getDeleteActorSshPublicKeyMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse>(
+                  this, METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY)))
+          .addMethod(
+            getSetWorkloadPasswordPolicyMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse>(
+                  this, METHODID_SET_WORKLOAD_PASSWORD_POLICY)))
           .build();
     }
   }
@@ -4779,13 +5103,24 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Create an account.
+     * Create a regular account.
      * </pre>
      */
     public void createAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getCreateAccountMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Create a trial account.
+     * </pre>
+     */
+    public void createTrialAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getCreateTrialAccountMethodHelper(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -5429,6 +5764,61 @@ public final class UserManagementGrpc {
       asyncUnaryCall(
           getChannel().newCall(getGetEventGenerationIdsMethodHelper(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * Adds an SSH public key for an actor.
+     * </pre>
+     */
+    public void addActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getAddActorSshPublicKeyMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Lists the SSH public keys for an actor.
+     * </pre>
+     */
+    public void listActorSshPublicKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getListActorSshPublicKeysMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Describes an SSH public key.
+     * </pre>
+     */
+    public void describeActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getDescribeActorSshPublicKeyMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Deletes an SSH public key for an actor.
+     * </pre>
+     */
+    public void deleteActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getDeleteActorSshPublicKeyMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Sets the workload password policy for an account.
+     * </pre>
+     */
+    public void setWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetWorkloadPasswordPolicyMethodHelper(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -5706,12 +6096,22 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Create an account.
+     * Create a regular account.
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse createAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest request) {
       return blockingUnaryCall(
           getChannel(), getCreateAccountMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Create a trial account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse createTrialAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getCreateTrialAccountMethodHelper(), getCallOptions(), request);
     }
 
     /**
@@ -6299,6 +6699,56 @@ public final class UserManagementGrpc {
       return blockingUnaryCall(
           getChannel(), getGetEventGenerationIdsMethodHelper(), getCallOptions(), request);
     }
+
+    /**
+     * <pre>
+     * Adds an SSH public key for an actor.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse addActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getAddActorSshPublicKeyMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Lists the SSH public keys for an actor.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse listActorSshPublicKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getListActorSshPublicKeysMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Describes an SSH public key.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse describeActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getDescribeActorSshPublicKeyMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Deletes an SSH public key for an actor.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse deleteActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getDeleteActorSshPublicKeyMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Sets the workload password policy for an account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse setWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSetWorkloadPasswordPolicyMethodHelper(), getCallOptions(), request);
+    }
   }
 
   /**
@@ -6600,13 +7050,24 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Create an account.
+     * Create a regular account.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse> createAccount(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest request) {
       return futureUnaryCall(
           getChannel().newCall(getCreateAccountMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Create a trial account.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> createTrialAccount(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getCreateTrialAccountMethodHelper(), getCallOptions()), request);
     }
 
     /**
@@ -7250,6 +7711,61 @@ public final class UserManagementGrpc {
       return futureUnaryCall(
           getChannel().newCall(getGetEventGenerationIdsMethodHelper(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Adds an SSH public key for an actor.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> addActorSshPublicKey(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getAddActorSshPublicKeyMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Lists the SSH public keys for an actor.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> listActorSshPublicKeys(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getListActorSshPublicKeysMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Describes an SSH public key.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> describeActorSshPublicKey(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getDescribeActorSshPublicKeyMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Deletes an SSH public key for an actor.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> deleteActorSshPublicKey(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getDeleteActorSshPublicKeyMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Sets the workload password policy for an account.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> setWorkloadPasswordPolicy(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetWorkloadPasswordPolicyMethodHelper(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_INTERACTIVE_LOGIN = 0;
@@ -7277,62 +7793,68 @@ public final class UserManagementGrpc {
   private static final int METHODID_GET_RIGHTS = 22;
   private static final int METHODID_CHECK_RIGHTS = 23;
   private static final int METHODID_CREATE_ACCOUNT = 24;
-  private static final int METHODID_GRANT_ENTITLEMENT = 25;
-  private static final int METHODID_REVOKE_ENTITLEMENT = 26;
-  private static final int METHODID_ASSIGN_ROLE = 27;
-  private static final int METHODID_UNASSIGN_ROLE = 28;
-  private static final int METHODID_LIST_ASSIGNED_ROLES = 29;
-  private static final int METHODID_ASSIGN_RESOURCE_ROLE = 30;
-  private static final int METHODID_UNASSIGN_RESOURCE_ROLE = 31;
-  private static final int METHODID_LIST_ASSIGNED_RESOURCE_ROLES = 32;
-  private static final int METHODID_LIST_ROLES = 33;
-  private static final int METHODID_LIST_RESOURCE_ROLES = 34;
-  private static final int METHODID_LIST_RESOURCE_ASSIGNEES = 35;
-  private static final int METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = 36;
-  private static final int METHODID_INITIATE_SUPPORT_CASE = 37;
-  private static final int METHODID_NOTIFY_RESOURCE_DELETED = 38;
-  private static final int METHODID_CREATE_MACHINE_USER = 39;
-  private static final int METHODID_LIST_MACHINE_USERS = 40;
-  private static final int METHODID_DELETE_MACHINE_USER = 41;
-  private static final int METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS = 42;
-  private static final int METHODID_SET_ACCOUNT_MESSAGES = 43;
-  private static final int METHODID_ACCEPT_TERMS = 44;
-  private static final int METHODID_CLEAR_ACCEPTED_TERMS = 45;
-  private static final int METHODID_DESCRIBE_TERMS = 46;
-  private static final int METHODID_LIST_TERMS = 47;
-  private static final int METHODID_LIST_ENTITLEMENTS = 48;
-  private static final int METHODID_SET_TERMS_ACCEPTANCE_EXPIRY = 49;
-  private static final int METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = 50;
-  private static final int METHODID_INSERT_AZURE_SUBSCRIPTION = 51;
-  private static final int METHODID_CREATE_GROUP = 52;
-  private static final int METHODID_DELETE_GROUP = 53;
-  private static final int METHODID_LIST_GROUPS = 54;
-  private static final int METHODID_UPDATE_GROUP = 55;
-  private static final int METHODID_ADD_MEMBER_TO_GROUP = 56;
-  private static final int METHODID_REMOVE_MEMBER_FROM_GROUP = 57;
-  private static final int METHODID_LIST_GROUP_MEMBERS = 58;
-  private static final int METHODID_LIST_GROUPS_FOR_MEMBER = 59;
-  private static final int METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY = 60;
-  private static final int METHODID_GET_CLUSTER_SSH_PRIVATE_KEY = 61;
-  private static final int METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION = 62;
-  private static final int METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR = 63;
-  private static final int METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS = 64;
-  private static final int METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR = 65;
-  private static final int METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR = 66;
-  private static final int METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR = 67;
-  private static final int METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED = 68;
-  private static final int METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = 69;
-  private static final int METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ = 70;
-  private static final int METHODID_SET_WORKLOAD_SUBDOMAIN = 71;
-  private static final int METHODID_CREATE_WORKLOAD_MACHINE_USER = 72;
-  private static final int METHODID_DELETE_WORKLOAD_MACHINE_USER = 73;
-  private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 74;
-  private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 75;
-  private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 76;
-  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS = 77;
-  private static final int METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS = 78;
-  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 79;
-  private static final int METHODID_GET_EVENT_GENERATION_IDS = 80;
+  private static final int METHODID_CREATE_TRIAL_ACCOUNT = 25;
+  private static final int METHODID_GRANT_ENTITLEMENT = 26;
+  private static final int METHODID_REVOKE_ENTITLEMENT = 27;
+  private static final int METHODID_ASSIGN_ROLE = 28;
+  private static final int METHODID_UNASSIGN_ROLE = 29;
+  private static final int METHODID_LIST_ASSIGNED_ROLES = 30;
+  private static final int METHODID_ASSIGN_RESOURCE_ROLE = 31;
+  private static final int METHODID_UNASSIGN_RESOURCE_ROLE = 32;
+  private static final int METHODID_LIST_ASSIGNED_RESOURCE_ROLES = 33;
+  private static final int METHODID_LIST_ROLES = 34;
+  private static final int METHODID_LIST_RESOURCE_ROLES = 35;
+  private static final int METHODID_LIST_RESOURCE_ASSIGNEES = 36;
+  private static final int METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = 37;
+  private static final int METHODID_INITIATE_SUPPORT_CASE = 38;
+  private static final int METHODID_NOTIFY_RESOURCE_DELETED = 39;
+  private static final int METHODID_CREATE_MACHINE_USER = 40;
+  private static final int METHODID_LIST_MACHINE_USERS = 41;
+  private static final int METHODID_DELETE_MACHINE_USER = 42;
+  private static final int METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS = 43;
+  private static final int METHODID_SET_ACCOUNT_MESSAGES = 44;
+  private static final int METHODID_ACCEPT_TERMS = 45;
+  private static final int METHODID_CLEAR_ACCEPTED_TERMS = 46;
+  private static final int METHODID_DESCRIBE_TERMS = 47;
+  private static final int METHODID_LIST_TERMS = 48;
+  private static final int METHODID_LIST_ENTITLEMENTS = 49;
+  private static final int METHODID_SET_TERMS_ACCEPTANCE_EXPIRY = 50;
+  private static final int METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = 51;
+  private static final int METHODID_INSERT_AZURE_SUBSCRIPTION = 52;
+  private static final int METHODID_CREATE_GROUP = 53;
+  private static final int METHODID_DELETE_GROUP = 54;
+  private static final int METHODID_LIST_GROUPS = 55;
+  private static final int METHODID_UPDATE_GROUP = 56;
+  private static final int METHODID_ADD_MEMBER_TO_GROUP = 57;
+  private static final int METHODID_REMOVE_MEMBER_FROM_GROUP = 58;
+  private static final int METHODID_LIST_GROUP_MEMBERS = 59;
+  private static final int METHODID_LIST_GROUPS_FOR_MEMBER = 60;
+  private static final int METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY = 61;
+  private static final int METHODID_GET_CLUSTER_SSH_PRIVATE_KEY = 62;
+  private static final int METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION = 63;
+  private static final int METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR = 64;
+  private static final int METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS = 65;
+  private static final int METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR = 66;
+  private static final int METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR = 67;
+  private static final int METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR = 68;
+  private static final int METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED = 69;
+  private static final int METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = 70;
+  private static final int METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ = 71;
+  private static final int METHODID_SET_WORKLOAD_SUBDOMAIN = 72;
+  private static final int METHODID_CREATE_WORKLOAD_MACHINE_USER = 73;
+  private static final int METHODID_DELETE_WORKLOAD_MACHINE_USER = 74;
+  private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 75;
+  private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 76;
+  private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 77;
+  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS = 78;
+  private static final int METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS = 79;
+  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 80;
+  private static final int METHODID_GET_EVENT_GENERATION_IDS = 81;
+  private static final int METHODID_ADD_ACTOR_SSH_PUBLIC_KEY = 82;
+  private static final int METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS = 83;
+  private static final int METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = 84;
+  private static final int METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY = 85;
+  private static final int METHODID_SET_WORKLOAD_PASSWORD_POLICY = 86;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -7450,6 +7972,10 @@ public final class UserManagementGrpc {
         case METHODID_CREATE_ACCOUNT:
           serviceImpl.createAccount((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse>) responseObserver);
+          break;
+        case METHODID_CREATE_TRIAL_ACCOUNT:
+          serviceImpl.createTrialAccount((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse>) responseObserver);
           break;
         case METHODID_GRANT_ENTITLEMENT:
           serviceImpl.grantEntitlement((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest) request,
@@ -7675,6 +8201,26 @@ public final class UserManagementGrpc {
           serviceImpl.getEventGenerationIds((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse>) responseObserver);
           break;
+        case METHODID_ADD_ACTOR_SSH_PUBLIC_KEY:
+          serviceImpl.addActorSshPublicKey((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse>) responseObserver);
+          break;
+        case METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS:
+          serviceImpl.listActorSshPublicKeys((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse>) responseObserver);
+          break;
+        case METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY:
+          serviceImpl.describeActorSshPublicKey((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse>) responseObserver);
+          break;
+        case METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY:
+          serviceImpl.deleteActorSshPublicKey((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse>) responseObserver);
+          break;
+        case METHODID_SET_WORKLOAD_PASSWORD_POLICY:
+          serviceImpl.setWorkloadPasswordPolicy((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse>) responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -7761,6 +8307,7 @@ public final class UserManagementGrpc {
               .addMethod(getGetRightsMethodHelper())
               .addMethod(getCheckRightsMethodHelper())
               .addMethod(getCreateAccountMethodHelper())
+              .addMethod(getCreateTrialAccountMethodHelper())
               .addMethod(getGrantEntitlementMethodHelper())
               .addMethod(getRevokeEntitlementMethodHelper())
               .addMethod(getAssignRoleMethodHelper())
@@ -7817,6 +8364,11 @@ public final class UserManagementGrpc {
               .addMethod(getSetActorWorkloadCredentialsMethodHelper())
               .addMethod(getGetActorWorkloadCredentialsMethodHelper())
               .addMethod(getGetEventGenerationIdsMethodHelper())
+              .addMethod(getAddActorSshPublicKeyMethodHelper())
+              .addMethod(getListActorSshPublicKeysMethodHelper())
+              .addMethod(getDescribeActorSshPublicKeyMethodHelper())
+              .addMethod(getDeleteActorSshPublicKeyMethodHelper())
+              .addMethod(getSetWorkloadPasswordPolicyMethodHelper())
               .build();
         }
       }

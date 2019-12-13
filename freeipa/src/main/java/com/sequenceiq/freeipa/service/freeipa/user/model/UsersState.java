@@ -2,12 +2,12 @@ package com.sequenceiq.freeipa.service.freeipa.user.model;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
 public class UsersState {
@@ -17,18 +17,11 @@ public class UsersState {
 
     private Multimap<String, String> groupMembership;
 
-    private Map<String, WorkloadCredential> usersWorkloadCredentialMap;
-
-    private Set<FmsUser> requestedWorkloadUsers = new HashSet<>();
-
     public UsersState(
-        Set<FmsGroup> groups, Set<FmsUser> users, Multimap<String, String> groupMembership,
-        Map<String, WorkloadCredential> usersWorkloadCredentialMap, Set<FmsUser> requestedWorkloadUsers) {
-        this.groups = requireNonNull(groups);
-        this.users = requireNonNull(users);
-        this.groupMembership = requireNonNull(groupMembership);
-        this.usersWorkloadCredentialMap = usersWorkloadCredentialMap;
-        this.requestedWorkloadUsers = requestedWorkloadUsers;
+        Set<FmsGroup> groups, Set<FmsUser> users, Multimap<String, String> groupMembership) {
+        this.groups = ImmutableSet.copyOf(requireNonNull(groups, "groups is null"));
+        this.users = ImmutableSet.copyOf(requireNonNull(users, "users is null"));
+        this.groupMembership = ImmutableMultimap.copyOf(requireNonNull(groupMembership, "group membership is null"));
     }
 
     public Set<FmsGroup> getGroups() {
@@ -41,14 +34,6 @@ public class UsersState {
 
     public Multimap<String, String> getGroupMembership() {
         return groupMembership;
-    }
-
-    public Map<String, WorkloadCredential> getUsersWorkloadCredentialMap() {
-        return usersWorkloadCredentialMap;
-    }
-
-    public Set<FmsUser> getRequestedWorkloadUsers() {
-        return requestedWorkloadUsers;
     }
 
     @Override
@@ -67,33 +52,23 @@ public class UsersState {
 
         private Multimap<String, String> groupMembership = HashMultimap.create();
 
-        private Map<String, WorkloadCredential> workloadCredentialMap = new HashMap<>();
-
-        private Set<FmsUser> requestedWorkloadUsers = new HashSet<>();
-
-        public void addGroup(FmsGroup fmsGroup) {
+        public Builder addGroup(FmsGroup fmsGroup) {
             fmsGroups.add(fmsGroup);
+            return this;
         }
 
-        public void addUser(FmsUser fmsUser) {
+        public Builder addUser(FmsUser fmsUser) {
             fmsUsers.add(fmsUser);
+            return this;
         }
 
-        public void addMemberToGroup(String group, String user) {
+        public Builder addMemberToGroup(String group, String user) {
             groupMembership.put(group, user);
-        }
-
-        public void addWorkloadCredentials(String userName, WorkloadCredential creds) {
-            workloadCredentialMap.put(userName, creds);
+            return this;
         }
 
         public UsersState build() {
-            return new UsersState(fmsGroups, fmsUsers, groupMembership, workloadCredentialMap, requestedWorkloadUsers);
-        }
-
-        public void addRequestedWorkloadUsers(FmsUser user) {
-            requestedWorkloadUsers.add(user);
-
+            return new UsersState(fmsGroups, fmsUsers, groupMembership);
         }
     }
 }

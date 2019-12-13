@@ -13,6 +13,9 @@ ipa-server-install \
           -p $FPW \
           --setup-dns \
           --auto-reverse \
+{%- for zone in salt['pillar.get']('freeipa:reverseZones').split(',') %}
+          --reverse-zone {{ zone }} \
+{%- endfor %}
           --allow-zone-overlap \
           --ssh-trust-dns \
           --mkhomedir \

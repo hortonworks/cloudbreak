@@ -25,7 +25,7 @@ import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -99,7 +99,7 @@ class UserServiceTest {
     @Test
     void testFullSyncRetrievesFullIpaState() throws Exception {
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
-        UsersState umsUsersState = mock(UsersState.class);
+        UmsUsersState umsUsersState = mock(UmsUsersState.class);
         underTest.getIpaUserState(freeIpaClient, umsUsersState, Set.of(), Set.of());
         verify(freeIpaUsersStateProvider).getUsersState(any());
     }
@@ -107,7 +107,7 @@ class UserServiceTest {
     @Test
     void testFilteredSyncRetrievesFilteredIpaState() throws Exception {
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
-        UsersState umsUsersState = mock(UsersState.class);
+        UmsUsersState umsUsersState = mock(UmsUsersState.class);
         Set<FmsUser> workloadUsers = mock(Set.class);
         when(umsUsersState.getRequestedWorkloadUsers()).thenReturn(workloadUsers);
         underTest.getIpaUserState(freeIpaClient, umsUsersState, Set.of(USER_CRN), Set.of(MACHINE_USER_CRN));

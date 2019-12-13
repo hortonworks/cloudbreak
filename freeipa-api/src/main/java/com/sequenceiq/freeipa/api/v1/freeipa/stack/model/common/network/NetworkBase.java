@@ -41,6 +41,38 @@ public abstract class NetworkBase extends ProviderParametersBase {
         return azure;
     }
 
+    public void setGcp(GcpNetworkParameters gcp) {
+        this.gcp = gcp;
+    }
+
+    public void setOpenstack(OpenStackNetworkParameters openstack) {
+        this.openstack = openstack;
+    }
+
+    public void setMock(MockNetworkParameters mock) {
+        this.mock = mock;
+    }
+
+    public void setYarn(YarnNetworkParameters yarn) {
+        this.yarn = yarn;
+    }
+
+    public GcpNetworkParameters getGcp() {
+        return gcp;
+    }
+
+    public OpenStackNetworkParameters getOpenstack() {
+        return openstack;
+    }
+
+    public MockNetworkParameters getMock() {
+        return mock;
+    }
+
+    public YarnNetworkParameters getYarn() {
+        return yarn;
+    }
+
     @Override
     public Mappable createAws() {
         if (aws == null) {

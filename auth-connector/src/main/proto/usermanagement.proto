@@ -122,9 +122,13 @@ service UserManagement {
   rpc CheckRights(CheckRightsRequest)
     returns (CheckRightsResponse) {}
 
-  // Create an account.
+  // Create a regular account.
   rpc CreateAccount (CreateAccountRequest)
     returns (CreateAccountResponse) {}
+
+  // Create a trial account.
+  rpc CreateTrialAccount (CreateTrialAccountRequest)
+    returns (CreateTrialAccountResponse) {}
 
   // Grant Entitlement to an Account
   rpc GrantEntitlement (GrantEntitlementRequest)
@@ -377,6 +381,26 @@ service UserManagement {
   // since tracking started an empty string will be returned instead of an ID.
   rpc GetEventGenerationIds(GetEventGenerationIdsRequest)
     returns (GetEventGenerationIdsResponse) {}
+
+  // Adds an SSH public key for an actor.
+  rpc AddActorSshPublicKey(AddActorSshPublicKeyRequest)
+    returns (AddActorSshPublicKeyResponse) {}
+
+  // Lists the SSH public keys for an actor.
+  rpc ListActorSshPublicKeys(ListActorSshPublicKeysRequest)
+    returns (ListActorSshPublicKeysResponse) {}
+
+  // Describes an SSH public key.
+  rpc DescribeActorSshPublicKey(DescribeActorSshPublicKeyRequest)
+     returns (DescribeActorSshPublicKeyResponse) {}
+
+  // Deletes an SSH public key for an actor.
+  rpc DeleteActorSshPublicKey(DeleteActorSshPublicKeyRequest)
+    returns (DeleteActorSshPublicKeyResponse) {}
+
+  // Sets the workload password policy for an account.
+  rpc SetWorkloadPasswordPolicy (SetWorkloadPasswordPolicyRequest)
+  returns (SetWorkloadPasswordPolicyResponse) {}
 }
 
 // An User is the Altus identity corresponding to an external SFDC contact. Users
@@ -1013,6 +1037,8 @@ message Account {
   // Note that this is ensured to be unique, that is, there will not be two
   // accounts with the same workload sub domain.
   string workloadSubdomain = 14;
+  // The workload password policy.
+  WorkloadPasswordPolicy passwordPolicy = 15;
 }
 
 // Either the accountId or externalAccountId is required to get
@@ -1143,13 +1169,25 @@ message CheckRightsResponse {
 }
 
 message CreateAccountRequest {
+  // The external account ID for the account. This must be an SFDC account ID.
   string externalAccountId = 1;
+  // A base64 encoded Cloudera Manager license to use for the account.
   string clouderaManagerLicenseKey = 2 [(options.FieldExtension.skipLogging) = true];
-  // if none is passed, the default cloudera provider id will be used
+  // The identity provider associated with the account. If none is passed, the
+  // default cloudera identity provider will be used.
   string identityProviderId = 3;
 }
 
 message CreateAccountResponse {
+  Account account = 1;
+}
+
+message CreateTrialAccountRequest {
+  // The okta user ID of the user for which we are creating a trial account.
+  string oktaUserId = 1;
+}
+
+message CreateTrialAccountResponse {
   Account account = 1;
 }
 
@@ -1531,6 +1569,12 @@ message DeleteMachineUserRequest {
 message DeleteMachineUserResponse {
 }
 
+message WorkloadPasswordPolicyStorage {
+  // Account-wide max lifetime, in ms, of actors workload passwords.
+  // The magic value 0 indicates that passwords never expire.
+  uint64 workloadPasswordMaxLifetime = 1;
+}
+
 // Object used to serialize account metadata that does not require its own
 // columns.
 message AccountDetails {
@@ -1541,6 +1585,8 @@ message AccountDetails {
   repeated EntitlementGrant entitlement = 2;
   // Whether login using Cloudera SSO is disabled
   bool clouderaSSOLoginDisabled = 3;
+  // The account workload password policy
+  WorkloadPasswordPolicyStorage passwordPolicy = 4;
 }
 
 // Set Account Messages request object.
@@ -2190,13 +2236,31 @@ message StoredKerberosKey {
   string saltValue = 4;
 }
 
+// A structure to store SSH public keys in dynamo.
+message SshPublicKeyStorage {
+  // The key's ID
+  string id = 1;
+  // The public key. Only populated for DescribeActorSshPublicKeyResponses. This
+  // is the same public key that was used in the call to add the public key, i.e.,
+  // a public key in RFC4253 XDR format.
+  string publicKey = 2 [(options.FieldExtension.skipLogging) = true];
+  // The optional description.
+  string description = 3;
+}
+
 // This is used to serialize all the Actor dynamoDB related information that is
 // not indexed.
 message ActorDetails {
   // The cdp workload password hash, encrypted.
   string encryptedPasswordHash = 1 [(options.FieldExtension.sensitive) = true];
+  // The password hash expiration date, in ms from the Java epoch of
+  // 1970-01-01T00:00:00Z. The value of 0 means that the password hash does
+  // not expire.
+  uint64 encryptedPasswordHashExpirationDate = 4;
   // A list of kerberos keys for the actor.
   repeated StoredKerberosKey kerberosKeys = 2;
+  // A list of ssh public keys for the actor.
+  repeated SshPublicKeyStorage sshPublicKeys = 3;
 }
 
 message SetActorWorkloadCredentialsRequest {
@@ -2230,6 +2294,10 @@ message GetActorWorkloadCredentialsRequest {
 message GetActorWorkloadCredentialsResponse {
   // The password hash.
   string passwordHash = 1 [(options.FieldExtension.sensitive) = true];
+  // The date, in ms from the Java epoch of 1970-01-01T00:00:00Z, when the
+  // password hash expires. A value of 0 indicates that the password hash
+  // never expires.
+  uint64 passwordHashExpirationDate = 3;
   // A list of kerberos keys for the actor.
   repeated ActorKerberosKey kerberosKeys = 2;
 }
@@ -2259,4 +2327,87 @@ message GetEventGenerationIdsResponse {
   // set-workload-password. Empty string if no such event has been occurred since
   // tracking started.
   string lastActorWorkloadCredentialsChangedEventId = 5;
+}
+
+message AddActorSshPublicKeyRequest {
+  // The actor's CRN
+  string actorCrn = 1;
+  // The RSA or ED25519 public SSH key to add. We do not support DSA or ECDSA
+  // public keys. The public key should be in an RFC4253 XDR format, e.g.,
+  // ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCqyj3P7cfW/D7xUfvITbq7cDmAfPOq6ZRw2jV6Qq3KXipR/zkEmRz1I38mAHrG+ydX4amVOV1KoylkkAkkeufIqFjsT4GyUhjXcXyYiBIn+BstTz7p+JQQ0uR8UDIdVFjXIhl/KEmUtiCnHlS2LIMlm0AnRmkvM0+xLytZGR2okaRkrDnpXiBu1O1HfjDztQTl+PMfpjoZtRjmgQW+C1DXce7b1AtuRHRGDTR39beZGfIEoJjT2q0BZC3j4VYoEZq2DCrsgeaxBffkm67v2qxW4vnd9GiETZkWp/dOlvPpSt2y2j6INCo2h55KYDXBixsjpyj0BXoKBOda0SIl9ye/ sample_public_key
+  // as produced, for example, by ssh-keygen.
+  string publicKey = 2 [(options.FieldExtension.skipLogging) = true];
+  // An optional description for the public key.
+  string description = 3 [(options.FieldExtension.skipLogging) = true];
+}
+
+message SshPublicKey {
+  //  The Ssh public key CRN
+  string crn = 1;
+  // the ssh public key SHA256 fingerprint. this is identical to the SHA256
+  // produced by running the following command on a public key named 'key.pub':
+  // ssh-keygen -l -E SHA256 -f /home/user/.ssh/key.pub.
+  // Note that ssh-keygen removes any padding bytes from the BASE64 fingerprint
+  // encoding (the '=' characters at the end of the fingerprint) and we will
+  // do the same.
+  string publicKeyFingerprint = 2;
+  // An optional description for the public key
+  string description = 3 [(options.FieldExtension.skipLogging) = true];
+  // The public key. Only populated for DescribeActorSshPublicKeyResponses. This
+  // is the same public key that was given used to add it, i.e., a public key
+  // in RFC4253 XDR format.
+  string publicKey = 4 [(options.FieldExtension.skipLogging) = true];
+}
+
+message AddActorSshPublicKeyResponse {
+  // The SSH public key information.
+  SshPublicKey sshPublicKey = 1;
+}
+
+message ListActorSshPublicKeysRequest {
+  // The actor's CRN
+  string actorCrn = 1;
+}
+
+message ListActorSshPublicKeysResponse {
+  // A list of public keys for the actor.
+  repeated SshPublicKey publicKey = 1;
+}
+
+message DescribeActorSshPublicKeyRequest {
+  // The actor's CRN
+  string actorCrn = 1;
+  // The SSH public key CRN or its SHA256 fingerprint.
+  string crnOrFingerprint = 2;
+}
+
+message DescribeActorSshPublicKeyResponse {
+  // The SSH public key information.
+  SshPublicKey publicKey = 1;
+}
+
+message DeleteActorSshPublicKeyRequest {
+  // The actor's CRN
+  string actorCrn = 1;
+  // The SSH public key CRN or the its SHA256 fingerprint to remove.
+  string crnOrFingerprint = 2;
+}
+
+message DeleteActorSshPublicKeyResponse {
+}
+
+message WorkloadPasswordPolicy {
+  // Account-wide max lifetime, in ms, of actors workload passwords.
+  // The magic value 0 indicates that passwords never expire.
+  uint64 workloadPasswordMaxLifetime = 1;
+}
+
+message SetWorkloadPasswordPolicyRequest {
+  // The account ID
+  string accountId = 1;
+  // The password policy to set.
+  WorkloadPasswordPolicy policy = 2;
+}
+
+message SetWorkloadPasswordPolicyResponse {
 }
