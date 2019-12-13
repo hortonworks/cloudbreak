@@ -1,6 +1,7 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 # CONFIGURED BY SALT - do not edit
 {% if providerPrefix != "databus" or fluent.dbusReportDeploymentLogs %}
+<worker {{ workerIndex }}>
 <source>
   @type tail
   format none
@@ -449,6 +450,7 @@
   tag {{providerPrefix}}.AUTOSSH
   read_from_head true
 </source>
+</worker>
 {% else %}
 # DATABUS inputs are disabled
 {% endif %}

@@ -1,6 +1,7 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {%- from 'databus/settings.sls' import databus with context %}
 {%- if databus.valid and fluent.dbusReportDeploymentLogs %}
+<worker {{ fluent.reportDeploymentLogsWorkerIndex }}>
 <match databus**>
   @type copy
   <store ignore_error>
@@ -17,7 +18,7 @@
 
     <buffer tag,time>
       @type file
-      path /var/log/td-agent/databus_metering
+      path /var/log/td-agent/databus_service_logs
       timekey 1m
       timekey_wait 0s
       chunk_limit_size 600k
@@ -25,6 +26,7 @@
     </buffer>
   </store>
 </match>
+</worker>
 {% elif fluent.dbusReportDeploymentLogs %}
 # DBUS settings are not valid - check dbus credentials file
 {% else %}
