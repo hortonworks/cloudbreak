@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -42,10 +43,13 @@ import com.sequenceiq.freeipa.util.CrnService;
 @Service
 public class PasswordService {
 
+    @VisibleForTesting
+    static final String INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PasswordService.class);
 
-    @VisibleForTesting
-    Supplier<Long> currentTimeSupplier = () -> System.currentTimeMillis();
+    @Inject
+    private Clock clock;
 
     @Inject
     private StackService stackService;
@@ -133,18 +137,18 @@ public class PasswordService {
     @VisibleForTesting
     Optional<Instant> calculateExpirationTime(String actorCrn, String accountId) {
         LOGGER.debug("calculating expiration time for password in account {}", accountId);
-        UserManagementProto.Account account = umsClient.getAccountDetails(actorCrn, accountId, MDCUtils.getRequestId());
+        UserManagementProto.Account account = umsClient.getAccountDetails(INTERNAL_ACTOR_CRN, accountId, MDCUtils.getRequestId());
         if (account.hasPasswordPolicy()) {
             long maxLifetime = account.getPasswordPolicy().getWorkloadPasswordMaxLifetime();
             if (maxLifetime != 0L) {
                 LOGGER.debug("Calculating password expiration by adding lifetime '{}' to current time", maxLifetime);
-                return Optional.of(Instant.ofEpochMilli(currentTimeSupplier.get() + maxLifetime));
+                return Optional.of(clock.getCurrentInstant().plusMillis(maxLifetime));
             } else {
                 LOGGER.debug("Password policy lifetime is {}. Using max expiration time", maxLifetime);
                 return Optional.empty();
             }
         } else {
-            LOGGER.debug("Account {} does not have a password policy. Using max expiration time for password");
+            LOGGER.debug("Account {} does not have a password policy. Using max expiration time for password", accountId);
             return Optional.empty();
         }
     }
