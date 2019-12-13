@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -14,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureAcceleratedNetworkValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView;
@@ -30,7 +27,6 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
@@ -108,7 +104,7 @@ public class AzureTemplateBuilder {
             model.put("noPublicIp", azureUtils.isPrivateIp(network));
             model.put("noFirewallRules", azureUtils.isNoSecurityGroups(network));
             model.put("userDefinedTags", cloudStack.getTags());
-            model.put("acceleratedNetworkEnabled", azureAcceleratedNetworkValidator.validate(getVmTypes(armStack)));
+            model.put("acceleratedNetworkEnabled", azureAcceleratedNetworkValidator.validate(armStack));
             model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(cloudStack), model);
             LOGGER.info("Generated Arm template: {}", generatedTemplate);
@@ -186,10 +182,6 @@ public class AzureTemplateBuilder {
         }
     }
 
-    public JsonNode getTemplateAsJson(String armTemplate) {
-        return freeMarkerTemplateUtils.convertStringTemplateToJson(armTemplate);
-    }
-
     private Template getTemplate() {
         try {
             return freemarkerConfiguration.getTemplate(armTemplatePath, "UTF-8");
@@ -208,14 +200,6 @@ public class AzureTemplateBuilder {
 
     private String base64EncodedUserData(String data) {
         return new String(Base64.encodeBase64(String.format("%s", data).getBytes()));
-    }
-
-    private Set<String> getVmTypes(AzureStackView azureStackView) {
-        return azureStackView.getGroups().entrySet().stream().map(entry -> entry.getValue().stream()
-                .map(instanceView -> instanceView.getInstance().getTemplate().getFlavor())
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("No VM type found for instance.")))
-                .collect(Collectors.toSet());
     }
 
 }
