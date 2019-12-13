@@ -1078,6 +1078,10 @@ public class StackService implements ResourceIdProvider {
         return stackRepository.findByWorkspaceId(workspaceId, environmentCrn, stackTypes);
     }
 
+    public int setMinaSshdServiceIdByStackId(Long id, String minaSshdServiceId) {
+        return stackRepository.setMinaSshdServiceIdByStackId(id, minaSshdServiceId);
+    }
+
     StackRepository repository() {
         return stackRepository;
     }

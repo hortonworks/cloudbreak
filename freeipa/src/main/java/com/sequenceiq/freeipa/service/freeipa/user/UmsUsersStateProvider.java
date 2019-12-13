@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +28,8 @@ import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState.Builder;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 
 import io.grpc.Status;
@@ -43,12 +44,12 @@ public class UmsUsersStateProvider {
     @Inject
     private GrpcUmsClient grpcUmsClient;
 
-    public Map<String, UsersState> getEnvToUmsUsersStateMap(String accountId, String actorCrn, Set<String> environmentCrns,
+    public Map<String, UmsUsersState> getEnvToUmsUsersStateMap(String accountId, String actorCrn, Set<String> environmentCrns,
                                                             Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional) {
         try {
             LOGGER.debug("Getting UMS state for environments {} with requestId {}", environmentCrns, requestIdOptional);
 
-            Map<String, UsersState> envUsersStateMap = new HashMap<>();
+            Map<String, UmsUsersState> envUsersStateMap = new HashMap<>();
 
             boolean fullSync = userCrns.isEmpty() && machineUserCrns.isEmpty();
 
@@ -60,33 +61,35 @@ public class UmsUsersStateProvider {
                     .collect(Collectors.toMap(Group::getCrn, this::umsGroupToGroup));
 
             environmentCrns.stream().forEach(environmentCrn -> {
-                Builder userStateBuilder = new Builder();
+                UmsUsersState.Builder umsUsersStateBuilder = new UmsUsersState.Builder();
+                UsersState.Builder usersStateBuilder = new UsersState.Builder();
 
-                crnToFmsGroup.values().stream().forEach(userStateBuilder::addGroup);
+                crnToFmsGroup.values().stream().forEach(usersStateBuilder::addGroup);
 
                 // add internal usersync group for each environment
                 FmsGroup internalUserSyncGroup = new FmsGroup();
                 internalUserSyncGroup.setName(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP);
-                userStateBuilder.addGroup(internalUserSyncGroup);
+                usersStateBuilder.addGroup(internalUserSyncGroup);
 
                 users.stream().forEach(u -> {
                     FmsUser fmsUser = umsUserToUser(u);
                     // add workload username for each user. This will be helpful in getting users from IPA.
-                    userStateBuilder.addRequestedWorkloadUsers(fmsUser);
+                    umsUsersStateBuilder.addRequestedWorkloadUsers(fmsUser);
 
-                    handleUser(userStateBuilder, crnToFmsGroup, actorCrn, u.getCrn(), fmsUser, environmentCrn, requestIdOptional);
+                    handleUser(umsUsersStateBuilder, usersStateBuilder, crnToFmsGroup, actorCrn, u.getCrn(), fmsUser, environmentCrn, requestIdOptional);
 
                 });
 
                 machineUsers.stream().forEach(mu -> {
                     FmsUser fmsUser = umsMachineUserToUser(mu);
-                    userStateBuilder.addRequestedWorkloadUsers(fmsUser);
+                    umsUsersStateBuilder.addRequestedWorkloadUsers(fmsUser);
                     // add workload username for each user. This will be helpful in getting users from IPA.
 
-                    handleUser(userStateBuilder, crnToFmsGroup, actorCrn, mu.getCrn(), fmsUser, environmentCrn, requestIdOptional);
+                    handleUser(umsUsersStateBuilder, usersStateBuilder, crnToFmsGroup, actorCrn, mu.getCrn(), fmsUser, environmentCrn, requestIdOptional);
                 });
 
-                envUsersStateMap.put(environmentCrn, userStateBuilder.build());
+                umsUsersStateBuilder.setUsersState(usersStateBuilder.build());
+                envUsersStateMap.put(environmentCrn, umsUsersStateBuilder.build());
             });
 
             return envUsersStateMap;
@@ -120,7 +123,10 @@ public class UmsUsersStateProvider {
         GetActorWorkloadCredentialsResponse response = grpcUmsClient.getActorWorkloadCredentials(IAM_INTERNAL_ACTOR_CRN, userCrn, requestId);
         String hashedPassword = response.getPasswordHash();
         List<ActorKerberosKey> keys = response.getKerberosKeysList();
-        return new WorkloadCredential(hashedPassword, keys);
+        long expirationDate = response.getPasswordHashExpirationDate();
+        Optional<Instant> expirationInstant = expirationDate == 0 ? Optional.empty() : Optional.of(Instant.ofEpochMilli(expirationDate));
+
+        return new WorkloadCredential(hashedPassword, keys, expirationInstant);
     }
 
     private boolean isEnvironmentUser(String enviromentCrn, GetRightsResponse rightsResponse) {
@@ -168,39 +174,39 @@ public class UmsUsersStateProvider {
         return false;
     }
 
-    private void handleUser(Builder userStateBuilder, Map<String, FmsGroup> crnToFmsGroup,
+    @SuppressWarnings("ParameterNumber")
+    private void handleUser(UmsUsersState.Builder umsUsersStateBuilder, UsersState.Builder usersStateBuilder, Map<String, FmsGroup> crnToFmsGroup,
                             String actorCrn, String memberCrn, FmsUser fmsUser, String environmentCrn, Optional<String> requestId) {
-
         try {
             GetRightsResponse rightsResponse = grpcUmsClient.getRightsForUser(actorCrn, memberCrn, environmentCrn, requestId);
             if (isEnvironmentUser(environmentCrn, rightsResponse)) {
-                userStateBuilder.addUser(fmsUser);
+                usersStateBuilder.addUser(fmsUser);
                 rightsResponse.getGroupCrnList().stream().forEach(gcrn -> {
                     FmsGroup group = crnToFmsGroup.get(gcrn);
                     // If the group is null, then there has been a group membership change after we started the sync
                     // the group and group membership will be updated on the next sync
                     if (group != null) {
-                        userStateBuilder.addMemberToGroup(group.getName(), fmsUser.getName());
+                        usersStateBuilder.addMemberToGroup(group.getName(), fmsUser.getName());
                     }
                 });
 
                 // Since this user is eligible, add this user to internal group
-                userStateBuilder.addMemberToGroup(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP, fmsUser.getName());
+                usersStateBuilder.addMemberToGroup(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP, fmsUser.getName());
 
                 List<String> workloadAdministrationGroupNames = rightsResponse.getWorkloadAdministrationGroupNameList();
                 LOGGER.debug("workloadAdministrationGroupNameList = {}", workloadAdministrationGroupNames);
                 workloadAdministrationGroupNames.forEach(groupName -> {
-                    userStateBuilder.addGroup(nameToGroup(groupName));
-                    userStateBuilder.addMemberToGroup(groupName, fmsUser.getName());
+                    usersStateBuilder.addGroup(nameToGroup(groupName));
+                    usersStateBuilder.addMemberToGroup(groupName, fmsUser.getName());
                 });
 
                 if (isEnvironmentAdmin(environmentCrn, rightsResponse)) {
                     // TODO: introduce a flag for adding admin
-                    userStateBuilder.addMemberToGroup("admins", fmsUser.getName());
+                    usersStateBuilder.addMemberToGroup("admins", fmsUser.getName());
                 }
 
                 // get credentials
-                userStateBuilder.addWorkloadCredentials(fmsUser.getName(), getCredentials(memberCrn, requestId));
+                umsUsersStateBuilder.addWorkloadCredentials(fmsUser.getName(), getCredentials(memberCrn, requestId));
             }
         } catch (StatusRuntimeException e) {
             // NOT_FOUND errors indicate that a user/machineUser has been deleted after we have

@@ -101,8 +101,7 @@ public class UserDataService {
                 String minaSshdServiceId = ccmParameters.getServerParameters().getMinaSshdServiceId();
                 if (StringUtils.isNotBlank(minaSshdServiceId)) {
                     LOGGER.debug("Add Minasshdserviceid [{}] to stack [{}]", minaSshdServiceId, stack.getResourceCrn());
-                    stack.setMinaSshdServiceId(minaSshdServiceId);
-                    stackService.save(stack);
+                    stackService.setMinaSshdServiceIdByStackId(stackId, minaSshdServiceId);
                 }
             }
         } catch (InterruptedException | ExecutionException e) {

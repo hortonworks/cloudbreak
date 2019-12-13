@@ -33,6 +33,8 @@ import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.freeipa.dns.ReverseDnsZoneCalculator;
+import com.sequenceiq.freeipa.service.stack.NetworkService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
@@ -66,6 +68,12 @@ public class FreeIpaInstallService {
     @Inject
     private AltusMachineUserService altusMachineUserService;
 
+    @Inject
+    private NetworkService networkService;
+
+    @Inject
+    private ReverseDnsZoneCalculator reverseDnsZoneCalculator;
+
     public void installFreeIpa(Long stackId) throws CloudbreakOrchestratorException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDatas = stack.getNotDeletedInstanceMetaDataSet();
@@ -78,9 +86,12 @@ public class FreeIpaInstallService {
 
         SaltConfig saltConfig = new SaltConfig();
         Map<String, SaltPillarProperties> servicePillarConfig = saltConfig.getServicePillarConfig();
+        Map<String, String> subnetWithCidr = networkService.getFilteredSubnetWithCidr(stack);
+        String reverseZones = reverseDnsZoneCalculator.reverseDnsZoneForCidrs(subnetWithCidr.values());
         Map<String, String> freeipaPillar = Map.of("realm", freeIpa.getDomain().toUpperCase(),
                 "domain", freeIpa.getDomain(),
-                "password", freeIpa.getAdminPassword());
+                "password", freeIpa.getAdminPassword(),
+                "reverseZones", reverseZones);
         servicePillarConfig.put("freeipa", new SaltPillarProperties("/freeipa/init.sls", Collections.singletonMap("freeipa", freeipaPillar)));
         decoratePillarsWithTelemetryConfigs(stack, servicePillarConfig);
         hostOrchestrator.initSaltConfig(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));

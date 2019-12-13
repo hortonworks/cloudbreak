@@ -1,6 +1,9 @@
 package com.sequenceiq.environment.platformresource;
 
+import static com.sequenceiq.cloudbreak.cloud.service.CloudParameterService.ACCESS_CONFIG_TYPE;
+
 import java.util.Map;
+import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -23,7 +26,9 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
+import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCloudCredentialConverter;
 
@@ -53,6 +58,7 @@ public class PlatformParameterService {
                 region,
                 platformVariant,
                 availabilityZone,
+                null,
                 CdpResourceType.DEFAULT);
     }
 
@@ -63,8 +69,29 @@ public class PlatformParameterService {
             String region,
             String platformVariant,
             String availabilityZone,
-            CdpResourceType cdpResourceType) {
+            AccessConfigTypeQueryParam accessConfigType) {
+        return getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                region,
+                platformVariant,
+                availabilityZone,
+                accessConfigType,
+                CdpResourceType.DEFAULT);
+    }
 
+    //CHECKSTYLE:OFF
+    public PlatformResourceRequest getPlatformResourceRequest(
+            String accountId,
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
+            String availabilityZone,
+            AccessConfigTypeQueryParam accessConfigType,
+            CdpResourceType cdpResourceType) {
+    //CHECKSTYLE:ON
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
 
         if (!Strings.isNullOrEmpty(credentialName)) {
@@ -81,15 +108,15 @@ public class PlatformParameterService {
             platformResourceRequest.setPlatformVariant(
                     Strings.isNullOrEmpty(platformVariant) ? platformResourceRequest.getCredential().getCloudPlatform() : platformVariant);
         }
-        if (cdpResourceType == null) {
-            platformResourceRequest.setCdpResourceType(CdpResourceType.DEFAULT);
-        } else {
-            platformResourceRequest.setCdpResourceType(cdpResourceType);
-        }
+        platformResourceRequest.setCdpResourceType(Objects.requireNonNullElse(cdpResourceType, CdpResourceType.DEFAULT));
         platformResourceRequest.setRegion(region);
         platformResourceRequest.setCloudPlatform(platformResourceRequest.getCredential().getCloudPlatform());
         if (!Strings.isNullOrEmpty(availabilityZone)) {
             platformResourceRequest.setAvailabilityZone(availabilityZone);
+        }
+        String accessConfigTypeString = NullUtil.getIfNotNull(accessConfigType, Enum::name);
+        if (accessConfigTypeString != null) {
+            platformResourceRequest.setFilters(Map.of(ACCESS_CONFIG_TYPE, accessConfigTypeString));
         }
         return platformResourceRequest;
     }

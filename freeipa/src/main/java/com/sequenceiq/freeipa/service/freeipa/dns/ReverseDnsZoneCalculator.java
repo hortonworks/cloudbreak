@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.service.freeipa.dns;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Component;
 
 @Component
@@ -10,6 +13,13 @@ public class ReverseDnsZoneCalculator {
     public static final int C_CLASS_ADDRESS = 24;
 
     public static final int B_CLASS_ADDRESS = 16;
+
+    public String reverseDnsZoneForCidrs(Collection<String> cidrs) {
+        return cidrs.stream()
+                .map(this::reverseDnsZoneForCidr)
+                .distinct()
+                .collect(Collectors.joining(","));
+    }
 
     public String reverseDnsZoneForCidr(String cidr) {
         if (!cidr.matches("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\/([0-9]|[1-2][0-9]|3[0-2]))$")) {

@@ -27,8 +27,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -56,6 +54,7 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
@@ -144,7 +143,7 @@ public class UserService {
                     new Json(umsEventGenerationIdsProvider.getEventGenerationIds(accountId, requestId)) :
                     null;
 
-            Map<String, UsersState> envToUmsStateMap = umsUsersStateProvider
+            Map<String, UmsUsersState> envToUmsStateMap = umsUsersStateProvider
                     .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userCrnFilter, machineUserCrnFilter, requestId);
 
             Collection<SuccessDetails> success = new ConcurrentLinkedQueue<>();
@@ -191,14 +190,15 @@ public class UserService {
         }
     }
 
-    private SyncStatusDetail synchronizeStack(Stack stack, UsersState umsUsersState, Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+    private SyncStatusDetail synchronizeStack(Stack stack, UmsUsersState umsUsersState, Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
         String environmentCrn = stack.getEnvironmentCrn();
         try {
             FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
             UsersState ipaUsersState = getIpaUserState(freeIpaClient, umsUsersState, userCrnFilter, machineUserCrnFilter);
             LOGGER.debug("IPA UsersState, found {} users and {} groups", ipaUsersState.getUsers().size(), ipaUsersState.getGroups().size());
 
-            applyStateDifferenceToIpa(stack.getEnvironmentCrn(), freeIpaClient, UsersStateDifference.fromUmsAndIpaUsersStates(umsUsersState, ipaUsersState));
+            applyStateDifferenceToIpa(stack.getEnvironmentCrn(), freeIpaClient,
+                    UsersStateDifference.fromUmsAndIpaUsersStates(umsUsersState.getUsersState(), ipaUsersState));
 
             // Check for the password related attribute (cdpUserAttr) existence and go for password sync.
             processUsersWorkloadCredentials(environmentCrn, umsUsersState, freeIpaClient);
@@ -211,7 +211,7 @@ public class UserService {
     }
 
     @VisibleForTesting
-    UsersState getIpaUserState(FreeIpaClient freeIpaClient, UsersState umsUsersState, Set<String> userCrnFilter, Set<String> machineUserCrnFilter)
+    UsersState getIpaUserState(FreeIpaClient freeIpaClient, UmsUsersState umsUsersState, Set<String> userCrnFilter, Set<String> machineUserCrnFilter)
             throws FreeIpaClientException {
         boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
         return fullSync ? freeIpaUsersStateProvider.getUsersState(freeIpaClient) :
@@ -231,7 +231,7 @@ public class UserService {
     }
 
     private void processUsersWorkloadCredentials(
-            String environmentCrn, UsersState umsUsersState, FreeIpaClient freeIpaClient) throws IOException, FreeIpaClientException {
+            String environmentCrn, UmsUsersState umsUsersState, FreeIpaClient freeIpaClient) throws IOException, FreeIpaClientException {
         Config config = freeIpaClient.getConfig();
         if (config.getIpauserobjectclasses() == null || !config.getIpauserobjectclasses().contains(Config.CDP_USER_ATTRIBUTE)) {
             LOGGER.debug("Doesn't seems like having config attribute, no credentials sync required for env:{}", environmentCrn);
@@ -242,7 +242,8 @@ public class UserService {
         LOGGER.debug("Having config attribute, going for credentials sync");
 
         // Should sync for all users and not just diff. At present there is no way to identify that there is a change in password for a user
-        for (FmsUser u : umsUsersState.getUsers()) {
+        UsersState usersState = umsUsersState.getUsersState();
+        for (FmsUser u : usersState.getUsers()) {
             WorkloadCredential workloadCredential = umsUsersState.getUsersWorkloadCredentialMap().get(u.getName());
             if (workloadCredential == null
                     || StringUtils.isEmpty(workloadCredential.getHashedPassword())
@@ -254,12 +255,8 @@ public class UserService {
             LOGGER.debug("Found Credentials for user {}", u.getName());
             String ansEncodedKrbPrincipalKey = KrbKeySetEncoder.getASNEncodedKrbPrincipalKey(workloadCredential.getKeys());
 
-            Map<String, Object> params =
-                    ImmutableMap.of("setattr", ImmutableList.of(
-                            "cdpHashedPassword=" + workloadCredential.getHashedPassword(),
-                            "cdpUnencryptedKrbPrincipalKey=" + ansEncodedKrbPrincipalKey));
-
-            freeIpaClient.userMod(u.getName(), params);
+            freeIpaClient.userSetPasswordHash(u.getName(), workloadCredential.getHashedPassword(),
+                    ansEncodedKrbPrincipalKey, workloadCredential.getExpirationDate());
             LOGGER.debug("Password synced for the user:{}, for the environment: {}", u.getName(), environmentCrn);
         }
     }

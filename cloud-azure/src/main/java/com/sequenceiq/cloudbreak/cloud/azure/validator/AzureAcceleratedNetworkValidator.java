@@ -8,6 +8,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureVirtualMachineTypeProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,6 +18,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
+import javax.inject.Inject;
+
 @Component
 public class AzureAcceleratedNetworkValidator {
 
@@ -23,8 +27,15 @@ public class AzureAcceleratedNetworkValidator {
 
     private static final String AZURE_ACCELERATED_NETWORK_SUPPORT_JSON = "definitions/azure-accelerated-network-support.json";
 
-    public Map<String, Boolean> validate(Set<String> vmTypes) {
-        return vmTypes.stream().collect(Collectors.toMap(vm -> vm, this::isSupportedForVm));
+    @Inject
+    private AzureVirtualMachineTypeProvider azureVirtualMachineTypeProvider;
+
+    public Map<String, Boolean> validate(AzureStackView azureStackView) {
+        return getVmTypes(azureStackView).stream().collect(Collectors.toMap(vm -> vm, this::isSupportedForVm));
+    }
+
+    private Set<String> getVmTypes(AzureStackView azureStackView) {
+        return azureVirtualMachineTypeProvider.getVmTypes(azureStackView);
     }
 
     private boolean isSupportedForVm(String vmType) {

@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -237,4 +238,8 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "AND (:environmentCrn IS null OR s.environmentCrn = :environmentCrn) "
             + "AND (s.type IS null OR s.type in :stackTypes)")
     Set<StackListItem> findByWorkspaceId(@Param("id") Long id, @Param("environmentCrn") String environmentCrn, @Param("stackTypes") List<StackType> stackTypes);
+
+    @Modifying
+    @Query("UPDATE Stack s SET s.minaSshdServiceId = :minaSshdServiceId WHERE s.id = :id")
+    int setMinaSshdServiceIdByStackId(@Param("id") Long id, @Param("minaSshdServiceId") String minaSshdServiceId);
 }
