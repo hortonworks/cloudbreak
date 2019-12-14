@@ -104,6 +104,8 @@ class KafkaAuthConfigProviderTest {
                 Arguments.of("7.0.2", cdhParcelVersion("7.0.2", 2), PAM_AUTH_EXPECTED_CONFIGS),
                 Arguments.of("7.0.2", cdhParcelVersion("7.0.2", 3), PAM_AUTH_EXPECTED_CONFIGS),
                 Arguments.of("7.0.2", "irregularCdhVersion-123", GENERAL_AUTH_EXPECTED_CONFIGS),
+                Arguments.of("7.0.3", cdhParcelVersion("7.0.3", 0), LDAP_AUTH_EXPECTED_CONFIGS),
+                Arguments.of("7.0.3", cdhParcelVersion("7.0.3", 3), LDAP_AUTH_EXPECTED_CONFIGS),
                 Arguments.of("7.1.0", cdhParcelVersion("7.1.0", 0), PAM_AUTH_EXPECTED_CONFIGS));
     }
 
