@@ -17,7 +17,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRe
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentLogStorageLocationValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentRegionValidator;
-import com.sequenceiq.environment.parameters.validation.validators.AwsParameterValidator;
+import com.sequenceiq.environment.parameters.validation.validators.AwsParameterProcessor;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentValidatorServiceTest {
@@ -29,7 +29,7 @@ class EnvironmentValidatorServiceTest {
     private EnvironmentLogStorageLocationValidator logStorageLocationValidator;
 
     @Mock
-    private AwsParameterValidator awsParameterValidator;
+    private AwsParameterProcessor awsParameterProcessor;
 
     @InjectMocks
     private EnvironmentValidatorService underTest;

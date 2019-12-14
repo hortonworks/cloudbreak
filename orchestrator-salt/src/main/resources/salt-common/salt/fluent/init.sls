@@ -118,6 +118,7 @@ fluent_stop:
     - file_mode: 640
     - context:
         databusReportDeploymentLogs: "true"
+        numberOfWorkers: {{ fluent.numberOfWorkers }}
 
 /etc/td-agent/td-agent_simple_profile.conf:
   file.managed:
@@ -128,6 +129,7 @@ fluent_stop:
     - file_mode: 640
     - context:
         databusReportDeploymentLogs: "false"
+        numberOfWorkers: {{ fluent.numberOfWorkers }}
 
 copy_td_agent_conf:
   cmd.run:
@@ -149,6 +151,7 @@ copy_td_agent_conf:
     - file_mode: 640
     - context:
         providerPrefix: {{ fluent.providerPrefix }}
+        workerIndex: {{ fluent.cloudStorageWorkerIndex }}
 {% endif %}
 
 /etc/td-agent/databus_metering.conf:
@@ -168,6 +171,7 @@ copy_td_agent_conf:
     - file_mode: 640
     - context:
         providerPrefix: "databus"
+        workerIndex: {{ fluent.reportDeploymentLogsWorkerIndex }}
 
 /etc/td-agent/filter_databus.conf:
   file.managed:
@@ -179,6 +183,7 @@ copy_td_agent_conf:
     - file_mode: 640
     - context:
         providerPrefix: "databus"
+        workerIndex: {{ fluent.reportDeploymentLogsWorkerIndex }}
 
 /etc/td-agent/output_databus.conf:
   file.managed:
@@ -199,6 +204,7 @@ copy_td_agent_conf:
     - file_mode: 640
     - context:
         providerPrefix: {{ fluent.providerPrefix }}
+        workerIndex: {{ fluent.cloudStorageWorkerIndex }}
 {% endif %}
 
 {% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}

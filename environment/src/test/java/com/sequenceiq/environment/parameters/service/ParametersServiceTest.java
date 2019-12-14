@@ -58,6 +58,7 @@ class ParametersServiceTest {
         environment.setCloudPlatform("AWS");
 
         BaseParameters result = underTest.saveParameters(environment, ParametersDto.builder().build());
+
         assertEquals(awsParameters, result);
     }
 

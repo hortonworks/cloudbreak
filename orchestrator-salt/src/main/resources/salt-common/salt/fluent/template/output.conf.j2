@@ -1,5 +1,6 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {% if fluent.providerPrefix == "s3" %}
+<worker {{ fluent.cloudStorageWorkerIndex }}>
 <match {{fluent.providerPrefix}}.*>
   @type copy
   <store ignore_error>
@@ -44,7 +45,9 @@
     format single_value
   </store>
 </match>
+</worker>
 {% elif fluent.providerPrefix == "abfs" %}
+<worker {{ fluent.cloudStorageWorkerIndex }}>
 <match {{fluent.providerPrefix}}.*>
   @type copy
   <store ignore_error>
@@ -105,7 +108,9 @@
     format single_value
   </store>
 </match>
+</worker>
 {% elif fluent.providerPrefix == "cloudwatch" %}
+<worker {{ cloudStorageWorkerIndex }}>
 <match **{{fluent.providerPrefix}}**>
   @type cloudwatch_logs
   log_group_name {{fluent.logFolderName}}
@@ -130,9 +135,11 @@
       time_format       %Y-%m-%dT%H:%M:%S.%NZ
    </inject>
 </match>
-
+</worker>
 {% else %}
+<worker {{ cloudStorageWorkerIndex }}>
 <match {{fluent.providerPrefix}}.*>
   @type stdout
 </match>
+</worker>
 {% endif %}

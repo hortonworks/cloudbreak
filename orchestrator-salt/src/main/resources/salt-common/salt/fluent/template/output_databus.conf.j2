@@ -1,6 +1,7 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {%- from 'databus/settings.sls' import databus with context %}
 {%- if databus.valid and fluent.dbusReportDeploymentLogs %}
+<worker {{ fluent.reportDeploymentLogsWorkerIndex }}>
 <match processed.databus**>
   @type copy
   <store ignore_error>
@@ -24,6 +25,7 @@
     </buffer>
   </store>
 </match>
+</worker>
 {% elif fluent.dbusReportDeploymentLogs %}
 # DBUS settings are not valid - check dbus credentials file
 {% else %}

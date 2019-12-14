@@ -1,5 +1,5 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
-
+<worker {{ workerIndex }}>
 <match **fluent**>
    @type null
 </match>
@@ -58,3 +58,4 @@
    @type record_transformer
    remove_keys {% if providerPrefix != "databus" %}time,{% endif %}timestamp,message,raw_tag
 </filter>
+</worker>

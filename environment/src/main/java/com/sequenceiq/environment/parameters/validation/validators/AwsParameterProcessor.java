@@ -10,30 +10,32 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.NoSqlTableCreationModeDeterminerService;
 import com.sequenceiq.environment.parameters.dao.domain.S3GuardTableCreation;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @Component
-public class AwsParameterValidator {
+public class AwsParameterProcessor {
 
     private final NoSqlTableCreationModeDeterminerService noSqlTableCreationModeDeterminerService;
 
     private final ParametersService parametersService;
 
-    public AwsParameterValidator(NoSqlTableCreationModeDeterminerService noSqlTableCreationModeDeterminerService,
+    public AwsParameterProcessor(NoSqlTableCreationModeDeterminerService noSqlTableCreationModeDeterminerService,
             ParametersService parametersService) {
         this.noSqlTableCreationModeDeterminerService = noSqlTableCreationModeDeterminerService;
         this.parametersService = parametersService;
     }
 
-    public ValidationResult validateAndDetermineAwsParameters(EnvironmentDto environmentDto, AwsParametersDto awsParameters) {
+    public ValidationResult processAwsParameters(EnvironmentDto environmentDto, ParametersDto parametersDto) {
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        if (StringUtils.isNotBlank(awsParameters.getS3GuardTableName())) {
-            boolean tableAlreadyAttached = isTableAlreadyAttached(environmentDto, awsParameters);
+        AwsParametersDto awsParametersDto = parametersDto.getAwsParametersDto();
+        if (StringUtils.isNotBlank(awsParametersDto.getS3GuardTableName())) {
+            boolean tableAlreadyAttached = isTableAlreadyAttached(environmentDto, awsParametersDto);
             if (tableAlreadyAttached) {
                 validationResultBuilder.error(String.format("S3Guard table '%s' is already attached to another active environment. "
-                        + "Please select another unattached table or specify a non-existing name to create it.", awsParameters.getS3GuardTableName()));
+                        + "Please select another unattached table or specify a non-existing name to create it.", awsParametersDto.getS3GuardTableName()));
             } else {
-                determineAwsParameters(environmentDto, awsParameters);
+                determineAwsParameters(environmentDto, parametersDto);
             }
         }
         return validationResultBuilder.build();
@@ -44,11 +46,12 @@ public class AwsParameterValidator {
                 environment.getLocation().getName(), awsParameters.getS3GuardTableName());
     }
 
-    private void determineAwsParameters(EnvironmentDto environment, AwsParametersDto awsParameters) {
+    private void determineAwsParameters(EnvironmentDto environment, ParametersDto parametersDto) {
         LocationAwareCredential locationAwareCredential = getLocationAwareCredential(environment);
         S3GuardTableCreation dynamoDbTableCreation = noSqlTableCreationModeDeterminerService
-                .determineCreationMode(locationAwareCredential, awsParameters.getS3GuardTableName());
-        awsParameters.setDynamoDbTableCreation(dynamoDbTableCreation);
+                .determineCreationMode(locationAwareCredential, parametersDto.getAwsParametersDto().getS3GuardTableName());
+        parametersDto.getAwsParametersDto().setDynamoDbTableCreation(dynamoDbTableCreation);
+        parametersService.saveParameters(environment.getId(), parametersDto);
     }
 
     private LocationAwareCredential getLocationAwareCredential(EnvironmentDto environment) {
