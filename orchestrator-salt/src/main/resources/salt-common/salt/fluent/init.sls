@@ -129,7 +129,11 @@ fluent_stop:
     - file_mode: 640
     - context:
         databusReportDeploymentLogs: "false"
+{%- if fluent.dbusReportDeploymentLogs and (fluent.numberOfWorkers > 1) %}
+        numberOfWorkers: {{ fluent.numberOfWorkers - 1 }}
+{% else %}
         numberOfWorkers: {{ fluent.numberOfWorkers }}
+{% endif %}
 
 copy_td_agent_conf:
   cmd.run:
