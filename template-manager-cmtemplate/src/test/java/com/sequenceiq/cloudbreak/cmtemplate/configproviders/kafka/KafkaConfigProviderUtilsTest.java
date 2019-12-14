@@ -19,10 +19,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigProviderUtils.CdhVersionForStreaming.VERSION_7_0_2_CANNOT_DETERMINE_PATCH;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigProviderUtils.CdhVersionForStreaming.VERSION_7_0_2;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigProviderUtils.CdhVersionForStreaming.VERSION_7_0_2_2_OR_LATER;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigProviderUtils.CdhVersionForStreaming.VERSION_PRE_7_0_2;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigProviderUtils.CdhVersionForStreaming.VERSION_7_0_2_MISSING_PATCH_VERSION;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigProviderUtils.CdhVersionForStreaming.VERSION_7_0_2_X;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigProviderUtils.CdhVersionForStreaming.VERSION_7_0_X;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigProviderUtils.CdhVersionForStreaming.VERSION_7_X_0;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigProviderUtils.CdhVersionForStreaming.VERSION_7_0_0;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -76,19 +78,22 @@ class KafkaConfigProviderUtilsTest {
 
     static Stream<Arguments> testArgs() {
         return Stream.of(
-                Arguments.of("7.0.1", cdhParcelVersion("7.0.1", 5), VERSION_PRE_7_0_2),
-                Arguments.of("7.0.1", null, VERSION_PRE_7_0_2),
-                Arguments.of("7.0.1", "irregular-12345", VERSION_PRE_7_0_2),
+                Arguments.of("7.0.1", cdhParcelVersion("7.0.1", 5), VERSION_7_0_0),
+                Arguments.of("7.0.1", null, VERSION_7_0_0),
+                Arguments.of("7.0.1", "irregular-12345", VERSION_7_0_0),
                 Arguments.of("7.0.2", cdhParcelVersion("7.0.2", 0), VERSION_7_0_2),
                 Arguments.of("7.0.2", cdhParcelVersion("7.0.2", 1), VERSION_7_0_2),
                 Arguments.of("7.0.2", cdhParcelVersion("7.0.2", 1), VERSION_7_0_2),
-                Arguments.of("7.0.2", cdhParcelVersion("7.0.2", 2), VERSION_7_0_2_2_OR_LATER),
-                Arguments.of("7.0.2", cdhParcelVersion("7.0.2", 3), VERSION_7_0_2_2_OR_LATER),
-                Arguments.of("7.0.2", null, VERSION_7_0_2_CANNOT_DETERMINE_PATCH),
-                Arguments.of("7.0.2", "irregular-12345", VERSION_7_0_2_CANNOT_DETERMINE_PATCH),
-                Arguments.of("7.1.0", cdhParcelVersion("7.1.0", 0), VERSION_7_0_2_2_OR_LATER),
-                Arguments.of("7.1.0", null, VERSION_7_0_2_2_OR_LATER),
-                Arguments.of("7.1.0", "irregular-12345", VERSION_7_0_2_2_OR_LATER)
+                Arguments.of("7.0.2", cdhParcelVersion("7.0.2", 2), VERSION_7_0_2_X),
+                Arguments.of("7.0.2", cdhParcelVersion("7.0.2", 3), VERSION_7_0_2_X),
+                Arguments.of("7.0.2", null, VERSION_7_0_2_MISSING_PATCH_VERSION),
+                Arguments.of("7.0.2", "irregular-12345", VERSION_7_0_2_MISSING_PATCH_VERSION),
+                Arguments.of("7.0.3", cdhParcelVersion("7.0.3", 0), VERSION_7_0_X),
+                Arguments.of("7.0.3", cdhParcelVersion("7.0.3", 3), VERSION_7_0_X),
+                Arguments.of("7.0.4", cdhParcelVersion("7.0.4", 0), VERSION_7_0_X),
+                Arguments.of("7.1.0", cdhParcelVersion("7.1.0", 0), VERSION_7_X_0),
+                Arguments.of("7.1.0", null, VERSION_7_X_0),
+                Arguments.of("7.1.0", "irregular-12345", VERSION_7_X_0)
         );
     }
 

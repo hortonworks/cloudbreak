@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigProviderUtils.CdhVersionForStreaming.VERSION_7_0_2_2_OR_LATER;
 
 @Component
 public class KafkaDatahubConfigProvider implements CmTemplateComponentConfigProvider {
@@ -26,14 +25,10 @@ public class KafkaDatahubConfigProvider implements CmTemplateComponentConfigProv
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         ArrayList<ApiClusterTemplateConfig> configs = Lists.newArrayList(config(PRODUCER_METRICS_ENABLE, "true"));
-        if (supportsRangerServiceCreation(source)) {
+        if (KafkaConfigProviderUtils.getCdhVersionForStreaming(source).supportsRangerServiceCreation()) {
             configs.add(config(RANGER_PLUGIN_KAFKA_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME));
         }
         return configs;
-    }
-
-    private boolean supportsRangerServiceCreation(TemplatePreparationObject source) {
-        return VERSION_7_0_2_2_OR_LATER.equals(KafkaConfigProviderUtils.getCdhVersionForStreaming(source));
     }
 
     @Override

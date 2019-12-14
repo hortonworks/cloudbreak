@@ -27,14 +27,14 @@ public class KafkaAuthConfigProvider implements CmTemplateComponentConfigProvide
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
-        KafkaConfigProviderUtils.CdhVersionForStreaming cdhVersion = KafkaConfigProviderUtils.getCdhVersionForStreaming(source);
+        KafkaConfigProviderUtils.KafkaAuthConfigType authType = KafkaConfigProviderUtils.getCdhVersionForStreaming(source).authType();
         LdapView ldapView = source.getLdapConfig().get();
-        switch (cdhVersion) {
-            case VERSION_7_0_2:
+        switch (authType) {
+            case LDAP_AUTH:
                 return ldapConfig(ldapView);
-            case VERSION_7_0_2_2_OR_LATER:
+            case SASL_PAM_AUTH:
                 return ldapAndPamConfig(ldapView);
-            case VERSION_7_0_2_CANNOT_DETERMINE_PATCH:
+            case LDAP_BASE_CONFIG:
                 return generalAuthConfig(ldapView);
             default:
                 return List.of();
