@@ -1,16 +1,24 @@
 package com.sequenceiq.flow.service.flowlog;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Supplier;
 
 import org.assertj.core.util.Lists;
 import org.junit.Rule;
@@ -27,9 +35,16 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.flow.core.ApplicationFlowInformation;
+import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.ResourceIdProvider;
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 import com.sequenceiq.flow.domain.StateStatus;
+import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -58,6 +73,15 @@ public class FlowLogDBServiceTest {
 
     @Mock
     private ResourceIdProvider resourceIdProvider;
+
+    @Mock
+    private ApplicationFlowInformation applicationFlowInformation;
+
+    @Mock
+    private TransactionService transactionService;
+
+    @Mock
+    private NodeConfig nodeConfig;
 
     @Test
     public void updateLastFlowLogStatus() {
@@ -176,10 +200,108 @@ public class FlowLogDBServiceTest {
         verify(resourceIdProvider, never()).getResourceIdByResourceName(anyString());
     }
 
+    @Test
+    public void cancelTooOldTerminationFlowForResourceTest() throws TransactionService.TransactionExecutionException {
+        Set<FlowLogIdWithTypeAndTimestamp> flowLogs = new LinkedHashSet<>();
+        FlowLogIdWithTypeAndTimestamp flowLog2 = mock(FlowLogIdWithTypeAndTimestamp.class);
+        Class flow2Class = Class.class;
+        when(flowLog2.getFlowType()).thenReturn(flow2Class);
+        flowLogs.add(flowLog2);
+        FlowLogIdWithTypeAndTimestamp flowLog1 = mock(FlowLogIdWithTypeAndTimestamp.class);
+        Class termFlowClass = TerminationFlowConfig.class;
+        when(flowLog1.getFlowType()).thenReturn(termFlowClass);
+        when(flowLog1.getCreated()).thenReturn(9000L);
+        when(flowLog1.getFlowId()).thenReturn("flow1");
+        flowLogs.add(flowLog1);
+        when(flowLogRepository.findAllRunningFlowLogByResourceId(eq(1L))).thenReturn(flowLogs);
+        FlowLog realFlowLog1 = mock(FlowLog.class);
+        when(realFlowLog1.getId()).thenReturn(10L);
+        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(eq("flow1"))).thenReturn(Optional.of(realFlowLog1));
+        when(applicationFlowInformation.getTerminationFlow()).thenReturn(Collections.singletonList(TerminationFlowConfig.class));
+        when(transactionService.required(any())).thenAnswer(invocation -> ((Supplier) invocation.getArguments()[0]).get());
+        when(nodeConfig.getId()).thenReturn("node1");
+        underTest.cancelTooOldTerminationFlowForResource(1L, 10000L);
+        verify(flowLogRepository).finalizeByFlowId(eq("flow1"));
+        verify(flowLogRepository, times(0)).finalizeByFlowId(eq("flow2"));
+        verify(flowLogRepository).updateLastLogStatusInFlow(eq(10L), eq(StateStatus.SUCCESSFUL));
+    }
+
+    @Test
+    public void doNotCancelTooYoungTerminationFlowForResourceTest() {
+        Set<FlowLogIdWithTypeAndTimestamp> flowLogs = new HashSet<>();
+        FlowLogIdWithTypeAndTimestamp flowLog1 = mock(FlowLogIdWithTypeAndTimestamp.class);
+        Class termFlowClass = TerminationFlowConfig.class;
+        when(flowLog1.getFlowType()).thenReturn(termFlowClass);
+        when(flowLog1.getCreated()).thenReturn(11000L);
+        flowLogs.add(flowLog1);
+        FlowLogIdWithTypeAndTimestamp flowLog2 = mock(FlowLogIdWithTypeAndTimestamp.class);
+        Class flow2Class = Class.class;
+        when(flowLog2.getFlowType()).thenReturn(flow2Class);
+        flowLogs.add(flowLog2);
+        when(flowLogRepository.findAllRunningFlowLogByResourceId(eq(1L))).thenReturn(flowLogs);
+        when(applicationFlowInformation.getTerminationFlow()).thenReturn(Collections.singletonList(TerminationFlowConfig.class));
+        underTest.cancelTooOldTerminationFlowForResource(1L, 10000L);
+        verify(flowLogRepository, times(0)).finalizeByFlowId(eq("flow1"));
+        verify(flowLogRepository, times(0)).finalizeByFlowId(eq("flow2"));
+        verify(flowLogRepository, times(0)).updateLastLogStatusInFlow(eq(10L), eq(StateStatus.SUCCESSFUL));
+    }
+
     private FlowLog createFlowLog(String flowId) {
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowId(flowId);
         flowLog.setFlowChainId(flowId + "chain");
         return flowLog;
+    }
+
+    public static class TerminationFlowConfig extends AbstractFlowConfiguration<MockFlowState, MockFlowEvent> {
+        protected TerminationFlowConfig(Class<MockFlowState> stateType, Class<MockFlowEvent> eventType) {
+            super(stateType, eventType);
+        }
+
+        @Override
+        protected List<Transition<MockFlowState, MockFlowEvent>> getTransitions() {
+            return null;
+        }
+
+        @Override
+        protected FlowEdgeConfig<MockFlowState, MockFlowEvent> getEdgeConfig() {
+            return null;
+        }
+
+        @Override
+        public MockFlowEvent[] getEvents() {
+            return new MockFlowEvent[0];
+        }
+
+        @Override
+        public MockFlowEvent[] getInitEvents() {
+            return new MockFlowEvent[0];
+        }
+
+        @Override
+        public String getDisplayName() {
+            return null;
+        }
+    }
+
+    public static class MockFlowState implements FlowState {
+
+        @Override
+        public String name() {
+            return null;
+        }
+
+    }
+
+    public static class MockFlowEvent implements FlowEvent {
+        @Override
+        public String name() {
+            return null;
+        }
+
+        @Override
+        public String event() {
+            return null;
+        }
     }
 }
