@@ -4,6 +4,7 @@ freeipa-install:
         - ntp
         - ipa-server
         - ipa-server-dns
+    - failhard: True
 
 net.ipv6.conf.lo.disable_ipv6:
   sysctl.present:
@@ -26,6 +27,7 @@ install-freeipa:
         - DOMAIN: {{salt['pillar.get']('freeipa:domain')}}
         - REALM: {{salt['pillar.get']('freeipa:realm')}}
     - unless: test -f /var/log/freeipa_install-executed
+    - failhard: True
     - require:
         - file: /opt/salt/scripts/freeipa_install.sh
 
