@@ -6,8 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudAccessConfigsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudAccessConfigsResult;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudUnauthorizedException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
@@ -44,6 +46,8 @@ public class GetPlatformAccessConfigsHandler implements CloudPlatformEventHandle
                     new GetPlatformCloudAccessConfigsResult(request.getResourceId(), cloudAccessConfigs);
             request.getResult().onNext(getPlatformCloudAccessConfigsResult);
             LOGGER.debug("Query platform access configs finished.");
+        } catch (CloudUnauthorizedException e) {
+            request.getResult().onNext(new GetPlatformCloudAccessConfigsResult(EventStatus.PERMANENTLY_FAILED, e.getMessage(), e, request.getResourceId()));
         } catch (Exception e) {
             request.getResult().onNext(new GetPlatformCloudAccessConfigsResult(e.getMessage(), e, request.getResourceId()));
         }
