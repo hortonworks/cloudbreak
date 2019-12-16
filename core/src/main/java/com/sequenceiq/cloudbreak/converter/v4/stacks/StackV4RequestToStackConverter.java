@@ -389,14 +389,13 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         if (source.getNetwork() != null) {
             source.getNetwork().setCloudPlatform(source.getCloudPlatform());
             stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
-        } else if (source.getPlacement() != null) {
+        } else {
             EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(source.getCloudPlatform());
+            String availabilityZone = source.getPlacement() != null ? source.getPlacement().getAvailabilityZone() : null;
             if (environmentNetworkConverter != null) {
-                Network network = environmentNetworkConverter.convertToLegacyNetwork(environment.getNetwork(), source.getPlacement().getAvailabilityZone());
+                Network network = environmentNetworkConverter.convertToLegacyNetwork(environment.getNetwork(), availabilityZone);
                 stack.setNetwork(network);
             }
-        } else if (!CloudPlatform.YARN.equals(source.getCloudPlatform())) {
-            throw new BadRequestException("We cannot determine the subnet from environment. Please add 'network' or 'placement' to the request");
         }
     }
 }

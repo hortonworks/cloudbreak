@@ -32,7 +32,7 @@ public class ClusterCreationTest extends AbstractIntegrationTest {
                 .withEmptyPlacement()
                 .when(StackTestAction::create, key("error"))
                 .expect(BadRequestException.class, key("error")
-                        .withExpectedMessage("We cannot determine the subnet from environment. Please add 'network' or 'placement' to the request"))
+                        .withExpectedMessage("Network must be specified!"))
                 .validate();
     }
 }

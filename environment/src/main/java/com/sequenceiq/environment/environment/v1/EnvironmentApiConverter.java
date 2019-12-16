@@ -8,6 +8,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,6 +18,7 @@ import org.springframework.util.StringUtils;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.util.NullUtil;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
@@ -53,6 +56,7 @@ import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.MockParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.dto.YarnParams;
+import com.sequenceiq.environment.network.service.SubnetIdProvider;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 
@@ -77,6 +81,9 @@ public class EnvironmentApiConverter {
     private final TelemetryApiConverter telemetryApiConverter;
 
     private final TunnelConverter tunnelConverter;
+
+    @Inject
+    private SubnetIdProvider subnetIdProvider;
 
     public EnvironmentApiConverter(RegionConverter regionConverter,
             CredentialToCredentialV1ResponseConverter credentialConverter,
@@ -244,7 +251,8 @@ public class EnvironmentApiConverter {
                 .withAdminGroupName(environmentDto.getAdminGroupName())
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams));
 
-        NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
+        NullUtil.doIfNotNull(environmentDto.getNetwork(), network ->
+                builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel())));
         NullUtil.doIfNotNull(environmentDto.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessDtoToResponse(securityAccess)));
         return builder.build();
     }
@@ -267,7 +275,8 @@ public class EnvironmentApiConverter {
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams));
 
-        NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
+        NullUtil.doIfNotNull(environmentDto.getNetwork(), network ->
+                builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel())));
         return builder.build();
     }
 
@@ -283,12 +292,13 @@ public class EnvironmentApiConverter {
                 .build();
     }
 
-    public EnvironmentNetworkResponse networkDtoToResponse(NetworkDto network) {
+    public EnvironmentNetworkResponse networkDtoToResponse(NetworkDto network, Tunnel tunnel) {
         return EnvironmentNetworkResponse.EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
                 .withCrn(network.getResourceCrn())
                 .withSubnetIds(network.getSubnetIds())
                 .withNetworkCidr(network.getNetworkCidr())
                 .withSubnetMetas(network.getSubnetMetas())
+                .withPreferedSubnetId(subnetIdProvider.provide(network, tunnel))
                 .withExistingNetwork(RegistrationType.EXISTING == network.getRegistrationType())
                 .withAws(getIfNotNull(network.getAws(), p -> EnvironmentNetworkAwsParams.EnvironmentNetworkAwsParamsBuilder
                         .anEnvironmentNetworkAwsParams()

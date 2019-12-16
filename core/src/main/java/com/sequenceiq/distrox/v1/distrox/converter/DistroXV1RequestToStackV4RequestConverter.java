@@ -8,6 +8,8 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -37,6 +39,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
 public class DistroXV1RequestToStackV4RequestConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXV1RequestToStackV4RequestConverter.class);
 
     @Inject
     private DistroXEnvironmentV1ToEnvironmentSettingsConverter environmentConverter;
@@ -168,9 +172,11 @@ public class DistroXV1RequestToStackV4RequestConverter {
     }
 
     private void validateSubnet(NetworkV4Request network, DetailedEnvironmentResponse environment, String subnetId) {
-        if (!environment.getNetwork().getSubnetIds().contains(subnetId)) {
+        if (subnetId != null && (environment == null || environment.getNetwork() == null || environment.getNetwork().getSubnetIds() == null
+                || !environment.getNetwork().getSubnetIds().contains(subnetId))) {
+            LOGGER.info("The given subnet id [{}] is not attached to the Environment [{}]. Network request: [{}]", subnetId, environment, network);
             throw new BadRequestException(String.format("The given subnet id (%s) is not attached to the Environment (%s)",
-                    network.getAws().getSubnetId(), environment.getName()));
+                    subnetId, environment.getName()));
         }
     }
 

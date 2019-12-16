@@ -105,6 +105,7 @@ public class NetworkV1ToNetworkV4ConverterTest {
         der.setCloudPlatform("AWS");
         EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
         environmentNetworkResponse.setSubnetIds(SUBNET_IDS);
+        environmentNetworkResponse.setPreferedSubnetId(SUBNET_ID);
 
         EnvironmentNetworkAwsParams environmentNetworkAwsParams = new EnvironmentNetworkAwsParams();
         environmentNetworkAwsParams.setVpcId(VPC_ID);
@@ -141,6 +142,7 @@ public class NetworkV1ToNetworkV4ConverterTest {
         der.setCloudPlatform("AZURE");
         EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
         environmentNetworkResponse.setSubnetIds(SUBNET_IDS);
+        environmentNetworkResponse.setPreferedSubnetId(SUBNET_ID);
 
         EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
         environmentNetworkAzureParams.setNetworkId(VPC_ID);

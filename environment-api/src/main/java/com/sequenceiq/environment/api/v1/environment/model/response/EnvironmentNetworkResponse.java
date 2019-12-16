@@ -30,6 +30,9 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
     @ApiModelProperty(value = EnvironmentModelDescription.EXISTING_NETWORK)
     private boolean existingNetwork;
 
+    @ApiModelProperty(EnvironmentModelDescription.PREFERED_SUBNET_ID)
+    private String preferedSubnetId;
+
     public String getCrn() {
         return crn;
     }
@@ -62,6 +65,14 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
         this.existingNetwork = existingNetwork;
     }
 
+    public String getPreferedSubnetId() {
+        return preferedSubnetId;
+    }
+
+    public void setPreferedSubnetId(String preferedSubnetId) {
+        this.preferedSubnetId = preferedSubnetId;
+    }
+
     public static final class EnvironmentNetworkResponseBuilder {
         private String crn;
 
@@ -74,6 +85,8 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
         private Map<String, CloudSubnet> subnetMetas;
 
         private boolean existingNetwork;
+
+        private String preferedSubnetId;
 
         private EnvironmentNetworkAwsParams aws;
 
@@ -115,6 +128,11 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             return this;
         }
 
+        public EnvironmentNetworkResponseBuilder withPreferedSubnetId(String preferedSubnetId) {
+            this.preferedSubnetId = preferedSubnetId;
+            return this;
+        }
+
         public EnvironmentNetworkResponseBuilder withAws(EnvironmentNetworkAwsParams aws) {
             this.aws = aws;
             return this;
@@ -152,6 +170,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             environmentNetworkResponse.setSubnetMetas(subnetMetas);
             environmentNetworkResponse.setExistingNetwork(existingNetwork);
             environmentNetworkResponse.setMock(mock);
+            environmentNetworkResponse.setPreferedSubnetId(preferedSubnetId);
             return environmentNetworkResponse;
         }
     }
