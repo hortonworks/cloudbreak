@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -127,6 +128,8 @@ public class StackService implements ResourceIdProvider {
 
     public static final Set<String> REATTACH_COMPATIBLE_PLATFORMS = Set.of(CloudConstants.AWS, CloudConstants.AZURE, CloudConstants.GCP, CloudConstants.MOCK);
 
+    public static final long MINUTE_IN_MS = 60 * 1000;
+
     private static final String STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE = "Stack not found by id '%d'";
 
     private static final String STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE = "Stack not found by name '%s'";
@@ -136,6 +139,9 @@ public class StackService implements ResourceIdProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
     private static final String SSH_USER_CB = "cloudbreak";
+
+    @Value("${cb.termination.retry.allowed.in.minute:60}")
+    private long terminationRetryAllowedInMinute;
 
     @Inject
     private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
@@ -960,6 +966,7 @@ public class StackService implements ResourceIdProvider {
         LOGGER.info("Check stack that no cluster is attached to {} in environment.", stack.getEnvironmentCrn());
         checkStackHasNoAttachedClusters(stack);
         MDCBuilder.buildMdcContext(stack);
+        cancelTooOldTerminationFlowForResource(stack);
         if (stack.isDeleteInProgress() && forced) {
             LOGGER.info("stack {} in environment {} is already delete in progress.", stack.getName(), stack.getEnvironmentCrn());
             List<FlowLog> flowLogs = flowLogService.findAllByResourceIdOrderByCreatedDesc(stack.getId());
@@ -980,6 +987,14 @@ public class StackService implements ResourceIdProvider {
             flowManager.triggerTermination(stack.getId(), forced);
         } else {
             LOGGER.debug("Stack is already deleted.");
+        }
+    }
+
+    private void cancelTooOldTerminationFlowForResource(Stack stack) {
+        try {
+            flowLogService.cancelTooOldTerminationFlowForResource(stack.getId(), new Date().getTime() - terminationRetryAllowedInMinute * MINUTE_IN_MS);
+        } catch (Exception e) {
+            LOGGER.warn("Can't cancel old termination flows for stack {}", stack.getName(), e);
         }
     }
 

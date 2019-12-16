@@ -15,6 +15,8 @@ import javax.inject.Inject;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.MockBeans;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScans;
@@ -51,9 +53,12 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.flow.core.ApplicationFlowInformation;
+import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 import reactor.Environment;
 
+@MockBeans({@MockBean(ApplicationFlowInformation.class), @MockBean(FlowLogDBService.class)})
 @Configuration
 @ComponentScans({ @ComponentScan("com.sequenceiq.cloudbreak.cloud"), @ComponentScan("com.sequenceiq.flow.reactor"),
         @ComponentScan("com.sequenceiq.cloudbreak.auth")})

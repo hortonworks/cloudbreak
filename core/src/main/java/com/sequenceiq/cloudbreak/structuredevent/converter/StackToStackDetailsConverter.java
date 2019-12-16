@@ -46,7 +46,9 @@ public class StackToStackDetailsConverter extends AbstractConversionServiceAware
         stackDetails.setCloudPlatform(source.cloudPlatform());
         stackDetails.setPlatformVariant(source.getPlatformVariant());
         stackDetails.setStatus(source.getStatus().name());
-        stackDetails.setDetailedStatus(source.getStackStatus().getDetailedStackStatus().name());
+        if (source.getStackStatus() != null && source.getStackStatus().getDetailedStackStatus() != null) {
+            stackDetails.setDetailedStatus(source.getStackStatus().getDetailedStackStatus().name());
+        }
         stackDetails.setStatusReason(source.getStatusReason());
         stackDetails.setInstanceGroups(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupDetails.class));
         convertComponents(stackDetails, source);
