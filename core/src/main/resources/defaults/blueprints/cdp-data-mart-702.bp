@@ -5,32 +5,17 @@
     "displayName": "datamart",
     "services": [
       {
-        "refName": "hdfs",
-        "serviceType": "HDFS",
+        "refName": "core_settings",
+        "serviceType": "CORE_SETTINGS",
         "roleConfigGroups": [
           {
-            "refName": "hdfs-NAMENODE-BASE",
-            "roleType": "NAMENODE",
+            "refName": "core_settings-GATEWAY-BASE",
+            "roleType": "GATEWAY",
             "base": true
           },
           {
-            "refName": "hdfs-SECONDARYNAMENODE-BASE",
-            "roleType": "SECONDARYNAMENODE",
-            "base": true
-          },
-          {
-            "refName": "hdfs-DATANODE-BASE",
-            "roleType": "DATANODE",
-            "configs" : [ {
-              "name" : "dfs_datanode_max_locked_memory",
-              "value" : "0",
-              "autoConfig" : false
-            } ],
-            "base": true
-          },
-          {
-            "refName": "hdfs-BALANCER-BASE",
-            "roleType": "BALANCER",
+            "refName": "core_settings-STORAGEOPERATIONS-BASE",
+            "roleType": "STORAGEOPERATIONS",
             "base": true
           }
         ]
@@ -54,7 +39,7 @@
       {
         "refName": "impala",
         "serviceType": "IMPALA",
-        "serviceConfigs" : [ {
+        "serviceConfigs": [ {
           "name" : "impala_cmd_args_safety_valve",
           "value" : "--cache_s3_file_handles=true"
         } ],
@@ -62,11 +47,11 @@
           {
             "refName": "impala-IMPALAD-COORDINATOR",
             "roleType": "IMPALAD",
-            "configs" : [ {
+            "configs": [ {
               "name" : "impalad_specialization",
               "value" : "COORDINATOR_ONLY"
             }, {
-              "name" : "impala_hdfs_site_conf_safety_valve",
+              "name" : "impalad_core_site_safety_valve",
               "value" : "<property><name>fs.s3a.experimental.input.fadvise</name><value>RANDOM</value></property><property><name>fs.s3a.fast.upload</name><value>true</value></property>"
             } ],
             "base": false
@@ -74,11 +59,11 @@
           {
             "refName": "impala-IMPALAD-EXECUTOR",
             "roleType": "IMPALAD",
-            "configs" : [ {
+            "configs": [ {
               "name" : "impalad_specialization",
               "value" : "EXECUTOR_ONLY"
             }, {
-              "name" : "impala_hdfs_site_conf_safety_valve",
+              "name" : "impalad_core_site_safety_valve",
               "value" : "<property><name>fs.s3a.experimental.input.fadvise</name><value>RANDOM</value></property><property><name>fs.s3a.fast.upload</name><value>true</value></property>"
             } ],
             "base": false
@@ -101,9 +86,8 @@
         "refName": "master",
         "cardinality": "1",
         "roleConfigGroupsRefNames": [
-          "hdfs-BALANCER-BASE",
-          "hdfs-NAMENODE-BASE",
-          "hdfs-SECONDARYNAMENODE-BASE",
+          "core_settings-GATEWAY-BASE",
+          "core_settings-STORAGEOPERATIONS-BASE",
           "hue-HUE_LOAD_BALANCER-BASE",
           "hue-HUE_SERVER-BASE",
           "impala-CATALOGSERVER-BASE",
@@ -114,7 +98,6 @@
         "refName": "coordinator",
         "cardinality": "1",
         "roleConfigGroupsRefNames": [
-          "hdfs-DATANODE-BASE",
           "impala-IMPALAD-COORDINATOR"
         ]
       },
@@ -122,7 +105,6 @@
         "refName": "executor",
         "cardinality": "2",
         "roleConfigGroupsRefNames": [
-          "hdfs-DATANODE-BASE",
           "impala-IMPALAD-EXECUTOR"
         ]
       }
