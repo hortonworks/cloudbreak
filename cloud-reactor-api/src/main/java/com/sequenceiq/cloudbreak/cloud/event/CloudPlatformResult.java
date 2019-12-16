@@ -19,8 +19,12 @@ public class CloudPlatformResult implements Payload {
     }
 
     public CloudPlatformResult(String statusReason, Exception errorDetails, Long resourceId) {
+        this(EventStatus.FAILED, statusReason, errorDetails, resourceId);
+    }
+
+    public CloudPlatformResult(EventStatus status, String statusReason, Exception errorDetails, Long resourceId) {
         this.resourceId = resourceId;
-        init(EventStatus.FAILED, statusReason, errorDetails);
+        init(status, statusReason, errorDetails);
     }
 
     protected void init(EventStatus status, String statusReason, Exception errorDetails) {

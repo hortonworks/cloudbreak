@@ -79,6 +79,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudUnauthorizedException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
@@ -791,9 +792,9 @@ public class AwsPlatformResources implements PlatformResources {
             return listRolesResult.getRoles().stream().map(this::roleToCloudAccessConfig).collect(Collectors.toSet());
         } catch (AmazonServiceException ase) {
             if (ase.getStatusCode() == UNAUTHORIZED) {
-                String policyMessage = "Could not get roles because the user does not have enough permission.";
+                String policyMessage = "Could not get roles because the user does not have enough permission. ";
                 LOGGER.error(policyMessage + ase.getMessage(), ase);
-                throw new CloudConnectorException(policyMessage, ase);
+                throw new CloudUnauthorizedException(ase.getErrorMessage(), ase);
             } else {
                 LOGGER.info(queryFailedMessage + ase.getMessage(), ase);
                 throw new CloudConnectorException(ase.getMessage(), ase);

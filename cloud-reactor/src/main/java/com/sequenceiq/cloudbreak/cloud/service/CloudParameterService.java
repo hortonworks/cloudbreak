@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -382,9 +383,13 @@ public class CloudParameterService {
             GetPlatformCloudAccessConfigsResult res = getPlatformCloudAccessConfigsRequest.await();
             LOGGER.debug("Platform accessConfigs result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform accessConfigs", res.getErrorDetails());
+                LOGGER.debug("Failed to get platform accessConfigs, retry again", res.getErrorDetails());
                 throw new GetCloudParameterException("Failed to get access configs for the cloud provider. "
                         + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
+            }
+            if (res.getStatus().equals(EventStatus.PERMANENTLY_FAILED)) {
+                LOGGER.debug("Failed to get platform accessConfigs", res.getErrorDetails());
+                throw new BadRequestException("Unable to fetch the access configs: " + res.getStatusReason());
             }
             return res.getCloudAccessConfigs();
         } catch (InterruptedException e) {
