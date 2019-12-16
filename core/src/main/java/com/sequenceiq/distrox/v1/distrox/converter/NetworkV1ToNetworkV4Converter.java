@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.AwsNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.AzureNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.MockNetworkV1Parameters;
@@ -77,7 +76,7 @@ public class NetworkV1ToNetworkV4Converter {
             String subnetId = key.getSubnetId();
             if (value != null) {
                 evaluateIfTrueDoOtherwise(subnetId, StringUtils::isNotEmpty, params::setSubnetId,
-                        s -> params.setSubnetId(getFirstSubnetIdFromEnvironment(value)));
+                        s -> params.setSubnetId(value.getPreferedSubnetId()));
             }
             params.setInternetGatewayId(key.getInternetGatewayId());
             params.setVpcId(key.getVpcId());
@@ -101,16 +100,12 @@ public class NetworkV1ToNetworkV4Converter {
             String subnetId = key.getSubnetId();
             if (!Strings.isNullOrEmpty(subnetId)) {
                 response.setSubnetId(subnetId);
-            } else {
-                response.setSubnetId(getFirstSubnetIdFromEnvironment(value));
+            } else if (source.getValue() != null) {
+                response.setSubnetId(source.getValue().getPreferedSubnetId());
             }
         }
 
         return response;
-    }
-
-    private String getFirstSubnetIdFromEnvironment(EnvironmentNetworkResponse enr) {
-        return enr.getSubnetIds().stream().findFirst().orElseThrow(() -> new BadRequestException(NO_SUBNET_ID_FOUND_MESSAGE));
     }
 
     private AwsNetworkV4Parameters convertToAwsStackRequest(Pair<AwsNetworkV1Parameters, EnvironmentNetworkResponse> source) {
@@ -125,9 +120,8 @@ public class NetworkV1ToNetworkV4Converter {
             String subnetId = key.getSubnetId();
             if (!Strings.isNullOrEmpty(subnetId)) {
                 response.setSubnetId(key.getSubnetId());
-            } else {
-                response.setSubnetId(value.getSubnetIds().stream().findFirst()
-                        .orElseThrow(() -> new BadRequestException(NO_SUBNET_ID_FOUND_MESSAGE)));
+            } else if (source.getValue() != null) {
+                response.setSubnetId(source.getValue().getPreferedSubnetId());
             }
         }
 

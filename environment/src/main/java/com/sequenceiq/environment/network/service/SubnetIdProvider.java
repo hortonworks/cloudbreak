@@ -12,7 +12,11 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 public class SubnetIdProvider {
 
     public String provide(NetworkDto network, Tunnel tunnel) {
-        return getSubnetIdByPreferedSubnetType(network, tunnel.useCcm());
+        if (network != null && network.getSubnetIds() != null && !network.getSubnetIds().isEmpty()) {
+            return getSubnetIdByPreferedSubnetType(network, tunnel.useCcm());
+        } else {
+            return null;
+        }
     }
 
     private String getSubnetIdByPreferedSubnetType(NetworkDto network, boolean preferPrivate) {

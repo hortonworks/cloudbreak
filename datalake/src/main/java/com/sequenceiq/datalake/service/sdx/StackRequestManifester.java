@@ -1,13 +1,9 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
@@ -17,19 +13,14 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
-import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
@@ -47,7 +38,6 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 
 @Service
@@ -107,14 +97,6 @@ public class StackRequestManifester {
                 setupYarnDetails(environment, stackRequest);
             }
 
-            if (environment.getNetwork() != null
-                    && environment.getNetwork().getSubnetMetas() != null
-                    && !environment.getNetwork().getSubnetMetas().isEmpty()) {
-                CloudSubnet cloudSubnet = getSubnet(environment.getNetwork());
-                setupPlacement(environment, cloudSubnet, stackRequest);
-                setupNetwork(environment, cloudSubnet, stackRequest);
-            }
-
             setupAuthentication(environment, stackRequest);
             setupSecurityAccess(environment, stackRequest);
             setupClusterRequest(stackRequest);
@@ -129,19 +111,6 @@ public class StackRequestManifester {
         }
     }
 
-    private CloudSubnet getSubnet(EnvironmentNetworkResponse network) {
-        return network.isExistingNetwork()
-                ? network.getSubnetMetas().values().stream().findFirst().orElseThrow(getException())
-                : network.getSubnetMetas().entrySet().stream()
-                .filter(entry -> !entry.getValue().isPrivateSubnet()).findFirst()
-                .map(Map.Entry::getValue)
-                .orElseThrow(getException());
-    }
-
-    private Supplier<BadRequestException> getException() {
-        return () -> new BadRequestException("No subnet id for this environment");
-    }
-
     private void setupYarnDetails(DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
         if (stackRequest.getYarn() == null || stackRequest.getYarn().getYarnQueue() == null) {
             if (environment.getNetwork() == null
@@ -154,41 +123,6 @@ public class StackRequestManifester {
                 stackRequest.setYarn(yarnStackV4Parameters);
             }
         }
-    }
-
-    private void setupPlacement(DetailedEnvironmentResponse environment, CloudSubnet cloudSubnet, StackV4Request stackRequest) {
-        PlacementSettingsV4Request placementSettingsV4Request = new PlacementSettingsV4Request();
-        placementSettingsV4Request.setAvailabilityZone(cloudSubnet.getAvailabilityZone());
-        placementSettingsV4Request.setRegion(environment.getRegions().getNames().iterator().next());
-        stackRequest.setPlacement(placementSettingsV4Request);
-    }
-
-    private void setupNetwork(DetailedEnvironmentResponse environmentResponse, CloudSubnet cloudSubnet, StackV4Request stackRequest) {
-        stackRequest.setNetwork(convertNetwork(environmentResponse.getNetwork(), cloudSubnet));
-    }
-
-    private NetworkV4Request convertNetwork(EnvironmentNetworkResponse network, CloudSubnet cloudSubnet) {
-        NetworkV4Request response = new NetworkV4Request();
-        response.setAws(getIfNotNull(network.getAws(), aws -> convertToAwsNetwork(network, cloudSubnet)));
-        response.setAzure(getIfNotNull(network.getAzure(), azure -> convertToAzureNetwork(network, cloudSubnet)));
-        return response;
-    }
-
-    private AzureNetworkV4Parameters convertToAzureNetwork(EnvironmentNetworkResponse source, CloudSubnet cloudSubnet) {
-        AzureNetworkV4Parameters response = new AzureNetworkV4Parameters();
-        response.setNetworkId(source.getAzure().getNetworkId());
-        response.setNoFirewallRules(source.getAzure().getNoFirewallRules());
-        response.setNoPublicIp(source.getAzure().getNoPublicIp());
-        response.setResourceGroupName(source.getAzure().getResourceGroupName());
-        response.setSubnetId(cloudSubnet.getId());
-        return response;
-    }
-
-    private AwsNetworkV4Parameters convertToAwsNetwork(EnvironmentNetworkResponse source, CloudSubnet cloudSubnet) {
-        AwsNetworkV4Parameters response = new AwsNetworkV4Parameters();
-        response.setSubnetId(cloudSubnet.getId());
-        response.setVpcId(source.getAws().getVpcId());
-        return response;
     }
 
     private void setupAuthentication(DetailedEnvironmentResponse environment, StackV4Request stackRequest) {

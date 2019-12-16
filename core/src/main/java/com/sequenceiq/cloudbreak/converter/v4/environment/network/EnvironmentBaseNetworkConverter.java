@@ -31,17 +31,23 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         result.setSubnetCIDR(null);
         Map<String, Object> attributes = new HashMap<>();
         Optional<CloudSubnet> cloudSubnet;
-        if (StringUtils.isNotEmpty(availabilityZone)) {
+        if (StringUtils.isNotBlank(source.getPreferedSubnetId())) {
+            LOGGER.debug("Choosing subnet by prefered subnet Id {}", source.getPreferedSubnetId());
+            cloudSubnet = Optional.of(source.getSubnetMetas().get(source.getPreferedSubnetId()));
+        } else if (StringUtils.isNotEmpty(availabilityZone)) {
+            LOGGER.debug("Choosing subnet by availability zone {}", availabilityZone);
             cloudSubnet = source.getSubnetMetas().values().stream()
                     .filter(s -> StringUtils.isNotEmpty(s.getAvailabilityZone()) &&
                             s.getAvailabilityZone().equals(availabilityZone))
                     .findFirst();
         } else {
+            LOGGER.debug("Fallback to choose random subnet");
             cloudSubnet = source.getSubnetMetas().values().stream().findFirst();
         }
-        if (!cloudSubnet.isPresent()) {
+        if (cloudSubnet.isEmpty()) {
             throw new BadRequestException("No subnet for the given availability zone: " + availabilityZone);
         }
+        LOGGER.debug("Chosen subnet: {}", cloudSubnet.get());
         attributes.put("subnetId", cloudSubnet.get().getId());
         attributes.put("cloudPlatform", getCloudPlatform().name());
         attributes.putAll(getAttributesForLegacyNetwork(source));
