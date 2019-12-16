@@ -1,27 +1,23 @@
 package com.sequenceiq.environment.network.service;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
-import com.sequenceiq.environment.network.dao.domain.RegistrationType;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Component
 public class SubnetIdProvider {
 
-    public String provide(NetworkDto network) {
-        return RegistrationType.EXISTING == network.getRegistrationType() ? network.getSubnetIds().iterator().next()
-                : getPublicSubnetIds(network.getSubnetMetas()).iterator().next();
+    public String provide(NetworkDto network, Tunnel tunnel) {
+        return getSubnetIdByPreferedSubnetType(network, tunnel.useCcm());
     }
 
-    private Set<String> getPublicSubnetIds(Map<String, CloudSubnet> subnetMetas) {
-        return subnetMetas.values().stream()
-                .filter(cloudSubnet -> !cloudSubnet.isPrivateSubnet())
-                .map(CloudSubnet::getId)
-                .collect(Collectors.toSet());
+    private String getSubnetIdByPreferedSubnetType(NetworkDto network, boolean preferPrivate) {
+        Optional<CloudSubnet> subnet =
+                network.getSubnetMetas().values().stream().filter(cloudSubnet -> preferPrivate == cloudSubnet.isPrivateSubnet()).findAny();
+        return subnet.isPresent() ? subnet.get().getId() : network.getSubnetIds().iterator().next();
     }
 }
