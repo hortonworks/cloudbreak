@@ -14,7 +14,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.flow.domain.FlowLog;
-import com.sequenceiq.flow.domain.FlowLogIdFlowAndType;
+import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 import com.sequenceiq.flow.domain.StateStatus;
 
 @Transactional(TxType.REQUIRED)
@@ -22,9 +22,9 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
 
     Optional<FlowLog> findFirstByFlowIdOrderByCreatedDesc(String flowId);
 
-    @Query("SELECT fl.flowId as flowId, fl.flowType as flowType FROM FlowLog fl "
+    @Query("SELECT fl.flowId as flowId, fl.flowType as flowType, fl.created as created FROM FlowLog fl "
             + "WHERE fl.stateStatus = 'PENDING' AND fl.resourceId = :resourceId")
-    Set<FlowLogIdFlowAndType> findAllRunningFlowLogByResourceId(@Param("resourceId") Long resourceId);
+    Set<FlowLogIdWithTypeAndTimestamp> findAllRunningFlowLogByResourceId(@Param("resourceId") Long resourceId);
 
     @Query("SELECT DISTINCT fl.flowId, fl.resourceId, fl.cloudbreakNodeId FROM FlowLog fl WHERE fl.stateStatus = 'PENDING'")
     List<Object[]> findAllPending();

@@ -1,9 +1,10 @@
 package com.sequenceiq.flow.domain;
 
-public interface FlowLogIdFlowAndType {
+public interface FlowLogIdWithTypeAndTimestamp {
 
     String getFlowId();
 
     Class<?> getFlowType();
 
+    Long getCreated();
 }

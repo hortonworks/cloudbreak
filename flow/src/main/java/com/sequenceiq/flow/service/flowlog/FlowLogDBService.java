@@ -32,7 +32,7 @@ import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
-import com.sequenceiq.flow.domain.FlowLogIdFlowAndType;
+import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.flow.repository.FlowLogRepository;
@@ -124,13 +124,29 @@ public class FlowLogDBService implements FlowLogService {
         flowLogRepository.updateLastLogStatusInFlow(lastFlowLog.getId(), stateStatus);
     }
 
+    public void cancelTooOldTerminationFlowForResource(Long resourceId, long olderThan) {
+        Set<FlowLogIdWithTypeAndTimestamp> allRunningFlowIdsByResourceId = flowLogRepository.findAllRunningFlowLogByResourceId(resourceId);
+        allRunningFlowIdsByResourceId.stream()
+                .filter(flowLog -> applicationFlowInformation.getTerminationFlow().stream()
+                        .map(Class::getName)
+                        .anyMatch(terminationFlowClassName -> terminationFlowClassName.equals(flowLog.getFlowType().getName())))
+                .filter(flowlog -> flowlog.getCreated() < olderThan)
+                .findFirst().ifPresent(flowLog -> {
+            try {
+                cancel(resourceId, flowLog.getFlowId());
+            } catch (TransactionExecutionException e) {
+                LOGGER.error("Can't cancel termination flow: {}", flowLog.getFlowId(), e);
+            }
+        });
+    }
+
     private Set<String> findAllRunningNonTerminationFlowIdsByResourceId(Long resourceId) {
-        Set<FlowLogIdFlowAndType> allRunningFlowIdsByResourceId = flowLogRepository.findAllRunningFlowLogByResourceId(resourceId);
+        Set<FlowLogIdWithTypeAndTimestamp> allRunningFlowIdsByResourceId = flowLogRepository.findAllRunningFlowLogByResourceId(resourceId);
         return allRunningFlowIdsByResourceId.stream()
                 .filter(flowLog -> applicationFlowInformation.getTerminationFlow().stream()
                         .map(Class::getName)
                         .noneMatch(terminationFlowClassName -> terminationFlowClassName.equals(flowLog.getFlowType().getName())))
-                .map(FlowLogIdFlowAndType::getFlowId)
+                .map(FlowLogIdWithTypeAndTimestamp::getFlowId)
                 .collect(Collectors.toSet());
     }
 
