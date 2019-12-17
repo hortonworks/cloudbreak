@@ -10,6 +10,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -38,6 +39,7 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.FreeipaService;
+import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -70,6 +72,9 @@ public class SdxStartServiceTest {
 
     @Mock
     private FreeipaService freeipaService;
+
+    @Mock
+    private CloudbreakFlowService cloudbreakFlowService;
 
     @Test
     public void testTriggerStart() {
@@ -110,6 +115,19 @@ public class SdxStartServiceTest {
     }
 
     @Test
+    public void testStartWhenStartSucceed() {
+        SdxCluster sdxCluster = sdxCluster();
+        when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
+
+        underTest.start(CLUSTER_ID);
+
+        verify(stackV4Endpoint).putStart(0L, CLUSTER_NAME);
+        verify(cloudbreakFlowService).getAndSaveLastCloudbreakFlowChainId(sdxCluster);
+        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.START_IN_PROGRESS, ResourceEvent.SDX_START_STARTED,
+                "Datalake start in progress", sdxCluster);
+    }
+
+    @Test
     public void testStartWhenNotFoundException() {
         SdxCluster sdxCluster = sdxCluster();
         doThrow(NotFoundException.class).when(stackV4Endpoint).putStart(0L, CLUSTER_NAME);
@@ -117,6 +135,7 @@ public class SdxStartServiceTest {
 
         underTest.start(CLUSTER_ID);
 
+        verifyZeroInteractions(cloudbreakFlowService);
         verify(sdxStatusService, times(0)).setStatusForDatalakeAndNotify(DatalakeStatusEnum.START_IN_PROGRESS, ResourceEvent.SDX_START_STARTED,
                 "Datalake start in progress", sdxCluster);
     }
@@ -130,6 +149,8 @@ public class SdxStartServiceTest {
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.start(CLUSTER_ID));
+
+        verifyZeroInteractions(cloudbreakFlowService);
         assertEquals("Can not start stack, client error happened on Cloudbreak side: Error message: \"error\"", exception.getMessage());
     }
 
@@ -143,6 +164,7 @@ public class SdxStartServiceTest {
 
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.start(CLUSTER_ID));
 
+        verifyZeroInteractions(cloudbreakFlowService);
         assertEquals("Can not start stack, web application error happened on Cloudbreak side: Error message: \"error\"", exception.getMessage());
     }
 

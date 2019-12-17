@@ -38,6 +38,7 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.FreeipaService;
+import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -50,9 +51,6 @@ public class SdxStopServiceTest {
     private static final String ENV_NAME = "envName";
 
     private static final Long CLUSTER_ID = 1L;
-
-    @InjectMocks
-    private SdxStopService underTest;
 
     @Mock
     private SdxReactorFlowManager sdxReactorFlowManager;
@@ -70,10 +68,16 @@ public class SdxStopServiceTest {
     private DistroxService distroxService;
 
     @Mock
-    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+    private FreeipaService freeipaService;
 
     @Mock
-    private FreeipaService freeipaService;
+    private CloudbreakFlowService cloudbreakFlowService;
+
+    @Mock
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    @InjectMocks
+    private SdxStopService underTest;
 
     @Test
     public void testTriggerStop() {
@@ -82,6 +86,19 @@ public class SdxStopServiceTest {
         underTest.triggerStopIfClusterNotStopped(sdxCluster);
 
         verify(sdxReactorFlowManager).triggerSdxStopFlow(CLUSTER_ID);
+    }
+
+    @Test
+    public void testStop() {
+        SdxCluster sdxCluster = sdxCluster();
+        when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
+
+        underTest.stop(CLUSTER_ID);
+
+        verify(stackV4Endpoint).putStop(0L, CLUSTER_NAME);
+        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS,
+                ResourceEvent.SDX_STOP_STARTED, "Datalake stop in progress", sdxCluster);
+        verify(cloudbreakFlowService).getAndSaveLastCloudbreakFlowChainId(sdxCluster);
     }
 
     @Test
@@ -94,6 +111,7 @@ public class SdxStopServiceTest {
 
         verify(sdxStatusService, times(0)).setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS,
                 ResourceEvent.SDX_STOP_STARTED, "Datalake stop in progress", sdxCluster);
+        verify(cloudbreakFlowService, times(0)).getAndSaveLastCloudbreakFlowChainId(sdxCluster);
     }
 
     @Test
