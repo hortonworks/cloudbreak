@@ -19,7 +19,7 @@ public class EvaluatorExecutorRegistry {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EvaluatorExecutorRegistry.class);
 
-    @Value("${periscope.monitor.exeutor.registry.timeout:60000}")
+    @Value("${periscope.monitor.exeutor.registry.timeout:360000}")
     private long timeout;
 
     @Inject
