@@ -136,17 +136,7 @@
       "longitude": "2.3730"
     },
     {
-      "name": "France South",
-      "latitude": "43.8345",
-      "longitude": "2.1972"
-    },
-    {
       "name": "Australia Central",
-      "latitude": "-35.3075",
-      "longitude": "149.1244"
-    },
-    {
-      "name": "Australia Central 2",
       "latitude": "-35.3075",
       "longitude": "149.1244"
     },
@@ -169,6 +159,36 @@
       "name": "South Africa West",
       "latitude": "-34.075691",
       "longitude": "18.843266"
+    },
+    {
+      "name": "Switzerland North",
+      "latitude": "47.451542",
+      "longitude": "8.564572"
+    },
+    {
+      "name": "Switzerland West",
+      "latitude": "46.204391",
+      "longitude": "6.143158"
+    },
+    {
+      "name": "Germany North",
+      "latitude": "53.073635",
+      "longitude": "8.806422"
+    },
+    {
+      "name": "Germany West Central",
+      "latitude": "50.110924",
+      "longitude": "8.682127"
+    },
+    {
+      "name": "Norway West",
+      "latitude": "58.969975",
+      "longitude": "5.733107"
+    },
+    {
+      "name": "Norway East",
+      "latitude": "59.913868",
+      "longitude": "10.752245"
     }
   ]
 }
