@@ -48,6 +48,12 @@
           {
             "refName": "hdfs-DATANODE-BASE",
             "roleType": "DATANODE",
+            "configs": [
+              {
+                "name": "dfs_datanode_max_locked_memory",
+                "value": "2147483648"
+              }
+            ],
             "base": true
           },
           {
@@ -99,7 +105,7 @@
             "configs": [
               {
                 "name": "hbase_regionserver_java_heapsize",
-                "value": "17179869184"
+                "value": "8589934592"
               },
               {
                 "name": "hbase_bucketcache_ioengine",
@@ -115,7 +121,7 @@
               },
               {
                 "name": "hbase_bucketcache_size",
-                "value": "12288"
+                "value": "9216"
               },
               {
                 "name": "hbase_regionserver_handler_count",
