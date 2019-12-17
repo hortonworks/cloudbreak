@@ -1,12 +1,17 @@
 package com.sequenceiq.environment.environment.validation.network;
 
+import java.util.Map;
+
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 public interface EnvironmentNetworkValidator {
 
-    void validate(NetworkDto networkV1Request, ValidationResult.ValidationResultBuilder resultBuilder);
+    void validateDuringFlow(NetworkDto networkV1Request, ValidationResult.ValidationResultBuilder resultBuilder);
+
+    void validateDuringRequest(NetworkDto networkV1Request, Map<String, CloudSubnet> subnetMetas, ValidationResult.ValidationResultBuilder resultBuilder);
 
     CloudPlatform getCloudPlatform();
 

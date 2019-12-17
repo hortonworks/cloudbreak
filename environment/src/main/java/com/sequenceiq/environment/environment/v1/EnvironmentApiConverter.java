@@ -161,6 +161,7 @@ public class EnvironmentApiConverter {
             AwsParams awsParams = new AwsParams();
             awsParams.setVpcId(network.getAws().getVpcId());
             builder.withAws(awsParams);
+            builder.withNetworkId(network.getAws().getVpcId());
         }
         if (network.getAzure() != null) {
             LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Azure");
@@ -169,6 +170,7 @@ public class EnvironmentApiConverter {
             azureParams.setNoPublicIp(Boolean.TRUE.equals(network.getAzure().getNoPublicIp()));
             azureParams.setResourceGroupName(network.getAzure().getResourceGroupName());
             builder.withAzure(azureParams);
+            builder.withNetworkId(network.getAzure().getNetworkId());
         }
         if (network.getYarn() != null) {
             LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Yarn");
@@ -186,6 +188,7 @@ public class EnvironmentApiConverter {
             mockParams.setInternetGatewayId(network.getMock().getInternetGatewayId());
             mockParams.setVpcId(network.getMock().getVpcId());
             builder.withMock(mockParams);
+            builder.withNetworkId(mockParams.getVpcId());
         }
         builder.withPrivateSubnetCreation(getPrivateSubnetCreation(network));
         return builder
