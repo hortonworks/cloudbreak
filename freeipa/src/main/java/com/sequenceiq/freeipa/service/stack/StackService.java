@@ -25,6 +25,14 @@ public class StackService {
         return stackRepository.findAllRunning();
     }
 
+    public List<Stack> findAllForAutoSync() {
+        return stackRepository.findAllRunningAndStatusNotIn(List.of(
+                Status.CREATE_IN_PROGRESS,
+                Status.CREATE_FAILED,
+                Status.REQUESTED,
+                Status.UPDATE_IN_PROGRESS));
+    }
+
     public Stack getByIdWithListsInTransaction(Long id) {
         return stackRepository.findOneWithLists(id).orElseThrow(() -> new NotFoundException(String.format("Stack [%s] not found", id)));
     }

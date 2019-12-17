@@ -59,7 +59,10 @@ public enum DetailedStackStatus {
     // Cluster operation is in progress
     CLUSTER_OPERATION(Status.UPDATE_IN_PROGRESS),
     // Wait for sync
-    WAIT_FOR_SYNC(Status.WAIT_FOR_SYNC);
+    WAIT_FOR_SYNC(Status.WAIT_FOR_SYNC),
+    UNREACHABLE(Status.UNREACHABLE),
+    DELETED_ON_PROVIDER_SIDE(Status.DELETED_ON_PROVIDER_SIDE),
+    UNHEALTHY(Status.UNHEALTHY);
 
     private final Status status;
 

@@ -32,7 +32,7 @@ public class InstanceGroupToInstanceGroupResponseConverter implements Converter<
         if (source.getTemplate() != null) {
             instanceGroupResponse.setInstanceTemplate(templateResponseConverter.convert(source.getTemplate()));
         }
-        instanceGroupResponse.setMetaData(metaDataConverter.convert(source.getNotDeletedInstanceMetaDataSet()));
+        instanceGroupResponse.setMetaData(metaDataConverter.convert(source.getNotTerminatedInstanceMetaDataSet()));
         if (source.getSecurityGroup() != null) {
             instanceGroupResponse.setSecurityGroup(securityGroupConverter.convert(source.getSecurityGroup()));
         }

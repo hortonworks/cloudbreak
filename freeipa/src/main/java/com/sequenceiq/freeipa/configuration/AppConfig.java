@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
@@ -32,6 +33,15 @@ public class AppConfig {
 
     @Inject
     private List<HostOrchestrator> hostOrchestrators;
+
+    @Value("${freeipa.autosync.threadpool.core.size:50}")
+    private int corePoolSize;
+
+    @Value("${freeipa.autosync.threadpool.max.size:500}")
+    private int maxPoolSize;
+
+    @Value("${freeipa.autosync.threadpool.queue.size:1000}")
+    private int queueCapacity;
 
     @Bean
     @Primary
@@ -53,5 +63,14 @@ public class AppConfig {
             map.put(hostOrchestrator.name(), hostOrchestrator);
         }
         return map;
+    }
+
+    @Bean
+    public ThreadPoolExecutorFactoryBean getThreadPoolExecutorFactoryBean() {
+        ThreadPoolExecutorFactoryBean executorFactoryBean = new ThreadPoolExecutorFactoryBean();
+        executorFactoryBean.setCorePoolSize(corePoolSize);
+        executorFactoryBean.setMaxPoolSize(maxPoolSize);
+        executorFactoryBean.setQueueCapacity(queueCapacity);
+        return executorFactoryBean;
     }
 }

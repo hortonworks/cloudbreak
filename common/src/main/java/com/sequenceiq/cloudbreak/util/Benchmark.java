@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.util;
 
-import org.slf4j.Logger;
-
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import org.slf4j.Logger;
 
 public class Benchmark {
     private Benchmark() {
@@ -29,7 +29,7 @@ public class Benchmark {
         return resp;
     }
 
-    public static <T, E extends Exception, X extends Exception> T checkedMeasure(MultiCheckedSupplier<T, E, X> callback, Logger logger, String message,
+    public static <T, E extends Exception, X extends Exception> T mutliCheckedMeasure(MultiCheckedSupplier<T, E, X> callback, Logger logger, String message,
             Object... params) throws E, X {
         long start = System.currentTimeMillis();
         T resp = callback.get();
