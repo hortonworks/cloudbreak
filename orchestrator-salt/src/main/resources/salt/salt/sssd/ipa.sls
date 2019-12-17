@@ -14,13 +14,19 @@ join_ipa:
     - name: |
         ipa-client-install --server={{salt['pillar.get']('sssd-ipa:server')}} --realm={{salt['pillar.get']('sssd-ipa:realm')}} \
           --domain={{salt['pillar.get']('sssd-ipa:domain')}} --mkhomedir --principal={{salt['pillar.get']('sssd-ipa:principal')}} \
+          {%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" in grains.get('roles', []) %}
+          --no-sshd \
+          {%- endif %}
           --password $PW --unattended --force-join --ssh-trust-dns --no-ntp
 {% else %}
     - name: |
         runuser -l root -c 'ipa-client-install --server={{salt['pillar.get']('sssd-ipa:server')}} --realm={{salt['pillar.get']('sssd-ipa:realm')}} \
           --domain={{salt['pillar.get']('sssd-ipa:domain')}} --mkhomedir --principal={{salt['pillar.get']('sssd-ipa:principal')}} \
+          {%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" in grains.get('roles', []) %}
+          --no-sshd \
+          {%- endif %}
           --password {{salt['pillar.get']('sssd-ipa:password')}} --unattended --force-join --ssh-trust-dns --no-ntp --unattended'
-{% endif%}
+{% endif %}
     - unless: ipa env
     - runas: root
     - env:

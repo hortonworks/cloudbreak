@@ -88,7 +88,7 @@ public class StackToCloudStackConverter {
     private ConverterUtil converterUtil;
 
     @Inject
-    private CloudFileSystemViewBuilder cloudFileSystemViewBuilder;
+    private CloudFileSystemViewProvider cloudFileSystemViewProvider;
 
     public CloudStack convert(Stack stack) {
         return convert(stack, Collections.emptySet());
@@ -211,7 +211,7 @@ public class StackToCloudStackConverter {
                         Template template = instanceGroup.getTemplate();
                         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
                         Optional<CloudFileSystemView> cloudFileSystemView
-                                = cloudFileSystemViewBuilder.build(cluster.getFileSystem(), componentsByHostGroup, instanceGroup);
+                                = cloudFileSystemViewProvider.getCloudFileSystemView(cluster.getFileSystem(), componentsByHostGroup, instanceGroup);
                         groups.add(
                                 new Group(instanceGroup.getGroupName(),
                                         instanceGroup.getInstanceGroupType(),

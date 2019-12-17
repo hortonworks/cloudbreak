@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
@@ -95,6 +96,7 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.model.CloudIdentityType;
 
 @Component
 public class ClusterHostServiceRunner {
@@ -104,6 +106,8 @@ public class ClusterHostServiceRunner {
     private static final int CM_HTTP_PORT = 7180;
 
     private static final int CM_HTTPS_PORT = 7183;
+
+    private static final String ROLES = "roles";
 
     @Value("${cb.cm.heartbeat.interval}")
     private String cmHeartbeatInterval;
@@ -467,19 +471,50 @@ public class ClusterHostServiceRunner {
         }
         addNameNodeRoleForHosts(grainProperties, cluster);
         addKnoxRoleForHosts(grainProperties, cluster);
+        addCloudIdentityRolesForHosts(grainProperties, cluster);
         return grainProperties;
     }
 
     private void addNameNodeRoleForHosts(Map<String, Map<String, String>> grainProperties, Cluster cluster) {
         Map<String, List<String>> nameNodeServiceLocations = getComponentLocationByHostname(cluster, ExposedService.NAMENODE.getServiceName());
         nameNodeServiceLocations.getOrDefault(ExposedService.NAMENODE.getServiceName(), List.of())
-                .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put("roles", "namenode"));
+                .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put(ROLES, "namenode"));
     }
 
     private void addKnoxRoleForHosts(Map<String, Map<String, String>> grainProperties, Cluster cluster) {
         Map<String, List<String>> knoxServiceLocations = getComponentLocationByHostname(cluster, "KNOX_GATEWAY");
         knoxServiceLocations.getOrDefault("KNOX_GATEWAY", List.of())
-                .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put("roles", "knox"));
+                .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put(ROLES, "knox"));
+    }
+
+    private void addCloudIdentityRolesForHosts(Map<String, Map<String, String>> grainProperties, Cluster cluster) {
+        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.getAllInstanceMetadataByStackId(cluster.getStack().getId());
+        instanceMetaDataSet.forEach(instanceMetaData -> setCloudIdentityRoles(grainProperties, instanceMetaData));
+    }
+
+    private void setCloudIdentityRoles(Map<String, Map<String, String>> grainProperties, InstanceMetaData instanceMetaData) {
+        InstanceGroup instanceGroup = instanceMetaData.getInstanceGroup();
+        CloudIdentityType cloudIdentityType = instanceGroup.getCloudIdentityType().orElse(CloudIdentityType.LOG);
+        Map<String, String> grainsForInstance = getGrainsPropertiesForInstance(grainProperties, instanceMetaData);
+        if (grainsForInstance.containsKey(ROLES)) {
+            String role = grainsForInstance.get(ROLES);
+            String rolesArray = String.format("[%s, %s]", role, cloudIdentityType.roleName());
+            grainsForInstance.put(ROLES, rolesArray);
+        } else {
+            grainsForInstance.put(ROLES, cloudIdentityType.roleName());
+        }
+    }
+
+    private Map<String, String> getGrainsPropertiesForInstance(Map<String, Map<String, String>> grainProperties, InstanceMetaData instanceMetaData) {
+        String discoveryFQDN = instanceMetaData.getDiscoveryFQDN();
+        Map<String, String> grainsForInstance;
+        if (grainProperties.containsKey(discoveryFQDN)) {
+            grainsForInstance = grainProperties.get(discoveryFQDN);
+        } else {
+            grainsForInstance = new HashMap<>();
+            grainProperties.put(discoveryFQDN, grainsForInstance);
+        }
+        return grainsForInstance;
     }
 
     private Map<String, List<String>> getComponentLocationByHostname(Cluster cluster, String componentName) {
