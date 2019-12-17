@@ -95,7 +95,7 @@ public class EnvironmentNetworkProviderValidator {
                 resultBuilder.error(String.format("The netmask must be /%s.", EXPECTED_NETWORK_MASK));
             }
             if (environmentNetworkValidator != null) {
-                environmentNetworkValidator.validate(networkDto, resultBuilder);
+                environmentNetworkValidator.validateDuringFlow(networkDto, resultBuilder);
             } else {
                 resultBuilder.error(String.format("Environment specific network is not supported for cloud platform: '%s'!", cloudPlatform));
             }
