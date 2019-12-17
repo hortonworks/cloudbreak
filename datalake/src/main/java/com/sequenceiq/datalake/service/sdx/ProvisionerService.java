@@ -128,6 +128,7 @@ public class ProvisionerService {
                 sdxCluster.setStackId(stackV4Response.getId());
                 sdxCluster.setStackCrn(stackV4Response.getCrn());
                 sdxClusterRepository.save(sdxCluster);
+                cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(sdxCluster);
                 LOGGER.info("Sdx cluster updated");
             } catch (ClientErrorException e) {
                 String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
@@ -155,6 +156,9 @@ public class ProvisionerService {
                             if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
                                 LOGGER.info("Cloudbreak stack polling cancelled in inmemory store, id: " + sdxCluster.getId());
                                 return AttemptResults.breakFor("Cloudbreak stack polling cancelled in inmemory store, id: " + sdxCluster.getId());
+                            } else if (cloudbreakFlowService.isLastKnownFlowRunning(sdxCluster)) {
+                                LOGGER.info("Cluster creation polling will continue, cluster has an active flow in Cloudbreak, id: {}", sdxCluster.getId());
+                                return AttemptResults.justContinue();
                             }
                             StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet());
                             LOGGER.info("Stack status of SDX {} by response from cloudbreak: {}", sdxCluster.getClusterName(),

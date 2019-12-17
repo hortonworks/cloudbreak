@@ -30,6 +30,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.service.FreeipaService;
+import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -60,6 +61,9 @@ public class SdxStopService {
     private FreeipaService freeipaService;
 
     @Inject
+    private CloudbreakFlowService cloudbreakFlowService;
+
+    @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     public void triggerStopIfClusterNotStopped(SdxCluster cluster) {
@@ -75,6 +79,7 @@ public class SdxStopService {
             stackV4Endpoint.putStop(0L, sdxCluster.getClusterName());
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS, ResourceEvent.SDX_STOP_STARTED, "Datalake stop in progress",
                     sdxCluster);
+            cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(sdxCluster);
         } catch (NotFoundException e) {
             LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
         } catch (ClientErrorException e) {
@@ -102,8 +107,12 @@ public class SdxStopService {
             if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
                 LOGGER.info("Stop polling cancelled in inmemory store, id: " + sdxCluster.getId());
                 return AttemptResults.breakFor("Stop polling cancelled in inmemory store, id: " + sdxCluster.getId());
+            } else if (cloudbreakFlowService.isLastKnownFlowRunning(sdxCluster)) {
+                LOGGER.info("Stop polling will continue, cluster has an active flow in Cloudbreak, id: {}", sdxCluster.getId());
+                return AttemptResults.justContinue();
+            } else {
+                return getStackResponseAttemptResult(sdxCluster);
             }
-            return getStackResponseAttemptResult(sdxCluster);
         } catch (NotFoundException e) {
             LOGGER.debug("Stack not found on CB side " + sdxCluster.getClusterName(), e);
             return AttemptResults.breakFor("Stack not found on CB side " + sdxCluster.getClusterName());
@@ -118,11 +127,11 @@ public class SdxStopService {
             return AttemptResults.finishWith(stackV4Response);
         } else {
             if (Status.STOP_FAILED.equals(stackV4Response.getStatus())) {
-                LOGGER.info("Stack stop failed for Stack {} with status {}, reason", stackV4Response.getName(), stackV4Response.getStatus(),
+                LOGGER.info("Stack stop failed for Stack {} with status {}, reason {}", stackV4Response.getName(), stackV4Response.getStatus(),
                         stackV4Response.getStatusReason());
                 return sdxStopFailed(sdxCluster, stackV4Response.getStatusReason());
             } else if (cluster != null && Status.STOP_FAILED.equals(cluster.getStatus())) {
-                LOGGER.info("Cluster stop failed for Cluster {} status {}, reason", cluster.getName(),
+                LOGGER.info("Cluster stop failed for Cluster {} status {}, reason {}", cluster.getName(),
                         stackV4Response.getCluster().getStatus(), stackV4Response.getStatusReason());
                 return sdxStopFailed(sdxCluster, cluster.getStatusReason());
             } else if (!stackV4Response.getStatus().isStopState()) {

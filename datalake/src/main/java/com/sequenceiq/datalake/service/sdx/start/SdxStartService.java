@@ -30,6 +30,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.service.FreeipaService;
+import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -58,6 +59,9 @@ public class SdxStartService {
     @Inject
     private FreeipaService freeipaService;
 
+    @Inject
+    private CloudbreakFlowService cloudbreakFlowService;
+
     public void triggerStartIfClusterNotRunning(SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
         checkFreeipaRunning(cluster.getEnvCrn());
@@ -69,6 +73,7 @@ public class SdxStartService {
         try {
             LOGGER.info("Triggering start flow for cluster {}", sdxCluster.getClusterName());
             stackV4Endpoint.putStart(0L, sdxCluster.getClusterName());
+            cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(sdxCluster);
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.START_IN_PROGRESS, ResourceEvent.SDX_START_STARTED,
                     "Datalake start in progress", sdxCluster);
         } catch (NotFoundException e) {
@@ -98,8 +103,12 @@ public class SdxStartService {
             if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
                 LOGGER.info("Start polling cancelled in inmemory store, id: " + sdxCluster.getId());
                 return AttemptResults.breakFor("Start polling cancelled in inmemory store, id: " + sdxCluster.getId());
+            } else if (cloudbreakFlowService.isLastKnownFlowRunning(sdxCluster)) {
+                LOGGER.info("Start polling will continue, cluster has an active flow in Cloudbreak, id: {}", sdxCluster.getId());
+                return AttemptResults.justContinue();
+            } else {
+                return getStackResponseAttemptResult(sdxCluster);
             }
-            return getStackResponseAttemptResult(sdxCluster);
         } catch (NotFoundException e) {
             LOGGER.debug("Stack not found on CB side " + sdxCluster.getClusterName(), e);
             return AttemptResults.breakFor("Stack not found on CB side " + sdxCluster.getClusterName());
