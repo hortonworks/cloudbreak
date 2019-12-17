@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.LdapView.LdapViewBuilder;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -222,6 +223,33 @@ public class KnoxGatewayConfigProviderTest {
             underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
         );
         assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
+    }
+
+    @Test
+    public void testGatewayWhitelistConfig() {
+        TemplatePreparationObject noKerberosTPO = Builder.builder()
+                .withGeneralClusterConfigs(new GeneralClusterConfigs())
+                .build();
+        assertEquals(config("gateway_dispatch_whitelist", "^*.*$"),
+                underTest.getGatewayWhitelistConfig(noKerberosTPO));
+
+        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
+                .withDomain("example.com").build();
+        TemplatePreparationObject kerberosNoAutoTlsTPO = Builder.builder()
+                .withGeneralClusterConfigs(new GeneralClusterConfigs())
+                .withKerberosConfig(kerberosConfig)
+                .build();
+        assertEquals(config("gateway_dispatch_whitelist", "^/.*$;^https?://(.+.example.com):[0-9]+/?.*$"),
+                underTest.getGatewayWhitelistConfig(kerberosNoAutoTlsTPO));
+
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setAutoTlsEnabled(true);
+        TemplatePreparationObject kerberosAutoTlsTPO = Builder.builder()
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withKerberosConfig(kerberosConfig)
+                .build();
+        assertEquals(config("gateway_dispatch_whitelist", "^/.*$;^https://(.+.example.com):[0-9]+/?.*$"),
+                underTest.getGatewayWhitelistConfig(kerberosAutoTlsTPO));
     }
 
     private String getBlueprintText(String path) {

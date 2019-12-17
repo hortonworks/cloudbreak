@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -82,18 +83,12 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
                 config.add(config(KNOX_MASTER_SECRET, masterSecret));
                 config.add(config(GATEWAY_DEFAULT_TOPOLOGY_NAME, topologyName));
                 config.add(config(GATEWAY_ADMIN_GROUPS, adminGroup));
-                Optional<KerberosConfig> kerberosConfig = source.getKerberosConfig();
                 if (gateway != null) {
                     config.add(config(GATEWAY_PATH, gateway.getPath()));
                     config.add(config(SIGNING_KEYSTORE_NAME, SIGNING_JKS));
                     config.add(config(SIGNING_KEYSTORE_TYPE, JKS));
                     config.add(config(SIGNING_KEY_ALIAS, SIGNING_IDENTITY));
-                    if (kerberosConfig.isPresent()) {
-                        String domain = kerberosConfig.get().getDomain();
-                        config.add(config(GATEWAY_WHITELIST, "^/.*$;^https?://(.+." + domain + "):[0-9]+/?.*$"));
-                    } else {
-                        config.add(config(GATEWAY_WHITELIST, "^*.*$"));
-                    }
+                    config.add(getGatewayWhitelistConfig(source));
                 }
                 return config;
             case KnoxRoles.IDBROKER:
@@ -104,6 +99,26 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
             default:
                 return List.of();
         }
+    }
+
+    @VisibleForTesting
+    ApiClusterTemplateConfig getGatewayWhitelistConfig(TemplatePreparationObject source) {
+        String whitelist;
+        Optional<KerberosConfig> kerberosConfig = source.getKerberosConfig();
+        if (kerberosConfig.isPresent()) {
+            String domain = kerberosConfig.get().getDomain();
+            if (source.getGeneralClusterConfigs().getAutoTlsEnabled()) {
+                // HTTPS only whitelist when AutoTLS enabled
+                whitelist = "^/.*$;^https://(.+." + domain + "):[0-9]+/?.*$";
+            } else {
+                // HTTP or HTTPS whitelist when AutoTLS disabled
+                whitelist = "^/.*$;^https?://(.+." + domain + "):[0-9]+/?.*$";
+            }
+        } else {
+            // Allow all when Kerberos isn't used
+            whitelist = "^*.*$";
+        }
+        return config(GATEWAY_WHITELIST, whitelist);
     }
 
     @Override
