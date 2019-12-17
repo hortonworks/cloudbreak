@@ -74,30 +74,47 @@ public class FreeIpaClientFactory {
 
         try {
             if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
-                HttpClientConfig httpClientConfig = new HttpClientConfig(clusterProxyConfiguration.getClusterProxyHost());
-                FreeIpa freeIpa = freeIpaService.findByStack(stack);
-                String clusterProxyPath = toClusterProxyBasepath(stack.getResourceCrn());
-
-                return new FreeIpaClientBuilder(ADMIN_USER,
-                        freeIpa.getAdminPassword(),
-                        freeIpa.getDomain().toUpperCase(),
-                        httpClientConfig,
-                        clusterProxyConfiguration.getClusterProxyPort(),
-                        clusterProxyPath,
-                        ADDITIONAL_CLUSTER_PROXY_HEADERS,
-                        CLUSTER_PROXY_ERROR_LISTENER).build();
+                return getFreeIpaClientBuilderForClusterProxy(stack).build();
             } else {
-                GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-                HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(
-                        stack, gatewayConfig.getPublicAddress());
-                FreeIpa freeIpa = freeIpaService.findByStack(stack);
-                return new FreeIpaClientBuilder(ADMIN_USER, freeIpa.getAdminPassword(), freeIpa.getDomain().toUpperCase(),
-                        httpClientConfig, stack.getGatewayport()).build();
+                return getFreeIpaClientBuilder(stack).build();
             }
         } catch (Exception e) {
             throw new FreeIpaClientException("Couldn't build FreeIPA client. "
                     + "Check if the FreeIPA security rules have not changed and the instance is in running state. " + e.getLocalizedMessage(), e);
         }
+    }
+
+    public FreeIpaClient getFreeIpaClientForStackWithPing(Stack stack) throws Exception {
+        LOGGER.debug("Ping the login endpoint and creating FreeIpaClient for stack {}", stack.getResourceCrn());
+        if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
+            return getFreeIpaClientBuilderForClusterProxy(stack).buildWithPing();
+        } else {
+            return getFreeIpaClientBuilder(stack).buildWithPing();
+        }
+    }
+
+    private FreeIpaClientBuilder getFreeIpaClientBuilderForClusterProxy(Stack stack) throws Exception {
+        HttpClientConfig httpClientConfig = new HttpClientConfig(clusterProxyConfiguration.getClusterProxyHost());
+        FreeIpa freeIpa = freeIpaService.findByStack(stack);
+        String clusterProxyPath = toClusterProxyBasepath(stack.getResourceCrn());
+
+        return new FreeIpaClientBuilder(ADMIN_USER,
+                freeIpa.getAdminPassword(),
+                freeIpa.getDomain().toUpperCase(),
+                httpClientConfig,
+                clusterProxyConfiguration.getClusterProxyPort(),
+                clusterProxyPath,
+                ADDITIONAL_CLUSTER_PROXY_HEADERS,
+                CLUSTER_PROXY_ERROR_LISTENER);
+    }
+
+    private FreeIpaClientBuilder getFreeIpaClientBuilder(Stack stack) throws Exception {
+        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(
+                stack, gatewayConfig.getPublicAddress());
+        FreeIpa freeIpa = freeIpaService.findByStack(stack);
+        return new FreeIpaClientBuilder(ADMIN_USER, freeIpa.getAdminPassword(), freeIpa.getDomain().toUpperCase(),
+                httpClientConfig, stack.getGatewayport());
     }
 
     public String getAdminUser() {

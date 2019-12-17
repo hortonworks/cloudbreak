@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+import static com.sequenceiq.cloudbreak.util.Benchmark.mutliCheckedMeasure;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -134,25 +134,29 @@ public class ClusterCreationSetupService {
 
         decorateStackWithCustomDomainIfAdOrIpaJoinable(stack);
 
-        List<ClusterComponent> components = checkedMeasure((MultiCheckedSupplier<List<ClusterComponent>, IOException, CloudbreakImageNotFoundException>) () -> {
-            if (blueprint != null) {
-                Set<Component> allComponent = componentConfigProviderService.getAllComponentsByStackIdAndType(stack.getId(),
-                        Sets.newHashSet(
-                                ComponentType.CM_REPO_DETAILS,
-                                ComponentType.CDH_PRODUCT_DETAILS,
-                                ComponentType.IMAGE));
-                Optional<Component> stackCmRepoConfig = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.CM_REPO_DETAILS)).findAny();
-                List<Component> stackCdhRepoConfig =
-                        allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.CDH_PRODUCT_DETAILS)).collect(Collectors.toList());
-                Optional<Component> stackImageComponent = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.IMAGE)
-                        && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name())).findAny();
-                if (blueprintService.isClouderaManagerTemplate(blueprint)) {
-                    return clouderaManagerClusterCreationSetupService.prepareClouderaManagerCluster(
-                            request, cluster, stackCmRepoConfig, stackCdhRepoConfig, stackImageComponent);
-                }
-            }
-            return Collections.emptyList();
-        }, LOGGER, "Cluster components saved in {} ms for stack {}", stackName);
+        List<ClusterComponent> components = mutliCheckedMeasure(
+                (MultiCheckedSupplier<List<ClusterComponent>, IOException, CloudbreakImageNotFoundException>) () -> {
+                    if (blueprint != null) {
+                        Set<Component> allComponent = componentConfigProviderService.getAllComponentsByStackIdAndType(stack.getId(),
+                                Sets.newHashSet(ComponentType.CM_REPO_DETAILS, ComponentType.CDH_PRODUCT_DETAILS, ComponentType.IMAGE));
+
+                        Optional<Component> stackCmRepoConfig = allComponent.stream()
+                                .filter(c -> c.getComponentType().equals(ComponentType.CM_REPO_DETAILS))
+                                .findAny();
+
+                        List<Component> stackCdhRepoConfig = allComponent.stream()
+                                .filter(c -> c.getComponentType().equals(ComponentType.CDH_PRODUCT_DETAILS))
+                                .collect(Collectors.toList());
+
+                        Optional<Component> stackImageComponent = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.IMAGE)
+                                && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name())).findAny();
+                        if (blueprintService.isClouderaManagerTemplate(blueprint)) {
+                            return clouderaManagerClusterCreationSetupService.prepareClouderaManagerCluster(
+                                    request, cluster, stackCmRepoConfig, stackCdhRepoConfig, stackImageComponent);
+                        }
+                    }
+                    return Collections.emptyList();
+                }, LOGGER, "Cluster components saved in {} ms for stack {}", stackName);
 
         return clusterService.create(stack, cluster, components, user);
     }

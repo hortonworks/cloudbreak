@@ -25,6 +25,9 @@ public enum Status {
     STOP_FAILED,
     WAIT_FOR_SYNC,
     MAINTENANCE_MODE_ENABLED,
+    UNREACHABLE,
+    UNHEALTHY,
+    DELETED_ON_PROVIDER_SIDE,
     UNKNOWN;
 
     public static final Collection<Status> AVAILABLE_STATUSES = List.of(AVAILABLE, MAINTENANCE_MODE_ENABLED);

@@ -509,6 +509,10 @@ public class FreeIpaClient {
         return (Host) invoke("host_show", flags, params, Host.class).getResult();
     }
 
+    public RPCResponse<Boolean> serverConnCheck(String cn, String remoteCn) throws FreeIpaClientException {
+        return invoke("server_conncheck", List.of(cn), Map.of("remote_cn", remoteCn), Boolean.class);
+    }
+
     public <T> RPCResponse<T> invoke(String method, List<String> flags, Map<String, Object> params, Type resultType) throws FreeIpaClientException {
         Map<String, Object> parameterMap = new HashMap<>();
         if (params != null && !params.isEmpty()) {

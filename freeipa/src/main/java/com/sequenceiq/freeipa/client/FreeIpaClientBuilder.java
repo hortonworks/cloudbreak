@@ -15,8 +15,10 @@ import javax.net.ssl.SSLContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -58,6 +60,8 @@ public class FreeIpaClientBuilder {
     private static final int SO_TIMEOUT = 30 * 1000;
 
     private static final int READ_TIMEOUT_MILLIS = 60 * 1000 * 5;
+
+    private static final int TEST_CONNECTION_READ_TIMEOUT_MILLIS = 5 * 1000;
 
     private final PoolingHttpClientConnectionManager connectionManager;
 
@@ -111,6 +115,27 @@ public class FreeIpaClientBuilder {
     public FreeIpaClientBuilder(String user, String pass, String realm,
             HttpClientConfig clientConfig, int port) throws Exception {
         this(user, pass, realm, clientConfig, port, DEFAULT_BASE_PATH, Map.of(), null);
+    }
+
+    public FreeIpaClient buildWithPing() throws URISyntaxException, FreeIpaClientException, IOException {
+        try (CloseableHttpClient client = HttpClientBuilder
+                .create()
+                .useSystemProperties()
+                .setConnectionManager(connectionManager)
+                .setConnectionManagerShared(true)
+                .setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(TEST_CONNECTION_READ_TIMEOUT_MILLIS).build())
+                .setDefaultSocketConfig(
+                        SocketConfig.custom()
+                                .setSoTimeout(SO_TIMEOUT)
+                                .setTcpNoDelay(true)
+                                .build())
+                .build()) {
+            URI target = getIpaUrl(clientConfig.getApiAddress(), port, basePath, "/session/login_password").toURI();
+            LOGGER.debug("Ping at target: {}", target);
+            client.execute(new HttpHead(target));
+            LOGGER.debug("Freeipa is reachable");
+        }
+        return build();
     }
 
     public FreeIpaClient build() throws URISyntaxException, FreeIpaClientException, IOException {
@@ -219,6 +244,7 @@ public class FreeIpaClientBuilder {
                 .useSystemProperties()
                 .setConnectionManager(connectionManager)
                 .setDefaultCookieStore(cookieStore)
+                .setConnectionManagerShared(true)
                 .setDefaultSocketConfig(
                         SocketConfig.custom()
                                 .setSoTimeout(SO_TIMEOUT)

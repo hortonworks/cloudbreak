@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.service.stack;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
@@ -15,6 +17,8 @@ import com.sequenceiq.freeipa.service.SecurityConfigService;
 
 @Component
 public class StackUpdater {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackUpdater.class);
 
     @Inject
     private StackService stackService;
@@ -49,13 +53,18 @@ public class StackUpdater {
     private Stack doUpdateStackStatus(Stack stack, DetailedStackStatus detailedStatus, String statusReason) {
         Status status = detailedStatus.getStatus();
         if (!Status.DELETE_COMPLETED.equals(stack.getStackStatus().getStatus())) {
-            stack.setStackStatus(new StackStatus(stack, status, statusReason, detailedStatus));
-            stack = stackService.save(stack);
-            if (status.isRemovableStatus()) {
-                InMemoryStateStore.deleteStack(stack.getId());
+            if (status != stack.getStackStatus().getStatus()) {
+                LOGGER.debug("Status is updated. {} to {}", stack.getStackStatus().getStatus(), status);
+                stack.setStackStatus(new StackStatus(stack, status, statusReason, detailedStatus));
+                stack = stackService.save(stack);
+                if (status.isRemovableStatus()) {
+                    InMemoryStateStore.deleteStack(stack.getId());
+                } else {
+                    PollGroup pollGroup = Status.DELETE_COMPLETED.equals(status) ? PollGroup.CANCELLED : PollGroup.POLLABLE;
+                    InMemoryStateStore.putStack(stack.getId(), pollGroup);
+                }
             } else {
-                PollGroup pollGroup = Status.DELETE_COMPLETED.equals(status) ? PollGroup.CANCELLED : PollGroup.POLLABLE;
-                InMemoryStateStore.putStack(stack.getId(), pollGroup);
+                LOGGER.debug("Statuses are the same, it will not update");
             }
         }
         return stack;
