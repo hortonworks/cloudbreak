@@ -15,14 +15,12 @@ public class SdxCreateInternalAction implements Action<SdxInternalTestDto, SdxCl
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.log(LOGGER, " Environment: %s", testDto.getRequest().getEnvironment());
-        Log.log(LOGGER, " SDX endpoint: %s", client.getSdxClient().sdxEndpoint().toString());
-        Log.logJSON(LOGGER, " SDX create request: ", testDto.getRequest());
+        Log.when(LOGGER, " SDX endpoint: %s" + client.getSdxClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
+        Log.whenJson(LOGGER, " SDX create request: ", testDto.getRequest());
         client.getSdxClient()
                 .sdxInternalEndpoint()
                 .create(testDto.getName(), testDto.getRequest());
-        Log.logJSON(LOGGER, " SDX describe response: ", client.getSdxClient().sdxEndpoint().get(testDto.getName()));
-        Log.log(LOGGER, " SDX name: %s", client.getSdxClient().sdxEndpoint().get(testDto.getName()).getName());
+        Log.whenJson(LOGGER, " SDX create response: ", client.getSdxClient().sdxEndpoint().get(testDto.getName()));
         return testDto;
     }
 }

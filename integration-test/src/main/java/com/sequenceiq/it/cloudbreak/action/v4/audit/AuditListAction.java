@@ -24,7 +24,7 @@ public class AuditListAction implements Action<AuditTestDto, CloudbreakClient> {
                 .getAuditEvents(client.getWorkspaceId(), testDto.getResourceType(), testDto.getResourceId(), null)
                 .getResponses();
         testDto.setResponses(responses.stream().collect(Collectors.toSet()));
-        Log.logJSON(LOGGER, " Audit listed successfully:\n", testDto.getResponses());
+        Log.whenJson(LOGGER, " Audit listed successfully:\n", testDto.getResponses());
         return testDto;
     }
 }

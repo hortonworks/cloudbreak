@@ -16,14 +16,13 @@ public class FreeIPACreateAction implements Action<FreeIPATestDto, FreeIPAClient
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIPACreateAction.class);
 
     public FreeIPATestDto action(TestContext testContext, FreeIPATestDto testDto, FreeIPAClient client) throws Exception {
-        Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, format(" FreeIPA post request:%n"), testDto.getRequest());
+        Log.whenJson(LOGGER, format(" FreeIPA post request:%n"), testDto.getRequest());
         testDto.setResponse(
                 client.getFreeIpaClient()
                         .getFreeIpaV1Endpoint()
                         .create(testDto.getRequest()));
-        Log.logJSON(LOGGER, format(" FreeIPA created  successfully:%n"), testDto.getResponse());
-        Log.log(LOGGER, format(" FreeIPA CRN: %s", testDto.getResponse().getCrn()));
+        Log.whenJson(LOGGER, format(" FreeIPA created  successfully:%n"), testDto.getResponse());
+        Log.when(LOGGER, format(" FreeIPA CRN: %s", testDto.getResponse().getCrn()));
         return testDto;
     }
 }

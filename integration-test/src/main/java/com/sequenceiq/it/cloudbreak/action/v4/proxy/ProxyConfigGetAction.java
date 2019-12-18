@@ -15,14 +15,12 @@ public class ProxyConfigGetAction implements Action<ProxyTestDto, EnvironmentCli
 
     @Override
     public ProxyTestDto action(TestContext testContext, ProxyTestDto testDto, EnvironmentClient client) throws Exception {
-        Log.log(LOGGER, String.format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, " Proxy config get request:\n", testDto.getRequest());
+        Log.when(LOGGER, " Proxy config get request: " + testDto.getName());
         testDto.setResponse(
                 client.getEnvironmentClient()
                         .proxyV1Endpoint()
                         .getByName(testDto.getName()));
-        Log.logJSON(LOGGER, " Proxy config was get successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, String.format(" CRN: %s", testDto.getResponse().getCrn()));
+        Log.whenJson(LOGGER, " Proxy config get successfully:\n", testDto.getResponse());
         return testDto;
     }
 

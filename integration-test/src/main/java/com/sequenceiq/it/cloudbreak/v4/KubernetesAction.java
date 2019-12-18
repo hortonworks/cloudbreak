@@ -1,16 +1,15 @@
 package com.sequenceiq.it.cloudbreak.v4;
 
-import static com.sequenceiq.it.cloudbreak.log.Log.logJSON;
-
 import java.io.IOException;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.dto.kubernetes.KubernetesTestDto;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.Entity;
+import com.sequenceiq.it.cloudbreak.dto.kubernetes.KubernetesTestDto;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class KubernetesAction {
     private KubernetesAction() {
@@ -25,7 +24,7 @@ public class KubernetesAction {
                 client.getCloudbreakClient()
                         .kubernetesV4Endpoint()
                         .post(workspaceId, kubernetesTestDto.getRequest()));
-        logJSON("Kubernetes config post request: ", kubernetesTestDto.getRequest());
+        Log.whenJson("Kubernetes config post request: ", kubernetesTestDto.getRequest());
     }
 
     public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
@@ -37,7 +36,7 @@ public class KubernetesAction {
                 client.getCloudbreakClient()
                         .kubernetesV4Endpoint()
                         .get(workspaceId, kubernetesTestDto.getRequest().getName()));
-        logJSON(" get Kubernetes config response: ", kubernetesTestDto.getResponse());
+        Log.whenJson(" get Kubernetes config response: ", kubernetesTestDto.getResponse());
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
@@ -50,7 +49,7 @@ public class KubernetesAction {
                         .kubernetesV4Endpoint()
                         .list(workspaceId)
                         .getResponses());
-        logJSON(" get all Kubernetes config response: ", kubernetesTestDto.getResponse());
+        Log.whenJson(" get all Kubernetes config response: ", kubernetesTestDto.getResponse());
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {

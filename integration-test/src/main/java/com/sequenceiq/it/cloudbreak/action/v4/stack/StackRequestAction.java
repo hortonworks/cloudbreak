@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.action.v4.stack;
 
-import static java.lang.String.format;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,14 +16,12 @@ public class StackRequestAction implements Action<StackTestDto, CloudbreakClient
 
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, " Stack get cli skeleton:\n", testDto.getRequest());
+        Log.when(LOGGER, " Stack get cli skeleton:" + testDto.getName());
         StackV4Request request = client.getCloudbreakClient().stackV4Endpoint().getRequestfromName(
                 client.getWorkspaceId(),
                 testDto.getName());
         testDto.setRequest(request);
-        Log.logJSON(LOGGER, " get cli skeleton was successfully:\n", testDto.getRequest());
-        Log.log(LOGGER, format(" CRN: %s", testDto.getResponse().getCrn()));
+        Log.whenJson(LOGGER, " get cli skeleton was successfully:\n", testDto.getRequest());
         return testDto;
     }
 }

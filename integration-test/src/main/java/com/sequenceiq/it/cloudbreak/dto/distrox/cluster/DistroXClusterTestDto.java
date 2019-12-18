@@ -90,6 +90,5 @@ public class DistroXClusterTestDto extends AbstractCloudbreakTestDto<DistroXClus
         getRequest().setValidateBlueprint(validateBlueprint);
         return this;
     }
-
 }
 

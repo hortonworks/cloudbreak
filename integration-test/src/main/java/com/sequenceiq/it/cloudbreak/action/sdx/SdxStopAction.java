@@ -17,9 +17,9 @@ public class SdxStopAction implements Action<SdxInternalTestDto, SdxClient> {
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.log(LOGGER, format(" Stop SDX: %s ", testDto.getName()));
+        Log.when(LOGGER, format(" Stop SDX: %s ", testDto.getName()));
         client.getSdxClient().sdxEndpoint().stopByName(testDto.getName());
-        Log.log(LOGGER, " SDX Stop have been initiated. ");
+        Log.when(LOGGER, " SDX Stop have been initiated. ");
         return testDto;
     }
 }

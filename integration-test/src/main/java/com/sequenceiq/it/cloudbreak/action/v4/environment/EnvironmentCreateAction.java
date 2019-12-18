@@ -10,12 +10,13 @@ public class EnvironmentCreateAction implements Action<EnvironmentTestDto, Envir
 
     @Override
     public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient environmentClient) throws Exception {
+        Log.whenJson("Environment post request: ", testDto.getRequest());
         testDto.setResponse(
                 environmentClient.getEnvironmentClient()
                         .environmentV1Endpoint()
                         .post(testDto.getRequest()));
 
-        Log.logJSON("Environment post request: ", testDto.getRequest());
+        Log.whenJson("Environment post response: ", testDto.getResponse());
         return testDto;
     }
 }

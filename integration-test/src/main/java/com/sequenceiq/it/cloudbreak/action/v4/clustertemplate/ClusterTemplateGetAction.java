@@ -17,12 +17,12 @@ public class ClusterTemplateGetAction implements Action<ClusterTemplateTestDto, 
 
     @Override
     public ClusterTemplateTestDto action(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.logJSON(LOGGER, " ClusterTemplateEntity get request:\n", testDto.getRequest());
+        Log.when(LOGGER, " ClusterTemplateEntity get request: " + testDto.getName());
         ClusterTemplateV4Response response = client.getCloudbreakClient()
                 .clusterTemplateV4EndPoint()
                 .getByName(client.getWorkspaceId(), testDto.getName());
         testDto.setResponses(Sets.newHashSet(response));
-        Log.logJSON(LOGGER, " ClusterTemplateEntity get call was successful:\n", response);
+        Log.whenJson(LOGGER, " ClusterTemplateEntity get call was successful:\n", response);
         return testDto;
     }
 }

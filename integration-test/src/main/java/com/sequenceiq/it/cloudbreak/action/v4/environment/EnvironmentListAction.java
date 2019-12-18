@@ -14,7 +14,7 @@ public class EnvironmentListAction implements Action<EnvironmentTestDto, Environ
                 environmentClient.getEnvironmentClient()
                         .environmentV1Endpoint()
                         .list().getResponses());
-        Log.logJSON("Environment list response: ", testDto.getResponse());
+        Log.whenJson("Environment list response: ", testDto.getResponse());
         return testDto;
     }
 }

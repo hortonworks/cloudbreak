@@ -17,14 +17,12 @@ public class DistroXGetAction implements Action<DistroXTestDto, CloudbreakClient
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.log(LOGGER, " Name: " + testDto.getRequest().getName());
-        Log.logJSON(LOGGER, " Stack get request:\n", testDto.getRequest());
         testDto.setResponse(
                 client.getCloudbreakClient()
                         .distroXV1Endpoint()
                         .getByName(testDto.getName(), new HashSet<>()));
-        Log.logJSON(LOGGER, " Stack get was successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, " crn: " + testDto.getResponse().getCrn());
+        Log.whenJson(LOGGER, " Stack get was successful:\n", testDto.getResponse());
+        Log.when(LOGGER, " crn: " + testDto.getResponse().getCrn());
 
         return testDto;
     }

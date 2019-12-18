@@ -296,4 +296,9 @@ public class MeasuredTestContext extends MockedTestContext {
     protected <T extends CloudbreakTestDto> T getEntityFromEntityClass(Class<T> entityClass, RunningParameter runningParameter) {
         return wrappedTestContext.getEntityFromEntityClass(entityClass, runningParameter);
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + wrappedTestContext.toString();
+    }
 }

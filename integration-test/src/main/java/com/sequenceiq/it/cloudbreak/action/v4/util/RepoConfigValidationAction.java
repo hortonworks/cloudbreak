@@ -7,6 +7,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.RepoConfigValidationTestDto;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class RepoConfigValidationAction implements Action<RepoConfigValidationTestDto, CloudbreakClient> {
 
@@ -14,10 +15,10 @@ public class RepoConfigValidationAction implements Action<RepoConfigValidationTe
 
     @Override
     public RepoConfigValidationTestDto action(TestContext testContext, RepoConfigValidationTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        String logInitMessage = "Posting repository config for validation";
-        LOGGER.info("{}", logInitMessage);
+        Log.whenJson(LOGGER, "Posting repository config request:\n", testDto.getRequest());
         testDto.setResponse(cloudbreakClient.getCloudbreakClient().utilV4Endpoint().repositoryConfigValidationRequest(testDto.getRequest()));
-        LOGGER.info("{} was successful", logInitMessage);
+        Log.whenJson(LOGGER, "Posting repository config response:\n", testDto.getResponse());
+
         return testDto;
     }
 }

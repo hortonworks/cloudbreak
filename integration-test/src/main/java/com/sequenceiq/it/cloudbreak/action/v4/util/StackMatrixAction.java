@@ -7,6 +7,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class StackMatrixAction implements Action<StackMatrixTestDto, CloudbreakClient> {
 
@@ -14,10 +15,9 @@ public class StackMatrixAction implements Action<StackMatrixTestDto, CloudbreakC
 
     @Override
     public StackMatrixTestDto action(TestContext testContext, StackMatrixTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        String logInitMessage = "Obtaining stack matrix";
-        LOGGER.info("{}", logInitMessage);
         testDto.setResponse(cloudbreakClient.getCloudbreakClient().utilV4Endpoint().getStackMatrix());
-        LOGGER.info("{} was successful", logInitMessage);
+        Log.whenJson(LOGGER, "Obtaining stack matrix response:\n", testDto.getResponse());
+
         return testDto;
     }
 }

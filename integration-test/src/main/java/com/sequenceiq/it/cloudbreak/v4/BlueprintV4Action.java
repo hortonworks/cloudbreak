@@ -47,7 +47,7 @@ public class BlueprintV4Action {
         blueprintEntity.setResponse(
                 client.getCloudbreakClient()
                         .blueprintV4Endpoint().getByName(workspaceId, blueprintEntity.getName()));
-        Log.logJSON(" getByName "
+        Log.whenJson(" getByName "
                 .concat(blueprintEntity.getName())
                 .concat(" blueprint response: "),
                 blueprintEntity.getResponse());

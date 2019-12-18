@@ -14,7 +14,7 @@ public class EnvironmentGetAction implements Action<EnvironmentTestDto, Environm
                 environmentClient.getEnvironmentClient()
                         .environmentV1Endpoint()
                         .getByName(testDto.getResponse().getName()));
-        Log.logJSON("Environment get response: ", testDto.getResponse());
+        Log.whenJson("Environment get response: ", testDto.getResponse());
         return testDto;
     }
 }

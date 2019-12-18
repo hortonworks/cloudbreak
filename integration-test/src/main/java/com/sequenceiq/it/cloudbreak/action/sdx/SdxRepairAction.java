@@ -17,12 +17,12 @@ public class SdxRepairAction implements Action<SdxTestDto, SdxClient> {
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        Log.log(LOGGER, format(" Starting repair on SDX: %s ", client.getSdxClient().sdxEndpoint().get(testDto.getName()).getName()));
-        Log.logJSON(LOGGER, " SDX repair request: ", testDto.getSdxRepairRequest());
+        Log.when(LOGGER, format(" Starting repair on SDX: %s " + testDto.getName()));
+        Log.whenJson(LOGGER, " SDX repair request: ", testDto.getSdxRepairRequest());
         client.getSdxClient()
                 .sdxEndpoint()
                 .repairCluster(testDto.getName(), testDto.getSdxRepairRequest());
-        Log.log(LOGGER, " SDX repair have been initiated.");
+        Log.when(LOGGER, " SDX repair have been initiated.");
         return testDto;
     }
 }

@@ -26,13 +26,12 @@ public class LaunchClusterFromClusterTemplateAction implements Action<ClusterTem
 
     @Override
     public ClusterTemplateTestDto action(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient client) throws Exception {
-//        Log.logJSON(LOGGER, "Stack from template post request:\n", testDto.getRequest().getStackTemplate());
+        Log.whenJson(LOGGER, "Stack from template post request:\n", testDto.getRequest());
         StackTemplateTestDto stackEntity = testContext.get(stackTemplateKey);
         stackEntity.setResponse(client.getCloudbreakClient()
                 .stackV4Endpoint()
                 .post(client.getWorkspaceId(), stackEntity.getRequest()));
-        Log.logJSON(LOGGER, " Stack from template created  successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, "Stack from template ID: " + testDto.getResponse().getId());
+        Log.whenJson(LOGGER, " Stack from template created  successfully:\n", testDto.getResponse());
         return testDto;
     }
 }

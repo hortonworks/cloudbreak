@@ -15,13 +15,13 @@ public class DatabaseCreateAction implements Action<DatabaseTestDto, CloudbreakC
 
     @Override
     public DatabaseTestDto action(TestContext testContext, DatabaseTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.logJSON(LOGGER, " Database create request:\n", testDto.getRequest());
+        Log.whenJson(LOGGER, " Database create request:\n", testDto.getRequest());
         testDto.setResponse(
                 client.getCloudbreakClient()
                         .databaseV4Endpoint()
                         .create(client.getWorkspaceId(), testDto.getRequest()));
-        Log.logJSON(LOGGER, " Database created successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, String.format(" ID: %s", testDto.getResponse().getId()));
+        Log.whenJson(LOGGER, " Database created successfully:\n", testDto.getResponse());
+        Log.when(LOGGER, String.format(" ID: %s", testDto.getResponse().getId()));
 
         return testDto;
     }

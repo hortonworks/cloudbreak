@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.action.v4.imagecatalog;
 
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,18 +16,19 @@ public class ImageCatalogCreateIfNotExistsAction implements Action<ImageCatalogT
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogCreateIfNotExistsAction.class);
 
     @Override
-    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient client) {
-        LOGGER.info("Create Imagecatalog with name: {}", testDto.getRequest().getName());
+    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient client) throws IOException {
+        Log.when(LOGGER, "Create Imagecatalog with name: " + testDto.getRequest().getName());
         try {
             testDto.setResponse(
                     client.getCloudbreakClient().imageCatalogV4Endpoint().create(client.getWorkspaceId(), testDto.getRequest())
             );
-            Log.logJSON(LOGGER, "Imagecatalog created successfully: ", testDto.getRequest());
+            Log.whenJson(LOGGER, "Imagecatalog created successfully: ", testDto.getRequest());
         } catch (Exception e) {
-            LOGGER.info("Cannot create Imagecatalog, fetch existed one: {}", testDto.getRequest().getName());
+            Log.when(LOGGER, "Cannot create Imagecatalog, fetch existed one: " + testDto.getRequest().getName());
             testDto.setResponse(
                     client.getCloudbreakClient().imageCatalogV4Endpoint()
                             .getByName(client.getWorkspaceId(), testDto.getRequest().getName(), Boolean.FALSE));
+            Log.whenJson(LOGGER, "Imagecatalog fetched successfully: ", testDto.getRequest());
         }
         if (testDto.getResponse() == null) {
             throw new IllegalStateException("ImageCatalog could not be created.");

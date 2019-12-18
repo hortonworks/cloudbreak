@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.action.v4.stack;
 
-import static java.lang.String.format;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,16 +16,14 @@ public class StackModifyAmbariPasswordAction implements Action<StackTestDto, Clo
 
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, " Stack put ambari password request:\n", testDto.getRequest());
+        Log.when(LOGGER, " Stack put password change request");
         UserNamePasswordV4Request userNamePasswordV4Request = new UserNamePasswordV4Request();
         userNamePasswordV4Request.setOldPassword(testDto.getRequest().getCluster().getPassword());
         userNamePasswordV4Request.setUserName(testDto.getRequest().getCluster().getUserName());
         userNamePasswordV4Request.setPassword("testnewambaripassword");
         client.getCloudbreakClient().stackV4Endpoint().putPassword(client.getWorkspaceId(),
                 testDto.getName(), userNamePasswordV4Request);
-        Log.logJSON(LOGGER, " Stack was modified ambari password successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, format(" CRN: %s", testDto.getResponse().getCrn()));
+        Log.when(LOGGER, " user's password modified successfully");
         return testDto;
     }
 }

@@ -14,17 +14,18 @@ public class LdapCreateIfNotExistsAction implements Action<LdapTestDto, FreeIPAC
 
     @Override
     public LdapTestDto action(TestContext testContext, LdapTestDto testDto, FreeIPAClient client) throws Exception {
-        LOGGER.info("Create LdapConfig for environment: {}", testDto.getRequest().getEnvironmentCrn());
+        Log.whenJson(LOGGER, " Ldap post request:\n", testDto.getRequest());
         try {
             testDto.setResponse(
                     client.getFreeIpaClient().getLdapConfigV1Endpoint().create(testDto.getRequest())
             );
-            Log.logJSON(LOGGER, "LdapConfig created successfully: ", testDto.getRequest());
+            Log.whenJson(LOGGER, "LdapConfig created successfully: ", testDto.getRequest());
         } catch (Exception e) {
-            LOGGER.info("Cannot create LdapConfig, fetch existed one: {}", testDto.getRequest().getName());
+            Log.when(LOGGER, "Cannot create LdapConfig, fetch existed one: " + testDto.getRequest().getName());
             testDto.setResponse(
                     client.getFreeIpaClient().getLdapConfigV1Endpoint()
                             .describe(testDto.getRequest().getEnvironmentCrn()));
+            Log.whenJson(LOGGER, "LdapConfig fetched successfully: ", testDto.getRequest());
         }
         if (testDto.getResponse() == null) {
             throw new IllegalStateException("LdapConfig could not be created.");

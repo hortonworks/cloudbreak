@@ -20,7 +20,7 @@ public class AuditGetAction implements Action<AuditTestDto, CloudbreakClient> {
                 .auditV4Endpoint()
                 .getAuditEventById(client.getWorkspaceId(), testDto.getAuditId());
         testDto.setResponse(response);
-        Log.logJSON(LOGGER, " Audit listed successfully:\n", testDto.getResponse());
+        Log.whenJson(LOGGER, " Audit listed successfully:\n", testDto.getResponse());
         return testDto;
     }
 }

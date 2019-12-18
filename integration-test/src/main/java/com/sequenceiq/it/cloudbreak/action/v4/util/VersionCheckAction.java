@@ -7,6 +7,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.VersionCheckTestDto;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class VersionCheckAction implements Action<VersionCheckTestDto, CloudbreakClient> {
 
@@ -14,9 +15,8 @@ public class VersionCheckAction implements Action<VersionCheckTestDto, Cloudbrea
 
     @Override
     public VersionCheckTestDto action(TestContext testContext, VersionCheckTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        String logInitMessage = "Obtaining client version";
-        LOGGER.info("{}", logInitMessage);
         testDto.setResponse(cloudbreakClient.getCloudbreakClient().utilV4Endpoint().checkClientVersion(testDto.getVersion()));
-        LOGGER.info("{} was successful", logInitMessage);
+        Log.whenJson(LOGGER, "Obtaining client version response:\n", testDto.getResponse());
+
         return testDto;    }
 }

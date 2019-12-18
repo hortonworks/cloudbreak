@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.action.sdx;
 
-import static java.lang.String.format;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,12 +16,12 @@ public class SdxDeleteInternalAction implements Action<SdxInternalTestDto, SdxCl
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.log(LOGGER, format(" Environment: %s", testDto.getRequest().getEnvironment()));
-        Log.logJSON(LOGGER, " SDX delete request: ", testDto.getRequest());
+        Log.when(LOGGER, " SDX endpoint: %s" + client.getSdxClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
         client.getSdxClient()
                 .sdxEndpoint()
                 .delete(testDto.getName(), false);
-        Log.logJSON(LOGGER, " SDX list response: ", client.getSdxClient().sdxEndpoint().list(testContext.get(EnvironmentTestDto.class).getName()));
+        Log.whenJson(LOGGER, " Delete internal response: ",
+                client.getSdxClient().sdxEndpoint().list(testContext.get(EnvironmentTestDto.class).getName()));
         return testDto;
     }
 }

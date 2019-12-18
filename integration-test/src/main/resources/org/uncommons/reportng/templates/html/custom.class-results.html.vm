@@ -46,6 +46,14 @@
       <i>$messages.getString("methodArguments"): </i><span class="arguments">$utils.getArguments($testResult)</span><br />
     #end
 
+    ##Show alternate output for the test
+    #set ($alternateLogKey = "alternateLog")
+    #set ($alternateLog = $testResult.getAttribute("$alternateLogKey"))
+    #if ($alternateLog)
+      $alternateLog
+    #end
+
+
     ## Show logger output for the test.
     #set ($output = $utils.getTestOutput($testResult))
     #if ($output.size() > 0)

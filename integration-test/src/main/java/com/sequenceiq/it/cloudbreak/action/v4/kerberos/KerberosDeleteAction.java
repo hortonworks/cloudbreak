@@ -16,12 +16,11 @@ public class KerberosDeleteAction implements Action<KerberosTestDto, FreeIPAClie
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosDeleteAction.class);
 
     public KerberosTestDto action(TestContext testContext, KerberosTestDto testDto, FreeIPAClient client) throws Exception {
-        Log.log(LOGGER, String.format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, format(" Kerberos delete:%n"), testDto.getRequest());
+        Log.whenJson(LOGGER, format(" Kerberos delete:%n"), testDto.getName());
         client.getFreeIpaClient()
                 .getKerberosConfigV1Endpoint()
                 .delete(testDto.getName());
-        Log.log(LOGGER, String.format(" Kerberos config was deleted successfully for environment %s", testDto.getName()));
+        Log.when(LOGGER, String.format(" Kerberos config was deleted successfully for environment " + testDto.getName()));
         return testDto;
     }
 }

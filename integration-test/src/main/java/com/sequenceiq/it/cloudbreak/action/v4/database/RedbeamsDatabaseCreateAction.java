@@ -15,13 +15,13 @@ public class RedbeamsDatabaseCreateAction implements Action<RedbeamsDatabaseTest
 
     @Override
     public RedbeamsDatabaseTestDto action(TestContext testContext, RedbeamsDatabaseTestDto testDto, RedbeamsClient client) throws Exception {
-        Log.logJSON(LOGGER, " Database register request:\n", testDto.getRequest());
+        Log.whenJson(LOGGER, " Database register request:\n", testDto.getRequest());
         testDto.setResponse(
                 client.getEndpoints()
                         .databaseV4Endpoint()
                         .register(testDto.getRequest()));
-        Log.logJSON(LOGGER, " Database registered successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, String.format(" CRN: %s", testDto.getResponse().getCrn()));
+        Log.whenJson(LOGGER, " Database registered successfully:\n", testDto.getResponse());
+        Log.when(LOGGER, String.format(" CRN: %s", testDto.getResponse().getCrn()));
 
         return testDto;
     }

@@ -19,7 +19,7 @@ public class EnvironmentInternalGetAction implements Action<EnvironmentTestDto, 
                         .withInternalCrn()
                         .environmentV1Endpoint()
                         .getByCrn(testDto.getResponse().getCrn()));
-        Log.logJSON("Environment get response with internal actor: ", testDto.getResponse());
+        Log.whenJson("Environment get response with internal actor: ", testDto.getResponse());
         return testDto;
     }
 }

@@ -17,9 +17,9 @@ public class SdxStartAction implements Action<SdxInternalTestDto, SdxClient> {
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.log(LOGGER, format(" Start SDX: %s ", testDto.getName()));
+        Log.when(LOGGER, format(" Start SDX: %s ", testDto.getName()));
         client.getSdxClient().sdxEndpoint().startByName(testDto.getName());
-        Log.log(LOGGER, " SDX Start have been initiated. ");
+        Log.when(LOGGER, " SDX Start have been initiated. ");
         return testDto;
     }
 }

@@ -24,7 +24,7 @@ public class RedbeamsDatabaseListAction implements Action<RedbeamsDatabaseTestDt
                 .list(client.getEnvironmentCrn())
                 .getResponses();
         testDto.setResponses(responses.stream().collect(Collectors.toSet()));
-        Log.logJSON(LOGGER, " Databases listed successfully:\n", testDto.getResponses());
+        Log.whenJson(LOGGER, " Databases listed successfully:\n", testDto.getResponses());
         return testDto;
     }
 }

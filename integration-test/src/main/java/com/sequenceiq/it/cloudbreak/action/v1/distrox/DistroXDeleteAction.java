@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.action.v1.distrox;
 
-import static java.lang.String.format;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,12 +15,10 @@ public class DistroXDeleteAction implements Action<DistroXTestDto, CloudbreakCli
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, " Stack delete request:\n", testDto.getRequest());
         client.getCloudbreakClient()
                 .distroXV1Endpoint()
                 .deleteByName(testDto.getName(), false);
-        Log.logJSON(LOGGER, " Stack deletion was successful:\n", testDto.getResponse());
+        Log.when(LOGGER, " Stack deletion was successful.");
         return testDto;
     }
 }

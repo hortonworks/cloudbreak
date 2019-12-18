@@ -32,7 +32,7 @@ public class StackScalePostAction implements Action<StackTestDto, CloudbreakClie
 
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.logJSON(" StackScale post request:\n", request);
+        Log.whenJson(" StackScale post request:\n", request);
         client.getCloudbreakClient()
                 .stackV4Endpoint()
                 .putScaling(client.getWorkspaceId(), testDto.getName(), request);

@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.action.v1.distrox;
 
-import static java.lang.String.format;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,15 +25,13 @@ public class DistroXScaleAction implements Action<DistroXTestDto, CloudbreakClie
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
-        Log.log(LOGGER, " Stack scale request on: %s", testDto.getName());
+        Log.when(LOGGER, String.format("Stack scale request on: %s. Hostgroup: %s, desiredCount: %d", testDto.getName(), hostGroup, count));
         DistroXScaleV1Request scaleRequest = new DistroXScaleV1Request();
         scaleRequest.setGroup(hostGroup);
         scaleRequest.setDesiredCount(count);
         client.getCloudbreakClient()
                 .distroXV1Endpoint()
                 .putScalingByName(testDto.getName(), scaleRequest);
-        Log.log(LOGGER, " Stack scale request was successful on: %s.", testDto.getName());
         return testDto;
     }
 }

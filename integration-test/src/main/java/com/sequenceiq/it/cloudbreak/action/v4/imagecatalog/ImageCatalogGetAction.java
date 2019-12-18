@@ -24,12 +24,12 @@ public class ImageCatalogGetAction implements Action<ImageCatalogTestDto, Cloudb
 
     @Override
     public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        LOGGER.info("Get Imagecatalog within workspace by name: {}", testDto.getRequest().getName());
+        Log.when(LOGGER, "Get Imagecatalog by name: " + testDto.getRequest().getName());
         try {
             testDto.setResponse(
                     cloudbreakClient.getCloudbreakClient().imageCatalogV4Endpoint().getByName(cloudbreakClient.getWorkspaceId(), testDto.getName(), withImages)
             );
-            Log.logJSON(LOGGER, "Imagecatalog has been fetched successfully: ", testDto.getRequest());
+            Log.whenJson(LOGGER, "Imagecatalog has been fetched successfully: ", testDto.getRequest());
         } catch (Exception e) {
             LOGGER.warn("Cannot get Imagecatalog : {}", testDto.getRequest().getName());
             throw e;

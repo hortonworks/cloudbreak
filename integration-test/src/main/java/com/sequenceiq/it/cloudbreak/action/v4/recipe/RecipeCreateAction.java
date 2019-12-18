@@ -17,13 +17,12 @@ public class RecipeCreateAction implements Action<RecipeTestDto, CloudbreakClien
 
     @Override
     public RecipeTestDto action(TestContext testContext, RecipeTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        Log.log(LOGGER, String.format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, format(" Recipe post request:%n"), testDto.getRequest());
+        Log.whenJson(LOGGER, format(" Recipe post request:%n"), testDto.getRequest());
         testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient()
                         .recipeV4Endpoint()
                         .post(cloudbreakClient.getWorkspaceId(), testDto.getRequest()));
-        Log.logJSON(LOGGER, format(" Recipe created  successfully:%n"), testDto.getResponse());
+        Log.whenJson(LOGGER, format(" Recipe created  successfully:%n"), testDto.getResponse());
 
         return testDto;
     }

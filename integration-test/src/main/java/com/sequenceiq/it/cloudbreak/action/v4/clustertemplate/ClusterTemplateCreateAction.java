@@ -15,14 +15,13 @@ public class ClusterTemplateCreateAction implements Action<ClusterTemplateTestDt
 
     @Override
     public ClusterTemplateTestDto action(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.log(LOGGER, "ClusterTemplateEntity name: " + testDto.getName());
-        Log.logJSON(LOGGER, " ClusterTemplateEntity post request:\n", testDto.getRequest());
+        Log.whenJson(LOGGER, " ClusterTemplateEntity post request:\n", testDto.getRequest());
         testDto.setResponse(
                 client.getCloudbreakClient()
                         .clusterTemplateV4EndPoint()
                         .post(client.getWorkspaceId(), testDto.getRequest()));
-        Log.logJSON(LOGGER, " ClusterTemplateEntity created  successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, "ClusterTemplateEntity ID: " + testDto.getResponse().getId());
+        Log.whenJson(LOGGER, " ClusterTemplateEntity created  successfully:\n", testDto.getResponse());
+        Log.when(LOGGER, "ClusterTemplateEntity ID: " + testDto.getResponse().getId());
 
         return testDto;
     }

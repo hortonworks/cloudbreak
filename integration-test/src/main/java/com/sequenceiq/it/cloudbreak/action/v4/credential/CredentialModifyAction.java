@@ -15,13 +15,13 @@ public class CredentialModifyAction implements Action<CredentialTestDto, Environ
 
     @Override
     public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, EnvironmentClient cloudbreakClient) throws Exception {
-        Log.logJSON(LOGGER, " Credential modifyV4 request:\n", testDto.getRequest());
+        Log.whenJson(LOGGER, " Credential modifyV4 request:\n", testDto.getRequest());
         testDto.setResponse(
                 cloudbreakClient.getEnvironmentClient()
                         .credentialV1Endpoint()
                         .put(testDto.getRequest()));
-        Log.logJSON(LOGGER, " Credential modified successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, String.format(" CRN: %s", testDto.getResponse().getCrn()));
+        Log.whenJson(LOGGER, " Credential modified successfully:\n", testDto.getResponse());
+        Log.when(LOGGER, String.format(" CRN: %s", testDto.getResponse().getCrn()));
 
         return testDto;
     }

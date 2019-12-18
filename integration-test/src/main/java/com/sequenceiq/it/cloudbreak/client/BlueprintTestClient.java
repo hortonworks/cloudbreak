@@ -8,7 +8,6 @@ import com.sequenceiq.it.cloudbreak.action.v4.blueprint.BlueprintCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.blueprint.BlueprintDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.blueprint.BlueprintGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.blueprint.BlueprintListAction;
-import com.sequenceiq.it.cloudbreak.action.v4.blueprint.BlueprintRequestAction;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 
 @Service
@@ -28,9 +27,5 @@ public class BlueprintTestClient {
 
     public Action<BlueprintTestDto, CloudbreakClient> deleteV4() {
         return new BlueprintDeleteAction();
-    }
-
-    public Action<BlueprintTestDto, CloudbreakClient> requestV4() {
-        return new BlueprintRequestAction();
     }
 }

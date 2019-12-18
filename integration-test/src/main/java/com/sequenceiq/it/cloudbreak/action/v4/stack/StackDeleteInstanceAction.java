@@ -17,13 +17,13 @@ public class StackDeleteInstanceAction implements Action<StackTestDto, Cloudbrea
 
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.logJSON(LOGGER, " Stack delete instance request:\n", testDto.getRequest());
         String instanceId = testContext.getRequiredSelected(INSTANCE_ID);
+        Log.when(LOGGER, " Stack delete instance request: " + testDto.getName() + " instance id: " + instanceId);
         Boolean forced = testContext.getSelected("forced");
         client.getCloudbreakClient()
                 .stackV4Endpoint()
                 .deleteInstance(client.getWorkspaceId(), testDto.getName(), forced != null && forced, instanceId);
-        Log.logJSON(LOGGER, " Stack delete instance was successful:\n", testDto.getResponse());
+        Log.whenJson(LOGGER, " Stack delete instance was successful:\n", testDto.getResponse());
         return testDto;
     }
 }

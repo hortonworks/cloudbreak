@@ -34,6 +34,6 @@ public class CloudbreakUser {
 
     @Override
     public String toString() {
-        return super.toString() + "{" + displayName + "}";
+        return getClass().getSimpleName() + "{" + displayName + "}";
     }
 }

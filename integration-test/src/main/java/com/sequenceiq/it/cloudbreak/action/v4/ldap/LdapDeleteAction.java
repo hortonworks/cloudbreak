@@ -14,12 +14,11 @@ public class LdapDeleteAction implements Action<LdapTestDto, FreeIPAClient> {
 
     @Override
     public LdapTestDto action(TestContext testContext, LdapTestDto testDto, FreeIPAClient client) throws Exception {
-        Log.log(LOGGER, String.format(" Environment: %s", testDto.getName()));
-        Log.logJSON(LOGGER, " LDAP config delete request:\n", testDto.getRequest());
+        Log.when(LOGGER, " LDAP config delete request: " + testDto.getName());
         client.getFreeIpaClient()
             .getLdapConfigV1Endpoint()
             .delete(testDto.getName());
-        Log.log(LOGGER, String.format(" LDAP config was deleted successfully for environment %s", testDto.getName()));
+        Log.when(LOGGER, String.format(" LDAP config was deleted successfully for environment %s", testDto.getName()));
         return testDto;
     }
 }

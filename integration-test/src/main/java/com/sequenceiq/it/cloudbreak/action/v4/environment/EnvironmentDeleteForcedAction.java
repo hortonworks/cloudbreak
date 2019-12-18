@@ -16,13 +16,11 @@ public class EnvironmentDeleteForcedAction implements Action<EnvironmentTestDto,
 
     @Override
     public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient environmentClient) throws Exception {
-        Log.log(LOGGER, " Environment name: %s", testDto.getRequest().getName());
-        Log.log(LOGGER, " Environment endpoint: %s", environmentClient.getEnvironmentClient().environmentV1Endpoint().toString());
-        Log.logJSON(LOGGER, " Environment forced delete request: ", testDto.getRequest());
+        Log.when(LOGGER, "Environment forced delete request, crn: " +  testDto.getResponse().getCrn());
         SimpleEnvironmentResponse delete = environmentClient.getEnvironmentClient()
                 .environmentV1Endpoint()
                 .deleteByCrn(testDto.getResponse().getCrn(), true);
-        Log.logJSON(LOGGER, " Environment forced delete response: ", delete);
+        Log.whenJson(LOGGER, " Environment forced delete response: ", delete);
         return testDto;
     }
 }

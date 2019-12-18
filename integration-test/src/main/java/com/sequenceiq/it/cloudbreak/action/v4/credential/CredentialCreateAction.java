@@ -17,13 +17,13 @@ public class CredentialCreateAction implements Action<CredentialTestDto, Environ
 
     @Override
     public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, EnvironmentClient environmentClient) throws Exception {
-        LOGGER.info(" Credential create request: {}", testDto.getRequest());
+        Log.when(LOGGER, "Credential create request: " + testDto.getRequest());
         testDto.setResponse(
                 environmentClient.getEnvironmentClient()
                         .credentialV1Endpoint()
                         .post(testDto.getRequest()));
-        Log.logJSON(LOGGER, " Credential created successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, format(" CRN: %s", testDto.getResponse().getCrn()));
+        Log.whenJson(LOGGER, " Credential created successfully:\n", testDto.getResponse());
+        Log.when(LOGGER, format(" CRN: %s", testDto.getResponse().getCrn()));
 
         return testDto;
     }

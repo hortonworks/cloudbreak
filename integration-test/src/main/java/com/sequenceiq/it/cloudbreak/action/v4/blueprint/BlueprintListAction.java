@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.action.v4.blueprint;
 
-import static com.sequenceiq.it.cloudbreak.log.Log.log;
-import static com.sequenceiq.it.cloudbreak.log.Log.logJSON;
 import static java.lang.String.format;
 
 import org.slf4j.Logger;
@@ -11,6 +9,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class BlueprintListAction implements Action<BlueprintTestDto, CloudbreakClient> {
 
@@ -18,13 +17,12 @@ public class BlueprintListAction implements Action<BlueprintTestDto, CloudbreakC
 
     @Override
     public BlueprintTestDto action(TestContext testContext, BlueprintTestDto testDto, CloudbreakClient client) throws Exception {
-        log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
-        logJSON(LOGGER, format(" Blueprint list by workspace request:%n"), testDto.getRequest());
+        Log.whenJson(LOGGER, format(" Blueprint list by workspace request, workspace:%n"), client.getWorkspaceId());
         testDto.setViewResponses(
                 client.getCloudbreakClient()
                         .blueprintV4Endpoint()
                         .list(client.getWorkspaceId(), true).getResponses());
-        logJSON(LOGGER, format(" Blueprint list has executed successfully:%n"), testDto.getViewResponses());
+        Log.whenJson(LOGGER, format(" Blueprint list has executed successfully:%n"), testDto.getViewResponses());
 
         return testDto;
     }

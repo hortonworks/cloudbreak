@@ -15,14 +15,12 @@ public class StackCreateAction implements Action<StackTestDto, CloudbreakClient>
 
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.log(LOGGER, " Name: " + testDto.getRequest().getName());
-        Log.logJSON(LOGGER, " Stack post request:\n", testDto.getRequest());
+        Log.whenJson(LOGGER, " Stack post request:\n", testDto.getRequest());
         testDto.setResponse(
                 client.getCloudbreakClient()
                         .stackV4Endpoint()
                         .post(client.getWorkspaceId(), testDto.getRequest()));
-        Log.logJSON(LOGGER, " Stack created was successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, " crn: " + testDto.getResponse().getCrn());
+        Log.whenJson(LOGGER, " Stack created was successfully:\n", testDto.getResponse());
 
         return testDto;
     }

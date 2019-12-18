@@ -15,13 +15,12 @@ public class CredentialGetAction implements Action<CredentialTestDto, Environmen
 
     @Override
     public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, EnvironmentClient environmentClient) throws Exception {
-        LOGGER.info(String.format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, " Credential get request:\n", testDto.getRequest());
+        Log.when(LOGGER, " Credential get request: " + testDto.getName());
         testDto.setResponse(
                 environmentClient.getEnvironmentClient()
                         .credentialV1Endpoint()
                         .getByName(testDto.getName()));
-        Log.logJSON(LOGGER, " Credential get successfully:\n", testDto.getResponse());
+        Log.whenJson(LOGGER, " Credential get successfully:\n", testDto.getResponse());
         return testDto;
     }
 }

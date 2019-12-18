@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.action.v1.distrox;
 
-import static java.lang.String.format;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,12 +15,10 @@ public class DistroXStopAction implements Action<DistroXTestDto, CloudbreakClien
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
-        Log.log(LOGGER, " Stack stop request on: %s", testDto.getName());
+        Log.when(LOGGER, " Stack stop request on: " + testDto.getName());
         client.getCloudbreakClient()
                 .distroXV1Endpoint()
                 .putStopByName(testDto.getName());
-        Log.log(LOGGER, " Stack stop request was successful on: %s.", testDto.getName());
         return testDto;
     }
 }

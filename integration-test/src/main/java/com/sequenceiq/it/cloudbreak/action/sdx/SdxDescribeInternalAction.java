@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.action.sdx;
 
-import static java.lang.String.format;
-
 import java.util.HashSet;
 
 import org.slf4j.Logger;
@@ -19,13 +17,12 @@ public class SdxDescribeInternalAction implements Action<SdxInternalTestDto, Sdx
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.log(LOGGER, format(" Environment: %s", testDto.getRequest().getEnvironment()));
-        Log.logJSON(LOGGER, " SDX describe request: ", testDto.getRequest());
+        Log.when(LOGGER, " SDX endpoint: %s" + client.getSdxClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
+        Log.whenJson(LOGGER, " SDX describe internal request: ", testDto.getRequest());
         testDto.setResponse(client.getSdxClient()
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), new HashSet<>()));
-        Log.logJSON(LOGGER, " SDX describe response: ", client.getSdxClient().sdxEndpoint().get(testDto.getName()));
-        Log.log(LOGGER, " SDX name: %s", client.getSdxClient().sdxEndpoint().get(testDto.getName()).getName());
+        Log.whenJson(LOGGER, " SDX describe internal response: ", client.getSdxClient().sdxEndpoint().get(testDto.getName()));
         return testDto;
     }
 }

@@ -14,17 +14,18 @@ public class ProxyConfigCreateIfNotExistsAction implements Action<ProxyTestDto, 
 
     @Override
     public ProxyTestDto action(TestContext testContext, ProxyTestDto testDto, EnvironmentClient client) throws Exception {
-        LOGGER.info("Create ProxyConfig with name: {}", testDto.getRequest().getName());
+        Log.whenJson(LOGGER, " Proxy config post request:\n", testDto.getRequest());
         try {
             testDto.setResponse(
                     client.getEnvironmentClient().proxyV1Endpoint().post(testDto.getRequest())
             );
-            Log.logJSON(LOGGER, "ProxyConfig created successfully: ", testDto.getRequest());
+            Log.whenJson(LOGGER, "ProxyConfig created successfully, response: ", testDto.getResponse());
         } catch (Exception e) {
-            LOGGER.info("Cannot create ProxyConfig, fetch existed one: {}", testDto.getRequest().getName());
+            Log.when(LOGGER, "Cannot create ProxyConfig, fetch existed one: " + testDto.getRequest().getName());
             testDto.setResponse(
                     client.getEnvironmentClient().proxyV1Endpoint()
                             .getByName(testDto.getRequest().getName()));
+            Log.whenJson(LOGGER, "ProxyConfig fetched successfully, response: ", testDto.getResponse());
         }
         if (testDto.getResponse() == null) {
             throw new IllegalStateException("ProxyConfig could not be created.");

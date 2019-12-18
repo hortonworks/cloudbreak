@@ -12,7 +12,7 @@ public class MicroserviceClient extends Entity {
 
     @Override
     public String toString() {
-        return super.toString() + "[" + acting + "]";
+        return getClass().getSimpleName() + "[" + acting + "]";
     }
 
     public void setActing(CloudbreakUser acting) {

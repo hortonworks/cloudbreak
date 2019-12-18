@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.action.v4.kubernetes;
 
-import static java.lang.String.format;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,13 +15,12 @@ public class KubernetesCreateAction implements Action<KubernetesTestDto, Cloudbr
 
     @Override
     public KubernetesTestDto action(TestContext testContext, KubernetesTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        Log.logJSON(LOGGER, " Kubernetes create request:\n", testDto.getRequest());
+        Log.whenJson(LOGGER, " Kubernetes create request:\n", testDto.getRequest());
         testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient()
                         .kubernetesV4Endpoint()
                         .post(cloudbreakClient.getWorkspaceId(), testDto.getRequest()));
-        Log.logJSON(LOGGER, " Kubernetes created successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
+        Log.whenJson(LOGGER, " Kubernetes created successfully:\n", testDto.getResponse());
 
         return testDto;
     }

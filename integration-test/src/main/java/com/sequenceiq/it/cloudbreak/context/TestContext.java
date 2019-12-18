@@ -162,11 +162,14 @@ public abstract class TestContext implements ApplicationContextAware {
         CloudbreakUser who = getWho(runningParameter);
 
         LOGGER.info("when {} action on {} by {}, name: {}", key, entity, who, entity.getName());
+        Log.when(LOGGER, action.getClass().getSimpleName() + " action on " + entity + " by " + who);
+
         try {
             return doAction(entity, clientClass, action, who.getAccessKey());
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
                 LOGGER.error("when [{}] action is failed: {}, name: {}", key, ResponseUtil.getErrorMessage(e), entity.getName(), e);
+                Log.when(null, action.getClass().getSimpleName() + " action is failed: " + ResponseUtil.getErrorMessage(e));
             }
             getExceptionMap().put(key, e);
         }
@@ -217,7 +220,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
         CloudbreakUser who = getWho(runningParameter);
 
-        LOGGER.info("then {} assertion on {} by {}, name: {}", key, entity, who, entity.getName());
+        Log.then(LOGGER, assertion.getClass().getSimpleName() + " assertion on " + entity + " by " + who);
         try {
             CloudbreakTestDto cloudbreakTestDto = resources.get(key);
             if (cloudbreakTestDto != null) {
@@ -228,6 +231,7 @@ public abstract class TestContext implements ApplicationContextAware {
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
                 LOGGER.error("then [{}] assertion is failed: {}, name: {}", key, ResponseUtil.getErrorMessage(e), entity.getName(), e);
+                Log.then(null, assertion.getClass().getSimpleName() + " assertion is failed: " + ResponseUtil.getErrorMessage(e));
             }
             getExceptionMap().put(key, e);
         }
@@ -241,6 +245,7 @@ public abstract class TestContext implements ApplicationContextAware {
     public TestContext as(Actor actor) {
         checkShutdown();
         CloudbreakUser acting = actor.acting(testParameter);
+        Log.as(LOGGER, acting.toString());
         setActingUser(acting);
         if (clients.get(acting.getAccessKey()) == null) {
             CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, acting);
@@ -293,7 +298,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public <O extends CloudbreakTestDto> O init(Class<O> clss) {
         checkShutdown();
-        Log.log(LOGGER, "init " + clss.getSimpleName());
+        LOGGER.info("init " + clss.getSimpleName());
         CloudbreakTestDto bean = applicationContext.getBean(clss, getTestContext());
         initialized = true;
         return (O) bean.valid();
@@ -304,15 +309,14 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <O extends CloudbreakTestDto> O given(String key, Class<O> clss) {
-        Optional<TestCaseDescription> description = getDescription();
-        if (description.isPresent()) {
-            Log.log(LOGGER, "Test case description: " + description.get().getValue());
-        }
         checkShutdown();
         O cloudbreakEntity = (O) resources.get(key);
         if (cloudbreakEntity == null) {
             cloudbreakEntity = init(clss);
             resources.put(key, cloudbreakEntity);
+            Log.given(LOGGER, cloudbreakEntity + " created");
+        } else {
+            Log.given(LOGGER, cloudbreakEntity + " retrieved");
         }
         return cloudbreakEntity;
     }
@@ -525,12 +529,12 @@ public abstract class TestContext implements ApplicationContextAware {
         checkShutdown();
 
         if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
-            LOGGER.info("Should be skipped beacause of previous error. await [{}]", desiredStatuses);
+            Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
             return entity;
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         FreeIPATestDto awaitEntity = get(key);
-        LOGGER.info("await {} for {}", key, desiredStatuses);
+        Log.await(LOGGER, String.format("%s for %s", key, desiredStatuses));
         try {
             if (awaitEntity == null) {
                 throw new RuntimeException("Key provided but no result in resource map, key=" + key);
@@ -545,6 +549,8 @@ public abstract class TestContext implements ApplicationContextAware {
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
                 LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
+                Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
+                        entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
             }
             exceptionMap.put("await " + entity + " for desired statuses " + desiredStatuses, e);
         }
@@ -561,12 +567,12 @@ public abstract class TestContext implements ApplicationContextAware {
         checkShutdown();
 
         if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
-            LOGGER.info("Should be skipped beacause of previous error. await [{}]", desiredStatuses);
+            Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
             return entity;
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         EnvironmentTestDto awaitEntity = get(key);
-        LOGGER.info("await {} for {}", key, desiredStatuses);
+        Log.await(LOGGER, String.format("%s for %s", key, desiredStatuses));
         try {
             if (awaitEntity == null) {
                 throw new RuntimeException("Key provided but no result in resource map, key=" + key);
@@ -581,6 +587,8 @@ public abstract class TestContext implements ApplicationContextAware {
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
                 LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
+                Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
+                        entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
             }
             exceptionMap.put("await " + entity + " for desired statuses " + desiredStatuses, e);
         }
@@ -597,12 +605,12 @@ public abstract class TestContext implements ApplicationContextAware {
         checkShutdown();
 
         if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
-            LOGGER.info("Should be skipped beacause of previous error. await [{}]", desiredStatuses);
+            Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
             return entity;
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         SdxTestDto awaitEntity = get(key);
-        LOGGER.info("await {} for {}", key, desiredStatuses);
+        Log.await(LOGGER, String.format("%s for %s", key, desiredStatuses));
         try {
             if (awaitEntity == null) {
                 throw new RuntimeException("Key provided but no result in resource map, key=" + key);
@@ -617,6 +625,8 @@ public abstract class TestContext implements ApplicationContextAware {
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
                 LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
+                Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
+                        entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
             }
             exceptionMap.put("await " + entity + " for desired statuses " + desiredStatuses, e);
         }
@@ -633,12 +643,12 @@ public abstract class TestContext implements ApplicationContextAware {
         checkShutdown();
 
         if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
-            LOGGER.info("Should be skipped beacause of previous error. await [{}]", desiredStatuses);
+            Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
             return entity;
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         SdxInternalTestDto awaitEntity = get(key);
-        LOGGER.info("await {} for {}", key, desiredStatuses);
+        Log.await(LOGGER, String.format("%s for %s", key, desiredStatuses));
         try {
             if (awaitEntity == null) {
                 throw new RuntimeException("Key provided but no result in resource map, key=" + key);
@@ -653,6 +663,8 @@ public abstract class TestContext implements ApplicationContextAware {
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
                 LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
+                Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
+                        entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
             }
             exceptionMap.put("await " + entity + " for desired statuses " + desiredStatuses, e);
         }
@@ -669,12 +681,12 @@ public abstract class TestContext implements ApplicationContextAware {
         checkShutdown();
 
         if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
-            LOGGER.info("Should be skipped beacause of previous error. await [{}]", desiredStatuses);
+            Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
             return entity;
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         SdxRepairTestDto awaitEntity = get(key);
-        LOGGER.info("await {} for {}", key, desiredStatuses);
+        Log.await(LOGGER, String.format("%s for %s", key, desiredStatuses));
         try {
             if (awaitEntity == null) {
                 throw new RuntimeException("Key provided but no result in resource map, key=" + key);
@@ -689,6 +701,8 @@ public abstract class TestContext implements ApplicationContextAware {
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
                 LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
+                Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
+                        entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
             }
             exceptionMap.put("await " + entity + " for desired statuses " + desiredStatuses, e);
         }
@@ -702,17 +716,22 @@ public abstract class TestContext implements ApplicationContextAware {
         if (exception == null) {
             String message = "Expected an exception but cannot find with key: " + key;
             exceptionMap.put("expect", new RuntimeException(message));
+            Log.expect(LOGGER, message);
         } else {
             if (!exception.getClass().equals(expectedException)) {
                 String message = String.format("Expected exception (%s) does not match with the actual exception (%s).",
                         expectedException, exception.getClass());
                 exceptionMap.put("expect", new RuntimeException(message));
+                Log.expect(LOGGER, message);
             } else if (!isMessageEquals(exception, runningParameter)) {
                 String message = String.format("Expected exception message (%s) does not match with the actual exception message (%s).",
                         runningParameter.getExpectedMessage(), ResponseUtil.getErrorMessage(exception));
                 exceptionMap.put("expect", new RuntimeException(message));
+                Log.expect(LOGGER, message);
             } else {
                 exceptionMap.remove(key);
+                Log.expect(LOGGER, "Expected exception conditions have met, exception: " + expectedException
+                        + ", message: " + runningParameter.getExpectedMessage());
             }
         }
         return entity;
@@ -747,7 +766,7 @@ public abstract class TestContext implements ApplicationContextAware {
         investigables.forEach(dto -> builder.append(dto.investigate()).append(System.lineSeparator()));
     }
 
-    protected  <T extends CloudbreakTestDto> T getEntityFromEntityClass(Class<T> entityClass, RunningParameter runningParameter) {
+    protected <T extends CloudbreakTestDto> T getEntityFromEntityClass(Class<T> entityClass, RunningParameter runningParameter) {
         String key = getKey(entityClass, runningParameter);
         T entity = (T) resources.get(key);
         if (entity == null) {
@@ -830,6 +849,6 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Override
     public String toString() {
-        return super.toString() + "{clients: " + clients + ", entities: " +  resources + "}";
+        return getClass().getSimpleName() + "{clients: " + clients + ", entities: " + resources + "}";
     }
 }

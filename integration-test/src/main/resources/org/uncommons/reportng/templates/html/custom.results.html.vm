@@ -11,6 +11,27 @@
   <link href="custom.css" rel="stylesheet" type="text/css" />
   #end
   <script type="text/javascript" src="reportng.js"></script>
+  <script>
+  function copyToClipboard(str) {
+  var copyText = document.getElementById(str).value;
+  var el = document.createElement('textarea');
+  el.value = copyText;
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand('copy');
+  document.body.removeChild(el);
+  }
+  </script>
+  <style>
+  table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+  }
+  th, td {
+    padding: 5px;
+    text-align: left;
+  }
+  </style>
 </head>
 <body>
 <h1>$result.testContext.name</h1>

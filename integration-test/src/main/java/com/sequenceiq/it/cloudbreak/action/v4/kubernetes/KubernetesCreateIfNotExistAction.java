@@ -16,17 +16,19 @@ public class KubernetesCreateIfNotExistAction implements Action<KubernetesTestDt
 
     @Override
     public KubernetesTestDto action(TestContext testContext, KubernetesTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        LOGGER.info("Create Kubernetes with name: {}", testDto.getRequest().getName());
+        Log.whenJson(LOGGER, " Kubernetes create request: ", testDto.getRequest());
         try {
             testDto.setResponse(
                     cloudbreakClient.getCloudbreakClient().kubernetesV4Endpoint().post(cloudbreakClient.getWorkspaceId(), testDto.getRequest())
             );
-            Log.logJSON(LOGGER, "Kubernetes created successfully: ", testDto.getRequest());
+            Log.whenJson(LOGGER, "Kubernetes created successfully: ", testDto.getResponse());
         } catch (ProxyMethodInvocationException e) {
-            LOGGER.info("Cannot create Kubernetes, fetch existed one: {}", testDto.getRequest().getName());
+            Log.whenJson(LOGGER, "Cannot create Kubernetes, fetch existed one: ", testDto.getRequest());
+
             testDto.setResponse(
                     cloudbreakClient.getCloudbreakClient().kubernetesV4Endpoint()
                             .get(cloudbreakClient.getWorkspaceId(), testDto.getRequest().getName()));
+            Log.whenJson(LOGGER, "Kubernetes fetched successfully: ", testDto.getResponse());
         }
         if (testDto.getResponse() == null) {
             throw new IllegalStateException("Kubernetes could not be created.");

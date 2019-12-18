@@ -44,7 +44,7 @@ public class StackActionV4 {
         stackTestDto.setResponse(
                 client.getCloudbreakClient().stackV4Endpoint()
                         .get(workspaceId, stackTestDto.getName(), null));
-        Log.logJSON(" stack get response: ", stackTestDto.getResponse());
+        Log.whenJson(" stack get response: ", stackTestDto.getResponse());
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) {

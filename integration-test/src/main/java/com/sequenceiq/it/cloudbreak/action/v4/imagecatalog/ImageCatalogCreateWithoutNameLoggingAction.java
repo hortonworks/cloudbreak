@@ -17,12 +17,12 @@ public class ImageCatalogCreateWithoutNameLoggingAction implements Action<ImageC
 
     @Override
     public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.logJSON(LOGGER, format(" Image catalog post request:%n"), testDto.getRequest());
+        Log.whenJson(LOGGER, format(" Image catalog post request:%n"), testDto.getRequest());
         testDto.setResponse(
                 client.getCloudbreakClient()
                         .imageCatalogV4Endpoint()
                         .create(client.getWorkspaceId(), testDto.getRequest()));
-        Log.logJSON(LOGGER, format(" Image catalog created  successfully:%n"), testDto.getResponse());
+        Log.whenJson(LOGGER, format(" Image catalog created  successfully:%n"), testDto.getResponse());
 
         return testDto;
     }

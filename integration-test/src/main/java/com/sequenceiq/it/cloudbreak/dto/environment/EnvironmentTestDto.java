@@ -39,10 +39,12 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.DeletableEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.search.Searchable;
 
 @Prototype
 public class EnvironmentTestDto
-        extends DeletableEnvironmentTestDto<EnvironmentRequest, DetailedEnvironmentResponse, EnvironmentTestDto, SimpleEnvironmentResponse> {
+        extends DeletableEnvironmentTestDto<EnvironmentRequest, DetailedEnvironmentResponse, EnvironmentTestDto, SimpleEnvironmentResponse>
+        implements Searchable {
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
 
@@ -274,5 +276,10 @@ public class EnvironmentTestDto
         enviornmentChangeCredentialRequest = new EnvironmentChangeCredentialRequest();
         enviornmentChangeCredentialRequest.setCredentialName(name);
         return this;
+    }
+
+    @Override
+    public String getSearchId() {
+        return getName();
     }
 }
