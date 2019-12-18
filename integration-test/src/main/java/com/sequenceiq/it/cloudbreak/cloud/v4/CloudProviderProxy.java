@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.StackV4ParameterBase;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
@@ -89,6 +91,16 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings) {
         return delegate.imageSettings(imageSettings);
+    }
+
+    @Override
+    public String getPreviousPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
+        return delegate.getPreviousPreWarmedImageID(testContext, imageCatalogTestDto, cloudbreakClient);
+    }
+
+    @Override
+    public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
+        return delegate.getLatestBaseImageID(testContext, imageCatalogTestDto, cloudbreakClient);
     }
 
     @Override
@@ -259,5 +271,20 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public CloudFunctionality getCloudFunctionality() {
         return delegate.getCloudFunctionality();
+    }
+
+    @Override
+    public void setImageCatalogName(String name) {
+        delegate.setImageCatalogName(name);
+    }
+
+    @Override
+    public void setImageCatalogUrl(String url) {
+        delegate.setImageCatalogUrl(url);
+    }
+
+    @Override
+    public void setImageId(String id) {
+        delegate.setImageId(id);
     }
 }

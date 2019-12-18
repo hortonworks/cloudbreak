@@ -67,7 +67,7 @@ public class AwsDistroXBaseImageTests extends AbstractE2ETest {
         testContext
                 .given(imageCatalog, ImageCatalogTestDto.class)
                 .when((tc, dto, client) -> {
-                    selectedImageID.set(awsCloudProvider.getLatestAWSBaseImageID(tc, dto, client));
+                    selectedImageID.set(awsCloudProvider.getLatestBaseImageID(tc, dto, client));
                     return dto;
                 })
                 .given(imageSettings, DistroXImageTestDto.class).withImageCatalog(awsCloudProvider.getImageCatalogName()).withImageId(selectedImageID.get())

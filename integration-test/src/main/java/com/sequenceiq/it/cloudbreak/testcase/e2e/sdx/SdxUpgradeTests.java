@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.aws;
+package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static java.lang.String.format;
@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -29,8 +30,8 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.BasicSdxTests;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class AwsSdxUpgradeTests extends BasicSdxTests {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsSdxUpgradeTests.class);
+public class SdxUpgradeTests extends BasicSdxTests {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeTests.class);
 
     @Inject
     private ImageCatalogTestClient imageCatalogTestClient;
@@ -60,9 +61,10 @@ public class AwsSdxUpgradeTests extends BasicSdxTests {
         createEnvironmentForSdx(testContext);
         initializeDefaultBlueprints(testContext);
 
-        awsCloudProvider.setImageCatalogName(imageCatalogName);
-        awsCloudProvider.setImageCatalogUrl(imageCatalogUrl);
-        awsCloudProvider.setImageId(imageId);
+        CloudProvider cloudProvider = testContext.getCloudProvider();
+        cloudProvider.setImageCatalogName(imageCatalogName);
+        cloudProvider.setImageCatalogUrl(imageCatalogUrl);
+        cloudProvider.setImageId(imageId);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -84,7 +86,7 @@ public class AwsSdxUpgradeTests extends BasicSdxTests {
                 .withName(awsCloudProvider.getImageCatalogName()).withUrl(awsCloudProvider.getImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(awsCloudProvider.getImageCatalogName()))
                 .when((tc, dto, client) -> {
-                    selectedImageID.set(awsCloudProvider.getPreviousAWSPreWarmedImageID(tc, dto, client));
+                    selectedImageID.set(testContext.getCloudProvider().getPreviousPreWarmedImageID(tc, dto, client));
                     return dto;
                 })
                 .given(imageSettings, ImageSettingsTestDto.class)

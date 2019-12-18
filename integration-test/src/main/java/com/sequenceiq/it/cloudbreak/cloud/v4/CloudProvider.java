@@ -5,6 +5,8 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.StackV4ParameterBase;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
@@ -45,6 +47,10 @@ public interface CloudProvider {
     ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings);
 
     DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings);
+
+    String getPreviousPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient);
+
+    String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient);
 
     InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template);
 
@@ -113,4 +119,11 @@ public interface CloudProvider {
     StackV4ParameterBase stackParameters();
 
     CloudFunctionality getCloudFunctionality();
+
+    void setImageCatalogName(String name);
+
+    void setImageCatalogUrl(String url);
+
+    void setImageId(String id);
+
 }

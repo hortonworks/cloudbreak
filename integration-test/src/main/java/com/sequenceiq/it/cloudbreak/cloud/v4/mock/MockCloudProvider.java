@@ -14,6 +14,7 @@ import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.MockNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.mock.MockParameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -98,7 +99,12 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public CloudFunctionality getCloudFunctionality() {
-        throw new NotImplementedException("MOCK cloud functionality not implemented yet");
+        return throwNotImplementedException();
+    }
+
+    @Override
+    public void setImageId(String id) {
+        throwNotImplementedException();
     }
 
     @Override
@@ -171,6 +177,20 @@ public class MockCloudProvider extends AbstractCloudProvider {
     public DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings) {
         return imageSettings.withImageId("f6e778fc-7f17-4535-9021-515351df3691")
                 .withImageCatalog(imageSettings.getTestContext().given(ImageSettingsTestDto.class).getName());
+    }
+
+    @Override
+    public String getPreviousPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
+        return throwNotImplementedException();
+    }
+
+    private <T> T throwNotImplementedException() {
+        throw new NotImplementedException(String.format("Not implemented on %s", getCloudPlatform()));
+    }
+
+    @Override
+    public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
+        return throwNotImplementedException();
     }
 
     @Override

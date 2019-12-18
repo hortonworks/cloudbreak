@@ -84,10 +84,9 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
         }
     }
 
-    private String getContainerName(SdxTestDto sdxTestDto) {
-        String fullPath = sdxTestDto.getRequest().getCloudStorage().getBaseLocation();
-        final String containerName = fullPath.substring(fullPath.lastIndexOf("/") + 1, fullPath.lastIndexOf("@"));
-        Log.log(LOGGER, format(" Container Name: [%s] ", containerName));
+    private String getContainerName(String baseLocation) {
+        final String containerName = baseLocation.substring(baseLocation.lastIndexOf("/") + 1, baseLocation.lastIndexOf("@"));
+        Log.log(LOGGER, format(" Container Name: [%]s ", containerName));
         return containerName;
     }
 
@@ -175,8 +174,8 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
         }
     }
 
-    public SdxTestDto cleanupContainer(TestContext testContext, SdxTestDto sdxTestDto, SdxClient sdxClient) {
-        String containerName = getContainerName(sdxTestDto);
+    public void cleanupContainer(String baseLocation) {
+        String containerName = getContainerName(baseLocation);
         CloudBlobContainer cloudBlobContainer = getCloudBlobContainer(containerName);
 
         try {
@@ -194,12 +193,10 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
         } finally {
             createCloudBlobContainer(containerName);
         }
-
-        return sdxTestDto;
     }
 
     public SdxTestDto deleteAllFolders(TestContext testContext, SdxTestDto sdxTestDto, SdxClient sdxClient) {
-        String containerName = getContainerName(sdxTestDto);
+        String containerName = getContainerName(sdxTestDto.getRequest().getCloudStorage().getBaseLocation());
         CloudBlobContainer cloudBlobContainer = getCloudBlobContainer(containerName);
 
         try {
@@ -254,8 +251,8 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
         }
     }
 
-    public SdxTestDto listAllFolders(TestContext testContext, SdxTestDto sdxTestDto, SdxClient sdxClient) {
-        String containerName = getContainerName(sdxTestDto);
+    public void listAllFolders(String baseLocation) {
+        String containerName = getContainerName(baseLocation);
         CloudBlobContainer cloudBlobContainer = getCloudBlobContainer(containerName);
 
         try {
@@ -283,7 +280,5 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
             LOGGER.error("Azure Adls Gen 2 Blob couldn't process the call. So it has been returned with error!", e);
             throw new TestFailException(String.format("Azure Adls Gen 2 Blob couldn't process the call. So it has been returned the error: %s", e));
         }
-
-        return sdxTestDto;
     }
 }

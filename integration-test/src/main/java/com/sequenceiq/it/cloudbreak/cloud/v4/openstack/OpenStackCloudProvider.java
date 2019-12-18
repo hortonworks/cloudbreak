@@ -11,7 +11,9 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.KeystoneV2Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.OpenstackParameters;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
@@ -25,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTem
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -134,7 +137,12 @@ public class OpenStackCloudProvider extends AbstractCloudProvider {
 
     @Override
     public CloudFunctionality getCloudFunctionality() {
-        throw new NotImplementedException("Openstack cloudFunctionality not implemented yet");
+        return throwNotImplementedException();
+    }
+
+    @Override
+    public void setImageId(String id) {
+        throwNotImplementedException();
     }
 
     @Override
@@ -193,5 +201,19 @@ public class OpenStackCloudProvider extends AbstractCloudProvider {
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
         return imageSettings.withImageCatalog(commonCloudProperties().getImageCatalogName());
+    }
+
+    @Override
+    public String getPreviousPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
+        return throwNotImplementedException();
+    }
+
+    private <T> T throwNotImplementedException() {
+        throw new NotImplementedException(String.format("Not implemented on %s", getCloudPlatform()));
+    }
+
+    @Override
+    public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
+        return throwNotImplementedException();
     }
 }

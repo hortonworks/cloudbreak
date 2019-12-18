@@ -14,7 +14,6 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 
 @Service
 public class S3Client {
@@ -51,10 +50,5 @@ public class S3Client {
 
     public String getEUWestS3Uri() {
         return String.join(".", "http://" + getBucketName(), "s3", awsProperties.getRegion(), "amazonaws.com");
-    }
-
-    public String getKeyPrefix(SdxTestDto sdxTestDto) {
-        String fullPath = sdxTestDto.getRequest().getCloudStorage().getBaseLocation();
-        return fullPath.substring(fullPath.lastIndexOf("/") + 1);
     }
 }

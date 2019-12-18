@@ -4,9 +4,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.it.cloudbreak.SdxClient;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.util.aws.amazons3.action.S3ClientActions;
 
 @Component
@@ -17,11 +14,11 @@ public class AmazonS3Util {
     private AmazonS3Util() {
     }
 
-    public SdxTestDto delete(TestContext testContext, SdxTestDto sdxTestDto, SdxClient sdxClient) {
-        return s3ClientActions.deleteNonVersionedBucket(testContext, sdxTestDto, sdxClient);
+    public void deleteNonVersionedBucket(String baseLocation) {
+        s3ClientActions.deleteNonVersionedBucket(baseLocation);
     }
 
-    public SdxTestDto list(TestContext testContext, SdxTestDto sdxTestDto, SdxClient sdxClient) {
-        return s3ClientActions.listBucket(testContext, sdxTestDto, sdxClient);
+    public void listBucket(String baseLocation) {
+        s3ClientActions.listBucket(baseLocation);
     }
 }

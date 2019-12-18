@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.aws;
+package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
 import javax.inject.Inject;
 
@@ -12,13 +12,14 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.ImageValidatorE2ETest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
-public class AwsInternalSdxTests extends ImageValidatorE2ETest {
+public class InternalSdxTests extends ImageValidatorE2ETest {
 
     @Inject
     private SdxTestClient sdxTestClient;
 
     @Override
     protected void setupTest(TestContext testContext) {
+        testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createEnvironmentWithNetworkAndFreeIPA(testContext);

@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.aws;
+package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
@@ -11,11 +11,12 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.BasicSdxTests;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.aws.amazons3.AmazonS3Util;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class AwsSdxCloudStorageTests extends BasicSdxTests {
+public class SdxCloudStorageTests extends BasicSdxTests {
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -29,10 +30,11 @@ public class AwsSdxCloudStorageTests extends BasicSdxTests {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a basic SDX create request with S3 Cloud Storage has been sent",
-            then = "SDX should be available AND deletable along with the created S3 objects"
+            when = "a basic SDX create request with Cloud Storage has been sent",
+            then = "SDX should be available AND deletable along with the created Cloud storage objects"
     )
     public void testSDXWithCloudStorageCanBeCreatedThenDeletedSuccessfully(TestContext testContext) {
+        CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
         String sdx = resourcePropertyProvider().getName();
 
         testContext
@@ -43,11 +45,17 @@ public class AwsSdxCloudStorageTests extends BasicSdxTests {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
                 .then((tc, testDto, client) -> {
-                    return amazonS3Util.list(tc, testDto, client);
+                    cloudFunctionality.cloudStorageListContainer(getBaseLocation(testDto));
+                    return testDto;
                 })
                 .then((tc, testDto, client) -> {
-                    return amazonS3Util.delete(tc, testDto, client);
+                    cloudFunctionality.cloudStorageDeleteContainer(getBaseLocation(testDto));
+                    return testDto;
                 })
                 .validate();
+    }
+
+    private String getBaseLocation(SdxTestDto testDto) {
+        return testDto.getRequest().getCloudStorage().getBaseLocation();
     }
 }

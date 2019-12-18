@@ -109,6 +109,16 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
+    public void setImageCatalogName(String name) {
+        commonCloudProperties().setImageCatalogName(name);
+    }
+
+    @Override
+    public void setImageCatalogUrl(String url) {
+        commonCloudProperties().setImageCatalogUrl(url);
+    }
+
+    @Override
     public final ClusterTestDto cluster(ClusterTestDto clusterTestDto) {
         clusterTestDto.withUserName(commonCloudProperties.getAmbari().getDefaultUser())
                 .withPassword(commonCloudProperties.getAmbari().getDefaultPassword());
