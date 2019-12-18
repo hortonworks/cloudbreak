@@ -16,12 +16,12 @@ public class FreeIPADeleteAction implements Action<FreeIPATestDto, FreeIPAClient
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIPADeleteAction.class);
 
     public FreeIPATestDto action(TestContext testContext, FreeIPATestDto testDto, FreeIPAClient client) throws Exception {
-        Log.log(LOGGER, String.format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, format(" FreeIPA delete:%n"), testDto.getRequest());
+        Log.when(LOGGER, String.format(" FreeIPA crn: %s", testDto.getRequest().getEnvironmentCrn()));
+        Log.whenJson(LOGGER, format(" FreeIPA delete:%n"), testDto.getRequest());
         client.getFreeIpaClient()
                 .getFreeIpaV1Endpoint()
                 .delete(testDto.getRequest().getEnvironmentCrn());
-        Log.log(LOGGER, String.format(" FreeIPA deleted successfully. FreeIPA CRN: %s", testDto.getResponse().getCrn()));
+        Log.when(LOGGER, String.format(" FreeIPA deleted successfully. FreeIPA CRN: %s", testDto.getResponse().getCrn()));
         return testDto;
     }
 }

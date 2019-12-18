@@ -1,16 +1,15 @@
 package com.sequenceiq.it.cloudbreak.v4;
 
-import static com.sequenceiq.it.cloudbreak.log.Log.logJSON;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.MaintenanceModeStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class MaintenanceModePostAction implements Action<StackTestDto, CloudbreakClient> {
 
@@ -38,7 +37,7 @@ public class MaintenanceModePostAction implements Action<StackTestDto, Cloudbrea
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
 
-        logJSON(" Enable Maintenance Mode post request:\n", request);
+        Log.whenJson(" Enable Maintenance Mode post request:\n", request);
 
         client.getCloudbreakClient()
                 .stackV4Endpoint()

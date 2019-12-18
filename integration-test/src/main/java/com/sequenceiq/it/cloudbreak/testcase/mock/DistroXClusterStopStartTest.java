@@ -50,10 +50,10 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "there is a running cloudbreak",
-            when = "a DistroX with Cloudera Manager is created",
+            given = "there is a running DistroX cluster",
+            when = "a scale, start stop called many times",
             then = "the cluster should be available")
-    public void testCreateNewRegularDistroXCluster(MockedTestContext testContext, ITestContext testNgContext) {
+    public void testCreateNewRegularDistroXClusterScaleStartStop(MockedTestContext testContext, ITestContext testNgContext) {
         DistroXStartStopTestParameters params = new DistroXStartStopTestParameters(testNgContext.getCurrentXmlTest().getAllParameters());
         int step = params.getStep();
         int current = step;

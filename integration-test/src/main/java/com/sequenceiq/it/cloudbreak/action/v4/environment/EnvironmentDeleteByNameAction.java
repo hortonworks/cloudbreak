@@ -14,7 +14,7 @@ public class EnvironmentDeleteByNameAction implements Action<EnvironmentTestDto,
         SimpleEnvironmentResponse delete = environmentClient.getEnvironmentClient()
                 .environmentV1Endpoint()
                 .deleteByName(testDto.getName(), false);
-        Log.logJSON("Environment delete response: ", delete);
+        Log.whenJson("Environment delete response: ", delete);
         return testDto;
     }
 }

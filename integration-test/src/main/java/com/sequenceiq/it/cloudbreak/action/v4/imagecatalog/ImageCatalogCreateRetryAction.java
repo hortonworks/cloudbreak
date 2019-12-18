@@ -19,8 +19,7 @@ public class ImageCatalogCreateRetryAction implements Action<ImageCatalogTestDto
 
     @Override
     public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, format(" Image catalog post request with retry: %n"), testDto.getRequest());
+        Log.whenJson(LOGGER, format(" Image catalog post request with retry: %n"), testDto.getRequest());
         ImageCatalogV4Response response = null;
         Exception exc = null;
         int counter = 0;
@@ -31,7 +30,7 @@ public class ImageCatalogCreateRetryAction implements Action<ImageCatalogTestDto
                                 .imageCatalogV4Endpoint()
                                 .create(client.getWorkspaceId(), testDto.getRequest());
             } catch (Exception e) {
-                LOGGER.info("Image catalog could not created - retry");
+                Log.when(LOGGER, "Image catalog could not created - retry");
                 exc = e;
                 Thread.sleep(2000);
                 if (counter++ > 30) {
@@ -44,10 +43,10 @@ public class ImageCatalogCreateRetryAction implements Action<ImageCatalogTestDto
         if (response != null) {
             testDto.setResponse(response);
         } else {
-            throw new TestException(" *****  ", exc);
+            throw new TestException("Image catalog could not created 30 times ", exc);
         }
 
-        Log.logJSON(LOGGER, format(" Image catalog created  successfully:%n"), testDto.getResponse());
+        Log.whenJson(LOGGER, format(" Image catalog created  successfully:%n"), testDto.getResponse());
 
         return testDto;
     }

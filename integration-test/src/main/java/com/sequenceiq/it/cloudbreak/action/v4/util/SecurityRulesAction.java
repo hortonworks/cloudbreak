@@ -7,6 +7,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.securityrule.SecurityRulesTestDto;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class SecurityRulesAction implements Action<SecurityRulesTestDto, CloudbreakClient> {
 
@@ -14,10 +15,8 @@ public class SecurityRulesAction implements Action<SecurityRulesTestDto, Cloudbr
 
     @Override
     public SecurityRulesTestDto action(TestContext testContext, SecurityRulesTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        String logInitMessage = "Obtaining default security rules";
-        LOGGER.info("{}", logInitMessage);
         testDto.setResponse(cloudbreakClient.getCloudbreakClient().utilV4Endpoint().getDefaultSecurityRules());
-        LOGGER.info("{} was successful", logInitMessage);
+        Log.whenJson(LOGGER, "default security rules response:\n", testDto.getResponse());
         return testDto;
     }
 }

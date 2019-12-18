@@ -17,12 +17,12 @@ public class SdxSyncAction implements Action<SdxTestDto, SdxClient> {
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        Log.log(LOGGER, format(" Environment: %s ", testDto.getRequest().getEnvironment()));
-        Log.logJSON(LOGGER, " SDX sync request: ", testDto.getRequest());
+        Log.when(LOGGER, format(" SDX's environment: %s ", testDto.getRequest().getEnvironment()));
+        Log.whenJson(LOGGER, " SDX sync request: ", testDto.getRequest());
         client.getSdxClient()
                 .sdxEndpoint()
                 .sync(testDto.getName());
-        Log.log(LOGGER, " SDX sync have been initiated. ");
+        Log.when(LOGGER, " SDX sync have been initiated. ");
         return testDto;
     }
 }

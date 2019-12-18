@@ -33,16 +33,13 @@ public class StackNodeUnhealthyAction implements Action<StackTestDto, Cloudbreak
 
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.log(LOGGER, String.format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, " Stack unhealthy request:\n", testDto.getRequest());
         FailureReportV4Request failureReport = new FailureReportV4Request();
         failureReport.setFailedNodes(getNodes(getInstanceGroupResponse(testDto)));
+        Log.when(LOGGER, String.format(" Name: %s, failure report: %s", testDto.getRequest().getName(), failureReport));
         CloudbreakClient autoscaleClient = testContext.as(Actor::secondUser).getCloudbreakClient(CloudbreakTest.SECONDARY_ACCESS_KEY);
         autoscaleClient.getCloudbreakClient().autoscaleEndpoint().failureReport(Objects.requireNonNull(testDto.getResponse().getCrn()), failureReport);
-            Log.logJSON(LOGGER, " Stack unhealthy was successful:\n", testDto.getResponse());
-            Log.log(LOGGER, String.format(" crn: %s", testDto.getResponse().getCrn()));
-            return testDto;
-
+        Log.whenJson(LOGGER, " Stack unhealthy was successful:\n", testDto.getResponse());
+        return testDto;
     }
 
     private InstanceGroupV4Response getInstanceGroupResponse(StackTestDto entity) {

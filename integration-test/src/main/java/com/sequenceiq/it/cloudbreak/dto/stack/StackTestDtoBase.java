@@ -98,13 +98,13 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
     public StackTestDtoBase<T> valid() {
         String name = getResourcePropertyProvider().getName();
         withName(name)
-                .withImageSettings(getCloudProvider().imageSettings(getTestContext().given(ImageSettingsTestDto.class)))
-                .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
+                .withImageSettings(getCloudProvider().imageSettings(getTestContext().init(ImageSettingsTestDto.class)))
+                .withPlacement(getTestContext().init(PlacementSettingsTestDto.class))
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()))
-                .withNetwork(getTestContext().given(NetworkV4TestDto.class))
-                .withStackAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
+                .withNetwork(getTestContext().init(NetworkV4TestDto.class))
+                .withStackAuthentication(getCloudProvider().stackAuthentication(init(StackAuthenticationTestDto.class)))
                 .withGatewayPort(getCloudProvider().gatewayPort(this))
-                .withCluster(getTestContext().given(ClusterTestDto.class).withName(name));
+                .withCluster(getTestContext().init(ClusterTestDto.class).withName(name));
         return getCloudProvider().stack(this);
     }
 

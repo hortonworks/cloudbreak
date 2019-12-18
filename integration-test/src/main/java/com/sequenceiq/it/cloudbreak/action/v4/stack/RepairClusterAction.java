@@ -19,16 +19,15 @@ public class RepairClusterAction implements Action<StackTestDto, CloudbreakClien
 
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.log(LOGGER, " Name: " + testDto.getRequest().getName());
         ClusterRepairV4Request request = new ClusterRepairV4Request();
         ClusterRepairNodesV4Request node = new ClusterRepairNodesV4Request();
         node.setIds(List.of(testDto.getInstanceId("master")));
         request.setNodes(node);
-        Log.logJSON(LOGGER, " Cluster repair request:\n", request);
+        Log.whenJson(LOGGER, " Cluster repair request:\n", request);
         client.getCloudbreakClient()
                 .stackV4Endpoint()
                 .repairCluster(client.getWorkspaceId(), testDto.getName(), request);
-        Log.log(LOGGER, " Cluster repair initiated.");
+        Log.when(LOGGER, " Cluster repair initiated.");
 
         return testDto;
     }

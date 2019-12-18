@@ -4,8 +4,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMess
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.UnknownFormatConversionException;
-
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
@@ -152,8 +150,8 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
                 .when(proxyTestClient.create(), key(INVALID_PROXY_NAME))
-                .expect(UnknownFormatConversionException.class,
-                        expectedMessage("Conversion = '|'")
+                .expect(BadRequestException.class,
+                        expectedMessage("The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
                                 .withKey(INVALID_PROXY_NAME))
                 .validate();
     }

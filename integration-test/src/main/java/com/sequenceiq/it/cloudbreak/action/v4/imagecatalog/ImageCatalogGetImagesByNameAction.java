@@ -4,9 +4,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -34,14 +34,14 @@ public class ImageCatalogGetImagesByNameAction implements Action<ImageCatalogTes
 
     @Override
     public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        LOGGER.info("Get images of ImageCatalog within workspace by catalog name: {}", testDto.getRequest().getName());
+        Log.when(LOGGER, "Get Imagecatalog by name: " + testDto.getRequest().getName());
         try {
             ImageCatalogV4Endpoint imageCatalogV4Endpoint = cloudbreakClient
                     .getCloudbreakClient()
                     .imageCatalogV4Endpoint();
 
             testDto.setResponseByProvider(getImagesV4Response(testDto, cloudbreakClient, imageCatalogV4Endpoint));
-            Log.logJSON(LOGGER, "images have been fetched successfully: ", testDto.getRequest());
+            Log.whenJson(LOGGER, "images have been fetched successfully: ", testDto.getRequest());
         } catch (Exception e) {
             LOGGER.warn("Cannot get images of ImageCatalog : {}", testDto.getRequest().getName());
             throw e;

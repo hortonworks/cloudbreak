@@ -14,14 +14,12 @@ public class LdapCreateAction implements Action<LdapTestDto, FreeIPAClient> {
 
     @Override
     public LdapTestDto action(TestContext testContext, LdapTestDto testDto, FreeIPAClient client) throws Exception {
-        Log.log(LOGGER, String.format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, " Ldap post request:\n", testDto.getRequest());
+        Log.whenJson(LOGGER, " Ldap post request:\n", testDto.getRequest());
         testDto.setResponse(
                 client.getFreeIpaClient()
                         .getLdapConfigV1Endpoint()
                         .create(testDto.getRequest()));
-        Log.logJSON(LOGGER, " Ldap was created successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, String.format(" Environment: %s", testDto.getResponse().getEnvironmentCrn()));
+        Log.whenJson(LOGGER, " Ldap was created successfully:\n", testDto.getResponse());
         return testDto;
     }
 }

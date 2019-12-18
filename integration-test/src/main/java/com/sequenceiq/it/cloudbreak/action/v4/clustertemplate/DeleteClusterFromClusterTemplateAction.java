@@ -26,17 +26,11 @@ public class DeleteClusterFromClusterTemplateAction implements Action<ClusterTem
 
     @Override
     public ClusterTemplateTestDto action(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient client) throws Exception {
-        if (testDto.getResponse() == null)  {
-//            Log.logJSON(LOGGER, "Cluster response is null", testDto.getRequest().getStackTemplate());
-            return testDto;
-        }
-//        Log.logJSON(LOGGER, "Stack from template post request:\n", testDto.getRequest().getStackTemplate());
         StackTemplateTestDto stackEntity = testContext.get(stackTemplateKey);
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .delete(client.getWorkspaceId(), stackEntity.getResponse().getName(), false);
-        Log.logJSON(LOGGER, " Stack from template created  successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, "Stack from template ID: " + testDto.getResponse().getId());
+                .delete(client.getWorkspaceId(), stackEntity.getName(), false);
+        Log.whenJson(LOGGER, " Stack from template created  successfully:\n", testDto.getResponse());
         return testDto;
     }
 }

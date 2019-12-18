@@ -35,7 +35,7 @@ public class ChangeImageAction implements Action<StackTestDto, CloudbreakClient>
         ImageCatalogTestDto imageCatalogTestDto = testContext.get(ImageCatalogTestDto.class);
         request.setImageCatalogName(imageCatalogTestDto.getName());
 
-        Log.logJSON(" Enable Maintenance Mode post request:\n", request);
+        Log.whenJson(" Enable Maintenance Mode post request:\n", request);
 
         client.getCloudbreakClient()
                 .stackV4Endpoint()

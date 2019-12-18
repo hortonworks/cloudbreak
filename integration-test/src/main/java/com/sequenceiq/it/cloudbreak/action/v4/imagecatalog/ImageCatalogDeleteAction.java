@@ -16,13 +16,12 @@ public class ImageCatalogDeleteAction implements Action<ImageCatalogTestDto, Clo
 
     @Override
     public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, format(" Image catalog DELETE request:%n"), testDto.getRequest());
+        Log.when(LOGGER, format(" Image catalog DELETE request:%n", testDto.getRequest().getName()));
         testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient()
                         .imageCatalogV4Endpoint()
                         .deleteByName(cloudbreakClient.getWorkspaceId(), testDto.getName()));
-        Log.logJSON(LOGGER, format(" Image catalog has been deleted successfully:%n"), testDto.getResponse());
+        Log.whenJson(LOGGER, format(" Image catalog has been deleted successfully:%n"), testDto.getResponse());
 
         return testDto;
     }

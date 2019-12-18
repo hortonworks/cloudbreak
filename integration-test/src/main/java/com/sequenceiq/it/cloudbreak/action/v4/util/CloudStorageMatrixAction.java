@@ -9,6 +9,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.CloudStorageMatrixTestDto;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class CloudStorageMatrixAction implements Action<CloudStorageMatrixTestDto, CloudbreakClient> {
 
@@ -16,10 +17,8 @@ public class CloudStorageMatrixAction implements Action<CloudStorageMatrixTestDt
 
     @Override
     public CloudStorageMatrixTestDto action(TestContext testContext, CloudStorageMatrixTestDto testDto, CloudbreakClient client) throws Exception {
-        String logInitMessage = "Obtaining cloud storage matrix";
-        LOGGER.info("{}", logInitMessage);
         testDto.setResponses(new HashSet<>(client.getCloudbreakClient().utilV4Endpoint().getCloudStorageMatrix(testDto.getStackVersion()).getResponses()));
-        LOGGER.info("{} was successful", logInitMessage);
+        Log.whenJson(LOGGER, "Cloud storage matrix response:\n", testDto.getResponses());
         return testDto;
     }
 }

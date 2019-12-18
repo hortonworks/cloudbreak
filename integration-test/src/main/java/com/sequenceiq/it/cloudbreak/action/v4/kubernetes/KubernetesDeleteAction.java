@@ -17,13 +17,12 @@ public class KubernetesDeleteAction implements Action<KubernetesTestDto, Cloudbr
 
     @Override
     public KubernetesTestDto action(TestContext testContext, KubernetesTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, " Kubernetes delete request:\n", testDto.getRequest());
+        Log.when(LOGGER, format("Kubernetes delete request: ", testDto.getName()));
         testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient()
                         .kubernetesV4Endpoint()
                         .delete(cloudbreakClient.getWorkspaceId(), testDto.getName()));
-        Log.logJSON(LOGGER, " Kubernetes deleted successfully:\n", testDto.getResponse());
+        Log.whenJson(LOGGER, " Kubernetes deleted successfully:\n", testDto.getResponse());
         return testDto;
     }
 }

@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.action.v4.stack;
 
-import static java.lang.String.format;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,11 +15,10 @@ public class StackStopAction implements Action<StackTestDto, CloudbreakClient> {
 
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, " Stack post request:\n", testDto.getRequest());
+        Log.when(LOGGER, String.format(" Stack stop request: %s", testDto.getRequest().getName()));
         client.getCloudbreakClient().stackV4Endpoint().putStop(client.getWorkspaceId(), testDto.getName());
-        Log.logJSON(LOGGER, " Stack was stopped successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, format(" crn: %s", testDto.getResponse().getCrn()));
+        Log.when(LOGGER, " Stack was stop requested successfully");
+
         return testDto;
     }
 }

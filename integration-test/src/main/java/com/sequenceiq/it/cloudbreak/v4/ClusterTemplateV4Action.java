@@ -41,7 +41,7 @@ public class ClusterTemplateV4Action {
                 client.getCloudbreakClient()
                         .clusterTemplateV4EndPoint()
                         .getByName(workspaceId, clusterTemplateV4Entity.getName()));
-        Log.logJSON(String.format(" get %s cluster template response: ", clusterTemplateV4Entity.getName()),
+        Log.whenJson(String.format(" get %s cluster template response: ", clusterTemplateV4Entity.getName()),
                 new Object[]{clusterTemplateV4Entity.getResponse()});
     }
 

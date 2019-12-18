@@ -17,14 +17,12 @@ public class StackGetAction implements Action<StackTestDto, CloudbreakClient> {
 
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.log(LOGGER, " Name: " + testDto.getRequest().getName());
-        Log.logJSON(LOGGER, " Stack get request:\n", testDto.getRequest());
+        Log.when(LOGGER, "Stack get request: " + testDto.getRequest().getName());
         testDto.setResponse(
                 client.getCloudbreakClient()
                         .stackV4Endpoint()
                         .get(client.getWorkspaceId(), testDto.getName(), new HashSet<>()));
-        Log.logJSON(LOGGER, " Stack get was successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, " CRN: " + testDto.getResponse().getCrn());
+        Log.whenJson(LOGGER, " Stack get was successful:\n", testDto.getResponse());
 
         return testDto;
     }

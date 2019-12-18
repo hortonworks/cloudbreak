@@ -24,7 +24,7 @@ public class DatabaseListAction implements Action<DatabaseTestDto, CloudbreakCli
                 .list(client.getWorkspaceId(), null, Boolean.TRUE)
                 .getResponses();
         testDto.setResponses(responses.stream().collect(Collectors.toSet()));
-        Log.logJSON(LOGGER, " Database listed successfully:\n", testDto.getResponses());
+        Log.whenJson(LOGGER, " Database listed successfully:\n", testDto.getResponses());
         return testDto;
     }
 }

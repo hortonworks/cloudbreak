@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.action.v4.proxy;
 
-import static java.lang.String.format;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,14 +15,12 @@ public class ProxyConfigDeleteAction implements Action<ProxyTestDto, Environment
 
     @Override
     public ProxyTestDto action(TestContext testContext, ProxyTestDto testDto, EnvironmentClient client) throws Exception {
-        Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, " Proxy config delete request:\n", testDto.getRequest());
+        Log.when(LOGGER, " Proxy config delete request: " + testDto.getName());
         testDto.setResponse(
                 client.getEnvironmentClient()
                         .proxyV1Endpoint()
                         .deleteByName(testDto.getName()));
-        Log.logJSON(LOGGER, " Proxy config was deleted successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, format(" CRN: %s", testDto.getResponse().getCrn()));
+        Log.whenJson(LOGGER, " Proxy config was deleted successfully:\n", testDto.getResponse());
         return testDto;
     }
 

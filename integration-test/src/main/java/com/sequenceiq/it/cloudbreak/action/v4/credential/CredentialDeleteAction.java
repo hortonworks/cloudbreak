@@ -15,13 +15,12 @@ public class CredentialDeleteAction implements Action<CredentialTestDto, Environ
 
     @Override
     public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, EnvironmentClient environmentClient) throws Exception {
-        LOGGER.info(String.format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, " Credential delete request:\n", testDto.getRequest());
+        Log.when(LOGGER, " Credential delete request, name:" + testDto.getName());
         testDto.setResponse(
                 environmentClient.getEnvironmentClient()
                         .credentialV1Endpoint()
                         .deleteByName(testDto.getName()));
-        Log.logJSON(LOGGER, " Credential deleted successfully:\n", testDto.getResponse());
+        Log.whenJson(LOGGER, " Credential deleted successfully:\n", testDto.getResponse());
         return testDto;
     }
 }

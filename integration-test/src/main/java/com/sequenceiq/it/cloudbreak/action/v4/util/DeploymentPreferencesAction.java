@@ -7,6 +7,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.DeploymentPreferencesTestDto;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class DeploymentPreferencesAction implements Action<DeploymentPreferencesTestDto, CloudbreakClient> {
 
@@ -14,10 +15,8 @@ public class DeploymentPreferencesAction implements Action<DeploymentPreferences
 
     @Override
     public DeploymentPreferencesTestDto action(TestContext testContext, DeploymentPreferencesTestDto testDto, CloudbreakClient client) throws Exception {
-        String logInitMessage = "Obtaining deployment";
-        LOGGER.info("{}", logInitMessage);
         testDto.setResponse(client.getCloudbreakClient().utilV4Endpoint().deployment());
-        LOGGER.info("{} was successful", logInitMessage);
+        Log.whenJson(LOGGER, "Deployment preferences response:\n", testDto.getResponse());
         return testDto;
     }
 }

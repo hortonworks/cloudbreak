@@ -16,6 +16,6 @@ public class SecurityRulesAction {
 
         Log.log(" get Security Rules to");
         securityRulesEntity.setResponse(client.getCloudbreakClient().utilV4Endpoint().getDefaultSecurityRules());
-        Log.logJSON(" get Security Rules response: ", securityRulesEntity.getResponse());
+        Log.whenJson(" get Security Rules response: ", securityRulesEntity.getResponse());
     }
 }

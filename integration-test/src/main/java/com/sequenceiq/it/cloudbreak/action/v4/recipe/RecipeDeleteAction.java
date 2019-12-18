@@ -17,13 +17,12 @@ public class RecipeDeleteAction implements Action<RecipeTestDto, CloudbreakClien
 
     @Override
     public RecipeTestDto action(TestContext testContext, RecipeTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        Log.log(LOGGER, String.format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, format(" Recipe post request:%n"), testDto.getRequest());
+        Log.when(LOGGER, format(" Recipe delete request:%n", testDto.getName()));
         testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient()
                         .recipeV4Endpoint()
                         .deleteByName(cloudbreakClient.getWorkspaceId(), testDto.getName()));
-        Log.logJSON(LOGGER, format(" Recipe created  successfully:%n"), testDto.getResponse());
+        Log.whenJson(LOGGER, format(" Recipe deleted successfully:%n"), testDto.getResponse());
 
         return testDto;
     }

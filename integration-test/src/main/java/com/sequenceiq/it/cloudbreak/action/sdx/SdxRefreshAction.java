@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.action.sdx;
 
-import static java.lang.String.format;
-
 import java.util.Collections;
 
 import org.slf4j.Logger;
@@ -19,11 +17,10 @@ public class SdxRefreshAction implements Action<SdxTestDto, SdxClient> {
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        Log.log(LOGGER, format(" Refresh SDX: %s ", client.getSdxClient().sdxEndpoint().get(testDto.getName()).getName()));
         testDto.setResponse(
                 client.getSdxClient().sdxEndpoint().getDetail(testDto.getName(), Collections.emptySet())
         );
-        Log.log(LOGGER, " SDX refresh have been initiated. ");
+        Log.whenJson(LOGGER, " SDX get detail response: ", testDto.getResponse());
         return testDto;
     }
 }

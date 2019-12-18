@@ -16,8 +16,8 @@ public class FreeIPAStopAction implements Action<FreeIPATestDto, FreeIPAClient> 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIPAStopAction.class);
 
     public FreeIPATestDto action(TestContext testContext, FreeIPATestDto testDto, FreeIPAClient client) throws Exception {
-        Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, format(" FreeIPA stop request: %n"), testDto.getRequest());
+        Log.when(LOGGER, format(" FreeIPA CRN: %s", testDto.getRequest().getEnvironmentCrn()));
+        Log.whenJson(LOGGER, format(" FreeIPA stop request: %n"), testDto.getRequest());
         client.getFreeIpaClient()
                 .getFreeIpaV1Endpoint()
                 .stop(testDto.getRequest().getEnvironmentCrn());

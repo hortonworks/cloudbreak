@@ -15,13 +15,12 @@ public class DatabaseDeleteAction implements Action<DatabaseTestDto, CloudbreakC
 
     @Override
     public DatabaseTestDto action(TestContext testContext, DatabaseTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.log(LOGGER, String.format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, " Database delete request:\n", testDto.getRequest());
+        Log.when(LOGGER, " Database delete request: " + testDto.getName());
         testDto.setResponse(
                 client.getCloudbreakClient()
                         .databaseV4Endpoint()
                         .delete(client.getWorkspaceId(), testDto.getName()));
-        Log.logJSON(LOGGER, " Database deleted successfully:\n", testDto.getResponse());
+        Log.whenJson(LOGGER, " Database deleted successfully:\n", testDto.getResponse());
         return testDto;
     }
 

@@ -15,7 +15,7 @@ public class EnvironmentChangeCredentialAction implements Action<EnvironmentTest
                         .environmentV1Endpoint()
                         .changeCredentialByEnvironmentName(testDto.getName(), testDto.getEnviornmentChangeCredentialRequest()));
 
-        Log.logJSON("Environment change credential request: ", testDto.getEnviornmentChangeCredentialRequest());
+        Log.whenJson("Environment change credential request: ", testDto.getEnviornmentChangeCredentialRequest());
         return testDto;
     }
 }

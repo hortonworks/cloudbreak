@@ -15,14 +15,12 @@ public class ProxyConfigCreateAction implements Action<ProxyTestDto, Environment
 
     @Override
     public ProxyTestDto action(TestContext testContext, ProxyTestDto testDto, EnvironmentClient client) throws Exception {
-        Log.log(LOGGER, String.format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, " Proxy config post request:\n", testDto.getRequest());
+        Log.whenJson(LOGGER, " Proxy config post request:\n", testDto.getRequest());
         testDto.setResponse(
                 client.getEnvironmentClient()
                         .proxyV1Endpoint()
                         .post(testDto.getRequest()));
-        Log.logJSON(LOGGER, " Proxy config was created successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, String.format(" CRN: %s", testDto.getResponse().getCrn()));
+        Log.whenJson(LOGGER, " Proxy config was created successfully:\n", testDto.getResponse());
         return testDto;
     }
 

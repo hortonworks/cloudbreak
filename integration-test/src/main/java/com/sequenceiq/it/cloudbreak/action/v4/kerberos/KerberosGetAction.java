@@ -16,14 +16,12 @@ public class KerberosGetAction implements Action<KerberosTestDto, FreeIPAClient>
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosGetAction.class);
 
     public KerberosTestDto action(TestContext testContext, KerberosTestDto testDto, FreeIPAClient client) throws Exception {
-        Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, format(" Kerberos get request:%n"), testDto.getRequest());
+        Log.when(LOGGER, format(" Kerberos get request:%n", testDto.getName()));
         testDto.setResponse(
                 client.getFreeIpaClient()
                         .getKerberosConfigV1Endpoint()
                         .describe(testDto.getName()));
-        Log.logJSON(LOGGER, format(" Kerberos get successfully:%n"), testDto.getResponse());
-        Log.log(LOGGER, String.format(" Environment: %s", testDto.getResponse().getEnvironmentCrn()));
+        Log.whenJson(LOGGER, format(" Kerberos get successfully:%n"), testDto.getResponse());
         return testDto;
     }
 }

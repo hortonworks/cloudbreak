@@ -225,6 +225,6 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
 
     @Override
     public String toString() {
-        return super.toString() + "[name: " + getName() + "]";
+        return getClass().getSimpleName() + "[name: " + getName() + "]";
     }
 }

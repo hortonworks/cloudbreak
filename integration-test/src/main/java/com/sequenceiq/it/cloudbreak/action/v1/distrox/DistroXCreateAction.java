@@ -15,13 +15,12 @@ public class DistroXCreateAction implements Action<DistroXTestDto, CloudbreakCli
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.log(LOGGER, " Name: " + testDto.getRequest().getName());
-        Log.logJSON(LOGGER, " Stack post request:\n", testDto.getRequest());
+        Log.whenJson(LOGGER, " Stack post request:\n", testDto.getRequest());
         testDto.setResponse(
                 client.getCloudbreakClient()
                         .distroXV1Endpoint()
                         .post(testDto.getRequest()));
-        Log.logJSON(LOGGER, " Stack created was successfully:\n", testDto.getResponse());
+        Log.whenJson(LOGGER, " Stack created was successful:\n", testDto.getResponse());
         return testDto;
     }
 }

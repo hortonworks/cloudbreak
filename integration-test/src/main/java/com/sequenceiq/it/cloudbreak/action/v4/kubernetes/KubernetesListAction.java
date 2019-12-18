@@ -24,7 +24,7 @@ public class KubernetesListAction implements Action<KubernetesTestDto, Cloudbrea
                 .list(cloudbreakClient.getWorkspaceId())
                 .getResponses();
         testDto.setResponses(responses.stream().collect(Collectors.toSet()));
-        Log.logJSON(LOGGER, " Kubernetes listed successfully:\n", testDto.getResponses());
+        Log.whenJson(LOGGER, " Kubernetes listed successfully:\n", testDto.getResponses());
         return testDto;
     }
 }

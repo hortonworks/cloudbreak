@@ -25,7 +25,7 @@ public class ImageCatalogGetImagesFromDefaultCatalogAction implements Action<Ima
 
     @Override
     public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        LOGGER.info("Get images of ImageCatalog within workspace by catalog name: {}", testDto.getRequest().getName());
+        Log.when(LOGGER, "Get Imagecatalog by platform: " + platform.name());
         try {
             testDto.setResponseByProvider(
                     cloudbreakClient
@@ -33,7 +33,7 @@ public class ImageCatalogGetImagesFromDefaultCatalogAction implements Action<Ima
                             .imageCatalogV4Endpoint()
                             .getImages(cloudbreakClient.getWorkspaceId(), null, platform.name())
             );
-            Log.logJSON(LOGGER, "images have been fetched successfully: ", testDto.getRequest());
+            Log.whenJson(LOGGER, "images have been fetched successfully: ", testDto.getRequest());
         } catch (Exception e) {
             LOGGER.warn("Cannot get images of ImageCatalog : {}", testDto.getRequest().getName());
             throw e;

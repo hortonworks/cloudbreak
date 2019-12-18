@@ -24,7 +24,7 @@ public class CredentialListAction implements Action<CredentialTestDto, Environme
                 .list()
                 .getResponses();
         testDto.setResponses(new HashSet<>(responses));
-        Log.logJSON(LOGGER, " Credential listed successfully:\n", testDto.getResponses());
+        Log.whenJson(LOGGER, " Credential listed successfully:\n", testDto.getResponses());
         return testDto;
     }
 }

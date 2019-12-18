@@ -16,20 +16,21 @@ public class CredentialCreateIfNotExistAction implements Action<CredentialTestDt
 
     @Override
     public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, EnvironmentClient environmentClient) throws Exception {
-        LOGGER.info("Create Credential with name: {}", testDto.getRequest());
+        Log.when(LOGGER, "Credential create request: " + testDto.getRequest());
         try {
             testDto.setResponse(
                     environmentClient.getEnvironmentClient().credentialV1Endpoint().post(testDto.getRequest())
             );
-            Log.logJSON(LOGGER, "Credential created successfully: ", testDto.getRequest());
+            Log.whenJson(LOGGER, "Credential created successfully: ", testDto.getRequest());
         } catch (ProxyMethodInvocationException e) {
-            LOGGER.info("Cannot create Credential, fetch existed one: {}", testDto.getRequest().getName());
+            Log.when(LOGGER, "Cannot create Credential, fetch existed one: " + testDto.getRequest());
+
             testDto.setResponse(
                     environmentClient.getEnvironmentClient().credentialV1Endpoint()
                             .getByName(testDto.getRequest().getName()));
         }
         if (testDto.getResponse() == null) {
-            throw new IllegalStateException("Credential could not be created.");
+            throw new IllegalStateException("Credential could not be created, or could not got with name." + testDto.getName());
         }
         return testDto;
     }

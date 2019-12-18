@@ -14,17 +14,18 @@ public class DatabaseCreateIfNotExistsAction implements Action<DatabaseTestDto, 
 
     @Override
     public DatabaseTestDto action(TestContext testContext, DatabaseTestDto testDto, CloudbreakClient client) throws Exception {
-        LOGGER.info("Create Database with name: {}", testDto.getRequest().getName());
+        Log.whenJson(LOGGER, " Database create request:\n", testDto.getRequest());
         try {
             testDto.setResponse(
                     client.getCloudbreakClient().databaseV4Endpoint().create(client.getWorkspaceId(), testDto.getRequest())
             );
-            Log.logJSON(LOGGER, "Database created successfully: ", testDto.getRequest());
+            Log.whenJson(LOGGER, "Database created successfully: ", testDto.getResponse());
         } catch (Exception e) {
-            LOGGER.info("Cannot create Database, fetch existed one: {}", testDto.getRequest().getName());
+            Log.when(LOGGER, "Cannot create Database, fetch existed one: " + testDto.getRequest().getName());
             testDto.setResponse(
                     client.getCloudbreakClient().databaseV4Endpoint()
                             .get(client.getWorkspaceId(), testDto.getRequest().getName()));
+            Log.whenJson(LOGGER, "Database fetched successfully: ", testDto.getResponse());
         }
         if (testDto.getResponse() == null) {
             throw new IllegalStateException("Database could not be created.");
