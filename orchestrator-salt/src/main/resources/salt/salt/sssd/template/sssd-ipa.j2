@@ -1,5 +1,9 @@
 [sssd]
+{%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" in grains.get('roles', []) %}
+services = nss, pam, sudo
+{% else %}
 services = nss, pam, sudo, ssh
+{% endif %}
 domains = {{ pillar['sssd-ipa']['realm'] }}
 
 [nss]

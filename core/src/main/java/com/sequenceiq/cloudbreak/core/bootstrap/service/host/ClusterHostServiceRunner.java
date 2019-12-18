@@ -180,6 +180,9 @@ public class ClusterHostServiceRunner {
     @Inject
     private VirtualGroupService virtualGroupService;
 
+    @Inject
+    private GrainPropertiesService grainPropertiesService;
+
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, List<String> candidateAddresses) {
         try {
             Set<Node> nodes = stackUtil.collectNodes(stack);
@@ -271,7 +274,7 @@ public class ClusterHostServiceRunner {
 
         decoratePillarWithJdbcConnectors(cluster, servicePillar);
 
-        return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs, cluster));
+        return new SaltConfig(servicePillar, grainPropertiesService.createGrainProperties(gatewayConfigs, cluster));
     }
 
     private void addKerberosConfig(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) throws IOException {
@@ -456,34 +459,6 @@ public class ClusterHostServiceRunner {
     private void decoratePillarWithClouderaManagerSettings(Map<String, SaltPillarProperties> servicePillar) {
         servicePillar.put("cloudera-manager-settings", new SaltPillarProperties("/cloudera-manager/settings.sls",
                 singletonMap("cloudera-manager", singletonMap("settings", singletonMap("heartbeat_interval", cmHeartbeatInterval)))));
-    }
-
-    private Map<String, Map<String, String>> createGrainProperties(Iterable<GatewayConfig> gatewayConfigs, Cluster cluster) {
-        Map<String, Map<String, String>> grainProperties = new HashMap<>();
-        for (GatewayConfig gatewayConfig : gatewayConfigs) {
-            Map<String, String> hostGrain = new HashMap<>();
-            hostGrain.put("gateway-address", gatewayConfig.getPublicAddress());
-            grainProperties.put(gatewayConfig.getHostname(), hostGrain);
-        }
-        addNameNodeRoleForHosts(grainProperties, cluster);
-        addKnoxRoleForHosts(grainProperties, cluster);
-        return grainProperties;
-    }
-
-    private void addNameNodeRoleForHosts(Map<String, Map<String, String>> grainProperties, Cluster cluster) {
-        Map<String, List<String>> nameNodeServiceLocations = getComponentLocationByHostname(cluster, ExposedService.NAMENODE.getServiceName());
-        nameNodeServiceLocations.getOrDefault(ExposedService.NAMENODE.getServiceName(), List.of())
-                .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put("roles", "namenode"));
-    }
-
-    private void addKnoxRoleForHosts(Map<String, Map<String, String>> grainProperties, Cluster cluster) {
-        Map<String, List<String>> knoxServiceLocations = getComponentLocationByHostname(cluster, "KNOX_GATEWAY");
-        knoxServiceLocations.getOrDefault("KNOX_GATEWAY", List.of())
-                .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put("roles", "knox"));
-    }
-
-    private Map<String, List<String>> getComponentLocationByHostname(Cluster cluster, String componentName) {
-        return componentLocator.getComponentLocationByHostname(cluster, List.of(componentName));
     }
 
     private void saveCustomNameservers(Stack stack, KerberosConfig kerberosConfig, Map<String, SaltPillarProperties> servicePillar) {

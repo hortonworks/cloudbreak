@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.domain.stack.instance;
 
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,6 +22,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
@@ -28,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.CloudIdentityType;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -35,6 +40,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
         attributeNodes = @NamedAttributeNode("instanceMetaData"))
 @Entity
 public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup> {
+
+    public static final String IDENTITY_TYPE_ATTRIBUTE = "identityType";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "instancegroup_generator")
@@ -162,6 +169,22 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     public void setAttributes(Json attributes) {
         this.attributes = attributes;
+    }
+
+    public Optional<CloudIdentityType> getCloudIdentityType() {
+        if (attributes != null && StringUtils.isNotEmpty(attributes.getValue())) {
+            Map<String, Object> attributeMap = attributes.getMap();
+            if (attributeMap.containsKey(IDENTITY_TYPE_ATTRIBUTE)) {
+                return Optional.of(CloudIdentityType.valueOf(attributeMap.get(IDENTITY_TYPE_ATTRIBUTE).toString()));
+            }
+        }
+        return Optional.empty();
+    }
+
+    public void setCloudIdentityType(CloudIdentityType cloudIdentityType) {
+        Map<String, Object> attributeMap = attributes.getMap();
+        attributeMap.put(InstanceGroup.IDENTITY_TYPE_ATTRIBUTE, cloudIdentityType);
+        attributes = new Json(attributeMap);
     }
 
     @SuppressFBWarnings("EQ_COMPARETO_USE_OBJECT_EQUALS")

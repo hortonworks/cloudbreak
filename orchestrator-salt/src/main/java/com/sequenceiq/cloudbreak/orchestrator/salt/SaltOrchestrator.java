@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.GrainProperties;
 import com.sequenceiq.cloudbreak.orchestrator.model.KeytabModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
@@ -427,14 +428,16 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
-    private void uploadGrains(Set<Node> allNodes, Map<String, Map<String, String>> grainsProperties, ExitCriteriaModel exitModel, SaltConnector sc)
+    private void uploadGrains(Set<Node> allNodes, List<GrainProperties> grainsProperties, ExitCriteriaModel exitModel, SaltConnector sc)
             throws Exception {
         if (!grainsProperties.isEmpty()) {
-            for (Entry<String, Map<String, String>> hostGrains : grainsProperties.entrySet()) {
-                for (Entry<String, String> hostGrain : hostGrains.getValue().entrySet()) {
-                    LOGGER.debug("upload grains to host: " + hostGrain);
-                    runSaltCommand(sc, new GrainAddRunner(Collections.singleton(hostGrains.getKey()), allNodes, hostGrain.getKey(), hostGrain.getValue()
-                    ), exitModel);
+            for (GrainProperties properties : grainsProperties) {
+                for (Entry<String, Map<String, String>> hostGrains : properties.getProperties().entrySet()) {
+                    for (Entry<String, String> hostGrain : hostGrains.getValue().entrySet()) {
+                        LOGGER.debug("upload grains to host: " + hostGrain);
+                        runSaltCommand(sc, new GrainAddRunner(Collections.singleton(hostGrains.getKey()), allNodes, hostGrain.getKey(), hostGrain.getValue()
+                        ), exitModel);
+                    }
                 }
             }
         }
