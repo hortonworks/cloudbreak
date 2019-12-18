@@ -1,0 +1,50 @@
+{%- from 'fluent/settings.sls' import fluent with context %}
+#!/bin/sh
+
+function install_plugin() {
+  local plugin=$1
+  local custom_repo=$2
+  local version=$3
+
+  install_command="/opt/td-agent/embedded/bin/fluent-gem install ${plugin}"
+  if [[ "${custom_repo}" == "true" ]]; then
+     install_command="${install_command} -s  {{ fluent.clouderaPublicGemRepo }}"
+  fi
+
+  if [[ ! -z "${version}" ]]; then
+     install_command="${install_command} -v ${version}"
+     /opt/td-agent/embedded/bin/fluent-gem uninstall "${plugin}"
+  fi
+  echo "Run install command: ${install_command}"
+  command_result=$(${install_command})
+  echo "Install ${plugin} command output: ${command_result}"
+}
+
+function check_and_install_plugin() {
+  local plugin=$1
+  local custom_repo=$2
+  local version=$3
+  check_command="/opt/td-agent/embedded/bin/fluent-gem list -i ${plugin}"
+  if [[ ! -z "${version}" ]]; then
+    check_command="$check_command -v ${version}"
+    echo "Checking plugin ${plugin} with the right version ${version}"
+  fi
+  echo "Run check command: $check_command"
+  local result=$($check_command)
+  echo "Check ${plugin} command output: $result"
+  if [[ "$result" == "false" ]]; then
+    echo "Plugin ${plugin} does not exist, installing it..."
+    install_plugin "${plugin}" "${custom_repo}" "${version}"
+  else
+    echo "Plugin ${plugin} exists."
+  fi
+}
+
+function main() {
+  check_and_install_plugin "fluent-plugin-azurestorage" "true" "{{ fluent.clouderaAzurePluginVersion }}"
+  check_and_install_plugin "fluent-plugin-azurestorage-gen2" "false" "{{ fluent.clouderaAzureGen2PluginVersion }}"
+  check_and_install_plugin "fluent-plugin-databus" "true" "{{ fluent.clouderaDatabusPluginVersion }}"
+  check_and_install_plugin "fluent-plugin-detect-exceptions" "false" ""
+}
+
+main ${1+"$@"}

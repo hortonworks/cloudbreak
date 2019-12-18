@@ -51,7 +51,7 @@
 <match {{fluent.providerPrefix}}.*>
   @type copy
   <store ignore_error>
-    @type azurestorage
+    @type azurestorage_gen2
 
     azure_storage_account    {{fluent.azureStorageAccount}}
     azure_container          {{fluent.azureContainer}}
@@ -60,7 +60,6 @@
 {% else %}
     azure_storage_access_key {{fluent.azureStorageAccessKey}}
 {% endif %}
-    azure_storage_type       blob
     store_as                 gzip
     path                     "{{fluent.logFolderName}}/{{fluent.serviceLogPathSuffix}}"
     azure_object_key_format  %{path}-%{index}.%{file_extension}
@@ -71,7 +70,7 @@
       path /var/log/td-agent/{{fluent.providerPrefix}}
       timekey {{fluent.partitionIntervalMin}}m
       timekey_wait 0s
-      chunk_limit_size 256m
+      chunk_limit_size 60m
       flush_at_shutdown true
     </buffer>
     utc
@@ -81,7 +80,7 @@
 <match {{fluent.providerPrefix}}_CM_COMMAND.**>
   @type copy
   <store ignore_error>
-    @type azurestorage
+    @type azurestorage_gen2
 
     azure_storage_account    {{fluent.azureStorageAccount}}
     azure_container          {{fluent.azureContainer}}
@@ -90,7 +89,6 @@
 {% else %}
     azure_storage_access_key {{fluent.azureStorageAccessKey}}
 {% endif %}
-    azure_storage_type       blob
     store_as                 gzip
     path                     "{{fluent.logFolderName}}/{{fluent.cmCommandLogPathSuffix}}"
     azure_object_key_format  %{path}-%{index}.%{file_extension}
@@ -101,7 +99,7 @@
       path /var/log/td-agent/{{fluent.providerPrefix}}_CM_COMMAND
       timekey {{fluent.partitionIntervalMin}}m
       timekey_wait 0s
-      chunk_limit_size 256m
+      chunk_limit_size 60m
       flush_at_shutdown true
     </buffer>
     utc
