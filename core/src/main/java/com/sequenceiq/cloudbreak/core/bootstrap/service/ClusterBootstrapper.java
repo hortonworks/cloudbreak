@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -35,7 +36,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorRes
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;

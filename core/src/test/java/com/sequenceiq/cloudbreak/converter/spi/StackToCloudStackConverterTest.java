@@ -133,7 +133,7 @@ public class StackToCloudStackConverterTest {
     private CmTemplateProcessor cmTemplateProcessor;
 
     @Mock
-    private CloudFileSystemViewBuilder cloudFileSystemViewBuilder;
+    private CloudFileSystemViewProvider cloudFileSystemViewProvider;
 
     @Before
     public void setUp() {
@@ -145,7 +145,7 @@ public class StackToCloudStackConverterTest {
         when(cluster.getExtendedBlueprintText()).thenReturn(BLUEPRINT_TEXT);
         when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         when(cmTemplateProcessor.getComponentsByHostGroup()).thenReturn(Mockito.mock(Map.class));
-        when(cloudFileSystemViewBuilder.build(any(), any(), any())).thenReturn(Optional.empty());
+        when(cloudFileSystemViewProvider.getCloudFileSystemView(any(), any(), any())).thenReturn(Optional.empty());
     }
 
     @Test

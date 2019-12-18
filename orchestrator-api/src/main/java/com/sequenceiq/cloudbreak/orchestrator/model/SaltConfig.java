@@ -1,23 +1,25 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SaltConfig {
     private final Map<String, SaltPillarProperties> servicePillarConfig;
 
-    private final Map<String, Map<String, String>> grainsProperties;
+    private final List<GrainProperties> grainsProperties;
 
     public SaltConfig() {
         servicePillarConfig = new HashMap<>();
-        grainsProperties = new HashMap<>();
+        grainsProperties = new ArrayList<>();
     }
 
     public SaltConfig(Map<String, SaltPillarProperties> servicePillarConfig) {
-        this(servicePillarConfig, new HashMap<>());
+        this(servicePillarConfig, new ArrayList<>());
     }
 
-    public SaltConfig(Map<String, SaltPillarProperties> servicePillarConfig, Map<String, Map<String, String>> grainsProperties) {
+    public SaltConfig(Map<String, SaltPillarProperties> servicePillarConfig, List<GrainProperties> grainsProperties) {
         this.servicePillarConfig = servicePillarConfig;
         this.grainsProperties = grainsProperties;
     }
@@ -26,7 +28,7 @@ public class SaltConfig {
         return servicePillarConfig;
     }
 
-    public Map<String, Map<String, String>> getGrainsProperties() {
+    public List<GrainProperties> getGrainsProperties() {
         return grainsProperties;
     }
 }

@@ -144,7 +144,6 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         } else {
             multideleteByCrn(multiDeleteRequest, forced);
         }
-
     }
 
     private void validateMultidelete(DistroXMultiDeleteV1Request multiDeleteRequest) {
