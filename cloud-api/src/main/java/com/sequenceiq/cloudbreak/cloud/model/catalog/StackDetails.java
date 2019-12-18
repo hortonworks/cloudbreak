@@ -16,14 +16,18 @@ public class StackDetails {
 
     private final List<Mpack> mpackList;
 
+    private final String stackBuildNumber;
+
     @JsonCreator
     public StackDetails(
             @JsonProperty(value = "version", required = true) String version,
             @JsonProperty(value = "repo", required = true) StackRepoDetails repo,
-            @JsonProperty("mpacks") List<Mpack> mpackList) {
+            @JsonProperty("mpacks") List<Mpack> mpackList,
+            @JsonProperty("build-number") String stackBuildNumber) {
         this.version = version;
         this.repo = repo;
         this.mpackList = mpackList == null ? Collections.emptyList() : mpackList;
+        this.stackBuildNumber = stackBuildNumber;
     }
 
     public String getVersion() {
@@ -36,5 +40,9 @@ public class StackDetails {
 
     public List<Mpack> getMpackList() {
         return mpackList;
+    }
+
+    public String getStackBuildNumber() {
+        return stackBuildNumber;
     }
 }

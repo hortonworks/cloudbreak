@@ -188,6 +188,7 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
             json.setRepository(new HashMap<>());
         }
         json.setImageSetsByProvider(new HashMap<>(source.getImageSetsByProvider()));
+        json.setCmBuildNumber(source.getCmBuildNumber());
     }
 
     private BaseStackDetailsV4Response convertStackDetailsToJson(StackDetails stackDetails, String osType, StackType stackType) {
@@ -202,6 +203,7 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         ClouderaManagerStackDetailsV4Response json = new ClouderaManagerStackDetailsV4Response();
         json.setVersion(stackDetails.getVersion());
         json.setRepository(convertClouderaManagerStackRepoDetailsToJson(stackDetails.getRepo()));
+        json.setStackBuildNumber(stackDetails.getStackBuildNumber());
         return json;
     }
 

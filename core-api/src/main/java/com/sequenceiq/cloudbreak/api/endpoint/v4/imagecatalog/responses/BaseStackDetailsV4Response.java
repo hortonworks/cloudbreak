@@ -10,11 +10,22 @@ public class BaseStackDetailsV4Response implements JsonEntity {
     @JsonProperty
     private String version;
 
+    @JsonProperty
+    private String stackBuildNumber;
+
     public String getVersion() {
         return version;
     }
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getStackBuildNumber() {
+        return stackBuildNumber;
+    }
+
+    public void setStackBuildNumber(String stackBuildNumber) {
+        this.stackBuildNumber = stackBuildNumber;
     }
 }

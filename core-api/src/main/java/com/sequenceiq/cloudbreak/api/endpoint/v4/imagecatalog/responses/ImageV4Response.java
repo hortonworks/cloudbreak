@@ -39,6 +39,9 @@ public class ImageV4Response implements JsonEntity {
     @JsonProperty("version")
     private String version;
 
+    @JsonProperty("cmBuildNumber")
+    private String cmBuildNumber;
+
     @JsonProperty("repository")
     private Map<String, String> repository;
 
@@ -149,5 +152,13 @@ public class ImageV4Response implements JsonEntity {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public String getCmBuildNumber() {
+        return cmBuildNumber;
+    }
+
+    public void setCmBuildNumber(String cmBuildNumber) {
+        this.cmBuildNumber = cmBuildNumber;
     }
 }
