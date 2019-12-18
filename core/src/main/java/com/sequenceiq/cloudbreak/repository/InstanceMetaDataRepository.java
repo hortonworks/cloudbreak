@@ -83,9 +83,6 @@ public interface InstanceMetaDataRepository extends DisabledBaseRepository<Insta
     Set<StackInstanceCount> countByWorkspaceId(@Param("id") Long id, @Param("environmentCrn") String environmentCrn,
             @Param("stackTypes") List<StackType> stackTypes);
 
-    @Query("SELECT i FROM InstanceMetaData i ")
-    Set<InstanceMetaData> findAllRequestedByStackId(@Param("id") Long stackId);
-
     @CheckPermissionsByWorkspaceId
     @Query("SELECT s.id as stackId, COUNT(i) as instanceCount "
             + "FROM InstanceMetaData i JOIN i.instanceGroup ig JOIN ig.stack s WHERE s.workspace.id= :id AND i.instanceStatus = 'SERVICES_UNHEALTHY' "
