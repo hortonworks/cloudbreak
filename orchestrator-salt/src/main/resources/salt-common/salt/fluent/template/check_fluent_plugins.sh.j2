@@ -43,6 +43,7 @@ function check_and_install_plugin() {
 function main() {
   {% if fluent.platform == 'AZURE' %}
   check_and_install_plugin "fluent-plugin-azurestorage" "true" "{{ fluent.clouderaAzurePluginVersion }}"
+  check_and_install_plugin "fluent-plugin-azurestorage-gen2" "false" "{{ fluent.clouderaAzureGen2PluginVersion }}"
   {% endif %}
   check_and_install_plugin "fluent-plugin-databus" "true" "{{ fluent.clouderaDatabusPluginVersion }}"
   check_and_install_plugin "fluent-plugin-detect-exceptions" "false" ""

@@ -69,6 +69,7 @@ install_fluentd_plugins:
       - /opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-databus -v {{ fluent.clouderaDatabusPluginVersion }}
       {% if fluent.platform == 'AZURE' %}
       - /opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-azurestorage -v {{ fluent.clouderaAzurePluginVersion }} -s {{ fluent.clouderaPublicGemRepo }}
+      - /opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-azurestorage-gen2 -v {{ fluent.clouderaAzureGen2PluginVersion }}
       {% endif %}
     - onlyif: test -d /opt/td-agent/embedded/bin/
 {% endif %}
