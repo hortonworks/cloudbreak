@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrenew.ClusterCertificateRenewEvent.CLUSTER_CERTIFICATE_REISSUE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
@@ -276,6 +277,11 @@ public class ReactorFlowManager {
     public void cancelRunningFlows(Long resourceId) {
         StackEvent cancelEvent = new StackEvent(Flow2Handler.FLOW_CANCEL, resourceId);
         reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(createEventParameters(resourceId), cancelEvent));
+    }
+
+    public void triggerClusterCertificationRenewal(Long stackId) {
+        String selector = CLUSTER_CERTIFICATE_REISSUE_EVENT.event();
+        notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
     private void notify(Long stackId, String selector, Acceptable acceptable) {

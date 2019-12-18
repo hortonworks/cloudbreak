@@ -36,7 +36,9 @@ public class DistroXV1RequestToCreateAWSClusterRequestConverter {
         request.setEnvironmentName(source.getEnvironmentName());
         request.setImage(convertImageRequest(source.getImage()));
         request.setInstanceGroups(convertInstanceGroups(source.getInstanceGroups()));
-        request.setSubnetId(source.getNetwork().getAws().getSubnetId());
+        if (source.getNetwork() != null && source.getNetwork().getAws() != null) {
+            request.setSubnetId(source.getNetwork().getAws().getSubnetId());
+        }
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         return request;
     }

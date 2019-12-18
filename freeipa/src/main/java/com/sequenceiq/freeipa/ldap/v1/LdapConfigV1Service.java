@@ -182,7 +182,7 @@ public class LdapConfigV1Service {
                 Optional<User> existinguser = freeIpaClient.userFind(bindUser);
                 User user = existinguser.isPresent() ? existinguser.get() : freeIpaClient.userAdd(bindUser, "service", "account");
                 String password = FreeIpaPasswordUtil.generatePassword();
-                freeIpaClient.userSetPassword(user.getUid(), password);
+                freeIpaClient.userSetPasswordWithExpiration(user.getUid(), password, Optional.empty());
                 ldapConfig = ldapConfigRegisterService.createLdapConfig(stack.get().getId(), user.getDn(), password, clusterName);
             }
             return convertLdapConfigToDescribeLdapConfigResponse(ldapConfig);

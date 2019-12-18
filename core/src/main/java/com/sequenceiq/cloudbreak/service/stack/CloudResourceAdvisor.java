@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -66,7 +67,7 @@ public class CloudResourceAdvisor {
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
     public PlatformRecommendation createForBlueprint(Long workspaceId, String blueprintName, String credentialName,
-        String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
+            String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
         Credential credential = credentialClientService.getByName(credentialName);
         String cloudPlatform = credential.cloudPlatform();
         Map<String, VmType> vmTypesByHostGroup = new HashMap<>();
@@ -102,7 +103,12 @@ public class CloudResourceAdvisor {
         }
         VmRecommendations recommendations = cloudParameterService.getRecommendation(cloudPlatform);
 
-        Set<VmType> availableVmTypes = vmTypes.getCloudVmResponses().get(availabilityZone);
+        Set<VmType> availableVmTypes = null;
+        if (StringUtils.isNotBlank(availabilityZone)) {
+            availableVmTypes = vmTypes.getCloudVmResponses().get(availabilityZone);
+        } else if (vmTypes.getCloudVmResponses() != null && !vmTypes.getCloudVmResponses().isEmpty()) {
+            availableVmTypes = vmTypes.getCloudVmResponses().values().iterator().next();
+        }
         if (availableVmTypes == null) {
             availableVmTypes = Collections.emptySet();
         }
@@ -182,7 +188,12 @@ public class CloudResourceAdvisor {
     }
 
     private VmType getDefaultVmType(String availabilityZone, CloudVmTypes vmtypes) {
-        VmType vmType = vmtypes.getDefaultCloudVmResponses().get(availabilityZone);
+        VmType vmType = null;
+        if (StringUtils.isNotBlank(availabilityZone)) {
+            vmtypes.getDefaultCloudVmResponses().get(availabilityZone);
+        } else if (vmtypes.getDefaultCloudVmResponses() != null && !vmtypes.getDefaultCloudVmResponses().isEmpty()) {
+            vmType = vmtypes.getDefaultCloudVmResponses().values().iterator().next();
+        }
         if (vmType == null || Strings.isNullOrEmpty(vmType.value())) {
             return null;
         }

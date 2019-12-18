@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -8,12 +9,16 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
@@ -40,7 +45,13 @@ import com.sequenceiq.freeipa.util.CrnService;
 @Service
 public class PasswordService {
 
+    @VisibleForTesting
+    static final String INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PasswordService.class);
+
+    @Inject
+    private Clock clock;
 
     @Inject
     private StackService stackService;
@@ -95,9 +106,11 @@ public class PasswordService {
             MDCBuilder.addRequestId(requestId.orElse(UUID.randomUUID().toString()));
             String userId = getUserIdFromUserCrn(actorCrn, userCrn);
 
+            Optional<Instant> expirationInstant = calculateExpirationTime(actorCrn, accountId);
+
             List<SetPasswordRequest> requests = new ArrayList<>();
             for (Stack stack : stacks) {
-                requests.add(triggerSetPassword(stack, stack.getEnvironmentCrn(), userId, password));
+                requests.add(triggerSetPassword(stack, stack.getEnvironmentCrn(), userId, password, expirationInstant));
             }
 
             List<SuccessDetails> success = new ArrayList<>();
@@ -124,6 +137,25 @@ public class PasswordService {
         }
     }
 
+    @VisibleForTesting
+    Optional<Instant> calculateExpirationTime(String actorCrn, String accountId) {
+        LOGGER.debug("calculating expiration time for password in account {}", accountId);
+        UserManagementProto.Account account = umsClient.getAccountDetails(INTERNAL_ACTOR_CRN, accountId, MDCUtils.getRequestId());
+        if (account.hasPasswordPolicy()) {
+            long maxLifetime = account.getPasswordPolicy().getWorkloadPasswordMaxLifetime();
+            if (maxLifetime != 0L) {
+                LOGGER.debug("Calculating password expiration by adding lifetime '{}' to current time", maxLifetime);
+                return Optional.of(clock.getCurrentInstant().plusMillis(maxLifetime));
+            } else {
+                LOGGER.debug("Password policy lifetime is {}. Using max expiration time", maxLifetime);
+                return Optional.empty();
+            }
+        } else {
+            LOGGER.debug("Account {} does not have a password policy. Using max expiration time for password", accountId);
+            return Optional.empty();
+        }
+    }
+
     private String getUserIdFromUserCrn(String actorCrn, String userCrn) {
         Crn crn = Crn.safeFromString(userCrn);
         switch (crn.getResourceType()) {
@@ -136,8 +168,8 @@ public class PasswordService {
         }
     }
 
-    private SetPasswordRequest triggerSetPassword(Stack stack, String environment, String username, String password) {
-        SetPasswordRequest request = new SetPasswordRequest(stack.getId(), environment, username, password);
+    private SetPasswordRequest triggerSetPassword(Stack stack, String environment, String username, String password, Optional<Instant> expirationInstant) {
+        SetPasswordRequest request = new SetPasswordRequest(stack.getId(), environment, username, password, expirationInstant);
         freeIpaFlowManager.notify(request);
         return request;
     }

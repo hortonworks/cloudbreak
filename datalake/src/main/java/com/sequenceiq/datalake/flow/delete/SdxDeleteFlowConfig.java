@@ -13,9 +13,10 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class SdxDeleteFlowConfig extends AbstractFlowConfiguration<SdxDeleteState, SdxDeleteEvent> {
+public class SdxDeleteFlowConfig extends AbstractFlowConfiguration<SdxDeleteState, SdxDeleteEvent> implements RetryableFlowConfiguration<SdxDeleteEvent> {
 
     private static final List<Transition<SdxDeleteState, SdxDeleteEvent>> TRANSITIONS = new Transition.Builder<SdxDeleteState, SdxDeleteEvent>()
             .defaultFailureEvent(SdxDeleteEvent.SDX_DELETE_FAILED_EVENT)
@@ -70,5 +71,10 @@ public class SdxDeleteFlowConfig extends AbstractFlowConfiguration<SdxDeleteStat
     @Override
     protected FlowEdgeConfig<SdxDeleteState, SdxDeleteEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public SdxDeleteEvent getFailHandledEvent() {
+        return SdxDeleteEvent.SDX_DELETE_FAILED_HANDLED_EVENT;
     }
 }

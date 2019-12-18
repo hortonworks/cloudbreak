@@ -165,8 +165,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     public PlatformRecommendation getRecommendation(Long workspaceId, String blueprintName, String credentialName,
         String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
-        if (!ObjectUtils.allNotNull(region, availabilityZone)) {
-            throw new BadRequestException("region and availabilityZone cannot be null");
+        if (!ObjectUtils.allNotNull(region)) {
+            throw new BadRequestException("region cannot be null");
         }
         return cloudResourceAdvisor.createForBlueprint(workspaceId, blueprintName, credentialName, region, platformVariant, availabilityZone, cdpResourceType);
     }

@@ -245,6 +245,10 @@ public enum ResourceEvent {
     CLUSTER_MANAGER_CLUSTER_SERVICES_STARTED("cluster.ambari.cluster.services.started"),
     CLUSTER_REMOVING_NODE_FROM_HOSTGROUP("cluster.removing.node.from.hostgroup"),
     CLUSTER_FORCE_REMOVING_NODE_FROM_HOSTGROUP("cluster.force.removing.node.from.hostgroup"),
+    CLUSTER_CERTIFICATE_REISSUE("cluster.certificate.reissue"),
+    CLUSTER_CERTIFICATE_REDEPLOY("cluster.certificate.redeploy"),
+    CLUSTER_CERTIFICATE_RENEWAL_FINISHED("cluster.certificate.renewal.finished"),
+    CLUSTER_CERTIFICATE_RENEWAL_FAILED("cluster.certificate.renewal.failed"),
 
     FLOW_STACK_METADATA_COLLECTED("stack.metadata.collected"),
     FLOW_STACK_PROVISIONED("flow.stack.provisioned"),

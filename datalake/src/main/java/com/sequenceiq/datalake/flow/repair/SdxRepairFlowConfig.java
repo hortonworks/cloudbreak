@@ -12,9 +12,10 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class SdxRepairFlowConfig extends AbstractFlowConfiguration<SdxRepairState, SdxRepairEvent> {
+public class SdxRepairFlowConfig extends AbstractFlowConfiguration<SdxRepairState, SdxRepairEvent> implements RetryableFlowConfiguration<SdxRepairEvent> {
 
     private static final List<Transition<SdxRepairState, SdxRepairEvent>> TRANSITIONS = new Transition.Builder<SdxRepairState, SdxRepairEvent>()
             .defaultFailureEvent(SdxRepairEvent.SDX_REPAIR_FAILED_EVENT)
@@ -64,5 +65,10 @@ public class SdxRepairFlowConfig extends AbstractFlowConfiguration<SdxRepairStat
     @Override
     protected FlowEdgeConfig<SdxRepairState, SdxRepairEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public SdxRepairEvent getFailHandledEvent() {
+        return SdxRepairEvent.SDX_REPAIR_FAILED_HANDLED_EVENT;
     }
 }

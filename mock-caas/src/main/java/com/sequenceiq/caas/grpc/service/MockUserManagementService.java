@@ -57,6 +57,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Polic
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Role;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RoleAssignment;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadPasswordPolicy;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
@@ -78,6 +79,9 @@ import io.grpc.stub.StreamObserver;
 
 @Service
 public class MockUserManagementService extends UserManagementGrpc.UserManagementImplBase {
+
+    @VisibleForTesting
+    static final long PASSWORD_LIFETIME = 31449600000L;
 
     private static final String ENV_ACCESS_RIGHT = "environments/accessEnvironment";
 
@@ -110,8 +114,6 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     private static final String CDP_AZURE = "CDP_AZURE";
 
     private static final String CDP_AUTOMATIC_USERSYNC_POLLER = "CDP_AUTOMATIC_USERSYNC_POLLER";
-
-    private static final long PASSWORD_EXPIRATION_DURATION = 31449600000L;
 
     @Inject
     private JsonUtil jsonUtil;
@@ -158,6 +160,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private GetActorWorkloadCredentialsResponse actorWorkloadCredentialsResponse;
 
+    private UserManagementProto.WorkloadPasswordPolicy workloadPasswordPolicy;
+
     @PostConstruct
     public void init() {
         this.cbLicense = getLicense();
@@ -179,6 +183,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                 });
 
         initializeActorWorkloadCredentials();
+        initializeWorkloadPasswordPolicy();
     }
 
     @VisibleForTesting
@@ -192,6 +197,13 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @VisibleForTesting
+    void initializeWorkloadPasswordPolicy() {
+        WorkloadPasswordPolicy.Builder builder = WorkloadPasswordPolicy.newBuilder();
+        builder.setWorkloadPasswordMaxLifetime(PASSWORD_LIFETIME);
+        workloadPasswordPolicy = builder.build();
     }
 
     @Override
@@ -328,6 +340,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                                 .setWorkloadSubdomain(ACCOUNT_SUBDOMAIN)
                                 .addEntitlements(createEntitlement(CDP_AZURE))
                                 .addEntitlements(createEntitlement(CDP_AUTOMATIC_USERSYNC_POLLER))
+                                .setPasswordPolicy(workloadPasswordPolicy)
                                 .build())
                         .build());
         responseObserver.onCompleted();
@@ -525,7 +538,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                     .UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
 
         GetActorWorkloadCredentialsResponse.Builder builder = GetActorWorkloadCredentialsResponse.newBuilder(actorWorkloadCredentialsResponse);
-        builder.setPasswordHashExpirationDate(System.currentTimeMillis() + PASSWORD_EXPIRATION_DURATION);
+        builder.setPasswordHashExpirationDate(System.currentTimeMillis() + PASSWORD_LIFETIME);
 
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();

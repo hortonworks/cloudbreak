@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.datalake.flow.create.SdxCreateFlowConfig;
 import com.sequenceiq.datalake.flow.delete.SdxDeleteFlowConfig;
+import com.sequenceiq.datalake.flow.repair.SdxRepairFlowConfig;
 import com.sequenceiq.datalake.flow.start.SdxStartFlowConfig;
 import com.sequenceiq.datalake.flow.stop.SdxStopFlowConfig;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
@@ -22,7 +23,8 @@ public class SdxFlowInformation implements ApplicationFlowInformation {
             SdxCreateFlowConfig.class,
             SdxDeleteFlowConfig.class,
             SdxStartFlowConfig.class,
-            SdxStopFlowConfig.class);
+            SdxStopFlowConfig.class,
+            SdxRepairFlowConfig.class);
 
     private static final List<String> ALLOWED_PARALLEL_FLOWS = Collections.singletonList(SDX_DELETE_EVENT.event());
 

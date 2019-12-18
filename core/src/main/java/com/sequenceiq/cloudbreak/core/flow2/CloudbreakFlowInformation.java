@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.cluster.certrenew.ClusterCertificateRenewFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayFlowConfig;
@@ -45,7 +46,8 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
             ClusterSyncFlowConfig.class, ClusterTerminationFlowConfig.class, ClusterCredentialChangeFlowConfig.class,
             ClusterStartFlowConfig.class, ClusterStopFlowConfig.class,
             ClusterUpscaleFlowConfig.class, ClusterDownscaleFlowConfig.class,
-            ClusterUpgradeFlowConfig.class, ClusterResetFlowConfig.class, ChangePrimaryGatewayFlowConfig.class
+            ClusterUpgradeFlowConfig.class, ClusterResetFlowConfig.class, ChangePrimaryGatewayFlowConfig.class,
+            ClusterCertificateRenewFlowConfig.class
     );
 
     @Override
