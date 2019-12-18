@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.aws;
+package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static java.lang.String.format;
@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
@@ -27,14 +26,11 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.BasicSdxTests;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class AwsSdxBaseImageTests extends BasicSdxTests {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsSdxBaseImageTests.class);
+public class SdxBaseImageTests extends BasicSdxTests {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxBaseImageTests.class);
 
     @Inject
     private SdxTestClient sdxTestClient;
-
-    @Inject
-    private AwsCloudProvider awsCloudProvider;
 
     @Inject
     private WaitUtil waitUtil;
@@ -65,7 +61,7 @@ public class AwsSdxBaseImageTests extends BasicSdxTests {
         testContext
                 .given(imageCatalog, ImageCatalogTestDto.class)
                 .when((tc, dto, client) -> {
-                    selectedImageID.set(awsCloudProvider.getLatestAWSBaseImageID(tc, dto, client));
+                    selectedImageID.set(testContext.getCloudProvider().getLatestBaseImageID(tc, dto, client));
                     return dto;
                 })
                 .given(imageSettings, ImageSettingsTestDto.class)

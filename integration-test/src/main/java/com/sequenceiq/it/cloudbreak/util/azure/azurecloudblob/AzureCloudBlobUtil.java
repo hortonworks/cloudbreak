@@ -28,15 +28,15 @@ public class AzureCloudBlobUtil {
         azureCloudBlobClientActions.deleteAllFolders();
     }
 
-    public SdxTestDto cleanupContainer(TestContext testContext, SdxTestDto sdxTestDto, SdxClient sdxClient) {
-        return azureCloudBlobClientActions.cleanupContainer(testContext, sdxTestDto, sdxClient);
+    public void cleanupContainer(String baseLocation) {
+        azureCloudBlobClientActions.cleanupContainer(baseLocation);
     }
 
-    public void createContainerIfNotExist(TestContext testContext) {
+    public void createContainerIfNotExist() {
         azureCloudBlobClientActions.createCloudBlobContainer();
     }
 
-    public SdxTestDto listAllFoldersInAContaier(TestContext testContext, SdxTestDto sdxTestDto, SdxClient sdxClient) {
-        return azureCloudBlobClientActions.listAllFolders(testContext, sdxTestDto, sdxClient);
+    public void listAllFoldersInAContaier(String baseLocation) {
+        azureCloudBlobClientActions.listAllFolders(baseLocation);
     }
 }

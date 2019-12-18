@@ -292,9 +292,8 @@ public class AwsCloudProvider extends AbstractCloudProvider {
                 .withImageCatalog(commonCloudProperties().getImageCatalogName());
     }
 
-    public String getPreviousAWSPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient)
-            throws TestFailException {
-
+    @Override
+    public String getPreviousPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (awsProperties.getBaseimage().getImageId() == null || awsProperties.getBaseimage().getImageId().isEmpty()) {
             try {
                 List<ImageV4Response> images = cloudbreakClient
@@ -323,9 +322,8 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         }
     }
 
-    public String getLatestAWSBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient)
-            throws TestFailException {
-
+    @Override
+    public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (awsProperties.getBaseimage().getImageId() == null || awsProperties.getBaseimage().getImageId().isEmpty()) {
             try {
                 List<BaseImageV4Response> images = cloudbreakClient
@@ -362,14 +360,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         return commonCloudProperties().getImageCatalogUrl();
     }
 
-    public void setImageCatalogName(String name) {
-        commonCloudProperties().setImageCatalogName(name);
-    }
-
-    public void setImageCatalogUrl(String url) {
-        commonCloudProperties().setImageCatalogUrl(url);
-    }
-
+    @Override
     public void setImageId(String id) {
         awsProperties.getBaseimage().setImageId(id);
     }

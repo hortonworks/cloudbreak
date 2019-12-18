@@ -396,7 +396,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     }
 
     protected void initializeAzureCloudStorage(TestContext testContext) {
-        azureCloudBlobUtil.createContainerIfNotExist(testContext);
+        azureCloudBlobUtil.createContainerIfNotExist();
     }
 
     /**

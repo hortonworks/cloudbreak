@@ -9,4 +9,10 @@ public interface CloudFunctionality {
 
     void stopInstances(List<String> instanceIds);
 
+    void cloudStorageInitialize();
+
+    void cloudStorageListContainer(String baseLocation);
+
+    void cloudStorageDeleteContainer(String baseLocation);
+
 }

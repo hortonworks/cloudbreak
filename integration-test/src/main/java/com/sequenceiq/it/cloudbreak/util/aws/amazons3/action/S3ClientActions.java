@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.aws.amazons3.action;
 
 import static java.lang.String.format;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -14,9 +15,6 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.sequenceiq.it.cloudbreak.SdxClient;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.aws.amazons3.client.S3Client;
@@ -25,21 +23,21 @@ import com.sequenceiq.it.cloudbreak.util.aws.amazons3.client.S3Client;
 public class S3ClientActions extends S3Client {
     private static final Logger LOGGER = LoggerFactory.getLogger(S3ClientActions.class);
 
-    public SdxTestDto deleteNonVersionedBucket(TestContext testContext, SdxTestDto sdxTestDto, SdxClient sdxClient) {
+    public void deleteNonVersionedBucket(String baseLocation) {
         AmazonS3 s3Client = buildS3Client();
         String bucketName = getBucketName();
         AmazonS3URI amazonS3URI = new AmazonS3URI(getEUWestS3Uri());
-        String keyPrefix = getKeyPrefix(sdxTestDto);
+        String prefix = StringUtils.substringAfterLast(baseLocation, "/");
 
         Log.log(LOGGER, format(" Amazon S3 URI: %s", amazonS3URI));
         Log.log(LOGGER, format(" Amazon S3 Bucket: %s", bucketName));
-        Log.log(LOGGER, format(" Amazon S3 Key Prefix: %s", keyPrefix));
+        Log.log(LOGGER, format(" Amazon S3 Key Prefix: %s", prefix));
 
         if (s3Client.doesBucketExistV2(bucketName)) {
             try {
                 ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
                         .withBucketName(bucketName)
-                        .withPrefix(keyPrefix);
+                        .withPrefix(prefix);
                 ObjectListing objectListing = s3Client.listObjects(listObjectsRequest);
 
                 do {
@@ -65,15 +63,13 @@ public class S3ClientActions extends S3Client {
             LOGGER.error("Amazon S3 bucket is not present with name: {}", bucketName);
             throw new TestFailException("Amazon S3 bucket is not present with name: " + bucketName);
         }
-
-        return sdxTestDto;
     }
 
-    public SdxTestDto listBucket(TestContext testContext, SdxTestDto sdxTestDto, SdxClient sdxClient) {
+    public void listBucket(String baseLocation) {
         AmazonS3 s3Client = buildS3Client();
         String bucketName = getBucketName();
         AmazonS3URI amazonS3URI = new AmazonS3URI(getEUWestS3Uri());
-        String keyPrefix = getKeyPrefix(sdxTestDto);
+        String keyPrefix = StringUtils.substringAfterLast(baseLocation, "/");
 
         Log.log(LOGGER, format(" Amazon S3 URI: %s", amazonS3URI));
         Log.log(LOGGER, format(" Amazon S3 Bucket: %s", bucketName));
@@ -109,7 +105,5 @@ public class S3ClientActions extends S3Client {
             LOGGER.error("Amazon S3 bucket is NOT present with name: {}", bucketName);
             throw new TestFailException("Amazon S3 bucket is NOT present with name: " + bucketName);
         }
-
-        return sdxTestDto;
     }
 }
