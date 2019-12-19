@@ -3,6 +3,7 @@
 ipa_packages_install:
   pkg.installed:
     - refresh: False
+    - failhard: True
     - pkgs:
         - ipa-client
         - openldap
@@ -29,6 +30,7 @@ join_ipa:
 {% endif %}
     - unless: ipa env
     - runas: root
+    - failhard: True
     - env:
         - PW: {{salt['pillar.get']('sssd-ipa:password')}}
 
