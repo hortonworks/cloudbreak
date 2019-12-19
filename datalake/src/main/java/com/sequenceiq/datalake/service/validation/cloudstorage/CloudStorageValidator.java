@@ -15,6 +15,7 @@ import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.Credential;
 import com.sequenceiq.datalake.service.validation.converter.CredentialToCloudCredentialConverter;
+import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
@@ -36,6 +37,12 @@ public class CloudStorageValidator {
     }
 
     public void validate(CloudStorageRequest cloudStorageRequest, DetailedEnvironmentResponse environment) {
+        if (CloudStorageValidation.DISABLED.equals(environment.getCloudStorageValidation())) {
+            LOGGER.info("Due to cloud storage validation not being enabled, not validating cloudStorageRequest: {}",
+                    JsonUtil.writeValueAsStringSilent(cloudStorageRequest));
+            return;
+        }
+
         LOGGER.info("Validating cloudStorageRequest: {}", JsonUtil.writeValueAsStringSilent(cloudStorageRequest));
         if (cloudStorageRequest != null) {
             Credential credential = getCredential(environment);

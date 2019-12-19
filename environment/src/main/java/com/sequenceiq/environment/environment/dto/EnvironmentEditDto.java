@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.dto;
 
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
@@ -24,6 +25,8 @@ public class EnvironmentEditDto {
 
     private final IdBrokerMappingSource idBrokerMappingSource;
 
+    private final CloudStorageValidation cloudStorageValidation;
+
     private final String adminGroupName;
 
     private final ParametersDto parameters;
@@ -37,6 +40,7 @@ public class EnvironmentEditDto {
             SecurityAccessDto securityAccess,
             Tunnel tunnel,
             IdBrokerMappingSource idBrokerMappingSource,
+            CloudStorageValidation cloudStorageValidation,
             String adminGroupName,
             ParametersDto parameters) {
         this.description = description;
@@ -47,6 +51,7 @@ public class EnvironmentEditDto {
         this.securityAccess = securityAccess;
         this.tunnel = tunnel;
         this.idBrokerMappingSource = idBrokerMappingSource;
+        this.cloudStorageValidation = cloudStorageValidation;
         this.adminGroupName = adminGroupName;
         this.parameters = parameters;
     }
@@ -83,6 +88,10 @@ public class EnvironmentEditDto {
         return idBrokerMappingSource;
     }
 
+    public CloudStorageValidation getCloudStorageValidation() {
+        return cloudStorageValidation;
+    }
+
     public String getAdminGroupName() {
         return adminGroupName;
     }
@@ -111,6 +120,8 @@ public class EnvironmentEditDto {
         private Tunnel tunnel;
 
         private IdBrokerMappingSource idBrokerMappingSource;
+
+        private CloudStorageValidation cloudStorageValidation;
 
         private String adminGroupName;
 
@@ -159,6 +170,11 @@ public class EnvironmentEditDto {
             return this;
         }
 
+        public EnvironmentEditDtoBuilder withCloudStorageValidation(CloudStorageValidation cloudStorageValidation) {
+            this.cloudStorageValidation = cloudStorageValidation;
+            return this;
+        }
+
         public EnvironmentEditDtoBuilder withAdminGroupName(String adminGroupName) {
             this.adminGroupName = adminGroupName;
             return this;
@@ -171,7 +187,7 @@ public class EnvironmentEditDto {
 
         public EnvironmentEditDto build() {
             return new EnvironmentEditDto(description, accountId, network, authentication, telemetry, securityAccess, tunnel, idBrokerMappingSource,
-                    adminGroupName, parameters);
+                    cloudStorageValidation, adminGroupName, parameters);
         }
     }
 }

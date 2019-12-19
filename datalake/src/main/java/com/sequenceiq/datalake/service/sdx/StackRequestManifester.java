@@ -119,8 +119,7 @@ public class StackRequestManifester {
             setupClusterRequest(stackRequest);
             prepareTelemetryForStack(stackRequest, environment, sdxCluster);
             setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
-            // TODO put this behind a feature flag
-            //cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment);
+            cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment);
             return stackRequest;
         } catch (IOException e) {
             LOGGER.error("Can not parse JSON to stack request");

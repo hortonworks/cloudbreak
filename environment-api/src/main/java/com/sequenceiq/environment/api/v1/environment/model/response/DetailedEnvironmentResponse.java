@@ -8,6 +8,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 
 import io.swagger.annotations.ApiModel;
@@ -69,6 +70,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         private String adminGroupName;
 
         private IdBrokerMappingSource idBrokerMappingSource;
+
+        private CloudStorageValidation cloudStorageValidation;
 
         private AwsEnvironmentParameters aws;
 
@@ -180,6 +183,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withCloudStorageValidation(CloudStorageValidation cloudStorageValidation) {
+            this.cloudStorageValidation = cloudStorageValidation;
+            return this;
+        }
+
         public Builder withAdminGroupName(String adminGroupName) {
             this.adminGroupName = adminGroupName;
             return this;
@@ -226,6 +234,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setSecurityAccess(securityAccess);
             detailedEnvironmentResponse.setTunnel(tunnel);
             detailedEnvironmentResponse.setIdBrokerMappingSource(idBrokerMappingSource);
+            detailedEnvironmentResponse.setCloudStorageValidation(cloudStorageValidation);
             detailedEnvironmentResponse.setAdminGroupName(adminGroupName);
             detailedEnvironmentResponse.setAws(aws);
             detailedEnvironmentResponse.setTags(tag);

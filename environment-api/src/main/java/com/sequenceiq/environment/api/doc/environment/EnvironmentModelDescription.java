@@ -55,6 +55,9 @@ public class EnvironmentModelDescription {
     public static final String LOG_CLOUD_STORAGE = "Cloud storage configuration for this environment. Service logs will be stored in the defined location.";
 
     public static final String IDBROKER_MAPPING_SOURCE = "IDBroker mapping source.";
+
+    public static final String CLOUD_STORAGE_VALIDATION = "Cloud storage validation enabled or not.";
+
     public static final String ADMIN_GROUP_NAME = "Name of the admin group to be used for all the services.";
 
     public static final String AWS_PARAMETERS = "AWS Specific parameters.";
