@@ -18,7 +18,7 @@ public class SdxUpgradeAction implements Action<SdxInternalTestDto, SdxClient> {
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         Log.log(LOGGER, format(" Environment: %s", testDto.getRequest().getEnvironment()));
-        Log.logJSON(LOGGER, " SDX upgrade request: ", testDto.getRequest());
+        Log.whenJson(LOGGER, " SDX upgrade request: ", testDto.getRequest());
         client.getSdxClient()
                 .sdxEndpoint()
                 .upgradeClusterByName(testDto.getName());
