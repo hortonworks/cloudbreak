@@ -347,6 +347,14 @@
         {% for hostloc in salt['pillar.get']('gateway:location')['IMPALAD'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['IMPALA'] }}</url>
         {%- endfor %}
+        <param>
+            <name>httpclient.connectionTimeout</name>
+            <value>5m</value>
+        </param>
+        <param>
+            <name>httpclient.socketTimeout</name>
+            <value>5m</value>
+        </param>
     </service>
     {%- endif %}
     {%- endif %}
