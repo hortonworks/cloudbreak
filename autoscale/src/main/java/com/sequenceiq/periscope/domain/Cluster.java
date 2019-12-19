@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -17,6 +18,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.converter.TunnelConverter;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.model.MonitoredStack;
 import com.sequenceiq.periscope.monitor.Monitored;
@@ -82,6 +85,9 @@ public class Cluster implements Monitored, Clustered {
 
     @Column(name = "cb_stack_id")
     private long stackId;
+
+    @Convert(converter = TunnelConverter.class)
+    private Tunnel tunnel = Tunnel.DIRECT;
 
     public Cluster() {
     }
@@ -275,6 +281,14 @@ public class Cluster implements Monitored, Clustered {
     @Override
     public Cluster getCluster() {
         return this;
+    }
+
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
+    public void setTunnel(Tunnel tunnel) {
+        this.tunnel = tunnel;
     }
 }
 

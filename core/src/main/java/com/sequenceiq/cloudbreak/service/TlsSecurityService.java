@@ -180,7 +180,7 @@ public class TlsSecurityService {
     public CertificateV4Response getCertificates(Long stackId) {
         SecurityConfig securityConfig = getSecurityConfigByStackIdOrThrowNotFound(stackId);
         String serverCert = instanceMetaDataService.getServerCertByStackId(stackId)
-                .orElseThrow(() -> new NotFoundException("Server certificate was not found."));
+                .orElse(null);
         return new CertificateV4Response(serverCert, securityConfig.getClientKeySecret(), securityConfig.getClientCertSecret());
     }
 

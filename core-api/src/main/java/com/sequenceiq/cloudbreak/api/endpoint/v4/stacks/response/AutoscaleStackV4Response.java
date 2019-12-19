@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
+import com.sequenceiq.common.api.type.Tunnel;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -60,6 +61,9 @@ public class AutoscaleStackV4Response {
 
     @ApiModelProperty(StackModelDescription.CRN)
     private String stackCrn;
+
+    @ApiModelProperty(StackModelDescription.TUNNEL)
+    private Tunnel tunnel;
 
     public String getStackCrn() {
         return stackCrn;
@@ -171,5 +175,13 @@ public class AutoscaleStackV4Response {
 
     public void setClusterManagerVariant(String clusterManagerVariant) {
         this.clusterManagerVariant = clusterManagerVariant;
+    }
+
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
+    public void setTunnel(Tunnel tunnel) {
+        this.tunnel = tunnel;
     }
 }

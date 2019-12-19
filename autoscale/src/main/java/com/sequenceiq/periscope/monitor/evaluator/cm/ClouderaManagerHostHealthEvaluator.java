@@ -70,7 +70,7 @@ public class ClouderaManagerHostHealthEvaluator implements ClusterManagerSpecifi
             MDCBuilder.buildMdcContext(cluster);
             LOGGER.debug("Checking '{}' alerts for cluster {}.", CM_HOST_HEARTBEAT, clusterId);
             HttpClientConfig httpClientConfig = tlsHttpClientConfigurationService.buildTLSClientConfig(cluster.getStackCrn(),
-                    cluster.getClusterManager().getHost());
+                    cluster.getClusterManager().getHost(), cluster.getTunnel());
             ClusterManager cm = cluster.getClusterManager();
             String user = secretService.get(cm.getUser());
             String pass = secretService.get(cm.getPass());

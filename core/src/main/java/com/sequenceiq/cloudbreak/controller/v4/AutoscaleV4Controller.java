@@ -23,11 +23,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeForAutoscaleV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
@@ -69,6 +71,9 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Inject
     private ClusterCommonService clusterCommonService;
+
+    @Inject
+    private ClusterProxyService clusterProxyService;
 
     @Override
     public void putStack(@ResourceCrn String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
@@ -130,6 +135,11 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Override
     public CertificateV4Response getCertificate(@ResourceCrn String crn) {
         return stackCommonService.getCertificate(crn);
+    }
+
+    @Override
+    public ClusterProxyConfiguration getClusterProxyconfiguration() {
+        return clusterProxyService.getClusterProxyConfigurationForAutoscale();
     }
 
     private void setupIdentityForAutoscale(String crn, String userId) {

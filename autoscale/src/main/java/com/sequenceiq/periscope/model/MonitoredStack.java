@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.model;
 
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.periscope.domain.ClusterManager;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 
@@ -13,15 +14,14 @@ public final class MonitoredStack {
 
     private final SecurityConfig securityConfig;
 
-    public MonitoredStack(ClusterManager clusterManager, Long stackId) {
-        this(clusterManager, null, stackId, null);
-    }
+    private final Tunnel tunnel;
 
-    public MonitoredStack(ClusterManager clusterManager, String stackCrn, Long stackId, SecurityConfig securityConfig) {
+    public MonitoredStack(ClusterManager clusterManager, String stackCrn, Long stackId, SecurityConfig securityConfig, Tunnel tunnel) {
         this.clusterManager = clusterManager;
         this.stackCrn = stackCrn;
         this.stackId = stackId;
         this.securityConfig = securityConfig;
+        this.tunnel = tunnel;
     }
 
     public ClusterManager getClusterManager() {
@@ -38,5 +38,9 @@ public final class MonitoredStack {
 
     public SecurityConfig getSecurityConfig() {
         return securityConfig;
+    }
+
+    public Tunnel getTunnel() {
+        return tunnel;
     }
 }
