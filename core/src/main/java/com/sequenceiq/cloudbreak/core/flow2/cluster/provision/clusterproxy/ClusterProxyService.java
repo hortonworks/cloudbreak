@@ -202,4 +202,11 @@ public class ClusterProxyService {
             throw new VaultConfigException(String.format("Could not parse vault secret string '%s'", vaultSecretJsonString), e);
         }
     }
+
+    public com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration getClusterProxyConfigurationForAutoscale() {
+        return clusterProxyConfiguration.isClusterProxyIntegrationEnabled()
+                ? com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration
+                .enabled(clusterProxyConfiguration.getClusterProxyUrl())
+                : com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration.disabled();
+    }
 }

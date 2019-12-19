@@ -156,14 +156,15 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
         }
         ClusterManager clusterManager =
                 new ClusterManager(host, gatewayPort, stack.getUserNamePath(), stack.getPasswordPath(), ClusterManagerVariant.CLOUDERA_MANAGER);
-        return new MonitoredStack(clusterManager, stack.getStackCrn(), stack.getStackId(), securityConfig);
+        return new MonitoredStack(clusterManager, stack.getStackCrn(), stack.getStackId(), securityConfig, stack.getTunnel());
     }
 
     private void cmHealthCheck(MonitoredStack monitoredStack) {
         ClusterManager cm = monitoredStack.getClusterManager();
         String host = cm.getHost();
         try {
-            HttpClientConfig httpClientConfig = tlsHttpClientConfigurationService.buildTLSClientConfig(monitoredStack.getStackCrn(), cm.getHost());
+            HttpClientConfig httpClientConfig = tlsHttpClientConfigurationService.buildTLSClientConfig(monitoredStack.getStackCrn(), cm.getHost(),
+                    monitoredStack.getTunnel());
             String user = secretService.get(cm.getUser());
             String pass = secretService.get(cm.getPass());
             ApiClient client = clouderaManagerApiClientProvider.getClient(Integer.valueOf(cm.getPort()), user, pass, httpClientConfig);

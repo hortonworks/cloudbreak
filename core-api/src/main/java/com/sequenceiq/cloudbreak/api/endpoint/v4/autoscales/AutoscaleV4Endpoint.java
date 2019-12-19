@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeForAutoscaleV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -92,4 +93,9 @@ public interface AutoscaleV4Endpoint {
     @ApiOperation(value = StackOpDescription.GET_STACK_CERT, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "getCertificateStackForAutoscale")
     CertificateV4Response getCertificate(@PathParam("crn") String crn);
+
+    @GET
+    @Path("clusterproxy")
+    @Produces(MediaType.APPLICATION_JSON)
+    ClusterProxyConfiguration getClusterProxyconfiguration();
 }
