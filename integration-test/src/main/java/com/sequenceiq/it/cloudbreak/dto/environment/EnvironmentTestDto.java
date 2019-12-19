@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
@@ -101,7 +102,8 @@ public class EnvironmentTestDto
                 .withCredentialName(getTestContext().get(CredentialTestDto.class).getName())
                 .withAuthentication(DUMMY_SSH_KEY)
                 .withCloudplatform(getCloudPlatform().toString())
-                .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK);
+                .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
+                .withCloudStorageValidation(CloudStorageValidation.ENABLED);
     }
 
     public EnvironmentTestDto withCreateFreeIpa(Boolean create) {
@@ -124,6 +126,11 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
         getRequest().setIdBrokerMappingSource(idBrokerMappingSource);
+        return this;
+    }
+
+    public EnvironmentTestDto withCloudStorageValidation(CloudStorageValidation cloudStorageValidation) {
+        getRequest().setCloudStorageValidation(cloudStorageValidation);
         return this;
     }
 

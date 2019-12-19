@@ -137,6 +137,7 @@ public class EnvironmentApiConverter {
                 .withCrn(createCrn(ThreadBasedUserCrnProvider.getAccountId()))
                 .withExperimentalFeatures(ExperimentalFeatures.builder()
                         .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
+                        .withCloudStorageValidation(request.getCloudStorageValidation())
                         .withTunnel(tunnelConverter.convert(request.getTunnel()))
                         .build())
                 .withParameters(getIfNotNull(request.getAws(), this::awsParamsToParametersDto))
@@ -303,6 +304,7 @@ public class EnvironmentApiConverter {
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
                 .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())
                 .withIdBrokerMappingSource(environmentDto.getExperimentalFeatures().getIdBrokerMappingSource())
+                .withCloudStorageValidation(environmentDto.getExperimentalFeatures().getCloudStorageValidation())
                 .withAdminGroupName(environmentDto.getAdminGroupName())
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams))
                 .withParentEnvironmentCrn(environmentDto.getParentEnvironmentCrn())
@@ -405,6 +407,7 @@ public class EnvironmentApiConverter {
                 .withDescription(request.getDescription())
                 .withAccountId(ThreadBasedUserCrnProvider.getAccountId())
                 .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
+                .withCloudStorageValidation(request.getCloudStorageValidation())
                 .withAdminGroupName(request.getAdminGroupName());
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));

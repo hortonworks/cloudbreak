@@ -13,6 +13,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -104,6 +105,7 @@ public class EnvironmentModificationService {
         editAuthenticationIfChanged(editDto, env);
         editSecurityAccessIfChanged(editDto, env);
         editIdBrokerMappingSource(editDto, env);
+        editCloudStorageValidation(editDto, env);
         editTunnelIfChanged(editDto, env);
         editEnvironmentParameters(editDto, env);
         Environment saved = environmentService.save(env);
@@ -204,6 +206,15 @@ public class EnvironmentModificationService {
         if (idBrokerMappingSource != null) {
             ExperimentalFeatures experimentalFeaturesJson = environment.getExperimentalFeaturesJson();
             experimentalFeaturesJson.setIdBrokerMappingSource(idBrokerMappingSource);
+            environment.setExperimentalFeaturesJson(experimentalFeaturesJson);
+        }
+    }
+
+    private void editCloudStorageValidation(EnvironmentEditDto editDto, Environment environment) {
+        CloudStorageValidation cloudStorageValidation = editDto.getCloudStorageValidation();
+        if (cloudStorageValidation != null) {
+            ExperimentalFeatures experimentalFeaturesJson = environment.getExperimentalFeaturesJson();
+            experimentalFeaturesJson.setCloudStorageValidation(cloudStorageValidation);
             environment.setExperimentalFeaturesJson(experimentalFeaturesJson);
         }
     }

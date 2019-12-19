@@ -6,6 +6,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 
 import io.swagger.annotations.ApiModel;
@@ -65,6 +66,9 @@ public abstract class EnvironmentBaseResponse {
 
     @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
     private IdBrokerMappingSource idBrokerMappingSource;
+
+    @ApiModelProperty(EnvironmentModelDescription.CLOUD_STORAGE_VALIDATION)
+    private CloudStorageValidation cloudStorageValidation;
 
     @ApiModelProperty(EnvironmentModelDescription.ADMIN_GROUP_NAME)
     private String adminGroupName;
@@ -223,6 +227,14 @@ public abstract class EnvironmentBaseResponse {
 
     public void setIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
         this.idBrokerMappingSource = idBrokerMappingSource;
+    }
+
+    public CloudStorageValidation getCloudStorageValidation() {
+        return cloudStorageValidation;
+    }
+
+    public void setCloudStorageValidation(CloudStorageValidation cloudStorageValidation) {
+        this.cloudStorageValidation = cloudStorageValidation;
     }
 
     public String getAdminGroupName() {
