@@ -10,10 +10,11 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.model.CloudIdentityType;
 
 @Service
 public class InstanceGroupService {
@@ -64,4 +65,10 @@ public class InstanceGroupService {
         return repository.saveAll(instanceGroups);
     }
 
+    public void setCloudIdentityType(InstanceGroup instanceGroup, CloudIdentityType cloudIdentityType) {
+        if (instanceGroup.getCloudIdentityType().isEmpty()) {
+            instanceGroup.setCloudIdentityType(cloudIdentityType);
+            save(instanceGroup);
+        }
+    }
 }

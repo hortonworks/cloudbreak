@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import static org.mockito.ArgumentMatchers.any;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +14,8 @@ import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -23,12 +27,13 @@ import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.S3Identity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.common.model.FileSystemType;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CloudFileSystemViewBuilderTest {
+public class CloudFileSystemViewProviderTest {
 
     private static final String ID_BROKER_INSTANCE_PROFILE = "idBrokerInstanceProfile";
 
@@ -57,8 +62,14 @@ public class CloudFileSystemViewBuilderTest {
     @Spy
     private final FileSystemConverter fileSystemConverter = new FileSystemConverter();
 
+    @Spy
+    private final CloudIdentityTypeDecider cloudIdentityTypeDecider = new CloudIdentityTypeDecider();
+
+    @Mock
+    private InstanceGroupService instanceGroupService;
+
     @InjectMocks
-    private final CloudFileSystemViewBuilder cloudFileSystemViewBuilder = new CloudFileSystemViewBuilder();
+    private final CloudFileSystemViewProvider cloudFileSystemViewProvider = new CloudFileSystemViewProvider();
 
     @Test
     public void testBuild() {
@@ -73,11 +84,15 @@ public class CloudFileSystemViewBuilderTest {
         computeGroup.setGroupName(COMPUTE_INSTANCE_GROUP_NAME);
         componentsByHostGroup.put(COMPUTE_INSTANCE_GROUP_NAME, new HashSet<>());
 
-        Optional<CloudFileSystemView> idBrokerGroupResult = cloudFileSystemViewBuilder.build(fileSystem, componentsByHostGroup, idBrokerGroup);
+        Optional<CloudFileSystemView> idBrokerGroupResult = cloudFileSystemViewProvider
+                .getCloudFileSystemView(fileSystem, componentsByHostGroup, idBrokerGroup);
         Assertions.assertEquals(idBrokerGroupResult.get().getCloudIdentityType(), CloudIdentityType.ID_BROKER);
 
-        Optional<CloudFileSystemView> computeGroupResult = cloudFileSystemViewBuilder.build(fileSystem, componentsByHostGroup, computeGroup);
+        Optional<CloudFileSystemView> computeGroupResult = cloudFileSystemViewProvider
+                .getCloudFileSystemView(fileSystem, componentsByHostGroup, computeGroup);
         Assertions.assertEquals(computeGroupResult.get().getCloudIdentityType(), CloudIdentityType.LOG);
+
+        Mockito.verify(instanceGroupService, Mockito.times(2)).setCloudIdentityType(any(), any());
     }
 
     @Test
@@ -93,10 +108,12 @@ public class CloudFileSystemViewBuilderTest {
         computeGroup.setGroupName(COMPUTE_INSTANCE_GROUP_NAME);
         componentsByHostGroup.put(COMPUTE_INSTANCE_GROUP_NAME, null);
 
-        Optional<CloudFileSystemView> idBrokerGroupResult = cloudFileSystemViewBuilder.build(fileSystem, componentsByHostGroup, idBrokerGroup);
+        Optional<CloudFileSystemView> idBrokerGroupResult = cloudFileSystemViewProvider
+                .getCloudFileSystemView(fileSystem, componentsByHostGroup, idBrokerGroup);
         Assertions.assertEquals(idBrokerGroupResult.get().getCloudIdentityType(), CloudIdentityType.ID_BROKER);
 
-        Optional<CloudFileSystemView> computeGroupResult = cloudFileSystemViewBuilder.build(fileSystem, componentsByHostGroup, computeGroup);
+        Optional<CloudFileSystemView> computeGroupResult = cloudFileSystemViewProvider
+                .getCloudFileSystemView(fileSystem, componentsByHostGroup, computeGroup);
         Assertions.assertEquals(computeGroupResult.get().getCloudIdentityType(), CloudIdentityType.LOG);
     }
 

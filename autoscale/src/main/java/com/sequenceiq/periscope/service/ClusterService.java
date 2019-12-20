@@ -68,6 +68,7 @@ public class ClusterService {
         cluster.setClusterManager(stack.getClusterManager());
         cluster.setStackCrn(stack.getStackCrn());
         cluster.setStackId(stack.getStackId());
+        cluster.setTunnel(stack.getTunnel());
         if (clusterState != null) {
             cluster.setState(clusterState);
         }

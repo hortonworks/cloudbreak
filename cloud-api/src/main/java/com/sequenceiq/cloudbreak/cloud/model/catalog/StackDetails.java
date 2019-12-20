@@ -11,12 +11,16 @@ public class StackDetails {
 
     private final StackRepoDetails repo;
 
+    private final String stackBuildNumber;
+
     @JsonCreator
     public StackDetails(
             @JsonProperty(value = "version", required = true) String version,
-            @JsonProperty(value = "repo", required = true) StackRepoDetails repo) {
+            @JsonProperty(value = "repo", required = true) StackRepoDetails repo,
+            @JsonProperty("build-number") String stackBuildNumber) {
         this.version = version;
         this.repo = repo;
+        this.stackBuildNumber = stackBuildNumber;
     }
 
     public String getVersion() {
@@ -25,5 +29,9 @@ public class StackDetails {
 
     public StackRepoDetails getRepo() {
         return repo;
+    }
+
+    public String getStackBuildNumber() {
+        return stackBuildNumber;
     }
 }

@@ -42,6 +42,8 @@ public class Image {
 
     private final List<String> preWarmCsd;
 
+    private final String cmBuildNumber;
+
     @JsonCreator
     public Image(
             @JsonProperty(value = "date", required = true) String date,
@@ -56,7 +58,8 @@ public class Image {
             @JsonProperty("os_type") String osType,
             @JsonProperty("package-versions") Map<String, String> packageVersions,
             @JsonProperty("pre_warm_parcels") List<List<String>> preWarmParcels,
-            @JsonProperty("pre_warm_csd") List<String> preWarmCsd) {
+            @JsonProperty("pre_warm_csd") List<String> preWarmCsd,
+            @JsonProperty("build-number") String cmBuildNumber) {
         this.date = date;
         this.created = created;
         this.description = description;
@@ -70,6 +73,7 @@ public class Image {
         this.packageVersions = packageVersions;
         this.preWarmParcels = preWarmParcels == null ? Collections.emptyList() : preWarmParcels;
         this.preWarmCsd = preWarmCsd == null ? Collections.emptyList() : preWarmCsd;
+        this.cmBuildNumber = cmBuildNumber;
     }
 
     public String getDate() {
@@ -136,6 +140,10 @@ public class Image {
         return created;
     }
 
+    public String getCmBuildNumber() {
+        return cmBuildNumber;
+    }
+
     @Override
     public String toString() {
         return "Image{"
@@ -150,6 +158,7 @@ public class Image {
                 + ", packageVersions='" + packageVersions + '\''
                 + ", preWarmParcels='" + preWarmParcels.stream().flatMap(Collection::stream).collect(Collectors.joining(", ")) + '\''
                 + ", preWarmCsd='" + String.join(", ", preWarmCsd) + '\''
+                + ", cmBuildNumber='" + cmBuildNumber + '\''
                 + '}';
     }
 

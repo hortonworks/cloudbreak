@@ -39,7 +39,7 @@ public class TlsSecurityService {
     private TlsConfiguration createTls(SecurityConfig securityConfig) {
         String clientKey = new String(Base64.decode(secretService.get(securityConfig.getClientKey())));
         String clientCert = new String(Base64.decode(secretService.get(securityConfig.getClientCert())));
-        String serverCert = new String(Base64.decode(securityConfig.getServerCert()));
+        String serverCert = securityConfig.getServerCert() != null ? new String(Base64.decode(securityConfig.getServerCert())) : null;
         return new TlsConfiguration(clientKey, clientCert, serverCert);
     }
 }

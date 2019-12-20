@@ -87,7 +87,7 @@ public class MaintenanceModeValidationServiceTest {
 
         image = new Image("asdf", System.currentTimeMillis(), "asdf", "centos7", "uuid", "2.8.0", Collections.emptyMap(),
                 Collections.singletonMap("AWS", Collections.emptyMap()), null, "centos", packageVersions,
-                Collections.emptyList(), Collections.emptyList());
+                Collections.emptyList(), Collections.emptyList(), "1");
 
         statedImage = StatedImage.statedImage(image, "url", "name");
         warnings = new ArrayList<Warning>();

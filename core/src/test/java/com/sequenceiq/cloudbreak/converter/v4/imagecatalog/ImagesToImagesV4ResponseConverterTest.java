@@ -81,11 +81,11 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
         Map<String, Map<String, String>> imageSetsByProvider = new HashMap<>();
         imageSetsByProvider.put("AWS", null);
         StackRepoDetails repoDetails = new StackRepoDetails(Collections.emptyMap(), Collections.emptyMap());
-        StackDetails stackDetails = new StackDetails("3.1", repoDetails);
+        StackDetails stackDetails = new StackDetails("3.1", repoDetails, "1");
 
         return new Image("", System.currentTimeMillis(), "", osType, UUID.randomUUID().toString(), "",
                 Collections.emptyMap(), imageSetsByProvider, stackDetails, osType, Collections.emptyMap(),
-                Collections.emptyList(), Collections.emptyList());
+                Collections.emptyList(), Collections.emptyList(), "1");
     }
 
     private void setupStackEntries() {

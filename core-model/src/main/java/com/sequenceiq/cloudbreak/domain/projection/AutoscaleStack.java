@@ -4,6 +4,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.Tunnel;
 
 public interface AutoscaleStack {
 
@@ -45,4 +46,5 @@ public interface AutoscaleStack {
 
     String getCrn();
 
+    Tunnel getTunnel();
 }
