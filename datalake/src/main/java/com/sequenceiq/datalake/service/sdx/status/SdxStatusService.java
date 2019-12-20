@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx.status;
 
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFoundException;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DELETED;
 
 import java.util.Collection;
@@ -48,10 +49,6 @@ public class SdxStatusService {
         });
     }
 
-    public void setStatusForDatalake(DatalakeStatusEnum status, String statusReason, Long datalakeId) {
-        sdxClusterRepository.findById(datalakeId).ifPresent(datalakeCluster -> setStatusForDatalake(status, statusReason, datalakeCluster));
-    }
-
     public void setStatusForDatalake(DatalakeStatusEnum status, String statusReason, SdxCluster sdxCluster) {
         SdxStatusEntity previous = getActualStatusForSdx(sdxCluster);
         if (statusChangeIsValid(previous)) {
@@ -65,6 +62,8 @@ public class SdxStatusService {
             String prevStatusText = previous == null ? "null" : previous.getStatus().name();
             LOGGER.info("Updated status of Datalake with name: {} from {} to {} with statusReason {}",
                     sdxCluster.getClusterName(), prevStatusText, status, statusReason);
+        } else if (DELETED.equals(previous.getStatus())) {
+            throw notFoundException("SDX cluster", sdxCluster.getClusterName());
         } else {
             throw new DatalakeStatusUpdateException(getActualStatusForSdx(sdxCluster).getStatus(), status);
         }
