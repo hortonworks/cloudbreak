@@ -359,22 +359,22 @@ cb:
       "[7.0.0]":
         parcels:
           - name: SCHEMAREGISTRY
-            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-80/tars/parcel
-            version: 0.8.0.3.0.0.0-80
+            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-103/tars/parcel
+            version: 0.8.0.3.0.0.0-103
             csd:
-              - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-80/tars/parcel/SCHEMAREGISTRY-0.8.0.jar
+              - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-103/tars/parcel/SCHEMAREGISTRY-0.8.0.jar
           - name: STREAMS_MESSAGING_MANAGER
-            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-80/tars/parcel
-            version: 2.1.0.3.0.0.0-80
+            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-103/tars/parcel
+            version: 2.1.0.3.0.0.0-103
             csd:
-              - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-80/tars/parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar
+              - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-103/tars/parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar
           - name: CFM
-            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-85/tars/parcel
+            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-121/tars/parcel
             version: 2.0.0.0
             csd:
-              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-85/tars/parcel/NIFI-1.10.0.2.0.0.0-85.jar
-              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-85/tars/parcel/NIFICA-1.10.0.2.0.0.0-85.jar
-              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-85/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-85.jar
+              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-121/tars/parcel/NIFI-1.10.0.2.0.0.0-121.jar
+              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-121/tars/parcel/NIFICA-1.10.0.2.0.0.0-121.jar
+              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-121/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-121.jar
         version: 7.0.0-1.cdh7.0.0.p0.1423385
         minCM: 7.0
         repo:
@@ -385,22 +385,22 @@ cb:
       "[7.0.1]":
         parcels:
           - name: SCHEMAREGISTRY
-            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-80/tars/parcel
-            version: 0.8.0.3.0.0.0-80
+            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-103/tars/parcel
+            version: 0.8.0.3.0.0.0-103
             csd:
-              - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-80/tars/parcel/SCHEMAREGISTRY-0.8.0.jar
+              - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-103/tars/parcel/SCHEMAREGISTRY-0.8.0.jar
           - name: STREAMS_MESSAGING_MANAGER
-            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-80/tars/parcel
-            version: 2.1.0.3.0.0.0-80
+            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-103/tars/parcel
+            version: 2.1.0.3.0.0.0-103
             csd:
-              - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-80/tars/parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar
+              - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-103/tars/parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar
           - name: CFM
-            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-85/tars/parcel
+            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-121/tars/parcel
             version: 2.0.0.0
             csd:
-              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-85/tars/parcel/NIFI-1.10.0.2.0.0.0-85.jar
-              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-85/tars/parcel/NIFICA-1.10.0.2.0.0.0-85.jar
-              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-85/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-85.jar
+              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-121/tars/parcel/NIFI-1.10.0.2.0.0.0-121.jar
+              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-121/tars/parcel/NIFICA-1.10.0.2.0.0.0-121.jar
+              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-121/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-121.jar
         version: 7.0.1-1.cdh7.0.1.p0.1454941
         minCM: 7.0
         repo:
@@ -411,22 +411,22 @@ cb:
       "[7.0.2]":
         parcels:
           - name: SCHEMAREGISTRY
-            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-80/tars/parcel
-            version: 0.8.0.3.0.0.0-80
+            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-103/tars/parcel
+            version: 0.8.0.3.0.0.0-103
             csd:
-              - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-80/tars/parcel/SCHEMAREGISTRY-0.8.0.jar
+              - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-103/tars/parcel/SCHEMAREGISTRY-0.8.0.jar
           - name: STREAMS_MESSAGING_MANAGER
-            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-80/tars/parcel
-            version: 2.1.0.3.0.0.0-80
+            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-103/tars/parcel
+            version: 2.1.0.3.0.0.0-103
             csd:
-              - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-80/tars/parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar
+              - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-103/tars/parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar
           - name: CFM
-            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-85/tars/parcel
+            parcel: http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-121/tars/parcel
             version: 2.0.0.0
             csd:
-              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-85/tars/parcel/NIFI-1.10.0.2.0.0.0-85.jar
-              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-85/tars/parcel/NIFICA-1.10.0.2.0.0.0-85.jar
-              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-85/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-85.jar
+              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-121/tars/parcel/NIFI-1.10.0.2.0.0.0-121.jar
+              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-121/tars/parcel/NIFICA-1.10.0.2.0.0.0-121.jar
+              - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-121/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-121.jar
         version: 7.0.2-1.cdh7.0.2.p0.1570147
         minCM: 7.0
         repo:
