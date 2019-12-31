@@ -16,6 +16,7 @@
       "Action": [
         "dynamodb:BatchGetItem",
         "dynamodb:BatchWriteItem",
+        "dynamodb:CreateTable",
         "dynamodb:DeleteItem",
         "dynamodb:DescribeTable",
         "dynamodb:GetItem",
