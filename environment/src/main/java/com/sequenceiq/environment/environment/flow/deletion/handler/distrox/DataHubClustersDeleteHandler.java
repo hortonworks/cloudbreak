@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.flow.deletion.event.EnvClusterDeleteFailedEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
-import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.util.PollingConfig;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
@@ -49,7 +49,7 @@ public class DataHubClustersDeleteHandler extends EventSenderAwareHandler<Enviro
             EnvDeleteEvent envDeleteEvent = getEnvDeleteEvent(environmentDto);
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
-            EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
+            EnvClusterDeleteFailedEvent failedEvent = EnvClusterDeleteFailedEvent.builder()
                     .withEnvironmentID(environmentDto.getId())
                     .withException(e)
                     .withResourceCrn(environmentDto.getResourceCrn())
