@@ -23,8 +23,8 @@ import org.mockito.quality.Strictness;
 
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.flow.deletion.event.EnvClusterDeleteFailedEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
-import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.util.PollingConfig;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
@@ -81,7 +81,7 @@ class DataHubClustersDeleteHandlerTest {
         underTest.accept(environmentDtoEvent);
         verify(distroXDeleteService).deleteDistroXClustersForEnvironment(any(PollingConfig.class), eq(environment));
         verify(eventSender).sendEvent(any(EnvDeleteEvent.class), eq(headers));
-        verify(eventSender, never()).sendEvent(any(EnvDeleteFailedEvent.class), any());
+        verify(eventSender, never()).sendEvent(any(EnvClusterDeleteFailedEvent.class), any());
         EnvDeleteEvent capturedDeleteEvent = (EnvDeleteEvent) baseNamedFlowEvent.getValue();
         assertThat(capturedDeleteEvent.getResourceName()).isEqualTo(ENV_NAME);
         assertThat(capturedDeleteEvent.getResourceId()).isEqualTo(ENV_ID);
@@ -95,7 +95,7 @@ class DataHubClustersDeleteHandlerTest {
         underTest.accept(environmentDtoEvent);
         verify(distroXDeleteService, never()).deleteDistroXClustersForEnvironment(any(), any());
         verify(eventSender).sendEvent(any(EnvDeleteEvent.class), eq(headers));
-        verify(eventSender, never()).sendEvent(any(EnvDeleteFailedEvent.class), any());
+        verify(eventSender, never()).sendEvent(any(EnvClusterDeleteFailedEvent.class), any());
         EnvDeleteEvent capturedDeleteEvent = (EnvDeleteEvent) baseNamedFlowEvent.getValue();
         assertThat(capturedDeleteEvent.getResourceName()).isEqualTo(ENV_NAME);
         assertThat(capturedDeleteEvent.getResourceId()).isEqualTo(ENV_ID);
@@ -109,13 +109,13 @@ class DataHubClustersDeleteHandlerTest {
         when(environmentService.findEnvironmentById(ENV_ID)).thenThrow(error);
         underTest.accept(environmentDtoEvent);
         verify(distroXDeleteService, never()).deleteDistroXClustersForEnvironment(any(), any());
-        verify(eventSender).sendEvent(any(EnvDeleteFailedEvent.class), eq(headers));
+        verify(eventSender).sendEvent(any(EnvClusterDeleteFailedEvent.class), eq(headers));
         verify(eventSender, never()).sendEvent(any(EnvDeleteEvent.class), any());
-        EnvDeleteFailedEvent capturedDeleteFailedEvent = (EnvDeleteFailedEvent) baseNamedFlowEvent.getValue();
+        EnvClusterDeleteFailedEvent capturedDeleteFailedEvent = (EnvClusterDeleteFailedEvent) baseNamedFlowEvent.getValue();
         assertThat(capturedDeleteFailedEvent.getResourceName()).isEqualTo(ENV_NAME);
         assertThat(capturedDeleteFailedEvent.getResourceId()).isEqualTo(ENV_ID);
         assertThat(capturedDeleteFailedEvent.getResourceCrn()).isEqualTo(RESOURCE_CRN);
-        assertThat(capturedDeleteFailedEvent.selector()).isEqualTo("FAILED_ENV_DELETE_EVENT");
+        assertThat(capturedDeleteFailedEvent.selector()).isEqualTo("FAILED_ENV_CLUSTERS_DELETE_EVENT");
         assertThat(capturedDeleteFailedEvent.getException()).isEqualTo(error);
     }
 
