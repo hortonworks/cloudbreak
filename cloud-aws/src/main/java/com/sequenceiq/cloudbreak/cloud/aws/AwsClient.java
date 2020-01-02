@@ -140,6 +140,7 @@ public class AwsClient {
         return AmazonS3ClientBuilder.standard()
                 .withCredentials(getCredentialProvider(awsCredential))
                 .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
+                .withForceGlobalBucketAccessEnabled(Boolean.TRUE)
                 .build();
     }
 
