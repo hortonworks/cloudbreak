@@ -27,6 +27,7 @@ join_ipa:
           --no-sshd \
           {%- endif %}
           --password "{{salt['pillar.get']('sssd-ipa:password')}}" --unattended --force-join --ssh-trust-dns --no-ntp --unattended'
+{% endif %}
     - unless: ipa env
     - runas: root
     - failhard: True
