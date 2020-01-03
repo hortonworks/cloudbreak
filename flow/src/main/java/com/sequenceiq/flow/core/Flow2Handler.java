@@ -80,7 +80,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         Map<Object, Object> contextParams = getContextParams(event);
         try {
             handle(key, payload, flowParameters, flowChainId, contextParams);
-        } catch (TransactionExecutionException e) {
+        } catch (Exception e) {
             LOGGER.error("Failed update last flow log status and save new flow log entry.", e);
             runningFlows.remove(flowId);
         }

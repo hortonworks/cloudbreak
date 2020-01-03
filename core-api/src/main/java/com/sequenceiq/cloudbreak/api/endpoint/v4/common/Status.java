@@ -69,4 +69,23 @@ public enum Status {
                 || Status.STOP_REQUESTED.equals(this)
                 || Status.STOP_FAILED.equals(this);
     }
+
+    public Status mapToFailedIfInProgress() {
+        switch (this) {
+            case REQUESTED:
+            case CREATE_IN_PROGRESS:
+                return CREATE_FAILED;
+            case UPDATE_IN_PROGRESS:
+                return UPDATE_FAILED;
+            case DELETE_IN_PROGRESS:
+            case PRE_DELETE_IN_PROGRESS:
+                return DELETE_FAILED;
+            case START_IN_PROGRESS:
+                return START_FAILED;
+            case STOP_IN_PROGRESS:
+                return STOP_FAILED;
+            default:
+                return this;
+        }
+    }
 }
