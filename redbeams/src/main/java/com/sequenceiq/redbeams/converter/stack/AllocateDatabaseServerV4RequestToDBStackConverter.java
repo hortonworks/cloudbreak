@@ -62,7 +62,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     private static final DBStackStatus NEW_STATUS = new DBStackStatus();
 
-    private static final String DBSTACK_NAME_PREFIX = "dbstck-";
+    private static final String DBSTACK_NAME_PREFIX = "dbstck";
 
     @Value("${cb.enabledplatforms:}")
     private Set<String> dbServiceSupportedPlatforms;
@@ -297,11 +297,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     }
 
     private String generateDatabaseServerStackName(String environmentName) {
-        return String.format("%s%s-%s",
-                DBSTACK_NAME_PREFIX,
-                environmentName,
-                uuidGeneratorService.uuidVariableParts(RDS_NAME_MAX_LENGTH - DBSTACK_NAME_PREFIX.length() - environmentName.length() - 1)
-        );
+        String environmentNameWithDbStack = String.format("%s-%s", environmentName, DBSTACK_NAME_PREFIX);
+        String uuid = uuidGeneratorService.uuidVariableParts(RDS_NAME_MAX_LENGTH - environmentNameWithDbStack.length() - 1);
+        return String.format("%s-%s", environmentNameWithDbStack, uuid);
     }
 }
 
