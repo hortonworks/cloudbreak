@@ -5,6 +5,7 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.StackV4ParameterBase;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
@@ -122,8 +123,12 @@ public interface CloudProvider {
 
     void setImageCatalogName(String name);
 
+    String getImageCatalogName();
+
     void setImageCatalogUrl(String url);
 
     void setImageId(String id);
+
+    void setInstanceTemplateV1Parameters(InstanceTemplateV1Request instanceTemplateV1Request);
 
 }
