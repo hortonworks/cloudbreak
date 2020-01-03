@@ -148,6 +148,9 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     public NetworkV4TestDto network(NetworkV4TestDto network) {
         AzureNetworkV4Parameters parameters = new AzureNetworkV4Parameters();
         parameters.setNoPublicIp(false);
+        parameters.setSubnetId(azureProperties.getNetwork().getSubnetIds().stream().findFirst().get());
+        parameters.setNetworkId(azureProperties.getNetwork().getNetworkId());
+        parameters.setResourceGroupName(azureProperties.getNetwork().getResourceGroupName());
         return network.withAzure(parameters)
                 .withSubnetCIDR(getSubnetCIDR());
     }
