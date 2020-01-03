@@ -352,10 +352,6 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         }
     }
 
-    public String getImageCatalogName() {
-        return commonCloudProperties().getImageCatalogName();
-    }
-
     public String getImageCatalogUrl() {
         return commonCloudProperties().getImageCatalogUrl();
     }

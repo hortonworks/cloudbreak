@@ -122,6 +122,8 @@ public interface CloudProvider {
 
     void setImageCatalogName(String name);
 
+    String getImageCatalogName();
+
     void setImageCatalogUrl(String url);
 
     void setImageId(String id);

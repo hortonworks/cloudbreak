@@ -279,6 +279,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getImageCatalogName() {
+        return delegate.getImageCatalogName();
+    }
+
+    @Override
     public void setImageCatalogUrl(String url) {
         delegate.setImageCatalogUrl(url);
     }
