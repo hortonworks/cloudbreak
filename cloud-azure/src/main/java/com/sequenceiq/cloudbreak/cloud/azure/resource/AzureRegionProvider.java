@@ -94,7 +94,7 @@ public class AzureRegionProvider {
                                 regionCoordinateSpecification.getLongitude(),
                                 regionCoordinateSpecification.getLatitude(),
                                 regionCoordinateSpecification.getName(),
-                                regionCoordinateSpecification.isEksSupported()));
+                                regionCoordinateSpecification.isK8sSupported()));
             }
         } catch (IOException ignored) {
             LOGGER.error("Failed to read enabled Azure regions from file.");

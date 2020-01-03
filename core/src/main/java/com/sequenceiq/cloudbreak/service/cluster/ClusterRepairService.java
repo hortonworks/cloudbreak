@@ -159,9 +159,11 @@ public class ClusterRepairService {
                 boolean reattach = !deleteVolumes;
                 Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult;
                 if (hasPendingFlow(stackId)) {
-                    repairStartResult = Result.error(RepairValidation.of("Repair cannot be performed, because there is already an active flow."));
+                    repairStartResult = Result.error(RepairValidation
+                            .of("Repair cannot be performed, because there is already an active operation."));
                 } else if (reattachNotSupportedOnProvider(stack, reattach)) {
-                    repairStartResult = Result.error(RepairValidation.of("Volume reattach currently not supported!"));
+                    repairStartResult = Result.error(RepairValidation
+                            .of(String.format("Volume reattach currently not supported on %s platform!", stack.getPlatformVariant())));
                 } else {
                     Map<HostGroupName, Set<InstanceMetaData>> repairableNodes = selectRepairableNodes(getInstanceSelectors(repairMode, selectedParts), stack);
                     RepairValidation validationBySelectedNodes = validateSelectedNodes(stack, repairableNodes, reattach);
@@ -273,7 +275,7 @@ public class ClusterRepairService {
                 validationResult.add("Repair is only supported when the image already contains Cloudera Manager and Cloudera Data Platform artifacts.");
             }
             if (!gatewayDatabaseAvailable(stack.getCluster()) && !stack.isMultipleGateway()) {
-                validationResult.add("Repair is only supported when single node Cloudera Manager state is externalized into an external Database.");
+                validationResult.add("Repair is only supported when single node Cloudera Manager state stored in external Database.");
             }
             if (withEmbeddedClusterManagerDB(stack.getCluster())) {
                 validationResult.add("Cloudera Manager server failure with embedded Database cannot be repaired!");
