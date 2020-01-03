@@ -251,7 +251,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
         DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
 
-        assertEquals("dbstck-envName-parts", dbStack.getName());
+        assertEquals("envName-dbstck-parts", dbStack.getName());
         assertEquals(PASSWORD, dbStack.getDatabaseServer().getRootPassword());
         assertEquals(USERNAME, dbStack.getDatabaseServer().getRootUserName());
         assertEquals("n-uuid", dbStack.getNetwork().getName());
