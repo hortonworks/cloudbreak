@@ -1,20 +1,17 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.inject.Inject;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
@@ -32,9 +29,6 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
-
-    @Inject
-    private BlueprintService blueprintService;
 
     /**
      *  For 2.4 compatibility we also need some extra field to be in the pillar so it will look like this:

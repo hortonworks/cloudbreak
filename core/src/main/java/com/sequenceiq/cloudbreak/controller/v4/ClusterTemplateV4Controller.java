@@ -1,21 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.dto.ClusterDefinitionAccessDto.ClusterDefinitionAccessDtoBuilder.aClusterDefinitionAccessDtoBuilder;
-import static java.util.stream.Collectors.toSet;
-
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
-import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.dto.ClusterDefinitionAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
@@ -30,9 +14,22 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
-import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+import javax.validation.Valid;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.dto.ClusterDefinitionAccessDto.ClusterDefinitionAccessDtoBuilder.aClusterDefinitionAccessDtoBuilder;
+import static java.util.stream.Collectors.toSet;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -55,9 +52,6 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
 
     @Inject
     private EnvironmentServiceDecorator environmentServiceDecorator;
-
-    @Inject
-    private ClusterTemplateViewService clusterTemplateViewService;
 
     @Override
     public ClusterTemplateV4Response post(Long workspaceId, @Valid ClusterTemplateV4Request request) {

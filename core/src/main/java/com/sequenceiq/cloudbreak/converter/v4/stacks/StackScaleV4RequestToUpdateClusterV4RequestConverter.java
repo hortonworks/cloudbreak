@@ -1,9 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
@@ -13,15 +9,14 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorFactory;
-import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component
 public class StackScaleV4RequestToUpdateClusterV4RequestConverter extends AbstractConversionServiceAwareConverter<StackScaleV4Request, UpdateClusterV4Request> {
-
-    @Inject
-    private HostGroupService hostGroupService;
 
     @Inject
     private StackService stackService;
@@ -63,4 +58,5 @@ public class StackScaleV4RequestToUpdateClusterV4RequestConverter extends Abstra
             throw e.getCause();
         }
     }
+
 }

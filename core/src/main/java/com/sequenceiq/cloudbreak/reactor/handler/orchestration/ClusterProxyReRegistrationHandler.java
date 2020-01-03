@@ -1,11 +1,5 @@
 package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
@@ -14,17 +8,20 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReRegistrationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReRegistrationResult;
-import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
-import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
+import javax.inject.Inject;
+
 @Component
 public class ClusterProxyReRegistrationHandler implements EventHandler<ClusterProxyReRegistrationRequest> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyReRegistrationHandler.class);
 
     @Inject
@@ -37,13 +34,7 @@ public class ClusterProxyReRegistrationHandler implements EventHandler<ClusterPr
     private ClusterProxyService clusterProxyService;
 
     @Inject
-    private HostGroupService hostGroupService;
-
-    @Inject
     private StackService stackService;
-
-    @Inject
-    private GatewayService gatewayService;
 
     @Override
     public String selector() {
@@ -73,4 +64,5 @@ public class ClusterProxyReRegistrationHandler implements EventHandler<ClusterPr
             return new ClusterProxyReRegistrationResult(e.getMessage(), e, request);
         }
     }
+
 }

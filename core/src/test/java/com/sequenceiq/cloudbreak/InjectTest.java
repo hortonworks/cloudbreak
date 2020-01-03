@@ -1,17 +1,6 @@
 package com.sequenceiq.cloudbreak;
 
-import static java.lang.System.lineSeparator;
-
-import java.lang.reflect.Member;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
@@ -19,10 +8,18 @@ import org.reflections.scanners.MemberUsageScanner;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 
+import javax.inject.Inject;
+import java.lang.reflect.Member;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static java.lang.System.lineSeparator;
+
 public class InjectTest {
 
     @Test
-    @Ignore("If we declar a class with the same name and different package this test is not working properly. It should be fix")
     public void testIfThereAreUnusedInjections() {
         Reflections reflections = new Reflections("com.sequenceiq",
                 new FieldAnnotationsScanner(),

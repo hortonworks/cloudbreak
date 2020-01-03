@@ -1,23 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster;
 
-import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
@@ -43,11 +28,19 @@ import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.common.model.FileSystemType;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
 
 @Component
 public class CloudStorageConverter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudStorageConverter.class);
 
     @Inject
     private MissingResourceNameGenerator nameGenerator;
@@ -57,9 +50,6 @@ public class CloudStorageConverter {
 
     @Inject
     private CloudStorageParametersConverter cloudStorageParametersConverter;
-
-    @Inject
-    private ConversionService conversionService;
 
     public CloudStorageRequest fileSystemToRequest(FileSystem fileSystem) {
         CloudStorageRequest result = new CloudStorageRequest();

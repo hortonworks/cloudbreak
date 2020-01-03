@@ -1,17 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.validator;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.Role;
@@ -23,10 +11,17 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.model.CloudIdentityType;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 @Component
 public class AwsIDBrokerObjectStorageValidator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsIDBrokerObjectStorageValidator.class);
 
     @Inject
     private AwsInstanceProfileEC2TrustValidator awsInstanceProfileEC2TrustValidator;
@@ -39,9 +34,6 @@ public class AwsIDBrokerObjectStorageValidator {
 
     @Inject
     private AwsRangerAuditRolePermissionValidator awsRangerAuditRolePermissionValidator;
-
-    @Inject
-    private AwsLogRolePermissionValidator awsLogRolePermissionValidator;
 
     @Inject
     private AwsIamService awsIamService;

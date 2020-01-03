@@ -1,17 +1,5 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
-
-import java.util.Map;
-import java.util.Optional;
-
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -24,8 +12,6 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
-import com.sequenceiq.cloudbreak.service.network.DefaultNetworkRequiredService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
@@ -36,14 +22,21 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentB
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.Map;
+import java.util.Optional;
+
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 @Component
 public class DistroXV1RequestToStackV4RequestConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXV1RequestToStackV4RequestConverter.class);
-
-    @Inject
-    private DistroXEnvironmentV1ToEnvironmentSettingsConverter environmentConverter;
 
     @Inject
     private DistroXAuthenticationToStaAuthenticationConverter authenticationConverter;
@@ -65,12 +58,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
 
     @Inject
     private EnvironmentClientService environmentClientService;
-
-    @Inject
-    private WorkspaceService workspaceService;
-
-    @Inject
-    private DefaultNetworkRequiredService defaultNetworkRequiredService;
 
     @Inject
     private SdxConverter sdxConverter;

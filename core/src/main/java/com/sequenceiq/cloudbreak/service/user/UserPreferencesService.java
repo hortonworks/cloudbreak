@@ -1,22 +1,20 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.inject.Inject;
-
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.UserPreferences;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.UserPreferencesRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.UserPreferences;
-import com.sequenceiq.cloudbreak.workspace.repository.workspace.UserPreferencesRepository;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import javax.inject.Inject;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserPreferencesService {
@@ -25,9 +23,6 @@ public class UserPreferencesService {
 
     @Inject
     private UserPreferencesRepository userPreferencesRepository;
-
-    @Inject
-    private UserService userService;
 
     @Inject
     private TransactionService transactionService;

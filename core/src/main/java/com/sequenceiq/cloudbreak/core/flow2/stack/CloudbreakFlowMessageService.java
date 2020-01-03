@@ -1,25 +1,15 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack;
 
-import java.util.Arrays;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.Arrays;
 
 @Service
 public class CloudbreakFlowMessageService implements FlowMessageService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakFlowMessageService.class);
-
-    @Inject
-    private CloudbreakMessagesService messagesService;
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;

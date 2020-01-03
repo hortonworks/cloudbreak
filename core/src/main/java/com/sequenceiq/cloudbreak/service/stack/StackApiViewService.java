@@ -1,22 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.converter.stack.StackListItemToStackApiViewConverter;
@@ -28,6 +11,21 @@ import com.sequenceiq.cloudbreak.repository.HostGroupViewRepository;
 import com.sequenceiq.cloudbreak.repository.StackApiViewRepository;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.flow.core.FlowLogService;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 
 @Service
 public class StackApiViewService {
@@ -39,9 +37,6 @@ public class StackApiViewService {
 
     @Inject
     private EnvironmentClientService environmentClientService;
-
-    @Inject
-    private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
 
     @Inject
     private StackApiViewRepository stackApiViewRepository;

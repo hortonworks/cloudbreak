@@ -1,48 +1,30 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserProfileService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserProfileService.class);
-
     @Inject
     private UserProfileRepository userProfileRepository;
-
-    @Inject
-    private ImageCatalogService imageCatalogService;
-
-    @Inject
-    private SecretService secretService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
     private UserService userService;
-
-    @Inject
-    private WorkspaceService workspaceService;
 
     public UserProfile getOrCreateForLoggedInUser() {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
