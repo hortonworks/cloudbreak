@@ -45,9 +45,13 @@ public class PlatformRegionsToRegionV1ResponseConverter extends AbstractConversi
         }
 
         Set<String> locations = new HashSet<>();
+        Set<String> k8sSupportedLocations = new HashSet<>();
         for (Entry<Region, Coordinate> coordinateEntry : source.getCoordinates().entrySet()) {
             locations.add(coordinateEntry.getKey().getRegionName());
             displayNames.put(coordinateEntry.getKey().getRegionName(), coordinateEntry.getValue().getDisplayName());
+            if (coordinateEntry.getValue().getK8sSupported()) {
+                k8sSupportedLocations.add(coordinateEntry.getKey().getRegionName());
+            }
         }
 
         json.setNames(regions);
@@ -55,6 +59,7 @@ public class PlatformRegionsToRegionV1ResponseConverter extends AbstractConversi
         json.setDefaultRegion(source.getDefaultRegion());
         json.setDisplayNames(displayNames);
         json.setLocations(locations);
+        json.setK8sSupportedlocations(k8sSupportedLocations);
         return json;
     }
 }

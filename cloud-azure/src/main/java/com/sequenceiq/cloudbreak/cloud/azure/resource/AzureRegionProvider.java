@@ -90,9 +90,11 @@ public class AzureRegionProvider {
             RegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, RegionCoordinateSpecifications.class);
             for (RegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
                 regionCoordinates.put(region(regionCoordinateSpecification.getName()),
-                        coordinate(regionCoordinateSpecification.getLongitude(),
+                        coordinate(
+                                regionCoordinateSpecification.getLongitude(),
                                 regionCoordinateSpecification.getLatitude(),
-                                regionCoordinateSpecification.getName()));
+                                regionCoordinateSpecification.getName(),
+                                regionCoordinateSpecification.isEksSupported()));
             }
         } catch (IOException ignored) {
             LOGGER.error("Failed to read enabled Azure regions from file.");

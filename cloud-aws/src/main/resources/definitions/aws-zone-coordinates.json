@@ -4,103 +4,120 @@
       "name": "sa-east-1",
       "displayName": "South America (São Paulo)",
       "latitude": "-22.51956989",
-      "longitude": "-44.09496769"
+      "longitude": "-44.09496769",
+      "k8sSupported": true
     },
     {
       "name": "eu-central-1",
       "displayName": "EU (Frankfurt)",
       "latitude": "50.09997683",
-      "longitude": "8.67501542"
+      "longitude": "8.67501542",
+      "k8sSupported": true
     },
     {
       "name": "ap-northeast-1",
       "displayName": "Asia Pacific (Tokyo)",
       "latitude": "35.68501691",
-      "longitude": "139.7514074"
+      "longitude": "139.7514074",
+      "k8sSupported": true
     },
     {
       "name": "eu-west-1",
       "displayName": "EU (Ireland)",
       "latitude": "53.33306114",
-      "longitude": "-6.248905682"
+      "longitude": "-6.248905682",
+      "k8sSupported": true
     },
     {
       "name": "eu-west-3",
       "displayName": "EU (Paris)",
       "latitude": "48.86669293",
-      "longitude": "2.333335326"
+      "longitude": "2.333335326",
+      "k8sSupported": true
     },
     {
       "name": "eu-north-1",
       "displayName": "EU (Stockholm)",
       "latitude": "59.329444",
-      "longitude": "18.068611"
+      "longitude": "18.068611",
+      "k8sSupported": true
     },
     {
       "name": "ap-northeast-2",
       "displayName": "Asia Pacific (Seoul)",
       "latitude": "37.5663491",
-      "longitude": "126.999731"
+      "longitude": "126.999731",
+      "k8sSupported": true
     },
     {
       "name": "us-east-1",
       "displayName": "US East(N. Virginia)",
       "latitude": "38.89954938",
-      "longitude": "-77.00941858"
+      "longitude": "-77.00941858",
+      "k8sSupported": true
     },
     {
       "name": "us-west-1",
       "displayName": "US West (N. California)",
       "latitude": "37.74000775",
-      "longitude": "-122.4599777"
+      "longitude": "-122.4599777",
+      "k8sSupported": false
     },
     {
       "name": "us-west-2",
       "displayName": "US West (Oregon)",
       "latitude": "45.5428",
-      "longitude": "-122.6544"
+      "longitude": "-122.6544",
+      "k8sSupported": true
     },
     {
       "name": "ap-southeast-2",
       "displayName": "Asia Pacific (Sydney)",
       "latitude": "-33.92001097",
-      "longitude": "151.1851798"
+      "longitude": "151.1851798",
+      "k8sSupported": true
     },
     {
       "name": "ap-southeast-1",
       "displayName": "Asia Pacific (Singapore)",
       "latitude": "1.293033466",
-      "longitude": "103.8558207"
+      "longitude": "103.8558207",
+      "k8sSupported": true
     },
     {
       "name": "ap-south-1",
       "displayName": "Asia Pacific (Mumbai)",
       "latitude": "19.01699038",
-      "longitude": "72.8569893"
+      "longitude": "72.8569893",
+      "k8sSupported": true
     },
     {
       "name": "eu-west-2",
       "displayName": "EU (London)",
       "latitude": "51.49999473",
-      "longitude": "-0.116721844"
+      "longitude": "-0.116721844",
+      "k8sSupported": true
     },
     {
       "name": "ca-central-1",
       "displayName": "Canada (Central)",
       "latitude": "43.69997988",
-      "longitude": "-79.42002079"
+      "longitude": "-79.42002079",
+      "k8sSupported": true
     },
     {
       "name": "us-east-2",
       "displayName": "US East (Ohio)",
       "latitude": "39.94028688",
-      "longitude": "-82.01332503"
+      "longitude": "-82.01332503",
+      "k8sSupported": true
     },
     {
       "name": "us-gov-west-1",
       "displayName": "GovCloud (US)",
       "latitude": "37.29998293",
-      "longitude": "-121.8499891"
+      "longitude": "-121.8499891",
+      "k8sSupported": false
     }
   ]
 }
