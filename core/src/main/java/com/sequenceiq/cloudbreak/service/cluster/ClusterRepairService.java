@@ -270,13 +270,13 @@ public class ClusterRepairService {
         List<String> validationResult = new ArrayList<>();
         if (isGateway(instanceMetaData)) {
             if (createdFromBaseImage(stack)) {
-                validationResult.add("Repair is not supported when cluster is created from base image.");
+                validationResult.add("Repair is only supported when the image already contains Cloudera Manager and Cloudera Data Platform artifacts.");
             }
             if (!gatewayDatabaseAvailable(stack.getCluster()) && !stack.isMultipleGateway()) {
-                validationResult.add("Repair with disk reattach not supported on single node gateway without external RDS.");
+                validationResult.add("Repair is only supported when single node Cloudera Manager state is externalized into an external Database.");
             }
             if (withEmbeddedClusterManagerDB(stack.getCluster())) {
-                validationResult.add("Cluster manager server failure with embedded database cannot be repaired!");
+                validationResult.add("Cloudera Manager server failure with embedded Database cannot be repaired!");
             }
         }
         return validationResult;
