@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e;
+package com.sequenceiq.it.cloudbreak.testcase.e2e.environment;
 
 import javax.inject.Inject;
 
@@ -12,6 +12,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
 public class BasicEnvironmentTests extends AbstractE2ETest {
 

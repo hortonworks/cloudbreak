@@ -3,3 +3,6 @@ tests:
   - name: "aws e2e tests"
     packages:
       - com.sequenceiq.it.cloudbreak.testcase.e2e.aws.*
+      - com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.*
+      - com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.*
+      - com.sequenceiq.it.cloudbreak.testcase.e2e.environment.*

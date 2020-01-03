@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.aws;
+package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static java.lang.String.format;
@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
-import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -27,8 +27,8 @@ import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 
-public class AwsDistroXBaseImageTests extends AbstractE2ETest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsDistroXBaseImageTests.class);
+public class DistroXBaseImageTests extends AbstractE2ETest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXBaseImageTests.class);
 
     private Map<String, InstanceStatus> instancesHealthy = new HashMap<>() {{
         put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
@@ -38,9 +38,6 @@ public class AwsDistroXBaseImageTests extends AbstractE2ETest {
 
     @Inject
     private DistroXTestClient distroXTestClient;
-
-    @Inject
-    private AwsCloudProvider awsCloudProvider;
 
     @Inject
     private WaitUtil waitUtil;
@@ -63,14 +60,15 @@ public class AwsDistroXBaseImageTests extends AbstractE2ETest {
         String imageCatalog = resourcePropertyProvider().getName();
         String distrox = resourcePropertyProvider().getName();
         AtomicReference<String> selectedImageID = new AtomicReference<>();
+        CloudProvider cloudProvider = testContext.getCloudProvider();
 
         testContext
                 .given(imageCatalog, ImageCatalogTestDto.class)
                 .when((tc, dto, client) -> {
-                    selectedImageID.set(awsCloudProvider.getLatestBaseImageID(tc, dto, client));
+                    selectedImageID.set(cloudProvider.getLatestBaseImageID(tc, dto, client));
                     return dto;
                 })
-                .given(imageSettings, DistroXImageTestDto.class).withImageCatalog(awsCloudProvider.getImageCatalogName()).withImageId(selectedImageID.get())
+                .given(imageSettings, DistroXImageTestDto.class).withImageCatalog(cloudProvider.getImageCatalogName()).withImageId(selectedImageID.get())
                 .given(distrox, DistroXTestDto.class).withImageSettings(imageSettings)
                 .when(distroXTestClient.create(), key(distrox))
                 .await(STACK_AVAILABLE)

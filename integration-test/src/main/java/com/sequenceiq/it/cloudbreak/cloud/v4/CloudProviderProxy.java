@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.StackV4ParameterBase;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
@@ -279,6 +280,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getImageCatalogName() {
+        return delegate.getImageCatalogName();
+    }
+
+    @Override
     public void setImageCatalogUrl(String url) {
         delegate.setImageCatalogUrl(url);
     }
@@ -286,5 +292,10 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public void setImageId(String id) {
         delegate.setImageId(id);
+    }
+
+    @Override
+    public void setInstanceTemplateV1Parameters(InstanceTemplateV1Request instanceTemplateV1Request) {
+        delegate.setInstanceTemplateV1Parameters(instanceTemplateV1Request);
     }
 }

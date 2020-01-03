@@ -18,8 +18,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.AwsDistroXV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsEncryptionV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.AwsNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBasedParameters;
@@ -352,10 +356,6 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         }
     }
 
-    public String getImageCatalogName() {
-        return commonCloudProperties().getImageCatalogName();
-    }
-
     public String getImageCatalogUrl() {
         return commonCloudProperties().getImageCatalogUrl();
     }
@@ -363,5 +363,14 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public void setImageId(String id) {
         awsProperties.getBaseimage().setImageId(id);
+    }
+
+    @Override
+    public void setInstanceTemplateV1Parameters(InstanceTemplateV1Request instanceTemplateV1Request) {
+        AwsInstanceTemplateV1Parameters awsInstanceTemplateV1Parameters = new AwsInstanceTemplateV1Parameters();
+        AwsEncryptionV1Parameters awsEncryptionV1Parameters = new AwsEncryptionV1Parameters();
+        awsEncryptionV1Parameters.setType(EncryptionType.DEFAULT);
+        awsInstanceTemplateV1Parameters.setEncryption(awsEncryptionV1Parameters);
+        instanceTemplateV1Request.setAws(awsInstanceTemplateV1Parameters);
     }
 }
