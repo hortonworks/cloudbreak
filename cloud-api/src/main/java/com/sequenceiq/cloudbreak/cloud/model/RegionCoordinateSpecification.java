@@ -15,8 +15,8 @@ public class RegionCoordinateSpecification {
     @JsonProperty("longitude")
     private String longitude;
 
-    @JsonProperty("eksSupported")
-    private boolean eksSupported;
+    @JsonProperty("k8sSupported")
+    private boolean k8sSupported;
 
     public String getName() {
         return name;
@@ -50,11 +50,11 @@ public class RegionCoordinateSpecification {
         this.displayName = displayName;
     }
 
-    public boolean isEksSupported() {
-        return eksSupported;
+    public boolean isK8sSupported() {
+        return k8sSupported;
     }
 
-    public void setEksSupported(boolean eksSupported) {
-        this.eksSupported = eksSupported;
+    public void setK8sSupported(boolean k8sSupported) {
+        this.k8sSupported = k8sSupported;
     }
 }

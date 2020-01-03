@@ -289,7 +289,7 @@ public class ClusterRepairServiceTest {
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
             underTest.repairNodes(1L, Set.of("instanceId1"), false, false);
         });
-        assertEquals("Repair cannot be performed, because there is already an active flow.", exception.getMessage());
+        assertEquals("Repair cannot be performed, because there is already an active operation.", exception.getMessage());
 
         verifyZeroInteractions(stackUpdater);
     }
