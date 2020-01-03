@@ -1,18 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
@@ -31,14 +18,20 @@ import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 import com.sequenceiq.common.model.CloudIdentityType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 public class FileSystemConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileSystemConverter.class);
-
-    @Inject
-    private ConversionService conversionService;
 
     public SpiFileSystem fileSystemToSpi(FileSystem source) {
         List<CloudFileSystemView> cloudFileSystemViews = Collections.emptyList();

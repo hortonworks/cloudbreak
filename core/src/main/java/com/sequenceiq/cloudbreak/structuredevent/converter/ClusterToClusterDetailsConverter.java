@@ -1,31 +1,22 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component
 public class ClusterToClusterDetailsConverter {
 
     @Inject
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
-
-    @Inject
     private RdsConfigService rdsConfigService;
-
-    @Inject
-    private KerberosConfigService kerberosConfigService;
 
     public ClusterDetails convert(Cluster source) {
         ClusterDetails clusterDetails = new ClusterDetails();

@@ -1,5 +1,15 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,18 +19,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Service;
-
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
-
 @Service
 public class ComponentLocatorService {
 
@@ -29,9 +27,6 @@ public class ComponentLocatorService {
 
     @Inject
     private HostGroupService hostGroupService;
-
-    @Inject
-    private BlueprintService blueprintService;
 
     public Map<String, List<String>> getComponentLocation(Cluster cluster, Collection<String> componentNames) {
         return getComponentAttribute(cluster, componentNames, InstanceMetaData::getDiscoveryFQDN);

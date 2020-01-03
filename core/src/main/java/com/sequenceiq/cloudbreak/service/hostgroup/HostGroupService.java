@@ -1,26 +1,20 @@
 package com.sequenceiq.cloudbreak.service.hostgroup;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Service;
-
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class HostGroupService {
 
     @Inject
     private HostGroupRepository hostGroupRepository;
-
-    @Inject
-    private TransactionService transactionService;
 
     public Set<HostGroup> getByCluster(Long clusterId) {
         return hostGroupRepository.findHostGroupsInCluster(clusterId);

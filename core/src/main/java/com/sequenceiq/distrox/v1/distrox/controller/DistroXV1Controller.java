@@ -1,18 +1,5 @@
 package com.sequenceiq.distrox.v1.distrox.controller;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Controller;
-
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.dto.StackAccessDto;
@@ -39,7 +26,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.EmptyResponse;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
-import com.sequenceiq.distrox.v1.distrox.converter.DistroXImageChangeV1RequestToStackImageChangeV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXMaintenanceModeV1ToMainenanceModeV4Converter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXRepairV1RequestToClusterRepairV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXScaleV1RequestToStackScaleV4RequestConverter;
@@ -47,6 +33,17 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToCreateAWSCl
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.StackRequestToCreateAWSClusterRequestConverter;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Controller;
+
+import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @InternalReady
@@ -67,9 +64,6 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Inject
     private DistroXRepairV1RequestToClusterRepairV4RequestConverter clusterRepairRequestConverter;
-
-    @Inject
-    private DistroXImageChangeV1RequestToStackImageChangeV4RequestConverter imageChangeRequestConverter;
 
     @Inject
     private DistroXMaintenanceModeV1ToMainenanceModeV4Converter maintenanceModeConverter;

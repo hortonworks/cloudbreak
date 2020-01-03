@@ -1,24 +1,19 @@
 package com.sequenceiq.flow.reactor.config;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
-
 import reactor.bus.EventBus;
 import reactor.core.Dispatcher;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 @Component
 public class EventBusStatisticReporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventBusStatisticReporter.class);
-
-    @Inject
-    private EventBusConfig eventBusConfig;
 
     @Inject
     private EventBus eventBus;

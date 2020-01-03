@@ -1,20 +1,5 @@
 package com.sequenceiq.distrox.v1.distrox;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.BadRequestException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.dto.StackAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
@@ -37,7 +22,6 @@ import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
-import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -48,6 +32,19 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.distrox.v1.distrox.service.SdxServiceDecorator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.BadRequestException;
+import java.util.List;
+import java.util.Set;
+
+import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Service
 public class StackOperations {
@@ -77,9 +74,6 @@ public class StackOperations {
 
     @Inject
     private StackApiViewService stackApiViewService;
-
-    @Inject
-    private DefaultClouderaManagerRepoService defaultClouderaManagerRepoService;
 
     @Inject
     private EnvironmentServiceDecorator environmentServiceDecorator;

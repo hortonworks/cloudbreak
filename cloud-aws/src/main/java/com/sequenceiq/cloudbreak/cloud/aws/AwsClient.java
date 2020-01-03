@@ -1,16 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-
-import java.io.IOException;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
@@ -42,6 +31,15 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationEx
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.service.Retry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.io.IOException;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Component
 public class AwsClient {
@@ -59,12 +57,6 @@ public class AwsClient {
 
     @Inject
     private AwsEnvironmentVariableChecker awsEnvironmentVariableChecker;
-
-    @Inject
-    private AwsPlatformParameters awsPlatformParameters;
-
-    @Inject
-    private AwsCredentialVerifier awsCredentialVerifier;
 
     @Inject
     private Retry retry;

@@ -1,23 +1,18 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.distrox.api.v1.distrox.model.environment.DistroXEnvironmentV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component
 public class DistroXEnvironmentV1ToEnvironmentSettingsConverter {
 
     @Inject
     private EnvironmentClientService environmentClientService;
-
-    @Inject
-    private WorkspaceService workspaceService;
 
     public EnvironmentSettingsV4Request convert(DistroXEnvironmentV1Request source) {
         DetailedEnvironmentResponse environment = environmentClientService.getByName(source.getName());

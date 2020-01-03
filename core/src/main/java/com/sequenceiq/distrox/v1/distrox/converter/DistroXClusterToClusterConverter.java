@@ -1,31 +1,21 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.List;
+
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 @Component
 public class DistroXClusterToClusterConverter {
-
-    @Inject
-    private RdsConfigService rdsConfigService;
-
-    @Inject
-    private WorkspaceService workspaceService;
 
     @Inject
     private ClouderaManagerV1ToClouderaManagerV4Converter cmConverter;

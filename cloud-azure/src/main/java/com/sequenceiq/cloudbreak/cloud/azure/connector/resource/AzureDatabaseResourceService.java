@@ -4,11 +4,9 @@ import com.google.common.collect.Lists;
 import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureContextService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -18,16 +16,14 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.common.api.type.ResourceType;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class AzureDatabaseResourceService {
@@ -38,12 +34,6 @@ public class AzureDatabaseResourceService {
     private static final int POSTGRESQL_SERVER_PORT = 5432;
 
     private static final String DATABASE_SERVER_FQDN = "databaseServerFQDN";
-
-    @Inject
-    private AzureContextBuilder contextBuilder;
-
-    @Inject
-    private AzureContextService azureContextService;
 
     @Inject
     private AzureTemplateBuilder azureTemplateBuilder;

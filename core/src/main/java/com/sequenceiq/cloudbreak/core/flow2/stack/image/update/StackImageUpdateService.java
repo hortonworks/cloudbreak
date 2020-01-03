@@ -1,23 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -34,6 +22,15 @@ import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.Set;
+
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
 @Service
 public class StackImageUpdateService {
@@ -44,9 +41,6 @@ public class StackImageUpdateService {
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
-
-    @Inject
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
     private ImageCatalogService imageCatalogService;

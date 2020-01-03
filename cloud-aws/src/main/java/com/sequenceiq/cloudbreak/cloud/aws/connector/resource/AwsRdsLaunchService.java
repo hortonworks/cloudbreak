@@ -1,20 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_COMPLETE;
-import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_FAILED;
-import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
@@ -38,6 +23,19 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.common.api.type.ResourceType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_COMPLETE;
+import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_FAILED;
+import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
 
 @Service
 public class AwsRdsLaunchService {
@@ -69,9 +67,6 @@ public class AwsRdsLaunchService {
 
     @Inject
     private AwsStackRequestHelper awsStackRequestHelper;
-
-    @Inject
-    private AwsResourceConnector awsResourceConnector;
 
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier resourceNotifier)
             throws Exception {

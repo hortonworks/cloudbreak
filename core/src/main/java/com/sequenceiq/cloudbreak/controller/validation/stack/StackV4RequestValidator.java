@@ -1,66 +1,36 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
-import java.util.Optional;
-
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
-import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.PlatformResourceClientService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.validation.Validator;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
+import javax.inject.Inject;
+import java.util.Optional;
 
 @Component
 public class StackV4RequestValidator implements Validator<StackV4Request> {
 
     @Inject
-    private ClusterService clusterService;
-
-    @Inject
-    private StackService stackService;
-
-    @Inject
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
     private InstanceTemplateV4RequestValidator templateRequestValidator;
-
-    @Inject
-    private BlueprintService blueprintService;
-
-    @Inject
-    private RdsConfigService rdsConfigService;
-
-    @Inject
-    private DatalakeResourcesService datalakeResourcesService;
 
     @Inject
     private EnvironmentClientService environmentClientService;
 
     @Inject
     private PlatformResourceClientService platformResourceClientService;
-
-    @Inject
-    private LdapConfigService ldapConfigService;
 
     @Override
     public ValidationResult validate(StackV4Request subject) {

@@ -1,21 +1,5 @@
 package com.sequenceiq.cloudbreak.cluster.service;
 
-import static java.util.Optional.ofNullable;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
@@ -25,7 +9,20 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
-import com.sequenceiq.cloudbreak.repository.ClusterComponentViewRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
 
 @Service
 public class ClusterComponentConfigProvider {
@@ -34,9 +31,6 @@ public class ClusterComponentConfigProvider {
 
     @Inject
     private ClusterComponentRepository componentRepository;
-
-    @Inject
-    private ClusterComponentViewRepository componentViewRepository;
 
     public ClusterComponent getComponent(Long clusterId, ComponentType componentType) {
         return getComponent(clusterId, componentType, componentType.name());

@@ -1,16 +1,5 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.Optional;
-
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -19,25 +8,28 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class RedbeamsDbServerConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsDbServerConfigurer.class);
 
-    private static final String JDBC_PATTERN = "\\/\\/(.*?):(\\d*)";
-
     @Inject
     private RedbeamsClientService redbeamsClientService;
 
     @Inject
     private DatabaseCommon dbCommon;
-
-    @Inject
-    private SecretService secretService;
 
     @Inject
     private DbUsernameConverterService dbUsernameConverterService;
