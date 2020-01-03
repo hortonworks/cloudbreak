@@ -8,6 +8,7 @@ public class PlatformResourceModelDescription {
     public static final String REGIONS = "regions";
     public static final String REGION_DISPLAYNAMES = "regions with displayNames";
     public static final String REGION_LOCATIONS = "regions with location data";
+    public static final String K8S_SUPPORTED_LOCATIONS = "regions with k8s support";
     public static final String AVAILABILITY_ZONES = "availability zones";
     public static final String DEFAULT_REGIOS = "default regions";
     public static final String TAG_SPECIFICATIONS = "tag specifications";

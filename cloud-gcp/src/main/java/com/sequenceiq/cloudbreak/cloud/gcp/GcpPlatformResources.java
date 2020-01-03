@@ -106,9 +106,11 @@ public class GcpPlatformResources implements PlatformResources {
             RegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, RegionCoordinateSpecifications.class);
             for (RegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
                 regionCoordinates.put(region(regionCoordinateSpecification.getName()),
-                        coordinate(regionCoordinateSpecification.getLongitude(),
+                        coordinate(
+                                regionCoordinateSpecification.getLongitude(),
                                 regionCoordinateSpecification.getLatitude(),
-                                regionCoordinateSpecification.getDisplayName()));
+                                regionCoordinateSpecification.getDisplayName(),
+                                regionCoordinateSpecification.isEksSupported()));
             }
         } catch (IOException ignored) {
             return regionCoordinates;

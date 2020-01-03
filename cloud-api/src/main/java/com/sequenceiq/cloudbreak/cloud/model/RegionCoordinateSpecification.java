@@ -15,6 +15,9 @@ public class RegionCoordinateSpecification {
     @JsonProperty("longitude")
     private String longitude;
 
+    @JsonProperty("eksSupported")
+    private boolean eksSupported;
+
     public String getName() {
         return name;
     }
@@ -45,5 +48,13 @@ public class RegionCoordinateSpecification {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public boolean isEksSupported() {
+        return eksSupported;
+    }
+
+    public void setEksSupported(boolean eksSupported) {
+        this.eksSupported = eksSupported;
     }
 }

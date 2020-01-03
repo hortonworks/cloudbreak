@@ -24,9 +24,13 @@ public class RegionResponse extends CompactRegionResponse {
     @ApiModelProperty(PlatformResourceModelDescription.REGION_LOCATIONS)
     private Set<String> locations;
 
+    @ApiModelProperty(PlatformResourceModelDescription.K8S_SUPPORTED_LOCATIONS)
+    private Set<String> k8sSupportedlocations;
+
     public RegionResponse() {
         availabilityZones = new HashMap<>();
         locations = new HashSet<>();
+        k8sSupportedlocations = new HashSet<>();
     }
 
     @JsonProperty("names")
@@ -45,6 +49,14 @@ public class RegionResponse extends CompactRegionResponse {
 
     public void setAvailabilityZones(Map<String, Collection<String>> availabilityZones) {
         this.availabilityZones = availabilityZones;
+    }
+
+    public Set<String> getK8sSupportedlocations() {
+        return k8sSupportedlocations;
+    }
+
+    public void setK8sSupportedlocations(Set<String> k8sSupportedlocations) {
+        this.k8sSupportedlocations = k8sSupportedlocations;
     }
 
     public String getDefaultRegion() {

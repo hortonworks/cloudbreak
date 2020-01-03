@@ -126,8 +126,8 @@ public class EnvironmentTestData {
     public static CloudRegions getCloudRegions() {
         List<Region> regions = List.of(Region.region("r1"), Region.region("r2"));
         List<String> displayNames = List.of("region 1", "region 2");
-        List<Coordinate> coordinates = List.of(Coordinate.coordinate("1", "2", "Here"),
-                Coordinate.coordinate("2", "2", "There"));
+        List<Coordinate> coordinates = List.of(Coordinate.coordinate("1", "2", "Here", false),
+                Coordinate.coordinate("2", "2", "There", false));
         List<List<AvailabilityZone>> availabilityZones = List.of(List.of(AvailabilityZone.availabilityZone("r1z1")),
                 List.of(AvailabilityZone.availabilityZone("r2z1")));
 
