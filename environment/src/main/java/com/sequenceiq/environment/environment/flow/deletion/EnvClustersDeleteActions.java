@@ -21,13 +21,14 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnviro
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.flow.deletion.event.EnvClusterDeleteFailedEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
-import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
+import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.notification.NotificationService;
 
@@ -86,9 +87,9 @@ public class EnvClustersDeleteActions {
 
     @Bean(name = "ENV_CLUSTERS_DELETE_FAILED_STATE")
     public Action<?, ?> failedAction() {
-        return new AbstractEnvClustersDeleteAction<>(EnvDeleteFailedEvent.class) {
+        return new AbstractEnvClustersDeleteAction<>(EnvClusterDeleteFailedEvent.class) {
             @Override
-            protected void doExecute(CommonContext context, EnvDeleteFailedEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(CommonContext context, EnvClusterDeleteFailedEvent payload, Map<Object, Object> variables) {
                 LOGGER.warn("Failed to delete environment", payload.getException());
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
@@ -101,8 +102,17 @@ public class EnvClustersDeleteActions {
                             notificationService.send(ResourceEvent.ENVIRONMENT_DELETION_FAILED, simpleResponse, context.getFlowTriggerUserCrn());
                         }, () -> LOGGER.error("Cannot set delete failed to env because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
-                LOGGER.info("Flow entered into ENV_DELETE_FAILED_STATE");
+                LOGGER.info("Flow entered into ENV_CLUSTERS_DELETE_FAILED_STATE");
                 sendEvent(context, HANDLED_FAILED_ENV_CLUSTERS_DELETE_EVENT.event(), payload);
+            }
+
+            @Override
+            protected CommonContext createFlowContext(
+                    FlowParameters flowParameters, StateContext<EnvClustersDeleteState, EnvClustersDeleteStateSelectors> stateContext,
+                    EnvClusterDeleteFailedEvent payload) {
+                Flow flow = getFlow(flowParameters.getFlowId());
+                flow.setFlowFailed(payload.getException());
+                return new CommonContext(flowParameters);
             }
         };
     }
