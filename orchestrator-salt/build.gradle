@@ -38,4 +38,6 @@ dependencies {
     testCompile (group: 'junit',                    name: 'junit',                          version: junitVersion) {
         exclude group: 'org.hamcrest'
     }
+
+    testCompile group: 'com.hubspot.jinjava', name: 'jinjava', version: jinjavaVersion
 }
