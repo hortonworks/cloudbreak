@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -17,6 +18,8 @@ import javax.persistence.Transient;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.converter.TunnelConverter;
+import com.sequenceiq.common.api.type.Tunnel;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -60,6 +63,9 @@ public class StackApiView extends CompactView {
 
     @Transient
     private Integer nodeCount;
+
+    @Convert(converter = TunnelConverter.class)
+    private Tunnel tunnel = Tunnel.DIRECT;
 
     public String getResourceCrn() {
         return resourceCrn;
@@ -167,5 +173,13 @@ public class StackApiView extends CompactView {
 
     public Integer getNodeCount() {
         return nodeCount;
+    }
+
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
+    public void setTunnel(Tunnel tunnel) {
+        this.tunnel = tunnel;
     }
 }
