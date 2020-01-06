@@ -141,8 +141,8 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "c.cloudbreakAmbariUser as cloudbreakAmbariUser, "
             + "c.cloudbreakAmbariPassword as cloudbreakAmbariPassword, "
             + "c.status as clusterStatus, "
-            + "ig.instanceGroupType as instanceGroupType, "
-            + "im.instanceMetadataType as instanceMetadataType, "
+            + "ig.instanceGroupType, "
+            + "im.instanceMetadataType, "
             + "im.publicIp as publicIp, "
             + "im.privateIp as privateIp, "
             + "sc.usePrivateIpToTls as usePrivateIpToTls, "
@@ -161,8 +161,8 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "LEFT JOIN s.workspace w "
             + "LEFT JOIN w.tenant t "
             + "LEFT JOIN s.creator u "
-            + "WHERE instanceGroupType = 'GATEWAY' "
-            + "AND instanceMetadataType = 'GATEWAY_PRIMARY' "
+            + "WHERE ig.instanceGroupType = 'GATEWAY' "
+            + "AND im.instanceMetadataType = 'GATEWAY_PRIMARY' "
             + "AND s.terminated = null "
             + "AND c.clusterManagerIp IS NOT NULL "
             + "AND c.status = 'AVAILABLE' "
@@ -200,7 +200,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @CheckPermissionsByReturnValue
     @Query("SELECT new java.lang.Boolean(count(*) > 0) "
-            + "FROM Stack c LEFT JOIN c.instanceGroups ig WHERE ig.template.id= :templateId AND c.stackStatus <> 'DELETE_COMPLETED'")
+            + "FROM Stack c LEFT JOIN c.instanceGroups ig WHERE ig.template.id= :templateId AND c.stackStatus.status <> 'DELETE_COMPLETED'")
     Boolean findTemplateInUse(@Param("templateId") Long templateId);
 
     @DisableCheckPermissions

@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.service.integration;
+package com.sequenceiq.cloudbreak;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,17 +12,24 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.repository.support.Repositories;
 
+@EnableAutoConfiguration
+@EntityScan(basePackages = {"com.sequenceiq.cloudbreak.repository",
+        "com.sequenceiq.cloudbreak.domain",
+        "com.sequenceiq.cloudbreak.workspace.repository",
+        "com.sequenceiq.cloudbreak.workspace.model",
+        "com.sequenceiq.flow.domain",
+        "com.sequenceiq.cloudbreak.ha.domain"
+})
 @DataJpaTest(properties = {
-        "spring.jpa.properties.hibernate.session_factory.statement_inspector=com.sequenceiq.environment.service.integration.SqlStatementInspector"})
-@EntityScan(basePackages = {"com.sequenceiq.flow.domain",
-        "com.sequenceiq.environment",
-        "com.sequenceiq.cloudbreak.ha.domain"})
+        "spring.jpa.properties.hibernate.session_factory.statement_inspector=com.sequenceiq.cloudbreak.SqlStatementInspector"})
 @Import(SqlStatementInspector.class)
 public class JpaTest {
 
@@ -100,5 +107,9 @@ public class JpaTest {
                 }
             }
         };
+    }
+
+    @Configuration
+    static class TestConfig {
     }
 }
