@@ -74,7 +74,8 @@ public class TlsSetupService {
             instanceMetaDataService.save(metaData);
         } catch (Exception e) {
             throw new CloudbreakException("Failed to retrieve the server's certificate from Nginx."
-                    + " Please check your security group is open enough and Cloudbreak can access your VPC and subnet", e);
+                    + " Please check your security group is open enough and the Management Console can access your VPC and subnet."
+                    + " Please also Make sure your Subnets can route to the internet and you have public DNS and IP options enabled", e);
         }
     }
 
