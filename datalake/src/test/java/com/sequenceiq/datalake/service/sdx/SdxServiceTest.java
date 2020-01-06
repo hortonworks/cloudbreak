@@ -41,6 +41,8 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -48,8 +50,10 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
@@ -107,6 +111,9 @@ class SdxServiceTest {
 
     @InjectMocks
     private SdxService underTest;
+
+    @Mock
+    private CloudStorageLocationValidator cloudStorageLocationValidator;
 
     @BeforeEach
     void initMocks() {
@@ -187,6 +194,48 @@ class SdxServiceTest {
         Assertions.assertFalse(capturedSdx.isCreateDatabase());
         Assertions.assertTrue(createdSdxCluster.getCrn().matches("crn:cdp:datalake:us-west-1:hortonworks:datalake:.*"));
         verify(sdxReactorFlowManager).triggerSdxCreation(id);
+    }
+
+    @Test
+    void createSdxWhenBaseLocationEndsWithSlash() {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
+        sdxClusterRequest.setEnvironment("envir");
+        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
+        cloudStorage.setFileSystemType(FileSystemType.S3);
+        cloudStorage.setBaseLocation("s3a://some/dir/");
+        cloudStorage.setS3(new S3CloudStorageV1Parameters());
+        sdxClusterRequest.setCloudStorage(cloudStorage);
+        long id = 10L;
+        when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
+            SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
+            sdxWithId.setId(id);
+            return sdxWithId;
+        });
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
+        SdxCluster createdSdxCluster = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        Assertions.assertEquals("s3a://some/dir", createdSdxCluster.getCloudStorageBaseLocation());
+    }
+
+    @Test
+    void createSdxWhenBaseLocation() {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
+        sdxClusterRequest.setEnvironment("envir");
+        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
+        cloudStorage.setFileSystemType(FileSystemType.S3);
+        cloudStorage.setBaseLocation("s3a://some/dir");
+        cloudStorage.setS3(new S3CloudStorageV1Parameters());
+        sdxClusterRequest.setCloudStorage(cloudStorage);
+        long id = 10L;
+        when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
+            SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
+            sdxWithId.setId(id);
+            return sdxWithId;
+        });
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
+        SdxCluster createdSdxCluster = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        Assertions.assertEquals("s3a://some/dir", createdSdxCluster.getCloudStorageBaseLocation());
     }
 
     private void mockEnvironmentCall(SdxClusterRequest sdxClusterRequest, CloudPlatform cloudPlatform) {
