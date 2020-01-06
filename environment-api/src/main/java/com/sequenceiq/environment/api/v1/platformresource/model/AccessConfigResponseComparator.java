@@ -7,6 +7,6 @@ public class AccessConfigResponseComparator implements Serializable, Comparator<
 
     @Override
     public int compare(AccessConfigResponse o1, AccessConfigResponse o2) {
-        return o1.getName().compareTo(o2.getName());
+        return o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase());
     }
 }
