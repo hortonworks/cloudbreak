@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
@@ -239,11 +240,20 @@ public class StackUpscaleActions {
     @Bean(name = "RE_REGISTER_WITH_CLUSTER_PROXY_STATE")
     public Action<?, ?> reRegisterWithClusterProxy() {
         return new AbstractStackUpscaleAction<>(StackEvent.class) {
+            @Inject
+            private ClusterProxyConfiguration clusterProxyConfiguration;
 
             @Override
             protected void doExecute(StackScalingFlowContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
-                stackUpscaleService.reRegisterWithClusterProxy(context.getStack().getId());
-                sendEvent(context);
+                if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
+                    stackUpscaleService.reRegisterWithClusterProxy(context.getStack().getId());
+                    sendEvent(context);
+                } else {
+                    LOGGER.info("Cluster Proxy integration is DISABLED, skipping re-registering with Cluster Proxy service");
+                    BootstrapNewNodesEvent bootstrapNewNodesEvent =
+                            new BootstrapNewNodesEvent(StackUpscaleEvent.CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT.event(), payload.getResourceId());
+                    sendEvent(context, bootstrapNewNodesEvent);
+                }
             }
 
             @Override

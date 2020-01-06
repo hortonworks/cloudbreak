@@ -5,11 +5,14 @@ import java.net.URL;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ClusterProxyConfiguration {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyConfiguration.class);
 
     @Value("${clusterProxy.enabled:}")
     private boolean clusterProxyIntegrationEnabled;
@@ -37,6 +40,7 @@ public class ClusterProxyConfiguration {
     @PostConstruct
     private void init() throws IllegalArgumentException {
         if (clusterProxyIntegrationEnabled) {
+            LOGGER.info("Cluster proxy integration enabled, initializing config from URL: [{}]", clusterProxyUrl);
             try {
                 URL url = new URL(clusterProxyUrl);
                 clusterProxyHost = url.getHost();
@@ -46,6 +50,8 @@ public class ClusterProxyConfiguration {
             } catch (MalformedURLException e) {
                 throw new IllegalArgumentException("Configuration `clusterProxy.url` is not a URL.", e);
             }
+        } else {
+            LOGGER.info("Cluster proxy integration is disabled");
         }
     }
 

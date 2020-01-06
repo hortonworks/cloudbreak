@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
@@ -48,10 +49,18 @@ public class ClusterCreationActions {
     @Bean(name = "CLUSTER_PROXY_REGISTRATION_STATE")
     public Action<?, ?> clusterProxyRegistrationAction() {
         return new AbstractStackCreationAction<>(StackEvent.class) {
+            @Inject
+            private ClusterProxyConfiguration clusterProxyConfiguration;
+
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
-                clusterCreationService.registeringToClusterProxy(context.getStack());
-                sendEvent(context);
+                if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
+                    clusterCreationService.registeringToClusterProxy(context.getStack());
+                    sendEvent(context);
+                } else {
+                    ClusterProxyRegistrationSuccess clusterProxyRegistrationSuccess = new ClusterProxyRegistrationSuccess(payload.getResourceId());
+                    sendEvent(context, clusterProxyRegistrationSuccess);
+                }
             }
 
             @Override
