@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -28,9 +29,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -114,6 +118,7 @@ public class UpgradeServiceTest {
         verify(imageService)
                 .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false), eq(user), any());
         assertThat(result.getUpgrade().getImageId()).isEqualTo("id-2");
+        assertThat(result.getReason()).isEqualTo(null);
     }
 
     @Test
@@ -133,6 +138,97 @@ public class UpgradeServiceTest {
         verifyZeroInteractions(componentConfigProviderService);
         verifyZeroInteractions(imageService);
         assertThat(result.getUpgrade()).isEqualTo(null);
+    }
+
+    @Test
+    public void upgradeNotAllowedWhenConnectedDataHubStackIsAvailable() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Stack stack = getStack();
+        Image image = getImage("id-1");
+        setUpMocks(stack, image, true, "id-1", "id-2");
+
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setBaseUrl("cm-base-url");
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(1L)).thenReturn(clouderaManagerRepo);
+
+        StackViewV4Response stackViewV4Response = new StackViewV4Response();
+        stackViewV4Response.setStatus(Status.AVAILABLE);
+        when(distroXV1Endpoint.list(any(), anyString())).thenReturn(new StackViewV4Responses(Set.of(stackViewV4Response)));
+
+        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackName(WORKSPACE_ID, CLUSTER_NAME, user);
+
+        verify(stackService).findStackByNameAndWorkspaceId(eq(CLUSTER_NAME), eq(WORKSPACE_ID));
+        verify(clusterService).repairSupported(eq(stack));
+        verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
+        verify(componentConfigProviderService).getImage(1L);
+        verify(imageService)
+                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false), eq(user), any());
+        assertThat(result.getUpgrade().getImageId()).isEqualTo("id-2");
+        assertThat(result.getReason()).isEqualTo("Please stop connected DataHub clusters before upgrade.");
+    }
+
+    @Test
+    public void upgradeNotAllowedWhenConnectedDataHubClusterIsAvailable() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Stack stack = getStack();
+        Image image = getImage("id-1");
+        setUpMocks(stack, image, true, "id-1", "id-2");
+
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setBaseUrl("cm-base-url");
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(1L)).thenReturn(clouderaManagerRepo);
+
+        StackViewV4Response stackViewV4Response = new StackViewV4Response();
+        stackViewV4Response.setStatus(Status.STOPPED);
+        ClusterViewV4Response clusterViewV4Response = new ClusterViewV4Response();
+        clusterViewV4Response.setStatus(Status.AVAILABLE);
+        stackViewV4Response.setCluster(clusterViewV4Response);
+        when(distroXV1Endpoint.list(any(), anyString())).thenReturn(new StackViewV4Responses(Set.of(stackViewV4Response)));
+
+        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackName(WORKSPACE_ID, CLUSTER_NAME, user);
+
+        verify(stackService).findStackByNameAndWorkspaceId(eq(CLUSTER_NAME), eq(WORKSPACE_ID));
+        verify(clusterService).repairSupported(eq(stack));
+        verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
+        verify(componentConfigProviderService).getImage(1L);
+        verify(imageService)
+                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false), eq(user), any());
+        assertThat(result.getUpgrade().getImageId()).isEqualTo("id-2");
+        assertThat(result.getReason()).isEqualTo("Please stop connected DataHub clusters before upgrade.");
+    }
+
+    @Test
+    public void upgradeAllowedWhenConnectedDataHubStackAndClusterStoppedOrDeleted() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Stack stack = getStack();
+        Image image = getImage("id-1");
+        setUpMocks(stack, image, true, "id-1", "id-2");
+
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setBaseUrl("cm-base-url");
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(1L)).thenReturn(clouderaManagerRepo);
+
+        StackViewV4Response datahubStack1 = new StackViewV4Response();
+        datahubStack1.setStatus(Status.STOPPED);
+        ClusterViewV4Response datahubCluster1 = new ClusterViewV4Response();
+        datahubCluster1.setStatus(Status.STOPPED);
+        datahubStack1.setCluster(datahubCluster1);
+        StackViewV4Response datahubStack2 = new StackViewV4Response();
+        datahubStack2.setStatus(Status.DELETE_COMPLETED);
+        ClusterViewV4Response datahubCluster2 = new ClusterViewV4Response();
+        datahubCluster2.setStatus(Status.DELETE_COMPLETED);
+        datahubStack2.setCluster(datahubCluster2);
+        StackViewV4Response datahubStack3 = new StackViewV4Response();
+        datahubStack3.setStatus(Status.STOPPED);
+        when(distroXV1Endpoint.list(any(), anyString())).thenReturn(new StackViewV4Responses(Set.of(datahubStack1, datahubStack2, datahubStack3)));
+
+        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackName(WORKSPACE_ID, CLUSTER_NAME, user);
+
+        verify(stackService).findStackByNameAndWorkspaceId(eq(CLUSTER_NAME), eq(WORKSPACE_ID));
+        verify(clusterService).repairSupported(eq(stack));
+        verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
+        verify(componentConfigProviderService).getImage(1L);
+        verify(imageService)
+                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false), eq(user), any());
+        assertThat(result.getUpgrade().getImageId()).isEqualTo("id-2");
+        assertThat(result.getReason()).isEqualTo(null);
     }
 
     private void setUpMocks(Stack stack, Image image, boolean prewarmedImage, String oldImage, String newImage)
