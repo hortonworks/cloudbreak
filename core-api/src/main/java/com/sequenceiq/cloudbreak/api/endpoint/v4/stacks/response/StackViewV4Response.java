@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.UserViewV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+import com.sequenceiq.common.api.type.Tunnel;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -49,6 +50,9 @@ public class StackViewV4Response implements JsonEntity {
 
     @ApiModelProperty(StackModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
+
+    @ApiModelProperty(StackModelDescription.TUNNEL)
+    private Tunnel tunnel = Tunnel.DIRECT;
 
     public String getCrn() {
         return crn;
@@ -152,5 +156,13 @@ public class StackViewV4Response implements JsonEntity {
 
     public void setCredentialName(String credentialName) {
         this.credentialName = credentialName;
+    }
+
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
+    public void setTunnel(Tunnel tunnel) {
+        this.tunnel = tunnel;
     }
 }

@@ -35,6 +35,7 @@ public class StackListItemToStackApiViewConverter {
         response.setStackStatus(stackStatusView);
         response.setCluster(getClusterApiView(item, hostGroupViews));
         response.setNodeCount(stackInstanceCounts.get(item.getId()));
+        response.setTunnel(item.getTunnel());
         response.setEnvironmentCrn(item.getEnvironmentCrn());
         response.setType(item.getType());
         response.setDatalakeId(item.getSharedClusterId());

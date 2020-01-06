@@ -23,6 +23,7 @@ public class StackApiViewToStackViewV4ResponseConverter extends AbstractConversi
         if (source.getCluster() != null) {
             stackViewResponse.setCluster(getConversionService().convert(source.getCluster(), ClusterViewV4Response.class));
         }
+        stackViewResponse.setTunnel(source.getTunnel());
         stackViewResponse.setNodeCount(source.getNodeCount());
         stackViewResponse.setStatus(source.getStatus());
         stackViewResponse.setCreated(source.getCreated());

@@ -4,6 +4,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.common.api.type.Tunnel;
 
 public interface StackListItem {
     Long getId();
@@ -57,4 +58,6 @@ public interface StackListItem {
     String getUserId();
 
     String getUsername();
+
+    Tunnel getTunnel();
 }

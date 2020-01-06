@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.type.Tunnel;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -117,6 +118,9 @@ public class StackV4Response extends StackV4Base {
 
     @ApiModelProperty(StackModelDescription.CLOUD_PLATFORM)
     private CloudPlatform cloudPlatform;
+
+    @ApiModelProperty(StackModelDescription.TUNNEL)
+    private Tunnel tunnel = Tunnel.DIRECT;
 
     public Long getId() {
         return id;
@@ -332,5 +336,13 @@ public class StackV4Response extends StackV4Base {
 
     public void setCredentialCrn(String credentialCrn) {
         this.credentialCrn = credentialCrn;
+    }
+
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
+    public void setTunnel(Tunnel tunnel) {
+        this.tunnel = tunnel;
     }
 }

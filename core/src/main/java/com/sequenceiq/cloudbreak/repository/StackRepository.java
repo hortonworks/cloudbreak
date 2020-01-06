@@ -211,6 +211,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s.id as id, "
             + "s.resourceCrn as resourceCrn, "
             + "s.name as name, "
+            + "s.tunnel as tunnel, "
             + "s.environmentCrn as environmentCrn, "
             + "s.type as type, "
             + "b.resourceCrn as blueprintCrn, "
