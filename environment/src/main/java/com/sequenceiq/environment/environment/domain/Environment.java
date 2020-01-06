@@ -6,7 +6,6 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -117,14 +116,6 @@ public class Environment implements AuthResource {
     @OneToOne(mappedBy = "environment", cascade = CascadeType.ALL, orphanRemoval = true)
     private BaseParameters parameters;
 
-    /**
-     * @deprecated
-     * The new experimentalFeaturesJson field is the primary source of truth.
-     */
-    @Deprecated
-    @Embedded
-    private ExperimentalFeatures experimentalFeatures;
-
     @Convert(converter = JsonToString.class)
     @Column(name = "experimentalfeatures", columnDefinition = "TEXT")
     private Json experimentalFeaturesJson;
@@ -132,7 +123,6 @@ public class Environment implements AuthResource {
     public Environment() {
         regions = new Json(new HashSet<Region>());
         experimentalFeaturesJson = new Json(new ExperimentalFeatures());
-        experimentalFeatures = new ExperimentalFeatures();
     }
 
     @Override
@@ -377,13 +367,12 @@ public class Environment implements AuthResource {
         if (experimentalFeaturesJson != null && experimentalFeaturesJson.getValue() != null) {
             return JsonUtil.readValueOpt(experimentalFeaturesJson.getValue(), ExperimentalFeatures.class).orElse(new ExperimentalFeatures());
         }
-        return experimentalFeatures;
+        return new ExperimentalFeatures();
     }
 
     public void setExperimentalFeaturesJson(ExperimentalFeatures experimentalFeaturesJson) {
         if (experimentalFeaturesJson != null) {
             this.experimentalFeaturesJson = new Json(experimentalFeaturesJson);
-            this.experimentalFeatures = experimentalFeaturesJson;
         }
     }
 
