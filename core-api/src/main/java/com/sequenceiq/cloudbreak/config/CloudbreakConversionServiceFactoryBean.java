@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.context.support.ConversionServiceFactoryBean;
 import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
@@ -18,7 +18,7 @@ public class CloudbreakConversionServiceFactoryBean extends ConversionServiceFac
         return new CloudbreakConversionService();
     }
 
-    private static class CloudbreakConversionService extends DefaultConversionService {
+    private static class CloudbreakConversionService extends ApplicationConversionService {
 
         @Override
         public <T> T convert(Object source, Class<T> targetType) {
