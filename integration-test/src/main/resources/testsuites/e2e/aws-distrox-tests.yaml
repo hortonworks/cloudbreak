@@ -2,6 +2,6 @@ name: "aws-distrox-tests"
 tests:
   - name: "aws distrox e2e tests"
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.BasicStackTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.stack.BasicStackTests
         includedMethods:
           - testCreateAndScaleCluster

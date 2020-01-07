@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.azure;
+package com.sequenceiq.it.cloudbreak.util.azure;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.it.cloudbreak.testcase.e2e.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
 import com.sequenceiq.it.cloudbreak.util.azure.azurevm.action.AzureClientActions;
 

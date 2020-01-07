@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e;
+package com.sequenceiq.it.cloudbreak.testcase.e2e.stack;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
@@ -15,6 +15,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
 public class BasicStackTests extends AbstractE2ETest {
 

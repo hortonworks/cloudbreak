@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e;
+package com.sequenceiq.it.cloudbreak.util;
 
 import java.util.List;
 

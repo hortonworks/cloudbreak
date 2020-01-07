@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.aws;
+package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
@@ -13,7 +13,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
-public class AwsFreeIPATests extends AbstractE2ETest {
+public class FreeIPATests extends AbstractE2ETest {
 
     protected static final Status FREEIPA_AVAILABLE = Status.AVAILABLE;
 
