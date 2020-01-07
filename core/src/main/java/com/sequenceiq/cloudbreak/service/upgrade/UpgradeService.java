@@ -111,35 +111,34 @@ public class UpgradeService {
     private UpgradeOptionV4Response getUpgradeOption(Stack stack, Long workspaceId, User user)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image image = componentConfigProviderService.getImage(stack.getId());
-        if (clusterRepairService.canRepairAll(stack) && attachedClustersStoppedOrDeleted(stack)) {
+        UpgradeOptionV4Response upgradeResponse;
+        if (clusterRepairService.canRepairAll(stack)) {
             StatedImage latestImage = getLatestImage(workspaceId, stack, image, user);
             if (!Objects.equals(image.getImageId(), latestImage.getImage().getUuid())) {
-                return upgradeable(image, latestImage, stack);
+                if (attachedClustersStoppedOrDeleted(stack)) {
+                    upgradeResponse = upgradeable(image, latestImage, stack);
+                } else {
+                    upgradeResponse = upgradeableAfterAction(image, latestImage, stack, "Please stop connected DataHub clusters before upgrade.");
+                }
             } else {
-                return notUpgradable(image);
+                upgradeResponse = notUpgradable(image);
             }
         } else {
-            return notUpgradable(image);
+            upgradeResponse = notUpgradable(image);
         }
+        return upgradeResponse;
     }
 
     private boolean attachedClustersStoppedOrDeleted(Stack stack) {
         StackViewV4Responses stackViewV4Responses = distroXV1Endpoint.list(null, stack.getEnvironmentCrn());
         for (StackViewV4Response stackViewV4Response : stackViewV4Responses.getResponses()) {
-            if (!(UPGRADEABLE_ATTACHED_DISTRO_X_STATES.contains(stack.getStatus())
-                    || UPGRADEABLE_ATTACHED_DISTRO_X_STATES.contains(getClusterStatus(stackViewV4Response)))) {
+            if (!UPGRADEABLE_ATTACHED_DISTRO_X_STATES.contains(stackViewV4Response.getStatus())
+                    || (stackViewV4Response.getCluster() != null
+                    && !UPGRADEABLE_ATTACHED_DISTRO_X_STATES.contains(stackViewV4Response.getCluster().getStatus()))) {
                 return false;
             }
         }
         return true;
-    }
-
-    private Status getClusterStatus(StackViewV4Response stack) {
-        if (stack.getCluster() == null) {
-            return null;
-        } else {
-            return stack.getCluster().getStatus();
-        }
     }
 
     private StatedImage getLatestImage(Long workspaceId, Stack stack, Image image, User user)
@@ -175,7 +174,24 @@ public class UpgradeService {
         return response;
     }
 
+    private UpgradeOptionV4Response upgradeableAfterAction(Image image, StatedImage latestImage, Stack stack, String reason)
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        UpgradeOptionV4Response response = notUpgradable(image, reason);
+        ImageInfoV4Response upgradeImageInfo = new ImageInfoV4Response(
+                latestImage.getImage().getImageSetsByProvider().get(stack.getPlatformVariant().toLowerCase()).get(stack.getRegion()),
+                latestImage.getImage().getUuid(),
+                latestImage.getImageCatalogName(),
+                latestImage.getImage().getCreated()
+        );
+        response.setUpgrade(upgradeImageInfo);
+        return response;
+    }
+
     private UpgradeOptionV4Response notUpgradable(Image image) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        return notUpgradable(image, null);
+    }
+
+    private UpgradeOptionV4Response notUpgradable(Image image, String reason) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         ImageInfoV4Response currentImageInfo = new ImageInfoV4Response(
                 image.getImageName(),
                 image.getImageId(),
@@ -183,6 +199,7 @@ public class UpgradeService {
                 imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId()).getImage().getCreated());
         UpgradeOptionV4Response upgradeOptionV4Response = new UpgradeOptionV4Response();
         upgradeOptionV4Response.setCurrent(currentImageInfo);
+        upgradeOptionV4Response.setReason(reason);
         return upgradeOptionV4Response;
     }
 

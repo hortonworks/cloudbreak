@@ -160,8 +160,10 @@ public class SdxService implements ResourceIdProvider {
 
         if (isCloudStorageConfigured(sdxClusterRequest)) {
             validateCloudStorageRequest(sdxClusterRequest.getCloudStorage(), environment);
-            sdxCluster.setCloudStorageBaseLocation(sdxClusterRequest.getCloudStorage().getBaseLocation());
+            String trimmedBaseLocation = StringUtils.stripEnd(sdxClusterRequest.getCloudStorage().getBaseLocation(), "/");
+            sdxCluster.setCloudStorageBaseLocation(trimmedBaseLocation);
             sdxCluster.setCloudStorageFileSystemType(sdxClusterRequest.getCloudStorage().getFileSystemType());
+            sdxClusterRequest.getCloudStorage().setBaseLocation(trimmedBaseLocation);
         }
         externalDatabaseConfigurer.configure(CloudPlatform.valueOf(environment.getCloudPlatform()), sdxClusterRequest.getExternalDatabase(), sdxCluster);
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(stackV4Request, environment.getCrn());
