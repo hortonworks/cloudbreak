@@ -43,8 +43,8 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.CloudFunctionality;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.azure.AzureCloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.azure.AzureCloudFunctionality;
 
 @Component
 public class AzureCloudProvider extends AbstractCloudProvider {

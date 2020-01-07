@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.NotImplementedException;
 
-import com.sequenceiq.it.cloudbreak.testcase.e2e.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 
 public class GcpCloudFunctionality implements CloudFunctionality {
 

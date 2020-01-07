@@ -49,8 +49,8 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.CloudFunctionality;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.aws.AwsCloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.aws.AwsCloudFunctionality;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 

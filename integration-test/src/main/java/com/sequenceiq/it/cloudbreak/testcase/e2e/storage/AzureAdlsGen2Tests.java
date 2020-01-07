@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.azure;
+package com.sequenceiq.it.cloudbreak.testcase.e2e.storage;
 
 import static com.sequenceiq.it.cloudbreak.assertion.storage.azure.AdlsGen2TestAssertion.stackContainsAdlsGen2Properties;
 import static com.sequenceiq.it.cloudbreak.assertion.storage.azure.AdlsGen2TestAssertion.stackContainsStorageLocations;

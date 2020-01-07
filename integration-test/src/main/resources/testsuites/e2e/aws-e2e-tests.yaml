@@ -6,3 +6,5 @@ tests:
       - com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.*
       - com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.*
       - com.sequenceiq.it.cloudbreak.testcase.e2e.environment.*
+      - com.sequenceiq.it.cloudbreak.testcase.e2e.stack.*
+      - com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.*
