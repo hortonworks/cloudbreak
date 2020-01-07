@@ -178,7 +178,7 @@
         "description": "Cloudbreak official base image"
       }
     ],
-    "hdp-images": [
+    "cdh-images": [
       {
         "date": "2016-08-14",
         "description": "Cloudbreak official image",

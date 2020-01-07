@@ -115,6 +115,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final String CDP_AUTOMATIC_USERSYNC_POLLER = "CDP_AUTOMATIC_USERSYNC_POLLER";
 
+    private static final String CDP_BASE_IMAGE = "CDP_BASE_IMAGE";
+
     @Inject
     private JsonUtil jsonUtil;
 
@@ -144,6 +146,9 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Value("${auth.mock.ccm.enable}")
     private boolean enableCcm;
+
+    @Value("${auth.mock.baseimage.enable}")
+    private boolean enableBaseImages;
 
     private String cbLicense;
 
@@ -332,6 +337,9 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         UserManagementProto.Account.Builder builder = UserManagementProto.Account.newBuilder();
         if (enableCcm) {
             builder.addEntitlements(createEntitlement(REVERSE_SSH_TUNNEL));
+        }
+        if (enableBaseImages) {
+            builder.addEntitlements(createEntitlement(CDP_BASE_IMAGE));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

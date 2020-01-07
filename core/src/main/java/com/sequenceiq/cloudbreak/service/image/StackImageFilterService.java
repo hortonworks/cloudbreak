@@ -59,10 +59,8 @@ public class StackImageFilterService {
         }
 
         String currentImageUuid = getCurrentImageUuid(stack);
-
         List<Image> filteredBaseImages =
                 filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getBaseImages(), currentImageUuid);
-
         List<Image> filteredCdhImages =
                 filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getCdhImages(), currentImageUuid);
 

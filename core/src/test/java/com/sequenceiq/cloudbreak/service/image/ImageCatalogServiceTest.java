@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -45,6 +46,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -68,6 +70,7 @@ import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
@@ -142,12 +145,17 @@ public class ImageCatalogServiceTest {
     @Mock
     private ImageCatalog imageCatalog;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @Before
     public void beforeTest() throws Exception {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, V2_CATALOG_FILE);
 
         when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList("AZURE", "AWS", "GCP", "OPENSTACK")));
+        lenient().when(user.getUserCrn()).thenReturn(TestConstants.CRN);
         when(userService.getOrCreate(any())).thenReturn(user);
+        when(entitlementService.baseImageEnabled(anyString(), anyString())).thenReturn(true);
 
         constants.addAll(Collections.singletonList(new AwsCloudConstant()));
 
@@ -164,7 +172,8 @@ public class ImageCatalogServiceTest {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, imageCatalog, i -> true);
+        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("AWS"), null, true, null, null);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter, i -> true);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertFalse(image.getImage().isDefaultImage());
@@ -176,7 +185,8 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.200", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, imageCatalog, i -> true);
+        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("AWS"), null, true, null, null);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter,  i -> true);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -188,7 +198,8 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.1", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, imageCatalog, i -> true);
+        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("AWS"), null, true, null, null);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter,  i -> true);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -200,7 +211,8 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.2", null);
 
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred("AWS", null, imageCatalog, i -> true);
+        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("AWS"), null, true, null, null);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter,  i -> true);
 
         assertEquals("f6e778fc-7f17-4535-9021-515351df3691", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -211,7 +223,9 @@ public class ImageCatalogServiceTest {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, DEV_CATALOG_FILE);
         Set<String> operatingSystems = new HashSet<>(Arrays.asList("redhat7", "redhat6", "amazonlinux2"));
-        StatedImages images = underTest.getStatedImagesFilteredByOperatingSystems("aws", operatingSystems, imageCatalog, i -> true);
+
+        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("AWS"), null, true, operatingSystems, null);
+        StatedImages images = underTest.getStatedImagesFilteredByOperatingSystems(imageFilter, i -> true);
 
         Set<Image> allImage = Stream.of(images.getImages().getHdpImages(), images.getImages().getHdpImages(), images.getImages().getBaseImages())
                 .flatMap(Collection::stream)
@@ -331,7 +345,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenSimilarDevVersionExistsInCatalog() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.1.0-dev.4000"));
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.1.0-dev.4000", true, null, null));
 
         boolean hdfImgMatch = images.getImages().getHdfImages().stream()
                 .anyMatch(ambariImage -> "9958938a-1261-48e2-aff9-dbcb2cebf6cd".equals(ambariImage.getUuid()));
@@ -631,7 +645,6 @@ public class ImageCatalogServiceTest {
     public void testPopulateCrnCorrectly() {
         ImageCatalog imageCatalog = getImageCatalog();
 
-        when(userService.getOrCreate(any(CloudbreakUser.class))).thenReturn(user);
         when(workspaceService.get(1L, user)).thenReturn(imageCatalog.getWorkspace());
         when(workspaceService.retrieveForUser(user)).thenReturn(Set.of(imageCatalog.getWorkspace()));
 

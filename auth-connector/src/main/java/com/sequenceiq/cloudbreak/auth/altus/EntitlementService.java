@@ -24,6 +24,10 @@ public class EntitlementService {
         return isEntitlementRegistered(actorCrn, accountId, "CDP_AZURE");
     }
 
+    public boolean baseImageEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, "CDP_BASE_IMAGE");
+    }
+
     public boolean automaticUsersyncPollerEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, "CDP_AUTOMATIC_USERSYNC_POLLER");
     }
@@ -46,9 +50,7 @@ public class EntitlementService {
     private boolean isEntitlementRegistered(String actorCrn, String accountId, String entitlement) {
         return getEntitlements(actorCrn, accountId)
                 .stream()
-                .filter(e -> e.equalsIgnoreCase(entitlement))
-                .findFirst()
-                .isPresent();
+                .anyMatch(e -> e.equalsIgnoreCase(entitlement));
     }
 
 }
