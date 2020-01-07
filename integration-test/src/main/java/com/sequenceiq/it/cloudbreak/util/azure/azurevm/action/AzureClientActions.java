@@ -15,7 +15,7 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.PowerState;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.azure.AzureInstanceActionExecutor;
+import com.sequenceiq.it.cloudbreak.util.azure.AzureInstanceActionExecutor;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 
 import rx.schedulers.Schedulers;

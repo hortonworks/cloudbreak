@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.aws;
+package com.sequenceiq.it.cloudbreak.util.aws;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.it.cloudbreak.testcase.e2e.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.aws.amazonec2.AmazonEC2Util;
 import com.sequenceiq.it.cloudbreak.util.aws.amazons3.AmazonS3Util;
 

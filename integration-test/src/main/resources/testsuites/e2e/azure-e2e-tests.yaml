@@ -2,7 +2,7 @@ name: "azure-e2e-tests"
 tests:
   - name: "azure e2e tests"
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.azure.AzureAdlsGen2Tests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.storage.AzureAdlsGen2Tests
         includedMethods:
           - testCreateStopAndStartClusterWithAdlsGen2CloudStorage
           - testCreateStopAndStartClusterWithAdlsGen2AndCloudStorage

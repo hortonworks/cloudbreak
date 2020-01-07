@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.azure;
+package com.sequenceiq.it.cloudbreak.util.azure;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
