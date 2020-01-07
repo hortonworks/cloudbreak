@@ -1,21 +1,11 @@
-{%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" in grains.get('roles', []) %}
-
-disable-sshd:
-  service.dead:
-    - enable: False
-    - name: sshd
-
-{% else %}
-
+{%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" not in grains.get('roles', []) %}
 {% if not salt['file.directory_exists']('/yarn-private') %}
-
 restart-sshd-if-reconfigured:
   service.running:
     - enable: True
     - name: sshd
     - watch:
       - file: /etc/ssh/sshd_config
-
 {% endif %}
 
 enable_password_ssh_auth:
@@ -24,5 +14,4 @@ enable_password_ssh_auth:
     - append_if_not_found: True
     - pattern: "PasswordAuthentication no"
     - repl: "PasswordAuthentication yes"
-
 {% endif %}
