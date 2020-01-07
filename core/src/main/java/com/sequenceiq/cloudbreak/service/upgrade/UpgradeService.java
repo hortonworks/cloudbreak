@@ -150,6 +150,7 @@ public class UpgradeService {
                         stack.getCloudPlatform().toLowerCase(),
                         stack.getCluster().getBlueprint(),
                         NOT_BASE_IMAGE,
+                        NOT_BASE_IMAGE,
                         user,
                         getImageFilter(image, stack));
     }

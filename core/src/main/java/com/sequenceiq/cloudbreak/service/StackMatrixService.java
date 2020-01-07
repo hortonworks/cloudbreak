@@ -49,9 +49,9 @@ public class StackMatrixService {
         return stackMatrixV4Response;
     }
 
-    public Set<String> getSupportedOperatingSystems(String clusterType, String clusterVersion) {
+    public Set<String> getSupportedOperatingSystems(String clusterVersion) {
         StackMatrixV4Response stackMatrix = getStackMatrix();
-        LOGGER.debug("Get Cloudera Manager stack info for determining the supported OS types for type: {} and version: {}", clusterType, clusterVersion);
+        LOGGER.debug("Get Cloudera Manager stack info for determining the supported OS types for version: {}", clusterVersion);
         ClouderaManagerStackDescriptorV4Response cmStackDescriptor = stackMatrix.getCdh().get(clusterVersion);
         return cmStackDescriptor != null ? cmStackDescriptor.getClouderaManager().getRepository().keySet() : Collections.emptySet();
     }

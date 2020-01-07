@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
@@ -103,45 +104,71 @@ public class ImageService {
 
     //CHECKSTYLE:OFF
     @Measure(ImageService.class)
-    public StatedImage determineImageFromCatalog(Long workspaceId, ImageSettingsV4Request imageSettins, String platformString,
-            Blueprint blueprint, boolean useBaseImage, User user, Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> imageFilter)
+    public StatedImage determineImageFromCatalog(Long workspaceId, ImageSettingsV4Request imageSettings, String platformString,
+            Blueprint blueprint, boolean useBaseImage, boolean baseImageEnabled,
+            User user, Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> imagePredicate)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        String clusterType = ImageCatalogService.UNDEFINED;
+        if (useBaseImage && !baseImageEnabled) {
+            throw new CloudbreakImageCatalogException("Inconsistent request, base images are disabled but custom repo information is submitted!" );
+        }
+
+        if (imageSettings != null && StringUtils.isNotEmpty(imageSettings.getId())) {
+            LOGGER.debug("Image id is specified for the stack.");
+            StatedImage image = imageCatalogService.getImageByCatalogName(workspaceId, imageSettings.getId(), imageSettings.getCatalog());
+            return checkIfBasePermitted(image, baseImageEnabled);
+        }
+        String clusterVersion = getClusterVersion(blueprint);
+        Set<String> operatingSystems = getSupportedOperationSystems(imageSettings, clusterVersion);
+
+        ImageCatalog imageCatalog = getImageCatalogFromRequestOrDefault(workspaceId, imageSettings, user);
+        ImageFilter imageFilter = new ImageFilter(imageCatalog, ImmutableSet.of(platformString), null, baseImageEnabled, operatingSystems, clusterVersion);
+        LOGGER.info("Image id is not specified for the stack.");
+        if (baseImageEnabled) {
+            LOGGER.info("Base image usage is enabled.");
+            if (useBaseImage) {
+                LOGGER.debug("Falling back to a base imageSettings, because repo information is provided");
+                return imageCatalogService.getLatestBaseImageDefaultPreferred(imageFilter, imagePredicate);
+            }
+            LOGGER.debug("Falling back to a prewarmed imageSettings of CDH-{} or to a base imageSettings if prewarmed doesn't exist", clusterVersion);
+            return imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilter, imagePredicate);
+        } else {
+            LOGGER.info("Base image usage is disabled.");
+            LOGGER.debug("Falling back to a prewarmed imageSettings of CDH-{}", clusterVersion);
+            return imageCatalogService.getLatestPrewarmedImageDefaultPreferred(imageFilter, imagePredicate);
+        }
+    }
+
+    private String getClusterVersion(Blueprint blueprint) {
         String clusterVersion = ImageCatalogService.UNDEFINED;
         if (blueprint != null) {
             try {
                 JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
-                if (blueprintUtils.isAmbariBlueprint(blueprint.getBlueprintText())) {
-                    clusterType = blueprintUtils.getBlueprintStackName(root);
-                    clusterVersion = blueprintUtils.getBlueprintStackVersion(root);
-                } else {
-                    clusterType = "CDH";
-                    clusterVersion = blueprintUtils.getCDHStackVersion(root);
-                }
+                clusterVersion = blueprintUtils.getCDHStackVersion(root);
             } catch (IOException ex) {
                 LOGGER.warn("Can not initiate default hdp info: ", ex);
             }
         }
-        Set<String> operatingSystems = stackMatrixService.getSupportedOperatingSystems(clusterType, clusterVersion);
-        if (imageSettins != null && StringUtils.isNotEmpty(imageSettins.getOs())) {
+        return clusterVersion;
+    }
+
+    private StatedImage checkIfBasePermitted(StatedImage image, boolean baseImageEnabled) throws CloudbreakImageCatalogException {
+        if (!baseImageEnabled && !image.getImage().isPrewarmed()) {
+            throw new CloudbreakImageCatalogException(String.format("Inconsistent request, base images are disabled but image with id %s is base image!",
+                    image.getImage().getUuid()));
+        }
+        return image;
+    }
+
+    private Set<String> getSupportedOperationSystems(ImageSettingsV4Request imageSettings, String clusterVersion) {
+        Set<String> operatingSystems = stackMatrixService.getSupportedOperatingSystems(clusterVersion);
+        if (imageSettings != null && StringUtils.isNotEmpty(imageSettings.getOs())) {
             if (operatingSystems.isEmpty()) {
-                operatingSystems = Collections.singleton(imageSettins.getOs());
+                operatingSystems = Collections.singleton(imageSettings.getOs());
             } else {
-                operatingSystems = operatingSystems.stream().filter(os -> os.equalsIgnoreCase(imageSettins.getOs())).collect(Collectors.toSet());
+                operatingSystems = operatingSystems.stream().filter(os -> os.equalsIgnoreCase(imageSettings.getOs())).collect(Collectors.toSet());
             }
         }
-        if (imageSettins != null && StringUtils.isNotEmpty(imageSettins.getId())) {
-            return imageCatalogService.getImageByCatalogName(workspaceId, imageSettins.getId(), imageSettins.getCatalog());
-        }
-        ImageCatalog imageCatalog = getImageCatalogFromRequestOrDefault(workspaceId, imageSettins, user);
-        if (useBaseImage) {
-            LOGGER.debug("Image id isn't specified for the stack, falling back to a base imageSettins, because repo information is provided");
-            return imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, operatingSystems, imageCatalog, imageFilter);
-        }
-        LOGGER.debug("Image id isn't specified for the stack, falling back to a prewarmed "
-                + "imageSettins of {}-{} or to a base imageSettins if prewarmed doesn't exist", clusterType, clusterVersion);
-        return imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, operatingSystems, imageCatalog,
-                imageFilter);
+        return operatingSystems;
     }
     //CHECKSTYLE:ON
 

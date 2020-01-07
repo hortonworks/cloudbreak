@@ -242,7 +242,8 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .when(imageCatalogTestClient.getImagesByNameV4(), key(imgCatalogName))
                 .then((testContext1, entity, cloudbreakClient) -> {
                     ImagesV4Response catalog = entity.getResponseByProvider();
-                    if (catalog.getBaseImages().isEmpty() && catalog.getHdpImages().isEmpty() && catalog.getHdfImages().isEmpty()) {
+                    if (catalog.getBaseImages().isEmpty() && catalog.getHdpImages().isEmpty() && catalog.getHdfImages().isEmpty()
+                            && catalog.getCdhImages().isEmpty()) {
                         throw new IllegalArgumentException("The Images response should contain results for MOCK provider.");
                     }
                     return entity;
@@ -310,7 +311,8 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .when(imageCatalogTestClient.getImagesFromDefaultCatalog(CloudPlatform.AWS), key(imgCatalogName))
                 .then((testContext1, entity, cloudbreakClient) -> {
                     ImagesV4Response catalog = entity.getResponseByProvider();
-                    if (catalog.getBaseImages().isEmpty() && catalog.getHdpImages().isEmpty() && catalog.getHdfImages().isEmpty()) {
+                    if (catalog.getBaseImages().isEmpty() && catalog.getHdpImages().isEmpty() && catalog.getHdfImages().isEmpty()
+                            && catalog.getCdhImages().isEmpty()) {
                         throw new IllegalArgumentException("The Images response should contain results for AWS provider.");
                     }
                     return entity;
