@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +35,8 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
     private static final String HUE_DATABASE_PASSWORD = "hue-hue_database_password";
 
     private static final String HUE_SAFETY_VALVE = "hue-hue_service_safety_valve";
+
+    private static final String KNOX_PROXYHOSTS = "knox_proxyhosts";
 
     private static final String SAFETY_VALVE_KNOX_PROXYHOSTS_KEY_PATTERN = "[desktop]\n[[knox]]\nknox_proxyhosts=";
 
@@ -92,12 +97,17 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
 
     private void configureKnoxProxyHostsConfigVariables(TemplatePreparationObject source, List<ApiClusterTemplateVariable> result) {
         GatewayView gateway = source.getGatewayView();
+        String cdhVersion = source.getBlueprintView().getProcessor().getVersion().orElse("");
         GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
         if (externalFQDNShouldConfigured(gateway, generalClusterConfigs)) {
             String proxyHosts = String.join(",", generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().get(),
                     generalClusterConfigs.getExternalFQDN());
-            String valveValue = SAFETY_VALVE_KNOX_PROXYHOSTS_KEY_PATTERN.concat(proxyHosts);
-            result.add(new ApiClusterTemplateVariable().name(HUE_SAFETY_VALVE).value(valveValue));
+            if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
+                result.add(new ApiClusterTemplateVariable().name(KNOX_PROXYHOSTS).value(proxyHosts));
+            } else {
+                String valveValue = SAFETY_VALVE_KNOX_PROXYHOSTS_KEY_PATTERN.concat(proxyHosts);
+                result.add(new ApiClusterTemplateVariable().name(HUE_SAFETY_VALVE).value(valveValue));
+            }
         }
     }
 

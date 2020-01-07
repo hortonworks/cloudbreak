@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 
 public class HueConfigProviderTest {
 
@@ -90,12 +91,25 @@ public class HueConfigProviderTest {
 
     @Test
     public void getServiceConfigVariables() {
+        BlueprintView blueprintView = mock(BlueprintView.class);
+        when(blueprintView.getVersion()).thenReturn("7.1.1");
+
+        CmTemplateProcessor templateProcessor = mock(CmTemplateProcessor.class);
+        when(templateProcessor.getVersion()).thenReturn(Optional.ofNullable("7.1.0"));
+        when(blueprintView.getProcessor()).thenReturn(templateProcessor);
+
+        when(blueprintView.getProcessor()).thenReturn(templateProcessor);
+
+
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setType(HUE);
         rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         rdsConfig.setConnectionUserName(USER_NAME);
         rdsConfig.setConnectionPassword(PASSWORD);
-        TemplatePreparationObject tpo = new Builder().withRdsConfigs(Set.of(rdsConfig)).build();
+        TemplatePreparationObject tpo = new Builder()
+                .withRdsConfigs(Set.of(rdsConfig))
+                .withBlueprintView(blueprintView)
+                .build();
 
         List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
         Map<String, String> paramToVariable =
@@ -111,6 +125,14 @@ public class HueConfigProviderTest {
 
     @Test
     public void getServiceConfigVariablesWhenKnoxConfiguredToExternalDomain() {
+        BlueprintView blueprintView = mock(BlueprintView.class);
+        when(blueprintView.getVersion()).thenReturn("7.0.1");
+
+        CmTemplateProcessor templateProcessor = mock(CmTemplateProcessor.class);
+        when(templateProcessor.getVersion()).thenReturn(Optional.ofNullable("7.0.1"));
+
+        when(blueprintView.getProcessor()).thenReturn(templateProcessor);
+
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setType(HUE);
         rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
@@ -127,6 +149,7 @@ public class HueConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withGateway(new Gateway(), "")
+                .withBlueprintView(blueprintView)
                 .withRdsConfigs(Set.of(rdsConfig))
                 .build();
 
@@ -143,6 +166,50 @@ public class HueConfigProviderTest {
                 new SimpleEntry<>("hue-hue_database_user", USER_NAME),
                 new SimpleEntry<>("hue-hue_database_password", PASSWORD),
                 new SimpleEntry<>("hue-hue_service_safety_valve", expectedSafetyValveValue));
+    }
+
+    @Test
+    public void getServiceConfigVariablesWhenKnoxConfiguredToExternalDomainWhenNoSafetyValve() {
+        BlueprintView blueprintView = mock(BlueprintView.class);
+        when(blueprintView.getVersion()).thenReturn("7.1.0");
+
+        CmTemplateProcessor templateProcessor = mock(CmTemplateProcessor.class);
+        when(templateProcessor.getVersion()).thenReturn(Optional.ofNullable("7.1.0"));
+
+        when(blueprintView.getProcessor()).thenReturn(templateProcessor);
+
+        RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setType(HUE);
+        rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        rdsConfig.setConnectionUserName(USER_NAME);
+        rdsConfig.setConnectionPassword(PASSWORD);
+
+        String expectedExternalFQDN = "myaddress.cloudera.site";
+        String expectedInternalFQDN = "private-gateway.cloudera.site";
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setExternalFQDN(expectedExternalFQDN);
+        generalClusterConfigs.setKnoxUserFacingCertConfigured(true);
+        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(expectedInternalFQDN));
+
+        TemplatePreparationObject tpo = new Builder()
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withGateway(new Gateway(), "")
+                .withBlueprintView(blueprintView)
+                .withRdsConfigs(Set.of(rdsConfig))
+                .build();
+
+        List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
+        Map<String, String> paramToVariable =
+                result.stream().collect(Collectors.toMap(ApiClusterTemplateVariable::getName, ApiClusterTemplateVariable::getValue));
+        String proxyHostsExpected = String.join(",", expectedInternalFQDN, expectedExternalFQDN);
+        assertThat(paramToVariable).containsOnly(
+                new SimpleEntry<>("hue-hue_database_host", HOST),
+                new SimpleEntry<>("hue-hue_database_port", PORT),
+                new SimpleEntry<>("hue-hue_database_name", DB_NAME),
+                new SimpleEntry<>("hue-hue_database_type", DB_PROVIDER),
+                new SimpleEntry<>("hue-hue_database_user", USER_NAME),
+                new SimpleEntry<>("hue-hue_database_password", PASSWORD),
+                new SimpleEntry<>("knox_proxyhosts.java ", proxyHostsExpected));
     }
 
     @Test
