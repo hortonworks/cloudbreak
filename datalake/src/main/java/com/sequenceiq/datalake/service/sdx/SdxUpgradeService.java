@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -69,6 +70,7 @@ public class SdxUpgradeService {
 
     public void triggerUpgradeByName(String userCrn, String clusterName) {
         UpgradeOptionV4Response upgradeOption = checkForUpgradeByName(userCrn, clusterName);
+        validateUpgradeOption(upgradeOption);
         SdxCluster cluster = sdxService.getSdxByNameInAccount(userCrn, clusterName);
         MDCBuilder.buildMdcContext(cluster);
         sdxReactorFlowManager.triggerDatalakeUpgradeFlow(cluster.getId(), upgradeOption);
@@ -76,6 +78,7 @@ public class SdxUpgradeService {
 
     public void triggerUpgradeByCrn(String userCrn, String clusterCrn) {
         UpgradeOptionV4Response upgradeOption = checkForUpgradeByCrn(userCrn, clusterCrn);
+        validateUpgradeOption(upgradeOption);
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
         MDCBuilder.buildMdcContext(cluster);
         sdxReactorFlowManager.triggerDatalakeUpgradeFlow(cluster.getId(), upgradeOption);
@@ -133,6 +136,12 @@ public class SdxUpgradeService {
         }, () -> {
             throw notFound("SDX cluster", id).get();
         });
+    }
+
+    private void validateUpgradeOption(UpgradeOptionV4Response upgradeOptionV4Response) {
+        if (upgradeOptionV4Response.getUpgrade() == null || upgradeOptionV4Response.getReason() != null) {
+            throw new BadRequestException("Cluster is not upgradeable.");
+        }
     }
 
     private AttemptResult<StackV4Response> checkClusterStatusDuringUpgrade(SdxCluster sdxCluster, String pollingMessage) throws JsonProcessingException {

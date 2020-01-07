@@ -6,6 +6,8 @@ public class UpgradeOptionV4Response {
 
     private ImageInfoV4Response upgrade;
 
+    private String reason;
+
     public UpgradeOptionV4Response() {
     }
 
@@ -23,5 +25,13 @@ public class UpgradeOptionV4Response {
 
     public void setUpgrade(ImageInfoV4Response upgrade) {
         this.upgrade = upgrade;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 }
