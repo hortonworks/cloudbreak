@@ -1,5 +1,28 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
+import static com.gs.collections.impl.utility.StringIterate.isEmpty;
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -24,8 +47,6 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.SecurityGroup;
-import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -37,40 +58,16 @@ import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static com.gs.collections.impl.utility.StringIterate.isEmpty;
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
-import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Component
 public class StackV4RequestToStackConverter extends AbstractConversionServiceAwareConverter<StackV4Request, Stack> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackV4RequestToStackConverter.class);
-
-    private static final String TCP_PROTOCOL = "tcp";
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -99,17 +96,11 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     @Inject
     private TelemetryConverter telemetryConverter;
 
+    @Inject
+    private GatewaySecurityGroupDecorator gatewaySecurityGroupDecorator;
+
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
-
-    @Value("#{'${cb.default.gateway.cidr}'.split(',')}")
-    private Set<String> defaultGatewayCidr;
-
-    @Value("${cb.nginx.port}")
-    private Integer nginxPort;
-
-    @Value("${cb.https.port}")
-    private Integer httpsPort;
 
     @Override
     public Stack convert(StackV4Request source) {
@@ -159,36 +150,10 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         if (source.getImage() != null) {
             stack.getComponents().add(getImageComponent(source, stack));
         }
-        extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack);
-        return stack;
-    }
-
-    private void extendGatewaySecurityGroupWithDefaultGatewayCidrs(Stack stack) {
-        Set<InstanceGroup> gateways =
-                stack.getInstanceGroups().stream().filter(ig -> InstanceGroupType.isGateway(ig.getInstanceGroupType())).collect(Collectors.toSet());
-        Set<String> defaultGatewayCidrs = defaultGatewayCidr.stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
-        if (!defaultGatewayCidrs.isEmpty()) {
-            for (InstanceGroup gateway : gateways) {
-                SecurityGroup securityGroup = Optional.ofNullable(gateway.getSecurityGroup()).orElse(new SecurityGroup());
-                gateway.setSecurityGroup(securityGroup);
-                if (CollectionUtils.isEmpty(securityGroup.getSecurityGroupIds())) {
-                    Set<SecurityRule> rules = securityGroup.getSecurityRules();
-                    String ports = (stack.getGatewayPort() == null ? nginxPort.toString() : stack.getGatewayPort().toString()) + ',' + httpsPort;
-                    defaultGatewayCidrs.forEach(cloudbreakCidr -> rules.add(createSecurityRule(securityGroup, cloudbreakCidr, ports)));
-                    LOGGER.info("The control plane cidrs {} are added to the {} gateway group for the {} port.", defaultGatewayCidrs, gateway.getGroupName(),
-                            stack.getGatewayPort());
-                }
-            }
+        if (!isTemplate(source)) {
+            gatewaySecurityGroupDecorator.extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack, environment.getTunnel());
         }
-    }
-
-    private SecurityRule createSecurityRule(SecurityGroup securityGroup, String cidr, String ports) {
-        SecurityRule securityRule = new SecurityRule();
-        securityRule.setPorts(ports);
-        securityRule.setProtocol(TCP_PROTOCOL);
-        securityRule.setCidr(cidr);
-        securityRule.setSecurityGroup(securityGroup);
-        return securityRule;
+        return stack;
     }
 
     private void setTimeToLive(StackV4Request source, Stack stack) {
