@@ -322,7 +322,9 @@ public class TestUtil {
         instanceMetaData.setId(instanceGroupId + serverNumber);
         instanceMetaData.setInstanceGroup(instanceGroup);
         instanceMetaData.setStartDate(new Date().getTime());
-        instanceMetaData.setInstanceMetadataType(instanceMetadataType);
+        boolean gatewayInstanceGroup = instanceGroup.getInstanceGroupType().equals(InstanceGroupType.GATEWAY);
+        InstanceMetadataType imType = gatewayInstanceGroup ? InstanceMetadataType.GATEWAY_PRIMARY : instanceMetadataType;
+        instanceMetaData.setInstanceMetadataType(imType);
         return instanceMetaData;
     }
 
