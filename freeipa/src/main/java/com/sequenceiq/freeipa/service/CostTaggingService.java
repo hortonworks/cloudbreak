@@ -7,9 +7,9 @@ import static com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType.NETWO
 import static com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType.SECURITY;
 import static com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType.STORAGE;
 import static com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType.TEMPLATE;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_CREATION_TIMESTAMP;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_USER_NAME;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_VERSION;
+import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_CREATION_TIMESTAMP;
+import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_USER_NAME;
+import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_CB_VERSION;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.OWNER;
 
 import java.util.HashMap;
@@ -73,12 +73,12 @@ public class CostTaggingService {
 
     public Map<String, String> prepareDefaultTags(String user, Map<String, String> sourceMap, String platform) {
         Map<String, String> result = new HashMap<>();
-        result.put(transform(CB_USER_NAME.key(), platform), transform(user, platform));
-        result.put(transform(CB_VERSION.key(), platform), transform(version, platform));
+        result.put(transform(CDP_USER_NAME.key(), platform), transform(user, platform));
+        result.put(transform(CDP_CB_VERSION.key(), platform), transform(version, platform));
         if (sourceMap == null || Strings.isNullOrEmpty(sourceMap.get(transform(OWNER.key(), platform)))) {
             result.put(transform(OWNER.key(), platform), transform(user, platform));
         }
-        result.put(transform(CB_CREATION_TIMESTAMP.key(), platform), transform(String.valueOf(clock.getCurrentInstant().getEpochSecond()), platform));
+        result.put(transform(CDP_CREATION_TIMESTAMP.key(), platform), transform(String.valueOf(clock.getCurrentInstant().getEpochSecond()), platform));
         return result;
     }
 
@@ -90,7 +90,7 @@ public class CostTaggingService {
 
     private Map<String, String> prepareResourceTag(CloudbreakResourceType cloudbreakResourceType) {
         Map<String, String> result = new HashMap<>();
-        result.put(DefaultApplicationTag.CB_RESOURCE_TYPE.key(), cloudbreakResourceType.key());
+        result.put(DefaultApplicationTag.CDP_RESOURCE_TYPE.key(), cloudbreakResourceType.key());
         return result;
     }
 }

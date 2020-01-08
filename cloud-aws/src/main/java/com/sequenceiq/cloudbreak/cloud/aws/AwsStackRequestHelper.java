@@ -21,6 +21,7 @@ import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.Image;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
@@ -88,7 +89,8 @@ public class AwsStackRequestHelper {
         addParameterChunks(parameters, "CBGateWayUserData", stack.getImage().getUserDataByType(InstanceGroupType.GATEWAY), CHUNK_COUNT);
         parameters.addAll(asList(
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
-                new Parameter().withParameterKey("StackOwner").withParameterValue(String.valueOf(ac.getCloudContext().getUserName())),
+                getStackOwnerFromStack(ac, stack, "Owner", "StackOwner"),
+                getStackOwnerFromStack(ac, stack, "owner", "stackowner"),
                 new Parameter().withParameterKey("KeyName").withParameterValue(keyPairName),
                 new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage().getImageName()),
                 new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(ac, stack))
@@ -112,6 +114,26 @@ public class AwsStackRequestHelper {
             }
         }
         return parameters;
+    }
+
+    private Parameter getStackOwnerFromStack(AuthenticatedContext ac, CloudStack stack, String key, String referenceName) {
+        return getStackOwner(ac, stack.getTags().get(key), referenceName);
+    }
+
+    private Parameter getStackOwnerFromDatabase(AuthenticatedContext ac, DatabaseStack stack, String key, String referenceName) {
+        return getStackOwner(ac, stack.getTags().get(key), referenceName);
+    }
+
+    private Parameter getStackOwner(AuthenticatedContext ac, String tagValue, String referenceName) {
+        if (Strings.isNullOrEmpty(tagValue)) {
+            return new Parameter()
+                .withParameterKey(referenceName)
+                .withParameterValue(String.valueOf(ac.getCloudContext().getUserName()));
+        } else {
+            return new Parameter()
+                .withParameterKey(referenceName)
+                .withParameterValue(tagValue);
+        }
     }
 
     @VisibleForTesting
@@ -170,7 +192,8 @@ public class AwsStackRequestHelper {
                 new Parameter().withParameterKey("EngineParameter").withParameterValue(awsRdsInstanceView.getEngine()),
                 new Parameter().withParameterKey("MasterUsernameParameter").withParameterValue(awsRdsInstanceView.getMasterUsername()),
                 new Parameter().withParameterKey("MasterUserPasswordParameter").withParameterValue(awsRdsInstanceView.getMasterUserPassword()),
-                new Parameter().withParameterKey("StackOwner").withParameterValue(ac.getCloudContext().getUserName()))
+                getStackOwnerFromDatabase(ac, stack, "Owner", "StackOwner"),
+                getStackOwnerFromDatabase(ac, stack, "owner", "stackowner"))
         );
 
         addParameterIfNotNull(parameters, "AllocatedStorageParameter", awsRdsInstanceView.getAllocatedStorage());

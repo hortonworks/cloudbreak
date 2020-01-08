@@ -67,6 +67,13 @@
       "MaxLength": "50"
     },
 
+    "stackowner" : {
+       "Description" : "The instances will have this parameter as an owner tag.",
+       "Type" : "String",
+       "MinLength": "1",
+       "MaxLength": "200"
+    },
+
     "CBUserData" : {
       "Description" : "User data to be executed",
       "Type" : "String",
@@ -186,6 +193,8 @@
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" },
+          { "Key" : "owner", "Value" : { "Ref" : "stackowner" }},
+          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }},
           { "Key" : "cb-resource-type", "Value" : "${network_resource}" }
         ]
       }
@@ -210,6 +219,8 @@
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" },
+          { "Key" : "owner", "Value" : { "Ref" : "stackowner" }},
+          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }},
           { "Key" : "cb-resource-type", "Value" : "${network_resource}" }
         ]
       }
@@ -223,6 +234,8 @@
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" },
+          { "Key" : "owner", "Value" : { "Ref" : "stackowner" }},
+          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }},
           { "Key" : "cb-resource-type", "Value" : "${network_resource}" }
         ]
       }
@@ -252,6 +265,8 @@
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" },
+          { "Key" : "owner", "Value" : { "Ref" : "stackowner" }},
+          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }},
           { "Key" : "cb-resource-type", "Value" : "${network_resource}" }
         ]
       }
@@ -306,7 +321,8 @@
         "MaxSize" : ${group.instanceCount},
         "DesiredCapacity" : ${group.instanceCount},
         "Tags" : [ { "Key" : "Name", "Value" : { "Fn::Join" : ["-", [ { "Ref" : "StackName" }, "${group.groupName}"]] }, "PropagateAtLaunch" : "true" },
-        		   { "Key" : "owner", "Value" : { "Ref" : "StackOwner" }, "PropagateAtLaunch" : "true" },
+        		   { "Key" : "owner", "Value" : { "Ref" : "stackowner" }, "PropagateAtLaunch" : "true" },
+        		   { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }, "PropagateAtLaunch" : "true" },
         		   { "Key" : "cb-resource-type", "Value" : "${instance_resource}", "PropagateAtLaunch" : "true" },
         		   { "Key" : "instanceGroup", "Value" : "${group.groupName}", "PropagateAtLaunch" : "true" }]
       }
@@ -379,7 +395,11 @@
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
         "GroupDescription" : "Allow access from web and bastion as well as outbound HTTP and HTTPS traffic",
-        "Tags" : [{ "Key" : "cb-resource-type", "Value" : "${securitygroup_resource}"}],
+        "Tags" : [
+            { "Key" : "cb-resource-type", "Value" : "${securitygroup_resource}" },
+            { "Key" : "owner", "Value" : { "Ref" : "stackowner" }},
+            { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }}
+        ],
         <#if existingVPC>
         "VpcId" : { "Ref" : "VPCId" },
         <#else>

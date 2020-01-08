@@ -1,6 +1,20 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Deploys a Cloudera Data Platform VPC on AWS.",
+    "Parameters": {
+        "StackOwner": {
+            "Description": "The instances will have this parameter as an Owner tag.",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "200"
+        },
+        "stackowner": {
+            "Description": "The instances will have this parameter as an owner tag.",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "200"
+        }
+    },
     "Resources": {
         "VPC": {
             "Type": "AWS::EC2::VPC",
@@ -22,6 +36,18 @@
                     {
                         "Key": "cb-resource-type",
                         "Value": "NETWORK"
+                    },
+                    {
+                        "Key": "owner",
+                        "Value": {
+                            "Ref": "stackowner"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "StackOwner"
+                        }
                     }
                 ]
             }
@@ -43,6 +69,18 @@
                     {
                         "Key": "cb-resource-type",
                         "Value": "NETWORK"
+                    },
+                    {
+                        "Key": "owner",
+                        "Value": {
+                            "Ref": "stackowner"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "StackOwner"
+                        }
                     }
                 ]
             }
@@ -85,6 +123,18 @@
                     {
                         "Key": "kubernetes.io/role/elb",
                         "Value": "1"
+                    },
+                    {
+                        "Key": "owner",
+                        "Value": {
+                            "Ref": "stackowner"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "StackOwner"
+                        }
                     }
                 ]
             }
@@ -127,6 +177,18 @@
                     {
                         "Key": "kubernetes.io/role/elb",
                         "Value": "1"
+                    },
+                    {
+                        "Key": "owner",
+                        "Value": {
+                            "Ref": "stackowner"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "StackOwner"
+                        }
                     }
                 ]
             }
@@ -162,6 +224,18 @@
                     {
                         "Key": "cb-resource-type",
                         "Value": "NETWORK"
+                    },
+                    {
+                        "Key": "owner",
+                        "Value": {
+                            "Ref": "stackowner"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "StackOwner"
+                        }
                     }
                 ]
             }

@@ -109,6 +109,12 @@
       "Type" : "String",
       "MinLength": "1",
       "MaxLength": "200"
+    },
+    "stackowner" : {
+        "Description" : "The instances will have this parameter as an owner tag.",
+        "Type" : "String",
+        "MinLength": "1",
+        "MaxLength": "200"
     }
   },
 
@@ -145,7 +151,8 @@
               "Tags" : [
                     { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
                     { "Key" : "cb-resource-type", "Value" : "${database_resource}" },
-                    { "Key" : "owner", "Value" : { "Ref" : "StackOwner" } }
+                    { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
+                    { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
               ],
               "VpcId" : { "Ref": "VPCIdParameter" }
             }
@@ -160,7 +167,8 @@
                 "Tags": [
                     { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
                     { "Key" : "cb-resource-type", "Value" : "${database_resource}" },
-                    { "Key" : "owner", "Value" : { "Ref" : "StackOwner" } }
+                    { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
+                    { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
                 ]
             }
         },
@@ -185,7 +193,8 @@
                 "Tags": [
                     { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
                     { "Key" : "cb-resource-type", "Value" : "${database_resource}" },
-                    { "Key" : "owner", "Value" : { "Ref" : "StackOwner" } }
+                    { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
+                    { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
                 ],
                 <#if hasSecurityGroup>
                 "VPCSecurityGroups": { "Ref": "VPCSecurityGroupsParameter" }
