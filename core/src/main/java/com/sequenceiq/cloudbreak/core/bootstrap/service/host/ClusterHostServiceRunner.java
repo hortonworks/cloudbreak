@@ -187,7 +187,7 @@ public class ClusterHostServiceRunner {
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs);
+            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
             boolean clouderaManager = blueprintService.isClouderaManagerTemplate(cluster.getBlueprint());
             hostOrchestrator.initServiceRun(gatewayConfigs, nodes, saltConfig, exitCriteriaModel, clouderaManager);
@@ -233,7 +233,8 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, Iterable<GatewayConfig> gatewayConfigs)
+    private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, Iterable<GatewayConfig> gatewayConfigs,
+            Set<Node> nodes)
             throws IOException, CloudbreakOrchestratorException {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
@@ -268,7 +269,7 @@ public class ClusterHostServiceRunner {
 
         decoratePillarWithJdbcConnectors(cluster, servicePillar);
 
-        return new SaltConfig(servicePillar, grainPropertiesService.createGrainProperties(gatewayConfigs, cluster));
+        return new SaltConfig(servicePillar, grainPropertiesService.createGrainProperties(gatewayConfigs, cluster, nodes));
     }
 
     private void addKerberosConfig(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) throws IOException {
