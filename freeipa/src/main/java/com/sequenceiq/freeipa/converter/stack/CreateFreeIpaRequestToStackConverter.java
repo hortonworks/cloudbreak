@@ -121,7 +121,7 @@ public class CreateFreeIpaRequestToStackConverter {
         Set<InstanceGroup> gateways =
                 stack.getInstanceGroups().stream().filter(ig -> InstanceGroupType.MASTER == ig.getInstanceGroupType()).collect(Collectors.toSet());
         Set<String> defaultGatewayCidrs = defaultGatewayCidr.stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet());
-        if (!defaultGatewayCidrs.isEmpty()) {
+        if (!defaultGatewayCidrs.isEmpty() && !stack.getTunnel().useCcm()) {
             for (InstanceGroup gateway : gateways) {
                 if (CollectionUtils.isEmpty(gateway.getSecurityGroup().getSecurityGroupIds())) {
                     Set<SecurityRule> rules = gateway.getSecurityGroup().getSecurityRules();
