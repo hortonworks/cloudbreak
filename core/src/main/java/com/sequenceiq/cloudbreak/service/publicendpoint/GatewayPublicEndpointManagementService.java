@@ -126,8 +126,8 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         SecurityConfig securityConfig = stack.getSecurityConfig();
-        KeyPair keyPair = getKeyPairForStack(stack);
         try {
+            KeyPair keyPair = getKeyPairForStack(stack);
             String endpointName = stack.getPrimaryGatewayInstance().getShortHostname();
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
             String environmentName = environment.getName();
