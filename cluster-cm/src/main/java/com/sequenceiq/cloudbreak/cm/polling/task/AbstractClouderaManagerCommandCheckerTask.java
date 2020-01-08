@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
+import java.net.SocketException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,12 +22,12 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
 
     private static final int INTERNAL_SERVER_ERROR = 500;
 
-    private static final int INTERNAL_SERVER_ERROR_LIMIT = 5;
+    private static final int TOLERATED_ERROR_LIMIT = 5;
 
     //CHECKSTYLE:OFF
     protected final ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
 
-    private int internalServerErrorCounter = 0;
+    private int toleratedErrorCounter = 0;
     //CHECKSTYLE:ON
 
     protected AbstractClouderaManagerCommandCheckerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory) {
@@ -42,21 +44,25 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
             if (e.getCode() == BAD_GATEWAY) {
                 LOGGER.debug("Cloudera Manager is not (yet) available.", e);
                 return false;
-            } else if (e.getCode() == INTERNAL_SERVER_ERROR) {
-                if (internalServerErrorCounter < INTERNAL_SERVER_ERROR_LIMIT) {
-                    internalServerErrorCounter++;
-                    LOGGER.warn("Command [{}] with id [{}] returned with internal server error for the {}. time(s). Tolerating till {} occasions.",
-                            getCommandName(), pollerObject.getId(), internalServerErrorCounter, INTERNAL_SERVER_ERROR_LIMIT);
+            } else if (isToleratedError(e)) {
+                if (toleratedErrorCounter < TOLERATED_ERROR_LIMIT) {
+                    toleratedErrorCounter++;
+                    LOGGER.warn("Command [{}] with id [{}] failed with a tolerated error '{}' for the {}. time(s). Tolerating till {} occasions.",
+                            getCommandName(), pollerObject.getId(), e.getMessage(), toleratedErrorCounter, TOLERATED_ERROR_LIMIT);
                     return false;
                 } else {
                     throw new ClouderaManagerOperationFailedException(
-                            String.format("Command [%s] with id [%s] returned with internal server error for %s times. Operation is considered failed.",
-                            getCommandName(), pollerObject.getId(), INTERNAL_SERVER_ERROR_LIMIT));
+                            String.format("Command [%s] with id [%s] failed with a tolerated error '%s' for %s times. Operation is considered failed.",
+                            getCommandName(), pollerObject.getId(), e.getMessage(), TOLERATED_ERROR_LIMIT));
                 }
             } else {
                 throw new ClouderaManagerOperationFailedException(String.format("Cloudera Manager [%s] operation  failed.", getCommandName()), e);
             }
         }
+    }
+
+    private boolean isToleratedError(ApiException e) {
+        return e.getCode() == INTERNAL_SERVER_ERROR || (e.getCause() != null && e.getCause() instanceof SocketException);
     }
 
     protected boolean doStatusCheck(T pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
