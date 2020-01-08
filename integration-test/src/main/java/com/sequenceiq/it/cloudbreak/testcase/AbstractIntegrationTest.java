@@ -272,6 +272,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/dnsrecord_find", freeIpaRouteHandler);
         dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/host_del", freeIpaRouteHandler);
         dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/role_find", freeIpaRouteHandler);
+        dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/server_conncheck", freeIpaRouteHandler);
     }
 
     protected void createDefaultEnvironment(TestContext testContext) {
@@ -438,5 +439,9 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected List<String> testProfiles() {
         return Collections.emptyList();
+    }
+
+    public FreeIpaRouteHandler getFreeIpaRouteHandler() {
+        return freeIpaRouteHandler;
     }
 }

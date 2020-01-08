@@ -64,7 +64,7 @@ public class ProviderChecker {
     @Inject
     private StackUpdater stackUpdater;
 
-    @Value("${freeipa.autosync.update.status:false}")
+    @Value("${freeipa.autosync.update.status:true}")
     private boolean updateStatus;
 
     public List<ProviderSyncResult> updateAndGetStatuses(Stack stack) {
@@ -137,8 +137,7 @@ public class ProviderChecker {
         if (instanceMetaData.getInstanceStatus() != newStatus) {
             if (updateStatus) {
                 instanceMetaData.setInstanceStatus(newStatus);
-                LOGGER.info(":::Auto sync updater::: The instance status would be had to update from {} to {}",
-                        instanceMetaData.getInstanceStatus(), newStatus);
+                LOGGER.info(":::Auto sync updater::: The instance status updated from {} to {}", instanceMetaData.getInstanceStatus(), newStatus);
             } else {
                 LOGGER.info(":::Auto sync updater::: The instance status would be had to update from {} to {}",
                         instanceMetaData.getInstanceStatus(), newStatus);
