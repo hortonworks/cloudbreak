@@ -61,7 +61,7 @@ public class FreeipaSyncService {
     @Value("${freeipa.autosync.enabled:true}")
     private boolean enabled;
 
-    @Value("${freeipa.autosync.update.status:false}")
+    @Value("${freeipa.autosync.update.status:true}")
     private boolean updateStatus;
 
     @PostConstruct

@@ -29,7 +29,7 @@ public class FreeIpaRouteHandler implements Route {
     @Inject
     private DummyResponse dummyResponse;
 
-    private Map<String, AbstractFreeIpaResponse> responseByMethod = new HashMap();
+    private Map<String, AbstractFreeIpaResponse> responseByMethod = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -50,5 +50,9 @@ public class FreeIpaRouteHandler implements Route {
             LOGGER.warn("No method found for request");
             return dummyResponse.handle(request, response);
         }
+    }
+
+    public void updateResponse(String method, AbstractFreeIpaResponse response) {
+        responseByMethod.put(method, response);
     }
 }
