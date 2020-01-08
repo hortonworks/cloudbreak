@@ -1,8 +1,8 @@
 package com.sequenceiq.redbeams.converter.stack;
 
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_CREATION_TIMESTAMP;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_USER_NAME;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_VERSION;
+import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_CREATION_TIMESTAMP;
+import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_USER_NAME;
+import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_CB_VERSION;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.OWNER;
 import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request.RDS_NAME_MAX_LENGTH;
 
@@ -270,10 +270,10 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 //        String user = ownerCrn.getUserId();
 
         Map<String, String> defaultTags = new HashMap<>();
-        defaultTags.put(safeTagString(CB_USER_NAME.key(), cloudPlatform), safeTagString(userEmail, cloudPlatform));
-        defaultTags.put(safeTagString(CB_VERSION.key(), cloudPlatform), safeTagString(version, cloudPlatform));
+        defaultTags.put(safeTagString(CDP_USER_NAME.key(), cloudPlatform), safeTagString(userEmail, cloudPlatform));
+        defaultTags.put(safeTagString(CDP_CB_VERSION.key(), cloudPlatform), safeTagString(version, cloudPlatform));
         defaultTags.put(safeTagString(OWNER.key(), cloudPlatform), safeTagString(userEmail, cloudPlatform));
-        defaultTags.put(safeTagString(CB_CREATION_TIMESTAMP.key(), cloudPlatform),
+        defaultTags.put(safeTagString(CDP_CREATION_TIMESTAMP.key(), cloudPlatform),
                 safeTagString(String.valueOf(now), cloudPlatform));
 
         return new Json(new StackTags(new HashMap<>(), new HashMap<>(), defaultTags));

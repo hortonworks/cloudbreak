@@ -1,8 +1,8 @@
 package com.sequenceiq.redbeams.converter.stack;
 
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_CREATION_TIMESTAMP;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_USER_NAME;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_VERSION;
+import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_CREATION_TIMESTAMP;
+import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_USER_NAME;
+import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_CB_VERSION;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.OWNER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -183,10 +183,10 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         Json tags = dbStack.getTags();
         StackTags stackTags = tags.get(StackTags.class);
         Map<String, String> defaultTags = stackTags.getDefaultTags();
-        assertEquals(USER_EMAIL, defaultTags.get(CB_USER_NAME.key()));
+        assertEquals(USER_EMAIL, defaultTags.get(CDP_USER_NAME.key()));
         assertEquals(USER_EMAIL, defaultTags.get(OWNER.key()));
-        assertEquals(String.valueOf(NOW.getEpochSecond()), defaultTags.get(CB_CREATION_TIMESTAMP.key()));
-        assertEquals(VERSION, defaultTags.get(CB_VERSION.key()));
+        assertEquals(String.valueOf(NOW.getEpochSecond()), defaultTags.get(CDP_CREATION_TIMESTAMP.key()));
+        assertEquals(VERSION, defaultTags.get(CDP_CB_VERSION.key()));
 
         assertEquals(Status.REQUESTED, dbStack.getStatus());
         assertEquals(DetailedDBStackStatus.PROVISION_REQUESTED, dbStack.getDbStackStatus().getDetailedDBStackStatus());

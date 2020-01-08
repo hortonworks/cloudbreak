@@ -209,7 +209,7 @@ public class HueConfigProviderTest {
                 new SimpleEntry<>("hue-hue_database_type", DB_PROVIDER),
                 new SimpleEntry<>("hue-hue_database_user", USER_NAME),
                 new SimpleEntry<>("hue-hue_database_password", PASSWORD),
-                new SimpleEntry<>("knox_proxyhosts.java ", proxyHostsExpected));
+                new SimpleEntry<>("knox_proxyhosts", proxyHostsExpected));
     }
 
     @Test

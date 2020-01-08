@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_CREATION_TIMESTAMP;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_USER_NAME;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_VERSION;
+import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_CREATION_TIMESTAMP;
+import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_USER_NAME;
+import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_CB_VERSION;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.OWNER;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -204,7 +204,8 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
         StackV4Request request = getRequest("stack-without-tags.json");
 
-        Map<String, String> defaultTags = Map.of(CB_USER_NAME.key(), "test", CB_VERSION.key(), "test", OWNER.key(), "test", CB_CREATION_TIMESTAMP.key(), "test");
+        Map<String, String> defaultTags = Map.of(CDP_USER_NAME.key(), "test", CDP_CB_VERSION.key(), "test", OWNER.key(),
+                "test", CDP_CREATION_TIMESTAMP.key(), "test");
         given(defaultCostTaggingService.prepareDefaultTags(anyString(), anyMap(), anyString())).willReturn(defaultTags);
         given(credentialClientService.getByName(anyString())).willReturn(credential);
         given(credentialClientService.getByCrn(anyString())).willReturn(credential);

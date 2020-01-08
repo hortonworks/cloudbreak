@@ -1,447 +1,572 @@
 {
-    "AWSTemplateFormatVersion":"2010-09-09",
-    "Description":"Deploys a Cloudera Data Platform VPC on AWS.",
-    "Resources":{
-        "VPC":{
-            "Type":"AWS::EC2::VPC",
-            "Properties":{
-                "CidrBlock":"0.0.0.0/16",
-                "EnableDnsSupport":"true",
-                "EnableDnsHostnames":"true",
-                "Tags":[
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Deploys a Cloudera Data Platform VPC on AWS.",
+    "Parameters": {
+        "StackOwner": {
+            "Description": "The instances will have this parameter as an Owner tag.",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "200"
+        },
+        "stackowner": {
+            "Description": "The instances will have this parameter as an owner tag.",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "200"
+        }
+    },
+    "Resources": {
+        "VPC": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": "0.0.0.0/16",
+                "EnableDnsSupport": "true",
+                "EnableDnsHostnames": "true",
+                "Tags": [
                     {
-                        "Key":"Application",
-                        "Value":{
-                            "Ref":"AWS::StackId"
+                        "Key": "Application",
+                        "Value": {
+                            "Ref": "AWS::StackId"
                         }
                     },
                     {
-                        "Key":"Network",
-                        "Value":"Public"
+                        "Key": "Network",
+                        "Value": "Public"
                     },
                     {
-                        "Key":"cb-resource-type",
-                        "Value":"NETWORK"
+                        "Key": "cb-resource-type",
+                        "Value": "NETWORK"
+                    },
+                    {
+                        "Key": "owner",
+                        "Value": {
+                            "Ref": "stackowner"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "StackOwner"
+                        }
                     }
                 ]
             }
         },
-        "InternetGateway":{
-            "Type":"AWS::EC2::InternetGateway",
-            "Properties":{
-                "Tags":[
+        "InternetGateway": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [
                     {
-                        "Key":"Application",
-                        "Value":{
-                            "Ref":"AWS::StackId"
+                        "Key": "Application",
+                        "Value": {
+                            "Ref": "AWS::StackId"
                         }
                     },
                     {
-                        "Key":"Network",
-                        "Value":"Public"
+                        "Key": "Network",
+                        "Value": "Public"
                     },
                     {
-                        "Key":"cb-resource-type",
-                        "Value":"NETWORK"
+                        "Key": "cb-resource-type",
+                        "Value": "NETWORK"
+                    },
+                    {
+                        "Key": "owner",
+                        "Value": {
+                            "Ref": "stackowner"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "StackOwner"
+                        }
                     }
                 ]
             }
         },
-        "AttachGateway":{
-            "Type":"AWS::EC2::VPCGatewayAttachment",
-            "Properties":{
-                "VpcId":{
-                    "Ref":"VPC"
+        "AttachGateway": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC"
                 },
-                "InternetGatewayId":{
-                    "Ref":"InternetGateway"
+                "InternetGatewayId": {
+                    "Ref": "InternetGateway"
                 }
             }
         },
-        "PublicSubnet0":{
-            "Type":"AWS::EC2::Subnet",
-            "Properties":{
-                "MapPublicIpOnLaunch":"true",
-                "CidrBlock":"2.2.2.2/24",
-                "VpcId":{
-                    "Ref":"VPC"
+        "PublicSubnet0": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "MapPublicIpOnLaunch": "true",
+                "CidrBlock": "2.2.2.2/24",
+                "VpcId": {
+                    "Ref": "VPC"
                 },
-                "AvailabilityZone":"az1",
-                "Tags":[
+                "AvailabilityZone": "az1",
+                "Tags": [
                     {
-                        "Key":"Application",
-                        "Value":{
-                            "Ref":"AWS::StackId"
+                        "Key": "Application",
+                        "Value": {
+                            "Ref": "AWS::StackId"
                         }
                     },
                     {
-                        "Key":"Network",
-                        "Value":"Public"
+                        "Key": "Network",
+                        "Value": "Public"
                     },
                     {
-                        "Key":"cb-resource-type",
-                        "Value":"NETWORK"
+                        "Key": "cb-resource-type",
+                        "Value": "NETWORK"
                     },
                     {
-                        "Key":"kubernetes.io/role/elb",
-                        "Value":"1"
+                        "Key": "kubernetes.io/role/elb",
+                        "Value": "1"
+                    },
+                    {
+                        "Key": "owner",
+                        "Value": {
+                            "Ref": "stackowner"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "StackOwner"
+                        }
                     }
                 ]
             }
         },
-        "PrivateSubnet0":{
-            "Type":"AWS::EC2::Subnet",
-            "Properties":{
-                "MapPublicIpOnLaunch":"false",
-                "CidrBlock":"2.2.2.2/24",
-                "VpcId":{
-                    "Ref":"VPC"
+        "PrivateSubnet0": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "MapPublicIpOnLaunch": "false",
+                "CidrBlock": "2.2.2.2/24",
+                "VpcId": {
+                    "Ref": "VPC"
                 },
-                "AvailabilityZone":"az1",
-                "Tags":[
+                "AvailabilityZone": "az1",
+                "Tags": [
                     {
-                        "Key":"Application",
-                        "Value":{
-                            "Ref":"AWS::StackId"
+                        "Key": "Application",
+                        "Value": {
+                            "Ref": "AWS::StackId"
                         }
                     },
                     {
-                        "Key":"Network",
-                        "Value":"Private"
+                        "Key": "Network",
+                        "Value": "Private"
                     },
                     {
-                        "Key":"cb-resource-type",
-                        "Value":"NETWORK"
+                        "Key": "cb-resource-type",
+                        "Value": "NETWORK"
                     },
                     {
-                        "Key":"kubernetes.io/role/elb",
-                        "Value":"1"
+                        "Key": "kubernetes.io/role/elb",
+                        "Value": "1"
+                    },
+                    {
+                        "Key": "owner",
+                        "Value": {
+                            "Ref": "stackowner"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "StackOwner"
+                        }
                     }
                 ]
             }
         },
-        "NatGateway0EIP":{
-            "Type":"AWS::EC2::EIP",
-            "DependsOn":"AttachGateway",
-            "Properties":{
-                "Domain":{
-                    "Ref":"VPC"
+        "NatGateway0EIP": {
+            "Type": "AWS::EC2::EIP",
+            "DependsOn": "AttachGateway",
+            "Properties": {
+                "Domain": {
+                    "Ref": "VPC"
                 }
             }
         },
-        "NatGateway0":{
-            "Type":"AWS::EC2::NatGateway",
-            "Properties":{
-                "AllocationId":{
-                    "Fn::GetAtt":[ "NatGateway0EIP", "AllocationId" ]
+        "NatGateway0": {
+            "Type": "AWS::EC2::NatGateway",
+            "Properties": {
+                "AllocationId": {
+                    "Fn::GetAtt": [
+                        "NatGateway0EIP",
+                        "AllocationId"
+                    ]
                 },
-                "SubnetId":{
-                    "Ref":"PublicSubnet0"
+                "SubnetId": {
+                    "Ref": "PublicSubnet0"
                 }
             }
         },
-        "PrivateRouteTable0":{
-            "Type":"AWS::EC2::RouteTable",
-            "Properties":{
-                "VpcId":{
-                    "Ref":"VPC"
+        "PrivateRouteTable0": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC"
                 },
-                "Tags":[
+                "Tags": [
                     {
-                        "Key":"Application",
-                        "Value":{
-                            "Ref":"AWS::StackId"
+                        "Key": "Application",
+                        "Value": {
+                            "Ref": "AWS::StackId"
                         }
                     },
                     {
-                        "Key":"Network",
-                        "Value":"Private"
+                        "Key": "Network",
+                        "Value": "Private"
                     },
                     {
-                        "Key":"cb-resource-type",
-                        "Value":"NETWORK"
+                        "Key": "cb-resource-type",
+                        "Value": "NETWORK"
+                    },
+                    {
+                        "Key": "owner",
+                        "Value": {
+                            "Ref": "stackowner"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "StackOwner"
+                        }
                     }
                 ]
             }
         },
-        "PrivateSubnetRouteTableAssociation0":{
-            "Type":"AWS::EC2::SubnetRouteTableAssociation",
-            "Properties":{
-                "SubnetId":{
-                    "Ref":"PrivateSubnet0"
+        "PrivateSubnetRouteTableAssociation0": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "PrivateSubnet0"
                 },
-                "RouteTableId":{
-                    "Ref":"PrivateRouteTable0"
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable0"
                 }
             }
         },
-        "PrivateRoute0":{
-            "Type":"AWS::EC2::Route",
-            "DependsOn":[
+        "PrivateRoute0": {
+            "Type": "AWS::EC2::Route",
+            "DependsOn": [
                 "PrivateRouteTable0",
                 "AttachGateway"
             ],
-            "Properties":{
-                "DestinationCidrBlock":"0.0.0.0/0",
-                "RouteTableId":{
-                    "Ref":"PrivateRouteTable0"
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable0"
                 },
-                "NatGatewayId":{
-                    "Ref":"NatGateway0"
+                "NatGatewayId": {
+                    "Ref": "NatGateway0"
                 }
             }
         },
-        "PublicSubnetRouteTableAssociation0":{
-            "Type":"AWS::EC2::SubnetRouteTableAssociation",
-            "Properties":{
-                "SubnetId":{
-                    "Ref":"PublicSubnet0"
+        "PublicSubnetRouteTableAssociation0": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "PublicSubnet0"
                 },
-                "RouteTableId":{
-                    "Ref":"PublicRouteTable"
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable"
                 }
             }
         },
-        "PublicSubnet1":{
-            "Type":"AWS::EC2::Subnet",
-            "Properties":{
-                "MapPublicIpOnLaunch":"true",
-                "CidrBlock":"2.2.2.2/24",
-                "VpcId":{
-                    "Ref":"VPC"
+        "PublicSubnet1": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "MapPublicIpOnLaunch": "true",
+                "CidrBlock": "2.2.2.2/24",
+                "VpcId": {
+                    "Ref": "VPC"
                 },
-                "AvailabilityZone":"az2",
-                "Tags":[
+                "AvailabilityZone": "az2",
+                "Tags": [
                     {
-                        "Key":"Application",
-                        "Value":{
-                            "Ref":"AWS::StackId"
+                        "Key": "Application",
+                        "Value": {
+                            "Ref": "AWS::StackId"
                         }
                     },
                     {
-                        "Key":"Network",
-                        "Value":"Public"
+                        "Key": "Network",
+                        "Value": "Public"
                     },
                     {
-                        "Key":"cb-resource-type",
-                        "Value":"NETWORK"
+                        "Key": "cb-resource-type",
+                        "Value": "NETWORK"
                     },
                     {
-                        "Key":"kubernetes.io/role/elb",
-                        "Value":"1"
+                        "Key": "kubernetes.io/role/elb",
+                        "Value": "1"
+                    },
+                    {
+                        "Key": "owner",
+                        "Value": {
+                            "Ref": "stackowner"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "StackOwner"
+                        }
                     }
                 ]
             }
         },
-        "PrivateSubnet1":{
-            "Type":"AWS::EC2::Subnet",
-            "Properties":{
-                "MapPublicIpOnLaunch":"false",
-                "CidrBlock":"2.2.2.2/24",
-                "VpcId":{
-                    "Ref":"VPC"
+        "PrivateSubnet1": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "MapPublicIpOnLaunch": "false",
+                "CidrBlock": "2.2.2.2/24",
+                "VpcId": {
+                    "Ref": "VPC"
                 },
-                "AvailabilityZone":"az2",
-                "Tags":[
+                "AvailabilityZone": "az2",
+                "Tags": [
                     {
-                        "Key":"Application",
-                        "Value":{
-                            "Ref":"AWS::StackId"
+                        "Key": "Application",
+                        "Value": {
+                            "Ref": "AWS::StackId"
                         }
                     },
                     {
-                        "Key":"Network",
-                        "Value":"Private"
+                        "Key": "Network",
+                        "Value": "Private"
                     },
                     {
-                        "Key":"cb-resource-type",
-                        "Value":"NETWORK"
+                        "Key": "cb-resource-type",
+                        "Value": "NETWORK"
                     },
                     {
-                        "Key":"kubernetes.io/role/elb",
-                        "Value":"1"
+                        "Key": "kubernetes.io/role/elb",
+                        "Value": "1"
+                    },
+                    {
+                        "Key": "owner",
+                        "Value": {
+                            "Ref": "stackowner"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "StackOwner"
+                        }
                     }
                 ]
             }
         },
-        "NatGateway1EIP":{
-            "Type":"AWS::EC2::EIP",
-            "DependsOn":"AttachGateway",
-            "Properties":{
-                "Domain":{
-                    "Ref":"VPC"
+        "NatGateway1EIP": {
+            "Type": "AWS::EC2::EIP",
+            "DependsOn": "AttachGateway",
+            "Properties": {
+                "Domain": {
+                    "Ref": "VPC"
                 }
             }
         },
-        "NatGateway1":{
-            "Type":"AWS::EC2::NatGateway",
-            "Properties":{
-                "AllocationId":{
-                    "Fn::GetAtt":[
+        "NatGateway1": {
+            "Type": "AWS::EC2::NatGateway",
+            "Properties": {
+                "AllocationId": {
+                    "Fn::GetAtt": [
                         "NatGateway1EIP",
                         "AllocationId"
                     ]
                 },
-                "SubnetId":{
-                    "Ref":"PublicSubnet1"
+                "SubnetId": {
+                    "Ref": "PublicSubnet1"
                 }
             }
         },
-        "PrivateRouteTable1":{
-            "Type":"AWS::EC2::RouteTable",
-            "Properties":{
-                "VpcId":{
-                    "Ref":"VPC"
+        "PrivateRouteTable1": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC"
                 },
-                "Tags":[
+                "Tags": [
                     {
-                        "Key":"Application",
-                        "Value":{
-                            "Ref":"AWS::StackId"
+                        "Key": "Application",
+                        "Value": {
+                            "Ref": "AWS::StackId"
                         }
                     },
                     {
-                        "Key":"Network",
-                        "Value":"Private"
+                        "Key": "Network",
+                        "Value": "Private"
                     },
                     {
-                        "Key":"cb-resource-type",
-                        "Value":"NETWORK"
+                        "Key": "cb-resource-type",
+                        "Value": "NETWORK"
+                    },
+                    {
+                        "Key": "owner",
+                        "Value": {
+                            "Ref": "stackowner"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "StackOwner"
+                        }
                     }
                 ]
             }
         },
-        "PrivateSubnetRouteTableAssociation1":{
-            "Type":"AWS::EC2::SubnetRouteTableAssociation",
-            "Properties":{
-                "SubnetId":{
-                    "Ref":"PrivateSubnet1"
+        "PrivateSubnetRouteTableAssociation1": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "PrivateSubnet1"
                 },
-                "RouteTableId":{
-                    "Ref":"PrivateRouteTable1"
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable1"
                 }
             }
         },
-        "PrivateRoute1":{
-            "Type":"AWS::EC2::Route",
-            "DependsOn":[
+        "PrivateRoute1": {
+            "Type": "AWS::EC2::Route",
+            "DependsOn": [
                 "PrivateRouteTable1",
                 "AttachGateway"
             ],
-            "Properties":{
-                "DestinationCidrBlock":"0.0.0.0/0",
-                "RouteTableId":{
-                    "Ref":"PrivateRouteTable1"
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable1"
                 },
-                "NatGatewayId":{
-                    "Ref":"NatGateway1"
+                "NatGatewayId": {
+                    "Ref": "NatGateway1"
                 }
             }
         },
-        "PublicSubnetRouteTableAssociation1":{
-            "Type":"AWS::EC2::SubnetRouteTableAssociation",
-            "Properties":{
-                "SubnetId":{
-                    "Ref":"PublicSubnet1"
+        "PublicSubnetRouteTableAssociation1": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "PublicSubnet1"
                 },
-                "RouteTableId":{
-                    "Ref":"PublicRouteTable"
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable"
                 }
             }
         },
-        "PublicRouteTable":{
-            "Type":"AWS::EC2::RouteTable",
-            "Properties":{
-                "VpcId":{
-                    "Ref":"VPC"
+        "PublicRouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC"
                 },
-                "Tags":[
+                "Tags": [
                     {
-                        "Key":"Application",
-                        "Value":{
-                            "Ref":"AWS::StackId"
+                        "Key": "Application",
+                        "Value": {
+                            "Ref": "AWS::StackId"
                         }
                     },
                     {
-                        "Key":"Network",
-                        "Value":"Public"
+                        "Key": "Network",
+                        "Value": "Public"
                     },
                     {
-                        "Key":"cb-resource-type",
-                        "Value":"NETWORK"
+                        "Key": "cb-resource-type",
+                        "Value": "NETWORK"
+                    },
+                    {
+                        "Key": "owner",
+                        "Value": {
+                            "Ref": "stackowner"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "StackOwner"
+                        }
                     }
                 ]
             }
         },
-        "PublicRoute":{
-            "Type":"AWS::EC2::Route",
-            "DependsOn":[
+        "PublicRoute": {
+            "Type": "AWS::EC2::Route",
+            "DependsOn": [
                 "PublicRouteTable",
                 "AttachGateway"
             ],
-            "Properties":{
-                "RouteTableId":{
-                    "Ref":"PublicRouteTable"
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable"
                 },
-                "DestinationCidrBlock":"0.0.0.0/0",
-                "GatewayId":{
-                    "Ref":"InternetGateway"
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "InternetGateway"
                 }
             }
         }
     },
-    "Outputs":{
-        "PublicSubnetId0":{
-            "Value":{
-                "Ref":"PublicSubnet0"
+    "Outputs": {
+        "PublicSubnetId0": {
+            "Value": {
+                "Ref": "PublicSubnet0"
             }
         },
-        "PublicSubnetCidr0":{
-            "Value":"2.2.2.2/24"
+        "PublicSubnetCidr0": {
+            "Value": "2.2.2.2/24"
         },
-        "PrivateSubnetId0":{
-            "Value":{
-                "Ref":"PrivateSubnet0"
+        "PrivateSubnetId0": {
+            "Value": {
+                "Ref": "PrivateSubnet0"
             }
         },
-        "PrivateSubnetCidr0":{
-            "Value":"2.2.2.2/24"
+        "PrivateSubnetCidr0": {
+            "Value": "2.2.2.2/24"
         },
-        "Az0":{
-            "Value":{
-                "Fn::GetAtt":[
+        "Az0": {
+            "Value": {
+                "Fn::GetAtt": [
                     "PublicSubnet0",
                     "AvailabilityZone"
                 ]
             }
         },
-        "PublicSubnetId1":{
-            "Value":{
-                "Ref":"PublicSubnet1"
+        "PublicSubnetId1": {
+            "Value": {
+                "Ref": "PublicSubnet1"
             }
         },
-        "PublicSubnetCidr1":{
-            "Value":"2.2.2.2/24"
+        "PublicSubnetCidr1": {
+            "Value": "2.2.2.2/24"
         },
-        "PrivateSubnetId1":{
-            "Value":{
-                "Ref":"PrivateSubnet1"
+        "PrivateSubnetId1": {
+            "Value": {
+                "Ref": "PrivateSubnet1"
             }
         },
-        "PrivateSubnetCidr1":{
-            "Value":"2.2.2.2/24"
+        "PrivateSubnetCidr1": {
+            "Value": "2.2.2.2/24"
         },
-        "Az1":{
-            "Value":{
-                "Fn::GetAtt":[
+        "Az1": {
+            "Value": {
+                "Fn::GetAtt": [
                     "PublicSubnet1",
                     "AvailabilityZone"
                 ]
             }
         },
-        "CreatedVpc":{
-            "Value":{
-                "Ref":"VPC"
+        "CreatedVpc": {
+            "Value": {
+                "Ref": "VPC"
             }
         }
     }

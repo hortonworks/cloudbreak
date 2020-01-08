@@ -6,6 +6,7 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_FAI
 import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_COMPLETE;
 import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
+import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +30,7 @@ import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.OnFailure;
+import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.cloudformation.model.Tag;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
@@ -154,7 +156,7 @@ public class AwsNetworkConnector implements NetworkConnector {
     private CreatedCloudNetwork createNewCfNetworkStack(NetworkCreationRequest networkRequest, AwsCredentialView credentialView,
             AmazonCloudFormationRetryClient cloudFormationRetryClient, String cloudFormationTemplate, String creatorUser) {
         Map<String, String> defaultTags = defaultCostTaggingService.prepareDefaultTags(creatorUser, null, CloudConstants.AWS);
-        cloudFormationRetryClient.createStack(createStackRequest(networkRequest.getStackName(), cloudFormationTemplate, defaultTags));
+        cloudFormationRetryClient.createStack(createStackRequest(networkRequest.getStackName(), cloudFormationTemplate, defaultTags, creatorUser));
         LOGGER.debug("CloudFormation stack creation request sent with stack name: '{}' ", networkRequest.getStackName());
         return getCreatedNetworkWithPolling(networkRequest, credentialView, cloudFormationRetryClient);
     }
@@ -178,14 +180,30 @@ public class AwsNetworkConnector implements NetworkConnector {
         return new CreatedCloudNetwork(networkRequest.getStackName(), vpcId, subnets);
     }
 
-    private CreateStackRequest createStackRequest(String stackName, String cloudFormationTemplate, Map<String, String> tags) {
+    private CreateStackRequest createStackRequest(String stackName, String cloudFormationTemplate, Map<String, String> tags, String creatorUser) {
         Collection<Tag> awsTags = awsTagPreparationService.prepareCloudformationTags(null, tags);
         return new CreateStackRequest()
                 .withStackName(stackName)
                 .withOnFailure(OnFailure.DO_NOTHING)
                 .withTemplateBody(cloudFormationTemplate)
                 .withTags(awsTags)
-                .withCapabilities(CAPABILITY_IAM);
+                .withCapabilities(CAPABILITY_IAM)
+                .withParameters(getStackParameters(creatorUser));
+    }
+
+    private Collection<Parameter> getStackParameters(String creatorUser) {
+        Collection<Parameter> parameters = new ArrayList<>();
+        parameters.addAll(asList(
+                getStackOwner("StackOwner", creatorUser),
+                getStackOwner("stackowner", creatorUser)
+        ));
+        return parameters;
+    }
+
+    private Parameter getStackOwner(String referenceName, String referenceValue) {
+        return new Parameter()
+                .withParameterKey(referenceName)
+                .withParameterValue(referenceValue);
     }
 
     private PollTask<Boolean> getNewNetworkPollTask(AwsCredentialView credentialView, NetworkCreationRequest networkRequest) {
