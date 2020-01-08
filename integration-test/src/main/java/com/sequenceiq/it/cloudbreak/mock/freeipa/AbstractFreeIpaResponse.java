@@ -1,11 +1,13 @@
 package com.sequenceiq.it.cloudbreak.mock.freeipa;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 
 import org.springframework.http.HttpStatus;
 
+import com.sequenceiq.freeipa.client.model.RPCMessage;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 
@@ -22,10 +24,15 @@ public abstract class AbstractFreeIpaResponse<T> extends ITResponse {
         rpcResponse.setResult(handleInternal(request, response));
         rpcResponse.setCount(1);
         rpcResponse.setTruncated(Boolean.FALSE);
+        rpcResponse.setMessages(getMessages());
         return Map.of("result", rpcResponse);
     }
 
     public abstract String method();
+
+    protected List<RPCMessage> getMessages() {
+        return null;
+    }
 
     protected abstract T handleInternal(Request request, Response response);
 }

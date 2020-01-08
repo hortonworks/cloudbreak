@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE;
 
+import java.util.Collections;
+
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
@@ -20,6 +22,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.mock.freeipa.ServerConnCheckFreeipaRpcResponse;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -72,7 +75,9 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 .await(STACK_AVAILABLE, RunningParameter.key("dx2"))
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.stop())
-                .await(EnvironmentStatus.ENV_STOPPED)
+                .await(EnvironmentStatus.ENV_STOPPED);
+        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse(false, Collections.emptyList()));
+        testContext.given(EnvironmentTestDto.class)
                 .when(environmentTestClient.start())
                 .await(EnvironmentStatus.AVAILABLE)
                 .validate();
