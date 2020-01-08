@@ -88,7 +88,7 @@ public class ProviderChecker {
                         results.add(new ProviderSyncResult("", instanceStatus, false, s.getCloudInstance().getInstanceId()));
                     }
                 } else {
-                    LOGGER.info(":::Auto sync updater::: Cannot find");
+                    LOGGER.info(":::Auto sync updater::: Cannot find instanceMetaData");
                 }
             });
             checkableInstances.forEach(instanceMetaData -> {
@@ -137,9 +137,11 @@ public class ProviderChecker {
         if (instanceMetaData.getInstanceStatus() != newStatus) {
             if (updateStatus) {
                 instanceMetaData.setInstanceStatus(newStatus);
+                LOGGER.info(":::Auto sync updater::: The instance status would be had to update from {} to {}",
+                        instanceMetaData.getInstanceStatus(), newStatus);
             } else {
                 LOGGER.info(":::Auto sync updater::: The instance status would be had to update from {} to {}",
-                        instanceMetaData.getInstanceStatus(), InstanceStatus.DELETED_ON_PROVIDER_SIDE);
+                        instanceMetaData.getInstanceStatus(), newStatus);
             }
         }
     }
@@ -154,7 +156,7 @@ public class ProviderChecker {
             return checkedMeasure(() -> instanceStateQuery.getCloudVmInstanceStatuses(cloudCredential, cloudContext, instances), LOGGER,
                     ":::Auto sync measure::: get instance statuses in {}ms");
         } catch (Exception e) {
-            LOGGER.info(":::Auto sync updater::: Could not fetch vm statuses" + e.getMessage(), e);
+            LOGGER.info(":::Auto sync updater::: Could not fetch vm statuses: " + e.getMessage(), e);
             throw e;
         }
     }
