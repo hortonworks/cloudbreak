@@ -53,7 +53,7 @@ public class ClusterPublicEndpointManagementService {
 
     public boolean renewCertificate(Stack stack) {
         boolean result = false;
-        if (gatewayPublicEndpointManagementService.isCertGenerationEnabled()) {
+        if (gatewayPublicEndpointManagementService.isCertRenewalTriggerable(stack)) {
             result = gatewayPublicEndpointManagementService.renewCertificate(stack);
         }
         return result;
