@@ -10,9 +10,9 @@ Both of them need similar preparation, so you will find first a section "Common 
 
 ### Edit /etc/hosts file
 
-Address `mockhosts.service.consul` has to be resolvable from the host where perftest will be running.
+Address `mockhosts` has to be resolvable from the host where perftest will be running.
 
-Edit your `/etc/hosts` file and add `mockhosts.service.consul` as can be seen below:
+Edit your `/etc/hosts` file and add `mockhosts` as can be seen below:
 
 ```
 ##
@@ -21,7 +21,7 @@ Edit your `/etc/hosts` file and add `mockhosts.service.consul` as can be seen be
 # localhost is used to configure the loopback interface
 # when the system is booting.  Do not change this entry.
 ##
-127.0.0.1       localhost       mockhosts.service.consul
+127.0.0.1       localhost       mockhosts
 255.255.255.255 broadcasthost
 ::1             localhost
 ```
@@ -45,7 +45,7 @@ CB_SERVER_ADDRESS=$CB_PERFTEST_HOST MOCK_SERVER_ADDRESS=$CB_MOCK_HOST ./gradlew 
 
 Where:
 * `CB_PERFTEST_HOST`: equals to the value of variable `YOUR_IP` from your environment folder / Profile file. It is 192.168.99.100 by default.
-* `MOCK_SERVER_ADDRESS`: is equal to `mockhosts.service.consul`
+* `MOCK_SERVER_ADDRESS`: is equal to `mockhosts`
 
 ## Creating mock clusters
 

@@ -30,7 +30,7 @@ dependencies {
   testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
 
   runtime group: 'org.glassfish.jersey.core', name: 'jersey-common', version: jerseyCoreVersion
-  compile(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonDatabindVersion) {
+  compile(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion) {
     force = true
   }
 

@@ -43,6 +43,14 @@ springBoot {
     mainClassName = 'com.sequenceiq.periscope.PeriscopeApplication'
 }
 
+configurations {
+    compile {
+        resolutionStrategy {
+            exclude group: 'org.testng'
+        }
+    }
+}
+
 dependencyManagement {
     dependencies {
         dependencySet(group: 'org.springframework.boot', version: springBootVersion) {
@@ -81,7 +89,7 @@ dependencyManagement {
         dependency (group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: swaggerVersion) {
           exclude 'org.yaml:snakeyaml'
         }
-        dependency group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonDatabindVersion
+        dependency group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
         dependency group: 'javax.mail',                    name: 'mail',                           version: '1.5.0-b01'
         dependency group: 'dnsjava',                       name: 'dnsjava',                        version: '2.1.7'
         dependency group: 'javax.xml.bind',                name: 'jaxb-api',                       version: '2.3.0'
@@ -96,8 +104,8 @@ dependencyManagement {
         }
         dependency group: 'org.apache.hadoop',                  name: 'hadoop-yarn-api',           version: hadoopVersion
         dependency group: 'org.freemarker',                     name: 'freemarker',                version: freemarkerVersion
-        dependency (group: 'org.quartz-scheduler',               name: 'quartz',                    version: '2.3.1') {
-            exclude 'com.zaxxer:HikariCP'
+        dependency (group: 'org.quartz-scheduler',               name: 'quartz',                    version: '2.3.2') {
+            exclude group: 'com.zaxxer', name: 'HikariCP-java7'
         }
         dependency group: 'org.postgresql',                     name: 'postgresql',                version: postgreSQLVersion
         dependency group: 'org.mybatis',                        name: 'mybatis-migrations',        version: '3.2.0'
@@ -131,7 +139,7 @@ dependencies {
     compile group: 'org.postgresql',                name: 'postgresql'
     compile group: 'org.mybatis',                   name: 'mybatis-migrations'
     compile group: 'org.quartz-scheduler',          name: 'quartz'
-    compile group: 'com.zaxxer',                    name: 'HikariCP' 
+    compile group: 'com.zaxxer',                    name: 'HikariCP'
     compile group: 'javax.mail',                    name: 'mail'
     compile group: 'dnsjava',                       name: 'dnsjava'
     compile group: 'net.sf.ehcache',                name: 'ehcache'

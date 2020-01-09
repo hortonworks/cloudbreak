@@ -17,7 +17,7 @@ jar {
 
 dependencies {
   implementation     group: 'com.github.briandilley.jsonrpc4j', name: 'jsonrpc4j',                   version: '1.5.3'
-  implementation     group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',            version: jacksonDatabindVersion
+  implementation     group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',            version: jacksonVersion
   implementation     group: 'org.slf4j',                        name: 'slf4j-api',                   version: slf4jApiVersion
   implementation     group: 'org.apache.commons',               name: 'commons-lang3',               version: apacheCommonsLangVersion
   implementation     group: 'org.bouncycastle',                 name: 'bcprov-jdk15on',              version: bouncycastleVersion
