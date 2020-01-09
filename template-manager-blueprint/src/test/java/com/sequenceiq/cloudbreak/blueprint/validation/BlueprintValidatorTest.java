@@ -84,7 +84,9 @@ public class BlueprintValidatorTest {
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
         IOException expectedException = new IOException("");
-        BDDMockito.given(objectMapper.readTree(ArgumentMatchers.anyString())).willThrow(expectedException);
+        BDDMockito.given(objectMapper.readTree(ArgumentMatchers.anyString())).willAnswer(i -> {
+            throw expectedException; }
+        );
         thrown.expect(BlueprintValidationException.class);
         thrown.expectMessage("Blueprint [null] can not be parsed from JSON.");
         thrown.expectCause(is(expectedException));

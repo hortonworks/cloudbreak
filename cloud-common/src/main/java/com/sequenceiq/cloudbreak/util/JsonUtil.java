@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import net.sf.json.JSONObject;
@@ -69,7 +70,8 @@ public class JsonUtil {
     }
 
     public static JsonNode readTree(String content) throws IOException {
-        return MAPPER.readTree(content);
+        JsonNode node = MAPPER.readTree(content);
+        return node instanceof MissingNode ? null : node;
     }
 
     public static JsonNode readTreeByArray(String content) throws IOException {

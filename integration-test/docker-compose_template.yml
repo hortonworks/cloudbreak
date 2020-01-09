@@ -1,57 +1,61 @@
-test:
-  dns:
-  ports:
-    - 2020:2020
-    - 9400-9900:9400-9900
-    - 7654:7654
-  volumes:
-    - ./:/it
-  command: java -jar /it/build/libs/cloudbreak-integration-test.jar com.sequenceiq.it.IntegrationTestApp --integrationtest.command=suiteurls --integrationtest.suiteFiles=${INTEGRATIONTEST_SUITEFILES}
-  environment:
-    - SERVICE_NAME=test
-    - SERVICE_2020_NAME=test
-    - SERVICE_9443_NAME=test
-    - SERVICE_7654_NAME=test
-    - INTEGRATIONTEST_UAA_SERVER=http://identity.service.consul:8089
-    - INTEGRATIONTEST_CLOUDBREAK_SERVER=http://cloudbreak.service.consul:8080
-    - INTEGRATIONTEST_UAA_USER=admin@example.com
-    - INTEGRATIONTEST_UAA_PASSWORD=cloudbreak
-    - INTEGRATIONTEST_UAA_AUTOSCALE_CLIENTID
-    - INTEGRATIONTEST_UAA_AUTOSCALE_CLIENTSECRET
-    - CLOUDBREAK_URL=cloudbreak.service.consul:8080
-    - SPRING_CONFIG_LOCATION=classpath:/application.yml,/it/it-application.yml
-    - INTEGRATIONTEST_SUITEFILES
-    - INTEGRATIONTEST_AWSCREDENTIAL_ROLEARN=${AWS_ROLE_ARN}
-    - INTEGRATIONTEST_AWSCREDENTIAL_SECRETKEY=${AWS_SECRET_ACCESS_KEY}
-    - INTEGRATIONTEST_AWSCREDENTIAL_ACCESSKEY=${AWS_ACCESS_KEY_ID}
-    - AWSREGION
-    - AWSAVAILABILITYZONE
-    - INTEGRATIONTEST_OPENSTACKV3CREDENTIAL_TENANTNAME
-    - INTEGRATIONTEST_OPENSTACKV3CREDENTIAL_USERNAME
-    - INTEGRATIONTEST_OPENSTACKV3CREDENTIAL_PASSWORD
-    - INTEGRATIONTEST_OPENSTACKV3CREDENTIAL_ENDPOINT
-    - INTEGRATIONTEST_AZURERMCREDENTIAL_ACCESSKEY
-    - INTEGRATIONTEST_AZURERMCREDENTIAL_SECRETKEY
-    - INTEGRATIONTEST_AZURERMCREDENTIAL_SUBSCRIPTIONID
-    - INTEGRATIONTEST_AZURERMCREDENTIAL_TENANTID
-    - INTEGRATIONTEST_RDSCONFIG_RDSUSER
-    - INTEGRATIONTEST_RDSCONFIG_RDSPASSWORD
-    - INTEGRATIONTEST_RDSCONFIG_RDSCONNECTIONURL
-    - INTEGRATIONTEST_LDAPCONFIG_LDAPSERVERHOST
-    - INTEGRATIONTEST_LDAPCONFIG_BINDPASSWORD
-    - INTEGRATIONTEST_PROXYCONFIG_PROXYHOST
-    - INTEGRATIONTEST_PROXYCONFIG_PROXYUSER
-    - INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD
-    - AWS_ACCESS_KEY_ID
-    - AWS_SECRET_ACCESS_KEY
-  image: openjdk:11-jdk
-swagger-diff:
-  dns:
-  volumes:
-    - ./apidefinitions:/json 
-  command: bash -c "curl -k http://cloudbreak.service.consul:8080/cb/api/swagger.json -o new.json && for f in /json/*.json ; do echo check to $${f} ; swagger-diff -i $${f} new.json ; done ; cp new.json /json"
-  image: afarsang/docker-swagger-diff
-swagger-validation:
-  dns:
-  command: validate http://cloudbreak.service.consul:8080/cb/api/swagger.json
-  image: quay.io/goswagger/swagger:0.12.0
+version: '3'
+networks:
+  cbreak_default:
+    external: true
+services:
+  test:
+    networks:
+      cbreak_default: {}
+    ports:
+      - 2020:2020
+      - 9400-9900:9400-9900
+      - 7654:7654
+    volumes:
+      - ./:/it
+    command: java -jar /it/build/libs/cloudbreak-integration-test.jar com.sequenceiq.it.IntegrationTestApp --integrationtest.command=suiteurls --integrationtest.suiteFiles=${INTEGRATIONTEST_SUITEFILES}
+    environment:
+      - INTEGRATIONTEST_UAA_SERVER=http://identity:8080
+      - INTEGRATIONTEST_CLOUDBREAK_SERVER=http://cloudbreak:8080
+      - INTEGRATIONTEST_UAA_USER=admin@example.com
+      - INTEGRATIONTEST_UAA_PASSWORD=cloudbreak
+      - INTEGRATIONTEST_UAA_AUTOSCALE_CLIENTID
+      - INTEGRATIONTEST_UAA_AUTOSCALE_CLIENTSECRET
+      - CLOUDBREAK_URL=cloudbreak:8080
+      - SPRING_CONFIG_LOCATION=classpath:/application.yml,/it/it-application.yml
+      - INTEGRATIONTEST_SUITEFILES
+      - INTEGRATIONTEST_AWSCREDENTIAL_ROLEARN=${AWS_ROLE_ARN}
+      - INTEGRATIONTEST_AWSCREDENTIAL_SECRETKEY=${AWS_SECRET_ACCESS_KEY}
+      - INTEGRATIONTEST_AWSCREDENTIAL_ACCESSKEY=${AWS_ACCESS_KEY_ID}
+      - AWSREGION
+      - AWSAVAILABILITYZONE
+      - INTEGRATIONTEST_OPENSTACKV3CREDENTIAL_TENANTNAME
+      - INTEGRATIONTEST_OPENSTACKV3CREDENTIAL_USERNAME
+      - INTEGRATIONTEST_OPENSTACKV3CREDENTIAL_PASSWORD
+      - INTEGRATIONTEST_OPENSTACKV3CREDENTIAL_ENDPOINT
+      - INTEGRATIONTEST_AZURERMCREDENTIAL_ACCESSKEY
+      - INTEGRATIONTEST_AZURERMCREDENTIAL_SECRETKEY
+      - INTEGRATIONTEST_AZURERMCREDENTIAL_SUBSCRIPTIONID
+      - INTEGRATIONTEST_AZURERMCREDENTIAL_TENANTID
+      - INTEGRATIONTEST_RDSCONFIG_RDSUSER
+      - INTEGRATIONTEST_RDSCONFIG_RDSPASSWORD
+      - INTEGRATIONTEST_RDSCONFIG_RDSCONNECTIONURL
+      - INTEGRATIONTEST_LDAPCONFIG_LDAPSERVERHOST
+      - INTEGRATIONTEST_LDAPCONFIG_BINDPASSWORD
+      - INTEGRATIONTEST_PROXYCONFIG_PROXYHOST
+      - INTEGRATIONTEST_PROXYCONFIG_PROXYUSER
+      - INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+    image: openjdk:11-jdk
+  swagger-diff:
+    networks:
+      cbreak_default: {}
+    volumes:
+      - ./apidefinitions:/json
+    command: bash -c "curl -k http://cloudbreak:8080/cb/api/swagger.json -o new.json && for f in /json/*.json ; do echo check to $${f} ; swagger-diff -i $${f} new.json ; done ; cp new.json /json"
+    image: afarsang/docker-swagger-diff
+  swagger-validation:
+    networks:
+      cbreak_default: {}
+    command: validate http://cloudbreak:8080/cb/api/swagger.json
+    image: quay.io/goswagger/swagger:0.12.0

@@ -45,6 +45,33 @@ allprojects {
     }
   }
 
+  // override Spring Depenendencies
+  ext['commons-codec.version'] = commonsCodecVersion
+  ext['hibernate-validator.version'] = hibernateValidatorVersion
+  ext['jackson.version'] = jacksonVersion
+
+  // override AWS SDK Depenendencies
+  ext['netty.version'] = "4.1.42.Final"
+
+  configurations {
+      all {
+          resolutionStrategy {
+              force 'commons-collections:commons-collections:3.2.2'
+              force 'xerces:xercesImpl:2.12.0'
+              force 'commons-beanutils:commons-beanutils:1.9.4'
+              force "commons-codec:commons-codec:$commonsCodecVersion"
+              force "commons-codec:commons-codec:$commonsCodecVersion"
+              force "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jacksonVersion"
+              force "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+              force "org.codehaus.jackson:jackson-jaxrs:1.9.13"
+              force "org.codehaus.jackson:jackson-mapper-asl:1.9.13"
+              force "org.codehaus.jackson:jackson-core-asl:1.9.13"
+              force "org.codehaus.jackson:jackson-xc:1.9.13"
+              force "org.testng:testng:$testNgVersion"
+          }
+      }
+  }
+
 }
 
 subprojects {

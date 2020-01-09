@@ -69,7 +69,7 @@ public class AppConfig implements ResourceLoaderAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
 
-    @Value("${cb.etc.config.dir}")
+    @Value("${cb.etc.config.dir:}")
     private String etcConfigDir;
 
     @Value("#{'${cb.supported.container.orchestrators:}'.split(',')}")

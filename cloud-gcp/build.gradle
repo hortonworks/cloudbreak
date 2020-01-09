@@ -20,7 +20,7 @@ dependencies {
     compile group: 'org.slf4j',                     name: 'slf4j-api',                    version: slf4jApiVersion
     compile group: 'org.apache.commons',            name: 'commons-lang3',                version: apacheCommonsLangVersion
     compile group: 'commons-io',                    name: 'commons-io',                   version: '2.4'
-    compile group: 'commons-codec',                 name: 'commons-codec',                version: '1.10'
+    compile group: 'commons-codec',                 name: 'commons-codec',                version: commonsCodecVersion
     compile group: 'com.google.apis',               name: 'google-api-services-compute',  version: 'v1-rev214-1.25.0'
     compile group: 'com.google.apis',               name: 'google-api-services-storage',  version: 'v1-rev94-1.22.0'
     compile group: 'com.google.apis',               name: 'google-api-services-dns',      version: 'v2beta1-rev14-1.22.0'

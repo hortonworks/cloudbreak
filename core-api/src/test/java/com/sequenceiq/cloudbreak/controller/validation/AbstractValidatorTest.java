@@ -19,8 +19,7 @@ import org.hibernate.validator.internal.engine.path.PathImpl;
 abstract class AbstractValidatorTest {
 
     ConstraintViolationBuilder getConstraintViolationBuilder() {
-        return new ConstraintValidatorContextImpl(
-                Collections.emptyList(), null,
+        return new ConstraintValidatorContextImpl(null,
                 PathImpl.createRootPath(),
                 new DummyConstraintDescriptor(),
                 null

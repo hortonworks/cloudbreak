@@ -11,6 +11,12 @@
 * Website: https://hortonworks.com/open-source/cloudbreak/
 * Documentation: https://docs.hortonworks.com/HDPDocuments/Cloudbreak/Cloudbreak-2.7.0/index.html
 
+# Warning for upgrading version 2.10
+
+Due to a technology change (upgrading docker-compose) the previous database volumes will become unreachable after upgrading to the latest version of Cloudbreak 2.10.
+
+Therefore dumping your database is **mandatory** before proceeding. After the upgrade you will need to restore all three databases (`cbdb`, `perscopedb` and `uaadb`). 
+
 # Local Development Setup
 As of now this document is focusing on setting up your development environment on OSX. You'll need brew to install certain components in case you don't have them already. To get brew please follow the install instructions on the brew homepage: https://brew.sh
 
@@ -19,17 +25,7 @@ As a prerequisite you need to have Java 11 installed. You can get it with the fo
 brew cask install java
 ```
 
-You'll need a Hypervisor too. Cloudbreak-Deployer has built-in xhyve setup option, but some of us use VirtualBox instead. Cloudbreak-Deployer works with both, it's up to you which one you prefer.
-
-To set xhyve up:
-```
-brew install docker-machine-driver-xhyve
-```
-
-For VirtualBox usage:
-```
-brew cask install virtualbox
-```
+You'll need [Docker for mac](https://docs.docker.com/docker-for-mac/install/) too.
 
 ## Cloudbreak Deployer
 
@@ -47,51 +43,23 @@ curl -s https://raw.githubusercontent.com/hortonworks/cloudbreak-deployer/master
 ```
 Use the -s branch option for sh here in case you'd like to checkout another branch than master.
 
-The next step is to setup your docker-machine. The `cbd machine create` command initializes xhyve for you, you can setup you docker machine with virtualbox as well if you prefer. 
-To configure docker machine with xhyve:
-
-xhyve:
-```
-cbd machine create
-eval $(docker-machine env cbd)
-```
-To configure docker machine with VirtualBox:
-
-VirtualBox:
-```
-docker-machine create --driver virtualbox --virtualbox-disk-size "50000" cbd
-eval $(docker-machine env cbd)
-```
-
-IP settings are based on your docker-machine configuration. The 'docker-machine ip cbd' command prints the ip address of your docker machine. This is the address you should use in multiple places below. Let's refer to this address as YOUR_IP throughout this document:
-```
-YOUR_IP=$(docker-machine ip cbd)
-```
-
-Add the following to the file named `Profile` under the cbd-local directory you have just created. Please note, when a `cbd` command is executed you should go to the deployment's directory where your `Profile` file could be found (`cbd-local` in our example). The CB_SCHEMA_SCRIPTS_LOCATION environment variable configures the location of SQL scripts that are in the 'core/src/main/resources/schema' directory in the cloned Cloudbreak git repository. CB_LOCAL_DEV_BIND_ADDR is the address of the network interface (`vboxnet0` for VirtualBox or `bridge100` for xhyve, one can check it with `ifconfig`).  
+Add the following to the file named `Profile` under the cbd-local directory you have just created. Please note, when a `cbd` command is executed you should go to the deployment's directory where your `Profile` file could be found (`cbd-local` in our example). The CB_SCHEMA_SCRIPTS_LOCATION environment variable configures the location of SQL scripts that are in the 'core/src/main/resources/schema' directory in the cloned Cloudbreak git repository.  
 Please note that the full path needs to be configured and env variables like $USER cannot be used. You also have to set a password for your local Cloudbreak in UAA_DEFAULT_USER_PW:
 
-xhyve:
 ```
-export PRIVATE_IP=$PUBLIC_IP
-export ULU_SUBSCRIBE_TO_NOTIFICATIONS=true
-export CB_INSTANCE_UUID=$(uuidgen | tr '[:upper:]' '[:lower:]')
-# NOTE: Some files could disappear when xhyve volume mounts are used, so CB_SCHEMA_SCRIPTS_LOCATION
-# is commented out by default. Remove the comment before `cbd util local-dev` is used.
-# export CB_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/core/src/main/resources/schema
-export UAA_DEFAULT_USER_PW=YOUR_PASSWORD
-```
-VirtualBox:
-```
-export PUBLIC_IP=$(docker-machine ip cbd)
-export DOCKER_MACHINE=cbd
-export PRIVATE_IP=$PUBLIC_IP
 export ULU_SUBSCRIBE_TO_NOTIFICATIONS=true
 export CB_INSTANCE_UUID=$(uuidgen | tr '[:upper:]' '[:lower:]')
 export CB_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/core/src/main/resources/schema
 export UAA_DEFAULT_USER_PW=YOUR_PASSWORD
-export CB_LOCAL_DEV_BIND_ADDR=192.168.99.1
 ```
+
+In order to run Cloudbreak, Periscope and Datalake from IDEA, put this into your Profile:
+
+```
+export CB_LOCAL_DEV=true
+```
+
+Cloudbreak and Periscope containers will be stopped and Uluwatu will connect to java processes running on your host.
 
 Then run these commands:
 ```
@@ -116,15 +84,17 @@ You can track the Periscope's logs to check the results by executing the followi
 cbd logs periscope
 ```
 
-If everything went well then Cloudbreak will be available on http://YOUR_IP. For more details and config parameters please check the documentation of [Cloudbreak Deployer](https://github.com/hortonworks/cloudbreak-deployer).
+If everything went well then Cloudbreak will be available on http://localhost. For more details and config parameters please check the documentation of [Cloudbreak Deployer](https://github.com/hortonworks/cloudbreak-deployer).
 
 The deployer has generated a `certs` directory under `cbd-local` directory which will be needed later on to set up IDEA properly.
 
-In order to kill Cloudbreak and Periscope containers running in docker/boot2docker and redirect the Cloudbreak and Periscope related traffic to the Cloudbreak running in IDEA, use the following command:
+In order to run Cloudbreak and Periscope from IDEA, put this into your Profile and restart cbd:
 
 ```
-cbd util local-dev
+export CB_LOCAL_DEV=true
 ```
+
+Cloudbreak and Periscope containers will be stopped and Uluwatu will connect to Java processes running on your host.
 
 ## IDEA
 
@@ -167,10 +137,10 @@ To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.Clou
 ```
 -Dcb.client.id=cloudbreak
 -Dcb.client.secret=CB_SECRET_GENERATED_BY_CBD
--Dcb.db.port.5432.tcp.addr=YOUR_IP
+-Dcb.db.port.5432.tcp.addr=localhost
 -Dcb.db.port.5432.tcp.port=5432
--Dcb.identity.server.url=http://YOUR_IP:8089
--Dspring.cloud.consul.host=YOUR_IP
+-Dcb.identity.server.url=http://localhost:8089
+-Dspring.cloud.consul.host=localhost
 -Dserver.port=9091
 ```
 
@@ -196,10 +166,10 @@ After having imported cloudbreak repo root you can launch Periscope application 
 ````
 -Dperiscope.client.id=periscope
 -Dperiscope.client.secret=PERISCOPE_SECRET_GENERATED_BY_CBD
--Dperiscope.identity.server.url=http://YOUR_IP:8089
--Dperiscope.db.port.5432.tcp.addr=YOUR_IP
+-Dperiscope.identity.server.url=http://localhost:8089
+-Dperiscope.db.port.5432.tcp.addr=localhost
 -Dperiscope.db.port.5432.tcp.port=5432
--Dperiscope.cloudbreak.url=http://YOUR_IP:8080
+-Dperiscope.cloudbreak.url=http://localhost:9091
 -Dserver.port=8085
 ````
 
@@ -213,9 +183,9 @@ To run Cloudbreak from command line, you have to list the JVM parameters from ab
 ```
 ./gradlew :core:buildInfo :core:bootRun -PjvmArgs="-Dcb.client.id=cloudbreak \
 -Dcb.client.secret=CB_SECRET_GENERATED_BY_CBD \
--Dcb.db.port.5432.tcp.addr=YOUR_IP \
+-Dcb.db.port.5432.tcp.addr=localhost \
 -Dcb.db.port.5432.tcp.port=5432 \
--Dcb.identity.server.url=http://YOUR_IP:8089 \
+-Dcb.identity.server.url=http://localhost:8089 \
 -Dcb.schema.scripts.location=$(pwd)/core/src/main/resources/schema
 -Dserver.port=9091 \
 -Dspring.config.location=$(pwd)/cloud-common/src/main/resources/application.yml,$(pwd)/core/build/resources/main/application.properties"
@@ -231,10 +201,10 @@ To run periscope from command line you have to run the below gradle command with
 ````
 ./gradlew :autoscale:bootRun -PjvmArgs="-Dperiscope.client.id=periscope \
 -Dperiscope.client.secret=CB_SECRET_GENERATED_BY_CBD \
--Dperiscope.identity.server.url=http://YOUR_IP:8089 \
--Dperiscope.db.port.5432.tcp.addr=YOUR_IP \
+-Dperiscope.identity.server.url=http://localhost:8089 \
+-Dperiscope.db.port.5432.tcp.addr=localhost \
 -Dperiscope.db.port.5432.tcp.port=5432 \
--Dperiscope.cloudbreak.url=http://YOUR_IP:8080 \
+-Dperiscope.cloudbreak.url=http://localhost:9091 \
 -Dperiscope.schema.scripts.location=$(pwd)/autoscale/src/main/resources/schema
 -Dserver.port=8085 \
 -Dspring.config.location=$(pwd)/autoscale/src/main/resources/application.yml,$(pwd)/autoscale/build/resources/main/application.properties"
