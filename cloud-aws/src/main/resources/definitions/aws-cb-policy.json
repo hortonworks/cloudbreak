@@ -184,7 +184,8 @@
         "iam:RemoveRoleFromInstanceProfile",
         "iam:DetachRolePolicy",
         "iam:DeleteRolePolicy",
-        "iam:SimulatePrincipalPolicy"
+        "iam:SimulatePrincipalPolicy",
+        "iam:ListRoles"
       ],
       "Effect": "Allow",
       "Resource": [

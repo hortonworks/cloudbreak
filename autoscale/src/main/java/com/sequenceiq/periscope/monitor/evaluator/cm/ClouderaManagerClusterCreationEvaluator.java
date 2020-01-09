@@ -131,7 +131,7 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
     private void createCluster(AutoscaleStackV4Response stack, MonitoredStack monitoredStack) {
         MDCBuilder.buildMdcContext(stack.getStackId(), stack.getName(), "CLUSTER");
         LOGGER.debug("Creating cluster for Cloudera Manager host: {}", monitoredStack.getClusterManager().getHost());
-        Cluster cluster = clusterService.create(monitoredStack, null,
+        Cluster cluster = clusterService.create(monitoredStack, RUNNING,
                 new ClusterPertain(stack.getTenant(), stack.getWorkspaceId(), stack.getUserId()));
         History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
         notificationSender.send(cluster, history);
