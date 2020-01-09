@@ -7,6 +7,7 @@ import static org.springframework.http.HttpMethod.POST;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -265,7 +266,7 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
             if (InstanceStatus.STARTED.equals(vmStatus.getCloudVmInstanceStatus().getStatus())) {
                 String ip = vmStatus.getMetaData().getPrivateIp();
                 String hostname = HostNameUtil.generateHostNameByIp(ip);
-                apiHosts.add(new ApiHost().hostname(hostname).hostId(hostname).ipAddress(ip));
+                apiHosts.add(new ApiHost().hostname(hostname).hostId(hostname).ipAddress(ip).lastHeartbeat(Instant.now().plusSeconds(60000L).toString()));
             }
         }
         return apiHosts;

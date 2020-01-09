@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cm.client;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.CommandsResourceApi;
+import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.cm.client.retry.CmApiRetryAspect;
@@ -22,5 +23,9 @@ public class ClouderaManagerApiPojoFactory {
 
     public ParcelsResourceApi getParcelsResourceApi(ApiClient apiClient) {
         return new ParcelsResourceApi(apiClient);
+    }
+
+    public HostsResourceApi getHostsResourceApi(ApiClient apiClient) {
+        return new HostsResourceApi(apiClient);
     }
 }
