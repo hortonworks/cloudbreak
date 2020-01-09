@@ -180,11 +180,22 @@ To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.Clou
 -Dvault.addr=localhost
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 -Dcb.enabledplatforms=""
+-Dinstance.node.id=<NODE_ID>
 ```
 
-Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
+Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file and `<NODE_ID>` with some value e.g.: CB-1
 
-then add these entries to the environment variables (the same values the you set in Profile):
+Note that if you're upgrading from 2.16 (or earlier) to master you may have to set this value in the database also to ensure the flow restart functionality for progressing cluster(s)
+
+You can set this by executing the following SQL on the cbdb database:
+
+```
+UPDATE flowlog 
+SET cloudbreaknodeid = 'YOUR_NODE_ID_VALUE';
+``` 
+Where the `YOUR_NODE_ID_VALUE` value must be the same what you provide in the cloudbreak run configuration mentioned above.
+
+Afterward add these entries to the environment variables (the same values the you set in Profile):
 ```
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
