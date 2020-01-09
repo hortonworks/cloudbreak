@@ -8,6 +8,8 @@ public class SupportedService {
 
     private String version;
 
+    private String componentNameInParcel;
+
     public String getName() {
         return name;
     }
@@ -30,5 +32,13 @@ public class SupportedService {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getComponentNameInParcel() {
+        return componentNameInParcel;
+    }
+
+    public void setComponentNameInParcel(String componentNameInParcel) {
+        this.componentNameInParcel = componentNameInParcel;
     }
 }
