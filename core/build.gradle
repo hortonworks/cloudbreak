@@ -58,6 +58,17 @@ bootJar {
     }
 }
 
+// override Spring Depenendencies
+ext['kafka.version'] = '2.3.1'
+
+configurations {
+  compile {
+    resolutionStrategy {
+        exclude group: 'org.testng'
+    }
+  }
+}
+
 dependencyManagement {
   dependencies {
     dependencySet(group: 'org.springframework.boot', version: springBootVersion) {
@@ -123,7 +134,7 @@ dependencyManagement {
       entry 'junit-jupiter-engine'
       entry 'junit-jupiter-params'
     }
-    dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: jacksonDatabindVersion
+    dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: jacksonVersion
     dependency group: 'org.junit.vintage',                  name: 'junit-vintage-engine',        version: '5.2.0'
     dependency group: 'activation',                         name: 'activation',                  version: '1.0.2'
     dependency group: 'com.google.code.findbugs',           name: 'annotations',                 version: '3.0.1'
@@ -138,7 +149,7 @@ dependencyManagement {
     dependency group: 'javax.mail',                         name: 'mail',                        version: '1.5.0-b01'
     dependency group: 'dnsjava',                            name: 'dnsjava',                     version: '2.1.7'
 
-    dependency group: 'org.springframework.kafka',          name: 'spring-kafka',                version: '2.2.4.RELEASE'
+    dependency group: 'org.springframework.kafka',          name: 'spring-kafka',                version: '2.2.9.RELEASE'
     dependency group: 'org.springframework.retry',          name: 'spring-retry',                version: '1.2.0.RELEASE'
     dependency group: 'org.springframework',                name: 'spring-context-support',      version: springFrameworkVersion
 
@@ -154,7 +165,7 @@ dependencyManagement {
     dependency group: 'org.mybatis',                        name: 'mybatis-migrations',          version: '3.2.0'
     dependency group: 'org.mockito',                        name: 'mockito-core',                version: mockitoVersion
     dependency group: 'org.mockito',                        name: 'mockito-junit-jupiter',       version: '2.21.0'
-    dependency group: 'org.apache.commons',                 name: 'commons-collections4',        version: '4.2'
+    dependency group: 'org.apache.commons',                 name: 'commons-collections4',        version: commonsCollections4Version
     dependency group: 'com.sequenceiq',                     name: 'consul-api',                  version: '1.10'
     dependency group: 'com.cloudera.cdp',                   name: 'cdp-sdk-java',                version: cdpSdkVersion
   }

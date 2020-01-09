@@ -1,10 +1,7 @@
-FROM openjdk:11-jdk-slim
+FROM docker-private.infra.cloudera.com/cloudera_base/cldr-java:11.0.5-cldr1-jdk-slim-buster
 MAINTAINER info@hortonworks.com
 
 WORKDIR /
-
-# Install zip
-RUN apt-get update --no-install-recommends && apt-get install -y zip procps wget && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ADD cloudbreak.jar /
 ADD start_cloudbreak_app.sh /
@@ -12,7 +9,6 @@ ADD wait_for_cloudbreak_api.sh /
 ADD jmx_prometheus_javaagent-0.10.jar /
 
 # extract schema files
-RUN unzip -o cloudbreak.jar BOOT-INF/classes/schema/* -d /tmp/ \
-    && mv /tmp/BOOT-INF/classes/schema/ /schema/
+RUN jar xf cloudbreak.jar && mv /BOOT-INF/classes/schema/ /schema/
 
 ENTRYPOINT ["/start_cloudbreak_app.sh"]

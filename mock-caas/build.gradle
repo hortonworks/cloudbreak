@@ -49,7 +49,7 @@ dependencies {
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter-actuator',   version: springBootVersion
   compile group:  'org.springframework',          name: 'spring-context-support',         version: springFrameworkVersion
   compile group:  'org.springframework.security', name: 'spring-security-jwt',            version: '1.0.10.RELEASE'
-  compile group:  'com.fasterxml.jackson.core',   name: 'jackson-core',                   version: '2.9.7'
+  compile group:  'com.fasterxml.jackson.core',   name: 'jackson-core',                   version: jacksonVersion
   compile group:  'com.google.protobuf',           name: 'protobuf-java-util',             version: '3.10.0'
   compile group:  'io.jsonwebtoken',              name: 'jjwt',                           version: '0.9.1'
   testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
