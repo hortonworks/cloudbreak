@@ -216,15 +216,27 @@
     },
     {
         "refName": "compute",
-          "cardinality": 1,
-          "roleConfigGroupsRefNames": [
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
             "hbase-REGIONSERVER-BASE",
             "hdfs-DATANODE-BASE",
             "hive-GATEWAY-BASE",
             "impala-IMPALAD-COORDINATOR",
             "spark_on_yarn-GATEWAY-BASE",
             "yarn-NODEMANAGER-BASE"
-          ]
+         ]
+    },
+    {
+        "refName": "gateway",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+         "hbase-REGIONSERVER-BASE",
+         "hdfs-DATANODE-BASE",
+         "hive-GATEWAY-BASE",
+         "impala-IMPALAD-COORDINATOR",
+         "spark_on_yarn-GATEWAY-BASE",
+         "yarn-NODEMANAGER-BASE"
+        ]
     }
   ]
 }
