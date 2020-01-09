@@ -1,5 +1,25 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
@@ -21,23 +41,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 
 @Service
 public class ClouderaManagerClusterCreationSetupService {
@@ -57,6 +61,9 @@ public class ClouderaManagerClusterCreationSetupService {
 
     @Inject
     private BlueprintUtils blueprintUtils;
+
+    @Inject
+    private ParcelService parcelService;
 
     public List<ClusterComponent> prepareClouderaManagerCluster(ClusterV4Request request, Cluster cluster,
             Optional<Component> stackClouderaManagerRepoConfig,
@@ -206,9 +213,10 @@ public class ClouderaManagerClusterCreationSetupService {
     private void addDefaultProducts(Cluster cluster, List<ClusterComponent> components, String blueprintCdhVersion, String osType) {
         DefaultCDHInfo defaultCDHInfo = getDefaultCDHInfo(blueprintCdhVersion, osType);
         if (defaultCDHInfo != null) {
-            if (CollectionUtils.isNotEmpty(defaultCDHInfo.getParcels())) {
+            Set<ClouderaManagerProduct> parcels = parcelService.filterParcelsByBlueprint(defaultCDHInfo.getParcels(), cluster.getBlueprint());
+            if (CollectionUtils.isNotEmpty(parcels)) {
                 LOGGER.info("Adding default products to CDH cluster with name '{}'.", cluster.getName());
-                defaultCDHInfo.getParcels().stream()
+                parcels.stream()
                         .map(product -> {
                             LOGGER.info("Adding default product '{}' to cluster '{}'.", product.getName(), cluster.getName());
                             return new ClusterComponent(CDH_PRODUCT_DETAILS, product.getName(), new Json(product), cluster);

@@ -9,6 +9,8 @@ public class ServiceConfig {
 
     private String displayName;
 
+    private String componentNameInParcel;
+
     private Set<String> dependencies = new HashSet<>();
 
     private Set<ComponentConfig> components = new HashSet<>();
@@ -45,4 +47,11 @@ public class ServiceConfig {
         this.components = components;
     }
 
+    public String getComponentNameInParcel() {
+        return componentNameInParcel;
+    }
+
+    public void setComponentNameInParcel(String componentNameInParcel) {
+        this.componentNameInParcel = componentNameInParcel;
+    }
 }
