@@ -12,9 +12,9 @@ services:
       - 7654:7654
     volumes:
       - ./:/it
-    command: java -jar /it/build/libs/cloudbreak-integration-test.jar com.sequenceiq.it.IntegrationTestApp --integrationtest.command=suiteurls --integrationtest.suiteFiles=${INTEGRATIONTEST_SUITEFILES}
+    command: java -jar /it/build/libs/cloudbreak-integration-test.jar com.sequenceiq.it.IntegrationTestApp --integrationtest.command=suiteurls --integrationtest.suiteFiles=${INTEGRATIONTEST_SUITEFILES} ; sleep 3600
     environment:
-      - INTEGRATIONTEST_UAA_SERVER=http://identity:8089
+      - INTEGRATIONTEST_UAA_SERVER=http://identity:8080
       - INTEGRATIONTEST_CLOUDBREAK_SERVER=http://cloudbreak:8080
       - INTEGRATIONTEST_UAA_USER=admin@example.com
       - INTEGRATIONTEST_UAA_PASSWORD=cloudbreak
