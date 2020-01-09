@@ -6,6 +6,8 @@ public class CdhService {
 
     private String version;
 
+    private String componentNameInParcel;
+
     public String getName() {
         return name;
     }
@@ -20,5 +22,13 @@ public class CdhService {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getComponentNameInParcel() {
+        return componentNameInParcel;
+    }
+
+    public void setComponentNameInParcel(String componentNameInParcel) {
+        this.componentNameInParcel = componentNameInParcel;
     }
 }

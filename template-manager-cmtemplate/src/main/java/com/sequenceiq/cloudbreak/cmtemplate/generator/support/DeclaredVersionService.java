@@ -1,5 +1,12 @@
 package com.sequenceiq.cloudbreak.cmtemplate.generator.support;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -10,11 +17,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.depen
 import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.versionmatrix.CdhService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedServices;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.HashSet;
-import java.util.Set;
 
 @Service
 public class DeclaredVersionService {
@@ -57,6 +59,7 @@ public class DeclaredVersionService {
             for (ServiceConfig serviceConfig : cmTemplateGeneratorConfigurationResolver.serviceConfigs()) {
                 if (serviceConfig.getName().equals(service.getServiceType())) {
                     supportedService.setDisplayName(serviceConfig.getDisplayName());
+                    supportedService.setComponentNameInParcel(serviceConfig.getComponentNameInParcel());
                 }
             }
 

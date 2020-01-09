@@ -3,6 +3,7 @@
     {
       "name": "OOZIE",
       "displayName": "Oozie",
+      "componentNameInParcel": "oozie",
       "components": [
         {
           "name": "OOZIE_CLIENT",
@@ -20,6 +21,7 @@
     {
       "name": "TEZ",
       "displayName": "Tez",
+      "componentNameInParcel": "tez",
       "components": [
         {
           "name": "TEZ",
@@ -32,6 +34,7 @@
     {
       "name": "HUE",
       "displayName": "Hue",
+      "componentNameInParcel": "hue",
       "components": [
         {
           "name": "HUE_SERVER",
@@ -49,6 +52,7 @@
     {
       "name": "HIVE_ON_TEZ",
       "displayName": "Hive on Tez",
+      "componentNameInParcel": "",
       "components": [
         {
           "name": "HIVE_ON_TEZ",
@@ -61,6 +65,7 @@
     {
       "name": "LIVY",
       "displayName": "Livy",
+      "componentNameInParcel": "",
       "components": [
       ],
       "dependencies": ["SPARK_ON_YARN"]
@@ -68,6 +73,7 @@
     {
       "name": "ZEPPELIN",
       "displayName": "Zeppelin",
+      "componentNameInParcel": "zeppelin",
       "components": [
       ],
       "dependencies": ["SPARK_ON_YARN"]
@@ -75,6 +81,7 @@
     {
       "name": "HDFS",
       "displayName": "Hdfs",
+      "componentNameInParcel": "hadoop-hdfs",
       "components": [
         {
           "name": "BALANCER",
@@ -125,6 +132,7 @@
     {
       "name": "HIVE",
       "displayName": "Hive",
+      "componentNameInParcel": "hive",
       "components": [
         {
           "name": "HIVEMETASTORE",
@@ -147,6 +155,7 @@
     {
       "name": "ZOOKEEPER",
       "displayName": "ZooKeeper",
+      "componentNameInParcel": "zookeeper",
       "components": [
         {
           "name": "SERVER",
@@ -158,6 +167,7 @@
     {
       "name": "HBASE",
       "displayName": "HBase",
+      "componentNameInParcel": "hbase",
       "components": [
         {
           "name": "GATEWAY",
@@ -185,6 +195,7 @@
     {
       "name": "YARN",
       "displayName": "Yarn",
+      "componentNameInParcel": "",
       "components": [
         {
           "name": "JOBHISTORY",
@@ -211,6 +222,7 @@
     {
       "name": "SPARK_ON_YARN",
       "displayName": "Spark",
+      "componentNameInParcel": "",
       "components": [
         {
           "name": "GATEWAY",
@@ -228,6 +240,7 @@
     {
       "name": "IMPALA",
       "displayName": "Impala",
+      "componentNameInParcel": "impala",
       "components": [
         {
           "name": "CATALOGSERVER",
@@ -250,6 +263,7 @@
     {
       "name": "KAFKA",
       "displayName": "Kafka",
+      "componentNameInParcel": "kafka",
       "components": [
         {
           "name": "KAFKA_BROKER",
@@ -267,6 +281,7 @@
     {
       "name": "SOLR",
       "displayName": "Solr",
+      "componentNameInParcel": "solr",
       "components": [
         {
           "name": "GATEWAY",
@@ -283,6 +298,7 @@
     {
       "name": "SQOOP",
       "displayName": "Sqoop",
+      "componentNameInParcel": "sqoop",
       "components": [
         {
           "name": "SQOOP_CLIENT",
@@ -295,6 +311,7 @@
     {
       "name": "KUDU",
       "displayName": "Kudu",
+      "componentNameInParcel": "kudu",
       "components": [
         {
           "name": "KUDU_MASTER",
@@ -312,6 +329,7 @@
     {
       "name": "FLUME",
       "displayName": "Flume",
+      "componentNameInParcel": "",
       "components": [
         {
           "name": "AGENT",
@@ -324,6 +342,7 @@
     {
       "name": "RANGER",
       "displayName": "Ranger",
+      "componentNameInParcel": "",
       "components": [
         {
           "name": "RANGER_ADMIN",
@@ -346,6 +365,7 @@
     {
       "name": "ATLAS",
       "displayName": "Atlas",
+      "componentNameInParcel": "",
       "components": [
         {
           "name": "ATLAS_SERVER",
@@ -358,6 +378,7 @@
     {
       "name": "KNOX",
       "displayName": "Knox",
+      "componentNameInParcel": "knox",
       "components": [
         {
           "name": "KNOX_GATEWAY",
@@ -375,6 +396,7 @@
     {
       "name": "NIFI",
       "displayName": "Nifi",
+      "componentNameInParcel": "nifi",
       "components": [
         {
           "name": "NIFI_NODE",
@@ -387,6 +409,7 @@
     {
       "name": "NIFIREGISTRY",
       "displayName": "Nifi Registry",
+      "componentNameInParcel": "nifiregistry",
       "components": [
         {
           "name": "NIFI_REGISTRY_SERVER",
@@ -399,6 +422,7 @@
     {
       "name": "SCHEMAREGISTRY",
       "displayName": "Schema Registry",
+      "componentNameInParcel": "schemaregistry",
       "components": [
         {
           "name": "SCHEMA_REGISTRY_SERVER",
@@ -411,6 +435,7 @@
     {
       "name": "STREAMS_MESSAGING_MANAGER",
       "displayName": "SMM",
+      "componentNameInParcel": "streamsmsgmgr",
       "components": [
         {
           "name": "STREAMS_MESSAGING_MANAGER_SERVER",
@@ -428,6 +453,7 @@
     {
       "name": "DAS",
       "displayName": "Data Analytics Studio",
+      "componentNameInParcel": "",
       "components": [
         {
           "name": "DAS_EVENT_PROCESSOR",
