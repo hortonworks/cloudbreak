@@ -17,7 +17,7 @@ public class SdxRepairAction implements Action<SdxTestDto, SdxClient> {
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, format(" Starting repair on SDX: %s " + testDto.getName()));
+        Log.when(LOGGER, format(" Starting repair on SDX: %s ", testDto.getName()));
         Log.whenJson(LOGGER, " SDX repair request: ", testDto.getSdxRepairRequest());
         client.getSdxClient()
                 .sdxEndpoint()
