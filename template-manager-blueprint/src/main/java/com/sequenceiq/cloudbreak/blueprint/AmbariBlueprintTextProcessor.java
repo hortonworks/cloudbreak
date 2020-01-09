@@ -97,7 +97,11 @@ public class AmbariBlueprintTextProcessor implements BlueprintTextProcessor {
 
     public AmbariBlueprintTextProcessor(@Nonnull String blueprintText) {
         try {
-            blueprint = Optional.ofNullable((ObjectNode) JsonUtil.readTree(blueprintText)).orElse(new ObjectNode(JsonNodeFactory.instance));
+            JsonNode bluePrintNode = JsonUtil.readTree(blueprintText);
+            if (bluePrintNode instanceof MissingNode) {
+                bluePrintNode = null;
+            }
+            blueprint = Optional.ofNullable((ObjectNode) bluePrintNode).orElse(new ObjectNode(JsonNodeFactory.instance));
         } catch (IOException e) {
             throw new BlueprintProcessingException("Failed to parse blueprint text.", e);
         }

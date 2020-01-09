@@ -49,7 +49,7 @@ dependencies {
     compile group: 'io.micrometer',                         name: 'micrometer-core',                version: micrometerVersion
     compile group: 'io.micrometer',                         name: 'micrometer-jersey2',             version: micrometerVersion
     compile group: 'io.micrometer',                         name: 'micrometer-registry-prometheus', version: micrometerVersion
-    compile group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonDatabindVersion
+    compile group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
     compile group: 'commons-io',                            name: 'commons-io',                     version: '2.4'
     compile group: 'com.google.guava',                      name: 'guava',                          version: guavaVersion
     compile group: 'org.freemarker',                        name: 'freemarker',                     version: freemarkerVersion

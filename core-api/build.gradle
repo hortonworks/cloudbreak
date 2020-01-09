@@ -24,7 +24,7 @@ dependencies {
   compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
   compile group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
-  compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
+  compile group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
   compile group: 'commons-net',                   name: 'commons-net',                    version: '3.6'
 
   compile group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.1'
@@ -35,7 +35,7 @@ dependencies {
   compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
 
   compile group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
-  compile (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonDatabindVersion) {
+  compile (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonVersion) {
     force = true
   }
   compile group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion

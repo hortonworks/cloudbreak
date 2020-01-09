@@ -26,7 +26,7 @@ dependencyManagement {
       entry 'junit-jupiter-engine'
       entry 'junit-jupiter-params'
     }
-    dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: jacksonDatabindVersion
+    dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: jacksonVersion
   }
 }
 

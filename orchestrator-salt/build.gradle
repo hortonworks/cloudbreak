@@ -23,7 +23,7 @@ dependencies {
 
     compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
     compile group: 'org.glassfish.jersey.core',     name: 'jersey-common',                  version: jerseyCoreVersion
-    compile group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonDatabindVersion
+    compile group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
     compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
 
     testCompile group: 'org.hamcrest',              name: 'hamcrest-all',                   version: '1.3'

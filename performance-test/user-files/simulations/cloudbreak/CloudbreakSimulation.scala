@@ -10,7 +10,7 @@ class CloudbreakSimulation extends Simulation {
   val r = scala.util.Random
 
   val host = sys.env("CB_PERFTEST_HOST")
-  val mockHost = sys.env.getOrElse("CB_MOCK_HOST", "mockhosts.service.consul")
+  val mockHost = sys.env.getOrElse("CB_MOCK_HOST", "mockhosts")
   val delayBeforeTermination = sys.env.get("CB_DELAY_BEFORE_TERM").filter(_.trim.nonEmpty).map(_.toInt).getOrElse(60)
   val numberOfUsers = sys.env.getOrElse("CB_NUMBER_OF_USERS", "3").toInt
   val rampupSeconds = sys.env.getOrElse("CB_RAMPUP_SECONDS", "5").toInt
