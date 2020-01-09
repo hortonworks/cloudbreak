@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 @Service
 public class SecurityRuleService {
 
-    private static final String TCP_PROTOCOL = "tcp";
+    public static final String TCP_PROTOCOL = "tcp";
 
     @Value("${cb.nginx.port}")
     private String gatewayPort;

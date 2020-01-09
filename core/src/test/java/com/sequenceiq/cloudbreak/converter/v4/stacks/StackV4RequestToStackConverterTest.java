@@ -22,8 +22,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -68,12 +66,14 @@ import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -146,6 +146,9 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
     private FreeIpaAdapter freeIPAAdapter;
 
     @Mock
+    private GatewaySecurityGroupDecorator gatewaySecurityGroupDecorator;
+
+    @Mock
     private CredentialResponse credentialResponse;
 
     private Credential credential;
@@ -161,13 +164,13 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredential(credentialResponse);
         environmentResponse.setCloudPlatform("AWS");
+        environmentResponse.setTunnel(Tunnel.DIRECT);
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
         credential = Credential.builder()
                 .cloudPlatform("AWS")
                 .build();
-        ReflectionTestUtils.setField(underTest, "defaultGatewayCidr", Set.of(""));
         when(freeIPAAdapter.getDomain(anyString())).thenReturn("cloudera.site");
     }
 
@@ -196,6 +199,9 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         assertEquals("AWS", stack.getCloudPlatform());
         assertEquals("mystack", stack.getName());
         verify(telemetryConverter, times(1)).convert(null, StackType.WORKLOAD);
+        verify(environmentClientService, times(1)).getByCrn(anyString());
+        verify(gatewaySecurityGroupDecorator, times(1))
+                .extendGatewaySecurityGroupWithDefaultGatewayCidrs(any(Stack.class), any(Tunnel.class));
     }
 
     @Test
@@ -298,44 +304,6 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
 
         //THEN
         assertEquals(expectedDataLakeId, result.getDatalakeResourceId());
-    }
-
-    @Test
-    public void testConvertExtendsGatewaySecurityGroupsWithDefaultGatewayCidrs() {
-        initMocks();
-        ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
-        ReflectionTestUtils.setField(underTest, "defaultGatewayCidr", Set.of("0.0.0.0/0", "1.1.1.1/1"));
-        ReflectionTestUtils.setField(underTest, "nginxPort", 9443);
-        StackV4Request request = getRequest("stack-with-instancegroups.json");
-
-        given(providerParameterCalculator.get(request)).willReturn(getMappable());
-        // WHEN
-        Stack stack = underTest.convert(request);
-        // THEN
-        Set<InstanceGroup> gateways =
-                stack.getInstanceGroups().stream().filter(ig -> InstanceGroupType.isGateway(ig.getInstanceGroupType())).collect(Collectors.toSet());
-        for (InstanceGroup ig : gateways) {
-            assertEquals(2, ig.getSecurityGroup().getSecurityRules().stream()
-                    .filter(rule -> rule.getCidr().equals("0.0.0.0/0")
-                            || rule.getCidr().equals("1.1.1.1/1")
-                            && Arrays.stream(rule.getPorts()).anyMatch(port -> port.equals("9443"))).count());
-        }
-    }
-
-    @Test
-    public void testConvertDoesntExtendGatewaySecurityGroupsWithDefaultGatewayCidrsIfItsEmpty() {
-        initMocks();
-        ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
-        StackV4Request request = getRequest("stack-with-instancegroups.json");
-        given(providerParameterCalculator.get(request)).willReturn(getMappable());
-        // WHEN
-        Stack stack = underTest.convert(request);
-        // THEN
-        Set<InstanceGroup> gateways =
-                stack.getInstanceGroups().stream().filter(ig -> InstanceGroupType.isGateway(ig.getInstanceGroupType())).collect(Collectors.toSet());
-        for (InstanceGroup ig : gateways) {
-            assertEquals(0, ig.getSecurityGroup().getSecurityRules().size());
-        }
     }
 
     @Override
