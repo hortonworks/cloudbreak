@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.mock;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -154,7 +155,7 @@ public class SetupCmScalingMock {
             if (InstanceStatus.STARTED.equals(vmStatus.getCloudVmInstanceStatus().getStatus())) {
                 String ip = vmStatus.getMetaData().getPrivateIp();
                 String hostname = HostNameUtil.generateHostNameByIp(ip);
-                apiHosts.add(new ApiHost().hostname(hostname).hostId(hostname).ipAddress(ip));
+                apiHosts.add(new ApiHost().hostname(hostname).hostId(hostname).ipAddress(ip).lastHeartbeat(Instant.now().plusSeconds(60000L).toString()));
             }
         }
         return apiHosts;
