@@ -86,7 +86,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
 
     private String getContainerName(String baseLocation) {
         final String containerName = baseLocation.substring(baseLocation.lastIndexOf("/") + 1, baseLocation.lastIndexOf("@"));
-        Log.log(LOGGER, format(" Container Name: [%]s ", containerName));
+        Log.log(LOGGER, format(" Container Name: [%s] ", containerName));
         return containerName;
     }
 
