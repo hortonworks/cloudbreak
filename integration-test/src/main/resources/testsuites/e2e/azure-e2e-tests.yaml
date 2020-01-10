@@ -3,19 +3,9 @@ tests:
   - name: "azure e2e tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.storage.AzureAdlsGen2Tests
-        includedMethods:
-          - testCreateStopAndStartClusterWithAdlsGen2CloudStorage
-          - testCreateStopAndStartClusterWithAdlsGen2AndCloudStorage
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.BasicEnvironmentTests
-        includedMethods:
-          - testCreateEnvironment
-          - testForceDeleteEnvironment
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXTest
         includedMethods:
           - testCreateDistroX
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxTests
-        includedMethods:
-          - testCreateInternalSdx
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxCloudStorageTests
-        includedMethods:
-          - testSDXWithCloudStorageCanBeCreatedThenDeletedSuccessfully
