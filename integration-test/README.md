@@ -48,6 +48,11 @@ If there are tests that contain DTOs with very specific cloud vendor dependent s
 
 #### Suites of tests in yaml files
 
-The previous organization of tests into cloud-vendor specific packages (e.g. aws tests) made it easy to see how many and what kind of tests do we have for say AWS. Now, this information will be solely kept in the testsuites yaml files under `integration-test/src/main/resources/testsuites/e2e`.
-It might make sense to keep a yaml file listing all implemented test for a given cloud vendor (e.g. `aws-e2e-tests.yaml`).
- 
+The previous organization of tests into cloud-vendor specific packages (e.g. aws tests) made it easy to see how many and what kind of tests are there for a given platform. Now, this information is not present any more and will be solely kept in the testsuites yaml files under `integration-test/src/main/resources/testsuites/e2e`.
+To help the reader to find out what tests are available for a certain platform the following guidelines are suggested:
+- keep a yaml file listing all implemented test for a given cloud vendor (e.g. `aws-e2e-tests.yaml`), and
+- yaml files should __list classes and included methods__, and avoid using package scope as much as possible. Class and method names will pop up in textual search and are __rename aware__ in IDEA: 
+    - method / class / package rename, 
+    - class move
+    - accidental moving or renaming of classes will be guarded by TestNG (will throw a not found exception on moved classes)
+    - however, testNG currently does not fail if an included method is not found, just ignores it - a quite dangeorous behavior in my mind 

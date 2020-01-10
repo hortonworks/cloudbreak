@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.gcp;
+package com.sequenceiq.it.cloudbreak.util.gcp;
 
 import java.util.List;
 
