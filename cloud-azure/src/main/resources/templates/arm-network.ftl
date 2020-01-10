@@ -56,7 +56,10 @@
                                  "serviceEndpoints": [
                                      {
                                          "service": "Microsoft.Sql"
-                                     }
+                                     },
+                                    {
+                                        "service": "Microsoft.Storage"
+                                    }
                                  ]
                              }
                          }<#if subnetPrefix_has_next>,</#if>
