@@ -275,6 +275,7 @@ dependencies {
   testCompile group: 'org.junit.jupiter',        name: 'junit-jupiter-params'
   testRuntime group: 'org.junit.jupiter',        name: 'junit-jupiter-engine'
   testImplementation group: 'org.assertj',       name: 'assertj-core',                      version: assertjVersion
+  testImplementation     group: "org.yaml",                  name: "snakeyaml"
 
 }
 
