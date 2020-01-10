@@ -14,8 +14,18 @@ This Springboot project wraps a TestNg framework, which actually runs the testca
 ```
 localhost:
   server: 127.0.0.1
-  refreshtoken: {token}
+  apikeyid: ***
+  privatekey: ***
 ```
+
+Note:
+Normally you would want to acquire apikey and privatekey from UMS, but for local development you can generate mocked api keys for your desired 
+tenant and user with the following command:
+
+```
+dp generate-mock-apikeys --tenant-name brandnew --tenant-user iamnewhere
+```
+
 
 #### How to run the integration tests from Intellij IDEA
 
