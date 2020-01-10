@@ -126,4 +126,9 @@ public class OpenStackNativeConnector implements CloudConnector<List<CloudResour
         return null;
     }
 
+    @Override
+    public String regionToDisplayName(String region) {
+        return region;
+    }
+
 }

@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
+package com.sequenceiq.environment.environment.flow.creation.handler.freeipa.network;
 
 import java.util.Set;
 

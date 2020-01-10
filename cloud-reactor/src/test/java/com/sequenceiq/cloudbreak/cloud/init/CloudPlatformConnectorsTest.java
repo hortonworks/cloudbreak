@@ -169,5 +169,10 @@ public class CloudPlatformConnectorsTest {
         public NetworkConnector networkConnector() {
             return null;
         }
+
+        @Override
+        public String regionToDisplayName(String region) {
+            return region;
+        }
     }
 }

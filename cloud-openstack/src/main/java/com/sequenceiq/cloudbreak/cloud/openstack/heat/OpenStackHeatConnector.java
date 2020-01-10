@@ -131,4 +131,9 @@ public class OpenStackHeatConnector implements CloudConnector<Object> {
     public NetworkConnector networkConnector() {
         return null;
     }
+
+    @Override
+    public String regionToDisplayName(String region) {
+        return region;
+    }
 }

@@ -290,11 +290,18 @@ public class AwsPlatformResources implements PlatformResources {
         try {
             RegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, RegionCoordinateSpecifications.class);
             for (RegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
+                Optional<Entry<Region, DisplayName>> region = regionDisplayNames
+                        .entrySet()
+                        .stream()
+                        .filter(e -> e.getValue().value().equalsIgnoreCase(regionCoordinateSpecification.getName()))
+                        .findFirst();
+
                 regionCoordinates.put(region(regionCoordinateSpecification.getName()),
                         coordinate(
                                 regionCoordinateSpecification.getLongitude(),
                                 regionCoordinateSpecification.getLatitude(),
                                 regionCoordinateSpecification.getDisplayName(),
+                                region.isPresent() ? region.get().getKey().value() : regionCoordinateSpecification.getDisplayName(),
                                 regionCoordinateSpecification.isK8sSupported()));
             }
         } catch (IOException ignored) {

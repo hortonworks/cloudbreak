@@ -144,6 +144,11 @@ public class AwsConnector implements CloudConnector<Object> {
     }
 
     @Override
+    public String regionToDisplayName(String region) {
+        return region;
+    }
+
+    @Override
     public IdentityService identityService() {
         return awsIdentityService;
     }

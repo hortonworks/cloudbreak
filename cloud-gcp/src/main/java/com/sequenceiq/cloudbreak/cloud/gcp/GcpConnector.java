@@ -121,4 +121,9 @@ public class GcpConnector implements CloudConnector<List<CloudResource>> {
         return null;
     }
 
+    @Override
+    public String regionToDisplayName(String region) {
+        return region;
+    }
+
 }

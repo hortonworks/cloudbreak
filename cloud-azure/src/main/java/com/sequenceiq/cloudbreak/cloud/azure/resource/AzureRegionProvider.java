@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
+import static com.microsoft.azure.management.resources.fluentcore.arm.Region.findByLabelOrName;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
@@ -94,6 +95,7 @@ public class AzureRegionProvider {
                                 regionCoordinateSpecification.getLongitude(),
                                 regionCoordinateSpecification.getLatitude(),
                                 regionCoordinateSpecification.getName(),
+                                findByLabelOrName(regionCoordinateSpecification.getName()).name(),
                                 regionCoordinateSpecification.isK8sSupported()));
             }
         } catch (IOException ignored) {

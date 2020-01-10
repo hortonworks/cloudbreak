@@ -129,6 +129,7 @@ public class MockPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getLongitude(),
                                 regionCoordinateSpecification.getLatitude(),
                                 regionCoordinateSpecification.getDisplayName(),
+                                regionCoordinateSpecification.getDisplayName(),
                                 regionCoordinateSpecification.isK8sSupported()));
             }
         } catch (IOException ignored) {

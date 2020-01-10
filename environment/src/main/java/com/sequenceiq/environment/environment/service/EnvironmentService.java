@@ -116,13 +116,18 @@ public class EnvironmentService implements ResourceIdProvider {
 
     public void setRegions(Environment environment, Set<String> requestedRegions, CloudRegions cloudRegions) {
         Set<Region> regionSet = new HashSet<>();
-        Map<com.sequenceiq.cloudbreak.cloud.model.Region, String> displayNames = cloudRegions.getDisplayNames();
-        for (com.sequenceiq.cloudbreak.cloud.model.Region r : cloudRegions.getCloudRegions().keySet()) {
-            if (requestedRegions.contains(r.getRegionName())) {
+        for (String requestedRegion : requestedRegions) {
+            Optional<Map.Entry<com.sequenceiq.cloudbreak.cloud.model.Region, Coordinate>> coordinateEntry =
+                    cloudRegions.getCoordinates()
+                            .entrySet()
+                            .stream()
+                            .filter(e -> e.getKey().getRegionName().equals(requestedRegion))
+                            .findFirst();
+            if (coordinateEntry.isPresent()) {
                 Region region = new Region();
-                region.setName(r.getRegionName());
-                String displayName = displayNames.get(r);
-                region.setDisplayName(isEmpty(displayName) ? r.getRegionName() : displayName);
+                region.setName(coordinateEntry.get().getValue().getKey());
+                String displayName = coordinateEntry.get().getValue().getDisplayName();
+                region.setDisplayName(isEmpty(displayName) ? coordinateEntry.get().getKey().getRegionName() : displayName);
                 regionSet.add(region);
             }
         }
@@ -141,12 +146,12 @@ public class EnvironmentService implements ResourceIdProvider {
         if (requestedLocation != null) {
             Coordinate coordinate = cloudRegions.getCoordinates().get(region(requestedLocation.getName()));
             if (coordinate != null) {
-                environment.setLocation(requestedLocation.getName());
+                environment.setLocation(coordinate.getKey());
                 environment.setLocationDisplayName(coordinate.getDisplayName());
                 environment.setLatitude(coordinate.getLatitude());
                 environment.setLongitude(coordinate.getLongitude());
             } else if (requestedLocation.getLatitude() != null && requestedLocation.getLongitude() != null) {
-                environment.setLocation(requestedLocation.getName());
+                environment.setLocation(requestedLocation.getDisplayName());
                 environment.setLocationDisplayName(requestedLocation.getDisplayName());
                 environment.setLatitude(requestedLocation.getLatitude());
                 environment.setLongitude(requestedLocation.getLongitude());

@@ -129,6 +129,11 @@ public class MockConnector implements CloudConnector<Object> {
     }
 
     @Override
+    public String regionToDisplayName(String region) {
+        return region;
+    }
+
+    @Override
     public ObjectStorageConnector objectStorage() {
         return mockObjectStorageConnector;
     }

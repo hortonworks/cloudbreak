@@ -87,6 +87,22 @@ public interface CloudConnector<R> extends CloudPlatformAware {
     NetworkConnector networkConnector();
 
     /**
+     * Giving back a valid provider display name. (because of CB-5013)
+     *
+     * @return the string object
+     */
+    String regionToDisplayName(String region);
+
+    /**
+     * Giving back a valid provider region. (because of CB-5013)
+     *
+     * @return the string object
+     */
+    default String displayNameToRegion(String displayName) {
+        return regionToDisplayName(displayName);
+    }
+
+    /**
      * Access to the {@link IdentityService} object.
      *
      * @return the {@link IdentityService} object
