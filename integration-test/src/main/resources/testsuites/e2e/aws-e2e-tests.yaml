@@ -1,10 +1,26 @@
 name: "aws-e2e-tests"
 tests:
-  - name: "aws e2e tests"
-    packages:
-      - com.sequenceiq.it.cloudbreak.testcase.e2e.aws.*
-      - com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.*
-      - com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.*
-      - com.sequenceiq.it.cloudbreak.testcase.e2e.environment.*
-      - com.sequenceiq.it.cloudbreak.testcase.e2e.stack.*
-      - com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.*
+  - name: "aws distrox tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXBaseImageTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXTest
+
+  - name: "aws sdx tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxBaseImageTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxCloudStorageTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRepairTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeTests
+
+  - name: "aws environment tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.BasicEnvironmentTests
+
+  - name: "aws freeipa tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIPATests
+
+  - name: "aws basic stack tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.stack.BasicStackTests

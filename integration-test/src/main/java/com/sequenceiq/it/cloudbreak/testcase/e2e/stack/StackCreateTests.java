@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.yarn;
+package com.sequenceiq.it.cloudbreak.testcase.e2e.stack;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
@@ -14,8 +14,7 @@ import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
-public class YarnBasicStackTests extends AbstractE2ETest {
-
+public class StackCreateTests extends AbstractE2ETest {
     @Inject
     private StackTestClient stackTestClient;
 
