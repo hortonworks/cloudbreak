@@ -15,13 +15,15 @@ import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerHostStatusChecker.class);
 
-    public ClouderaManagerHostStatusChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory) {
-        super(clouderaManagerApiPojoFactory);
+    public ClouderaManagerHostStatusChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
+            CloudbreakEventService cloudbreakEventService) {
+        super(clouderaManagerApiPojoFactory, cloudbreakEventService);
     }
 
     @Override

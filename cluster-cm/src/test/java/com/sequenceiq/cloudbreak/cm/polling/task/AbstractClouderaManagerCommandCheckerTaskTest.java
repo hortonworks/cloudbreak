@@ -2,9 +2,15 @@ package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.net.ConnectException;
 import java.net.SocketException;
 
 import org.junit.Before;
@@ -19,10 +25,13 @@ import org.springframework.http.HttpStatus;
 import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractClouderaManagerCommandCheckerTaskTest {
@@ -33,6 +42,8 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
 
     private static final int SIX = 6;
 
+    private static final int TEN = 10;
+
     @Rule
     public final ExpectedException expectedEx = ExpectedException.none();
 
@@ -42,7 +53,10 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
 
     private final CommandsResourceApi commandsResourceApi = Mockito.mock(CommandsResourceApi.class);
 
-    private final AbstractClouderaManagerCommandCheckerTask underTest = new ClouderaManagerDecommissionHostListenerTask(clouderaManagerApiPojoFactory);
+    private CloudbreakEventService cloudbreakEventService = Mockito.mock(CloudbreakEventService.class);
+
+    private final AbstractClouderaManagerCommandCheckerTask underTest
+            = new ClouderaManagerDecommissionHostListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService);
 
     @Before
     public void setup() {
@@ -120,6 +134,32 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
             assertFalse(inProgress);
         }
         underTest.checkStatus(pollerObject);
+    }
+
+    @Test
+    public void testPollingWithConnectException() throws ApiException {
+        Stack stack = new Stack();
+        stack.setId(1L);
+        StackStatus stackStatus = new StackStatus();
+        stackStatus.setStatus(Status.UPDATE_IN_PROGRESS);
+        stack.setStackStatus(stackStatus);
+        BigDecimal id = new BigDecimal(1);
+        ClouderaManagerPollerObject pollerObject = new ClouderaManagerPollerObject(stack, apiClient, id);
+        ConnectException connectException = new ConnectException("Connect failed.");
+        ApiException apiException = new ApiException(connectException);
+        ApiException[] exceptions = new ApiException[TEN];
+        for (int i = 0; i < TEN; i++){
+            exceptions[i] = apiException;
+        }
+        when(commandsResourceApi.readCommand(id)).thenAnswer(new ExceptionThrowingApiCommandAnswer(exceptions));
+
+        for (int i = 0; i < TEN; i++) {
+            boolean inProgress = underTest.checkStatus(pollerObject);
+            assertFalse(inProgress);
+        }
+        underTest.checkStatus(pollerObject);
+
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(), any());
     }
 
 }

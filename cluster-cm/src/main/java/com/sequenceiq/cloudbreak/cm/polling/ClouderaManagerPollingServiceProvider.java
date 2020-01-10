@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerTemplateInstalla
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @Service
 public class ClouderaManagerPollingServiceProvider {
@@ -40,7 +41,7 @@ public class ClouderaManagerPollingServiceProvider {
 
     private static final int INFINITE_ATTEMPT = -1;
 
-    private static final int POLL_ATTEMPTS_TWELVE_HOURS = 8640;
+    private static final int POLL_ATTEMPTS_FOUR_HOURS = 2880;
 
     @Inject
     private ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
@@ -48,100 +49,103 @@ public class ClouderaManagerPollingServiceProvider {
     @Inject
     private PollingService<ClouderaManagerPollerObject> clouderaManagerCommandPollerObjectPollingService;
 
+    @Inject
+    private CloudbreakEventService cloudbreakEventService;
+
     public PollingResult startPollingCmStartup(Stack stack, ApiClient apiClient) {
         LOGGER.debug("Waiting for Cloudera Manager startup. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, null, POLL_ATTEMPTS_TWELVE_HOURS,
-                new ClouderaManagerStartupListenerTask(clouderaManagerApiPojoFactory));
+        return pollCommandWithTimeListener(stack, apiClient, null, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerStartupListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
     public PollingResult startPollingCmHostStatus(Stack stack, ApiClient apiClient) {
         LOGGER.debug("Waiting for Cloudera Manager hosts to connect. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, null, POLL_ATTEMPTS_TWELVE_HOURS,
-                new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory));
+        return pollCommandWithTimeListener(stack, apiClient, null, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
     public PollingResult startPollingCmTemplateInstallation(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to install template. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_TWELVE_HOURS,
-                new ClouderaManagerTemplateInstallationChecker(clouderaManagerApiPojoFactory));
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerTemplateInstallationChecker(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
     public PollingResult startPollingCmParcelRepositoryRefresh(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to refresh parcel repo. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_TWELVE_HOURS,
-                new ClouderaManagerParcelRepositoryRefreshChecker(clouderaManagerApiPojoFactory));
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerParcelRepositoryRefreshChecker(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
     public PollingResult startPollingCmShutdown(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager services to stop. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_TWELVE_HOURS,
-                new ClouderaManagerStopListenerTask(clouderaManagerApiPojoFactory));
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerStopListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
     public PollingResult startPollingCmStartup(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager services to start. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_TWELVE_HOURS,
-                new ClouderaManagerServiceStartListenerTask(clouderaManagerApiPojoFactory));
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerServiceStartListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
     public PollingResult startPollingCmKerberosJob(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to configure kerberos. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_TWELVE_HOURS,
-                new ClouderaManagerKerberosConfigureListenerTask(clouderaManagerApiPojoFactory));
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerKerberosConfigureListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
     public PollingResult startPollingCmParcelActivation(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to deploy client configuratuions. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_TWELVE_HOURS,
-                new ClouderaManagerParcelActivationListenerTask(clouderaManagerApiPojoFactory));
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerParcelActivationListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
     public PollingResult startPollingCmClientConfigDeployment(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to deploy client configuratuions. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_TWELVE_HOURS,
-                new ClouderaManagerDeployClientConfigListenerTask(clouderaManagerApiPojoFactory));
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerDeployClientConfigListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
     public PollingResult startPollingCmConfigurationRefresh(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to refresh cluster. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_TWELVE_HOURS,
-                new ClouderaManagerRefreshServiceConfigsListenerTask(clouderaManagerApiPojoFactory));
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerRefreshServiceConfigsListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
     public PollingResult startPollingCmApplyHostTemplate(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to apply host template. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_TWELVE_HOURS,
-                new ClouderaManagerApplyHostTemplateListenerTask(clouderaManagerApiPojoFactory));
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerApplyHostTemplateListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
     public PollingResult startPollingCmHostDecommissioning(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to decommission host. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithAttemptListener(stack, apiClient, commandId, INFINITE_ATTEMPT,
-                new ClouderaManagerDecommissionHostListenerTask(clouderaManagerApiPojoFactory));
+                new ClouderaManagerDecommissionHostListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
     public PollingResult startPollingCmManagementServiceStartup(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to start management service. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_TWELVE_HOURS,
-                new ClouderaManagerStartManagementServiceListenerTask(clouderaManagerApiPojoFactory));
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerStartManagementServiceListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
     public PollingResult startPollingCmManagementServiceShutdown(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to stop management service. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_TWELVE_HOURS,
-                new ClouderaManagerStopManagementServiceListenerTask(clouderaManagerApiPojoFactory));
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerStopManagementServiceListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
     public PollingResult startPollingCmServicesRestart(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to restart services. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_TWELVE_HOURS,
-                new ClouderaManagerRestartServicesListenerTask(clouderaManagerApiPojoFactory));
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerRestartServicesListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
     public PollingResult startPollingCmGenerateCredentials(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to finish generate credentials. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_TWELVE_HOURS,
-                new ClouderaManagerGenerateCredentialsListenerTask(clouderaManagerApiPojoFactory));
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerGenerateCredentialsListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
     private PollingResult pollCommandWithTimeListener(Stack stack, ApiClient apiClient, BigDecimal commandId, int numAttempts,

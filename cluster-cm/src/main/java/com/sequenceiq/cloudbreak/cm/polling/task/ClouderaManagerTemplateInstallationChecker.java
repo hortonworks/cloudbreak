@@ -18,13 +18,15 @@ import com.cloudera.api.swagger.model.ApiCommandList;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerTemplateInstallationChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerTemplateInstallationChecker.class);
 
-    public ClouderaManagerTemplateInstallationChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory) {
-        super(clouderaManagerApiPojoFactory);
+    public ClouderaManagerTemplateInstallationChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
+            CloudbreakEventService cloudbreakEventService) {
+        super(clouderaManagerApiPojoFactory, cloudbreakEventService);
     }
 
     @Override

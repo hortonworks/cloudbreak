@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
+import java.net.ConnectException;
 import java.net.SocketException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -13,25 +15,29 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public abstract class AbstractClouderaManagerCommandCheckerTask<T extends ClouderaManagerPollerObject> extends ClusterBasedStatusCheckerTask<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractClouderaManagerCommandCheckerTask.class);
 
-    private static final int BAD_GATEWAY = 502;
-
-    private static final int INTERNAL_SERVER_ERROR = 500;
-
     private static final int TOLERATED_ERROR_LIMIT = 5;
 
     //CHECKSTYLE:OFF
     protected final ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
-
-    private int toleratedErrorCounter = 0;
     //CHECKSTYLE:ON
 
-    protected AbstractClouderaManagerCommandCheckerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory) {
+    private final CloudbreakEventService cloudbreakEventService;
+
+    private int toleratedErrorCounter = 0;
+
+    private boolean connectExceptionOccurred = false;
+
+    protected AbstractClouderaManagerCommandCheckerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory, CloudbreakEventService cloudbreakEventService) {
         this.clouderaManagerApiPojoFactory = clouderaManagerApiPojoFactory;
+        this.cloudbreakEventService = cloudbreakEventService;
     }
 
     @Override
@@ -41,28 +47,50 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
         try {
             return doStatusCheck(pollerObject, commandsResourceApi);
         } catch (ApiException e) {
-            if (e.getCode() == BAD_GATEWAY) {
-                LOGGER.debug("Cloudera Manager is not (yet) available.", e);
-                return false;
-            } else if (isToleratedError(e)) {
-                if (toleratedErrorCounter < TOLERATED_ERROR_LIMIT) {
-                    toleratedErrorCounter++;
-                    LOGGER.warn("Command [{}] with id [{}] failed with a tolerated error '{}' for the {}. time(s). Tolerating till {} occasions.",
-                            getCommandName(), pollerObject.getId(), e.getMessage(), toleratedErrorCounter, TOLERATED_ERROR_LIMIT);
-                    return false;
-                } else {
-                    throw new ClouderaManagerOperationFailedException(
-                            String.format("Command [%s] with id [%s] failed with a tolerated error '%s' for %s times. Operation is considered failed.",
-                            getCommandName(), pollerObject.getId(), e.getMessage(), TOLERATED_ERROR_LIMIT));
-                }
-            } else {
-                throw new ClouderaManagerOperationFailedException(String.format("Cloudera Manager [%s] operation  failed.", getCommandName()), e);
-            }
+            return handleApiException(pollerObject, e);
+        }
+    }
+
+    private boolean handleApiException(T pollerObject, ApiException e) {
+        if (e.getCode() == HttpStatus.BAD_GATEWAY.value()) {
+            LOGGER.debug("Cloudera Manager is not (yet) available.", e);
+            return false;
+        }
+        else if (e.getCause() instanceof ConnectException) {
+            return handleConnectException(pollerObject);
+        }
+        else if (isToleratedError(e)) {
+            return handleToleratedError(pollerObject, e);
+        } else {
+            throw new ClouderaManagerOperationFailedException(String.format("Cloudera Manager [%s] operation  failed.", getCommandName()), e);
+        }
+    }
+
+    private boolean handleConnectException(T pollerObject) {
+        if (!connectExceptionOccurred) {
+            connectExceptionOccurred = true;
+            Stack stack = pollerObject.getStack();
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(),
+                    ResourceEvent.CLUSTER_CM_SECURITY_GROUP_TOO_STRICT);
+        }
+        return false;
+    }
+
+    private boolean handleToleratedError(T pollerObject, ApiException e) {
+        if (toleratedErrorCounter < TOLERATED_ERROR_LIMIT) {
+            toleratedErrorCounter++;
+            LOGGER.warn("Command [{}] with id [{}] failed with a tolerated error '{}' for the {}. time(s). Tolerating till {} occasions.",
+                    getCommandName(), pollerObject.getId(), e.getMessage(), toleratedErrorCounter, TOLERATED_ERROR_LIMIT);
+            return false;
+        } else {
+            throw new ClouderaManagerOperationFailedException(
+                    String.format("Command [%s] with id [%s] failed with a tolerated error '%s' for %s times. Operation is considered failed.",
+                    getCommandName(), pollerObject.getId(), e.getMessage(), TOLERATED_ERROR_LIMIT));
         }
     }
 
     private boolean isToleratedError(ApiException e) {
-        return e.getCode() == INTERNAL_SERVER_ERROR || (e.getCause() != null && e.getCause() instanceof SocketException);
+        return e.getCode() == HttpStatus.INTERNAL_SERVER_ERROR.value() || e.getCause() instanceof SocketException;
     }
 
     protected boolean doStatusCheck(T pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {

@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 class ClouderaManagerTemplateInstallationCheckerTest {
 
@@ -54,7 +55,10 @@ class ClouderaManagerTemplateInstallationCheckerTest {
 
     private ApiCommand apiCommand = Mockito.mock(ApiCommand.class);
 
-    private ClouderaManagerTemplateInstallationChecker underTest = new ClouderaManagerTemplateInstallationChecker(clouderaManagerApiPojoFactory);
+    private CloudbreakEventService cloudbreakEventService = Mockito.mock(CloudbreakEventService.class);
+
+    private ClouderaManagerTemplateInstallationChecker underTest
+            = new ClouderaManagerTemplateInstallationChecker(clouderaManagerApiPojoFactory, cloudbreakEventService);
 
     private ClouderaManagerPollerObject pollerObject;
 
