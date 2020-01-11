@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.mock.model;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -435,7 +436,8 @@ public class ClouderaManagerMock extends AbstractModelMock {
                 ApiHost apiHost = new ApiHost()
                         .hostId(entry.getValue().getCloudVmInstanceStatus().getCloudInstance().getInstanceId())
                         .hostname(HostNameUtil.generateHostNameByIp(entry.getValue().getMetaData().getPrivateIp()))
-                        .ipAddress(entry.getValue().getMetaData().getPrivateIp());
+                        .ipAddress(entry.getValue().getMetaData().getPrivateIp())
+                        .lastHeartbeat(Instant.now().toString());
                 apiHostList.addItemsItem(apiHost);
             }
             return apiHostList;
@@ -473,6 +475,7 @@ public class ClouderaManagerMock extends AbstractModelMock {
                 .hostId(cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())
                 .hostname(HostNameUtil.generateHostNameByIp(cloudVmMetaDataStatus.getMetaData().getPrivateIp()))
                 .ipAddress(cloudVmMetaDataStatus.getMetaData().getPrivateIp())
+                .lastHeartbeat(Instant.now().plusSeconds(60000L).toString())
                 .healthSummary(ApiHealthSummary.GOOD);
     }
 }
