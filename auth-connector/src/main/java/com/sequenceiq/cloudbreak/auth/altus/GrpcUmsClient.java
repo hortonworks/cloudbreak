@@ -300,14 +300,21 @@ public class GrpcUmsClient {
         }
     }
 
-    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right, #resource }")
-    public boolean checkRight(String actorCrn, String userCrn, String right, String resource, Optional<String> requestId) {
+    public boolean precheckRight(String actorCrn, String userCrn, String right, String resource, Optional<String> requestId) {
         if (InternalCrnBuilder.isInternalCrn(actorCrn)) {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
             return true;
         }
         if (isReadRight(right)) {
             LOGGER.info("Letting read operation through for right {} for user {}!", right, userCrn);
+            return true;
+        }
+        return false;
+    }
+
+    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right, #resource }")
+    public boolean checkRight(String actorCrn, String userCrn, String right, String resource, Optional<String> requestId) {
+        if (precheckRight(actorCrn, userCrn, right, resource, requestId)) {
             return true;
         }
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
@@ -325,6 +332,19 @@ public class GrpcUmsClient {
     @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right, #resource }")
     public boolean checkRight(String actorCrn, String userCrn, String right, Optional<String> requestId) {
         return checkRight(actorCrn, userCrn, right, null, requestId);
+    }
+
+    public boolean hasRight(String actorCrn, String userCrn, String right, String resource, Optional<String> requestId) {
+        if (precheckRight(actorCrn, userCrn, right, resource, requestId)) {
+            return true;
+        }
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.info("Checking if user {} has right {}!", userCrn, right);
+            boolean hasRight = client.hasRight(requestId.orElse(UUID.randomUUID().toString()), userCrn, right, resource);
+            LOGGER.info("User {} {} right {}!", userCrn, hasRight ? "has" : "doesn't have", right);
+            return hasRight;
+        }
     }
 
     @Cacheable(cacheNames = "umsResourceAssigneesCache", key = "{ #actorCrn, #userCrn, #resourceCrn }")

@@ -12,6 +12,8 @@ public class RightsConstants {
 
     public static final String WRITE_ACTION = "write";
 
+    public static final String ACCESS_ENVIRONMENT_ACTION = "accessEnvironment";
+
     private RightsConstants() {
 
     }

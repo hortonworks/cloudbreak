@@ -22,6 +22,10 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Machi
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ResourceRoleAssignment;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RoleAssignment;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.resource.ResourceAction;
+import com.sequenceiq.authorization.resource.RightUtils;
+import com.sequenceiq.authorization.service.UmsAuthorizationService;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
@@ -41,8 +45,13 @@ public class UmsUsersStateProvider {
 
     private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
+    private static final String ACCESS_ENVIRONMENT_RIGHT = RightUtils.getRight(AuthorizationResource.ENVIRONMENT, ResourceAction.ACCESS_ENVIRONMENT);
+
     @Inject
     private GrpcUmsClient grpcUmsClient;
+
+    @Inject
+    private UmsAuthorizationService umsAuthorizationService;
 
     public Map<String, UmsUsersState> getEnvToUmsUsersStateMap(String accountId, String actorCrn, Set<String> environmentCrns,
                                                             Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional) {
@@ -77,7 +86,6 @@ public class UmsUsersStateProvider {
                     umsUsersStateBuilder.addRequestedWorkloadUsers(fmsUser);
 
                     handleUser(umsUsersStateBuilder, usersStateBuilder, crnToFmsGroup, actorCrn, u.getCrn(), fmsUser, environmentCrn, requestIdOptional);
-
                 });
 
                 machineUsers.stream().forEach(mu -> {
@@ -129,28 +137,8 @@ public class UmsUsersStateProvider {
         return new WorkloadCredential(hashedPassword, keys, expirationInstant);
     }
 
-    private boolean isEnvironmentUser(String enviromentCrn, GetRightsResponse rightsResponse) {
-
-        List<RoleAssignment> rolesAssignedList = rightsResponse.getRoleAssignmentList();
-        for (RoleAssignment roleAssigned : rolesAssignedList) {
-            // TODO: should come from IAM Roles and check against Role Object
-            if (roleAssigned.getRole().getCrn().contains("PowerUser") ||
-                roleAssigned.getRole().getCrn().contains("EnvironmentAdmin")) {
-                return true;
-                // admins are also users
-            }
-        }
-
-        List<ResourceRoleAssignment> resourceRoleAssignedList = rightsResponse.getResourceRolesAssignmentList();
-        for (ResourceRoleAssignment resourceRoleAssigned : resourceRoleAssignedList) {
-            // TODO: should come from IAM Roles and check against Role Object
-            if (resourceRoleAssigned.getResourceRole().getCrn().contains("EnvironmentAdmin") ||
-                (resourceRoleAssigned.getResourceRole().getCrn().contains("EnvironmentUser"))) {
-                return true;
-            }
-        }
-
-        return false;
+    private boolean isAuthorizedForEnvironment(String actorCrn, String userCrn, String environmentCrn, Optional<String> requestId) {
+        return grpcUmsClient.hasRight(actorCrn, userCrn, ACCESS_ENVIRONMENT_RIGHT, environmentCrn, requestId);
     }
 
     private boolean isEnvironmentAdmin(String enviromentCrn, GetRightsResponse rightsResponse) {
@@ -178,8 +166,8 @@ public class UmsUsersStateProvider {
     private void handleUser(UmsUsersState.Builder umsUsersStateBuilder, UsersState.Builder usersStateBuilder, Map<String, FmsGroup> crnToFmsGroup,
                             String actorCrn, String memberCrn, FmsUser fmsUser, String environmentCrn, Optional<String> requestId) {
         try {
-            GetRightsResponse rightsResponse = grpcUmsClient.getRightsForUser(actorCrn, memberCrn, environmentCrn, requestId);
-            if (isEnvironmentUser(environmentCrn, rightsResponse)) {
+            if (isAuthorizedForEnvironment(actorCrn, memberCrn, environmentCrn, requestId)) {
+                GetRightsResponse rightsResponse = grpcUmsClient.getRightsForUser(actorCrn, memberCrn, environmentCrn, requestId);
                 usersStateBuilder.addUser(fmsUser);
                 rightsResponse.getGroupCrnList().stream().forEach(gcrn -> {
                     FmsGroup group = crnToFmsGroup.get(gcrn);

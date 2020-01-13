@@ -48,6 +48,24 @@ public class AuthorizationClient {
         );
     }
 
+    public boolean hasRight(String requestId, String userCrn, String right, String resource) {
+        checkNotNull(requestId);
+        checkNotNull(userCrn);
+        checkNotNull(right);
+
+        AuthorizationProto.HasRightsRequest.Builder requestBuilder = AuthorizationProto.HasRightsRequest.newBuilder()
+                .setActorCrn(userCrn);
+
+        AuthorizationProto.RightCheck.Builder rightCheckBuilder = AuthorizationProto.RightCheck.newBuilder().setRight(right);
+        if (!StringUtils.isEmpty(resource)) {
+            rightCheckBuilder.setResource(resource);
+        }
+        requestBuilder.addCheck(rightCheckBuilder.build());
+
+        AuthorizationProto.HasRightsResponse response = newStub(requestId).hasRights(requestBuilder.build());
+        return response.getResultList().get(0);
+    }
+
     /**
      * Creates a new stub with the appropriate metadata injecting interceptors.
      *
