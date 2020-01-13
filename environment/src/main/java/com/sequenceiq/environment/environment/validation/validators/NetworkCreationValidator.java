@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.validation.validators;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.YARN;
 
 import java.util.Map;
 import java.util.Objects;
@@ -52,6 +53,7 @@ public class NetworkCreationValidator {
                 resultBuilder.error(message);
             }
             if (!MOCK.name().equalsIgnoreCase(environment.getCloudPlatform())
+                    && (!YARN.name().equalsIgnoreCase(environment.getCloudPlatform()))
                     && StringUtils.isEmpty(network.getNetworkCidr()) && StringUtils.isEmpty(network.getNetworkId())) {
                 String message = String.format("Either the %s network id or cidr needs to be defined!", environment.getCloudPlatform());
                 LOGGER.info(message);
