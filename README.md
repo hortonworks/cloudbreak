@@ -55,7 +55,7 @@ export AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY"
 
 ```
 
-At first, you should start every service from cbd to check your that your cloud environment is set up correctly.
+At first, you should start every service from cbd to check that your cloud environment is set up correctly.
 ```
 export CB_LOCAL_DEV_LIST=
 ```
