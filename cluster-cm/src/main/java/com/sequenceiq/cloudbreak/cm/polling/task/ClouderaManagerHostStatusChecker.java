@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
 
@@ -26,8 +27,9 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerCom
 
     private final Instant start;
 
-    public ClouderaManagerHostStatusChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory) {
-        super(clouderaManagerApiPojoFactory);
+    public ClouderaManagerHostStatusChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
+            CloudbreakEventService cloudbreakEventService) {
+        super(clouderaManagerApiPojoFactory, cloudbreakEventService);
         start = Instant.now();
     }
 
@@ -45,10 +47,10 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerCom
 
     private List<InstanceMetaData> collectNotKnownInstancesByManager(ClouderaManagerPollerObject pollerObject, List<String> hostIpsFromManager) {
         return pollerObject.getStack().getInstanceMetaDataAsList().stream()
-                    .filter(metaData -> metaData.getDiscoveryFQDN() != null)
-                    .filter(metaData -> !metaData.isTerminated() && !metaData.isDeletedOnProvider())
-                    .filter(metaData -> !hostIpsFromManager.contains(metaData.getPrivateIp()))
-                    .collect(Collectors.toList());
+                .filter(metaData -> metaData.getDiscoveryFQDN() != null)
+                .filter(metaData -> !metaData.isTerminated() && !metaData.isDeletedOnProvider())
+                .filter(metaData -> !hostIpsFromManager.contains(metaData.getPrivateIp()))
+                .collect(Collectors.toList());
     }
 
     private List<String> fetchHeartbeatedHostIpsFromManager(ClouderaManagerPollerObject pollerObject) throws ApiException {
@@ -61,10 +63,10 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerCom
 
     private List<String> filterForHeartBeatedIps(ApiHostList hostList) {
         return hostList.getItems().stream()
-                    .filter(item -> StringUtils.isNotBlank(item.getLastHeartbeat()))
-                    .filter(item -> start.isBefore(Instant.parse(item.getLastHeartbeat())))
-                    .map(ApiHost::getIpAddress)
-                    .collect(Collectors.toList());
+                .filter(item -> StringUtils.isNotBlank(item.getLastHeartbeat()))
+                .filter(item -> start.isBefore(Instant.parse(item.getLastHeartbeat())))
+                .map(ApiHost::getIpAddress)
+                .collect(Collectors.toList());
     }
 
     @Override

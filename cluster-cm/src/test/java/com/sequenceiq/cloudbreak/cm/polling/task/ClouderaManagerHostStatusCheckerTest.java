@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClouderaManagerHostStatusCheckerTest {
@@ -40,13 +41,16 @@ public class ClouderaManagerHostStatusCheckerTest {
     private ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
 
     @Mock
+    private CloudbreakEventService cloudbreakEventService;
+
+    @Mock
     private HostsResourceApi hostsResourceApi;
 
     private ClouderaManagerHostStatusChecker underTest;
 
     @Before
     public void init() {
-        underTest = new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory);
+        underTest = new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, cloudbreakEventService);
         when(clouderaManagerApiPojoFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
     }
 
