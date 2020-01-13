@@ -68,7 +68,7 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
-        when(stackTestClient.deleteV4(), withoutLogError());
+        when(stackTestClient.forceDeleteV4(), withoutLogError());
         await(STACK_DELETED);
     }
 

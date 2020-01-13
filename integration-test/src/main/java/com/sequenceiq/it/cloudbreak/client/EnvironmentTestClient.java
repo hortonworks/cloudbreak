@@ -8,7 +8,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeCrede
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteByNameAction;
-import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteForcedAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentInternalGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentListAction;
@@ -35,8 +35,8 @@ public class EnvironmentTestClient {
         return new EnvironmentDeleteAction();
     }
 
-    public Action<EnvironmentTestDto, EnvironmentClient> deleteForced() {
-        return new EnvironmentDeleteForcedAction();
+    public Action<EnvironmentTestDto, EnvironmentClient> forceDelete() {
+        return new EnvironmentForceDeleteAction();
     }
 
     public Action<EnvironmentTestDto, EnvironmentClient> deleteByName() {

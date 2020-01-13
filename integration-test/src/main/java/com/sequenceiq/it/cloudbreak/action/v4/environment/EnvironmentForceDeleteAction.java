@@ -10,9 +10,9 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class EnvironmentDeleteForcedAction implements Action<EnvironmentTestDto, EnvironmentClient> {
+public class EnvironmentForceDeleteAction implements Action<EnvironmentTestDto, EnvironmentClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentDeleteForcedAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentForceDeleteAction.class);
 
     @Override
     public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient environmentClient) throws Exception {
