@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerParcelActivationListenerTaskTest {
@@ -74,6 +75,9 @@ class ClouderaManagerParcelActivationListenerTaskTest {
     @Mock
     private ParcelsResourceApi parcelsResourcesApi;
 
+    @Mock
+    private CloudbreakEventService cloudbreakEventService;
+
     private ClouderaManagerParcelActivationListenerTask underTest;
 
     private Stack stack;
@@ -82,7 +86,7 @@ class ClouderaManagerParcelActivationListenerTaskTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new ClouderaManagerParcelActivationListenerTask(clouderaManagerApiPojoFactory);
+        underTest = new ClouderaManagerParcelActivationListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService);
         stack = new Stack();
         cluster = new Cluster();
 
