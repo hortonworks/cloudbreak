@@ -81,5 +81,6 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.start())
                 .await(EnvironmentStatus.AVAILABLE)
                 .validate();
+        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
     }
 }
