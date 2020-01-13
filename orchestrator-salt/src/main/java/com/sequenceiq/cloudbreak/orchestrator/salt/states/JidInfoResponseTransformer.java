@@ -7,10 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo.RunNumComparator;
 
 public class JidInfoResponseTransformer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JidInfoResponseTransformer.class);
 
     private JidInfoResponseTransformer() {
     }
@@ -46,7 +51,14 @@ public class JidInfoResponseTransformer {
                 ((Map<String, List<Map<String, Map<String, Map<String, Object>>>>>) map).get("return").get(0);
         Map<String, List<RunnerInfo>> result = new HashMap<>();
         for (Entry<String, Map<String, Map<String, Object>>> stringMapEntry : stringMapMap.entrySet()) {
-            result.put(stringMapEntry.getKey(), runnerInfoObjects(stringMapEntry.getValue()));
+            try {
+                result.put(stringMapEntry.getKey(), runnerInfoObjects(stringMapEntry.getValue()));
+            } catch (RuntimeException e) {
+                LOGGER.info("Can't create runner info", e);
+                if (stringMapEntry.getKey() != null) {
+                    result.put(stringMapEntry.getKey(), null);
+                }
+            }
         }
 
         return result;

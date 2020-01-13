@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorInProgressException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTerminateException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
@@ -73,7 +74,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
         return doCall();
     }
 
-    private Boolean doCall() throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+    private Boolean doCall() throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
         Boolean success = null;
         int retryCount = 1;
         int errorCount = 1;
@@ -135,7 +136,8 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
         return String.format(elapsedTimeTemplate, elapsedTime, totalElapsedTime);
     }
 
-    private Boolean checkResult(Boolean success, int retryCount, Exception actualException) throws CloudbreakOrchestratorFailedException {
+    private Boolean checkResult(Boolean success, int retryCount, Exception actualException)
+            throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
         if (Boolean.TRUE.equals(success)) {
             return true;
         }
@@ -154,7 +156,11 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
         if (actualException instanceof CloudbreakOrchestratorException) {
             nodesWithErrors = ((CloudbreakOrchestratorException) actualException).getNodesWithErrors();
         }
-        throw new CloudbreakOrchestratorFailedException(errorMessage, nodesWithErrors);
+        if (retryCount >= maxRetryCount) {
+            throw new CloudbreakOrchestratorTimeoutException(errorMessage, nodesWithErrors, elapsedTimeRounded);
+        } else {
+            throw new CloudbreakOrchestratorFailedException(errorMessage, nodesWithErrors);
+        }
     }
 
     private boolean belowAttemptThreshold(int retryCount, int errorCount) {
