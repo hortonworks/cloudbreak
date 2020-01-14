@@ -113,4 +113,11 @@ class FreeIpaPasswordValidatorTest {
         underTest.validate(password);
     }
 
+    @Test
+    void testValidateShouldNotThrowExceptionWhenThePasswordComplexityIs4AndThePasswordContainsAllClassesWithUnderScore() {
+        ReflectionTestUtils.setField(underTest, "minCharacterClasses", 4);
+        String password = "Asd4asd_22";
+        underTest.validate(password);
+    }
+
 }
