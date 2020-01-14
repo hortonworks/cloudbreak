@@ -10,7 +10,15 @@ import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 @Component
 class FreeIpaPasswordValidator {
 
-    private static final Set<String> PATTERNS = Set.of("(?=.*[a-z]).*$", "(?=.*[A-Z]).*$", "(?=.*[0-9]).*$", ".*\\W+.*");
+    private static final String LOWERCASE = "(?=.*[a-z]).*$";
+
+    private static final String UPPERCASE = "(?=.*[A-Z]).*$";
+
+    private static final String NUMERIC = "(?=.*[0-9]).*$";
+
+    private static final String SPECIAL = "(?=.*[^a-zA-Z0-9]).*$";
+
+    private static final Set<String> PATTERNS = Set.of(LOWERCASE, UPPERCASE, NUMERIC, SPECIAL);
 
     @Value("${freeipa.passwordpolicy.min-password-lenght}")
     private Integer minPasswordLength;
