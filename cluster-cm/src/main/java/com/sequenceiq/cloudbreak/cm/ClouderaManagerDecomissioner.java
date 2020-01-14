@@ -68,7 +68,7 @@ public class ClouderaManagerDecomissioner {
         boolean host2Healthy = ApiHealthSummary.GOOD.equals(host2.getHealthSummary());
 
         if (host1Healthy && host2Healthy) {
-            return 0;
+            return host2.getHostname().compareTo(host1.getHostname());
         } else if (host1Healthy) {
             return 1;
         } else {
@@ -137,7 +137,7 @@ public class ClouderaManagerDecomissioner {
 
             Set<String> hostsToRemove = apiHosts.stream()
                     .sorted(hostHealthComparator)
-                    .limit(Math.abs(scalingAdjustment - instancesToRemove.size()))
+                    .limit(Math.abs(scalingAdjustment) - instancesToRemove.size())
                     .map(ApiHost::getHostname)
                     .collect(Collectors.toSet());
 
