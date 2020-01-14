@@ -107,7 +107,8 @@ public class AwsNetworkConnector implements NetworkConnector {
             if (networkDoesNotExist(e)) {
                 LOGGER.warn("{} occurred during describe AWS CloudFormation stack for Network with stack name: '{}'. "
                         + "Assuming the CF Stack does not exist, so creating a new one. Exception message: {}", e.getClass(), cfStackName, e.getMessage());
-                return createNewCfNetworkStack(networkRequest, credentialView, cloudFormationRetryClient, cloudFormationTemplate, creatorUser);
+                return createNewCfNetworkStack(networkRequest, credentialView, cloudFormationRetryClient, cloudFormationTemplate, creatorUser,
+                        networkRequest.getEnvCrn());
             } else {
                 throw new CloudConnectorException("Failed to create network.", e);
             }
@@ -154,8 +155,8 @@ public class AwsNetworkConnector implements NetworkConnector {
     }
 
     private CreatedCloudNetwork createNewCfNetworkStack(NetworkCreationRequest networkRequest, AwsCredentialView credentialView,
-            AmazonCloudFormationRetryClient cloudFormationRetryClient, String cloudFormationTemplate, String creatorUser) {
-        Map<String, String> defaultTags = defaultCostTaggingService.prepareDefaultTags(creatorUser, null, CloudConstants.AWS);
+            AmazonCloudFormationRetryClient cloudFormationRetryClient, String cloudFormationTemplate, String creatorUser, String envCrn) {
+        Map<String, String> defaultTags = defaultCostTaggingService.prepareDefaultTags(creatorUser, null, CloudConstants.AWS, envCrn);
         cloudFormationRetryClient.createStack(createStackRequest(networkRequest.getStackName(), cloudFormationTemplate, defaultTags, creatorUser));
         LOGGER.debug("CloudFormation stack creation request sent with stack name: '{}' ", networkRequest.getStackName());
         return getCreatedNetworkWithPolling(networkRequest, credentialView, cloudFormationRetryClient);

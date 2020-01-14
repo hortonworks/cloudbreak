@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.recipe;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.dto.RecipeAccessDto.RecipeAccessDtoBuilder.aRecipeAccessDtoBuilder;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto.ResourceAccessDtoBuilder.aResourceAccessDtoBuilder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -80,7 +80,7 @@ public class RecipeServiceTest {
         Recipe recipe = getRecipe();
         when(recipeRepository.findByNameAndWorkspaceId(recipe.getName(), recipe.getWorkspace().getId())).thenReturn(Optional.of(recipe));
 
-        Recipe result = underTest.delete(aRecipeAccessDtoBuilder().withName(recipe.getName()).build(), recipe.getWorkspace().getId());
+        Recipe result = underTest.delete(aResourceAccessDtoBuilder().withName(recipe.getName()).build(), recipe.getWorkspace().getId());
 
         assertEquals(recipe, result);
         verify(recipeRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
@@ -94,7 +94,7 @@ public class RecipeServiceTest {
         Recipe recipe = getRecipe();
         when(recipeRepository.findByResourceCrnAndWorkspaceId(recipe.getResourceCrn(), recipe.getWorkspace().getId())).thenReturn(Optional.of(recipe));
 
-        Recipe result = underTest.delete(aRecipeAccessDtoBuilder().withCrn(recipe.getResourceCrn()).build(), recipe.getWorkspace().getId());
+        Recipe result = underTest.delete(aResourceAccessDtoBuilder().withCrn(recipe.getResourceCrn()).build(), recipe.getWorkspace().getId());
 
         assertEquals(recipe, result);
         verify(recipeRepository, times(1)).findByResourceCrnAndWorkspaceId(anyString(), anyLong());
@@ -108,7 +108,7 @@ public class RecipeServiceTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(INVALID_DTO_MESSAGE);
 
-        underTest.delete(aRecipeAccessDtoBuilder().build(), 1L);
+        underTest.delete(aResourceAccessDtoBuilder().build(), 1L);
 
         verify(recipeRepository, times(0)).findByResourceCrnAndWorkspaceId(anyString(), anyLong());
         verify(recipeRepository, times(0)).save(any());
@@ -117,7 +117,7 @@ public class RecipeServiceTest {
     @Test
     public void testDeleteIfDtoIsNullThenIllegalArgumentExceptionComes() {
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("RecipeAccessDto should not be null");
+        thrown.expectMessage("AccessDto should not be null");
 
         underTest.delete(null, 1L);
     }
@@ -127,7 +127,7 @@ public class RecipeServiceTest {
         Recipe recipe = getRecipe();
         when(recipeRepository.findByNameAndWorkspaceId(recipe.getName(), recipe.getWorkspace().getId())).thenReturn(Optional.of(recipe));
 
-        Recipe result = underTest.get(aRecipeAccessDtoBuilder().withName(recipe.getName()).build(), recipe.getWorkspace().getId());
+        Recipe result = underTest.get(aResourceAccessDtoBuilder().withName(recipe.getName()).build(), recipe.getWorkspace().getId());
 
         assertEquals(recipe, result);
         verify(recipeRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
@@ -139,7 +139,7 @@ public class RecipeServiceTest {
         Recipe recipe = getRecipe();
         when(recipeRepository.findByResourceCrnAndWorkspaceId(recipe.getResourceCrn(), recipe.getWorkspace().getId())).thenReturn(Optional.of(recipe));
 
-        Recipe result = underTest.get(aRecipeAccessDtoBuilder().withCrn(recipe.getResourceCrn()).build(), recipe.getWorkspace().getId());
+        Recipe result = underTest.get(aResourceAccessDtoBuilder().withCrn(recipe.getResourceCrn()).build(), recipe.getWorkspace().getId());
 
         assertEquals(recipe, result);
         verify(recipeRepository, times(1)).findByResourceCrnAndWorkspaceId(anyString(), anyLong());
@@ -151,7 +151,7 @@ public class RecipeServiceTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(INVALID_DTO_MESSAGE);
 
-        underTest.get(aRecipeAccessDtoBuilder().build(), 1L);
+        underTest.get(aResourceAccessDtoBuilder().build(), 1L);
 
         verify(recipeRepository, times(0)).findByResourceCrnAndWorkspaceId(anyString(), anyLong());
         verify(recipeRepository, times(0)).save(any());
@@ -160,7 +160,7 @@ public class RecipeServiceTest {
     @Test
     public void testGetIfDtoIsNullThenIllegalArgumentExceptionComes() {
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("RecipeAccessDto should not be null");
+        thrown.expectMessage("AccessDto should not be null");
 
         underTest.get(null, 1L);
     }

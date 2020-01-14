@@ -77,8 +77,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return new Builder();
         }
 
-        public Builder withCrn(String id) {
-            this.crn = id;
+        public Builder withCrn(String crn) {
+            this.crn = crn;
             return this;
         }
 

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.dto.BlueprintAccessDto.BlueprintAccessDtoBuilder.aBlueprintAccessDtoBuilder;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto.ResourceAccessDtoBuilder.aResourceAccessDtoBuilder;
 
 import java.util.Set;
 
@@ -46,13 +46,13 @@ public class BlueprintV4Controller extends NotificationController implements Blu
 
     @Override
     public BlueprintV4Response getByName(Long workspaceId, @NotNull String name) {
-        Blueprint blueprint = blueprintService.getByWorkspace(aBlueprintAccessDtoBuilder().withName(name).build(), workspaceId);
+        Blueprint blueprint = blueprintService.getByWorkspace(aResourceAccessDtoBuilder().withName(name).build(), workspaceId);
         return converterUtil.convert(blueprint, BlueprintV4Response.class);
     }
 
     @Override
     public BlueprintV4Response getByCrn(Long workspaceId, @NotNull String crn) {
-        Blueprint blueprint = blueprintService.getByWorkspace(aBlueprintAccessDtoBuilder().withCrn(crn).build(), workspaceId);
+        Blueprint blueprint = blueprintService.getByWorkspace(aResourceAccessDtoBuilder().withCrn(crn).build(), workspaceId);
         return converterUtil.convert(blueprint, BlueprintV4Response.class);
     }
 
@@ -68,14 +68,14 @@ public class BlueprintV4Controller extends NotificationController implements Blu
 
     @Override
     public BlueprintV4Response deleteByName(Long workspaceId, @NotNull String name) {
-        Blueprint deleted = blueprintService.deleteByWorkspace(aBlueprintAccessDtoBuilder().withName(name).build(), workspaceId);
+        Blueprint deleted = blueprintService.deleteByWorkspace(aResourceAccessDtoBuilder().withName(name).build(), workspaceId);
         notify(ResourceEvent.BLUEPRINT_DELETED);
         return converterUtil.convert(deleted, BlueprintV4Response.class);
     }
 
     @Override
     public BlueprintV4Response deleteByCrn(Long workspaceId, @NotNull String crn) {
-        Blueprint deleted = blueprintService.deleteByWorkspace(aBlueprintAccessDtoBuilder().withCrn(crn).build(), workspaceId);
+        Blueprint deleted = blueprintService.deleteByWorkspace(aResourceAccessDtoBuilder().withCrn(crn).build(), workspaceId);
         notify(ResourceEvent.BLUEPRINT_DELETED);
         return converterUtil.convert(deleted, BlueprintV4Response.class);
     }

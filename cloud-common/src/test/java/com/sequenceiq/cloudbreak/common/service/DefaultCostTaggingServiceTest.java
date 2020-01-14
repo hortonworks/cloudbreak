@@ -25,6 +25,12 @@ public class DefaultCostTaggingServiceTest {
 
     private static final String CB_USER = "apache1@apache.com";
 
+    private static final String ENV_CRN = "Some-AmazingEnv-CRN";
+
+    private static final String CB_VERSION = "2.2.0";
+
+    private static final String ENV_RES_TAG_NAME = "Cloudera-Environment-Resource-Name";
+
     @Mock
     private Clock clock;
 
@@ -33,7 +39,6 @@ public class DefaultCostTaggingServiceTest {
 
     @Before
     public void before() {
-
         ReflectionTestUtils.setField(underTest, "cbVersion", "2.2.0");
         MockitoAnnotations.initMocks(this);
     }
@@ -49,12 +54,13 @@ public class DefaultCostTaggingServiceTest {
         long epochSeconds = 1526991986L;
         when(clock.getCurrentInstant()).thenReturn(Instant.ofEpochSecond(epochSeconds));
 
-        Map<String, String> result = underTest.prepareDefaultTags(CB_USER, new HashMap<>(), CloudConstants.AWS);
+        Map<String, String> result = underTest.prepareDefaultTags(CB_USER, new HashMap<>(), CloudConstants.AWS, ENV_CRN);
 
-        Assert.assertEquals(4L, result.size());
+        Assert.assertEquals(5L, result.size());
         Assert.assertEquals("apache1@apache.com", result.get(DefaultApplicationTag.CDP_USER_NAME.key()));
         Assert.assertEquals("2.2.0", result.get(DefaultApplicationTag.CDP_CB_VERSION.key()));
         Assert.assertEquals("apache1@apache.com", result.get(DefaultApplicationTag.OWNER.key()));
+        Assert.assertEquals(ENV_CRN, result.get(ENV_RES_TAG_NAME));
         Assert.assertEquals(String.valueOf(epochSeconds), result.get("cdp-creation-timestamp"));
     }
 
@@ -63,12 +69,13 @@ public class DefaultCostTaggingServiceTest {
         long epochSeconds = 1526991986L;
         when(clock.getCurrentInstant()).thenReturn(Instant.ofEpochSecond(epochSeconds));
 
-        Map<String, String> result = underTest.prepareDefaultTags(CB_USER, new HashMap<>(), CloudConstants.GCP);
+        Map<String, String> result = underTest.prepareDefaultTags(CB_USER, new HashMap<>(), CloudConstants.GCP, ENV_CRN);
 
-        Assert.assertEquals(4L, result.size());
+        Assert.assertEquals(5L, result.size());
         Assert.assertEquals("apache1", result.get(DefaultApplicationTag.CDP_USER_NAME.key()));
         Assert.assertEquals("2-2-0", result.get(DefaultApplicationTag.CDP_CB_VERSION.key()));
         Assert.assertEquals("apache1", result.get(DefaultApplicationTag.OWNER.key().toLowerCase()));
+        Assert.assertEquals(ENV_CRN, result.get("Cloudera-Environment-Resource-Name".toLowerCase()));
         Assert.assertEquals(String.valueOf(epochSeconds), result.get("cdp-creation-timestamp"));
     }
 
@@ -79,11 +86,12 @@ public class DefaultCostTaggingServiceTest {
         Map<String, String> sourceMap = new HashMap<>();
         sourceMap.put(DefaultApplicationTag.OWNER.key(), "appletree");
 
-        Map<String, String> result = underTest.prepareDefaultTags(CB_USER, sourceMap, CloudConstants.AZURE);
+        Map<String, String> result = underTest.prepareDefaultTags(CB_USER, sourceMap, CloudConstants.AZURE, ENV_CRN);
 
-        Assert.assertEquals(3L, result.size());
+        Assert.assertEquals(4L, result.size());
         Assert.assertEquals("apache1@apache.com", result.get(DefaultApplicationTag.CDP_USER_NAME.key()));
         Assert.assertEquals("2.2.0", result.get(DefaultApplicationTag.CDP_CB_VERSION.key()));
+        Assert.assertEquals(ENV_CRN, result.get("Cloudera-Environment-Resource-Name"));
         Assert.assertNull(result.get(DefaultApplicationTag.OWNER.key()));
         Assert.assertEquals(String.valueOf(epochSeconds), result.get("cdp-creation-timestamp"));
     }

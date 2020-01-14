@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.dto.ImageCatalogAccessDto.ImageCatalogAccessDtoBuilder.aImageCatalogAccessDtoBuilder;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto.ResourceAccessDtoBuilder.aResourceAccessDtoBuilder;
 
 import java.util.Collections;
 import java.util.Set;
@@ -44,7 +44,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Override
     public ImageCatalogV4Response getByName(Long workspaceId, String name, Boolean withImages) {
-        ImageCatalog catalog = imageCatalogService.get(aImageCatalogAccessDtoBuilder().withName(name).build(), workspaceId);
+        ImageCatalog catalog = imageCatalogService.get(aResourceAccessDtoBuilder().withName(name).build(), workspaceId);
         ImageCatalogV4Response imageCatalogResponse = converterUtil.convert(catalog, ImageCatalogV4Response.class);
         Images images = imageCatalogService.propagateImagesIfRequested(workspaceId, name, withImages);
         if (images != null) {
@@ -55,7 +55,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Override
     public ImageCatalogV4Response getByCrn(Long workspaceId, String crn, Boolean withImages) {
-        ImageCatalog catalog = imageCatalogService.get(aImageCatalogAccessDtoBuilder().withCrn(crn).build(), workspaceId);
+        ImageCatalog catalog = imageCatalogService.get(aResourceAccessDtoBuilder().withCrn(crn).build(), workspaceId);
         ImageCatalogV4Response imageCatalogResponse = converterUtil.convert(catalog, ImageCatalogV4Response.class);
         Images images = imageCatalogService.propagateImagesIfRequested(workspaceId, catalog.getName(), withImages);
         if (images != null) {
@@ -76,14 +76,14 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Override
     public ImageCatalogV4Response deleteByName(Long workspaceId, String name) {
-        ImageCatalog deleted = imageCatalogService.delete(aImageCatalogAccessDtoBuilder().withName(name).build(), workspaceId);
+        ImageCatalog deleted = imageCatalogService.delete(aResourceAccessDtoBuilder().withName(name).build(), workspaceId);
         notify(ResourceEvent.IMAGE_CATALOG_DELETED);
         return converterUtil.convert(deleted, ImageCatalogV4Response.class);
     }
 
     @Override
     public ImageCatalogV4Response deleteByCrn(Long workspaceId, String crn) {
-        ImageCatalog deleted = imageCatalogService.delete(aImageCatalogAccessDtoBuilder().withCrn(crn).build(), workspaceId);
+        ImageCatalog deleted = imageCatalogService.delete(aResourceAccessDtoBuilder().withCrn(crn).build(), workspaceId);
         notify(ResourceEvent.IMAGE_CATALOG_DELETED);
         return converterUtil.convert(deleted, ImageCatalogV4Response.class);
     }

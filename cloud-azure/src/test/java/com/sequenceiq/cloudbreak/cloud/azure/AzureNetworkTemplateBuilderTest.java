@@ -42,6 +42,8 @@ public class AzureNetworkTemplateBuilderTest {
 
     private static final String NETWORK_CIDR = "1.1.1.1/8";
 
+    private static final String ENV_CRN = "someCrn";
+
     @InjectMocks
     private AzureNetworkTemplateBuilder underTest;
 
@@ -81,6 +83,7 @@ public class AzureNetworkTemplateBuilderTest {
     private NetworkCreationRequest createRequest() {
         return new NetworkCreationRequest.Builder()
                 .withEnvName(ENV_NAME)
+                .withEnvCrn(ENV_CRN)
                 .withRegion(Region.region(REGION))
                 .withNetworkCidr(NETWORK_CIDR)
                 .withSubnetCidrs(createSubnetCidrs())

@@ -1,5 +1,19 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
@@ -45,18 +59,6 @@ import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
 
 @Component
 public class StackToTemplatePreparationObjectConverter extends AbstractConversionServiceAwareConverter<Stack, TemplatePreparationObject> {
@@ -162,7 +164,8 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withDefaultTags(defaultCostTaggingService.prepareDefaultTags(
                             source.getCreator().getUserName(),
                             new HashMap<>(),
-                            source.getCloudPlatform()))
+                            source.getCloudPlatform(),
+                            environment.getCrn()))
                     .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeResource))
                     .withStackType(source.getType())
                     .withVirtualGroupView(virtualGroupRequest);

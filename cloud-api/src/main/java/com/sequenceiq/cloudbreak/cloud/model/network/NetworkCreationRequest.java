@@ -11,6 +11,8 @@ public class NetworkCreationRequest {
 
     private final String envName;
 
+    private final String envCrn;
+
     private final CloudCredential cloudCredential;
 
     private final String variant;
@@ -28,20 +30,25 @@ public class NetworkCreationRequest {
     private final boolean privateSubnetEnabled;
 
     private NetworkCreationRequest(Builder builder) {
-        this.envId = builder.envId;
-        this.envName = builder.envName;
-        this.cloudCredential = builder.cloudCredential;
-        this.variant = builder.variant;
-        this.region = builder.region;
-        this.networkCidr = builder.networkCidr;
-        this.subnetCidrs = builder.subnetCidrs;
-        this.noPublicIp = builder.noPublicIp;
-        this.stackName = builder.stackName;
-        this.privateSubnetEnabled = builder.privateSubnetEnabled;
+        envId = builder.envId;
+        envName = builder.envName;
+        envCrn = builder.envCrn;
+        cloudCredential = builder.cloudCredential;
+        variant = builder.variant;
+        region = builder.region;
+        networkCidr = builder.networkCidr;
+        subnetCidrs = builder.subnetCidrs;
+        noPublicIp = builder.noPublicIp;
+        stackName = builder.stackName;
+        privateSubnetEnabled = builder.privateSubnetEnabled;
     }
 
     public String getEnvName() {
         return envName;
+    }
+
+    public String getEnvCrn() {
+        return envCrn;
     }
 
     public CloudCredential getCloudCredential() {
@@ -85,6 +92,8 @@ public class NetworkCreationRequest {
 
         private String envName;
 
+        private String envCrn;
+
         private CloudCredential cloudCredential;
 
         private String variant;
@@ -108,6 +117,11 @@ public class NetworkCreationRequest {
 
         public Builder withEnvName(String envName) {
             this.envName = envName;
+            return this;
+        }
+
+        public Builder withEnvCrn(String envCrn) {
+            this.envCrn = envCrn;
             return this;
         }
 
@@ -155,4 +169,5 @@ public class NetworkCreationRequest {
             return new NetworkCreationRequest(this);
         }
     }
+
 }

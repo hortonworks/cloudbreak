@@ -8,6 +8,7 @@ public enum DefaultApplicationTag {
     CDP_ACOUNT_NAME("cdp-account-name"),
     CDP_RESOURCE_TYPE("cdp-resource-type"),
     CDP_CREATION_TIMESTAMP("cdp-creation-timestamp"),
+    ENVIRONMENT_CRN("Cloudera-Environment-Resource-Name"),
     CDP_CREATION_DATETIME_UTC("cdp-creation-datetime-utc");
 
     private final String key;

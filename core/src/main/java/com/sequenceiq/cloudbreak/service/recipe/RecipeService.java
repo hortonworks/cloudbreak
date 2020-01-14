@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.dto.RecipeAccessDto;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -46,18 +46,18 @@ public class RecipeService extends AbstractArchivistService<Recipe> {
     @Inject
     private HostGroupService hostGroupService;
 
-    public Recipe delete(RecipeAccessDto recipeAccessDto, Long workspaceId) {
-        validateDto(recipeAccessDto);
-        Recipe toDelete = get(recipeAccessDto, workspaceId);
+    public Recipe delete(ResourceAccessDto accessDto, Long workspaceId) {
+        ResourceAccessDto.validate(accessDto);
+        Recipe toDelete = get(accessDto, workspaceId);
         return super.delete(toDelete);
     }
 
-    public Recipe get(RecipeAccessDto recipeAccessDto, Long workspaceId) {
-        validateDto(recipeAccessDto);
-        return isNotEmpty(recipeAccessDto.getName())
-                ? super.getByNameForWorkspaceId(recipeAccessDto.getName(), workspaceId)
-                : recipeRepository.findByResourceCrnAndWorkspaceId(recipeAccessDto.getCrn(), workspaceId)
-                        .orElseThrow(() -> new NotFoundException("No recipe found with crn: \"" + recipeAccessDto.getCrn() + "\""));
+    public Recipe get(ResourceAccessDto accessDto, Long workspaceId) {
+        ResourceAccessDto.validate(accessDto);
+        return isNotEmpty(accessDto.getName())
+                ? super.getByNameForWorkspaceId(accessDto.getName(), workspaceId)
+                : recipeRepository.findByResourceCrnAndWorkspaceId(accessDto.getCrn(), workspaceId)
+                .orElseThrow(() -> new NotFoundException("No recipe found with crn: \"" + accessDto.getCrn() + "\""));
     }
 
     public Set<Recipe> getRecipesByNamesForWorkspace(Workspace workspace, Set<String> recipeNames) {
@@ -116,13 +116,6 @@ public class RecipeService extends AbstractArchivistService<Recipe> {
     @Override
     protected void prepareCreation(Recipe resource) {
         resource.setCreated(System.currentTimeMillis());
-    }
-
-    private void validateDto(RecipeAccessDto dto) {
-        throwIfNull(dto, () -> new IllegalArgumentException("RecipeAccessDto should not be null"));
-        if (dto.isNotValid()) {
-            throw new BadRequestException("One and only one value of the crn and name should be filled!");
-        }
     }
 
     private String createCRN(String accountId) {
