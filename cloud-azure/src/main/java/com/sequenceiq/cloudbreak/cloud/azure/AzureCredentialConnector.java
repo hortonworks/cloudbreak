@@ -46,6 +46,9 @@ public class AzureCredentialConnector implements CredentialConnector {
     @Inject
     private CBRefreshTokenClientProvider cbRefreshTokenClientProvider;
 
+    @Inject
+    private AzurePlatformParameters azurePlatformParameters;
+
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
         CloudCredential cloudCredential = authenticatedContext.getCloudCredential();
@@ -90,7 +93,7 @@ public class AzureCredentialConnector implements CredentialConnector {
     public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress) {
         String creationCommand = appCreationCommand.generate(deploymentAddress);
         String encodedCommand = Base64.encodeBase64String(creationCommand.getBytes());
-        AzureCredentialPrerequisites azurePrerequisites = new AzureCredentialPrerequisites(encodedCommand);
+        AzureCredentialPrerequisites azurePrerequisites = new AzureCredentialPrerequisites(encodedCommand, azurePlatformParameters.getRoleDefJson());
         return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), azurePrerequisites);
     }
 
