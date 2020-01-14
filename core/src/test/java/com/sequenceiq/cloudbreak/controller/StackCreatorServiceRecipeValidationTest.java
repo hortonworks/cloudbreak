@@ -25,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.dto.RecipeAccessDto;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
@@ -109,7 +109,7 @@ class StackCreatorServiceRecipeValidationTest {
         StackV4Request request = new StackV4Request();
         request.setInstanceGroups(List.of(getInstanceGroupWithRecipe(INSTANCE_GROUP_MASTER, Set.of(notExistingRecipeName))));
 
-        when(recipeService.get(any(RecipeAccessDto.class), eq(WORKSPACE_ID))).thenThrow(new NotFoundException("Recipe not found"));
+        when(recipeService.get(any(ResourceAccessDto.class), eq(WORKSPACE_ID))).thenThrow(new NotFoundException("Recipe not found"));
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, request));
 
@@ -117,7 +117,7 @@ class StackCreatorServiceRecipeValidationTest {
         Assertions.assertEquals(String.format("The given recipe does not exist for the instance group \"%s\": %s", INSTANCE_GROUP_MASTER,
                 notExistingRecipeName), exception.getMessage());
 
-        verify(recipeService, times(1)).get(any(RecipeAccessDto.class), anyLong());
+        verify(recipeService, times(1)).get(any(ResourceAccessDto.class), anyLong());
     }
 
     @Test
@@ -128,7 +128,7 @@ class StackCreatorServiceRecipeValidationTest {
         StackV4Request request = new StackV4Request();
         request.setInstanceGroups(List.of(getInstanceGroupWithRecipe(INSTANCE_GROUP_MASTER, Set.of(notExistingRecipeName, someOtherNotExistingRecipeName))));
 
-        when(recipeService.get(any(RecipeAccessDto.class), eq(WORKSPACE_ID))).thenThrow(new NotFoundException("Recipe not found"));
+        when(recipeService.get(any(ResourceAccessDto.class), eq(WORKSPACE_ID))).thenThrow(new NotFoundException("Recipe not found"));
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, request));
 
@@ -136,11 +136,11 @@ class StackCreatorServiceRecipeValidationTest {
         Assertions.assertTrue(exception.getMessage()
                 .matches(String.format("The given recipes does not exists for the instance group \"%s\": (\\w+), (\\w+)", INSTANCE_GROUP_MASTER)));
 
-        verify(recipeService, times(2)).get(any(RecipeAccessDto.class), anyLong());
+        verify(recipeService, times(2)).get(any(ResourceAccessDto.class), anyLong());
     }
 
     @Test
-    void  testIfOneOfTheRecipeDoesNotExistsInOneInstanceGroupWhenOtherInstanceGroupHaveAnExistingRecipeThenBadRequestComesForThatInstanceGroup() {
+    void testIfOneOfTheRecipeDoesNotExistsInOneInstanceGroupWhenOtherInstanceGroupHaveAnExistingRecipeThenBadRequestComesForThatInstanceGroup() {
         String existingRecipe = "someExistingRecipe";
         String someOtherExistingRecipe = "someOtherExistingRecipe";
         String notExistingRecipe = "thisOneDoesNotExists";
@@ -151,7 +151,7 @@ class StackCreatorServiceRecipeValidationTest {
                 getInstanceGroupWithRecipe(INSTANCE_GROUP_COMPUTE, Set.of(someOtherExistingRecipe, notExistingRecipe))));
 
         doAnswer(withNotFoundExceptionIfRecipeNameMatchesOtherwiseGiveRecipe(notExistingRecipe))
-                .when(recipeService).get(any(RecipeAccessDto.class), eq(WORKSPACE_ID));
+                .when(recipeService).get(any(ResourceAccessDto.class), eq(WORKSPACE_ID));
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, request));
 
@@ -159,7 +159,7 @@ class StackCreatorServiceRecipeValidationTest {
         Assertions.assertEquals(String.format("The given recipe does not exist for the instance group \"%s\": %s", INSTANCE_GROUP_COMPUTE, notExistingRecipe),
                 exception.getMessage());
 
-        verify(recipeService, times(3)).get(any(RecipeAccessDto.class), anyLong());
+        verify(recipeService, times(3)).get(any(ResourceAccessDto.class), anyLong());
     }
 
     @Test
@@ -170,13 +170,13 @@ class StackCreatorServiceRecipeValidationTest {
         request.setName("stack_name");
         request.setInstanceGroups(List.of(getInstanceGroupWithRecipe(INSTANCE_GROUP_MASTER, Set.of(existingRecipeName))));
 
-        when(recipeService.get(any(RecipeAccessDto.class), eq(WORKSPACE_ID))).thenReturn(getRecipeWithName(existingRecipeName));
+        when(recipeService.get(any(ResourceAccessDto.class), eq(WORKSPACE_ID))).thenReturn(getRecipeWithName(existingRecipeName));
         when(converterUtil.convert(request, Stack.class)).thenReturn(TestUtil.stack());
         when(transactionService.required(any())).thenReturn(TestUtil.stack());
         when(stackService.getIdByNameInWorkspace(anyString(), any(Long.class))).thenThrow(new NotFoundException("stack not found by name"));
         underTest.createStack(user, workspace, request);
 
-        verify(recipeService, times(1)).get(any(RecipeAccessDto.class), anyLong());
+        verify(recipeService, times(1)).get(any(ResourceAccessDto.class), anyLong());
     }
 
     @Test
@@ -192,15 +192,15 @@ class StackCreatorServiceRecipeValidationTest {
 
         underTest.createStack(user, workspace, request);
 
-        verify(recipeService, times(0)).get(any(RecipeAccessDto.class), anyLong());
+        verify(recipeService, times(0)).get(any(ResourceAccessDto.class), anyLong());
     }
 
     private Answer<Recipe> withNotFoundExceptionIfRecipeNameMatchesOtherwiseGiveRecipe(String recipeNameForMatch) {
         return invocation -> {
-            if (recipeNameForMatch.equals(((RecipeAccessDto) invocation.getArgument(0)).getName())) {
+            if (recipeNameForMatch.equals(((ResourceAccessDto) invocation.getArgument(0)).getName())) {
                 throw new NotFoundException("Recipe not found!");
             }
-            return getRecipeWithName(((RecipeAccessDto) invocation.getArgument(0)).getName());
+            return getRecipeWithName(((ResourceAccessDto) invocation.getArgument(0)).getName());
         };
     }
 

@@ -46,16 +46,17 @@ import com.sequenceiq.freeipa.entity.SecurityGroup;
 import com.sequenceiq.freeipa.entity.SecurityRule;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
-import com.sequenceiq.freeipa.service.CostTaggingService;
+import com.sequenceiq.freeipa.service.FreeIpaCostTaggingService;
 
 @Component
 public class CreateFreeIpaRequestToStackConverter {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateFreeIpaRequestToStackConverter.class);
 
     private static final String TCP_PROTOCOL = "tcp";
 
     @Inject
-    private CostTaggingService costTaggingService;
+    private FreeIpaCostTaggingService freeIpaCostTaggingService;
 
     @Inject
     private StackAuthenticationRequestToStackAuthenticationConverter stackAuthenticationConverter;
@@ -153,7 +154,7 @@ public class CreateFreeIpaRequestToStackConverter {
             LOGGER.error(errorMessage, e);
             stack.getStackStatus().setStatusReason(errorMessage + e.getMessage());
         }
-        stack.setTags(getTags(owner, cloudPlatform));
+        stack.setTags(getTags(owner, cloudPlatform, stack.getEnvironmentCrn()));
         stack.setOwner(owner);
     }
 
@@ -186,18 +187,18 @@ public class CreateFreeIpaRequestToStackConverter {
         return source.getPlacement().getRegion();
     }
 
-    private Json getTags(String owner, String cloudPlatform) {
+    private Json getTags(String owner, String cloudPlatform, String envCrn) {
         try {
-            return new Json(new StackTags(new HashMap<>(), new HashMap<>(), getDefaultTags(owner, cloudPlatform)));
+            return new Json(new StackTags(new HashMap<>(), new HashMap<>(), getDefaultTags(owner, cloudPlatform, envCrn)));
         } catch (Exception ignored) {
             throw new BadRequestException("Failed to convert dynamic tags.");
         }
     }
 
-    private Map<String, String> getDefaultTags(String owner, String cloudPlatform) {
+    private Map<String, String> getDefaultTags(String owner, String cloudPlatform, String envCrn) {
         Map<String, String> result = new HashMap<>();
         try {
-            result.putAll(costTaggingService.prepareDefaultTags(owner, result, cloudPlatform));
+            result.putAll(freeIpaCostTaggingService.prepareDefaultTags(owner, result, cloudPlatform, envCrn));
         } catch (Exception e) {
             LOGGER.debug("Exception during reading default tags.", e);
         }
@@ -224,4 +225,5 @@ public class CreateFreeIpaRequestToStackConverter {
             throw new BadRequestException("More than one instance group is missing the instance template. Defaults cannot be applied.");
         }
     }
+
 }

@@ -202,7 +202,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         source.setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
         stack.setRegion(getIfNotNull(source.getPlacement(), s -> getRegion(source, cloudPlatform)));
         stack.setCloudPlatform(cloudPlatform);
-        stack.setTags(getTags(source, cloudPlatform));
+        stack.setTags(getTags(source, cloudPlatform, environment.getCrn()));
         stack.setPlatformVariant(cloudPlatform);
     }
 
@@ -252,22 +252,23 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         return environmentResponse.getCloudPlatform();
     }
 
-    private Json getTags(StackV4Request source, String cloudPlatform) {
+    private Json getTags(StackV4Request source, String cloudPlatform, String envCrn) {
         try {
             TagsV4Request tags = source.getTags();
             if (tags == null) {
-                return new Json(new StackTags(new HashMap<>(), new HashMap<>(), getDefaultTags(cloudPlatform)));
+                return new Json(new StackTags(new HashMap<>(), new HashMap<>(), getDefaultTags(cloudPlatform, envCrn)));
             }
-            return new Json(new StackTags(tags.getUserDefined(), tags.getApplication(), getDefaultTags(cloudPlatform)));
+            return new Json(new StackTags(tags.getUserDefined(), tags.getApplication(), getDefaultTags(cloudPlatform, envCrn)));
         } catch (Exception ignored) {
             throw new BadRequestException("Failed to convert dynamic tags.");
         }
     }
 
-    private Map<String, String> getDefaultTags(String cloudPlatform) {
+    private Map<String, String> getDefaultTags(String cloudPlatform, String envCrn) {
         Map<String, String> result = new HashMap<>();
         try {
-            result.putAll(defaultCostTaggingService.prepareDefaultTags(restRequestThreadLocalService.getCloudbreakUser().getUsername(), result, cloudPlatform));
+            result.putAll(defaultCostTaggingService.prepareDefaultTags(restRequestThreadLocalService.getCloudbreakUser().getUsername(),
+                    result, cloudPlatform, envCrn));
         } catch (Exception e) {
             LOGGER.debug("Exception during reading default tags.", e);
         }

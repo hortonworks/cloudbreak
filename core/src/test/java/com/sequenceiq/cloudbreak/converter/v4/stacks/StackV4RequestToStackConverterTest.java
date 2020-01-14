@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
+import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_CB_VERSION;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_CREATION_TIMESTAMP;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_USER_NAME;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_CB_VERSION;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.OWNER;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -180,7 +180,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
         StackV4Request request = getRequest("stack.json");
 
-        given(defaultCostTaggingService.prepareDefaultTags(anyString(), anyMap(), anyString())).willReturn(new HashMap<>());
+        given(defaultCostTaggingService.prepareDefaultTags(anyString(), anyMap(), anyString(), any())).willReturn(new HashMap<>());
         given(credentialClientService.getByCrn(anyString())).willReturn(credential);
         given(credentialClientService.getByName(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
@@ -212,7 +212,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
 
         Map<String, String> defaultTags = Map.of(CDP_USER_NAME.key(), "test", CDP_CB_VERSION.key(), "test", OWNER.key(),
                 "test", CDP_CREATION_TIMESTAMP.key(), "test");
-        given(defaultCostTaggingService.prepareDefaultTags(anyString(), anyMap(), anyString())).willReturn(defaultTags);
+        given(defaultCostTaggingService.prepareDefaultTags(anyString(), anyMap(), anyString(), any())).willReturn(defaultTags);
         given(credentialClientService.getByName(anyString())).willReturn(credential);
         given(credentialClientService.getByCrn(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
@@ -225,7 +225,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
                 Arrays.asList("description", "cluster", "environmentCrn", "gatewayPort", "useCcm", "network", "securityConfig",
                         "version", "created", "platformVariant", "cloudPlatform", "resourceCrn",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
-                        "environmentCrn", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy",  "minaSshdServiceId"));
+                        "environmentCrn", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy", "minaSshdServiceId"));
         assertEquals("eu-west-1", stack.getRegion());
         assertEquals("AWS", stack.getCloudPlatform());
         assertEquals("mystack", stack.getName());
@@ -250,7 +250,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
     public void testConvertWithLoginUserName() {
         initMocks();
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
-        given(defaultCostTaggingService.prepareDefaultTags(anyString(), anyMap(), anyString())).willReturn(new HashMap<>());
+        given(defaultCostTaggingService.prepareDefaultTags(anyString(), anyMap(), anyString(), any())).willReturn(new HashMap<>());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("You can not modify the default user!");
         // WHEN

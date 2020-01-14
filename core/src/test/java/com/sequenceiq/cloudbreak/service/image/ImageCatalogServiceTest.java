@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.dto.ImageCatalogAccessDto.ImageCatalogAccessDtoBuilder.aImageCatalogAccessDtoBuilder;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto.ResourceAccessDtoBuilder.aResourceAccessDtoBuilder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -186,7 +186,7 @@ public class ImageCatalogServiceTest {
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.200", null);
 
         ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("AWS"), null, true, null, null);
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter,  i -> true);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter, i -> true);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -199,7 +199,7 @@ public class ImageCatalogServiceTest {
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.1", null);
 
         ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("AWS"), null, true, null, null);
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter,  i -> true);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter, i -> true);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -212,7 +212,7 @@ public class ImageCatalogServiceTest {
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.2", null);
 
         ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("AWS"), null, true, null, null);
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter,  i -> true);
+        StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter, i -> true);
 
         assertEquals("f6e778fc-7f17-4535-9021-515351df3691", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -552,7 +552,7 @@ public class ImageCatalogServiceTest {
         ImageCatalog catalog = getImageCatalog();
         when(imageCatalogRepository.findByNameAndWorkspaceId(catalog.getName(), catalog.getWorkspace().getId())).thenReturn(Optional.of(catalog));
 
-        ImageCatalog result = underTest.delete(aImageCatalogAccessDtoBuilder().withName(catalog.getName()).build(), catalog.getWorkspace().getId());
+        ImageCatalog result = underTest.delete(aResourceAccessDtoBuilder().withName(catalog.getName()).build(), catalog.getWorkspace().getId());
 
         assertEquals(catalog, result);
         verify(imageCatalogRepository, times(2)).findByNameAndWorkspaceId(anyString(), anyLong());
@@ -570,7 +570,7 @@ public class ImageCatalogServiceTest {
         when(imageCatalogRepository.findByResourceCrnAndArchivedFalse(catalog.getResourceCrn())).thenReturn(Optional.of(catalog));
         when(imageCatalogRepository.findByNameAndWorkspaceId(catalog.getName(), catalog.getWorkspace().getId())).thenReturn(Optional.of(catalog));
 
-        ImageCatalog result = underTest.delete(aImageCatalogAccessDtoBuilder().withCrn(catalog.getResourceCrn()).build(), catalog.getWorkspace().getId());
+        ImageCatalog result = underTest.delete(aResourceAccessDtoBuilder().withCrn(catalog.getResourceCrn()).build(), catalog.getWorkspace().getId());
 
         assertEquals(catalog, result);
         verify(imageCatalogRepository, times(1)).findByResourceCrnAndArchivedFalse(anyString());
@@ -584,7 +584,7 @@ public class ImageCatalogServiceTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("One and only one value of the crn and name should be filled!");
 
-        underTest.delete(aImageCatalogAccessDtoBuilder().build(), catalog.getWorkspace().getId());
+        underTest.delete(aResourceAccessDtoBuilder().build(), catalog.getWorkspace().getId());
 
         verify(imageCatalogRepository, times(0)).findByResourceCrnAndArchivedFalse(anyString());
         verify(imageCatalogRepository, times(0)).delete(any());
@@ -593,7 +593,7 @@ public class ImageCatalogServiceTest {
     @Test
     public void testDeleteByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("ImageCatalogAccessDto should not be null");
+        thrown.expectMessage("AccessDto should not be null");
 
         underTest.delete(null, 1L);
     }
@@ -603,7 +603,7 @@ public class ImageCatalogServiceTest {
         ImageCatalog catalog = getImageCatalog();
         when(imageCatalogRepository.findByNameAndWorkspaceId(catalog.getName(), catalog.getWorkspace().getId())).thenReturn(Optional.of(catalog));
 
-        ImageCatalog result = underTest.get(aImageCatalogAccessDtoBuilder().withName(catalog.getName()).build(), catalog.getWorkspace().getId());
+        ImageCatalog result = underTest.get(aResourceAccessDtoBuilder().withName(catalog.getName()).build(), catalog.getWorkspace().getId());
 
         assertEquals(catalog, result);
         verify(imageCatalogRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
@@ -615,7 +615,7 @@ public class ImageCatalogServiceTest {
         ImageCatalog catalog = getImageCatalog();
         when(imageCatalogRepository.findByResourceCrnAndArchivedFalse(catalog.getResourceCrn())).thenReturn(Optional.of(catalog));
 
-        ImageCatalog result = underTest.get(aImageCatalogAccessDtoBuilder().withCrn(catalog.getResourceCrn()).build(), catalog.getWorkspace().getId());
+        ImageCatalog result = underTest.get(aResourceAccessDtoBuilder().withCrn(catalog.getResourceCrn()).build(), catalog.getWorkspace().getId());
 
         assertEquals(catalog, result);
         verify(imageCatalogRepository, times(1)).findByResourceCrnAndArchivedFalse(anyString());
@@ -627,7 +627,7 @@ public class ImageCatalogServiceTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("One and only one value of the crn and name should be filled!");
 
-        underTest.get(aImageCatalogAccessDtoBuilder().build(), 1L);
+        underTest.get(aResourceAccessDtoBuilder().build(), 1L);
 
         verify(imageCatalogRepository, times(0)).findByResourceCrnAndArchivedFalse(anyString());
         verify(imageCatalogRepository, times(0)).save(any());
@@ -636,7 +636,7 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("ImageCatalogAccessDto should not be null");
+        thrown.expectMessage("AccessDto should not be null");
 
         underTest.get(null, 1L);
     }

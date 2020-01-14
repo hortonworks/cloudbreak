@@ -70,6 +70,8 @@ public class AzureNetworkConnectorTest {
 
     private static final String RESOURCE_GROUP = "resource-group";
 
+    private static final String ENV_CRN = "someCrn";
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -246,6 +248,7 @@ public class AzureNetworkConnectorTest {
         return new NetworkCreationRequest.Builder()
                 .withStackName(STACK_NAME)
                 .withEnvName(ENV_NAME)
+                .withEnvCrn(ENV_CRN)
                 .withCloudCredential(new CloudCredential("1", "credential"))
                 .withRegion(REGION)
                 .withNetworkCidr(networkCidr)

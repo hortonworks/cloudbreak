@@ -28,9 +28,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.dto.BlueprintAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
@@ -114,19 +115,19 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return super.createForLoggedInUser(blueprint, workspaceId);
     }
 
-    public Blueprint deleteByWorkspace(BlueprintAccessDto blueprintAccessDto, Long workspaceId) {
-        validateDto(blueprintAccessDto);
-        return isNotEmpty(blueprintAccessDto.getName())
-                ? super.deleteByNameFromWorkspace(blueprintAccessDto.getName(), workspaceId)
-                : delete(blueprintRepository.findByResourceCrnAndWorkspaceId(blueprintAccessDto.getCrn(), workspaceId)
-                .orElseThrow(() -> NotFoundException.notFound("blueprint", blueprintAccessDto.getCrn()).get()));
+    public Blueprint deleteByWorkspace(ResourceAccessDto accessDto, Long workspaceId) {
+        validateDto(accessDto);
+        return isNotEmpty(accessDto.getName())
+                ? super.deleteByNameFromWorkspace(accessDto.getName(), workspaceId)
+                : delete(blueprintRepository.findByResourceCrnAndWorkspaceId(accessDto.getCrn(), workspaceId)
+                .orElseThrow(() -> notFound("blueprint", accessDto.getCrn()).get()));
     }
 
-    public Blueprint getByWorkspace(@NotNull BlueprintAccessDto blueprintAccessDto, Long workspaceId) {
-        validateDto(blueprintAccessDto);
-        return isNotEmpty(blueprintAccessDto.getName())
-                ? super.getByNameForWorkspaceId(blueprintAccessDto.getName(), workspaceId)
-                : getByCrnAndWorkspaceIdAndAddToMdc(blueprintAccessDto.getCrn(), workspaceId);
+    public Blueprint getByWorkspace(@NotNull ResourceAccessDto accessDto, Long workspaceId) {
+        validateDto(accessDto);
+        return isNotEmpty(accessDto.getName())
+                ? super.getByNameForWorkspaceId(accessDto.getName(), workspaceId)
+                : getByCrnAndWorkspaceIdAndAddToMdc(accessDto.getCrn(), workspaceId);
     }
 
     public void decorateWithCrn(Blueprint bp, String accountId, String creator) {
@@ -397,7 +398,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return new HashSet<>(hostGroupNames).size() != hostGroupNames.size();
     }
 
-    private void validateDto(BlueprintAccessDto dto) {
+    private void validateDto(ResourceAccessDto dto) {
         throwIfNull(dto, () -> new IllegalArgumentException("BlueprintAccessDto should not be null"));
         if (dto.isNotValid()) {
             throw new BadRequestException(INVALID_DTO_MESSAGE);
@@ -406,7 +407,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     private Blueprint getByCrnAndWorkspaceIdAndAddToMdc(String crn, Long workspaceId) {
         Blueprint bp = blueprintRepository.findByResourceCrnAndWorkspaceId(crn, workspaceId)
-                .orElseThrow(() -> NotFoundException.notFound("cluster template", crn).get());
+                .orElseThrow(() -> notFound("cluster template", crn).get());
         MDCBuilder.buildMdcContext(bp);
         return bp;
     }
@@ -415,7 +416,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return Crn.builder()
                 .setService(Crn.Service.DATAHUB)
                 .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.CLUSTER_DEFINITION)
+                .setResourceType(ResourceType.CLUSTER_DEFINITION)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();

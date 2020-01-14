@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.dto.BlueprintAccessDto.BlueprintAccessDtoBuilder.aBlueprintAccessDtoBuilder;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.PRE_DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto.ResourceAccessDtoBuilder.aResourceAccessDtoBuilder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
@@ -131,7 +131,7 @@ public class BlueprintServiceTest {
         when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.deleteByWorkspace(aBlueprintAccessDtoBuilder()
+        Blueprint result = underTest.deleteByWorkspace(aResourceAccessDtoBuilder()
                 .withName(blueprint.getName()).build(), blueprint.getWorkspace().getId());
 
         assertEquals(blueprint, result);
@@ -148,7 +148,7 @@ public class BlueprintServiceTest {
         when(blueprintRepository.findByResourceCrnAndWorkspaceId(blueprint.getResourceCrn(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.deleteByWorkspace(aBlueprintAccessDtoBuilder()
+        Blueprint result = underTest.deleteByWorkspace(aResourceAccessDtoBuilder()
                 .withCrn(blueprint.getResourceCrn()).build(), blueprint.getWorkspace().getId());
 
         assertEquals(blueprint, result);
@@ -165,7 +165,7 @@ public class BlueprintServiceTest {
         exceptionRule.expect(BadRequestException.class);
         exceptionRule.expectMessage(INVALID_DTO_MESSAGE);
 
-        underTest.deleteByWorkspace(aBlueprintAccessDtoBuilder().build(), blueprint.getWorkspace().getId());
+        underTest.deleteByWorkspace(aResourceAccessDtoBuilder().build(), blueprint.getWorkspace().getId());
 
         verify(blueprintRepository, times(0)).findByResourceCrnAndWorkspaceId(anyString(), anyLong());
         verify(blueprintRepository, times(0)).delete(any());
@@ -184,7 +184,7 @@ public class BlueprintServiceTest {
         when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.getByWorkspace(aBlueprintAccessDtoBuilder()
+        Blueprint result = underTest.getByWorkspace(aResourceAccessDtoBuilder()
                 .withName(blueprint.getName()).build(), blueprint.getWorkspace().getId());
 
         assertEquals(blueprint, result);
@@ -199,7 +199,7 @@ public class BlueprintServiceTest {
         when(blueprintRepository.findByResourceCrnAndWorkspaceId(blueprint.getResourceCrn(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.getByWorkspace(aBlueprintAccessDtoBuilder()
+        Blueprint result = underTest.getByWorkspace(aResourceAccessDtoBuilder()
                 .withCrn(blueprint.getResourceCrn()).build(), blueprint.getWorkspace().getId());
 
         assertEquals(blueprint, result);
@@ -214,7 +214,7 @@ public class BlueprintServiceTest {
         exceptionRule.expect(BadRequestException.class);
         exceptionRule.expectMessage(INVALID_DTO_MESSAGE);
 
-        underTest.getByWorkspace(aBlueprintAccessDtoBuilder().build(), blueprint.getWorkspace().getId());
+        underTest.getByWorkspace(aResourceAccessDtoBuilder().build(), blueprint.getWorkspace().getId());
 
         verify(blueprintRepository, times(0)).findByResourceCrnAndWorkspaceId(anyString(), anyLong());
         verify(blueprintRepository, times(0)).save(any());

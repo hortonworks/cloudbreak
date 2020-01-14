@@ -23,11 +23,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.dto.ClusterDefinitionAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.GeneralAccessDto;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -198,8 +197,8 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
     }
 
-    public Set<ClusterTemplate> findAllByEnvironment(ClusterDefinitionAccessDto dto) {
-        GeneralAccessDto.validate(dto);
+    public Set<ClusterTemplate> findAllByEnvironment(ResourceAccessDto dto) {
+        ResourceAccessDto.validate(dto);
         DetailedEnvironmentResponse env = getEnvironmentByDto(dto);
         LOGGER.debug("About to collect cluster definitions by environment: {} - [crn: {}]", env.getName(), env.getCrn());
         return clusterTemplateRepository.getAllByEnvironmentCrn(env.getCrn());
@@ -322,8 +321,8 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return clusterTemplate;
     }
 
-    private DetailedEnvironmentResponse getEnvironmentByDto(ClusterDefinitionAccessDto dto) {
-        GeneralAccessDto.validate(dto);
+    private DetailedEnvironmentResponse getEnvironmentByDto(ResourceAccessDto dto) {
+        ResourceAccessDto.validate(dto);
         DetailedEnvironmentResponse env;
         if (StringUtils.isNotEmpty(dto.getCrn())) {
             env = environmentClientService.getByCrn(dto.getCrn());

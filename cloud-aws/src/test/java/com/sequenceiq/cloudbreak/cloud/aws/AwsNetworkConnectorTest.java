@@ -24,14 +24,12 @@ import java.util.concurrent.TimeoutException;
 
 import javax.ws.rs.BadRequestException;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.AmazonServiceException;
@@ -96,6 +94,8 @@ public class AwsNetworkConnectorTest {
 
     private static final Region REGION = Region.region("US_WEST_2");
 
+    private static final String ENV_CRN = "someCrn";
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -133,24 +133,24 @@ public class AwsNetworkConnectorTest {
     public void testPlatformShouldReturnAwsPlatform() {
         Platform actual = underTest.platform();
 
-        Assert.assertEquals(AwsConstants.AWS_PLATFORM, actual);
+        assertEquals(AwsConstants.AWS_PLATFORM, actual);
     }
 
     @Test
     public void testVariantShouldReturnAwsPlatform() {
         Variant actual = underTest.variant();
 
-        Assert.assertEquals(AwsConstants.AWS_VARIANT, actual);
+        assertEquals(AwsConstants.AWS_VARIANT, actual);
     }
 
     @Test
     public void testCreateNetworkWithSubnetsShouldReturnTheNetworkAndSubnets() {
         String networkCidr = "0.0.0.0/16";
         Set<String> subnetCidrs = Set.of("1.1.1.1/8", "1.1.1.2/8");
-        AmazonCloudFormationRetryClient cloudFormationRetryClient = Mockito.mock(AmazonCloudFormationRetryClient.class);
-        AmazonCloudFormationClient cfClient = Mockito.mock(AmazonCloudFormationClient.class);
-        AmazonEC2Client ec2Client = Mockito.mock(AmazonEC2Client.class);
-        PollTask pollTask = Mockito.mock(PollTask.class);
+        AmazonCloudFormationRetryClient cloudFormationRetryClient = mock(AmazonCloudFormationRetryClient.class);
+        AmazonCloudFormationClient cfClient = mock(AmazonCloudFormationClient.class);
+        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        PollTask pollTask = mock(PollTask.class);
         Map<String, String> output = createOutput();
         NetworkCreationRequest networkCreationRequest = createNetworkRequest(networkCidr, subnetCidrs);
         List<SubnetRequest> subnetRequestList = createSubnetRequestList();
@@ -174,7 +174,7 @@ public class AwsNetworkConnectorTest {
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest);
         verify(cfStackUtil).getOutputs(NETWORK_ID, cloudFormationRetryClient);
-        verify(defaultCostTaggingService, never()).prepareDefaultTags(any(), any(), any());
+        verify(defaultCostTaggingService, never()).prepareDefaultTags(any(), any(), any(), any());
         verify(awsTagPreparationService, never()).prepareCloudformationTags(any(), any());
         verify(cloudFormationRetryClient, never()).createStack(any(CreateStackRequest.class));
         assertEquals(VPC_ID, actual.getNetworkId());
@@ -185,13 +185,13 @@ public class AwsNetworkConnectorTest {
     public void testCreateNewNetworkWithSubnetsShouldCreateTheNetworkAndSubnets() {
         String networkCidr = "0.0.0.0/16";
         Set<String> subnetCidrs = Set.of("1.1.1.1/8", "1.1.1.2/8");
-        AmazonCloudFormationRetryClient cloudFormationRetryClient = Mockito.mock(AmazonCloudFormationRetryClient.class);
+        AmazonCloudFormationRetryClient cloudFormationRetryClient = mock(AmazonCloudFormationRetryClient.class);
         AmazonServiceException amazonServiceException = new AmazonServiceException("does not exist");
         amazonServiceException.setStatusCode(400);
         when(cloudFormationRetryClient.describeStacks(any(DescribeStacksRequest.class))).thenThrow(amazonServiceException);
-        AmazonCloudFormationClient cfClient = Mockito.mock(AmazonCloudFormationClient.class);
-        AmazonEC2Client ec2Client = Mockito.mock(AmazonEC2Client.class);
-        PollTask pollTask = Mockito.mock(PollTask.class);
+        AmazonCloudFormationClient cfClient = mock(AmazonCloudFormationClient.class);
+        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        PollTask pollTask = mock(PollTask.class);
         Map<String, String> output = createOutput();
         NetworkCreationRequest networkCreationRequest = createNetworkRequest(networkCidr, subnetCidrs);
         List<SubnetRequest> subnetRequestList = createSubnetRequestList();
@@ -213,7 +213,7 @@ public class AwsNetworkConnectorTest {
         verify(awsNetworkCfTemplateProvider).provide(networkCidr, subnetRequestList, true);
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest);
-        verify(defaultCostTaggingService).prepareDefaultTags("creatorUser", null, CloudConstants.AWS);
+        verify(defaultCostTaggingService).prepareDefaultTags(eq("creatorUser"), any(), eq(CloudConstants.AWS), any());
         verify(awsTagPreparationService).prepareCloudformationTags(any(), any());
         verify(cloudFormationRetryClient).createStack(any(CreateStackRequest.class));
         verify(cfStackUtil).getOutputs(NETWORK_ID, cloudFormationRetryClient);
@@ -224,9 +224,9 @@ public class AwsNetworkConnectorTest {
     @Test
     public void testDeleteNetworkWithSubNetsShouldDeleteTheStackAndTheResourceGroup() {
         NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest();
-        AmazonCloudFormationRetryClient cloudFormationRetryClient = Mockito.mock(AmazonCloudFormationRetryClient.class);
-        AmazonCloudFormationClient cfClient = Mockito.mock(AmazonCloudFormationClient.class);
-        PollTask pollTask = Mockito.mock(PollTask.class);
+        AmazonCloudFormationRetryClient cloudFormationRetryClient = mock(AmazonCloudFormationRetryClient.class);
+        AmazonCloudFormationClient cfClient = mock(AmazonCloudFormationClient.class);
+        PollTask pollTask = mock(PollTask.class);
 
         when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq(networkDeletionRequest.getRegion())))
                 .thenReturn(cloudFormationRetryClient);
@@ -246,9 +246,9 @@ public class AwsNetworkConnectorTest {
     public void testDeleteNetworkWithSubNetsShouldThrowAnExceptionWhenTheStackDeletionFailed()
             throws InterruptedException, ExecutionException, TimeoutException {
         NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest();
-        AmazonCloudFormationRetryClient cloudFormationRetryClient = Mockito.mock(AmazonCloudFormationRetryClient.class);
-        AmazonCloudFormationClient cfClient = Mockito.mock(AmazonCloudFormationClient.class);
-        PollTask pollTask = Mockito.mock(PollTask.class);
+        AmazonCloudFormationRetryClient cloudFormationRetryClient = mock(AmazonCloudFormationRetryClient.class);
+        AmazonCloudFormationClient cfClient = mock(AmazonCloudFormationClient.class);
+        PollTask pollTask = mock(PollTask.class);
 
         when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq(networkDeletionRequest.getRegion())))
                 .thenReturn(cloudFormationRetryClient);
@@ -351,6 +351,7 @@ public class AwsNetworkConnectorTest {
         return new NetworkCreationRequest.Builder()
                 .withStackName(STACK_NAME)
                 .withEnvName(ENV_NAME)
+                .withEnvCrn(ENV_CRN)
                 .withCloudCredential(new CloudCredential("1", "credential"))
                 .withRegion(REGION)
                 .withNetworkCidr(networkCidr)

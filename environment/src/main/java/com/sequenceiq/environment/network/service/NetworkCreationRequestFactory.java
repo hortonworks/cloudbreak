@@ -33,6 +33,7 @@ public class NetworkCreationRequestFactory {
                 .withStackName(getStackName(environment))
                 .withEnvId(environment.getId())
                 .withEnvName(environment.getName())
+                .withEnvCrn(environment.getResourceCrn())
                 .withCloudCredential(getCredential(environment))
                 .withVariant(environment.getCloudPlatform())
                 .withRegion(Region.region(environment.getLocation().getName()))

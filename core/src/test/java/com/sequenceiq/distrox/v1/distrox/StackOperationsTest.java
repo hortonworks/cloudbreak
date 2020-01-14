@@ -15,8 +15,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Set;
 
-import javax.ws.rs.BadRequestException;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,7 +25,8 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.dto.StackAccessDto;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto.ResourceAccessDtoBuilder;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
@@ -47,10 +46,6 @@ import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.distrox.v1.distrox.service.SdxServiceDecorator;
 
 public class StackOperationsTest {
-
-    private static final String INVALID_DTO_MESSAGE = "A stack name or crn must be provided. One and only one of them.";
-
-    private static final String NULL_DTO_EXCEPTION_MESSAGE = "StackAccessDto should not be null";
 
     private static final StackType STACK_TYPE = StackType.WORKLOAD;
 
@@ -113,7 +108,7 @@ public class StackOperationsTest {
 
     @Test
     public void testDeleteWhenDtoNameFilledAndForcedTrueThenDeleteCalled() {
-        underTest.delete(StackAccessDto.builder().withName(stack.getName()).build(), stack.getWorkspace().getId(), true);
+        underTest.delete(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(stack.getName()).build(), stack.getWorkspace().getId(), true);
 
         verify(stackCommonService, times(1)).deleteWithKerberosByNameInWorkspace(anyString(), anyLong(), anyBoolean());
         verify(stackCommonService, times(1)).deleteWithKerberosByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), true);
@@ -122,7 +117,7 @@ public class StackOperationsTest {
 
     @Test
     public void testDeleteWhenDtoNameFilledAndForcedFalseThenDeleteCalled() {
-        underTest.delete(StackAccessDto.builder().withName(stack.getName()).build(), stack.getWorkspace().getId(), false);
+        underTest.delete(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(stack.getName()).build(), stack.getWorkspace().getId(), false);
 
         verify(stackCommonService, times(1)).deleteWithKerberosByNameInWorkspace(anyString(), anyLong(), anyBoolean());
         verify(stackCommonService, times(1)).deleteWithKerberosByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), false);
@@ -131,7 +126,7 @@ public class StackOperationsTest {
 
     @Test
     public void testDeleteWhenDtoCrnFilledAndForcedTrueThenDeleteCalled() {
-        underTest.delete(StackAccessDto.builder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(), true);
+        underTest.delete(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(), true);
 
         verify(stackCommonService, times(1)).deleteWithKerberosByCrnInWorkspace(anyString(), anyLong(), anyBoolean());
         verify(stackCommonService, times(1)).deleteWithKerberosByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), true);
@@ -140,7 +135,7 @@ public class StackOperationsTest {
 
     @Test
     public void testDeleteWhenDtoCrnFilledAndForcedFalseThenDeleteCalled() {
-        underTest.delete(StackAccessDto.builder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(), false);
+        underTest.delete(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(), false);
 
         verify(stackCommonService, times(1)).deleteWithKerberosByCrnInWorkspace(anyString(), anyLong(), anyBoolean());
         verify(stackCommonService, times(1)).deleteWithKerberosByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), false);
@@ -149,10 +144,10 @@ public class StackOperationsTest {
 
     @Test
     public void testDeleteWhenNeitherCrnOrNameProvidedThenBadRequestExceptionComes() {
-        exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage(INVALID_DTO_MESSAGE);
+        exceptionRule.expect(com.sequenceiq.cloudbreak.exception.BadRequestException.class);
+        exceptionRule.expectMessage(ResourceAccessDto.INVALID_RESOURCE_ACCESS_DTO_EXCEPTION_MESSAGE);
 
-        underTest.delete(StackAccessDto.builder().build(), stack.getWorkspace().getId(), true);
+        underTest.delete(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().build(), stack.getWorkspace().getId(), true);
 
         verify(stackCommonService, times(0)).findStackByNameAndWorkspaceId(anyString(), anyLong(), anySet(), any());
         verify(stackCommonService, times(0)).findStackByCrnAndWorkspaceId(anyString(), anyLong(), anySet(), any());
@@ -161,7 +156,7 @@ public class StackOperationsTest {
     @Test
     public void testDeleteIfDtoIsNullThenIllegalArgumentExceptionComes() {
         exceptionRule.expect(IllegalArgumentException.class);
-        exceptionRule.expectMessage(NULL_DTO_EXCEPTION_MESSAGE);
+        exceptionRule.expectMessage(ResourceAccessDto.NULL_DTO_EXCEPTION_MESSAGE);
 
         underTest.delete(null, stack.getWorkspace().getId(), true);
 
@@ -175,8 +170,8 @@ public class StackOperationsTest {
         when(stackCommonService.findStackByNameAndWorkspaceId(stack.getName(), stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE))
                 .thenReturn(expected);
 
-        StackV4Response result = underTest.get(StackAccessDto.builder().withName(stack.getName()).build(), stack.getWorkspace().getId(),
-                STACK_ENTRIES, STACK_TYPE);
+        StackV4Response result = underTest.get(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(stack.getName()).build(),
+                stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
 
         assertEquals(expected, result);
         verify(stackCommonService, times(1)).findStackByNameAndWorkspaceId(anyString(), anyLong(), anySet(), any());
@@ -190,8 +185,8 @@ public class StackOperationsTest {
         when(stackCommonService.findStackByCrnAndWorkspaceId(stack.getResourceCrn(), stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE))
                 .thenReturn(expected);
 
-        StackV4Response result = underTest.get(StackAccessDto.builder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(),
-                STACK_ENTRIES, STACK_TYPE);
+        StackV4Response result = underTest.get(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(stack.getResourceCrn()).build(),
+                stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
 
         assertEquals(expected, result);
         verify(stackCommonService, times(1)).findStackByCrnAndWorkspaceId(anyString(), anyLong(), anySet(), any());
@@ -201,10 +196,10 @@ public class StackOperationsTest {
 
     @Test
     public void testGethenNeitherCrnOrNameProvidedThenBadRequestExceptionComes() {
-        exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage(INVALID_DTO_MESSAGE);
+        exceptionRule.expect(com.sequenceiq.cloudbreak.exception.BadRequestException.class);
+        exceptionRule.expectMessage(ResourceAccessDto.INVALID_RESOURCE_ACCESS_DTO_EXCEPTION_MESSAGE);
 
-        underTest.get(StackAccessDto.builder().build(), stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
+        underTest.get(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().build(), stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
 
         verify(stackCommonService, times(0)).findStackByNameAndWorkspaceId(anyString(), anyLong(), anySet(), any());
         verify(stackCommonService, times(0)).findStackByCrnAndWorkspaceId(anyString(), anyLong(), anySet(), any());
@@ -213,7 +208,7 @@ public class StackOperationsTest {
     @Test
     public void testGetByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
         exceptionRule.expect(IllegalArgumentException.class);
-        exceptionRule.expectMessage(NULL_DTO_EXCEPTION_MESSAGE);
+        exceptionRule.expectMessage(ResourceAccessDto.NULL_DTO_EXCEPTION_MESSAGE);
 
         underTest.get(null, stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
 
@@ -228,7 +223,7 @@ public class StackOperationsTest {
         when(converterUtil.convert(any(StackApiView.class), any())).thenReturn(new StackViewV4Response());
         doNothing().when(environmentServiceDecorator).prepareEnvironment(any(StackViewV4Response.class));
 
-        StackViewV4Response response = underTest.getForInternalCrn(StackAccessDto.builder().withCrn("myCrn").build(), STACK_TYPE);
+        StackViewV4Response response = underTest.getForInternalCrn(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn("myCrn").build(), STACK_TYPE);
 
         assertNotNull(response);
         verify(stackApiViewService, times(1)).retrieveStackByCrnAndType(anyString(), any(StackType.class));

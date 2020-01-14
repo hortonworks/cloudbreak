@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.dto.RecipeAccessDto.RecipeAccessDtoBuilder.aRecipeAccessDtoBuilder;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto.ResourceAccessDtoBuilder.aResourceAccessDtoBuilder;
 
 import java.util.Set;
 
@@ -45,13 +45,13 @@ public class RecipesV4Controller extends NotificationController implements Recip
 
     @Override
     public RecipeV4Response getByName(Long workspaceId, String name) {
-        Recipe recipe = recipeService.get(aRecipeAccessDtoBuilder().withName(name).build(), workspaceId);
+        Recipe recipe = recipeService.get(aResourceAccessDtoBuilder().withName(name).build(), workspaceId);
         return converterUtil.convert(recipe, RecipeV4Response.class);
     }
 
     @Override
     public RecipeV4Response getByCrn(Long workspaceId, @NotNull String crn) {
-        Recipe recipe = recipeService.get(aRecipeAccessDtoBuilder().withCrn(crn).build(), workspaceId);
+        Recipe recipe = recipeService.get(aResourceAccessDtoBuilder().withCrn(crn).build(), workspaceId);
         return converterUtil.convert(recipe, RecipeV4Response.class);
     }
 
@@ -67,14 +67,14 @@ public class RecipesV4Controller extends NotificationController implements Recip
 
     @Override
     public RecipeV4Response deleteByName(Long workspaceId, String name) {
-        Recipe deleted = recipeService.delete(aRecipeAccessDtoBuilder().withName(name).build(), workspaceId);
+        Recipe deleted = recipeService.delete(aResourceAccessDtoBuilder().withName(name).build(), workspaceId);
         notify(ResourceEvent.RECIPE_DELETED);
         return converterUtil.convert(deleted, RecipeV4Response.class);
     }
 
     @Override
     public RecipeV4Response deleteByCrn(Long workspaceId, @NotNull String crn) {
-        Recipe deleted = recipeService.delete(aRecipeAccessDtoBuilder().withCrn(crn).build(), workspaceId);
+        Recipe deleted = recipeService.delete(aResourceAccessDtoBuilder().withCrn(crn).build(), workspaceId);
         notify(ResourceEvent.RECIPE_DELETED);
         return converterUtil.convert(deleted, RecipeV4Response.class);
     }

@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.service.image.StatedImage.statedImage;
 import static com.sequenceiq.cloudbreak.service.image.StatedImages.statedImages;
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
-import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -36,7 +35,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.ImmutableSet;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.dto.ImageCatalogAccessDto;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
@@ -114,8 +113,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return imageCatalogs;
     }
 
-    public ImageCatalog delete(ImageCatalogAccessDto imageCatalogAccessDto, Long workspaceId) {
-        validateDto(imageCatalogAccessDto);
+    public ImageCatalog delete(ResourceAccessDto imageCatalogAccessDto, Long workspaceId) {
+        ResourceAccessDto.validate(imageCatalogAccessDto);
         ImageCatalog catalog = get(imageCatalogAccessDto, workspaceId);
         return delete(workspaceId, catalog.getName());
     }
@@ -136,11 +135,11 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return super.createForLoggedInUser(imageCatalog, workspaceId);
     }
 
-    public ImageCatalog get(ImageCatalogAccessDto imageCatalogAccessDto, Long workspaceId) {
-        validateDto(imageCatalogAccessDto);
-        return isNotEmpty(imageCatalogAccessDto.getName())
-                ? get(workspaceId, imageCatalogAccessDto.getName())
-                : findByResourceCrn(imageCatalogAccessDto.getCrn());
+    public ImageCatalog get(ResourceAccessDto accessDto, Long workspaceId) {
+        ResourceAccessDto.validate(accessDto);
+        return isNotEmpty(accessDto.getName())
+                ? get(workspaceId, accessDto.getName())
+                : findByResourceCrn(accessDto.getCrn());
     }
 
     public ImageCatalog findByResourceCrn(String resourceCrn) {
@@ -310,15 +309,15 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     public Set<ImageCatalog> deleteMultiple(Long workspaceId, Set<String> names) {
         Set<String> envDefaults = names.stream()
-            .filter(this::isEnvDefault)
-            .collect(Collectors.toSet());
+                .filter(this::isEnvDefault)
+                .collect(Collectors.toSet());
         if (!envDefaults.isEmpty()) {
             throw new BadRequestException(String.format("The following image catalogs cannot be deleted because they are environment defaults: %s", names));
         }
 
         return names.stream()
-            .map(name -> deleteNonDefault(workspaceId, name))
-            .collect(Collectors.toSet());
+                .map(name -> deleteNonDefault(workspaceId, name))
+                .collect(Collectors.toSet());
     }
 
     private ImageCatalog deleteNonDefault(Long workspaceId, String name) {
@@ -665,13 +664,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         if (isEnvDefault(resource.getName())) {
             throw new BadRequestException(String
                     .format("%s cannot be created because it is an environment default image catalog.", resource.getName()));
-        }
-    }
-
-    private void validateDto(ImageCatalogAccessDto dto) {
-        throwIfNull(dto, () -> new IllegalArgumentException("ImageCatalogAccessDto should not be null"));
-        if (dto.isNotValid()) {
-            throw new BadRequestException("One and only one value of the crn and name should be filled!");
         }
     }
 
