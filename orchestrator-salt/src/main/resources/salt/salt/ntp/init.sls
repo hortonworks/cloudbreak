@@ -1,6 +1,6 @@
 {%- from 'ntp/settings.sls' import ntp with context %}
 
-{% if salt['file.file_exists' ]('/etc/chrony.conf') and ntp.ntp_server|length > 0 %}
+{% if salt['file.file_exists' ]('/etc/chrony.conf') and ntp.ntp_config_line|length > 0 %}
 
 # Restart chronyd if its configuration file changes, but only if it was actually
 # running from the get go.
@@ -19,6 +19,6 @@ add_cloud_platform_time_server_to_chrony:
     - name: /etc/chrony.conf
     - text: |
 
-        server {{ ntp.ntp_server }} prefer iburst
+        {{ ntp.ntp_config_line }}
 
 {% endif %}
