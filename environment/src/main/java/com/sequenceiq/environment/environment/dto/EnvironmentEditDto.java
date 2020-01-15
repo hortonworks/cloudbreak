@@ -1,13 +1,8 @@
 package com.sequenceiq.environment.environment.dto;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.apache.commons.collections4.CollectionUtils;
-
-import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
-import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 
@@ -15,13 +10,9 @@ public class EnvironmentEditDto {
 
     private final String description;
 
-    private final Set<String> regions;
-
     private final String accountId;
 
     private final EnvironmentTelemetry telemetry;
-
-    private LocationDto location;
 
     private final NetworkDto network;
 
@@ -39,9 +30,7 @@ public class EnvironmentEditDto {
 
     public EnvironmentEditDto(
             String description,
-            Set<String> regions,
             String accountId,
-            LocationDto location,
             NetworkDto network,
             AuthenticationDto authentication,
             EnvironmentTelemetry telemetry,
@@ -52,13 +41,7 @@ public class EnvironmentEditDto {
             ParametersDto parameters) {
         this.description = description;
         this.accountId = accountId;
-        if (CollectionUtils.isEmpty(regions)) {
-            this.regions = new HashSet<>();
-        } else {
-            this.regions = regions;
-        }
         this.network = network;
-        this.location = location;
         this.authentication = authentication;
         this.telemetry = telemetry;
         this.securityAccess = securityAccess;
@@ -70,18 +53,6 @@ public class EnvironmentEditDto {
 
     public String getDescription() {
         return description;
-    }
-
-    public Set<String> getRegions() {
-        return regions;
-    }
-
-    public LocationDto getLocation() {
-        return location;
-    }
-
-    public void setLocation(LocationDto location) {
-        this.location = location;
     }
 
     public String getAccountId() {
@@ -127,11 +98,7 @@ public class EnvironmentEditDto {
     public static final class EnvironmentEditDtoBuilder {
         private String description;
 
-        private Set<String> regions;
-
         private String accountId;
-
-        private LocationDto location;
 
         private NetworkDto network;
 
@@ -157,18 +124,8 @@ public class EnvironmentEditDto {
             return this;
         }
 
-        public EnvironmentEditDtoBuilder withRegions(Set<String> regions) {
-            this.regions = regions;
-            return this;
-        }
-
         public EnvironmentEditDtoBuilder withAccountId(String accountId) {
             this.accountId = accountId;
-            return this;
-        }
-
-        public EnvironmentEditDtoBuilder withLocation(LocationDto location) {
-            this.location = location;
             return this;
         }
 
@@ -213,8 +170,8 @@ public class EnvironmentEditDto {
         }
 
         public EnvironmentEditDto build() {
-            return new EnvironmentEditDto(description, regions, accountId, location, network,
-                    authentication, telemetry, securityAccess, tunnel, idBrokerMappingSource, adminGroupName, parameters);
+            return new EnvironmentEditDto(description, accountId, network, authentication, telemetry, securityAccess, tunnel, idBrokerMappingSource,
+                    adminGroupName, parameters);
         }
     }
 }

@@ -13,7 +13,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -32,13 +31,11 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
-import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
-import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
@@ -119,110 +116,6 @@ class EnvironmentModificationServiceTest {
     }
 
     @Test
-    void editByNameRegionChange() {
-        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withRegions(Set.of("r1"))
-                .build();
-        when(environmentDtoConverter.environmentToLocationDto(any())).thenReturn(LocationDto.builder().withName("loc").build());
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
-        when(environmentService.getValidatorService()).thenReturn(validatorService);
-        when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(validationResultBuilder);
-        when(validationResultBuilder.build()).thenReturn(validationResult);
-
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
-
-        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
-        verify(environmentService).save(environmentArgumentCaptor.capture());
-        verify(environmentService).setRegions(any(), any(), any());
-        verify(environmentService, never()).setLocation(any(), any(), any());
-    }
-
-    @Test
-    void editByNameRegionAndLocationChange() {
-        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withRegions(Set.of("r1"))
-                .withLocation(LocationDto.builder()
-                        .withName("test")
-                        .withDisplayName("test")
-                        .withLatitude(0.1)
-                        .withLongitude(0.1)
-                        .build())
-                .build();
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
-        when(environmentService.getValidatorService()).thenReturn(validatorService);
-        when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(validationResultBuilder);
-        when(validationResultBuilder.build()).thenReturn(validationResult);
-
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
-
-        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
-        verify(environmentService).save(environmentArgumentCaptor.capture());
-        verify(environmentService).setRegions(any(), any(), any());
-        verify(environmentService).setLocation(any(), any(), any());
-    }
-
-    @Test
-    void editByNameRegionAndLocationChangeValidationError() {
-        final String description = "test";
-        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withRegions(Set.of("r1"))
-                .withLocation(LocationDto.builder()
-                        .withName("test")
-                        .withDisplayName("test")
-                        .withLatitude(0.1)
-                        .withLongitude(0.1)
-                        .build())
-                .build();
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
-        when(environmentService.getValidatorService()).thenReturn(validatorService);
-        when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(validationResultBuilder);
-        when(validationResultBuilder.build()).thenReturn(validationResult);
-        when(validationResult.hasError()).thenReturn(Boolean.TRUE);
-
-        assertThrows(BadRequestException.class,
-                () -> environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto));
-
-        verify(environmentService, never()).save(any());
-        verify(environmentService, never()).setRegions(any(), any(), any());
-        verify(environmentService, never()).setLocation(any(), any(), any());
-    }
-
-    @Test
-    void editByNameLocationChange() {
-        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withLocation(LocationDto.builder()
-                        .withName("test")
-                        .withDisplayName("test")
-                        .withLatitude(0.1)
-                        .withLongitude(0.1)
-                        .build())
-                .build();
-        Environment value = new Environment();
-        Region region = new Region();
-        region.setName("r3");
-        value.setRegions(Set.of(region));
-        when(environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
-        when(environmentService.getValidatorService()).thenReturn(validatorService);
-        when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(validationResultBuilder);
-        when(validationResultBuilder.build()).thenReturn(validationResult);
-
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
-
-        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
-        verify(environmentService).save(environmentArgumentCaptor.capture());
-        verify(environmentService, never()).setRegions(any(), any(), any());
-        verify(environmentService).setLocation(any(), any(), any());
-    }
-
-    @Test
     void editByNameNetworkChange() {
         NetworkDto network = NetworkDto.builder().build();
         EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
@@ -244,7 +137,6 @@ class EnvironmentModificationServiceTest {
 
     @Test
     void editByNameAuthenticationChange() {
-        final String description = "test";
         final EnvironmentAuthentication envAuthResult = new EnvironmentAuthentication();
         AuthenticationDto authentication = AuthenticationDto.builder().build();
         EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
