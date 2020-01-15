@@ -405,6 +405,88 @@
 <source>
   @type tail
   format none
+  path {{fluent.serviceLogFolderPrefix}}/*/streams-messaging-manager*.log
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-streams-messaging-manager.log.pos
+  exclude_path ["{{fluent.serviceLogFolderPrefix}}/*/streams-messaging-manager-ui*.log"]
+  tag {{providerPrefix}}.STREAMS_MESSAGING_MANAGER-server
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path {{fluent.serviceLogFolderPrefix}}/*/streams-messaging-manager-ui*.log
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-streams-messaging-manager-ui.log.pos
+  tag {{providerPrefix}}.STREAMS_MESSAGING_MANAGER-ui
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path {{fluent.serviceLogFolderPrefix}}/*/streams-messaging-manager*.err
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-streams-messaging-manager.err.pos
+  exclude_path ["{{fluent.serviceLogFolderPrefix}}/*/streams-messaging-manager-ui*.err"]
+  tag {{providerPrefix}}.STREAMS_MESSAGING_MANAGER-server_ERROR
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path {{fluent.serviceLogFolderPrefix}}/*/streams-messaging-manager-ui*.err
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-streams-messaging-manager-ui.err.pos
+  tag {{providerPrefix}}.STREAMS_MESSAGING_MANAGER-ui_ERROR
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path {{fluent.serviceLogFolderPrefix}}/schemaregistry/registry*.log
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-schemaregistry.log.pos
+  tag {{providerPrefix}}.SCHEMAREGISTRY_registry
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path {{fluent.serviceLogFolderPrefix}}/kafka/kafka-broker*.log
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-kafka-broker.log.pos
+  tag {{providerPrefix}}.KAFKA_kafka-broker
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path {{fluent.serviceLogFolderPrefix}}/kafka/ranger_kafka*.log
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ranger-kafka.log.pos
+  tag {{providerPrefix}}.KAFKA_ranger
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path {{fluent.serviceLogFolderPrefix}}/hbase/*hbase-HBASETHRIFTSERVER*.log.out
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-hbase-thriftserver.log.pos
+  tag {{providerPrefix}}.HBASE_thriftserver
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path {{fluent.serviceLogFolderPrefix}}/hbase/*hbase-MASTER*.log.out
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-hbase-master.log.pos
+  tag {{providerPrefix}}.HBASE_master
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path {{fluent.serviceLogFolderPrefix}}/hbase/*hbase-REGIONSERVER*.log.out
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-hbase-regionserver.log.pos
+  tag {{providerPrefix}}.HBASE_regionserver
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
   path /var/run/cloudera-scm-agent/process/*/logs/stderr.log
   pos_file /var/log/td-agent/pos/{{providerPrefix}}-scm-agent-process-stderr.log.pos
   tag {{providerPrefix}}_CM_COMMAND.ERROR.*
