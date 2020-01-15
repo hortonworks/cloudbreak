@@ -23,7 +23,7 @@ public class WaitUtilForMultipleStatuses {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WaitUtilForMultipleStatuses.class);
 
-    @Value("${integrationtest.testsuite.maxRetry:1800}")
+    @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 300 : ${integrationtest.testsuite.maxRetry:1800}}")
     private int maxRetry;
 
     @Value("${integrationtest.testsuite.pollingInterval:1000}")
@@ -89,9 +89,11 @@ public class WaitUtilForMultipleStatuses {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         Map<String, Status> currentStatuses = new HashMap<>();
 
+        long startTime = System.currentTimeMillis();
         int retryCount = 0;
         while (!checkStatuses(currentStatuses, desiredStatuses) && !checkFailedStatuses(currentStatuses) && retryCount < maxRetry) {
-            LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatuses, stackName, currentStatuses);
+            LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {}, ellapsed {}ms ...", desiredStatuses, stackName, currentStatuses,
+                    System.currentTimeMillis() - startTime);
 
             sleep(pollingInterval);
             try {
