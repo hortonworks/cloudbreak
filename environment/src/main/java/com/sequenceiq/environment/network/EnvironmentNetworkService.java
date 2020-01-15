@@ -86,12 +86,12 @@ public class EnvironmentNetworkService {
                 .withStackName(networkCreationRequestFactory.getStackName(environment))
                 .withCloudCredential(cloudCredential)
                 .withRegion(environment.getLocation().getName());
-        getNoPublicIp(environment.getNetwork()).ifPresent(builder::withResourceGroup);
+        getResourceGroupName(environment.getNetwork()).ifPresent(builder::withResourceGroup);
         builder.withExisting(environment.getNetwork().getRegistrationType() == RegistrationType.EXISTING);
         return builder.build();
     }
 
-    private Optional<String> getNoPublicIp(NetworkDto networkDto) {
+    private Optional<String> getResourceGroupName(NetworkDto networkDto) {
         return Optional.of(networkDto).map(NetworkDto::getAzure).map(AzureParams::getResourceGroupName);
     }
 
