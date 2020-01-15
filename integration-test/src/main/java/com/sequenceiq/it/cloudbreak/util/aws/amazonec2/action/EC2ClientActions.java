@@ -2,11 +2,12 @@ package com.sequenceiq.it.cloudbreak.util.aws.amazonec2.action;
 
 import static java.lang.String.format;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
@@ -18,8 +19,10 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.EbsInstanceBlockDevice;
+import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceBlockDeviceMapping;
 import com.amazonaws.services.ec2.model.InstanceState;
+import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
@@ -50,19 +53,26 @@ public class EC2ClientActions extends EC2Client {
 
     public List<String> getInstanceVolumeIds(List<String> instanceIds) {
         AmazonEC2 ec2Client = buildEC2Client();
-        DescribeInstancesResult instance = ec2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceIds));
-
-        List<String> volumeIds = instance.getReservations().get(0).getInstances().get(0).getBlockDeviceMappings().stream()
-                .filter(dev -> !"/dev/xvda".equals(dev.getDeviceName()))
-                .map(InstanceBlockDeviceMapping::getEbs)
-                .map(EbsInstanceBlockDevice::getVolumeId)
+        DescribeInstancesResult describeInstancesResult = ec2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceIds));
+        Map<String, Set<String>> instanceIdVolumeIdMap = describeInstancesResult.getReservations()
+                .stream()
+                .map(Reservation::getInstances)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toMap(Instance::getInstanceId,
+                        instance -> instance.getBlockDeviceMappings()
+                                .stream()
+                                .filter(dev -> !"/dev/xvda".equals(dev.getDeviceName()))
+                                .map(InstanceBlockDeviceMapping::getEbs)
+                                .map(EbsInstanceBlockDevice::getVolumeId)
+                                .collect(Collectors.toSet())
+                ));
+        instanceIdVolumeIdMap.forEach((instanceId, volumeIds) -> Log.log(LOGGER, format(" Attached volume IDs are %s for [%s] EC2 instance ",
+                volumeIds.toString(), instanceId)));
+        return instanceIdVolumeIdMap
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-
-        Map<String, String> map = IntStream.range(0, instanceIds.size()).boxed()
-                .collect(Collectors.toMap(instanceIds::get, volumeIds::get));
-
-        map.forEach((instanceId, volumeId) -> Log.log(LOGGER, format(" Attached volume ID is [%s] for [%s] EC2 instance ", volumeId, instanceId)));
-        return volumeIds;
     }
 
     public void deleteHostGroupInstances(List<String> instanceIds) {
