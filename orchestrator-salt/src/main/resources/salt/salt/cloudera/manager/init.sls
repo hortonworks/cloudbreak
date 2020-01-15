@@ -11,11 +11,16 @@ install-cloudera-manager-server:
 
 /etc/cloudera-scm-server/cm.settings:
   file.managed:
-    - contents:
-        setsettings HEARTBEAT_INTERVAL {{ cloudera_manager.settings.heartbeat_interval }}
     - user: cloudera-scm
     - group: cloudera-scm
     - mode: 600
+    - replace: False
+
+setup_cm_heartbeat:
+  file.append:
+    - name: /etc/cloudera-scm-server/cm.settings
+    - text: setsettings HEARTBEAT_INTERVAL {{ cloudera_manager.settings.heartbeat_interval }}
+    - unless: grep "HEARTBEAT_INTERVAL" /etc/cloudera-scm-server/cm.settings
 
 {% if salt['pillar.get']('ldap', None) != None and salt['pillar.get']('ldap:local', None) == None %}
 
