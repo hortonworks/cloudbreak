@@ -338,11 +338,9 @@ public class EnvironmentApiConverter {
         EnvironmentEditDto.EnvironmentEditDtoBuilder builder = EnvironmentEditDto.builder()
                 .withDescription(request.getDescription())
                 .withAccountId(ThreadBasedUserCrnProvider.getAccountId())
-                .withRegions(request.getRegions())
                 .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
                 .withAdminGroupName(request.getAdminGroupName());
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
-        NullUtil.doIfNotNull(request.getLocation(), location -> builder.withLocation(locationRequestToDto(location)));
         NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));
         NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convert(request.getTelemetry())));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));

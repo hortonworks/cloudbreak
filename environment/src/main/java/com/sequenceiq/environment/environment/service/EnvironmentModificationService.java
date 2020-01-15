@@ -2,8 +2,6 @@ package com.sequenceiq.environment.environment.service;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 
@@ -11,9 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -23,14 +19,12 @@ import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
-import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
-import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
@@ -104,7 +98,6 @@ public class EnvironmentModificationService {
 
     private EnvironmentDto edit(EnvironmentEditDto editDto, Environment env) {
         editDescriptionIfChanged(env, editDto);
-        editLocationAndRegionsIfChanged(env, editDto);
         editTelemetryIfChanged(env, editDto);
         editNetworkIfChanged(env, editDto);
         editAdminGroupNameIfChanged(env, editDto);
@@ -126,15 +119,6 @@ public class EnvironmentModificationService {
         LOGGER.debug("About to change credential on environment \"{}\"", environmentName);
         Environment saved = environmentService.save(environment);
         return environmentDtoConverter.environmentToDto(saved);
-    }
-
-    private boolean locationAndRegionChanged(EnvironmentEditDto editDto) {
-        return !CollectionUtils.isEmpty(editDto.getRegions())
-                && locationChanged(editDto);
-    }
-
-    private boolean locationChanged(EnvironmentEditDto editDto) {
-        return editDto.getLocation() != null && !editDto.getLocation().isEmpty();
     }
 
     private void editNetworkIfChanged(Environment environment, EnvironmentEditDto editDto) {
@@ -168,48 +152,6 @@ public class EnvironmentModificationService {
         if (StringUtils.isNotEmpty(editDto.getDescription())) {
             environment.setDescription(editDto.getDescription());
         }
-    }
-
-    private void editLocationAndRegionsIfChanged(Environment environment, EnvironmentEditDto editDto) {
-        CloudRegions cloudRegions = environmentService.getRegionsByEnvironment(environment);
-        if (locationAndRegionChanged(editDto)) {
-            editRegionsAndLocation(editDto, environment, cloudRegions);
-        } else if (locationChanged(editDto)) {
-            editLocation(editDto, environment, cloudRegions);
-        } else if (!CollectionUtils.isEmpty(editDto.getRegions())) {
-            LocationDto locationDto = environmentDtoConverter.environmentToLocationDto(environment);
-            editDto.setLocation(locationDto);
-            editRegions(editDto, environment, cloudRegions);
-        }
-    }
-
-    private void editRegionsAndLocation(EnvironmentEditDto editDto, Environment environment, CloudRegions cloudRegions) {
-        validateRegionAndLocation(editDto.getLocation(), editDto.getRegions(), cloudRegions, environment);
-        environmentService.setLocation(environment, editDto.getLocation(), cloudRegions);
-        environmentService.setRegions(environment, editDto.getRegions(), cloudRegions);
-    }
-
-    private void editRegions(EnvironmentEditDto request, Environment environment, CloudRegions cloudRegions) {
-        LocationDto locationDto = environmentDtoConverter.environmentToLocationDto(environment);
-        validateRegionAndLocation(locationDto, request.getRegions(), cloudRegions, environment);
-        environmentService.setRegions(environment, request.getRegions(), cloudRegions);
-    }
-
-    private void validateRegionAndLocation(LocationDto location, Set<String> requestedRegions,
-            CloudRegions cloudRegions, Environment environment) {
-        ValidationResult validationResult = environmentService.getValidatorService()
-                .validateRegionsAndLocation(location.getName(), requestedRegions, environment, cloudRegions)
-                .build();
-        if (validationResult.hasError()) {
-            throw new BadRequestException(validationResult.getFormattedErrors());
-        }
-    }
-
-    private void editLocation(EnvironmentEditDto editDto, Environment environment, CloudRegions cloudRegions) {
-        Set<String> regions = environment.getRegionSet().stream()
-                .map(Region::getName).collect(Collectors.toSet());
-        validateRegionAndLocation(editDto.getLocation(), regions, cloudRegions, environment);
-        environmentService.setLocation(environment, editDto.getLocation(), cloudRegions);
     }
 
     private void editAuthenticationIfChanged(EnvironmentEditDto editDto, Environment environment) {
