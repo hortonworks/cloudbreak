@@ -1,6 +1,6 @@
 {
   "cdhVersion": "7.0.1",
-  "displayName": "CDP HA Streaming Cluster",
+  "displayName": "testcluster",
   "cmVersion": "7.x.0",
   "services": [
     {
