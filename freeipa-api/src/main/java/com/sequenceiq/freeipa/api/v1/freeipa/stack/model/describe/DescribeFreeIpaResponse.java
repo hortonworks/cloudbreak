@@ -70,6 +70,9 @@ public class DescribeFreeIpaResponse {
     @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_APPLICATION_VERSION)
     private String appVersion;
 
+    @ApiModelProperty(value = FreeIpaModelDescriptions.CLOUD_PLATFORM)
+    private String cloudPlatform;
+
     @ApiModelProperty(value = FreeIpaModelDescriptions.TELEMETRY)
     private TelemetryResponse telemetry;
 
@@ -194,5 +197,13 @@ public class DescribeFreeIpaResponse {
 
     public void setStatusString(String statusString) {
         this.statusString = statusString;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
     }
 }
