@@ -83,6 +83,7 @@ public class CentralCmTemplateUpdater implements BlueprintUpdater {
         cmTemplateComponentConfigProviderProcessor.process(processor, source);
         cmTemplateConfigInjectorProcessor.process(processor, source);
         cmHostGroupRoleConfigProviderProcessor.process(processor, source);
+        processor.setDisplayName(source.getGeneralClusterConfigs().getClusterName());
     }
 
     private void updateCmTemplateRepoDetails(CmTemplateProcessor cmTemplateProcessor, ClouderaManagerRepo clouderaManagerRepoDetails,

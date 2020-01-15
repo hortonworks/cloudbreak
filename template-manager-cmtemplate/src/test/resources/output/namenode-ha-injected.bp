@@ -1,6 +1,6 @@
 {
   "cdhVersion": "6.1.0",
-  "displayName": "simple_template",
+  "displayName": "testcluster",
   "cmVersion": "6.1.0",
   "repositories": [
     "https://archive.cloudera.com/cdh6/{latest_supported}/parcels/"
