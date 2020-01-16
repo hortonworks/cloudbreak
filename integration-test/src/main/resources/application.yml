@@ -118,7 +118,7 @@ integrationtest:
 
   # aws parameters
   aws:
-    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive"
     blueprintCdhVersion: 7.0.2
     region: eu-central-1
     location: eu-central-1
@@ -149,7 +149,7 @@ integrationtest:
 
   # azure parameters
   azure:
-    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive"
     blueprintCdhVersion: 7.0.2
     availabilityZone:
     region: West US
@@ -183,7 +183,7 @@ integrationtest:
 
   # gcp parameters
   gcp:
-    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive"
     blueprintCdhVersion: 7.0.2
     availabilityZone: europe-west2-a
     region: europe-west2
@@ -204,7 +204,7 @@ integrationtest:
 
   # openstack parameters
   openstack:
-    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive"
     blueprintCdhVersion: 7.0.2
     availabilityZone: nova
     region: RegionOne
@@ -224,7 +224,7 @@ integrationtest:
 
   # yarn parameters
   yarn:
-    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive"
     blueprintCdhVersion: 7.0.2
     availabilityZone:
     region: default
@@ -242,7 +242,7 @@ integrationtest:
 
   # mock parameters
   mock:
-    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive"
     region: Europe
     location: London
     availabilityZone: London
@@ -266,7 +266,7 @@ integrationtest:
       redhat7:
         imageId: ee68297d-59b3-4cb0-419a-f9e00763bdb4
         blueprints:
-          - "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+          - "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive"
     cloudstorage:
       s3:
         instanceProfile:

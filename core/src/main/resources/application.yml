@@ -211,6 +211,7 @@ cb:
     cm:
       defaults: >
                 CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-702;
+                CDP 1.2 - Data Engineering: Apache Spark, Apache Hive=cdp-data-engineering-without-oozie-702;
                 CDP 1.2 - Data Mart: Apache Impala, Hue=cdp-data-mart-702;
                 CDP 1.2 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart-702;
                 CDP 1.2 - Operational Database: Apache HBase=cdp-opdb-702;

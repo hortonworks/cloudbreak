@@ -46,6 +46,8 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 
     private static final String ILLEGAL_CT_NAME = "Illegal template name ;";
 
+    private static final long EXPECTED_CLUSTER_TEMPLATE_COUNT = 16;
+
     @Inject
     private LdapTestClient ldapTestClient;
 
@@ -434,8 +436,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         assertNotNull(entity);
         assertNotNull(entity.getResponses());
         long defaultCount = entity.getResponses().stream().filter(template -> ResourceStatus.DEFAULT.equals(template.getStatus())).count();
-        long expectedCount = 14;
-        assertEquals("Should have " + expectedCount + " of default cluster templates.", expectedCount, defaultCount);
+        assertEquals("Should have " + EXPECTED_CLUSTER_TEMPLATE_COUNT + " of default cluster templates.", EXPECTED_CLUSTER_TEMPLATE_COUNT, defaultCount);
         return entity;
     }
 
