@@ -43,7 +43,8 @@ import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 @Component
 public class UpgradeService {
 
-    private static final Set<Status> UPGRADEABLE_ATTACHED_DISTRO_X_STATES = Sets.immutableEnumSet(Status.STOPPED, Status.DELETE_COMPLETED);
+    private static final Set<Status> UPGRADEABLE_ATTACHED_DISTRO_X_STATES = Sets.immutableEnumSet(Status.STOPPED, Status.DELETE_COMPLETED,
+            Status.CREATE_FAILED, Status.DELETE_FAILED);
 
     private static final boolean NOT_BASE_IMAGE = false;
 
