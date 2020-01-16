@@ -37,7 +37,7 @@ public class FreeIpaOperationCheckerTask<T extends FreeIpaOperationPollerObject>
             failureDetails = operationStatus.getFailure() != null && !operationStatus.getFailure().isEmpty() ?
                     operationStatus.getFailure().stream()
                             .map(FailureDetails::getAdditionalDetails)
-                            .map(m -> toString())
+                            .map(Object::toString)
                             .collect(Collectors.joining(","))
                     : "empty";
         } catch (Exception e) {

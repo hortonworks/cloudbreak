@@ -12,7 +12,7 @@ public class RemoveVaultEntriesResponseToCleanupFailureEventConverter implements
     @Override
     public CleanupFailureEvent convert(Object payload) {
         RemoveVaultEntriesResponse removeVaultEntriesResponse = (RemoveVaultEntriesResponse) payload;
-        CleanupFailureEvent event = new CleanupFailureEvent(removeVaultEntriesResponse, "DNS record removal",
+        CleanupFailureEvent event = new CleanupFailureEvent(removeVaultEntriesResponse, "Vault entry removal",
                 removeVaultEntriesResponse.getVaultCleanupFailed(), removeVaultEntriesResponse.getVaultCleanupSuccess());
         return event;
     }

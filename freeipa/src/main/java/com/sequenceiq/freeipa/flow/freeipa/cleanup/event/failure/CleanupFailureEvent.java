@@ -33,4 +33,13 @@ public class CleanupFailureEvent extends AbstractCleanupEvent {
     public Set<String> getSuccess() {
         return success;
     }
+
+    @Override
+    public String toString() {
+        return "CleanupFailureEvent{" +
+                "failedPhase='" + failedPhase + '\'' +
+                ", failureDetails=" + failureDetails +
+                ", success=" + success +
+                '}';
+    }
 }

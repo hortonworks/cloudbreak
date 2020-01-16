@@ -12,7 +12,7 @@ public class RemoveHostsResponseToCleanupFailureEventConverter implements Payloa
     @Override
     public CleanupFailureEvent convert(Object payload) {
         RemoveHostsResponse removeHostsResponse = (RemoveHostsResponse) payload;
-        CleanupFailureEvent event = new CleanupFailureEvent(removeHostsResponse, "DNS record removal", removeHostsResponse.getHostCleanupFailed(),
+        CleanupFailureEvent event = new CleanupFailureEvent(removeHostsResponse, "Hosts removal", removeHostsResponse.getHostCleanupFailed(),
                 removeHostsResponse.getHostCleanupSuccess());
         return event;
     }

@@ -32,4 +32,12 @@ public class RemoveDnsResponse extends AbstractCleanupEvent {
     public Map<String, String> getDnsCleanupFailed() {
         return dnsCleanupFailed;
     }
+
+    @Override
+    public String toString() {
+        return "RemoveDnsResponse{" +
+                "dnsCleanupSuccess=" + dnsCleanupSuccess +
+                ", dnsCleanupFailed=" + dnsCleanupFailed +
+                '}';
+    }
 }

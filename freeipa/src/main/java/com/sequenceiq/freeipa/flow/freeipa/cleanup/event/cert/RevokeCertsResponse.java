@@ -32,4 +32,12 @@ public class RevokeCertsResponse extends AbstractCleanupEvent {
     public Map<String, String> getCertCleanupFailed() {
         return certCleanupFailed;
     }
+
+    @Override
+    public String toString() {
+        return "RevokeCertsResponse{" +
+                "certCleanupSuccess=" + certCleanupSuccess +
+                ", certCleanupFailed=" + certCleanupFailed +
+                '}';
+    }
 }

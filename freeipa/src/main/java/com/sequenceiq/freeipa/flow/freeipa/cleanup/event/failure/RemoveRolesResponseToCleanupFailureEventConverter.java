@@ -13,7 +13,7 @@ public class RemoveRolesResponseToCleanupFailureEventConverter implements Payloa
     public CleanupFailureEvent convert(Object payload) {
         RemoveRolesResponse removeRolesResponse = (RemoveRolesResponse) payload;
         CleanupFailureEvent event = new CleanupFailureEvent(removeRolesResponse,
-                "DNS record removal", removeRolesResponse.getRoleCleanupFailed(), removeRolesResponse.getRoleCleanupSuccess());
+                "Roles removal", removeRolesResponse.getRoleCleanupFailed(), removeRolesResponse.getRoleCleanupSuccess());
         return event;
     }
 }

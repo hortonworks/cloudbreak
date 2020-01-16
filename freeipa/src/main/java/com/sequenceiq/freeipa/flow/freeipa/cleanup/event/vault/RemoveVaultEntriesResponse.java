@@ -33,4 +33,12 @@ public class RemoveVaultEntriesResponse extends AbstractCleanupEvent {
     public Map<String, String> getVaultCleanupFailed() {
         return vaultCleanupFailed;
     }
+
+    @Override
+    public String toString() {
+        return "RemoveVaultEntriesResponse{" +
+                "vaultCleanupSuccess=" + vaultCleanupSuccess +
+                ", vaultCleanupFailed=" + vaultCleanupFailed +
+                '}';
+    }
 }

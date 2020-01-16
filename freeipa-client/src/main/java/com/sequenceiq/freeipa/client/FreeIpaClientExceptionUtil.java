@@ -1,12 +1,11 @@
-package com.sequenceiq.freeipa.kerberosmgmt.v1;
+package com.sequenceiq.freeipa.client;
 
 import java.util.Optional;
 import java.util.Set;
 
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
-import com.sequenceiq.freeipa.client.FreeIpaClientException;
 
-public class KerberosMgmtUtil {
+public class FreeIpaClientExceptionUtil {
 
     public static final int NOT_MAPPED_ERROR_CODE = 4000;
 
@@ -14,7 +13,7 @@ public class KerberosMgmtUtil {
 
     public static final int DUPLICATE_ENTRY_ERROR_CODE = 4002;
 
-    private KerberosMgmtUtil() {
+    private FreeIpaClientExceptionUtil() {
     }
 
     public static boolean isNotFoundException(FreeIpaClientException e) {

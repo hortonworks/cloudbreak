@@ -22,6 +22,7 @@ import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServicePrincipalRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.VaultCleanupRequest;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.model.Host;
 import com.sequenceiq.freeipa.client.model.Keytab;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
@@ -31,6 +32,7 @@ import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.KeytabCreationException;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.freeipa.host.HostDeletionService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -39,8 +41,6 @@ public class KerberosMgmtV1Service {
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosMgmtV1Service.class);
 
     private static final String HOST_CREATION_FAILED = "Failed to create host.";
-
-    private static final String HOST_DELETION_FAILED = "Failed to delete host.";
 
     private static final String SERVICE_PRINCIPAL_CREATION_FAILED = "Failed to create service principal.";
 
@@ -74,6 +74,9 @@ public class KerberosMgmtV1Service {
 
     @Inject
     private KerberosMgmtVaultComponent vaultComponent;
+
+    @Inject
+    private HostDeletionService hostDeletionService;
 
     public ServiceKeytabResponse generateServiceKeytab(ServiceKeytabRequest request, String accountId) throws FreeIpaClientException {
         LOGGER.debug("Request to generate service keytab: {}", request);
@@ -169,19 +172,19 @@ public class KerberosMgmtV1Service {
         roleComponent.deleteRoleIfItIsNoLongerUsed(request.getRoleName(), ipaClient);
     }
 
-    public void deleteHost(HostRequest request, String accountId) throws FreeIpaClientException, DeleteException {
-        LOGGER.debug("Request to delete host for account {}: {}", accountId, request);
-        Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
-        FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
+    public void deleteHost(HostRequest request, String accountId) throws FreeIpaClientException {
+        FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientByAccountAndEnvironment(request.getEnvironmentCrn(), accountId);
+        cleanupServicesForHost(request, accountId, ipaClient);
+        hostDeletionService.deleteHostsWithDeleteException(ipaClient, Set.of(request.getServerHostName()));
+        cleanupVaultAndRolesForHost(request, accountId, ipaClient);
+    }
 
-        Set<String> services = ipaClient.findAllService().stream()
-                .filter(s -> s.getKrbprincipalname().contains(request.getServerHostName()))
-                .map(f -> f.getKrbcanonicalname()).collect(Collectors.toSet());
-        LOGGER.debug("Services count on the given host: {}", services.size());
-        for (String service : services) {
-            delService(service, ipaClient);
-        }
-        delHost(request.getServerHostName(), ipaClient);
+    public void removeHostRelatedKerberosConfiguration(HostRequest request, String accountId, FreeIpaClient ipaClient) throws FreeIpaClientException {
+        cleanupServicesForHost(request, accountId, ipaClient);
+        cleanupVaultAndRolesForHost(request, accountId, ipaClient);
+    }
+
+    private void cleanupVaultAndRolesForHost(HostRequest request, String accountId, FreeIpaClient ipaClient) throws FreeIpaClientException {
         VaultPathBuilder vaultPathBuilder = new VaultPathBuilder()
                 .withAccountId(accountId)
                 .withEnvironmentCrn(request.getEnvironmentCrn())
@@ -193,6 +196,18 @@ public class KerberosMgmtV1Service {
             vaultComponent.recursivelyCleanupVault(vaultPathBuilder.withSubType(VaultPathBuilder.SecretSubType.KEYTAB).build());
         }
         roleComponent.deleteRoleIfItIsNoLongerUsed(request.getRoleName(), ipaClient);
+    }
+
+    private void cleanupServicesForHost(HostRequest request, String accountId, FreeIpaClient ipaClient) throws FreeIpaClientException {
+        LOGGER.debug("Request to delete host for account {}: {}", accountId, request);
+
+        Set<String> services = ipaClient.findAllService().stream()
+                .filter(s -> s.getKrbprincipalname().contains(request.getServerHostName()))
+                .map(f -> f.getKrbcanonicalname()).collect(Collectors.toSet());
+        LOGGER.debug("Services count on the given host: {}", services.size());
+        for (String service : services) {
+            delService(service, ipaClient);
+        }
     }
 
     public void cleanupByCluster(VaultCleanupRequest request, String accountId) throws DeleteException {
@@ -252,7 +267,7 @@ public class KerberosMgmtV1Service {
             try {
                 host = ipaClient.addHost(hostname);
             } catch (FreeIpaClientException e) {
-                if (!KerberosMgmtUtil.isDuplicateEntryException(e)) {
+                if (!FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
                     LOGGER.error(HOST_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
                     throw new KeytabCreationException(HOST_CREATION_FAILED);
                 }
@@ -265,17 +280,6 @@ public class KerberosMgmtV1Service {
             throw new KeytabCreationException(HOST_CREATION_FAILED);
         }
         return host;
-    }
-
-    private void delHost(String hostname, FreeIpaClient ipaClient) throws DeleteException {
-        try {
-            ipaClient.deleteHost(hostname);
-        } catch (FreeIpaClientException e) {
-            if (!KerberosMgmtUtil.isNotFoundException(e)) {
-                LOGGER.error(HOST_DELETION_FAILED + " " + e.getLocalizedMessage(), e);
-                throw new DeleteException(HOST_DELETION_FAILED);
-            }
-        }
     }
 
     private com.sequenceiq.freeipa.client.model.Service serviceAdd(ServiceKeytabRequest request, String realm, FreeIpaClient ipaClient)
@@ -293,7 +297,7 @@ public class KerberosMgmtV1Service {
             allowServiceKeytabRetrieval(service.getKrbprincipalname(), freeIpaClientFactory.getAdminUser(), ipaClient);
             roleComponent.addRoleAndPrivileges(Optional.of(service), Optional.empty(), request.getRoleRequest(), ipaClient);
         } catch (FreeIpaClientException e) {
-            LOGGER.error(SERVICE_PRINCIPAL_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
+            LOGGER.error(SERVICE_PRINCIPAL_CREATION_FAILED + ' ' + e.getLocalizedMessage(), e);
             throw new KeytabCreationException(SERVICE_PRINCIPAL_CREATION_FAILED);
         }
         return service;
@@ -304,7 +308,7 @@ public class KerberosMgmtV1Service {
         try {
             service = ipaClient.addService(canonicalPrincipal);
         } catch (FreeIpaClientException e) {
-            if (!KerberosMgmtUtil.isDuplicateEntryException(e)) {
+            if (!FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
                 throw e;
             }
             service = ipaClient.showService(canonicalPrincipal);
@@ -318,7 +322,8 @@ public class KerberosMgmtV1Service {
         try {
             service = ipaClient.addServiceAlias(canonicalPrincipal, aliasPrincipal);
         } catch (FreeIpaClientException e) {
-            if (!KerberosMgmtUtil.isExceptionWithErrorCode(e, Set.of(KerberosMgmtUtil.NOT_MAPPED_ERROR_CODE, KerberosMgmtUtil.DUPLICATE_ENTRY_ERROR_CODE))) {
+            if (!FreeIpaClientExceptionUtil.isExceptionWithErrorCode(e,
+                    Set.of(FreeIpaClientExceptionUtil.NOT_MAPPED_ERROR_CODE, FreeIpaClientExceptionUtil.DUPLICATE_ENTRY_ERROR_CODE))) {
                 throw e;
             }
             service = ipaClient.showService(canonicalPrincipal);
@@ -330,7 +335,7 @@ public class KerberosMgmtV1Service {
         try {
             ipaClient.deleteService(canonicalPrincipal);
         } catch (FreeIpaClientException e) {
-            if (!KerberosMgmtUtil.isNotFoundException(e)) {
+            if (!FreeIpaClientExceptionUtil.isNotFoundException(e)) {
                 LOGGER.error(SERVICE_PRINCIPAL_DELETION_FAILED + " " + e.getLocalizedMessage(), e);
                 throw new DeleteException(SERVICE_PRINCIPAL_DELETION_FAILED);
             }
