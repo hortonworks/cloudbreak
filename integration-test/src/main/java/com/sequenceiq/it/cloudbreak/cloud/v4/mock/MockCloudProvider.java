@@ -37,6 +37,8 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestD
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.dto.mock.HttpMock;
+import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.ImageCatalogEndpoint;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -62,8 +64,13 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public CredentialTestDto credential(CredentialTestDto credentialEntity) {
         MockParameters credentialParameters = new MockParameters();
-        MockedTestContext mockedTestContext = (MockedTestContext) credentialEntity.getTestContext();
-        credentialParameters.setMockEndpoint(mockedTestContext.getSparkServer().getEndpoint());
+        if (credentialEntity.getTestContext() instanceof MockedTestContext) {
+            MockedTestContext mockedTestContext = (MockedTestContext) credentialEntity.getTestContext();
+            credentialParameters.setMockEndpoint(mockedTestContext.getSparkServer().getEndpoint());
+        } else {
+            credentialParameters.setMockEndpoint(
+                    credentialEntity.getTestContext().get(HttpMock.class).getSparkServer().getEndpoint());
+        }
         return credentialEntity.withName(resourcePropertyProvider.getName())
                 .withDescription(commonCloudProperties().getDefaultCredentialDescription())
                 .withMockParameters(credentialParameters)
@@ -77,8 +84,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public DistroXTestDtoBase distrox(DistroXTestDtoBase distrox) {
-        MockedTestContext testContext = (MockedTestContext) distrox.getTestContext();
-        return distrox.withGatewayPort(testContext.getSparkServer().getPort());
+        return distrox.withGatewayPort(getSparkServerPort(distrox.getTestContext()));
     }
 
     @Override
@@ -166,8 +172,13 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
-        MockedTestContext mockedTestContext = (MockedTestContext) imageCatalog.getTestContext();
-        imageCatalog.withUrl(mockedTestContext.getImageCatalogMockServerSetup().getPreWarmedImageCatalogUrl());
+        if (imageCatalog.getTestContext() instanceof MockedTestContext) {
+            MockedTestContext mockedTestContext = (MockedTestContext) imageCatalog.getTestContext();
+            imageCatalog.withUrl(mockedTestContext.getImageCatalogMockServerSetup().getPreWarmedImageCatalogUrl());
+        } else {
+            imageCatalog.withUrl(
+                    httpMock -> httpMock.whenRequested(ImageCatalogEndpoint.Base.class).getCatalog().getFullUrl());
+        }
         return imageCatalog;
     }
 
@@ -285,14 +296,12 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public Integer gatewayPort(StackTestDtoBase stackEntity) {
-        MockedTestContext mockedTestContext = (MockedTestContext) stackEntity.getTestContext();
-        return mockedTestContext.getSparkServer().getPort();
+        return getSparkServerPort(stackEntity.getTestContext());
     }
 
     @Override
     public Integer gatewayPort(FreeIPATestDto stackEntity) {
-        MockedTestContext mockedTestContext = (MockedTestContext) stackEntity.getTestContext();
-        return mockedTestContext.getSparkServer().getPort();
+        return getSparkServerPort(stackEntity.getTestContext());
     }
 
     @Override
@@ -330,5 +339,16 @@ public class MockCloudProvider extends AbstractCloudProvider {
         params.setInternetGatewayId(getInternetGatewayId());
         params.setVpcId(getVpcId());
         return params;
+    }
+
+    private Integer getSparkServerPort(TestContext testContext) {
+        if (testContext instanceof MockedTestContext) {
+            MockedTestContext mockedTestContext = (MockedTestContext) testContext;
+            return mockedTestContext.getSparkServer().getPort();
+        } else if (testContext.get(HttpMock.class) != null) {
+            return testContext.get(HttpMock.class).getSparkServer().getPort();
+        } else {
+            throw new IllegalArgumentException("There should have HttpMock entity.");
+        }
     }
 }
