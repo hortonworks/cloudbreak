@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AuthenticationContextProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.client.CBRefreshTokenClientProvider;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
@@ -49,16 +50,19 @@ public class AzureCredentialConnectorTest {
     private AzureInteractiveLogin azureInteractiveLogin;
 
     @Mock
-    private CredentialSender credentialSender;
-
-    @Mock
-    private CloudCredential cloudCredential;
-
-    @Mock
     private AzureCredentialAppCreationCommand appCreationCommand;
 
     @Mock
+    private AuthenticationContextProvider authenticationContextProvider;
+
+    @Mock
     private CBRefreshTokenClientProvider cbRefreshTokenClientProvider;
+
+    @Mock
+    private AzurePlatformParameters azurePlatformParameters;
+
+    @Mock
+    private CredentialSender credentialSender;
 
     @Before
     public void setUp() {
@@ -67,23 +71,28 @@ public class AzureCredentialConnectorTest {
 
     @Test
     public void testGetPrerequisitesReturnsTheExpectedValue() {
-        String expected = "someAppCreationCommandValue";
-        when(appCreationCommand.generate(anyString())).thenReturn(expected);
+        String expectedCommand = "someAppCreationCommandValue";
+        String expectedRoleDef = "roleDefJson";
+        when(appCreationCommand.generate(anyString())).thenReturn(expectedCommand);
+        when(azurePlatformParameters.getRoleDefJson()).thenReturn(expectedRoleDef);
 
         CredentialPrerequisitesResponse result = underTest.getPrerequisites(TEST_CLOUD_CONTEXT, "2", DEPLOYMENT_ADDRESS);
 
         assertEquals(PLATFORM, result.getCloudPlatform());
-        assertEquals(expected, new String(Base64.decodeBase64(result.getAzure().getAppCreationCommand())));
+        assertEquals(expectedCommand, new String(Base64.decodeBase64(result.getAzure().getAppCreationCommand())));
+        assertEquals(expectedRoleDef, result.getAzure().getRoleDefitionJson());
     }
 
     @Test
-    public void testGetPrerequisitesAwsIsNotImplemented() {
+    public void testGetPrerequisitesOnlyAzureIsImplemented() {
         String expected = "someAppCreationCommandValue";
         when(appCreationCommand.generate(anyString())).thenReturn(expected);
 
         CredentialPrerequisitesResponse result = underTest.getPrerequisites(TEST_CLOUD_CONTEXT, "2", DEPLOYMENT_ADDRESS);
 
         assertNull(result.getAws());
+        assertNull(result.getGcp());
+        assertNotNull(result.getAzure());
     }
 
     @Test

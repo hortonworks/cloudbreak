@@ -19,6 +19,7 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
@@ -74,9 +76,12 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     private VmRecommendations vmRecommendations;
 
+    private String roleDefJson;
+
     @PostConstruct
     public void init() {
         vmRecommendations = initVmRecommendations();
+        roleDefJson = initRoleDefJson();
     }
 
     @Override
@@ -189,6 +194,10 @@ public class AzurePlatformParameters implements PlatformParameters {
         return vmRecommendations;
     }
 
+    public String getRoleDefJson() {
+        return roleDefJson;
+    }
+
     private VmRecommendations initVmRecommendations() {
         VmRecommendations result = null;
         String vmRecommendation = resourceDefinition("vm-recommendation");
@@ -198,5 +207,16 @@ public class AzurePlatformParameters implements PlatformParameters {
             LOGGER.error("Cannot initialize Virtual machine recommendations for Azure", e);
         }
         return result;
+    }
+
+    private String initRoleDefJson() {
+        String roleDef = resourceDefinition("role-def");
+        String minified = JsonUtil.minify(roleDef);
+        if (JsonUtil.INVALID_JSON_CONTENT.equals(minified)) {
+            String message = String.format("Cannot initialize Cloudbreak's role def JSON for Azure: %s", minified);
+            LOGGER.error(message);
+            throw new CloudConnectorException(message);
+        }
+        return Base64.encodeBase64String(minified.getBytes());
     }
 }

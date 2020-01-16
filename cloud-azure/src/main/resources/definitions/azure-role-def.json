@@ -1,0 +1,41 @@
+{
+  "Name": "Cloudbreak Operator",
+  "IsCustom": true,
+  "Description": "Can use Cloudbreak managed clusters and resources.",
+  "Actions": [
+    "Microsoft.Storage/*/read",
+    "Microsoft.Storage/storageAccounts/write",
+    "Microsoft.Storage/storageAccounts/blobServices/write",
+    "Microsoft.Storage/storageAccounts/blobServices/containers/*",
+    "Microsoft.Storage/storageAccounts/listkeys/action",
+    "Microsoft.Storage/storageAccounts/regeneratekey/action",
+    "Microsoft.Storage/storageAccounts/delete",
+    "Microsoft.Storage/locations/deleteVirtualNetworkOrSubnets/action",
+    "Microsoft.Network/virtualNetworks/*",
+    "Microsoft.Network/publicIPAddresses/*",
+    "Microsoft.Network/networkInterfaces/*",
+    "Microsoft.Network/networkSecurityGroups/*",
+    "Microsoft.Network/*/read",
+    "Microsoft.Compute/availabilitySets/*",
+    "Microsoft.Compute/disks/*",
+    "Microsoft.Compute/images/*",
+    "Microsoft.Compute/virtualMachines/*",
+    "Microsoft.Compute/*/read",
+    "Microsoft.Authorization/*/read",
+    "Microsoft.DataLakeStore/*/read",
+    "Microsoft.Features/*/read",
+    "Microsoft.ResourceHealth/*/read",
+    "Microsoft.Resources/subscriptions/resourceGroups/*",
+    "Microsoft.Resources/deployments/*",
+    "Microsoft.Resources/*/read",
+    "Microsoft.Support/*"
+  ],
+  "NotActions": [],
+  "DataActions": [
+    "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
+  ],
+  "NotDataActions": [],
+  "AssignableScopes": [
+    "/subscriptions/{subscriptionId}"
+  ]
+}
