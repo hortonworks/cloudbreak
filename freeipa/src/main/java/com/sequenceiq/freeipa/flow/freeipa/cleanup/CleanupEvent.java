@@ -53,4 +53,15 @@ public class CleanupEvent extends StackEvent {
     public String getClusterName() {
         return clusterName;
     }
+
+    @Override
+    public String toString() {
+        return "CleanupEvent{" +
+                "users=" + users +
+                ", hosts=" + hosts +
+                ", roles=" + roles +
+                ", operationId='" + operationId + '\'' +
+                ", clusterName='" + clusterName + '\'' +
+                '}';
+    }
 }

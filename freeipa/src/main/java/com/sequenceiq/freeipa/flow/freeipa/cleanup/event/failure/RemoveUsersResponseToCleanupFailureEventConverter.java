@@ -13,7 +13,7 @@ public class RemoveUsersResponseToCleanupFailureEventConverter implements Payloa
     public CleanupFailureEvent convert(Object payload) {
         RemoveUsersResponse removeUsersResponse = (RemoveUsersResponse) payload;
         CleanupFailureEvent event = new CleanupFailureEvent(removeUsersResponse,
-                "DNS record removal", removeUsersResponse.getUserCleanupFailed(), removeUsersResponse.getUserCleanupSuccess());
+                "Users removal", removeUsersResponse.getUserCleanupFailed(), removeUsersResponse.getUserCleanupSuccess());
         return event;
     }
 }

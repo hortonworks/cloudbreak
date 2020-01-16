@@ -32,4 +32,12 @@ public class RemoveRolesResponse extends AbstractCleanupEvent {
     public Map<String, String> getRoleCleanupFailed() {
         return roleCleanupFailed;
     }
+
+    @Override
+    public String toString() {
+        return "RemoveRolesResponse{" +
+                "roleCleanupSuccess=" + roleCleanupSuccess +
+                ", roleCleanupFailed=" + roleCleanupFailed +
+                '}';
+    }
 }

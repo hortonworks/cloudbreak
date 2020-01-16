@@ -25,6 +25,7 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.failure.RemoveDnsRespon
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.failure.RemoveHostsResponseToCleanupFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.failure.RemoveRolesResponseToCleanupFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.failure.RemoveUsersResponseToCleanupFailureEventConverter;
+import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.failure.RemoveVaultEntriesResponseToCleanupFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.failure.RevokeCertsResponseToCleanupFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.host.RemoveHostsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.host.RemoveHostsResponse;
@@ -165,6 +166,7 @@ public class FreeIpaCleanupActions {
                 successDetails.getAdditionalDetails().put("Users", payload.getUsers() == null ? List.of() : new ArrayList<>(payload.getUsers()));
                 successDetails.getAdditionalDetails().put("Roles", payload.getRoles() == null ? List.of() : new ArrayList<>(payload.getRoles()));
                 operationStatusService.completeOperation(payload.getOperationId(), List.of(successDetails), Collections.emptyList());
+                LOGGER.info("Cleanup successfully finished with: " + successDetails);
                 sendEvent(context, cleanupEvent);
             }
         };
@@ -179,6 +181,7 @@ public class FreeIpaCleanupActions {
 
             @Override
             protected void doExecute(FreeIpaContext context, CleanupFailureEvent payload, Map<Object, Object> variables) {
+                LOGGER.error("Cleanup failed with payload: " + payload);
                 SuccessDetails successDetails = new SuccessDetails(context.getStack().getEnvironmentCrn());
                 successDetails.getAdditionalDetails()
                         .put(payload.getFailedPhase(), payload.getSuccess() == null ? List.of() : new ArrayList<>(payload.getSuccess()));
@@ -198,6 +201,7 @@ public class FreeIpaCleanupActions {
                 payloadConverters.add(new RemoveRolesResponseToCleanupFailureEventConverter());
                 payloadConverters.add(new RemoveUsersResponseToCleanupFailureEventConverter());
                 payloadConverters.add(new RevokeCertsResponseToCleanupFailureEventConverter());
+                payloadConverters.add(new RemoveVaultEntriesResponseToCleanupFailureEventConverter());
             }
         };
     }

@@ -26,10 +26,10 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.model.Cert;
 import com.sequenceiq.freeipa.client.model.DnsRecord;
 import com.sequenceiq.freeipa.client.model.DnsZoneList;
-import com.sequenceiq.freeipa.client.model.Host;
 import com.sequenceiq.freeipa.client.model.Role;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
@@ -40,10 +40,11 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
-import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtV1Controller;
+import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtV1Service;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.freeipa.host.HostDeletionService;
 import com.sequenceiq.freeipa.service.operation.OperationStatusService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -59,7 +60,7 @@ public class CleanupService {
     private StackService stackService;
 
     @Inject
-    private KerberosMgmtV1Controller kerberosMgmtV1Controller;
+    private KerberosMgmtV1Service kerberosMgmtV1Service;
 
     @Inject
     private FreeIpaFlowManager flowManager;
@@ -75,6 +76,9 @@ public class CleanupService {
 
     @Inject
     private LdapConfigService ldapConfigService;
+
+    @Inject
+    private HostDeletionService hostDeletionService;
 
     public OperationStatus cleanup(String accountId, CleanupRequest request) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);
@@ -116,40 +120,32 @@ public class CleanupService {
             Set<DnsRecord> allDnsRecordInZone = client.findAllDnsRecordInZone(zone);
             for (String host : hosts) {
                 allDnsRecordInZone.stream().filter(record -> record.isHostRelatedRecord(host, domain))
-                        .forEach(record -> {
-                            try {
-                                client.deleteDnsRecord(record.getIdnsname(), zone);
-                                dnsCleanupSuccess.add(host);
-                            } catch (FreeIpaClientException e) {
-                                LOGGER.info("DNS record delete in zone [{}] with name [{}] failed for host: {}", zone, record.getIdnsname(), host, e);
-                                dnsCleanupFailed.put(host, e.getMessage());
-                            }
-                        });
+                        .forEach(record -> deleteRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, host, record));
             }
         }
         return Pair.of(dnsCleanupSuccess, dnsCleanupFailed);
     }
 
-    public Pair<Set<String>, Map<String, String>> removeHosts(Long stackId, Set<String> hosts) throws FreeIpaClientException {
-        FreeIpaClient client = getFreeIpaClient(stackId);
-        Set<String> hostCleanupSuccess = new HashSet<>();
-        Map<String, String> hostCleanupFailed = new HashMap<>();
-        Set<String> existingHostFqdn = client.findAllHost().stream().map(Host::getFqdn).collect(Collectors.toSet());
-        Set<String> hostsToRemove = hosts.stream()
-                .filter(existingHostFqdn::contains)
-                .collect(Collectors.toSet());
-        LOGGER.debug("Hosts to delete: {}", hostsToRemove);
-        for (String host : hostsToRemove) {
-            try {
-                client.deleteHost(host);
-                hostCleanupSuccess.add(host);
-            } catch (FreeIpaClientException e) {
-                LOGGER.info("Host delete failed for host: {}", host, e);
-                hostCleanupFailed.put(host, e.getMessage());
+    private void deleteRecord(FreeIpaClient client, Set<String> dnsCleanupSuccess, Map<String, String> dnsCleanupFailed, String zone, String host,
+            DnsRecord record) {
+        try {
+            client.deleteDnsRecord(record.getIdnsname(), zone);
+            dnsCleanupSuccess.add(host);
+        } catch (FreeIpaClientException e) {
+            if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {
+                dnsCleanupSuccess.add(host);
+            } else {
+                LOGGER.info("DNS record delete in zone [{}] with name [{}] failed for host: {}", zone, record.getIdnsname(), host, e);
+                dnsCleanupFailed.put(host, e.getMessage());
             }
         }
+    }
+
+    public Pair<Set<String>, Map<String, String>> removeHosts(Long stackId, Set<String> hosts) throws FreeIpaClientException {
+        FreeIpaClient client = getFreeIpaClient(stackId);
+        Pair<Set<String>, Map<String, String>> hostDeleteResult = hostDeletionService.removeHosts(client, hosts);
         removeHostRelatedServices(client, hosts);
-        return Pair.of(hostCleanupSuccess, hostCleanupFailed);
+        return hostDeleteResult;
     }
 
     private void removeHostRelatedServices(FreeIpaClient client, Set<String> hostsToRemove) throws FreeIpaClientException {
@@ -164,7 +160,9 @@ public class CleanupService {
                 try {
                     client.deleteService(service);
                 } catch (FreeIpaClientException e) {
-                    LOGGER.info("Service delete failed for service: {}", service, e);
+                    if (!FreeIpaClientExceptionUtil.isNotFoundException(e)) {
+                        LOGGER.info("Service delete failed for service: {}", service, e);
+                    }
                 }
             }
         }
@@ -181,8 +179,12 @@ public class CleanupService {
                 client.deleteUser(userUid);
                 userCleanupSuccess.add(userUid);
             } catch (FreeIpaClientException e) {
-                LOGGER.info("User delete failed for user: {}", userUid, e);
-                userCleanupFailed.put(userUid, e.getMessage());
+                if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {
+                    userCleanupSuccess.add(userUid);
+                } else {
+                    LOGGER.info("User delete failed for user: {}", userUid, e);
+                    userCleanupFailed.put(userUid, e.getMessage());
+                }
             }
         });
         if (StringUtils.isNotBlank(clusterName)) {
@@ -214,8 +216,12 @@ public class CleanupService {
                 client.deleteRole(role);
                 roleCleanupSuccess.add(role);
             } catch (FreeIpaClientException e) {
-                LOGGER.info("Role delete failed for role: {}", role, e);
-                roleCleanupFailed.put(role, e.getMessage());
+                if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {
+                    roleCleanupSuccess.add(role);
+                } else {
+                    LOGGER.info("Role delete failed for role: {}", role, e);
+                    roleCleanupFailed.put(role, e.getMessage());
+                }
             }
         });
         return Pair.of(roleCleanupSuccess, roleCleanupFailed);
@@ -225,12 +231,13 @@ public class CleanupService {
         Set<String> vaultCleanupSuccess = new HashSet<>();
         Map<String, String> vaultCleanupFailed = new HashMap<>();
         Stack stack = stackService.getStackById(stackId);
+        FreeIpaClient freeIpaClient = getFreeIpaClient(stackId);
         for (String host : hosts) {
             try {
                 HostRequest hostRequest = new HostRequest();
                 hostRequest.setEnvironmentCrn(stack.getEnvironmentCrn());
                 hostRequest.setServerHostName(host);
-                kerberosMgmtV1Controller.deleteHost(hostRequest);
+                kerberosMgmtV1Service.removeHostRelatedKerberosConfiguration(hostRequest, stack.getAccountId(), freeIpaClient);
                 vaultCleanupSuccess.add(host);
             } catch (DeleteException | FreeIpaClientException e) {
                 LOGGER.info("Vault secret cleanup failed for host: {}", host, e);

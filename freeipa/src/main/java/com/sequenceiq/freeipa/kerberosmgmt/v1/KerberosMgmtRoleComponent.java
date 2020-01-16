@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.RoleRequest;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.model.Host;
 import com.sequenceiq.freeipa.client.model.Privilege;
 import com.sequenceiq.freeipa.client.model.Role;
@@ -22,7 +23,7 @@ import com.sequenceiq.freeipa.client.model.Service;
 @Component
 public class KerberosMgmtRoleComponent {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosMgmtV1Service.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosMgmtRoleComponent.class);
 
     public boolean privilegesExist(RoleRequest roleRequest, FreeIpaClient ipaClient) {
         return roleRequest == null ||
@@ -31,7 +32,7 @@ public class KerberosMgmtRoleComponent {
                     ipaClient.showPrivilege(privilegeName);
                     return true;
                 } catch (FreeIpaClientException e) {
-                    if (!KerberosMgmtUtil.isNotFoundException(e)) {
+                    if (!FreeIpaClientExceptionUtil.isNotFoundException(e)) {
                         LOGGER.debug("Privilege [{}] does not exist", privilegeName);
                     } else {
                         LOGGER.error("Privilege [{}] show error", privilegeName, e);
@@ -98,10 +99,11 @@ public class KerberosMgmtRoleComponent {
                 LOGGER.debug("The role {} is still in use, so it was not deleted.", role);
             }
         } catch (FreeIpaClientException e) {
-            if (!KerberosMgmtUtil.isNotFoundException(e)) {
+            if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {
+                LOGGER.debug("The role {} does not exist, so it was not deleted.", role);
+            } else {
                 throw e;
             }
-            LOGGER.debug("The role {} does not exist, so it was not deleted.", role);
         }
     }
 }

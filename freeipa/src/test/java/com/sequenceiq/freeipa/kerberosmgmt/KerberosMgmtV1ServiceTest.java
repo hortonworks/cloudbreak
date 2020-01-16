@@ -41,6 +41,7 @@ import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtV1Service;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtVaultComponent;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.freeipa.host.HostDeletionService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
@@ -103,6 +104,9 @@ public class KerberosMgmtV1ServiceTest {
 
     @Mock
     private KerberosMgmtRoleComponent roleComponent;
+
+    @Mock
+    private HostDeletionService hostDeletionService;
 
     @InjectMocks
     private KerberosMgmtV1Service underTest;
@@ -364,12 +368,11 @@ public class KerberosMgmtV1ServiceTest {
         request.setServerHostName(HOST);
         request.setClusterCrn(CLUSTER_ID);
         request.setRoleName(ROLE);
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountId(anyString(), anyString())).thenReturn(stack);
-        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStack(any())).thenReturn(mockIpaClient);
+        Mockito.when(freeIpaClientFactory.getFreeIpaClientByAccountAndEnvironment(anyString(), anyString())).thenReturn(mockIpaClient);
         Mockito.when(mockIpaClient.findAllService()).thenReturn(services);
         underTest.deleteHost(request, ACCOUNT_ID);
         Mockito.verify(mockIpaClient).deleteService(SERVICE_PRINCIPAL);
-        Mockito.verify(mockIpaClient).deleteHost(HOST);
+        Mockito.verify(hostDeletionService).deleteHostsWithDeleteException(mockIpaClient, Set.of(HOST));
         Mockito.verify(vaultComponent).recursivelyCleanupVault("accountId/ServiceKeytab/serviceprincipal/12345-6789/54321-9876/host1/");
         Mockito.verify(vaultComponent).recursivelyCleanupVault("accountId/ServiceKeytab/keytab/12345-6789/54321-9876/host1/");
         Mockito.verify(vaultComponent).recursivelyCleanupVault("accountId/HostKeytab/serviceprincipal/12345-6789/54321-9876/host1");

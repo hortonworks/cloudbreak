@@ -32,4 +32,12 @@ public class RemoveUsersResponse extends AbstractCleanupEvent {
     public Map<String, String> getUserCleanupFailed() {
         return userCleanupFailed;
     }
+
+    @Override
+    public String toString() {
+        return "RemoveUsersResponse{" +
+                "userCleanupSuccess=" + userCleanupSuccess +
+                ", userCleanupFailed=" + userCleanupFailed +
+                '}';
+    }
 }

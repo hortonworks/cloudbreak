@@ -32,4 +32,12 @@ public class RemoveHostsResponse extends AbstractCleanupEvent {
     public Map<String, String> getHostCleanupFailed() {
         return hostCleanupFailed;
     }
+
+    @Override
+    public String toString() {
+        return "RemoveHostsResponse{" +
+                "hostCleanupSuccess=" + hostCleanupSuccess +
+                ", hostCleanupFailed=" + hostCleanupFailed +
+                '}';
+    }
 }
