@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak.context;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+
 import com.sequenceiq.it.cloudbreak.actor.Actor;
 
 public class RunningParameter {
@@ -13,6 +16,10 @@ public class RunningParameter {
     private boolean logError = true;
 
     private String expectedMessage;
+
+    private Class urlClass;
+
+    private Method urlMethod;
 
     public Actor getWho() {
         return who;
@@ -54,8 +61,32 @@ public class RunningParameter {
         return expectedMessage;
     }
 
+    public Class getUrlClass() {
+        return urlClass;
+    }
+
+    public Method getUrlMethod() {
+        return urlMethod;
+    }
+
     public RunningParameter withKey(String key) {
         this.key = key;
+        return this;
+    }
+
+    public RunningParameter withHttpMockUrl(Class urlClass, Method method) {
+        this.urlClass = urlClass;
+        urlMethod = method;
+        return this;
+    }
+
+    public RunningParameter withHttpMockUrl(Class urlClass, String method) {
+        this.urlClass = urlClass;
+
+        urlMethod = Arrays.stream(urlClass.getMethods())
+                .filter(m -> m.getName().equals(method))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(urlClass + "does not have method " + method));
         return this;
     }
 
@@ -86,5 +117,15 @@ public class RunningParameter {
     public static RunningParameter expectedMessage(String message) {
         return new RunningParameter()
                 .withExpectedMessage(message);
+    }
+
+    public static RunningParameter httpMockUrl(Class url, Method method) {
+        return new RunningParameter()
+                .withHttpMockUrl(url, method);
+    }
+
+    public static RunningParameter httpMockUrl(Class url, String method) {
+        return new RunningParameter()
+                .withHttpMockUrl(url, method);
     }
 }

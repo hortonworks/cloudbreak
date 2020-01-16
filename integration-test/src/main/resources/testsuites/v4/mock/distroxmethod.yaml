@@ -4,4 +4,4 @@ parameters:
 tests:
   - name: "newway mock testcases"
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.mock.DistroXClusterCreationTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.mock.DistroXClusterStopStartTest
