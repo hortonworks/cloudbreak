@@ -17,6 +17,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialViewProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -45,11 +46,14 @@ public class AwsCredentialConnector implements CredentialConnector {
     @Inject
     private AwsPlatformParameters awsPlatformParameters;
 
+    @Inject
+    private AwsCredentialViewProvider credentialViewProvider;
+
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
         CloudCredential credential = authenticatedContext.getCloudCredential();
         LOGGER.debug("Create credential: {}", credential);
-        AwsCredentialView awsCredential = new AwsCredentialView(credential);
+        AwsCredentialView awsCredential = credentialViewProvider.createAwsCredentialView(credential);
         String roleArn = awsCredential.getRoleArn();
         String accessKey = awsCredential.getAccessKey();
         String secretKey = awsCredential.getSecretKey();
@@ -85,7 +89,7 @@ public class AwsCredentialConnector implements CredentialConnector {
     }
 
     private CloudCredentialStatus verifyIamRoleIsAssumable(CloudCredential cloudCredential) {
-        AwsCredentialView awsCredential = new AwsCredentialView(cloudCredential);
+        AwsCredentialView awsCredential = credentialViewProvider.createAwsCredentialView(cloudCredential);
         try {
             credentialClient.retrieveSessionCredentials(awsCredential);
         } catch (AmazonClientException ae) {
@@ -107,7 +111,8 @@ public class AwsCredentialConnector implements CredentialConnector {
         } catch (AwsPermissionMissingException e) {
             return new CloudCredentialStatus(cloudCredential, CredentialStatus.PERMISSIONS_MISSING, new Exception(e.getMessage()), e.getMessage());
         } catch (SdkBaseException e) {
-            LOGGER.error("AWS credential validation failed", e);
+            LOGGER.warn("AWS credential validation failed due to {}", e.getMessage(), e);
+            return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, e.getMessage());
         }
         return new CloudCredentialStatus(cloudCredential, CredentialStatus.VERIFIED);
     }

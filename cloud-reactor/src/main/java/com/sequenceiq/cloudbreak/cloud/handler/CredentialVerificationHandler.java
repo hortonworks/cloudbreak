@@ -53,7 +53,7 @@ public class CredentialVerificationHandler implements CloudPlatformEventHandler<
             }
             CredentialVerificationResult credentialVerificationResult = new CredentialVerificationResult(request.getResourceId(), cloudCredentialStatus);
             request.getResult().onNext(credentialVerificationResult);
-            LOGGER.debug("Credential verification successfully finished");
+            LOGGER.debug("Credential verification has finished");
         } catch (RuntimeException e) {
             request.getResult().onNext(new CredentialVerificationResult(e.getMessage(), e, request.getResourceId()));
         }
