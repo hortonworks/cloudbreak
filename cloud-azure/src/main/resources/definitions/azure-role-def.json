@@ -28,7 +28,12 @@
     "Microsoft.Resources/subscriptions/resourceGroups/*",
     "Microsoft.Resources/deployments/*",
     "Microsoft.Resources/*/read",
-    "Microsoft.Support/*"
+    "Microsoft.Support/*",
+    "Microsoft.ManagedIdentity/userAssignedIdentities/write",
+    "Microsoft.ManagedIdentity/userAssignedIdentities/read",
+    "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action",
+    "Microsoft.DBforPostgreSQL/servers/write",
+    "Microsoft.DBforPostgreSQL/servers/virtualNetworkRules/write"
   ],
   "NotActions": [],
   "DataActions": [
