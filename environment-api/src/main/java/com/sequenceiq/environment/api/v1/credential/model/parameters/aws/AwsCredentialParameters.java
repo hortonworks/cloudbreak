@@ -2,6 +2,7 @@ package com.sequenceiq.environment.api.v1.credential.model.parameters.aws;
 
 import java.io.Serializable;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -16,9 +17,11 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class AwsCredentialParameters implements Serializable {
 
+    @Valid
     @ApiModelProperty
     private KeyBasedParameters keyBased;
 
+    @Valid
     @ApiModelProperty
     private RoleBasedParameters roleBased;
 
