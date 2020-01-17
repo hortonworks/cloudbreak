@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
@@ -123,6 +124,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
 
 @Service
 public class AwsPlatformResources implements PlatformResources {
@@ -471,7 +473,7 @@ public class AwsPlatformResources implements PlatformResources {
             describeSecurityGroupsRequest.withGroupNames(filter.getGroupName());
         }
 
-        for (SecurityGroup securityGroup : ec2Client.describeSecurityGroups(describeSecurityGroupsRequest).getSecurityGroups()) {
+        for (SecurityGroup securityGroup : fetchSecurityGroups(ec2Client, describeSecurityGroupsRequest)) {
             Map<String, Object> properties = new HashMap<>();
             properties.put("vpcId", securityGroup.getVpcId());
             properties.put("description", securityGroup.getDescription());
@@ -481,6 +483,18 @@ public class AwsPlatformResources implements PlatformResources {
         }
         result.put(region.value(), cloudSecurityGroups);
         return new CloudSecurityGroups(result);
+    }
+
+    private List<SecurityGroup> fetchSecurityGroups(AmazonEC2Client ec2Client, DescribeSecurityGroupsRequest describeSecurityGroupsRequest) {
+        try {
+            return ec2Client.describeSecurityGroups(describeSecurityGroupsRequest).getSecurityGroups();
+        } catch (AmazonEC2Exception e) {
+            if (e.getStatusCode() == HttpStatus.BAD_REQUEST.value() || e.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                throw new PermanentlyFailedException(e.getErrorMessage(), e);
+            } else {
+                throw e;
+            }
+        }
     }
 
     @Override

@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -165,12 +166,58 @@ class EnvironmentModificationServiceTest {
         Environment value = new Environment();
         when(environmentService
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
+        when(environmentService.getValidatorService()).thenReturn(validatorService);
+        when(validatorService.validateSecurityAccessModification(any(), any())).thenReturn(validationResult);
+        when(validatorService.validateSecurityGroups(any(), any())).thenReturn(validationResult);
 
         environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentService).save(environmentArgumentCaptor.capture());
-        verify(environmentService).setSecurityAccess(eq(value), eq(securityAccessDto));
+        verify(environmentService).editSecurityAccess(eq(value), eq(securityAccessDto));
+    }
+
+    @Test
+    void editByNameSecurityAccessChangeHasSecurityAccessError() {
+        ValidationResult validationResultError = ValidationResult.builder().error("sec access error").build();
+        SecurityAccessDto securityAccessDto = SecurityAccessDto.builder().withCidr("test").build();
+        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withSecurityAccess(securityAccessDto)
+                .build();
+        Environment value = new Environment();
+        when(environmentService
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
+        when(environmentService.getValidatorService()).thenReturn(validatorService);
+        when(validatorService.validateSecurityAccessModification(any(), any())).thenReturn(validationResultError);
+
+        BadRequestException actual = assertThrows(BadRequestException.class,
+                () -> environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto));
+
+        assertEquals("1. sec access error", actual.getMessage());
+        verify(environmentService, times(0)).editSecurityAccess(eq(value), eq(securityAccessDto));
+    }
+
+    @Test
+    void editByNameSecurityAccessChangeHasSecurityGroupsError() {
+        ValidationResult validationResultError = ValidationResult.builder().error("sec group error").build();
+        SecurityAccessDto securityAccessDto = SecurityAccessDto.builder().withCidr("test").build();
+        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withSecurityAccess(securityAccessDto)
+                .build();
+        Environment value = new Environment();
+        when(environmentService
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
+        when(environmentService.getValidatorService()).thenReturn(validatorService);
+        when(validatorService.validateSecurityAccessModification(any(), any())).thenReturn(validationResult);
+        when(validatorService.validateSecurityGroups(any(), any())).thenReturn(validationResultError);
+
+        BadRequestException actual = assertThrows(BadRequestException.class,
+                () -> environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto));
+
+        assertEquals("1. sec group error", actual.getMessage());
+        verify(environmentService, times(0)).editSecurityAccess(eq(value), eq(securityAccessDto));
     }
 
     @Test

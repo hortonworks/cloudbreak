@@ -256,6 +256,10 @@ public class CloudParameterService {
                 throw new GetCloudParameterException("Failed to get security groups for the cloud provider. "
                         + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
             }
+            if (res.getStatus().equals(EventStatus.PERMANENTLY_FAILED)) {
+                LOGGER.debug("Failed to get platform accessConfigs", res.getErrorDetails());
+                throw new BadRequestException(res.getStatusReason());
+            }
             return res.getCloudSecurityGroups();
         } catch (InterruptedException e) {
             LOGGER.error("Error while getting the platform securitygroups", e);

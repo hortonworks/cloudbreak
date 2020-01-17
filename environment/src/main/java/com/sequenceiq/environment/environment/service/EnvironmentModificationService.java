@@ -26,8 +26,8 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
-import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
+import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -55,10 +55,9 @@ public class EnvironmentModificationService {
 
     private final EnvironmentFlowValidatorService environmentFlowValidatorService;
 
-    public EnvironmentModificationService(EnvironmentDtoConverter environmentDtoConverter, EnvironmentRepository environmentRepository,
-            EnvironmentService environmentService, CredentialService credentialService, NetworkService networkService,
-            AuthenticationDtoConverter authenticationDtoConverter, ParametersService parametersService,
-            EnvironmentFlowValidatorService environmentFlowValidatorService) {
+    public EnvironmentModificationService(EnvironmentDtoConverter environmentDtoConverter, EnvironmentService environmentService,
+            CredentialService credentialService, NetworkService networkService, AuthenticationDtoConverter authenticationDtoConverter,
+            ParametersService parametersService, EnvironmentFlowValidatorService environmentFlowValidatorService) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentService = environmentService;
         this.credentialService = credentialService;
@@ -172,7 +171,16 @@ public class EnvironmentModificationService {
     private void editSecurityAccessIfChanged(EnvironmentEditDto editDto, Environment environment) {
         SecurityAccessDto securityAccessDto = editDto.getSecurityAccess();
         if (securityAccessDto != null) {
-            environmentService.setSecurityAccess(environment, securityAccessDto);
+            EnvironmentValidatorService validatorService = environmentService.getValidatorService();
+            ValidationResult validationResult = validatorService.validateSecurityAccessModification(securityAccessDto, environment);
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
+            validationResult = validatorService.validateSecurityGroups(editDto, environment);
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
+            environmentService.editSecurityAccess(environment, securityAccessDto);
         }
     }
 

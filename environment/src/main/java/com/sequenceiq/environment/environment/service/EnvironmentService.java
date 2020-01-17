@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -205,6 +206,24 @@ public class EnvironmentService implements ResourceIdProvider {
 
     Optional<Environment> findByResourceCrnAndAccountIdAndArchivedIsFalse(String resourceCrn, String accountId) {
         return environmentRepository.findByResourceCrnAndAccountIdAndArchivedIsFalse(resourceCrn, accountId);
+    }
+
+    /**
+     * The CIDR could not be edited so the first step we clear the the existed CIDR every time.
+     * We are assuming the security access has the proper security group ids and we don't check it again.
+     * If the knox or default security groups are blank we don't set
+     *
+     * @param environment    the security access will be update for this environment
+     * @param securityAccess this should contains the knox and default security groups
+     */
+    void editSecurityAccess(Environment environment, SecurityAccessDto securityAccess) {
+        environment.setCidr(null);
+        if (StringUtils.isNotBlank(securityAccess.getDefaultSecurityGroupId())) {
+            environment.setDefaultSecurityGroupId(securityAccess.getDefaultSecurityGroupId());
+        }
+        if (StringUtils.isNotBlank(securityAccess.getSecurityGroupIdForKnox())) {
+            environment.setSecurityGroupIdForKnox(securityAccess.getSecurityGroupIdForKnox());
+        }
     }
 
     void setSecurityAccess(Environment environment, SecurityAccessDto securityAccess) {
