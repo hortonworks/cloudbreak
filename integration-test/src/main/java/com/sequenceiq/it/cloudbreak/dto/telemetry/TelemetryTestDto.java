@@ -4,9 +4,11 @@ import javax.inject.Inject;
 
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.azure.AzureCloudProvider;
@@ -58,6 +60,15 @@ public class TelemetryTestDto extends AbstractCloudbreakTestDto<TelemetryRequest
             default:
                 break;
         }
+        return this;
+    }
+
+    public TelemetryTestDto withReportClusterLogs() {
+        FeaturesRequest featuresRequest = new FeaturesRequest();
+        FeatureSetting reportDeploymentLogs = new FeatureSetting();
+        reportDeploymentLogs.setEnabled(true);
+        featuresRequest.setReportDeploymentLogs(reportDeploymentLogs);
+        getRequest().setFeatures(featuresRequest);
         return this;
     }
 }

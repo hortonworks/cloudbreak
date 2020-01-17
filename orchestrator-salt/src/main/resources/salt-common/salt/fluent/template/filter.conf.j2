@@ -38,17 +38,25 @@
   @type record_transformer
   enable_ruby true
   <record>
+    {% if providerPrefix == "databus" %}
+    component ${"cm_agent_command." + tag.split(".")[7]}
+    {% else %}
     component cm_agent_command
     cm_agent_command_id ${tag.split(".")[7]}
+    {% endif %}
   </record>
 </filter>
 <filter processed.{{providerPrefix}}**>
   @type record_transformer
   enable_ruby true
   <record>
+    {% if providerPrefix == "databus" %}
+    @app {{ fluent.clusterType }}
+    {% else %}
+    @message ${record['message']}
     context {"clusterName": "{{ fluent.clusterName }}", "clusterType": "{{ fluent.clusterType }}", "clusterCrn": "{{ fluent.clusterCrn }}", "clusterOwner": "{{ fluent.clusterOwner }}", "clusterVersion": "{{ fluent.clusterVersion }}" }
     hostname "#{Socket.gethostname}"
-    @message ${record['message']}
+    {% endif %}
     {% if providerPrefix == "databus" %}
     @timestamp ${time.to_datetime.strftime("%Y-%m-%dT%H:%M:%S.%NZ")}
     {% endif %}
@@ -56,6 +64,16 @@
 </filter>
 <filter processed.{{providerPrefix}}**>
    @type record_transformer
-   remove_keys {% if providerPrefix != "databus" %}time,{% endif %}timestamp,message,raw_tag
+   remove_keys {% if providerPrefix != "databus" %}time,message,{% endif %}timestamp,raw_tag
 </filter>
+{% if providerPrefix == "databus" %}
+<match processed.{{providerPrefix}}**>
+   @type rewrite_tag_filter
+   <rule>
+      key component
+      pattern ^(.+)$
+      tag logs.$1
+   </rule>
+</match>
+{% endif %}
 </worker>
