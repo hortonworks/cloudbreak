@@ -14,7 +14,9 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
+import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentLogStorageLocationValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentRegionValidator;
 import com.sequenceiq.environment.parameters.validation.validators.AwsParameterProcessor;
@@ -99,4 +101,77 @@ class EnvironmentValidatorServiceTest {
         assertFalse(result.hasError());
     }
 
+    @Test
+    void testValidateSecurityAccessModificationWhenDefaultSecGroupAdded() {
+        Environment environment = new Environment();
+        SecurityAccessDto securityAccessDto = SecurityAccessDto.builder()
+                .withDefaultSecurityGroupId("sec-group")
+                .build();
+        ValidationResult validationResult = underTest.validateSecurityAccessModification(securityAccessDto, environment);
+
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    void testValidateSecurityAccessModificationWhenKnoxSecGroupAdded() {
+        Environment environment = new Environment();
+        SecurityAccessDto securityAccessDto = SecurityAccessDto.builder()
+                .withSecurityGroupIdForKnox("knox-sec-group")
+                .build();
+        ValidationResult validationResult = underTest.validateSecurityAccessModification(securityAccessDto, environment);
+
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    void testValidateSecurityAccessModificationWhenEnvCidrIsNotEmptyButDefaultSecGroupAddedOnly() {
+        Environment environment = new Environment();
+        environment.setCidr("cidr");
+        SecurityAccessDto securityAccessDto = SecurityAccessDto.builder()
+                .withDefaultSecurityGroupId("sec-group")
+                .build();
+        ValidationResult validationResult = underTest.validateSecurityAccessModification(securityAccessDto, environment);
+
+        assertTrue(validationResult.hasError());
+        assertEquals("1. The CIDR can be replaced with the default and knox security groups, please add to the request", validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void testValidateSecurityAccessModificationWhenEnvCidrIsNotEmptyAndKnoxAndDefaultSecGroupAdded() {
+        Environment environment = new Environment();
+        environment.setCidr("cidr");
+        SecurityAccessDto securityAccessDto = SecurityAccessDto.builder()
+                .withDefaultSecurityGroupId("sec-group")
+                .withSecurityGroupIdForKnox("knox-sec-group")
+                .build();
+        ValidationResult validationResult = underTest.validateSecurityAccessModification(securityAccessDto, environment);
+
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    void testValidateSecurityAccessModificationWhenCidrAddedOnlyInRequest() {
+        Environment environment = new Environment();
+        SecurityAccessDto securityAccessDto = SecurityAccessDto.builder()
+                .withCidr("cidr")
+                .build();
+        ValidationResult validationResult = underTest.validateSecurityAccessModification(securityAccessDto, environment);
+
+        assertTrue(validationResult.hasError());
+        assertEquals("1. Please add the default or knox security groups, we cannot edit with empty value.\n" +
+                " 2. The CIDR could not be updated in the environment", validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void testValidateSecurityAccessModificationWhenCidrAndDefaultSecurityGroupAddedInRequest() {
+        Environment environment = new Environment();
+        SecurityAccessDto securityAccessDto = SecurityAccessDto.builder()
+                .withCidr("cidr")
+                .withDefaultSecurityGroupId("sec-group")
+                .build();
+        ValidationResult validationResult = underTest.validateSecurityAccessModification(securityAccessDto, environment);
+
+        assertTrue(validationResult.hasError());
+        assertEquals("1. The CIDR could not be updated in the environment", validationResult.getFormattedErrors());
+    }
 }

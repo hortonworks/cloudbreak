@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.SSD;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -51,6 +52,8 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
+import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSecurityGroupFilterView;
+import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
 
 @Service
 public class AzurePlatformResources implements PlatformResources {
@@ -121,21 +124,43 @@ public class AzurePlatformResources implements PlatformResources {
     public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Map<String, Set<CloudSecurityGroup>> result = new HashMap<>();
-
-        for (NetworkSecurityGroup securityGroup : client.getSecurityGroups().list()) {
-            String actualRegion = securityGroup.region().label();
-            if (regionMatch(actualRegion, region)) {
-                Map<String, Object> properties = new HashMap<>();
-                properties.put("resourceGroupName", securityGroup.resourceGroupName());
-                properties.put("networkInterfaceIds", securityGroup.networkInterfaceIds());
-                CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(securityGroup.name(), securityGroup.id(), properties);
-                result.computeIfAbsent(actualRegion, s -> new HashSet<>()).add(cloudSecurityGroup);
+        PlatformResourceSecurityGroupFilterView filter = new PlatformResourceSecurityGroupFilterView(filters);
+        String groupId = filter.getGroupId();
+        if (groupId != null) {
+            NetworkSecurityGroup networkSecurityGroup = getNetworkSecurityGroup(client, groupId);
+            convertAndAddToResult(region, result, networkSecurityGroup);
+        } else {
+            for (NetworkSecurityGroup securityGroup : client.getSecurityGroups().list()) {
+                convertAndAddToResult(region, result, securityGroup);
             }
         }
         if (result.isEmpty() && Objects.nonNull(region)) {
             result.put(region.value(), new HashSet<>());
         }
         return new CloudSecurityGroups(result);
+    }
+
+    private NetworkSecurityGroup getNetworkSecurityGroup(AzureClient client, String groupId) {
+        try {
+            NetworkSecurityGroup networkSecurityGroup = client.getSecurityGroups().getById(groupId);
+            if (networkSecurityGroup == null) {
+                throw new PermanentlyFailedException("Nothing found on Azure with id: " + groupId);
+            }
+            return networkSecurityGroup;
+        } catch (InvalidParameterException e) {
+            throw new PermanentlyFailedException(e.getMessage(), e);
+        }
+    }
+
+    private void convertAndAddToResult(Region region, Map<String, Set<CloudSecurityGroup>> result, NetworkSecurityGroup securityGroup) {
+        String actualRegion = securityGroup.region().label();
+        if (regionMatch(actualRegion, region)) {
+            Map<String, Object> properties = new HashMap<>();
+            properties.put("resourceGroupName", securityGroup.resourceGroupName());
+            properties.put("networkInterfaceIds", securityGroup.networkInterfaceIds());
+            CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(securityGroup.name(), securityGroup.id(), properties);
+            result.computeIfAbsent(actualRegion, s -> new HashSet<>()).add(cloudSecurityGroup);
+        }
     }
 
     @Override
