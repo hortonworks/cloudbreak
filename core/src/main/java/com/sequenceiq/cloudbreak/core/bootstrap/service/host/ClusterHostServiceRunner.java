@@ -108,6 +108,9 @@ public class ClusterHostServiceRunner {
     @Value("${cb.cm.heartbeat.interval}")
     private String cmHeartbeatInterval;
 
+    @Value("${cb.cm.missed.heartbeat.interval}")
+    private String cmMissedHeartbeatInterval;
+
     @Inject
     private StackService stackService;
 
@@ -459,7 +462,9 @@ public class ClusterHostServiceRunner {
 
     private void decoratePillarWithClouderaManagerSettings(Map<String, SaltPillarProperties> servicePillar) {
         servicePillar.put("cloudera-manager-settings", new SaltPillarProperties("/cloudera-manager/settings.sls",
-                singletonMap("cloudera-manager", singletonMap("settings", singletonMap("heartbeat_interval", cmHeartbeatInterval)))));
+                singletonMap("cloudera-manager", singletonMap("settings", Map.of(
+                        "heartbeat_interval", cmHeartbeatInterval,
+                        "missed_heartbeat_interval", cmMissedHeartbeatInterval)))));
     }
 
     private void saveCustomNameservers(Stack stack, KerberosConfig kerberosConfig, Map<String, SaltPillarProperties> servicePillar) {
