@@ -11,6 +11,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzu
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.EnvironmentNetworkBase;
+import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -86,6 +87,8 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
         private boolean existingNetwork;
 
+        private PrivateSubnetCreation privateSubnetCreation;
+
         private String preferedSubnetId;
 
         private EnvironmentNetworkAwsParams aws;
@@ -133,6 +136,11 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             return this;
         }
 
+        public EnvironmentNetworkResponseBuilder withPrivateSubnetCreation(PrivateSubnetCreation privateSubnetCreation) {
+            this.privateSubnetCreation = privateSubnetCreation;
+            return this;
+        }
+
         public EnvironmentNetworkResponseBuilder withAws(EnvironmentNetworkAwsParams aws) {
             this.aws = aws;
             return this;
@@ -171,6 +179,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             environmentNetworkResponse.setExistingNetwork(existingNetwork);
             environmentNetworkResponse.setMock(mock);
             environmentNetworkResponse.setPreferedSubnetId(preferedSubnetId);
+            environmentNetworkResponse.setPrivateSubnetCreation(privateSubnetCreation);
             return environmentNetworkResponse;
         }
     }
