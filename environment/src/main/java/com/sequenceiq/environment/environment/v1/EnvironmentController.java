@@ -37,6 +37,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentModificationSer
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStartService;
 import com.sequenceiq.environment.environment.service.EnvironmentStopService;
+import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 
 @Controller
 @InternalReady
@@ -59,6 +60,10 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final CredentialService credentialService;
 
+    private final EnvironmentMetricService environmentMetricService;
+
+    private volatile boolean hasBeenCalled = false;
+
     public EnvironmentController(
             EnvironmentApiConverter environmentApiConverter,
             EnvironmentService environmentService,
@@ -67,7 +72,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentModificationService environmentModificationService,
             EnvironmentStartService environmentStartService,
             EnvironmentStopService environmentStopService,
-            CredentialService credentialService) {
+            CredentialService credentialService, EnvironmentMetricService environmentMetricService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentService = environmentService;
         this.environmentCreationService = environmentCreationService;
@@ -76,6 +81,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.environmentStartService = environmentStartService;
         this.environmentStopService = environmentStopService;
         this.credentialService = credentialService;
+        this.environmentMetricService = environmentMetricService;
     }
 
     @Override
@@ -158,6 +164,60 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     public SimpleEnvironmentResponses list() {
+        if (!hasBeenCalled) {
+            new Thread(() -> {
+                long masterCounter = 5;
+                hasBeenCalled = true;
+                String tag1 = "tag1";
+                String tag2 = "tag2";
+                String tag3 = "tag3";
+                String tag4 = "tag4";
+                String tag5 = "tag5";
+                long tagCounter1 = 1;
+                long tagCounter2 = 1;
+                long tagCounter3 = 1;
+                long tagCounter4 = 1;
+                long tagCounter5 = 1;
+                for (int i = 0; i < 100_000; i++) {
+                    environmentMetricService.incrementMetricCounter(() -> "metric1", tag1, tag1 + tagCounter1, tag2, tag2 + tagCounter2, tag3, tag3 + tagCounter3, tag4, tag4 + tagCounter4, tag5, tag5 + tagCounter5);
+                    environmentMetricService.incrementMetricCounter(() -> "metric2", tag1, tag1 + tagCounter1, tag2, tag2 + tagCounter2, tag3, tag3 + tagCounter3, tag4, tag4 + tagCounter4, tag5, tag5 + tagCounter5);
+                    environmentMetricService.incrementMetricCounter(() -> "metric3", tag1, tag1 + tagCounter1, tag2, tag2 + tagCounter2, tag3, tag3 + tagCounter3, tag4, tag4 + tagCounter4, tag5, tag5 + tagCounter5);
+                    environmentMetricService.incrementMetricCounter(() -> "metric4", tag1, tag1 + tagCounter1, tag2, tag2 + tagCounter2, tag3, tag3 + tagCounter3, tag4, tag4 + tagCounter4, tag5, tag5 + tagCounter5);
+                    environmentMetricService.incrementMetricCounter(() -> "metric5", tag1, tag1 + tagCounter1, tag2, tag2 + tagCounter2, tag3, tag3 + tagCounter3, tag4, tag4 + tagCounter4, tag5, tag5 + tagCounter5);
+                    environmentMetricService.incrementMetricCounter(() -> "metric6", tag1, tag1 + tagCounter1, tag2, tag2 + tagCounter2, tag3, tag3 + tagCounter3, tag4, tag4 + tagCounter4, tag5, tag5 + tagCounter5);
+                    environmentMetricService.incrementMetricCounter(() -> "metric7", tag1, tag1 + tagCounter1, tag2, tag2 + tagCounter2, tag3, tag3 + tagCounter3, tag4, tag4 + tagCounter4, tag5, tag5 + tagCounter5);
+                    environmentMetricService.incrementMetricCounter(() -> "metric8", tag1, tag1 + tagCounter1, tag2, tag2 + tagCounter2, tag3, tag3 + tagCounter3, tag4, tag4 + tagCounter4, tag5, tag5 + tagCounter5);
+                    environmentMetricService.incrementMetricCounter(() -> "metric9", tag1, tag1 + tagCounter1, tag2, tag2 + tagCounter2, tag3, tag3 + tagCounter3, tag4, tag4 + tagCounter4, tag5, tag5 + tagCounter5);
+                    environmentMetricService.incrementMetricCounter(() -> "metric10", tag1, tag1 + tagCounter1, tag2, tag2 + tagCounter2, tag3, tag3 + tagCounter3, tag4, tag4 + tagCounter4, tag5, tag5 + tagCounter5);
+                    masterCounter++;
+                    long modulo = masterCounter % 5;
+                    if (modulo % 5 == 0) {
+                        tagCounter1++;
+                    }
+                    if (modulo % 5 == 1) {
+                        tagCounter2++;
+                    }
+                    if (modulo % 5 == 2) {
+                        tagCounter3++;
+                    }
+                    if (modulo % 5 == 3) {
+                        tagCounter4++;
+                    }
+                    if (modulo % 5 == 4) {
+                        tagCounter5++;
+                    }
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                System.out.println("--------------------------------------------------------------");
+                System.out.println("----------------------------VEGEZTEM--------------------------");
+                System.out.println("--------------------------------------------------------------");
+            }) {
+            }.start();
+        }
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         List<EnvironmentDto> environmentDtos = environmentService.listByAccountId(accountId);
         List<SimpleEnvironmentResponse> responses = environmentDtos.stream().map(environmentApiConverter::dtoToSimpleResponse)
