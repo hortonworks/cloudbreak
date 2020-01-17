@@ -19,6 +19,8 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private static final String EMPTY_CONFIG_DEFAULT = "";
 
+    private static final Boolean DBUS_DISABLE_STOP_REPORTING_DEFAULT = false;
+
     private static final Integer PARTITION_INTERVAL_DEFAULT = 5;
 
     private final boolean enabled;
@@ -186,6 +188,7 @@ public class FluentConfigView implements TelemetryConfigView {
         map.put("cloudLoggingServiceEnabled", this.cloudLoggingServiceEnabled);
         map.put("dbusMeteringEnabled", this.meteringEnabled);
         map.put("dbusReportDeploymentLogs", this.reportClusterDeploymentLogs);
+        map.put("dbusReportDeploymentLogsDisableStop", DBUS_DISABLE_STOP_REPORTING_DEFAULT);
         map.put("user", ObjectUtils.defaultIfNull(this.user, TD_AGENT_USER_DEFAULT));
         map.put("group", ObjectUtils.defaultIfNull(this.group, TD_AGENT_GROUP_DEFAULT));
         map.put("providerPrefix", ObjectUtils.defaultIfNull(this.providerPrefix, PROVIDER_PREFIX_DEFAULT));

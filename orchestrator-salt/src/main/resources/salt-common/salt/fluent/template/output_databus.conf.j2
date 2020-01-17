@@ -2,7 +2,7 @@
 {%- from 'databus/settings.sls' import databus with context %}
 {%- if databus.valid and fluent.dbusReportDeploymentLogs %}
 <worker {{ fluent.reportDeploymentLogsWorkerIndex }}>
-<match processed.databus**>
+<match logs.**>
   @type copy
   <store ignore_error>
     @type                            databus
@@ -11,7 +11,8 @@
     credential_file_reload_interval  60
     debug                            false
     endpoint                         "{{ databus.endpoint }}"
-    headers                          app:{{ fluent.clusterType }}
+    headers                          app:{{ fluent.clusterType }},clusterName:{{ fluent.clusterName }},clusterType:{{ fluent.clusterType }},clusterCrn:{{ fluent.clusterCrn }},clusterOwner:{{ fluent.clusterOwner}},clusterVersion:{{ fluent.clusterVersion }}
+    event_message_field              message
     stream_name                      LogCollection
     partition_key                    "#{Socket.gethostname}"
 

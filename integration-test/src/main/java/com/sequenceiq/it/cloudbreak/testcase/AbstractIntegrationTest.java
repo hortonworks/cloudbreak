@@ -194,6 +194,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         testContext
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()
+                .withReportClusterLogs()
                 .given(EnvironmentTestDto.class)
                 .withNetwork()
                 .withTelemetry("telemetry")
@@ -207,6 +208,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         testContext
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()
+                .withReportClusterLogs()
                 .given(EnvironmentTestDto.class)
                 .withNetwork()
                 .withCreateFreeIpa(Boolean.TRUE)
@@ -219,6 +221,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         testContext
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()
+                .withReportClusterLogs()
                 .given(EnvironmentTestDto.class)
                 .withNetwork()
                 .withTelemetry("telemetry")
