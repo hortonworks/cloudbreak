@@ -22,6 +22,12 @@ setup_cm_heartbeat:
     - text: setsettings HEARTBEAT_INTERVAL {{ cloudera_manager.settings.heartbeat_interval }}
     - unless: grep "HEARTBEAT_INTERVAL" /etc/cloudera-scm-server/cm.settings
 
+setup_missed_cm_heartbeat:
+  file.append:
+    - name: /etc/cloudera-scm-server/cm.settings
+    - text: setsettings MISSED_HB_BAD {{ cloudera_manager.settings.missed_heartbeat_interval }}
+    - unless: grep "MISSED_HB_BAD" /etc/cloudera-scm-server/cm.settings
+
 {% if salt['pillar.get']('ldap', None) != None and salt['pillar.get']('ldap:local', None) == None %}
 
 add_ldap_settings_to_cm:
