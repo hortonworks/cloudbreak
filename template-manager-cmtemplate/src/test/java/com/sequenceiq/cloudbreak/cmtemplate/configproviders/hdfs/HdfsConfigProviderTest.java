@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.NAMENODE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfiguration
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.views.ExposedServiceUtil;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -94,13 +95,13 @@ public class HdfsConfigProviderTest {
                     new AdlsFileSystemConfigurationsView(new AdlsFileSystem(), locations, false);
         }
 
-        Gateway gateway = TestUtil.gatewayEnabledWithExposedKnoxServices(NAMENODE.getKnoxService());
+        Gateway gateway = TestUtil.gatewayEnabledWithExposedKnoxServices(ExposedServiceUtil.exposedService("NAMENODE").getKnoxService());
 
         PlacementView placementView = new PlacementView("region", "az");
 
         return Builder.builder().withFileSystemConfigurationView(fileSystemConfigurationsView)
                 .withHostgroupViews(Set.of(master, worker))
-                .withGateway(gateway, "/cb/secret/signkey")
+                .withGateway(gateway, "/cb/secret/signkey", new HashSet<>())
                 .withPlacementView(placementView)
                 .withDefaultTags(Map.of("apple", "apple1"))
                 .build();

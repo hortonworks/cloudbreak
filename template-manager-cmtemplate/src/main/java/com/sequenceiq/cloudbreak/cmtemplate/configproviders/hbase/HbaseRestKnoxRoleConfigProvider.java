@@ -5,10 +5,12 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import java.util.List;
 import java.util.Objects;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
+import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
@@ -20,6 +22,9 @@ public class HbaseRestKnoxRoleConfigProvider extends AbstractRoleConfigProvider 
     private static final String CONFIG_SAFETY_VALVE = "hbase_restserver_config_safety_valve";
 
     private static final String SUPPORT_PROXYUSER = "hbase.rest.support.proxyuser";
+
+    @Inject
+    private ExposedServiceCollector exposedServiceCollector;
 
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
@@ -42,7 +47,7 @@ public class HbaseRestKnoxRoleConfigProvider extends AbstractRoleConfigProvider 
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
-                && source.getGatewayView().getExposedServices().contains(ExposedService.HBASE_REST.getKnoxService());
+                && source.getGatewayView().getExposedServices().contains(exposedServiceCollector.getHBaseRestService().getKnoxService());
     }
 
 }

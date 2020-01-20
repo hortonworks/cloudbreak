@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3guard;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.NAMENODE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -95,13 +95,13 @@ public class S3GuardConfigProviderTest {
                     new AdlsFileSystemConfigurationsView(new AdlsFileSystem(), locations, false);
         }
 
-        Gateway gateway = TestUtil.gatewayEnabledWithExposedKnoxServices(NAMENODE.getKnoxService());
+        Gateway gateway = TestUtil.gatewayEnabledWithExposedKnoxServices("NAMENODE");
 
         PlacementView placementView = new PlacementView("region", "az");
 
         return Builder.builder().withFileSystemConfigurationView(fileSystemConfigurationsView)
                 .withHostgroupViews(Set.of(master, worker))
-                .withGateway(gateway, "/cb/secret/signkey")
+                .withGateway(gateway, "/cb/secret/signkey", new HashSet<>())
                 .withPlacementView(placementView)
                 .withDefaultTags(Map.of("apple", "apple1"))
                 .build();
