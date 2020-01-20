@@ -228,7 +228,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up sdx with name: {}", getName());
-        when(sdxTestClient.deleteInternal(), key("delete-sdx-" + getName()));
+        when(sdxTestClient.forceDeleteInternal(), key("delete-sdx-" + getName()));
         await(DELETED, new RunningParameter().withSkipOnFail(true));
     }
 

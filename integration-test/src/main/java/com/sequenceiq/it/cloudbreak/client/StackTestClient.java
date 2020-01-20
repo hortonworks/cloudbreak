@@ -4,12 +4,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
-import com.sequenceiq.it.cloudbreak.action.v4.stack.RepairClusterAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.ChangeImageAction;
+import com.sequenceiq.it.cloudbreak.action.v4.stack.RepairClusterAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackBlueprintRequestAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackDeleteInstanceAction;
+import com.sequenceiq.it.cloudbreak.action.v4.stack.StackForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackModifyAmbariPasswordAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackNodeUnhealthyAction;
@@ -38,6 +39,10 @@ public class StackTestClient {
 
     public Action<StackTestDto, CloudbreakClient> deleteV4() {
         return new StackDeleteAction();
+    }
+
+    public Action<StackTestDto, CloudbreakClient> forceDeleteV4() {
+        return new StackForceDeleteAction();
     }
 
     public Action<StackTestDto, CloudbreakClient> blueprintRequestV4() {

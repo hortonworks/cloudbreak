@@ -64,7 +64,7 @@ public class CleanupUtil extends CleanupClientUtil {
             sdxNames.stream().forEach(sdxName -> {
                 LOG.info("Deleting sdx with name: {}", sdxName);
                 try {
-                    sdx.sdxEndpoint().delete(sdxName, false);
+                    sdx.sdxEndpoint().delete(sdxName, true);
                 } catch (Exception e) {
                     LOG.error("Sdx with name: {} cannot be deleted, because of: {}", sdxName, e);
                 }
@@ -90,7 +90,7 @@ public class CleanupUtil extends CleanupClientUtil {
         if (!environmentNames.isEmpty()) {
             environmentNames.stream().forEach(environmentName -> LOG.info("Environment with name: {} will be deleted!", environmentName));
             try {
-                environment.environmentV1Endpoint().deleteMultipleByNames(environmentNames, false);
+                environment.environmentV1Endpoint().deleteMultipleByNames(environmentNames, true);
             } catch (Exception e) {
                 LOG.error("One or more environment cannot be deleted, because of: ", e);
             }

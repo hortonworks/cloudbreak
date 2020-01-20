@@ -73,7 +73,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     @Override
     public void cleanUp(TestContext context, CloudbreakClient client) {
         LOGGER.info("Cleaning up SDX with name: {}", getName());
-        when(sdxTestClient.delete(), key("delete-sdx-" + getName()).withSkipOnFail(false));
+        when(sdxTestClient.forceDelete(), key("delete-sdx-" + getName()).withSkipOnFail(false));
         await(DELETED, new RunningParameter().withSkipOnFail(true));
     }
 

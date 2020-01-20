@@ -238,7 +238,7 @@ public class EnvironmentTestDto
     @Override
     public void cleanUp(TestContext context, CloudbreakClient client) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
-        when(environmentTestClient.delete(), key("delete-environment-" + getName()).withSkipOnFail(false));
+        when(environmentTestClient.forceDelete(), key("delete-environment-" + getName()).withSkipOnFail(false));
         await(ARCHIVED, new RunningParameter().withSkipOnFail(true));
     }
 

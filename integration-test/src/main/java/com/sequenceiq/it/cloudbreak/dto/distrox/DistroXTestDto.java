@@ -69,7 +69,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
-        when(distroXTestClient.delete(), withoutLogError());
+        when(distroXTestClient.forceDelete(), withoutLogError());
         await(STACK_DELETED);
     }
 

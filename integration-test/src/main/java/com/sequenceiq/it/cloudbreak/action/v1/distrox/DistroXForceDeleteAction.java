@@ -1,0 +1,24 @@
+package com.sequenceiq.it.cloudbreak.action.v1.distrox;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.log.Log;
+
+public class DistroXForceDeleteAction implements Action<DistroXTestDto, CloudbreakClient> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXForceDeleteAction.class);
+
+    @Override
+    public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
+        client.getCloudbreakClient()
+                .distroXV1Endpoint()
+                .deleteByName(testDto.getName(), true);
+        Log.when(LOGGER, " Stack deletion was successful.");
+        return testDto;
+    }
+}
