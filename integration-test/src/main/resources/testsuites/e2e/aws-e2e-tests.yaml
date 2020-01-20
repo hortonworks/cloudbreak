@@ -11,7 +11,6 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxBaseImageTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxCloudStorageTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRepairTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeTests
 
   - name: "aws environment tests"
     classes:
