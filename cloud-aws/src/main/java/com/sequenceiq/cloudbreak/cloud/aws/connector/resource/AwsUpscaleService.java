@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 import static java.util.Collections.singletonList;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
+import com.amazonaws.services.autoscaling.model.Instance;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
@@ -27,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClien
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -69,17 +72,19 @@ public class AwsUpscaleService {
         AmazonEC2Client amazonEC2Client = getEC2Client(ac);
 
         List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
-        Map<String, Group> groupMap = getAutoScaleGroupsByName(ac, cloudFormationClient, scaledGroups);
-        awsAutoScalingService.resumeAutoScaling(amazonASClient, groupMap.keySet(), UPSCALE_PROCESSES);
-
-        Map<String, Integer> autoScalingGroupsBySize = getAutoScalingGroupsBySize(groupMap.keySet(), amazonASClient);
-
-        for (Entry<String, Group> groupEntry : groupMap.entrySet()) {
-            if (autoScalingGroupsBySize.get(groupEntry.getKey()) < groupEntry.getValue().getInstancesSize()) {
-                awsAutoScalingService.updateAutoscalingGroup(amazonASClient, groupEntry.getKey(), groupEntry.getValue(), ac.getCloudContext().getId());
-            }
+        Map<String, Group> desiredAutoscalingGroupsByName = getAutoScaleGroupsByNameFromCloudFormationTemplate(ac, cloudFormationClient, scaledGroups);
+        LOGGER.info("Desired autoscaling groups: {}", desiredAutoscalingGroupsByName);
+        awsAutoScalingService.resumeAutoScaling(amazonASClient, desiredAutoscalingGroupsByName.keySet(), UPSCALE_PROCESSES);
+        Map<String, Integer> originalAutoScalingGroupsBySize = getAutoScalingGroupsBySize(desiredAutoscalingGroupsByName.keySet(), amazonASClient);
+        LOGGER.info("Update autoscaling groups for stack: {}", ac.getCloudContext().getName());
+        Date timeBeforeASUpdate = new Date();
+        updateAutoscalingGroups(amazonASClient, desiredAutoscalingGroupsByName, originalAutoScalingGroupsBySize);
+        try {
+            awsAutoScalingService.scheduleStatusChecks(stack, ac, cloudFormationClient, timeBeforeASUpdate);
+        } catch (AmazonAutoscalingFailed amazonAutoscalingFailed) {
+            return recoverOriginalState(ac, stack, amazonASClient, desiredAutoscalingGroupsByName, originalAutoScalingGroupsBySize,
+                    amazonAutoscalingFailed);
         }
-        awsAutoScalingService.scheduleStatusChecks(stack, ac, cloudFormationClient);
         awsAutoScalingService.suspendAutoScaling(ac, stack);
         List<CloudResource> instances = cfStackUtil.getInstanceCloudResources(ac, cloudFormationClient, amazonASClient, scaledGroups);
         associateElasticIpWithNewInstances(stack, resources, cloudFormationClient, amazonEC2Client, scaledGroups, instances);
@@ -95,6 +100,82 @@ public class AwsUpscaleService {
         return singletonList(new CloudResourceStatus(cfStackUtil.getCloudFormationStackResource(resources), ResourceStatus.UPDATED));
     }
 
+    private List<CloudResourceStatus> recoverOriginalState(AuthenticatedContext ac,
+            CloudStack stack,
+            AmazonAutoScalingRetryClient amazonASClient,
+            Map<String, Group> desiredAutoscalingGroupsByName,
+            Map<String, Integer> originalAutoScalingGroupsBySize,
+            AmazonAutoscalingFailed amazonAutoscalingFailedException) {
+        LOGGER.info("Amazon autoscaling group update failed, suspend autoscaling", amazonAutoscalingFailedException);
+        try {
+            awsAutoScalingService.suspendAutoScaling(ac, stack);
+            List<Instance> instancesFromASGs = getInstancesInAutoscalingGroups(amazonASClient, desiredAutoscalingGroupsByName.keySet());
+            LOGGER.info("Instances from ASGs: {}", instancesFromASGs);
+            List<String> knownInstanceIdsByCloudbreak = getKnownInstancesByCloudbreak(stack);
+            LOGGER.info("Known instance ids by cloudbreak: {}", knownInstanceIdsByCloudbreak);
+            List<String> unknownInstancesByCloudbreak = getUnknownInstancesFromASGs(instancesFromASGs, knownInstanceIdsByCloudbreak);
+            LOGGER.info("Unknown instances by cloudbreak: {}", unknownInstancesByCloudbreak);
+            if (!unknownInstancesByCloudbreak.isEmpty()) {
+                for (String unknownInstance : unknownInstancesByCloudbreak) {
+                    LOGGER.info("Terminate unknown instance: {}", unknownInstance);
+                    awsAutoScalingService.terminateInstance(amazonASClient, unknownInstance);
+                }
+            }
+            Date timeBeforeASUpdate = new Date();
+            for (Entry<String, Group> desiredAutoscalingGroup : desiredAutoscalingGroupsByName.entrySet()) {
+                String autoscalingGroupName = desiredAutoscalingGroup.getKey();
+                Integer originalInstanceSizeForTheGroup = originalAutoScalingGroupsBySize.get(autoscalingGroupName);
+                LOGGER.info("Original instance size for the group: {}", originalInstanceSizeForTheGroup);
+                Integer desiredInstanceSize = desiredAutoscalingGroup.getValue().getInstancesSize();
+                if (originalInstanceSizeForTheGroup < desiredInstanceSize) {
+                    LOGGER.info("Restore original instance size [{}] for autoscaling group: {}", originalInstanceSizeForTheGroup, autoscalingGroupName);
+                    awsAutoScalingService.updateAutoscalingGroup(amazonASClient, autoscalingGroupName, originalInstanceSizeForTheGroup);
+                }
+            }
+            awsAutoScalingService.scheduleStatusChecks(originalAutoScalingGroupsBySize, ac, timeBeforeASUpdate);
+        } catch (Exception autoscalingFailed) {
+            autoscalingFailed.addSuppressed(amazonAutoscalingFailedException);
+            LOGGER.info("AWS Autoscaling group update failed, original autoscaling group state recover is failed", autoscalingFailed);
+            throw new CloudConnectorException("AWS Autoscaling Group update failed: '" + amazonAutoscalingFailedException.getMessage() +
+                    "'. We tried to recover to the original state, but it failed also: '" + autoscalingFailed.getMessage() +
+                    "' Please check your autoscaling groups on AWS.", autoscalingFailed);
+        }
+        LOGGER.info("AWS Autoscaling group update failed, original autoscaling group state has been recovered");
+        throw new CloudConnectorException("Autoscaling group update failed: '" + amazonAutoscalingFailedException.getMessage() +
+                "' Original autoscaling group state has been recovered.", amazonAutoscalingFailedException);
+    }
+
+    private void updateAutoscalingGroups(AmazonAutoScalingRetryClient amazonASClient,
+            Map<String, Group> desiredAutoscalingGroupsByName, Map<String, Integer> originalAutoScalingGroupsBySize) {
+        for (Entry<String, Group> groupEntry : desiredAutoscalingGroupsByName.entrySet()) {
+            Integer newInstanceSize = groupEntry.getValue().getInstancesSize();
+            if (originalAutoScalingGroupsBySize.get(groupEntry.getKey()) < newInstanceSize) {
+                awsAutoScalingService.updateAutoscalingGroup(amazonASClient, groupEntry.getKey(), newInstanceSize);
+            }
+        }
+    }
+
+    private List<String> getUnknownInstancesFromASGs(List<Instance> instancesFromASGs, List<String> knownInstanceIdsByCloudbreak) {
+        return instancesFromASGs.stream()
+                        .filter(instance -> !knownInstanceIdsByCloudbreak.contains(instance.getInstanceId()))
+                        .map(Instance::getInstanceId)
+                        .collect(Collectors.toList());
+    }
+
+    private List<String> getKnownInstancesByCloudbreak(CloudStack stack) {
+        return stack.getGroups()
+                        .stream()
+                        .flatMap(group -> group.getInstances().stream())
+                        .map(CloudInstance::getInstanceId)
+                        .collect(Collectors.toList());
+    }
+
+    private List<Instance> getInstancesInAutoscalingGroups(AmazonAutoScalingRetryClient amazonASClient, Set<String> autoscalingGroupNames) {
+        List<AutoScalingGroup> autoscalingGroups = awsAutoScalingService.getAutoscalingGroups(amazonASClient, autoscalingGroupNames);
+        return autoscalingGroups.stream()
+                .flatMap(autoScalingGroup -> autoScalingGroup.getInstances().stream()).collect(Collectors.toList());
+    }
+
     private Map<String, Integer> getAutoScalingGroupsBySize(Set<String> autoScalingGroupNames, AmazonAutoScalingRetryClient amazonASClient) {
         DescribeAutoScalingGroupsRequest request = new DescribeAutoScalingGroupsRequest();
         request.setAutoScalingGroupNames(new ArrayList<>(autoScalingGroupNames));
@@ -103,7 +184,7 @@ public class AwsUpscaleService {
                                 autoScalingGroup -> autoScalingGroup.getInstances().size()));
     }
 
-    private Map<String, Group> getAutoScaleGroupsByName(AuthenticatedContext ac, AmazonCloudFormationRetryClient cloudFormationClient,
+    private Map<String, Group> getAutoScaleGroupsByNameFromCloudFormationTemplate(AuthenticatedContext ac, AmazonCloudFormationRetryClient cloudFormationClient,
             List<Group> scaledGroups) {
         return scaledGroups.stream()
                 .collect(Collectors.toMap(g -> cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, g.getName()), g -> g));

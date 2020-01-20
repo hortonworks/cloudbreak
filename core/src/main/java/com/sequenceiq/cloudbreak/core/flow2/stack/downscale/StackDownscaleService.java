@@ -75,7 +75,10 @@ public class StackDownscaleService {
                 .collect(toList());
         List<String> fqdns = instanceMetaDatas.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
         cleanupDnsRecords(stack, fqdns);
-        List<String> deletedInstanceIds = instanceMetaDatas.stream().map(InstanceMetaData::getInstanceId).collect(Collectors.toList());
+        List<String> deletedInstanceIds = instanceMetaDatas.stream()
+                .map(instanceMetaData ->
+                        instanceMetaData.getInstanceId() != null ? instanceMetaData.getInstanceId() : instanceMetaData.getPrivateId().toString())
+                .collect(Collectors.toList());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_COMPLETED,
                 String.format("Downscale of the cluster infrastructure finished successfully. Terminated node(s): %s", deletedInstanceIds));
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DOWNSCALE_SUCCESS, AVAILABLE.name(), deletedInstanceIds);

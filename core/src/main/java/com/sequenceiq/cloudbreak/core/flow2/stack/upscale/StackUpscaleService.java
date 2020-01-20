@@ -38,7 +38,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.Msg;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -157,10 +156,11 @@ public class StackUpscaleService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_UPSCALE_FINISHED, AVAILABLE.name());
     }
 
-    public void handleStackUpscaleFailure(long stackId, StackFailureEvent payload) {
-        LOGGER.info("Exception during the upscale of stack", payload.getException());
+    public void handleStackUpscaleFailure(Exception exception, Long stackId) {
+        LOGGER.info("Exception during the upscale of stack", exception);
         try {
-            String errorReason = payload.getException().getMessage();
+            String errorReason = exception.getMessage();
+            metadataSetupService.cleanupRequestedInstances(stackId);
             stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
             flowMessageService.fireEventAndLog(stackId, Msg.STACK_INFRASTRUCTURE_UPDATE_FAILED, UPDATE_FAILED.name(), errorReason);
         } catch (Exception e) {
