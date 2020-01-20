@@ -153,11 +153,13 @@ public class UpgradeService {
                         NOT_BASE_IMAGE,
                         NOT_BASE_IMAGE,
                         user,
-                        getImageFilter(image, stack));
+                        null);
+                        //getImageFilter(image, stack));
     }
 
     private ImageSettingsV4Request toImageSettingsRequest(Image image) {
         ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
+        imageSettingsV4Request.setId("5d9ce13c-9399-4cd8-6076-a15c43442d0f");
         imageSettingsV4Request.setOs(image.getOs());
         imageSettingsV4Request.setCatalog(image.getImageCatalogName());
         return imageSettingsV4Request;
