@@ -267,7 +267,12 @@ public class AwsLaunchService {
     private void suspendAutoscalingGoupsWhenNewInstancesAreReady(AuthenticatedContext ac, CloudStack stack) {
         AmazonCloudFormationRetryClient cloudFormationClient = awsClient.createCloudFormationRetryClient(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
-        awsAutoScalingService.scheduleStatusChecks(stack, ac, cloudFormationClient);
+        try {
+            awsAutoScalingService.scheduleStatusChecks(stack, ac, cloudFormationClient);
+        } catch (AmazonAutoscalingFailed amazonAutoscalingFailed) {
+            LOGGER.info("Amazon autoscaling failed", amazonAutoscalingFailed);
+            throw new CloudConnectorException(amazonAutoscalingFailed);
+        }
         awsAutoScalingService.suspendAutoScaling(ac, stack);
     }
 }

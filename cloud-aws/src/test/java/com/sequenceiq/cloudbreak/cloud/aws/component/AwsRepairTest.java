@@ -166,7 +166,7 @@ public class AwsRepairTest extends AwsComponentTest {
 
         verify(amazonAutoScalingRetryClient, times(stack.getGroups().size()))
                 .suspendProcesses(argThat(argument -> AUTOSCALING_GROUP_NAME.equals(argument.getAutoScalingGroupName())
-                    && SUSPENDED_PROCESSES.equals(argument.getScalingProcesses())));
+                    && argument.getScalingProcesses().size() == 0));
 
         ArgumentCaptor<CloudResource> updatedCloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(resourceNotifier, times(4)).notifyUpdate(updatedCloudResourceArgumentCaptor.capture(), any());

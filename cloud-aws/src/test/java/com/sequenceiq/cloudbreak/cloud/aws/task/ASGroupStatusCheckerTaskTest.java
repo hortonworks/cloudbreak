@@ -88,7 +88,7 @@ public class ASGroupStatusCheckerTaskTest {
         when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingRetryClient.class), eq(asGroupName))).thenReturn(instancIds);
 
         ASGroupStatusCheckerTask asGroupStatusCheckerTask = new ASGroupStatusCheckerTask(authenticatedContext, asGroupName, requiredInstances, awsClient,
-                cloudFormationStackUtil);
+                cloudFormationStackUtil, null);
         Boolean taskResult = asGroupStatusCheckerTask.call();
 
         ArgumentCaptor<DescribeInstanceStatusRequest> instanceStatusRequestArgumentCaptor = ArgumentCaptor.forClass(DescribeInstanceStatusRequest.class);
@@ -148,7 +148,7 @@ public class ASGroupStatusCheckerTaskTest {
         when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingRetryClient.class), eq(asGroupName))).thenReturn(instancIds);
 
         ASGroupStatusCheckerTask asGroupStatusCheckerTask = new ASGroupStatusCheckerTask(authenticatedContext, asGroupName, requiredInstances, awsClient,
-                cloudFormationStackUtil);
+                cloudFormationStackUtil, null);
         Boolean taskResult = asGroupStatusCheckerTask.call();
 
         ArgumentCaptor<DescribeInstanceStatusRequest> instanceStatusRequestArgumentCaptor = ArgumentCaptor.forClass(DescribeInstanceStatusRequest.class);
