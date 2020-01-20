@@ -24,8 +24,11 @@ public class StackDownscaleValidatorServiceTest {
 
     private static final String INSTANCE_PUBLIC_IP = "2.2.2.2";
 
-    private static final String AMBARI_SERVER_HOST_EXCEPTION_MESSAGE = String.format("Downscale for node [public IP: %s] is prohibited because it serves as "
-            + "a host the Cluster Manager server", INSTANCE_PUBLIC_IP);
+    private static final String CLUSTER_MANAGER_HOST_EXCEPTION_MESSAGE_WITHOUT_IP = "Downscale for the given node is prohibited because it " +
+            "serves as a host the Cluster Manager server";
+
+    private static final String CLUSTER_MANAGER_SERVER_HOST_EXCEPTION_MESSAGE = String.format("Downscale for the given node [public IP: %s] is prohibited " +
+            "because it serves as a host the Cluster Manager server", INSTANCE_PUBLIC_IP);
 
     private static final String ACCESS_DENIED_EXCEPTION_MESSAGE = String.format("Private stack (%s) is only modifiable by the owner.", STACK_ID);
 
@@ -43,7 +46,7 @@ public class StackDownscaleValidatorServiceTest {
     @Test
     public void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayThenException() {
         expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(AMBARI_SERVER_HOST_EXCEPTION_MESSAGE);
+        expectedException.expectMessage(CLUSTER_MANAGER_SERVER_HOST_EXCEPTION_MESSAGE);
 
         underTest.checkInstanceIsTheClusterManagerServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY);
     }
@@ -51,7 +54,7 @@ public class StackDownscaleValidatorServiceTest {
     @Test
     public void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayPrimaryThenException() {
         expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(AMBARI_SERVER_HOST_EXCEPTION_MESSAGE);
+        expectedException.expectMessage(CLUSTER_MANAGER_SERVER_HOST_EXCEPTION_MESSAGE);
 
         underTest.checkInstanceIsTheClusterManagerServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY_PRIMARY);
     }
@@ -86,6 +89,38 @@ public class StackDownscaleValidatorServiceTest {
         expectedException.expectMessage("Cluster is in Stopped status. Please start the cluster for downscale.");
 
         underTest.checkClusterInValidStatus(cluster);
+    }
+
+    @Test
+    public void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayPrimaryAndNullPublicIpProvidedThenExceptionWithoutIp() {
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage(CLUSTER_MANAGER_HOST_EXCEPTION_MESSAGE_WITHOUT_IP);
+
+        underTest.checkInstanceIsTheClusterManagerServerOrNot(null, GATEWAY_PRIMARY);
+    }
+
+    @Test
+    public void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayPrimaryAndEmptyPublicIpProvidedThenExceptionWithoutIp() {
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage(CLUSTER_MANAGER_HOST_EXCEPTION_MESSAGE_WITHOUT_IP);
+
+        underTest.checkInstanceIsTheClusterManagerServerOrNot("", GATEWAY_PRIMARY);
+    }
+
+    @Test
+    public void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayAndNullPublicIpProvidedThenExceptionWithoutIp() {
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage(CLUSTER_MANAGER_HOST_EXCEPTION_MESSAGE_WITHOUT_IP);
+
+        underTest.checkInstanceIsTheClusterManagerServerOrNot(null, GATEWAY);
+    }
+
+    @Test
+    public void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayAndEmptyPublicIpProvidedThenExceptionWithoutIp() {
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage(CLUSTER_MANAGER_HOST_EXCEPTION_MESSAGE_WITHOUT_IP);
+
+        underTest.checkInstanceIsTheClusterManagerServerOrNot("", GATEWAY);
     }
 
 }

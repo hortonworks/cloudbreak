@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMeta
 
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
@@ -18,8 +19,13 @@ public class StackDownscaleValidatorService {
 
     public void checkInstanceIsTheClusterManagerServerOrNot(String instancePublicIp, InstanceMetadataType metadataType) {
         if (GATEWAY.equals(metadataType) || GATEWAY_PRIMARY.equals(metadataType)) {
-            throw new BadRequestException(String.format("Downscale for node [public IP: %s] is prohibited because it " +
-                            "serves as a host the Cluster Manager server", instancePublicIp));
+            String additionalIpPartForTemplate = "";
+            String messageTemplate = "Downscale for the given node%s is prohibited because it " +
+                    "serves as a host the Cluster Manager server";
+            if (StringUtils.isNotEmpty(instancePublicIp)) {
+                additionalIpPartForTemplate = " [public IP: " + instancePublicIp + "]";
+            }
+            throw new BadRequestException(String.format(messageTemplate, additionalIpPartForTemplate));
         }
     }
 
