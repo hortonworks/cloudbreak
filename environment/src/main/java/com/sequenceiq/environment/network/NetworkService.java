@@ -102,7 +102,7 @@ public class NetworkService {
     }
 
     public Optional<String> getAwsVpcId(NetworkDto networkDto) {
-        return Optional.ofNullable(networkDto)
+        return Optional.ofNullable(networkDto) 
                 .map(NetworkDto::getAws)
                 .map(AwsParams::getVpcId);
     }

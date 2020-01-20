@@ -199,7 +199,7 @@ public class WaitUtil {
             com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status desiredStatus, long pollingInterval) {
         Map<String, String> errors = new HashMap<>();
         WaitResult waitResult = WaitResult.SUCCESSFUL;
-        for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
+        for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 1; retryBecauseOfWrongStatusHandlingInCB++) {
             waitResult = waitForStatuses(freeIPAClient, name, desiredStatus);
         }
         if (waitResult == WaitResult.FAILED) {
@@ -226,7 +226,7 @@ public class WaitUtil {
             EnvironmentStatus desiredStatus, long pollingInterval) {
         Map<String, String> errors = new HashMap<>();
         WaitResult waitResult = WaitResult.SUCCESSFUL;
-        for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
+        for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 1; retryBecauseOfWrongStatusHandlingInCB++) {
             waitResult = waitForStatuses(environmentClient, name, desiredStatus);
         }
         if (waitResult == WaitResult.FAILED) {
@@ -247,7 +247,7 @@ public class WaitUtil {
             SdxClusterStatusResponse desiredStatus, long pollingInterval) {
         Map<String, String> errors = new HashMap<>();
         WaitResult waitResult = WaitResult.SUCCESSFUL;
-        for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
+        for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 1; retryBecauseOfWrongStatusHandlingInCB++) {
             waitResult = waitForStatuses(sdxClient, name, desiredStatus);
         }
         if (waitResult == WaitResult.FAILED) {
