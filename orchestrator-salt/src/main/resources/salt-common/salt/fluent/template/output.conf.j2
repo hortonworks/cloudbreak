@@ -64,6 +64,7 @@
     path                     "{{fluent.logFolderName}}/{{fluent.serviceLogPathSuffix}}"
     azure_object_key_format  %{path}-%{index}.%{file_extension}
     auto_create_container    true
+    enable_retry             true
 
     <buffer tag,time>
       @type file
@@ -72,6 +73,9 @@
       timekey_wait 0s
       chunk_limit_size 60m
       flush_at_shutdown true
+      retry_type        periodic
+      retry_max_times   3
+      retry_wait        5s
     </buffer>
     utc
     format single_value
@@ -93,6 +97,7 @@
     path                     "{{fluent.logFolderName}}/{{fluent.cmCommandLogPathSuffix}}"
     azure_object_key_format  %{path}-%{index}.%{file_extension}
     auto_create_container    true
+    enable_retry             true
 
     <buffer tag,time>
       @type file
@@ -101,6 +106,9 @@
       timekey_wait 0s
       chunk_limit_size 60m
       flush_at_shutdown true
+      retry_type        periodic
+      retry_max_times   3
+      retry_wait        5s
     </buffer>
     utc
     format single_value

@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.util.aws.amazons3.action;
 
 import static java.lang.String.format;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,10 +13,11 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3URI;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.google.common.collect.Lists;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.aws.amazons3.client.S3Client;
@@ -41,11 +44,15 @@ public class S3ClientActions extends S3Client {
                 ObjectListing objectListing = s3Client.listObjects(listObjectsRequest);
 
                 do {
+                    List<DeleteObjectsRequest.KeyVersion> deletableObjects = Lists.newArrayList();
                     for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
                         Log.log(LOGGER, format(" Removing Amazon S3 Key with Name: %s and with bites of content %d",
                                 objectSummary.getKey(), objectSummary.getSize()));
-                        s3Client.deleteObject(new DeleteObjectRequest(bucketName, objectSummary.getKey()));
+                        deletableObjects.add(new DeleteObjectsRequest.KeyVersion(objectSummary.getKey()));
                     }
+                    DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
+                    deleteObjectsRequest.setKeys(deletableObjects);
+                    s3Client.deleteObjects(deleteObjectsRequest);
                     if (objectListing.isTruncated()) {
                         objectListing = s3Client.listNextBatchOfObjects(objectListing);
                     }
@@ -86,7 +93,6 @@ public class S3ClientActions extends S3Client {
                     for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
                         Log.log(LOGGER, format(" Amazon S3 Key is present with Name: %s and with bites of content %d",
                                 objectSummary.getKey(), objectSummary.getSize()));
-                        s3Client.getObject(bucketName, objectSummary.getKey());
                     }
                     if (objectListing.isTruncated()) {
                         objectListing = s3Client.listNextBatchOfObjects(objectListing);
