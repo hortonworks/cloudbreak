@@ -96,7 +96,7 @@ public class EnvironmentNetworkAzureParams {
         }
 
         public EnvironmentNetworkAzureParamsBuilder withNoFirewallRules(Boolean noFirewallRules) {
-            this.noFirewallRules = noFirewallRules;
+            this.noFirewallRules = noFirewallRules == null ? Boolean.FALSE : noFirewallRules;
             return this;
         }
 
