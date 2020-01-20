@@ -87,7 +87,7 @@ public class AwsNetworkConnector implements NetworkConnector {
     private AwsCreatedSubnetProvider awsCreatedSubnetProvider;
 
     @Inject
-    private AwsTagPreparationService awsTagPreparationService;
+    private AwsTaggingService awsTaggingService;
 
     @Inject
     private DefaultCostTaggingService defaultCostTaggingService;
@@ -182,7 +182,7 @@ public class AwsNetworkConnector implements NetworkConnector {
     }
 
     private CreateStackRequest createStackRequest(String stackName, String cloudFormationTemplate, Map<String, String> tags, String creatorUser) {
-        Collection<Tag> awsTags = awsTagPreparationService.prepareCloudformationTags(null, tags);
+        Collection<Tag> awsTags = awsTaggingService.prepareCloudformationTags(null, tags);
         return new CreateStackRequest()
                 .withStackName(stackName)
                 .withOnFailure(OnFailure.DO_NOTHING)

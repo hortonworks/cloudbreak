@@ -124,7 +124,7 @@ public class AwsNetworkConnectorTest {
     private AwsCreatedSubnetProvider awsCreatedSubnetProvider;
 
     @Mock
-    private AwsTagPreparationService awsTagPreparationService;
+    private AwsTaggingService awsTaggingService;
 
     @Mock
     private DefaultCostTaggingService defaultCostTaggingService;
@@ -175,7 +175,7 @@ public class AwsNetworkConnectorTest {
         verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest);
         verify(cfStackUtil).getOutputs(NETWORK_ID, cloudFormationRetryClient);
         verify(defaultCostTaggingService, never()).prepareDefaultTags(any(), any(), any(), any());
-        verify(awsTagPreparationService, never()).prepareCloudformationTags(any(), any());
+        verify(awsTaggingService, never()).prepareCloudformationTags(any(), any());
         verify(cloudFormationRetryClient, never()).createStack(any(CreateStackRequest.class));
         assertEquals(VPC_ID, actual.getNetworkId());
         assertEquals(NUMBER_OF_SUBNETS, actual.getSubnets().size());
@@ -214,7 +214,7 @@ public class AwsNetworkConnectorTest {
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest);
         verify(defaultCostTaggingService).prepareDefaultTags(eq("creatorUser"), any(), eq(CloudConstants.AWS), any());
-        verify(awsTagPreparationService).prepareCloudformationTags(any(), any());
+        verify(awsTaggingService).prepareCloudformationTags(any(), any());
         verify(cloudFormationRetryClient).createStack(any(CreateStackRequest.class));
         verify(cfStackUtil).getOutputs(NETWORK_ID, cloudFormationRetryClient);
         assertEquals(VPC_ID, actual.getNetworkId());

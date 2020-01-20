@@ -38,7 +38,7 @@ import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters.AwsDiskType;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsTagPreparationService;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2RetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedSnapshotService;
@@ -79,7 +79,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     private PersistenceNotifier resourceNotifier;
 
     @Inject
-    private AwsTagPreparationService awsTagPreparationService;
+    private AwsTaggingService awsTaggingService;
 
     @Inject
     private EncryptedSnapshotService encryptedSnapshotService;
@@ -174,7 +174,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         String snapshotId = getEbsSnapshotIdIfNeeded(auth, cloudStack, group);
         TagSpecification tagSpecification = new TagSpecification()
                 .withResourceType(com.amazonaws.services.ec2.model.ResourceType.Volume)
-                .withTags(awsTagPreparationService.prepareEc2Tags(auth, cloudStack.getTags()));
+                .withTags(awsTaggingService.prepareEc2Tags(auth, cloudStack.getTags()));
 
         List<CloudResource> requestedResources = buildableResource.stream()
                 .filter(cloudResource -> CommonStatus.REQUESTED.equals(cloudResource.getStatus()))

@@ -34,11 +34,13 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
+import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesResult;
 import com.amazonaws.services.ec2.model.InstanceState;
+import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.VolumeState;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
@@ -106,6 +108,7 @@ public class AwsLaunchTest extends AwsComponentTest {
         setupDescribeStackResourceResponse();
         setupAutoscalingResponses();
         setupDescribeInstanceStatusResponse();
+        setupDescribeInstancesResponse();
         setupCreateVolumeResponse();
         setupDescribeVolumeResponse();
         setupDescribeSubnetResponse();
@@ -191,6 +194,13 @@ public class AwsLaunchTest extends AwsComponentTest {
         when(amazonEC2Client.describeInstanceStatus(any())).thenReturn(
                 new DescribeInstanceStatusResult().withInstanceStatuses(
                         new com.amazonaws.services.ec2.model.InstanceStatus().withInstanceState(new InstanceState().withCode(INSTANCE_STATE_RUNNING)))
+        );
+    }
+
+    private void setupDescribeInstancesResponse() {
+        when(amazonEC2Client.describeInstances(any())).thenReturn(
+                new DescribeInstancesResult().withReservations(
+                        new Reservation().withInstances(new com.amazonaws.services.ec2.model.Instance().withInstanceId("i-instance")))
         );
     }
 
