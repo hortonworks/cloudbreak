@@ -91,8 +91,10 @@ public class AzurePlatformResources implements PlatformResources {
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
 
         for (Network network : client.getNetworks()) {
-            String actualRegion = network.region().label();
-            if (regionMatch(actualRegion, region)) {
+            String actualRegionLabel = network.region().label();
+            String actualRegionName = network.region().name();
+
+            if (regionMatch(actualRegionLabel, region) || regionMatch(actualRegionName, region)) {
                 Set<CloudSubnet> subnets = new HashSet<>();
                 for (Entry<String, Subnet> subnet : network.subnets().entrySet()) {
                     subnets.add(new CloudSubnet(subnet.getKey(), subnet.getKey(), null, subnet.getValue().addressPrefix()));
@@ -103,7 +105,8 @@ public class AzurePlatformResources implements PlatformResources {
                 properties.put("resourceGroupName", network.resourceGroupName());
 
                 CloudNetwork cloudNetwork = new CloudNetwork(network.name(), network.id(), subnets, properties);
-                result.computeIfAbsent(actualRegion, s -> new HashSet<>()).add(cloudNetwork);
+                result.computeIfAbsent(actualRegionLabel, s -> new HashSet<>()).add(cloudNetwork);
+                result.computeIfAbsent(actualRegionName, s -> new HashSet<>()).add(cloudNetwork);
             }
         }
         if (result.isEmpty() && Objects.nonNull(region)) {
@@ -121,15 +124,16 @@ public class AzurePlatformResources implements PlatformResources {
     public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Map<String, Set<CloudSecurityGroup>> result = new HashMap<>();
-
         for (NetworkSecurityGroup securityGroup : client.getSecurityGroups().list()) {
-            String actualRegion = securityGroup.region().label();
-            if (regionMatch(actualRegion, region)) {
+            String actualRegionName = securityGroup.region().name();
+            String actualRegionLabel = securityGroup.region().label();
+            if (regionMatch(actualRegionName, region) || regionMatch(actualRegionLabel, region)) {
                 Map<String, Object> properties = new HashMap<>();
                 properties.put("resourceGroupName", securityGroup.resourceGroupName());
                 properties.put("networkInterfaceIds", securityGroup.networkInterfaceIds());
                 CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(securityGroup.name(), securityGroup.id(), properties);
-                result.computeIfAbsent(actualRegion, s -> new HashSet<>()).add(cloudSecurityGroup);
+                result.computeIfAbsent(actualRegionLabel, s -> new HashSet<>()).add(cloudSecurityGroup);
+                result.computeIfAbsent(actualRegionName, s -> new HashSet<>()).add(cloudSecurityGroup);
             }
         }
         if (result.isEmpty() && Objects.nonNull(region)) {
