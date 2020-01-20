@@ -67,7 +67,10 @@ public class TelemetryTestDto extends AbstractCloudbreakTestDto<TelemetryRequest
         FeaturesRequest featuresRequest = new FeaturesRequest();
         FeatureSetting reportDeploymentLogs = new FeatureSetting();
         reportDeploymentLogs.setEnabled(true);
+        FeatureSetting useSharedCredential = new FeatureSetting();
+        useSharedCredential.setEnabled(true);
         featuresRequest.setReportDeploymentLogs(reportDeploymentLogs);
+        featuresRequest.setUseSharedAltusCredential(useSharedCredential);
         getRequest().setFeatures(featuresRequest);
         return this;
     }
