@@ -196,11 +196,11 @@ public class CentralCmTemplateUpdaterTest {
         BaseFileSystemConfigurationsView baseFileSystemConfigurationsView =
                 new S3FileSystemConfigurationsView(s3FileSystem, Sets.newHashSet(storageLocationView), false);
         when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(Optional.of(baseFileSystemConfigurationsView));
-        when(templatePreparationObject.getGatewayView()).thenReturn(new GatewayView(new Gateway(), "signkey"));
+        when(templatePreparationObject.getGatewayView()).thenReturn(new GatewayView(new Gateway(), "signkey", new HashSet<>()));
         Set<HostgroupView> hostgroupViews = new HashSet<>();
         hostgroupViews.add(new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1));
         when(templatePreparationObject.getHostgroupViews()).thenReturn(hostgroupViews);
-        when(templatePreparationObject.getGatewayView()).thenReturn(new GatewayView(new Gateway(), "signkey"));
+        when(templatePreparationObject.getGatewayView()).thenReturn(new GatewayView(new Gateway(), "signkey", new HashSet<>()));
 
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/kafka-without-hdfs.bp"));
         String generated = generator.getBlueprintText(templatePreparationObject);

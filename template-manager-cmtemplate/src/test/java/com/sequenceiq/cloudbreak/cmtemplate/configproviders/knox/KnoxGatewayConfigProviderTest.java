@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +64,10 @@ public class KnoxGatewayConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         Gateway gateway = new Gateway();
-        TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).withGateway(gateway, "key").build();
+        TemplatePreparationObject preparationObject = Builder.builder()
+                .withHostgroupViews(Set.of(master, worker))
+                .withGateway(gateway, "key", new HashSet<>())
+                .build();
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -85,7 +89,10 @@ public class KnoxGatewayConfigProviderTest {
         HostgroupView master2 = new HostgroupView("master2", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         Gateway gateway = new Gateway();
-        TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, master2, worker)).withGateway(gateway, "key").build();
+        TemplatePreparationObject preparationObject = Builder.builder()
+                .withHostgroupViews(Set.of(master, master2, worker))
+                .withGateway(gateway, "key", new HashSet<>())
+                .build();
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -113,7 +120,10 @@ public class KnoxGatewayConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         Gateway gateway = new Gateway();
-        TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).withGateway(gateway, "key").build();
+        TemplatePreparationObject preparationObject = Builder.builder()
+                .withHostgroupViews(Set.of(master, worker))
+                .withGateway(gateway, "key", new HashSet<>())
+                .build();
         String inputJson = getBlueprintText("input/clouderamanager-knox.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -133,7 +143,7 @@ public class KnoxGatewayConfigProviderTest {
         gateway.setPath("/a/b/c");
         gateway.setTopologies(Set.of(topology));
         TemplatePreparationObject source = Builder.builder()
-                .withGateway(gateway, "key")
+                .withGateway(gateway, "key", new HashSet<>())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
                 .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, "")).build();
         Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
@@ -196,7 +206,7 @@ public class KnoxGatewayConfigProviderTest {
         LdapView ldapConfig = LdapViewBuilder.aLdapView().build();
 
         TemplatePreparationObject source = Builder.builder()
-                .withGateway(gateway, "key")
+                .withGateway(gateway, "key", new HashSet<>())
                 .withLdapConfig(ldapConfig)
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
                 .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, "")).build();

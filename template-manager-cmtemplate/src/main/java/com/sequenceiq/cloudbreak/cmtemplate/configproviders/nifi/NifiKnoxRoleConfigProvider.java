@@ -9,12 +9,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
+import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
@@ -31,6 +33,9 @@ public class NifiKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
     private static final String NIFI_UI_KNOX_URL = "nifi.ui.knox.url";
 
     private static final String CFM = "CFM";
+
+    @Inject
+    private ExposedServiceCollector exposedServiceCollector;
 
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
@@ -56,7 +61,7 @@ public class NifiKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
         if (source.getExposedServices() != null && !source.getExposedServices().isEmpty()) {
             Optional<ClusterExposedServiceView> nifi = source.getExposedServices().get("cdp-proxy")
                     .stream()
-                    .filter(e -> e.getKnoxService().equalsIgnoreCase(ExposedService.NIFI.name()))
+                    .filter(e -> e.getKnoxService().equalsIgnoreCase(exposedServiceCollector.getNiFiService().getName()))
                     .findFirst();
             if (nifi.isEmpty()) {
                 LOGGER.info("Nifi is not presented as an Exposed service");
@@ -96,7 +101,7 @@ public class NifiKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
-                && source.getGatewayView().getExposedServices().contains(ExposedService.NIFI.getKnoxService());
+                && source.getGatewayView().getExposedServices().contains(exposedServiceCollector.getNiFiService().getKnoxService());
     }
 
 }

@@ -12,7 +12,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
+import com.sequenceiq.cloudbreak.api.service.ExposedService;
+import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -34,6 +35,9 @@ class GrainPropertiesService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
+    @Inject
+    private ExposedServiceCollector exposedServiceCollector;
+
     List<GrainProperties> createGrainProperties(Iterable<GatewayConfig> gatewayConfigs, Cluster cluster, Set<Node> nodes) {
         GrainProperties grainProperties = new GrainProperties();
         for (GatewayConfig gatewayConfig : gatewayConfigs) {
@@ -47,8 +51,10 @@ class GrainPropertiesService {
     }
 
     private void addNameNodeRoleForHosts(GrainProperties grainProperties, Cluster cluster) {
-        Map<String, List<String>> nameNodeServiceLocations = getComponentLocationByHostname(cluster, ExposedService.NAMENODE.getServiceName());
-        nameNodeServiceLocations.getOrDefault(ExposedService.NAMENODE.getServiceName(), List.of())
+        ExposedService nameNodeService = exposedServiceCollector.getNameNodeService();
+        Map<String, List<String>> nameNodeServiceLocations = getComponentLocationByHostname(cluster,
+                nameNodeService.getServiceName());
+        nameNodeServiceLocations.getOrDefault(nameNodeService.getServiceName(), List.of())
                 .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put(ROLES, "namenode"));
     }
 

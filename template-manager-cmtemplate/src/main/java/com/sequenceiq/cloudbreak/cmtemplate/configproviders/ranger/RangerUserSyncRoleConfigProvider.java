@@ -10,7 +10,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
+import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -28,6 +28,9 @@ public class RangerUserSyncRoleConfigProvider extends AbstractRoleConfigProvider
 
     @Inject
     private VirtualGroupService virtualGroupService;
+
+    @Inject
+    private ExposedServiceCollector exposedServiceCollector;
 
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
@@ -51,6 +54,6 @@ public class RangerUserSyncRoleConfigProvider extends AbstractRoleConfigProvider
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
-                && source.getGatewayView().getExposedServices().contains(ExposedService.RANGER.getKnoxService());
+                && source.getGatewayView().getExposedServices().contains(exposedServiceCollector.getRangerService().getKnoxService());
     }
 }

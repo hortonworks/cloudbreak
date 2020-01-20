@@ -7,13 +7,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
@@ -106,25 +104,8 @@ public class TemplateModelContextBuilder {
         return this;
     }
 
-    public TemplateModelContextBuilder withGateway(Gateway gatewayConfig, String signKey) {
-        gateway = Optional.ofNullable(gatewayConfig == null ? null : new GatewayView(gatewayConfig, signKey));
-        return this;
-    }
-
     public TemplateModelContextBuilder withGateway(GatewayView gatewayConfig) {
         gateway = Optional.ofNullable(gatewayConfig);
-        return this;
-    }
-
-    public TemplateModelContextBuilder withCustomProperties(Map<String, Object> customProperties) {
-        for (Entry<String, Object> customProperty : customProperties.entrySet()) {
-            withCustomProperty(customProperty.getKey(), customProperty.getValue().toString());
-        }
-        return this;
-    }
-
-    public TemplateModelContextBuilder withCustomProperty(String key, String value) {
-        customProperties.put(key, value);
         return this;
     }
 

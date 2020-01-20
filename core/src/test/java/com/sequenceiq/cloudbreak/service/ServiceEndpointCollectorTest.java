@@ -1,13 +1,11 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.ATLAS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.CLOUDERA_MANAGER_UI;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.HIVE_SERVER;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.WEBHDFS;
+import static com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceUtil.exposedService;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -18,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
@@ -31,11 +30,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
+import com.sequenceiq.cloudbreak.api.service.ExposedService;
+import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.validation.StackServiceComponentDescriptors;
@@ -80,6 +80,9 @@ public class ServiceEndpointCollectorTest {
     @Mock
     private ExposedServiceListValidator exposedServiceListValidator;
 
+    @Mock
+    private ExposedServiceCollector exposedServiceCollector;
+
     @InjectMocks
     private final GatewayTopologyV4RequestToExposedServicesConverter exposedServicesConverter = new GatewayTopologyV4RequestToExposedServicesConverter();
 
@@ -90,6 +93,11 @@ public class ServiceEndpointCollectorTest {
     public void setup() {
         ReflectionTestUtils.setField(underTest, "httpsPort", "443");
         when(exposedServiceListValidator.validate(any())).thenReturn(ValidationResult.builder().build());
+        when(exposedServiceCollector.getClouderaManagerUIService()).thenReturn(getClouderaManagerUIService());
+        when(exposedServiceCollector.getImpalaService()).thenReturn(exposedService("IMPALA"));
+        when(exposedServiceCollector.knoxServicesForComponents(anyList())).thenReturn(
+                List.of(exposedService("CLOUDERA_MANAGER"), exposedService("CLOUDERA_MANAGER_UI")));
+        when(exposedServiceCollector.getFullServiceListBasedOnList(anyList())).thenAnswer(a -> Set.copyOf(a.getArgument(0)));
     }
 
     @Test
@@ -112,8 +120,8 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetCmServerUrlWithNoAmbariInTopologies() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{ATLAS, ATLAS},
-                new ExposedService[]{HIVE_SERVER}, GatewayType.INDIVIDUAL);
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{exposedService("ATLAS"), exposedService("ATLAS")},
+                new ExposedService[]{exposedService("HIVE_SERVER")}, GatewayType.INDIVIDUAL);
 
         String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
         assertEquals("https://127.0.0.1/", result);
@@ -121,8 +129,8 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetCmServerUrlWithAmbariPresentInTopologiesWithCentralGateway() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{CLOUDERA_MANAGER_UI, ATLAS},
-                new ExposedService[]{HIVE_SERVER}, GatewayType.CENTRAL);
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{exposedService("CLOUDERA_MANAGER_UI"), exposedService("ATLAS")},
+                new ExposedService[]{exposedService("HIVE_SERVER")}, GatewayType.CENTRAL);
 
         String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
         assertEquals("/gateway-path/topology1/cmf/home/", result);
@@ -130,8 +138,8 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetCmServerUrlWithAmbariPresentInTopologiesWithIndividualGateway() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{CLOUDERA_MANAGER_UI, ATLAS},
-                new ExposedService[]{HIVE_SERVER}, GatewayType.INDIVIDUAL);
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{exposedService("CLOUDERA_MANAGER_UI"), exposedService("ATLAS")},
+                new ExposedService[]{exposedService("HIVE_SERVER")}, GatewayType.INDIVIDUAL);
         cluster.getGateway().setGatewayPort(443);
 
         String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
@@ -140,18 +148,26 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetCmServerUrlInTopologiesWithIndividualGatewayOnPort8443() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{CLOUDERA_MANAGER_UI, ATLAS},
-                new ExposedService[]{HIVE_SERVER}, GatewayType.INDIVIDUAL);
+        ExposedService clouderaManagerUIService = getClouderaManagerUIService();
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{clouderaManagerUIService, exposedService("ATLAS")},
+                new ExposedService[]{exposedService("HIVE_SERVER")}, GatewayType.INDIVIDUAL);
         cluster.getGateway().setGatewayPort(8443);
 
         String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
         assertEquals("https://127.0.0.1:8443/gateway-path/topology1/cmf/home/", result);
     }
 
+    private ExposedService getClouderaManagerUIService() {
+        ExposedService clouderaManagerUIService = exposedService("CLOUDERA_MANAGER_UI");
+        clouderaManagerUIService.setKnoxUrl("/cmf/home/");
+        clouderaManagerUIService.setPort(443);
+        return clouderaManagerUIService;
+    }
+
     @Test
     public void testPrepareClusterExposedServices() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{ATLAS},
-                new ExposedService[]{HIVE_SERVER, WEBHDFS}, GatewayType.INDIVIDUAL);
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{exposedService("ATLAS")},
+                new ExposedService[]{exposedService("HIVE_SERVER"), exposedService("WEBHDFS")}, GatewayType.INDIVIDUAL);
         cluster.getGateway().setGatewayPort(443);
 
         mockBlueprintTextProcessor();
