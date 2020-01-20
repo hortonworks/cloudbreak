@@ -152,6 +152,11 @@ public class AwsRepairTest extends AwsComponentTest {
                         new com.amazonaws.services.ec2.model.Volume().withVolumeId(VOLUME_ID_3).withState(VolumeState.InUse)
                 ));
 
+        when(amazonEC2Client.describeInstances(any())).thenReturn(
+                new DescribeInstancesResult().withReservations(
+                        new Reservation().withInstances(new com.amazonaws.services.ec2.model.Instance().withInstanceId("i-instance")))
+        );
+
         underTest.upscale(authenticatedContext, stack, cloudResources);
 
         verify(amazonAutoScalingRetryClient).resumeProcesses(argThat(argument -> AUTOSCALING_GROUP_NAME.equals(argument.getAutoScalingGroupName())
@@ -165,7 +170,7 @@ public class AwsRepairTest extends AwsComponentTest {
 
         verify(amazonAutoScalingRetryClient, times(stack.getGroups().size()))
                 .suspendProcesses(argThat(argument -> AUTOSCALING_GROUP_NAME.equals(argument.getAutoScalingGroupName())
-                    && SUSPENDED_PROCESSES.equals(argument.getScalingProcesses())));
+                        && SUSPENDED_PROCESSES.equals(argument.getScalingProcesses())));
 
         ArgumentCaptor<CloudResource> updatedCloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(resourceNotifier, times(4)).notifyUpdate(updatedCloudResourceArgumentCaptor.capture(), any());

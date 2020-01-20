@@ -21,6 +21,7 @@ import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
@@ -64,6 +65,9 @@ public class AwsUpscaleService {
     @Inject
     private AwsElasticIpService awsElasticIpService;
 
+    @Inject
+    private AwsTaggingService awsTaggingService;
+
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
         AmazonCloudFormationRetryClient cloudFormationClient = getCloudFormationRetryClient(ac);
         AmazonAutoScalingRetryClient amazonASClient = getAutoScalingRetryClient(ac);
@@ -93,6 +97,8 @@ public class AwsUpscaleService {
                 .collect(Collectors.toList());
         awsComputeResourceService.buildComputeResourcesForUpscale(ac, stack, groupsWithNewInstances, newInstances, reattachableVolumeSets, networkResources);
 
+        awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
+
         return singletonList(new CloudResourceStatus(cfStackUtil.getCloudFormationStackResource(resources), ResourceStatus.UPDATED));
     }
 
@@ -101,7 +107,7 @@ public class AwsUpscaleService {
         request.setAutoScalingGroupNames(new ArrayList<>(autoScalingGroupNames));
         return amazonASClient.describeAutoScalingGroups(request).getAutoScalingGroups().stream()
                 .collect(Collectors.toMap(AutoScalingGroup::getAutoScalingGroupName,
-                                autoScalingGroup -> autoScalingGroup.getInstances().size()));
+                        autoScalingGroup -> autoScalingGroup.getInstances().size()));
     }
 
     private Map<String, Group> getAutoScaleGroupsByName(AuthenticatedContext ac, AmazonCloudFormationRetryClient cloudFormationClient,

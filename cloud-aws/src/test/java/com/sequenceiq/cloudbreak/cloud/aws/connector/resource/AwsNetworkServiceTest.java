@@ -33,7 +33,7 @@ import com.amazonaws.services.ec2.model.Vpc;
 import com.amazonaws.services.ec2.model.VpcCidrBlockAssociation;
 import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsTagPreparationService;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
@@ -82,7 +82,7 @@ public class AwsNetworkServiceTest {
     private CloudFormationStackUtil cloudFormationStackUtil;
 
     @Mock
-    private AwsTagPreparationService awsTagPreparationService;
+    private AwsTaggingService awsTaggingService;
 
     private Optional<CloudFileSystemView> identity = Optional.empty();
 

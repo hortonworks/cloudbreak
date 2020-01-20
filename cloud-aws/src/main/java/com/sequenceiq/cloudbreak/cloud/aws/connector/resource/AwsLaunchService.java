@@ -25,6 +25,7 @@ import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
@@ -93,6 +94,9 @@ public class AwsLaunchService {
     @Inject
     private AwsElasticIpService awsElasticIpService;
 
+    @Inject
+    private AwsTaggingService awsTaggingService;
+
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
         createKeyPair(ac, stack);
@@ -156,6 +160,9 @@ public class AwsLaunchService {
         }
 
         awsComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentType, threshold, instances, networkResources);
+
+        awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
+
         return awsResourceConnector.check(ac, instances);
     }
 

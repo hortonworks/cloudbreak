@@ -46,7 +46,7 @@ public class AwsStackRequestHelper {
     static final int CHUNK_SIZE = 4096;
 
     @Inject
-    private AwsTagPreparationService awsTagPreparationService;
+    private AwsTaggingService awsTaggingService;
 
     @Inject
     private AwsClient awsClient;
@@ -56,7 +56,7 @@ public class AwsStackRequestHelper {
                 .withStackName(cFStackName)
                 .withOnFailure(OnFailure.DO_NOTHING)
                 .withTemplateBody(cfTemplate)
-                .withTags(awsTagPreparationService.prepareCloudformationTags(ac, stack.getTags()))
+                .withTags(awsTaggingService.prepareCloudformationTags(ac, stack.getTags()))
                 .withCapabilities(CAPABILITY_IAM)
                 .withParameters(getStackParameters(ac, stack, cFStackName, subnet));
     }
@@ -66,7 +66,7 @@ public class AwsStackRequestHelper {
                 .withStackName(cFStackName)
                 .withOnFailure(OnFailure.DO_NOTHING)
                 .withTemplateBody(cfTemplate)
-                .withTags(awsTagPreparationService.prepareCloudformationTags(ac, stack.getTags()))
+                .withTags(awsTaggingService.prepareCloudformationTags(ac, stack.getTags()))
                 .withCapabilities(CAPABILITY_IAM)
                 .withParameters(getStackParameters(ac, stack));
     }

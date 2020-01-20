@@ -29,7 +29,7 @@ import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsTagPreparationService;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
@@ -70,7 +70,7 @@ public class EncryptedSnapshotService {
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
 
     @Inject
-    private AwsTagPreparationService awsTagPreparationService;
+    private AwsTaggingService awsTaggingService;
 
     public boolean isEncryptedVolumeRequested(Group group) {
         return new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate()).isEncryptedVolumes();
@@ -134,7 +134,7 @@ public class EncryptedSnapshotService {
 
     private Collection<Tag> prepareTagList(AuthenticatedContext ac, CloudStack cloudStack, AwsInstanceView awsInstanceView) {
         String ebsEncryptedTag = getEncryptedSnapshotName(awsInstanceView);
-        Collection<com.amazonaws.services.ec2.model.Tag> tags = awsTagPreparationService.prepareEc2Tags(ac, cloudStack.getTags());
+        Collection<com.amazonaws.services.ec2.model.Tag> tags = awsTaggingService.prepareEc2Tags(ac, cloudStack.getTags());
         tags.add(new Tag().withKey(ebsEncryptedTag).withValue(ebsEncryptedTag));
         return tags;
     }

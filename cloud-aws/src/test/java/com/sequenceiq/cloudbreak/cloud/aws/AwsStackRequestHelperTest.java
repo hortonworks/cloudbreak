@@ -45,7 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 public class AwsStackRequestHelperTest {
 
     @Mock
-    private AwsTagPreparationService awsTagPreparationService;
+    private AwsTaggingService awsTaggingService;
 
     @Mock
     private AwsClient awsClient;
@@ -105,7 +105,7 @@ public class AwsStackRequestHelperTest {
         when(network.getStringParameter(anyString())).thenReturn("");
 
         Collection<Tag> tags = Lists.newArrayList(new Tag().withKey("mytag").withValue("myvalue"));
-        when(awsTagPreparationService.prepareCloudformationTags(authenticatedContext, cloudStack.getTags())).thenReturn(tags);
+        when(awsTaggingService.prepareCloudformationTags(authenticatedContext, cloudStack.getTags())).thenReturn(tags);
 
         CreateStackRequest createStackRequest =
                 underTest.createCreateStackRequest(authenticatedContext, cloudStack, "stackName", "subnet", "template");
@@ -113,14 +113,14 @@ public class AwsStackRequestHelperTest {
         assertEquals("stackName", createStackRequest.getStackName());
         assertEquals("template", createStackRequest.getTemplateBody());
 
-        verify(awsTagPreparationService).prepareCloudformationTags(authenticatedContext, cloudStack.getTags());
+        verify(awsTaggingService).prepareCloudformationTags(authenticatedContext, cloudStack.getTags());
         assertEquals(tags, createStackRequest.getTags());
     }
 
     @Test
     public void testCreateCreateStackRequestForDatabaseStack() {
         Collection<Tag> tags = Lists.newArrayList(new Tag().withKey("mytag").withValue("myvalue"));
-        when(awsTagPreparationService.prepareCloudformationTags(authenticatedContext, databaseStack.getTags())).thenReturn(tags);
+        when(awsTaggingService.prepareCloudformationTags(authenticatedContext, databaseStack.getTags())).thenReturn(tags);
 
         CreateStackRequest createStackRequest =
                 underTest.createCreateStackRequest(authenticatedContext, databaseStack, "stackName", "template");
@@ -128,7 +128,7 @@ public class AwsStackRequestHelperTest {
         assertEquals("stackName", createStackRequest.getStackName());
         assertEquals("template", createStackRequest.getTemplateBody());
 
-        verify(awsTagPreparationService).prepareCloudformationTags(authenticatedContext, cloudStack.getTags());
+        verify(awsTaggingService).prepareCloudformationTags(authenticatedContext, cloudStack.getTags());
         assertEquals(tags, createStackRequest.getTags());
     }
 
