@@ -14,6 +14,8 @@ without-build: download-cbd runtest
 
 build-with-docker: download-cbd docker-build runtest
 
+bring-up-schema: download-cbd create-image create-cloudbreak-context schema-migration
+
 download-jar-from-s3:
 	./scripts/download-artifacts.sh
 
@@ -49,6 +51,9 @@ revert-db:
 
 cbd-delete:
 	./scripts/cbd-delete.sh
+
+schema-migration:
+	./scripts/schema-migration.sh
 
 upload-s3:
 	aws s3 cp ./apidefinitions/cb.json s3://cloudbreak-swagger/swagger-$(VERSION).json --acl public-read
