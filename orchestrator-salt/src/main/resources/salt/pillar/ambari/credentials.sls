@@ -1,3 +1,0 @@
-ambari:
-  username:
-  password:

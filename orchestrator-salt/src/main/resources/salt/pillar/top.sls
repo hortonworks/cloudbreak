@@ -1,11 +1,4 @@
 base:
-  'G@roles:ambari_server or G@roles:ambari_agent':
-    - match: compound
-    - ambari.config
-    - ambari.repo
-    - ambari.gpl
-    - hdp.repo
-
   '*':
     - nodes.hosts
     - discovery.init
@@ -72,17 +65,6 @@ base:
     - gateway.init
     - gateway.ldap
     - gateway.settings
-
-  'roles:ambari_server*':
-    - match: grain
-    - ambari.database
-    - ambari.credentials
-    - ambari.ldaps
-    - grafana.repo
-    - gateway.init
-    - gateway.ldap
-    - gateway.settings
-    - jdbc.connectors
 
   'roles:knox_gateway':
     - match: grain

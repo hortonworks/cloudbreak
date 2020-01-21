@@ -26,15 +26,6 @@
     - makedirs: True
     - source: salt://nginx/conf/ssl-locations.d/saltboot.conf
 
-{% if "ambari_server" in grains.get('roles', []) %}
-
-/etc/nginx/sites-enabled/ssl-locations.d/ambari.conf:
-  file.managed:
-    - makedirs: True
-    - source: salt://nginx/conf/ssl-locations.d/ambari.conf
-
-{% endif %}
-
 {% if "manager_server" in grains.get('roles', []) %}
 {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
 
@@ -105,15 +96,11 @@ generate_user_facing_cert:
 /etc/nginx/sites-enabled/ssl-user-facing.conf:
   file.managed:
     - makedirs: True
-  {% if "ambari_server" in grains.get('roles', []) %}
-    - source: salt://nginx/conf/ambari-ssl-user-facing.conf
-  {% elif "manager_server" in grains.get('roles', []) %}
     {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
     - source: salt://nginx/conf/clouderamanager-ssl-user-facing.conf
     - template: jinja
     - context:
       protocol: {{ cloudera_manager.communication.protocol }}
-  {% endif %}
 
 restart_nginx_after_ssl_reconfig_with_user_facing:
   service.running:

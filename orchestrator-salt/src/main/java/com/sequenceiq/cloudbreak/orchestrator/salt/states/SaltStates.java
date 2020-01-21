@@ -48,10 +48,6 @@ public class SaltStates {
     private SaltStates() {
     }
 
-    public static String ambariReset(SaltConnector sc, Target<String> target) {
-        return applyState(sc, "ambari.reset", target).getJid();
-    }
-
     public static String mountDisks(SaltConnector sc) {
         return applyStateAll(sc, "disks.format-and-mount").getJid();
     }

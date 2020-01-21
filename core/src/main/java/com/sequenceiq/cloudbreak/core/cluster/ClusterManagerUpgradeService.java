@@ -69,7 +69,7 @@ public class ClusterManagerUpgradeService {
                 credentials.put("password", clusterSecurityService.getCloudbreakClusterPassword());
                 servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
                 SaltConfig pillar = new SaltConfig(servicePillar);
-                hostOrchestrator.upgradeAmbari(gatewayConfig, gatewayFQDN, stackUtil.collectNodes(stack), pillar, exitCriteriaModel);
+                hostOrchestrator.upgradeClusterManager(gatewayConfig, gatewayFQDN, stackUtil.collectNodes(stack), pillar, exitCriteriaModel);
             } else {
                 throw new UnsupportedOperationException("Ambari upgrade works only with host orchestrator");
             }
