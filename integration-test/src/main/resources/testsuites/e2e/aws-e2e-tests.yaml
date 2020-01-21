@@ -7,7 +7,6 @@ tests:
 
   - name: "aws sdx tests"
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxBaseImageTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxCloudStorageTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRepairTests

@@ -31,31 +31,9 @@ public class BasicEnvironmentTests extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak",
-            when = "valid create environment request is sent",
-            then = "environment should be created")
-    public void testCreateEnvironment(TestContext testContext) {
-        testContext
-                .given(CredentialTestDto.class)
-                .when(credentialTestClient.create())
-                .given("telemetry", TelemetryTestDto.class)
-                .withLogging()
-                .withReportClusterLogs()
-                .given(EnvironmentTestDto.class)
-                .withNetwork()
-                .withTelemetry("telemetry")
-                .withCreateFreeIpa(Boolean.TRUE)
-                .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .then((tc, testDto, cc) -> environmentTestClient.describe().action(tc, testDto, cc))
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT)
-    @Description(
-            given = "there is an available environment",
-            when = "a delete request is sent for the environment",
+            when = "valid create environment request is sent, then a valid force delete request is sent",
             then = "the environment should be deleted")
-    public void testForceDeleteEnvironment(TestContext testContext) {
+    public void testCreateAndForceDeleteEnvironment(TestContext testContext) {
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
