@@ -86,14 +86,14 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
 
     private String getContainerName(String baseLocation) {
         final String containerName = baseLocation.substring(baseLocation.lastIndexOf("/") + 1, baseLocation.lastIndexOf("@"));
-        Log.log(LOGGER, format(" Container Name: [%s] ", containerName));
+        LOGGER.info("Container Name: {} at Base Location: {}", containerName, baseLocation);
         return containerName;
     }
 
     private String getContainerName() {
         String fullPath = azureProperties.getCloudstorage().getBaseLocation();
         final String containerName = fullPath.substring(fullPath.lastIndexOf("/") + 1, fullPath.lastIndexOf("@"));
-        Log.log(LOGGER, format(" Container Name: [%s] ", containerName));
+        LOGGER.info("Container Name: {} at Path: {}", containerName, fullPath);
         return containerName;
     }
 
@@ -108,12 +108,12 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
                 deleteBlobsInDirectory(cloudBlobContainer, ((CloudBlobDirectory) blobItem).getPrefix());
             } else if (blobItem instanceof CloudPageBlob) {
                 CloudPageBlob cloudPageBlob = cloudBlobContainer.getPageBlobReference(((CloudPageBlob) blobItem).getName());
-                Log.log(LOGGER, format(" Deleting Azure Adls Gen 2 Cloud Page Blob with Name: [%s] and with bites of content: [%d] at URI: [%s] ",
+                Log.log(LOGGER, format(" Deleting Azure Adls Gen 2 Cloud Page Blob with Name: [%s] and with bytes of content: [%d] at URI: [%s] ",
                         ((CloudPageBlob) blobItem).getName(), ((CloudPageBlob) blobItem).getProperties().getLength(), blobItem.getUri().getPath()));
                 cloudPageBlob.deleteIfExists();
             } else if (blobItem instanceof CloudBlockBlob) {
                 CloudBlockBlob cloudBlockBlob = cloudBlobContainer.getBlockBlobReference(((CloudBlockBlob) blobItem).getName());
-                Log.log(LOGGER, format(" Deleting Azure Adls Gen 2 Cloud Block Blob with Name: [%s] and with bites of content: [%d] at URI: [%s] ",
+                Log.log(LOGGER, format(" Deleting Azure Adls Gen 2 Cloud Block Blob with Name: [%s] and with bytes of content: [%d] at URI: [%s] ",
                         ((CloudBlockBlob) blobItem).getName(), ((CloudBlockBlob) blobItem).getProperties().getLength(), blobItem.getUri().getPath()));
                 cloudBlockBlob.deleteIfExists();
             }
@@ -131,10 +131,10 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
                         ((CloudBlobDirectory) blobItem).getPrefix(), blobItem.getUri().getPath()));
                 listBlobsInDirectory(cloudBlobContainer, ((CloudBlobDirectory) blobItem).getPrefix());
             } else if (blobItem instanceof CloudPageBlob) {
-                Log.log(LOGGER, format(" Azure Adls Gen 2 Cloud Page Blob is present with Name: [%s] and with bites of content: [%d] at URI: [%s] ",
+                Log.log(LOGGER, format(" Azure Adls Gen 2 Cloud Page Blob is present with Name: [%s] and with bytes of content: [%d] at URI: [%s] ",
                         ((CloudPageBlob) blobItem).getName(), ((CloudPageBlob) blobItem).getProperties().getLength(), blobItem.getUri().getPath()));
             } else if (blobItem instanceof CloudBlockBlob) {
-                Log.log(LOGGER, format(" Azure Adls Gen 2 Cloud Block Blob is present with Name: [%s] and with bites of content: [%d] at URI: [%s] ",
+                Log.log(LOGGER, format(" Azure Adls Gen 2 Cloud Block Blob is present with Name: [%s] and with bytes of content: [%d] at URI: [%s] ",
                         ((CloudBlockBlob) blobItem).getName(), ((CloudBlockBlob) blobItem).getProperties().getLength(), blobItem.getUri().getPath()));
             } else {
                 LOGGER.error("Azure Adls Gen 2 Cloud Storage Item that is present at URI: [{}] cannot be classify as CloudBlob, CloudPageBlob and " +
@@ -142,6 +142,43 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
                 throw new TestFailException(String.format("Azure Adls Gen 2 Cloud Storage Item that is present at URI: [%s] cannot be classify as" +
                         " CloudBlob, CloudPageBlob and CloudBlockBlob. ", blobItem.getUri().getPath()));
             }
+        }
+    }
+
+    private void listBlobsInDirectoryWithValidation(CloudBlobContainer cloudBlobContainer, String directoryName, Boolean zeroContent)
+            throws URISyntaxException, StorageException {
+
+        CloudBlobDirectory blobDirectory = cloudBlobContainer.getDirectoryReference(directoryName);
+
+        for (ListBlobItem blobItem : blobDirectory.listBlobs()) {
+            if (blobItem instanceof CloudBlobDirectory) {
+                LOGGER.info("Azure Adls Gen 2 Cloud Blob Directory is present with Prefix: {} at URI: {}",
+                        ((CloudBlobDirectory) blobItem).getPrefix(), blobItem.getUri().getPath());
+                listBlobsInDirectoryWithValidation(cloudBlobContainer, ((CloudBlobDirectory) blobItem).getPrefix(), zeroContent);
+            } else if (blobItem instanceof CloudPageBlob) {
+                LOGGER.info("Azure Adls Gen 2 Cloud Page Blob is present with Name: {} and with bytes of content: {} at URI: {}",
+                        ((CloudPageBlob) blobItem).getName(), ((CloudPageBlob) blobItem).getProperties().getLength(), blobItem.getUri().getPath());
+                validateBlobItemLength(blobItem, zeroContent);
+            } else if (blobItem instanceof CloudBlockBlob) {
+                LOGGER.info("Azure Adls Gen 2 Cloud Block Blob is present with Name: {} and with bytes of content: {} at URI: {}",
+                        ((CloudBlockBlob) blobItem).getName(), ((CloudBlockBlob) blobItem).getProperties().getLength(), blobItem.getUri().getPath());
+                validateBlobItemLength(blobItem, zeroContent);
+            } else {
+                LOGGER.error("Azure Adls Gen 2 Cloud Storage Item that is present at URI: {} cannot be classify as CloudBlob, CloudPageBlob and " +
+                        "CloudBlockBlob. ", blobItem.getUri().getPath());
+                throw new TestFailException(String.format("Azure Adls Gen 2 Cloud Storage Item that is present at URI: %s cannot be classify as" +
+                        " CloudBlob, CloudPageBlob and CloudBlockBlob. ", blobItem.getUri().getPath()));
+            }
+        }
+    }
+
+    private void validateBlobItemLength(ListBlobItem blobItem, Boolean zeroContent) {
+        if (((CloudBlob) blobItem).getProperties().getLength() == 0 && !zeroContent) {
+            LOGGER.error(" Azure Adls Gen 2 Blob: {} has 0 bytes of content!", ((CloudBlob) blobItem).getName());
+            throw new TestFailException(String.format("Azure Adls Gen 2 Blob: %s has 0 bytes of content!", ((CloudBlob) blobItem).getName()));
+        } else {
+            LOGGER.info("Azure Adls Gen 2 Block Blob is present with Name: {} and with bytes of content: {} at URI: {}",
+                    ((CloudBlob) blobItem).getName(), ((CloudBlob) blobItem).getProperties().getLength(), blobItem.getUri().getPath());
         }
     }
 
@@ -164,13 +201,13 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
                 } catch (StorageException | URISyntaxException createAfterWaitException) {
                     limit++;
                     if (limit >= 60) {
-                        LOGGER.error("Azure Adls Gen2 Blob Storage Container [{}] create cannot be succeed during 360000 ms!\n",
+                        LOGGER.error("Azure Adls Gen2 Blob Storage Container: {} create cannot be succeed during 360000 ms!\n",
                                 containerName, createAfterWaitException);
                     }
                 }
             } while (limit < 60);
         } catch (InterruptedException waitException) {
-            LOGGER.error("Creation of Adls Gen2 Blob Storage Container [{}] has been timed out after 360000 ms!\n", containerName, waitException);
+            LOGGER.error("Creation of Adls Gen2 Blob Storage Container: {} has been timed out after 360000 ms!\n", containerName, waitException);
         }
     }
 
@@ -179,16 +216,17 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
         CloudBlobContainer cloudBlobContainer = getCloudBlobContainer(containerName);
 
         try {
-            Log.log(LOGGER, format(" Removing Azure Adls Gen 2 Blob Container with Name: [%s] ", containerName));
+            Log.log(LOGGER, format(" Removing Azure Adls Gen 2 Blob Container with Name: %s at Base Location: %s", containerName, baseLocation));
             cloudBlobContainer.deleteIfExists();
-            Log.log(LOGGER, format(" Azure Adls Gen 2 Blob Container [%s] delete has been initiated. ", containerName));
+            Log.log(LOGGER, format(" Azure Adls Gen 2 Blob Container: %s delete has been initiated. ", containerName));
         } catch (StorageException e) {
             if (e.getHttpStatusCode() == 404) {
-                LOGGER.error("Azure Adls Gen2 Blob Storage does not present with name: {}", containerName);
-                throw new TestFailException("Azure Adls Gen2 Blob Storage does not present with name: " + containerName);
+                LOGGER.error("Azure Adls Gen2 Blob Container does not present with name: {} at Base Location: {}", containerName, baseLocation);
+                throw new TestFailException("Azure Adls Gen2 Blob Container does not present with name: " +  containerName
+                        + " at Base Location: " + baseLocation);
             } else {
-                LOGGER.error("Azure Adls Gen2 Blob Storage delete cannot be succeed!", e);
-                throw new TestFailException("Azure Adls Gen2 Blob Storage delete cannot be succeed!" + e);
+                LOGGER.error("Azure Adls Gen2 Blob Container delete cannot be succeed!", e);
+                throw new TestFailException("Azure Adls Gen2 Blob Container delete cannot be succeed!" + e);
             }
         } finally {
             createCloudBlobContainer(containerName);
@@ -205,7 +243,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
                 String blobUriPath = blob.getUri().getPath();
 
                 if (blob instanceof CloudBlob) {
-                    Log.log(LOGGER, format(" Removing Azure Adls Gen 2 Blob with Name: [%s] and with bites of content: [%d] at URI: [%s] ",
+                    Log.log(LOGGER, format(" Removing Azure Adls Gen 2 Blob with Name: %s and with bytes of content: %d at URI: %s ",
                             ((CloudBlob) blob).getName(), ((CloudBlob) blob).getProperties().getLength(), blobUriPath));
                     ((CloudBlob) blob).deleteIfExists();
                 } else {
@@ -234,7 +272,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
                 String blobUriPath = blob.getUri().getPath();
 
                 if (blob instanceof CloudBlob) {
-                    Log.log(LOGGER, format(" Removing Azure Adls Gen 2 Blob with Name: [%s] and with bites of content: [%d] at URI: [%s] ",
+                    Log.log(LOGGER, format(" Removing Azure Adls Gen 2 Blob with Name: %s and with bytes of content: %d at URI: %s ",
                             ((CloudBlob) blob).getName(), ((CloudBlob) blob).getProperties().getLength(), blobUriPath));
                     ((CloudBlob) blob).deleteIfExists();
                 } else {
@@ -262,10 +300,10 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
 
                 if (blob instanceof CloudBlob) {
                     if (((CloudBlob) blob).exists()) {
-                        Log.log(LOGGER, format(" Azure Adls Gen 2 Blob is present with Name: [%s] and with bites of content: [%d] at URI: [%s] ",
+                        Log.log(LOGGER, format(" Azure Adls Gen 2 Blob is present with Name: %s and with bytes of content: %d at URI: %s ",
                                 ((CloudBlob) blob).getName(), ((CloudBlob) blob).getProperties().getLength(), blobUriPath));
                     } else {
-                        Log.log(LOGGER, format(" Azure Adls Gen 2 Blob is NOT present with Name: [%s] and with bites of content: [%d] at URI: [%s] ",
+                        Log.log(LOGGER, format(" Azure Adls Gen 2 Blob is NOT present with Name: %s and with bytes of content: %d at URI: %s ",
                                 ((CloudBlob) blob).getName(), ((CloudBlob) blob).getProperties().getLength(), blobUriPath));
                     }
                 } else {
@@ -274,6 +312,44 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
                     }
                     CloudBlobDirectory blobDirectory = cloudBlobContainer.getDirectoryReference(blobName);
                     listBlobsInDirectory(cloudBlobContainer, blobDirectory.getPrefix());
+                }
+            }
+        } catch (StorageException | URISyntaxException e) {
+            LOGGER.error("Azure Adls Gen 2 Blob couldn't process the call. So it has been returned with error!", e);
+            throw new TestFailException(String.format("Azure Adls Gen 2 Blob couldn't process the call. So it has been returned the error: %s", e));
+        }
+    }
+
+    public void listSelectedDirectory(String baseLocation, String selectedDirectory, Boolean zeroContent) {
+        String containerName = getContainerName(baseLocation);
+        CloudBlobContainer cloudBlobContainer = getCloudBlobContainer(containerName);
+
+        try {
+            CloudBlobDirectory logsDirectory = cloudBlobContainer.getDirectoryReference("cluster-logs");
+            CloudBlobDirectory selectedLogsDirectory = logsDirectory.getDirectoryReference(selectedDirectory);
+            LOGGER.info("Selected Adls Gen 2 Blob directory: {}", selectedLogsDirectory.getPrefix());
+
+            for (ListBlobItem blob : selectedLogsDirectory.listBlobs()) {
+                String blobName = blob.getUri().getPath().split("/", 3)[2];
+                String blobUriPath = blob.getUri().getPath();
+                LOGGER.info("Selected Adls Gen 2 Blob name: {} at path: {} ", blobName, blobUriPath);
+
+                if (blob instanceof CloudBlob) {
+                    if (((CloudBlob) blob).exists()) {
+                        LOGGER.info("Azure Adls Gen 2 Blob is present with Name: {} and with bytes of content: {} at URI: {}",
+                                ((CloudBlob) blob).getName(), ((CloudBlob) blob).getProperties().getLength(), blobUriPath);
+                        validateBlobItemLength(blob, zeroContent);
+                    } else {
+                        LOGGER.error("Azure Adls Gen 2 Blob is NOT present with Name: {} and with bytes of content: {} at URI: {}",
+                                ((CloudBlob) blob).getName(), ((CloudBlob) blob).getProperties().getLength(), blobUriPath);
+                        throw new TestFailException(String.format("Azure Adls Gen 2 Blob is NOT present with Name: %s", ((CloudBlob) blob).getName()));
+                    }
+                } else {
+                    if (blobName.endsWith("/")) {
+                        blobName = blobName.replaceAll(".$", "");
+                    }
+                    CloudBlobDirectory blobDirectory = cloudBlobContainer.getDirectoryReference(blobName);
+                    listBlobsInDirectoryWithValidation(cloudBlobContainer, blobDirectory.getPrefix(), zeroContent);
                 }
             }
         } catch (StorageException | URISyntaxException e) {

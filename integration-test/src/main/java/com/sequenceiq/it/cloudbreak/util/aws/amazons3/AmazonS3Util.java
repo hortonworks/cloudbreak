@@ -19,6 +19,14 @@ public class AmazonS3Util {
     }
 
     public void listBucket(String baseLocation) {
-        s3ClientActions.listBucket(baseLocation);
+        s3ClientActions.listBucketSelectedObject(baseLocation, "ranger", true);
+    }
+
+    public void listFreeIPAObject(String baseLocation) {
+        s3ClientActions.listBucketSelectedObject(baseLocation, "freeipa", false);
+    }
+
+    public void listDataLakeObject(String baseLocation) {
+        s3ClientActions.listBucketSelectedObject(baseLocation, "datalake", false);
     }
 }
