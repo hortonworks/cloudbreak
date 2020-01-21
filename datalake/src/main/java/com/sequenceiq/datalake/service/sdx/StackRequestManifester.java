@@ -175,11 +175,10 @@ public class StackRequestManifester {
             loggingRequest.setCloudwatch(envLogging.getCloudwatch());
             loggingRequest.setStorageLocation(envLogging.getStorageLocation());
             telemetryRequest.setLogging(loggingRequest);
-            if (envTelemetry.getFeatures() != null
-                    && envTelemetry.getFeatures().getReportDeploymentLogs() != null) {
+            if (envTelemetry.getFeatures() != null) {
                 FeaturesRequest featuresRequest = new FeaturesRequest();
-                featuresRequest.setReportDeploymentLogs(
-                        environment.getTelemetry().getFeatures().getReportDeploymentLogs());
+                featuresRequest.setReportDeploymentLogs(envTelemetry.getFeatures().getReportDeploymentLogs());
+                featuresRequest.setUseSharedAltusCredential(envTelemetry.getFeatures().getUseSharedAltusCredential());
                 telemetryRequest.setFeatures(featuresRequest);
             }
             if (envTelemetry.getFluentAttributes() != null) {

@@ -133,7 +133,7 @@ public class TelemetryConverter {
 
     private FeaturesResponse createFeaturesResponseFromSource(Features features) {
         FeaturesResponse featuresResponse = null;
-        if (features != null && features.getReportDeploymentLogs() != null) {
+        if (features != null) {
             featuresResponse = new FeaturesResponse();
             featuresResponse.setReportDeploymentLogs(features.getReportDeploymentLogs());
             featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());

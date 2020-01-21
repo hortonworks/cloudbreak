@@ -112,6 +112,8 @@ public class TelemetryConverter {
             if (featuresResponse != null) {
                 LOGGER.debug("Setting report deployment logs response (telemetry) based on environment response.");
                 featuresRequest.setReportDeploymentLogs(featuresResponse.getReportDeploymentLogs());
+                LOGGER.debug("Setting use shared altus credential feature based on environment response.");
+                featuresRequest.setUseSharedAltusCredential(featuresResponse.getUseSharedAltusCredential());
             }
             telemetryRequest.setFluentAttributes(response.getFluentAttributes());
         }
@@ -204,6 +206,7 @@ public class TelemetryConverter {
             featuresRequest = new FeaturesRequest();
             featuresRequest.setWorkloadAnalytics(features.getWorkloadAnalytics());
             featuresRequest.setReportDeploymentLogs(features.getReportDeploymentLogs());
+            featuresRequest.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
         }
         return featuresRequest;
     }
