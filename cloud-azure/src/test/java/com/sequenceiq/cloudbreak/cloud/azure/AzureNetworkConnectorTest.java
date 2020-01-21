@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,7 +19,6 @@ import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -92,14 +93,14 @@ public class AzureNetworkConnectorTest {
     public void testPlatformShouldReturnAzurePlatform() {
         Platform actual = underTest.platform();
 
-        Assert.assertEquals(AzureConstants.PLATFORM, actual);
+        assertEquals(AzureConstants.PLATFORM, actual);
     }
 
     @Test
     public void testVariantShouldReturnAzurePlatform() {
         Variant actual = underTest.variant();
 
-        Assert.assertEquals(AzureConstants.VARIANT, actual);
+        assertEquals(AzureConstants.VARIANT, actual);
     }
 
     @Test
@@ -132,6 +133,8 @@ public class AzureNetworkConnectorTest {
     @Test
     public void testDeleteNetworkWithSubNetsShouldDeleteTheStackAndTheResourceGroup() {
         NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest();
+
+        when(azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup())).thenReturn(mock(ResourceGroup.class));
         when(azureClientService.getClient(networkDeletionRequest.getCloudCredential())).thenReturn(azureClient);
 
         underTest.deleteNetworkWithSubnets(networkDeletionRequest);
@@ -144,10 +147,41 @@ public class AzureNetworkConnectorTest {
     public void testDeleteNetworkWithSubNetsShouldThrowAnExceptionWhenTheStackDeletionFailed() {
         NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest();
 
+        when(azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup())).thenReturn(mock(ResourceGroup.class));
         when(azureClientService.getClient(networkDeletionRequest.getCloudCredential())).thenReturn(azureClient);
         doThrow(createCloudException()).when(azureClient).deleteTemplateDeployment(RESOURCE_GROUP, STACK);
 
         underTest.deleteNetworkWithSubnets(networkDeletionRequest);
+    }
+
+    @Test
+    public void testDeleteNetworkWithSubNetsShouldDoNothingWhenResourceGroupNameIsNullInRequest() {
+        NetworkDeletionRequest networkDeletionRequest = mock(NetworkDeletionRequest.class);
+        when(networkDeletionRequest.getResourceGroup()).thenReturn(null);
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+
+        underTest.deleteNetworkWithSubnets(networkDeletionRequest);
+
+        verify(azureClient, times(0)).getResourceGroup(any());
+        verify(azureClient, times(0)).getResourceGroup(null);
+        verify(azureClient, times(0)).deleteTemplateDeployment(any(), any());
+        verify(azureClient, times(0)).deleteResourceGroup(any());
+    }
+
+    @Test
+    public void testDeleteNetworkWithSubNetsShouldDoNothingWhenResourceGroupNameRefersToANonExistingResourceGroupInRequest() {
+        NetworkDeletionRequest networkDeletionRequest = mock(NetworkDeletionRequest.class);
+        String resourceGroupName = "someNotExistingResourceGroupName";
+        when(networkDeletionRequest.getResourceGroup()).thenReturn(resourceGroupName);
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+        when(azureClient.getResourceGroup(resourceGroupName)).thenReturn(null);
+
+        underTest.deleteNetworkWithSubnets(networkDeletionRequest);
+
+        verify(azureClient, times(1)).getResourceGroup(any());
+        verify(azureClient, times(1)).getResourceGroup(resourceGroupName);
+        verify(azureClient, times(0)).deleteTemplateDeployment(any(), any());
+        verify(azureClient, times(0)).deleteResourceGroup(any());
     }
 
     @Test

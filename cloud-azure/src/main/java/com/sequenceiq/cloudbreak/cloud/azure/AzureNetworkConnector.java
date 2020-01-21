@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -89,9 +90,10 @@ public class AzureNetworkConnector implements NetworkConnector {
         if (!networkDeletionRequest.isExisting()) {
             try {
                 AzureClient azureClient = azureClientService.getClient(networkDeletionRequest.getCloudCredential());
-                azureClient.deleteTemplateDeployment(networkDeletionRequest.getResourceGroup(), networkDeletionRequest.getStackName());
-                azureClient.deleteResourceGroup(networkDeletionRequest.getResourceGroup());
-
+                if (isResourceGroupExists(azureClient, networkDeletionRequest)) {
+                    azureClient.deleteTemplateDeployment(networkDeletionRequest.getResourceGroup(), networkDeletionRequest.getStackName());
+                    azureClient.deleteResourceGroup(networkDeletionRequest.getResourceGroup());
+                }
             } catch (CloudException e) {
                 LOGGER.warn("Deletion error, cloud exception happened: ", e);
                 if (e.body() != null && e.body().details() != null) {
@@ -102,6 +104,19 @@ public class AzureNetworkConnector implements NetworkConnector {
                     throw new CloudConnectorException(String.format("Stack deletion failed: '%s', please go to Azure Portal for detailed message", e));
                 }
             }
+        }
+    }
+
+    private boolean isResourceGroupExists(AzureClient azureClient, NetworkDeletionRequest networkDeletionRequest) {
+        if (StringUtils.isEmpty(networkDeletionRequest.getResourceGroup())) {
+            LOGGER.debug("The deletable network does not contain a valid resource group name, it is null or empty!");
+            return false;
+        }
+        if (azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup()) == null) {
+            LOGGER.debug("No resource group found on cloud provider (Azure) with name: \"{}\"", networkDeletionRequest.getResourceGroup());
+            return false;
+        } else {
+            return true;
         }
     }
 
@@ -164,4 +179,5 @@ public class AzureNetworkConnector implements NetworkConnector {
         properties.put("stackName", stackName);
         return properties;
     }
+
 }
