@@ -36,6 +36,16 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
+    public void cloudStorageListContainerFreeIPA(String baseLocation) {
+        throw new NotImplementedException(GCP_IMPLEMENTATION_MISSING);
+    }
+
+    @Override
+    public void cloudStorageListContainerDataLake(String baseLocation) {
+        throw new NotImplementedException(GCP_IMPLEMENTATION_MISSING);
+    }
+
+    @Override
     public void cloudStorageDeleteContainer(String baseLocation) {
         throw new NotImplementedException(GCP_IMPLEMENTATION_MISSING);
     }

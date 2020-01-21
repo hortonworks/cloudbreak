@@ -2,7 +2,9 @@ package com.sequenceiq.it.cloudbreak.util.aws.amazons3.action;
 
 import static java.lang.String.format;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -16,6 +18,8 @@ import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.collect.Lists;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -29,12 +33,7 @@ public class S3ClientActions extends S3Client {
     public void deleteNonVersionedBucket(String baseLocation) {
         AmazonS3 s3Client = buildS3Client();
         String bucketName = getBucketName();
-        AmazonS3URI amazonS3URI = new AmazonS3URI(getEUWestS3Uri());
         String prefix = StringUtils.substringAfterLast(baseLocation, "/");
-
-        Log.log(LOGGER, format(" Amazon S3 URI: %s", amazonS3URI));
-        Log.log(LOGGER, format(" Amazon S3 Bucket: %s", bucketName));
-        Log.log(LOGGER, format(" Amazon S3 Key Prefix: %s", prefix));
 
         if (s3Client.doesBucketExistV2(bucketName)) {
             try {
@@ -46,8 +45,8 @@ public class S3ClientActions extends S3Client {
                 do {
                     List<DeleteObjectsRequest.KeyVersion> deletableObjects = Lists.newArrayList();
                     for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
-                        Log.log(LOGGER, format(" Removing Amazon S3 Key with Name: %s and with bites of content %d",
-                                objectSummary.getKey(), objectSummary.getSize()));
+                        LOGGER.info("Removing Amazon S3 key with name: {} and with bytes of content {}",
+                                objectSummary.getKey(), objectSummary.getSize());
                         deletableObjects.add(new DeleteObjectsRequest.KeyVersion(objectSummary.getKey()));
                     }
                     DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
@@ -72,15 +71,17 @@ public class S3ClientActions extends S3Client {
         }
     }
 
-    public void listBucket(String baseLocation) {
+    public void listBucketSelectedObject(String baseLocation, String selectedObject, Boolean zeroContent) {
         AmazonS3 s3Client = buildS3Client();
         String bucketName = getBucketName();
         AmazonS3URI amazonS3URI = new AmazonS3URI(getEUWestS3Uri());
+        List<S3ObjectSummary> filteredObjectSummaries;
         String keyPrefix = StringUtils.substringAfterLast(baseLocation, "/");
 
         Log.log(LOGGER, format(" Amazon S3 URI: %s", amazonS3URI));
         Log.log(LOGGER, format(" Amazon S3 Bucket: %s", bucketName));
         Log.log(LOGGER, format(" Amazon S3 Key Prefix: %s", keyPrefix));
+        Log.log(LOGGER, format(" Amazon S3 Object: %s", selectedObject));
 
         if (s3Client.doesBucketExistV2(bucketName)) {
             try {
@@ -90,14 +91,35 @@ public class S3ClientActions extends S3Client {
                 ObjectListing objectListing = s3Client.listObjects(listObjectsRequest);
 
                 do {
-                    for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
-                        Log.log(LOGGER, format(" Amazon S3 Key is present with Name: %s and with bites of content %d",
-                                objectSummary.getKey(), objectSummary.getSize()));
-                    }
+                    filteredObjectSummaries = objectListing.getObjectSummaries().stream()
+                            .filter(objectSummary -> objectSummary.getKey().contains(selectedObject))
+                            .collect(Collectors.toList());
+
                     if (objectListing.isTruncated()) {
                         objectListing = s3Client.listNextBatchOfObjects(objectListing);
                     }
-                } while (objectListing.isTruncated());
+                } while (filteredObjectSummaries.isEmpty() && objectListing.isTruncated());
+
+                Log.log(LOGGER, format(" Amazon S3 object: %s contains %d sub-objects.",
+                        selectedObject, filteredObjectSummaries.size()));
+
+                for (S3ObjectSummary objectSummary : filteredObjectSummaries.stream().limit(10).collect(Collectors.toList())) {
+                    S3Object object = s3Client.getObject(bucketName, objectSummary.getKey());
+                    S3ObjectInputStream inputStream = object.getObjectContent();
+
+                    if (object.getObjectMetadata().getContentLength() == 0 && !zeroContent) {
+                        throw new TestFailException(String.format("Amazon S3 path: %s has 0 bytes of content!", object.getKey()));
+                    } else {
+                        LOGGER.info("Amazon S3 object is present with path: {} and with bytes of content {}",
+                                object.getKey(), object.getObjectMetadata().getContentLength());
+                    }
+                    try {
+                        inputStream.abort();
+                        object.close();
+                    } catch (IOException e) {
+                        LOGGER.error("Unable to close Amazon S3 object {}. It has been returned with error!", object.getKey(), e);
+                    }
+                }
             } catch (AmazonServiceException e) {
                 LOGGER.error("Amazon S3 couldn't process the call. So it has been returned with error!", e);
                 throw new TestFailException(String.format("Amazon S3 couldn't process the call. So it has been returned the error: %s", e));
