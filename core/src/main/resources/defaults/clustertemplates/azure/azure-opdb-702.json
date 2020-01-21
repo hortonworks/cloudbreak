@@ -98,7 +98,7 @@
             {
               "count": 1,
               "size": 100,
-              "type": "Premium_LRS"
+              "type": "StandardSSD_LRS"
             }
           ],
           "azure": {
@@ -108,7 +108,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_DS4_v2",
+          "instanceType": "Standard_D8_v3",
           "rootVolume": {
             "size": 50
           },
