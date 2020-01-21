@@ -192,8 +192,7 @@ public class ClusterHostServiceRunner {
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-            boolean clouderaManager = blueprintService.isClouderaManagerTemplate(cluster.getBlueprint());
-            hostOrchestrator.initServiceRun(gatewayConfigs, nodes, saltConfig, exitCriteriaModel, clouderaManager);
+            hostOrchestrator.initServiceRun(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
             if (CollectionUtils.isEmpty(candidateAddresses)) {
                 mountDisks.mountAllDisks(stack.getId());
             } else {
@@ -261,12 +260,6 @@ public class ClusterHostServiceRunner {
         saveSssdAdPillar(cluster, servicePillar, kerberosConfig);
         saveSssdIpaPillar(servicePillar, kerberosConfig, serviceLocations);
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
-        ldapView.ifPresent(ldap -> saveLdapsAdPillar(ldap, servicePillar, connector));
-        Map<String, Object> credentials = new HashMap<>();
-        credentials.put("username", connector.getCloudbreakClusterUserName(cluster));
-        credentials.put("password", connector.getCloudbreakClusterPassword(cluster));
-        credentials.put("securityMasterKey", connector.getMasterKey(cluster));
-        servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
 
         proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
 
@@ -321,16 +314,6 @@ public class ClusterHostServiceRunner {
             sssdConnfig.put("domain", kerberosConfig.getRealm().toLowerCase());
             sssdConnfig.put("password", kerberosConfig.getPassword());
             servicePillar.put("sssd-ad", new SaltPillarProperties("/sssd/ad.sls", singletonMap("sssd-ad", sssdConnfig)));
-        }
-    }
-
-    private void saveLdapsAdPillar(LdapView ldapView, Map<String, SaltPillarProperties> servicePillar, ClusterPreCreationApi connector) {
-        if (ldapView.getCertificate() != null) {
-            Map<String, Object> ldapsProperties = new HashMap<>();
-            ldapsProperties.put("certPath", connector.getCertPath());
-            ldapsProperties.put("keystorePassword", connector.getKeystorePassword());
-            ldapsProperties.put("keystorePath", connector.getKeystorePath());
-            servicePillar.put("ldaps-ad", new SaltPillarProperties("/ambari/ldaps.sls", singletonMap("ambari", singletonMap("ldaps", ldapsProperties))));
         }
     }
 
@@ -416,16 +399,6 @@ public class ClusterHostServiceRunner {
         } catch (CloudbreakImageNotFoundException e) {
             throw new CloudbreakOrchestratorFailedException("Cannot determine image of stack, thus osType and repository information cannot be provided.");
         }
-    }
-
-    private void decoratePillarWithAmbariDatabase(Cluster cluster, Map<String, SaltPillarProperties> servicePillar)
-            throws CloudbreakOrchestratorFailedException {
-        RDSConfig ambariRdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getId(), DatabaseType.AMBARI);
-        if (ambariRdsConfig == null) {
-            throw new CloudbreakOrchestratorFailedException("Ambari Database is missing for stack");
-        }
-        RdsView ambariRdsView = new RdsView(rdsConfigService.resolveVaultValues(ambariRdsConfig));
-        servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariRdsView))));
     }
 
     private void decoratePillarWithClouderaManagerCsds(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {

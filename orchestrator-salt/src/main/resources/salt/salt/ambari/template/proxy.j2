@@ -1,4 +1,0 @@
-export AMBARI_JVM_ARGS="$AMBARI_JVM_ARGS -D{{ pillar['proxy']['protocol'] }}.proxyHost={{ pillar['proxy']['host'] }} -D{{ pillar['proxy']['protocol'] }}.proxyPort={{ pillar['proxy']['port'] }}"
-{% if 'user' in pillar['proxy'] %}
-export AMBARI_JVM_ARGS="$AMBARI_JVM_ARGS -D{{ pillar['proxy']['protocol'] }}.proxyUser={{ pillar['proxy']['user'] }} -D{{ pillar['proxy']['protocol'] }}.proxyPassword={{ pillar['proxy']['password'] }}"
-{% endif %}

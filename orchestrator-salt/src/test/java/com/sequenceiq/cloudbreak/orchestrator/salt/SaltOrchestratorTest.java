@@ -40,7 +40,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
@@ -123,7 +122,7 @@ public class SaltOrchestratorTest {
         verifyNew(OrchestratorBootstrapRunner.class, times(3))
                 .withArguments(any(SaltUpload.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
         verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(Collections.singletonList(gatewayConfig)), eq(targets),
-            eq(bootstrapParams));
+                eq(bootstrapParams));
     }
 
     @Test
@@ -140,7 +139,7 @@ public class SaltOrchestratorTest {
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
                 .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
         verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector),
-            eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
+                eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
     }
 
     @Test
@@ -182,32 +181,16 @@ public class SaltOrchestratorTest {
         PowerMockito.when(SaltStates.getGrains(any(), any(), any())).thenReturn(new HashMap<>());
 
         SaltConfig saltConfig = new SaltConfig();
-        saltOrchestrator.initServiceRun(Collections.singletonList(gatewayConfig), targets, saltConfig, exitCriteriaModel, false);
+        saltOrchestrator.initServiceRun(Collections.singletonList(gatewayConfig), targets, saltConfig, exitCriteriaModel);
         saltOrchestrator.runService(Collections.singletonList(gatewayConfig), targets, saltConfig, exitCriteriaModel);
 
         // verify pillar save
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
                 .withArguments(eq(pillarSave), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
 
-        // verify ambari server role
-        verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(Sets.newHashSet(gatewayConfig.getHostname())),
-                eq(targets), eq("ambari_server_install"));
-        // verify ambari server role
-        verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(Sets.newHashSet(gatewayConfig.getHostname())),
-                eq(targets), eq("ambari_server"));
-
-        // verify ambari agent role
         Set<String> allNodes = targets.stream().map(Node::getHostname).collect(Collectors.toSet());
-        verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(allNodes),
-                eq(targets), eq("ambari_agent_install"));
-        // verify ambari agent role
-        allNodes = targets.stream().map(Node::getHostname).collect(Collectors.toSet());
-        verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(allNodes),
-                eq(targets), eq("ambari_agent"));
-        // verify two role command (amabari server, ambari agent)
-        verifyNew(SaltCommandTracker.class, times(4)).withArguments(eq(saltConnector), eq(addRemoveGrainRunner));
         // verify two OrchestratorBootstrapRunner call with rolechecker command tracker
-        verifyNew(OrchestratorBootstrapRunner.class, times(4))
+        verifyNew(OrchestratorBootstrapRunner.class, times(2))
                 .withArguments(eq(roleCheckerSaltCommandTracker), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
 
         // verify syncgrains command

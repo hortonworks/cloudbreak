@@ -101,7 +101,7 @@ class OrchestratorRecipeExecutor {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
-            hostOrchestrator.preAmbariStartRecipes(gatewayConfig, stackUtil.collectNodes(stack),
+            hostOrchestrator.preCluserManagerStartRecipes(gatewayConfig, stackUtil.collectNodes(stack),
                     clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
             String message = getRecipeExecutionFaiureMessage(stack, e);
@@ -113,7 +113,7 @@ class OrchestratorRecipeExecutor {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
-            hostOrchestrator.postAmbariStartRecipes(gatewayConfig, stackUtil.collectNodes(stack),
+            hostOrchestrator.postClusterManagerStartRecipes(gatewayConfig, stackUtil.collectNodes(stack),
                     clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
             String message = getRecipeExecutionFaiureMessage(stack, e);

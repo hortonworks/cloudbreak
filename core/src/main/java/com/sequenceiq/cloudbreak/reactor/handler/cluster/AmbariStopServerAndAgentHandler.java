@@ -58,8 +58,7 @@ public class AmbariStopServerAndAgentHandler implements EventHandler<AmbariStopS
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             Set<Node> allNodes = stackUtil.collectNodes(stack);
-
-            hostOrchestrator.stopAmbariOnMaster(primaryGatewayConfig, allNodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+            hostOrchestrator.stopClusterManagerOnMaster(primaryGatewayConfig, allNodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
             result = new AmbariStopServerAndAgentResult(request);
         } catch (Exception e) {
             String message = "Failed to start ambari agent and/or server on new host.";

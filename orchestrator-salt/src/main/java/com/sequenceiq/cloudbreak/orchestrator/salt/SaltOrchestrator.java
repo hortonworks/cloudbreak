@@ -276,7 +276,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
-    public void initServiceRun(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, boolean clouderaManager)
+    public void initServiceRun(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorException {
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
         Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
@@ -304,7 +304,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             setPostgreRoleIfNeeded(allNodes, saltConfig, exitModel, sc, serverHostname);
 
-            addClusterManagerRoles(allNodes, exitModel, gatewayTargetHostnames, sc, serverHostname, allNodeHostname, clouderaManager);
+            addClusterManagerRoles(allNodes, exitModel, sc, serverHostname, allNodeHostname);
 
             // kerberos
             if (saltConfig.getServicePillarConfig().containsKey("kerberos")) {
@@ -315,14 +315,14 @@ public class SaltOrchestrator implements HostOrchestrator {
             runSaltCommand(sc, new SyncAllRunner(allNodeHostname, allNodes), exitModel);
             runSaltCommand(sc, new MineUpdateRunner(gatewayTargetHostnames, allNodes), exitModel);
         } catch (ExecutionException e) {
-            LOGGER.warn("Error occurred during ambari bootstrap", e);
+            LOGGER.warn("Error occurred during bootstrap", e);
             if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
                 throw (CloudbreakOrchestratorFailedException) e.getCause();
             }
             throw new CloudbreakOrchestratorFailedException(e);
 
         } catch (Exception e) {
-            LOGGER.warn("Error occurred during ambari bootstrap", e);
+            LOGGER.warn("Error occurred during bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -343,37 +343,22 @@ public class SaltOrchestrator implements HostOrchestrator {
                 saltPillarRunner.call();
             }
         } catch (ExecutionException e) {
-            LOGGER.warn("Error occurred during ambari bootstrap", e);
+            LOGGER.warn("Error occurred during bootstrap", e);
             if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
                 throw (CloudbreakOrchestratorFailedException) e.getCause();
             }
             throw new CloudbreakOrchestratorFailedException(e);
 
         } catch (Exception e) {
-            LOGGER.warn("Error occurred during ambari bootstrap", e);
+            LOGGER.warn("Error occurred during bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
 
-    private void addClusterManagerRoles(Set<Node> allNodes, ExitCriteriaModel exitModel, Set<String> gatewayTargetHostnames,
-            SaltConnector sc, Set<String> serverHostnames, Set<String> allNodeHostname, boolean clouderaManager) throws Exception {
-        if (clouderaManager) {
-            runSaltCommand(sc, new GrainAddRunner(allNodeHostname, allNodes, "manager_agent"), exitModel);
-            runSaltCommand(sc, new GrainAddRunner(serverHostnames, allNodes, "manager_server"), exitModel);
-        } else {
-            // ambari server
-            runSaltCommand(sc, new GrainAddRunner(serverHostnames, allNodes, "ambari_server_install"), exitModel);
-            runSaltCommand(sc, new GrainAddRunner(serverHostnames, allNodes, "ambari_server"), exitModel);
-            // ambari server standby
-            Set<String> standbyServers = gatewayTargetHostnames.stream().filter(hostname -> !serverHostnames.contains(hostname)).collect(Collectors.toSet());
-            if (!standbyServers.isEmpty()) {
-                runSaltCommand(sc, new GrainAddRunner(standbyServers, allNodes, "ambari_server_install"), exitModel);
-                runSaltCommand(sc, new GrainAddRunner(standbyServers, allNodes, "ambari_server_standby"), exitModel);
-            }
-            // ambari agent
-            runSaltCommand(sc, new GrainAddRunner(allNodeHostname, allNodes, "ambari_agent_install"), exitModel);
-            runSaltCommand(sc, new GrainAddRunner(allNodeHostname, allNodes, "ambari_agent"), exitModel);
-        }
+    private void addClusterManagerRoles(Set<Node> allNodes, ExitCriteriaModel exitModel,
+            SaltConnector sc, Set<String> serverHostnames, Set<String> allNodeHostname) throws Exception {
+        runSaltCommand(sc, new GrainAddRunner(allNodeHostname, allNodes, "manager_agent"), exitModel);
+        runSaltCommand(sc, new GrainAddRunner(serverHostnames, allNodes, "manager_server"), exitModel);
     }
 
     private void setAdMemberRoleIfNeeded(Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, SaltConnector sc, Set<String> allHostnames)
@@ -401,13 +386,13 @@ public class SaltOrchestrator implements HostOrchestrator {
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
             runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitModel);
         } catch (ExecutionException e) {
-            LOGGER.info("Error occurred during ambari bootstrap", e);
+            LOGGER.info("Error occurred during bootstrap", e);
             if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
                 throw (CloudbreakOrchestratorFailedException) e.getCause();
             }
             throw new CloudbreakOrchestratorFailedException(e);
         } catch (Exception e) {
-            LOGGER.info("Error occurred during ambari bootstrap", e);
+            LOGGER.info("Error occurred during bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
         LOGGER.debug("Run services on nodes finished: {}", allNodes);
@@ -416,7 +401,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Retryable
     private void getRolesBeforeHighstateMagicWithRetry(SaltConnector sc) {
         // YARN/SALT MAGIC: If you remove 'get role grains' before highstate, then highstate can run with defective roles,
-        // so it can happen that 'ambari_agent' role will be missing on some nodes. Please do not delete only if you know what you are doing.
+        // so it can happen that some roles will be missing on some nodes. Please do not delete only if you know what you are doing.
         Map<String, JsonNode> roles = SaltStates.getGrains(sc, "roles");
         LOGGER.info("Roles before highstate: " + roles);
     }
@@ -446,46 +431,8 @@ public class SaltOrchestrator implements HostOrchestrator {
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
     public void changePrimaryGateway(GatewayConfig formerGateway, GatewayConfig newPrimaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
-            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
-        LOGGER.debug("Change primary gateway: {}", formerGateway);
-        Set<String> serverHostname = Collections.singleton(newPrimaryGateway.getHostname());
-        try (SaltConnector sc = createSaltConnector(newPrimaryGateway)) {
-            SaltStates.stopMinions(sc, Collections.singletonMap(formerGateway.getHostname(), formerGateway.getPrivateAddress()));
-
-            // change ambari_server_standby role to ambari_server
-            runSaltCommand(sc, new GrainAddRunner(serverHostname, allNodes, "ambari_server"), exitCriteriaModel);
-            runSaltCommand(sc, new GrainRemoveRunner(serverHostname, allNodes, "roles", "ambari_server_standby"), exitCriteriaModel);
-            // add ambari_server_standby role to the standby servers and remove ambari_server role from them.
-            Set<String> standByServersHostnames = allGatewayConfigs.stream()
-                    .filter(gwc -> !gwc.getHostname().equals(newPrimaryGateway.getHostname()) && !gwc.getHostname().equals(formerGateway.getHostname()))
-                    .map(GatewayConfig::getHostname).collect(Collectors.toSet());
-            runSaltCommand(sc, new GrainAddRunner(standByServersHostnames, allNodes, "ambari_server_standby"), exitCriteriaModel);
-            runSaltCommand(sc, new GrainRemoveRunner(standByServersHostnames, allNodes, "roles", "ambari_server"), exitCriteriaModel);
-
-            // remove minion key from all remaining gateway nodes
-            for (GatewayConfig gatewayConfig : allGatewayConfigs) {
-                if (!gatewayConfig.getHostname().equals(formerGateway.getHostname())) {
-                    try (SaltConnector sc1 = createSaltConnector(gatewayConfig)) {
-                        LOGGER.debug("Removing minion key '{}' from gateway '{}'", formerGateway.getHostname(), gatewayConfig.getHostname());
-                        sc1.wheel("key.delete", Collections.singleton(formerGateway.getHostname()), Object.class);
-                    } catch (Exception ex) {
-                        LOGGER.info("Unsuccessful key removal from gateway: " + gatewayConfig.getHostname(), ex);
-                    }
-                }
-            }
-
-            // salt '*' state.highstate
-            runNewService(sc, new HighStateRunner(serverHostname, allNodes), exitCriteriaModel);
-        } catch (ExecutionException e) {
-            LOGGER.warn("Error occurred during primary gateway change", e);
-            if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
-                throw (CloudbreakOrchestratorFailedException) e.getCause();
-            }
-            throw new CloudbreakOrchestratorFailedException(e);
-        } catch (Exception e) {
-            LOGGER.warn("Error occurred during primary gateway change", e);
-            throw new CloudbreakOrchestratorFailedException(e);
-        }
+            ExitCriteriaModel exitCriteriaModel) {
+        LOGGER.debug("Change primary gateway is not implemented, yet");
     }
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
@@ -519,75 +466,25 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void resetAmbari(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException {
-        try (SaltConnector saltConnector = createSaltConnector(gatewayConfig)) {
-            BaseSaltJobRunner baseSaltJobRunner = new BaseSaltJobRunner(target, allNodes) {
-                @Override
-                public String submit(SaltConnector saltConnector) {
-                    return SaltStates.ambariReset(saltConnector, new HostList(getTargetHostnames()));
-                }
-            };
-            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltConnector, baseSaltJobRunner);
-            Callable<Boolean> saltJobRunBootstrapRunner = runner(saltJobIdTracker, exitCriteria, exitCriteriaModel);
-            saltJobRunBootstrapRunner.call();
-        } catch (Exception e) {
-            LOGGER.warn("Error occurred during reset", e);
-            throw new CloudbreakOrchestratorFailedException(e);
-        }
+    public void resetClusterManager(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel) {
+        LOGGER.debug("Cluster manager reset is not implemented, yet");
     }
 
     @Override
-    public void stopAmbariOnMaster(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException {
-        try (SaltConnector saltConnector = createSaltConnector(gatewayConfig)) {
-            Set<String> masterHostname = Set.of(gatewayConfig.getHostname());
-            runSaltCommand(saltConnector, new GrainAddRunner(masterHostname, allNodes, "ambari_single_master_repair_stop"), exitCriteriaModel);
-            runNewService(saltConnector, new HighStateRunner(masterHostname, allNodes), exitCriteriaModel);
-        } catch (Exception e) {
-            LOGGER.info("Error occurred during stopping ambari agent and server", e);
-            throw new CloudbreakOrchestratorFailedException(e);
-        }
+    public void stopClusterManagerOnMaster(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel) {
+        LOGGER.debug("Stop cluster manager is not implemented, yet");
     }
 
     @Override
-    public void startAmbariOnMaster(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException {
-        try (SaltConnector saltConnector = createSaltConnector(gatewayConfig)) {
-            Set<String> masterHostname = Set.of(gatewayConfig.getHostname());
-            runSaltCommand(saltConnector, new GrainRemoveRunner(masterHostname, allNodes, "ambari_single_master_repair_stop"), exitCriteriaModel);
-            runNewService(saltConnector, new HighStateRunner(masterHostname, allNodes), exitCriteriaModel);
-        } catch (Exception e) {
-            LOGGER.info("Error occurred during starting ambari agent and server", e);
-            throw new CloudbreakOrchestratorFailedException(e);
-        }
+    public void startClusterManagerOnMaster(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel) {
+        LOGGER.debug("Start cluster manager is not implemented, yet");
     }
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
-    public void upgradeAmbari(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, SaltConfig pillarConfig,
-            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
-        try (SaltConnector sc = createSaltConnector(gatewayConfig)) {
-            for (Entry<String, SaltPillarProperties> propertiesEntry : pillarConfig.getServicePillarConfig().entrySet()) {
-                OrchestratorBootstrap pillarSave = new PillarSave(sc, Sets.newHashSet(gatewayConfig.getPrivateAddress()), propertiesEntry.getValue());
-                Callable<Boolean> saltPillarRunner = runner(pillarSave, exitCriteria, exitCriteriaModel);
-                saltPillarRunner.call();
-            }
-
-            // add 'ambari_upgrade' role to all nodes
-            Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "roles", "ambari_upgrade"), exitCriteriaModel);
-
-            Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel);
-            runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry, true);
-
-            // remove 'ambari_upgrade' role from all nodes
-            runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "roles", "ambari_upgrade"), exitCriteriaModel);
-        } catch (Exception e) {
-            LOGGER.warn("Error occurred during ambari upgrade", e);
-            throw new CloudbreakOrchestratorFailedException(e);
-        }
+    public void upgradeClusterManager(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, SaltConfig pillarConfig,
+            ExitCriteriaModel exitCriteriaModel) {
+        LOGGER.debug("Upgrade of cluster manager is not implemented, yet");
     }
 
     @Override
@@ -746,14 +643,14 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void preAmbariStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+    public void preCluserManagerStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
         LOGGER.debug("Executing pre-cloudera-manager-start recipes.");
         executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_CLOUDERA_MANAGER_START, false);
     }
 
     @Override
-    public void postAmbariStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+    public void postClusterManagerStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
         LOGGER.debug("Executing post-cloudera-manager-start recipes.");
         executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_CLOUDERA_MANAGER_START, false);

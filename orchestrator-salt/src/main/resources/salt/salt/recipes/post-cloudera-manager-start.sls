@@ -16,7 +16,7 @@ create_recipe_log_dir_post_start:
      - makedirs: True
      - mode: 755
 
-run_post_ambari_start_script_{{ script_name }}:
+run_post_cm_start_script_{{ script_name }}:
   cmd.run:
     - name: /opt/scripts/recipe-runner.sh post-cloudera-manager-start {{ script_name }}
     - onlyif:

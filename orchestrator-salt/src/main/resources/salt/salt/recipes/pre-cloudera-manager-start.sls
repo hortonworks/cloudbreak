@@ -16,7 +16,7 @@ create_recipe_log_dir_pre_start:
      - makedirs: True
      - mode: 755
 
-run_pre_ambari_start_script_{{ script_name }}:
+run_pre_cm_start_script_{{ script_name }}:
   cmd.run:
     - name: /opt/scripts/recipe-runner.sh pre-cloudera-manager-start {{ script_name }}
     - onlyif:

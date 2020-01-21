@@ -24,7 +24,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void init(ExitCriteria exitCriteria);
 
     void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, BootstrapParams params,
-        ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
     void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, Set<Node> allNodes, byte[] stateConfigZip,
             BootstrapParams params, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
@@ -32,7 +32,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig);
 
     void initServiceRun(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
-            SaltConfig pillarConfig, ExitCriteriaModel exitCriteriaModel, boolean clouderaManager) throws CloudbreakOrchestratorException;
+            SaltConfig pillarConfig, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
     void initSaltConfig(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException;
@@ -40,14 +40,15 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void runService(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
             SaltConfig pillarConfig, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
-    void resetAmbari(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+    void resetClusterManager(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
-    void stopAmbariOnMaster(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
+    void stopClusterManagerOnMaster(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
-    void startAmbariOnMaster(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
+    void startClusterManagerOnMaster(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException;
 
-    void upgradeAmbari(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, SaltConfig pillarConfig, ExitCriteriaModel exitCriteriaModel)
+    void upgradeClusterManager(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, SaltConfig pillarConfig, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
     List<String> getMissingNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
@@ -70,7 +71,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
     void installFreeIPA(GatewayConfig primaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
-                        ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
     void leaveDomain(GatewayConfig gatewayConfig, Set<Node> allNodes, String roleToRemove, String roleToAdd, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException;

@@ -1,2 +1,0 @@
-hdp:
-  stack: 'HDP'

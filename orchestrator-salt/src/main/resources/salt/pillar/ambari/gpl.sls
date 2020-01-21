@@ -1,3 +1,0 @@
-ambari:
-  gpl:
-    enabled: false
