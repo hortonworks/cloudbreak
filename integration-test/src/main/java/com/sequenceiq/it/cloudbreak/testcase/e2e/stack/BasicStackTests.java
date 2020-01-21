@@ -33,35 +33,10 @@ public class BasicStackTests extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak",
-            when = "a valid stack create request is sent AND the stack is stopped AND the stack is started",
+            when = "a valid stack create request is sent AND the stack is scaled up AND the stack is scaled down " +
+                    "AND the stack is stopped AND the stack is started",
             then = "the stack should be available AND deletable")
-    public void testCreateStopAndStartCluster(TestContext testContext) {
-        String cm = resourcePropertyProvider().getName();
-        String cmcluster = resourcePropertyProvider().getName();
-        String stack = resourcePropertyProvider().getName();
-
-        testContext.given(cm, ClouderaManagerTestDto.class)
-                .given(cmcluster, ClusterTestDto.class)
-                .withValidateBlueprint(Boolean.FALSE)
-                .withClouderaManager(cm)
-                .given(stack, StackTestDto.class)
-                .withCluster(cmcluster)
-                .when(stackTestClient.createV4(), key(stack))
-                .await(STACK_AVAILABLE)
-                .when(stackTestClient.stopV4(), key(stack))
-                .await(STACK_STOPPED)
-                .when(stackTestClient.startV4(), key(stack))
-                .await(STACK_AVAILABLE, key(stack))
-                .then((tc, testDto, cc) -> stackTestClient.deleteV4().action(tc, testDto, cc))
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "a valid stack create request is sent AND the stack is scaled",
-            then = "the scaled stack should be available")
-    public void testCreateAndScaleCluster(TestContext testContext) {
+    public void testCreateScaleStopStartCluster(TestContext testContext) {
         String cm = resourcePropertyProvider().getName();
         String cmcluster = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
@@ -69,6 +44,7 @@ public class BasicStackTests extends AbstractE2ETest {
         Integer upscaleCount = 4;
         Integer downscaleCount = 3;
         String groupToScale = "worker";
+
         testContext.given(cm, ClouderaManagerTestDto.class)
                 .given(cmcluster, ClusterTestDto.class)
                 .withValidateBlueprint(Boolean.FALSE)
@@ -89,6 +65,11 @@ public class BasicStackTests extends AbstractE2ETest {
                 .await(STACK_AVAILABLE, key(stack))
                 .then((ctx, stackDto, cloudbreakClient) -> stackTestClient.getV4().action(ctx, stackDto, cloudbreakClient))
                 .then(checkWorkerGroupNodeCount(groupToScale, downscaleCount))
+                .when(stackTestClient.stopV4(), key(stack))
+                .await(STACK_STOPPED)
+                .when(stackTestClient.startV4(), key(stack))
+                .await(STACK_AVAILABLE, key(stack))
+                .then((tc, testDto, cc) -> stackTestClient.deleteV4().action(tc, testDto, cc))
                 .validate();
     }
 
