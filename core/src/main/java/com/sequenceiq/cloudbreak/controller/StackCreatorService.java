@@ -21,6 +21,7 @@ import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -421,7 +422,7 @@ public class StackCreatorService {
                     throw new BadRequestException("Image id settings are incorrect: " + e.getMessage(), e);
                 }
                 if (e.getCause() instanceof CloudbreakImageCatalogException) {
-                    throw new BadRequestException("Image or image catalog settings are incorrect: " + e.getMessage(), e.getCause());
+                    throw new BadRequestException("Image or image catalog settings are incorrect: " + ExceptionUtils.getRootCauseMessage(e), e.getCause());
                 }
                 throw new RuntimeException("Unknown error happened when determining image from image catalog:" + e.getMessage(), e);
             } catch (InterruptedException e) {
