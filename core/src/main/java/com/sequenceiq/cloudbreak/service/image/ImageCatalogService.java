@@ -293,8 +293,12 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         if (StringUtils.isEmpty(catalogName)) {
             image = getImage(imageId);
         } else {
-            ImageCatalog imageCatalog = get(workspaceId, catalogName);
-            image = getImage(imageCatalog.getImageCatalogUrl(), imageCatalog.getName(), imageId);
+            try {
+                ImageCatalog imageCatalog = get(workspaceId, catalogName);
+                image = getImage(imageCatalog.getImageCatalogUrl(), imageCatalog.getName(), imageId);
+            } catch (NotFoundException e) {
+                throw new CloudbreakImageCatalogException(e.getMessage());
+            }
         }
         return image;
     }

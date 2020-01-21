@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
@@ -77,16 +78,57 @@ public class ImageServiceTest {
     @Test
     public void testUseBaseImageAndDisabledBaseImageShouldReturnError() {
         CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class, () ->
-            underTest.determineImageFromCatalog(
-                    WORKSPACE_ID,
-                    imageSettingsV4Request,
-                    PLATFORM,
-                    TestUtil.blueprint(),
-                    true,
-                    false,
-                    TestUtil.user(USER_ID, USER_ID_STRING),
-                    image -> true));
+                underTest.determineImageFromCatalog(
+                        WORKSPACE_ID,
+                        imageSettingsV4Request,
+                        PLATFORM,
+                        TestUtil.blueprint(),
+                        true,
+                        false,
+                        TestUtil.user(USER_ID, USER_ID_STRING),
+                        image -> true));
         assertEquals("Inconsistent request, base images are disabled but custom repo information is submitted!", exception.getMessage());
+    }
+
+    @Test
+    public void testDetermineImageFromCatalogWithNonExistingCatalogNameAndIdSpecified()
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        when(imageCatalogService.getImageByCatalogName(WORKSPACE_ID, "anImageId", "aCatalog"))
+                .thenThrow(new CloudbreakImageCatalogException("Image catalog not found with name: aCatalog"));
+
+        CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class, () ->
+                underTest.determineImageFromCatalog(
+                        WORKSPACE_ID,
+                        imageSettingsV4Request,
+                        PLATFORM,
+                        TestUtil.blueprint(),
+                        true,
+                        true,
+                        TestUtil.user(USER_ID, USER_ID_STRING),
+                        image -> true));
+
+        assertEquals("Image catalog not found with name: aCatalog", exception.getMessage());
+    }
+
+    @Test
+    public void testDetermineImageFromCatalogWithNonExistingCatalogName() {
+        when(imageCatalogService.get(WORKSPACE_ID, "aCatalog")).thenThrow(new NotFoundException("Image catalog not found with name: aCatalog"));
+        ImageSettingsV4Request imageRequest = new ImageSettingsV4Request();
+        imageRequest.setCatalog("aCatalog");
+        imageRequest.setOs(OS);
+
+        CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class, () ->
+                underTest.determineImageFromCatalog(
+                        WORKSPACE_ID,
+                        imageRequest,
+                        PLATFORM,
+                        TestUtil.blueprint(),
+                        true,
+                        true,
+                        TestUtil.user(USER_ID, USER_ID_STRING),
+                        image -> true));
+
+        assertEquals("Image catalog not found with name: aCatalog", exception.getMessage());
     }
 
     @Test

@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -109,7 +110,7 @@ public class ImageService {
             User user, Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> imagePredicate)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         if (useBaseImage && !baseImageEnabled) {
-            throw new CloudbreakImageCatalogException("Inconsistent request, base images are disabled but custom repo information is submitted!" );
+            throw new CloudbreakImageCatalogException("Inconsistent request, base images are disabled but custom repo information is submitted!");
         }
 
         if (imageSettings != null && StringUtils.isNotEmpty(imageSettings.getId())) {
@@ -172,11 +173,16 @@ public class ImageService {
     }
     //CHECKSTYLE:ON
 
-    private ImageCatalog getImageCatalogFromRequestOrDefault(Long workspaceId, ImageSettingsV4Request imageSettings, User user) {
+    private ImageCatalog getImageCatalogFromRequestOrDefault(Long workspaceId, ImageSettingsV4Request imageSettings, User user)
+            throws CloudbreakImageCatalogException {
         if (imageSettings == null || imageSettings.getCatalog() == null) {
             return imageCatalogService.getDefaultImageCatalog(user);
         } else {
-            return imageCatalogService.get(workspaceId, imageSettings.getCatalog());
+            try {
+                return imageCatalogService.get(workspaceId, imageSettings.getCatalog());
+            } catch (NotFoundException e) {
+                throw new CloudbreakImageCatalogException(e.getMessage());
+            }
         }
     }
 
