@@ -33,7 +33,7 @@ public class TelemetryApiConverterTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration("", false, "", null);
+        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration("", true, "****", "****");
         TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true);
         underTest = new TelemetryApiConverter(telemetryConfiguration);
     }
@@ -53,8 +53,11 @@ public class TelemetryApiConverterTest {
         fsReportLogs.setEnabled(true);
         FeatureSetting fsWorladAnalytics = new FeatureSetting();
         fsWorladAnalytics.setEnabled(true);
+        FeatureSetting fsUseSharedCredential = new FeatureSetting();
+        fsUseSharedCredential.setEnabled(true);
         fr.setReportDeploymentLogs(fsReportLogs);
         fr.setWorkloadAnalytics(fsWorladAnalytics);
+        fr.setUseSharedAltusCredential(fsUseSharedCredential);
         telemetryRequest.setFeatures(fr);
         // WHEN
         EnvironmentTelemetry result = underTest.convert(telemetryRequest);
@@ -62,6 +65,7 @@ public class TelemetryApiConverterTest {
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
         assertTrue(result.getFeatures().getReportDeploymentLogs().isEnabled());
         assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
+        assertTrue(result.getFeatures().getUseSharedAltusCredential().isEnabled());
     }
 
     @Test

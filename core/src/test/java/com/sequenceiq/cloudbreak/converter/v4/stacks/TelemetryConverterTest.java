@@ -40,7 +40,7 @@ public class TelemetryConverterTest {
 
     @Before
     public void setUp() {
-        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, false, "", null);
+        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, true, "****", "****");
         TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true);
         underTest = new TelemetryConverter(telemetryConfiguration, true, true);
     }
@@ -71,6 +71,9 @@ public class TelemetryConverterTest {
         FeatureSetting reportDeploymentLogs = new FeatureSetting();
         reportDeploymentLogs.setEnabled(false);
         featuresRequest.setReportDeploymentLogs(reportDeploymentLogs);
+        FeatureSetting useSharedCredential = new FeatureSetting();
+        useSharedCredential.setEnabled(true);
+        featuresRequest.setUseSharedAltusCredential(useSharedCredential);
         telemetryRequest.setLogging(logging);
         telemetryRequest.setFeatures(featuresRequest);
         telemetryRequest.setWorkloadAnalytics(workloadAnalyticsRequest);
@@ -81,6 +84,7 @@ public class TelemetryConverterTest {
         assertFalse(result.getFeatures().getReportDeploymentLogs().isEnabled());
         assertTrue(result.getFeatures().getMetering().isEnabled());
         assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
+        assertTrue(result.getFeatures().getUseSharedAltusCredential().isEnabled());
         assertEquals(DATABUS_ENDPOINT, result.getDatabusEndpoint());
         assertEquals(DATABUS_ENDPOINT, result.getWorkloadAnalytics().getDatabusEndpoint());
     }
