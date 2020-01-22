@@ -4,5 +4,7 @@ public enum MetricTag {
     EXCEPTION_TYPE,
     REASON,
     ERROR_CODE,
-    CLOUD_PROVIDER
+    CLOUD_PROVIDER,
+    TARGET_API,
+    TARGET_METHOD
 }

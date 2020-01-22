@@ -26,12 +26,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.BlueprintOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
-import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
+import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@RetryingRestClient
+@RetryAndMetrics
 @Path("/v4/{workspaceId}/blueprints")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v4/{workspaceId}/blueprints", description = ControllerDescription.BLUEPRINT_V4_DESCRIPTION, protocols = "http,https",

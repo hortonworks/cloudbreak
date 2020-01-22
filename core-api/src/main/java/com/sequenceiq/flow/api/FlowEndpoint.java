@@ -9,14 +9,14 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
+import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Path("/flow_logs")
-@RetryingRestClient
+@RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/flow_logs", description = "Operations on flow logs", protocols = "http,https",
         consumes = MediaType.APPLICATION_JSON)

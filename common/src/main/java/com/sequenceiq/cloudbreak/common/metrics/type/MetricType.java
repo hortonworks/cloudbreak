@@ -6,7 +6,9 @@ public enum MetricType implements Metric {
     VAULT_WRITE("vault.write"),
     VAULT_WRITE_FAILED("vault.write.failed"),
     VAULT_DELETE("vault.delete"),
-    HEARTBEAT_UPDATE_FAILED("heartbeat.update.failed");
+    HEARTBEAT_UPDATE_FAILED("heartbeat.update.failed"),
+    REST_OPERATION("rest.operation"),
+    REST_OPERATION_FAILED("rest.operation.failed");
 
     private final String metricName;
 
