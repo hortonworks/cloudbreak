@@ -7,12 +7,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
+import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@RetryingRestClient
+@RetryAndMetrics
 @Path("/v1/freeipa/test")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v1/freeipa/test", description = "Client test endpoint", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)

@@ -10,13 +10,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.info.responses.CloudbreakInfoRe
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.InfoOpDescription;
-import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
+import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Path("/v4/info")
-@RetryingRestClient
+@RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v4/info", description = ControllerDescription.INFO_DESCRIPTION, protocols = "http,https",
         consumes = MediaType.APPLICATION_JSON)
