@@ -1,24 +1,12 @@
 name: "aws-e2e-tests"
 tests:
-  - name: "aws distrox tests"
+  - name: "aws-e2e-tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXBaseImageTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXTest
-
-  - name: "aws sdx tests"
-    classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxBaseImageTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxCloudStorageTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRepairTests
-
-  - name: "aws environment tests"
-    classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.BasicEnvironmentTests
-
-  - name: "aws freeipa tests"
-    classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIPATests
-
-  - name: "aws basic stack tests"
-    classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.stack.BasicStackTests
