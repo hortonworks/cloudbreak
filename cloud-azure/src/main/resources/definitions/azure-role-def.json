@@ -1,7 +1,7 @@
 {
-  "Name": "Cloudbreak Operator",
+  "Name": "Cloudera Management Console Azure Operator",
   "IsCustom": true,
-  "Description": "Can use Cloudbreak managed clusters and resources.",
+  "Description": "Can use Cloudera Management Console managed clusters and resources.",
   "Actions": [
     "Microsoft.Storage/*/read",
     "Microsoft.Storage/storageAccounts/write",
