@@ -8,14 +8,14 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
+import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxInternalClusterRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@RetryingRestClient
+@RetryAndMetrics
 @Path("/internal/sdx")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/internal/sdx", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)

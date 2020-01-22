@@ -11,7 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
+import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.doc.KeytabModelNotes;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.doc.KeytabOperationsDescription;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabRequest;
@@ -25,7 +25,7 @@ import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.VaultCleanupRequest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@RetryingRestClient
+@RetryAndMetrics
 @Path("/v1/kerberosmgmt")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v1/kerberosmgmt", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
