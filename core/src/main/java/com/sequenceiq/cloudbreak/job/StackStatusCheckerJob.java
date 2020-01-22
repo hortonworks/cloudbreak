@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.job;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
@@ -130,7 +131,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         } else if (stack.getCluster().getStatus() == Status.AMBIGUOUS) {
             clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
         }
-        syncInstances(stack, failedInstances, InstanceSyncState.RUNNING);
+        syncInstances(stack, failedInstances, defaultState);
     }
 
     private boolean isClusterManagerRunning(Stack stack, ClusterApi connector) {
@@ -156,7 +157,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 .map(HostName::value)
                 .collect(Collectors.toSet());
         Set<String> unhealthyStoredHosts = getAllRunningInstanceMetadata(stack).stream()
-                .filter(i -> i.getInstanceStatus() == SERVICES_UNHEALTHY)
+                .filter(i -> i.getInstanceStatus() == SERVICES_UNHEALTHY || i.getInstanceStatus() == SERVICES_RUNNING)
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(Collectors.toSet());
         return Sets.intersect(healthyHosts, unhealthyStoredHosts);
