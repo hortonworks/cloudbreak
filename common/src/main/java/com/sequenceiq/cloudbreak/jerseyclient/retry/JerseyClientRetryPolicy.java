@@ -21,6 +21,7 @@ public class JerseyClientRetryPolicy implements RetryPolicy {
         if (lastThrowable == null) {
             return true;
         } else {
+            LOGGER.debug(String.format("Retry attempt %s. %s", context.getRetryCount(), context.getLastThrowable()));
             if (lastThrowable instanceof WebApplicationException) {
                 WebApplicationException wae = (WebApplicationException) lastThrowable;
                 if (wae.getResponse().getStatusInfo().getFamily() == Response.Status.Family.CLIENT_ERROR) {

@@ -18,7 +18,7 @@ import javax.ws.rs.core.MediaType;
 import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
-import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
+import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
@@ -33,7 +33,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Validated
 @Path("/sdx")
-@RetryingRestClient
+@RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/sdx", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface SdxEndpoint {

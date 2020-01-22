@@ -1,13 +1,13 @@
-package com.sequenceiq.datalake.metric;
+package com.sequenceiq.redbeams.metrics;
 
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.metrics.AbstractMetricService;
 
 @Service
-public class SdxMetricService extends AbstractMetricService {
+public class RedbeamsMetricService extends AbstractMetricService {
 
-    private static final String METRIC_PREFIX = "sdx";
+    private static final String METRIC_PREFIX = "redbeams";
 
     @Override
     protected String getMetricPrefix() {

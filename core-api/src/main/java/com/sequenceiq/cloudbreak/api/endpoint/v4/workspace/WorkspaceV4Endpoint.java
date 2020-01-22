@@ -12,12 +12,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.WorkspaceOpDescription;
-import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
+import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@RetryingRestClient
+@RetryAndMetrics
 @Path("/v4/workspaces")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v4/workspaces", description = ControllerDescription.WORKSPACE_V4_DESCRIPTION, protocols = "http,https",

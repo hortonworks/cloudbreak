@@ -11,7 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
+import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceModelDescription.OpDescription;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
@@ -31,7 +31,7 @@ import com.sequenceiq.environment.api.v1.platformresource.model.TagSpecification
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@RetryingRestClient
+@RetryAndMetrics
 @Path("/v1/platform_resources")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v1/platform_resources", description = PlatformResourceModelDescription.CONNECTOR_V1_DESCRIPTION, protocols = "http,https",
