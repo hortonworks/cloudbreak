@@ -70,4 +70,19 @@ public class VolumeUtilsTest {
     public void buildSingleVolumePathWithManyDisks() {
         assertEquals("/hadoopfs/fs1/test", buildSingleVolumePath(3, "test"));
     }
+
+    @Test
+    public void testBuildSingleVolumePathWithVolumeId() {
+        assertEquals("/hadoopfs/fs5/test", buildSingleVolumePath(5, 10, "test"));
+    }
+
+    @Test
+    public void testBuildSingleVolumePathWithVolumeIdWhenThereAreNotEnoughVolumes() {
+        assertEquals("/hadoopfs/fs3/test", buildSingleVolumePath(5, 3, "test"));
+    }
+
+    @Test
+    public void testBuildSingleVolumePathWithVolumeIdWhenThereAreNoVolumes() {
+        assertEquals("/hadoopfs/root1/test", buildSingleVolumePath(5, 0, "test"));
+    }
 }
