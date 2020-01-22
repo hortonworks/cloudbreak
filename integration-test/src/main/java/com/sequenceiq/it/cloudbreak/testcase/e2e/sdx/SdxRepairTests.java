@@ -153,7 +153,7 @@ public class SdxRepairTests extends BasicSdxTests {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
-                    return waitUtil.waitForSdxInstanceStatus(testDto, client, IDBROKER.getName(), InstanceStatus.SERVICES_UNHEALTHY);
+                    return waitUtil.waitForSdxInstanceStatus(testDto, client, IDBROKER.getName(), InstanceStatus.STOPPED);
                 })
                 .when(sdxTestClient.repair(), key(sdx))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx))
