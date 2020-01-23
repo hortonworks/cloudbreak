@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto.ResourceAccessDtoBuilder.aResourceAccessDtoBuilder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -47,6 +46,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
@@ -574,7 +574,7 @@ public class ImageCatalogServiceTest {
         ImageCatalog catalog = getImageCatalog();
         when(imageCatalogRepository.findByNameAndWorkspaceId(catalog.getName(), catalog.getWorkspace().getId())).thenReturn(Optional.of(catalog));
 
-        ImageCatalog result = underTest.delete(aResourceAccessDtoBuilder().withName(catalog.getName()).build(), catalog.getWorkspace().getId());
+        ImageCatalog result = underTest.delete(NameOrCrn.ofName(catalog.getName()), catalog.getWorkspace().getId());
 
         assertEquals(catalog, result);
         verify(imageCatalogRepository, times(2)).findByNameAndWorkspaceId(anyString(), anyLong());
@@ -592,7 +592,7 @@ public class ImageCatalogServiceTest {
         when(imageCatalogRepository.findByResourceCrnAndArchivedFalse(catalog.getResourceCrn())).thenReturn(Optional.of(catalog));
         when(imageCatalogRepository.findByNameAndWorkspaceId(catalog.getName(), catalog.getWorkspace().getId())).thenReturn(Optional.of(catalog));
 
-        ImageCatalog result = underTest.delete(aResourceAccessDtoBuilder().withCrn(catalog.getResourceCrn()).build(), catalog.getWorkspace().getId());
+        ImageCatalog result = underTest.delete(NameOrCrn.ofCrn(catalog.getResourceCrn()), catalog.getWorkspace().getId());
 
         assertEquals(catalog, result);
         verify(imageCatalogRepository, times(1)).findByResourceCrnAndArchivedFalse(anyString());
@@ -601,31 +601,11 @@ public class ImageCatalogServiceTest {
     }
 
     @Test
-    public void testDeleteByWorkspaceWhenNeitherCrnOrNameProvidedThenBadRequestExceptionComes() {
-        ImageCatalog catalog = getImageCatalog();
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("One and only one value of the crn and name should be filled!");
-
-        underTest.delete(aResourceAccessDtoBuilder().build(), catalog.getWorkspace().getId());
-
-        verify(imageCatalogRepository, times(0)).findByResourceCrnAndArchivedFalse(anyString());
-        verify(imageCatalogRepository, times(0)).delete(any());
-    }
-
-    @Test
-    public void testDeleteByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("AccessDto should not be null");
-
-        underTest.delete(null, 1L);
-    }
-
-    @Test
     public void testGetByWorkspaceWhenDtoNameFilledThenProperGetCalled() {
         ImageCatalog catalog = getImageCatalog();
         when(imageCatalogRepository.findByNameAndWorkspaceId(catalog.getName(), catalog.getWorkspace().getId())).thenReturn(Optional.of(catalog));
 
-        ImageCatalog result = underTest.get(aResourceAccessDtoBuilder().withName(catalog.getName()).build(), catalog.getWorkspace().getId());
+        ImageCatalog result = underTest.get(NameOrCrn.ofName(catalog.getName()), catalog.getWorkspace().getId());
 
         assertEquals(catalog, result);
         verify(imageCatalogRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
@@ -637,30 +617,11 @@ public class ImageCatalogServiceTest {
         ImageCatalog catalog = getImageCatalog();
         when(imageCatalogRepository.findByResourceCrnAndArchivedFalse(catalog.getResourceCrn())).thenReturn(Optional.of(catalog));
 
-        ImageCatalog result = underTest.get(aResourceAccessDtoBuilder().withCrn(catalog.getResourceCrn()).build(), catalog.getWorkspace().getId());
+        ImageCatalog result = underTest.get(NameOrCrn.ofCrn(catalog.getResourceCrn()), catalog.getWorkspace().getId());
 
         assertEquals(catalog, result);
         verify(imageCatalogRepository, times(1)).findByResourceCrnAndArchivedFalse(anyString());
         verify(imageCatalogRepository, times(1)).findByResourceCrnAndArchivedFalse(catalog.getResourceCrn());
-    }
-
-    @Test
-    public void testGetByWorkspaceWhenNeitherCrnOrNameProvidedThenBadRequestExceptionComes() {
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("One and only one value of the crn and name should be filled!");
-
-        underTest.get(aResourceAccessDtoBuilder().build(), 1L);
-
-        verify(imageCatalogRepository, times(0)).findByResourceCrnAndArchivedFalse(anyString());
-        verify(imageCatalogRepository, times(0)).save(any());
-    }
-
-    @Test
-    public void testGetByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("AccessDto should not be null");
-
-        underTest.get(null, 1L);
     }
 
     @Test

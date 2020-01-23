@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto.ResourceAccessDtoBuilder.aResourceAccessDtoBuilder;
-
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -12,8 +10,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.stereotype.Controller;
 
 import com.cloudera.cdp.datahub.model.CreateRecipeRequest;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
@@ -21,10 +18,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Respo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.view.RecipeView;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
+import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -45,13 +44,13 @@ public class RecipesV4Controller extends NotificationController implements Recip
 
     @Override
     public RecipeV4Response getByName(Long workspaceId, String name) {
-        Recipe recipe = recipeService.get(aResourceAccessDtoBuilder().withName(name).build(), workspaceId);
+        Recipe recipe = recipeService.get(NameOrCrn.ofName(name), workspaceId);
         return converterUtil.convert(recipe, RecipeV4Response.class);
     }
 
     @Override
     public RecipeV4Response getByCrn(Long workspaceId, @NotNull String crn) {
-        Recipe recipe = recipeService.get(aResourceAccessDtoBuilder().withCrn(crn).build(), workspaceId);
+        Recipe recipe = recipeService.get(NameOrCrn.ofCrn(crn), workspaceId);
         return converterUtil.convert(recipe, RecipeV4Response.class);
     }
 
@@ -67,14 +66,14 @@ public class RecipesV4Controller extends NotificationController implements Recip
 
     @Override
     public RecipeV4Response deleteByName(Long workspaceId, String name) {
-        Recipe deleted = recipeService.delete(aResourceAccessDtoBuilder().withName(name).build(), workspaceId);
+        Recipe deleted = recipeService.delete(NameOrCrn.ofName(name), workspaceId);
         notify(ResourceEvent.RECIPE_DELETED);
         return converterUtil.convert(deleted, RecipeV4Response.class);
     }
 
     @Override
     public RecipeV4Response deleteByCrn(Long workspaceId, @NotNull String crn) {
-        Recipe deleted = recipeService.delete(aResourceAccessDtoBuilder().withCrn(crn).build(), workspaceId);
+        Recipe deleted = recipeService.delete(NameOrCrn.ofCrn(crn), workspaceId);
         notify(ResourceEvent.RECIPE_DELETED);
         return converterUtil.convert(deleted, RecipeV4Response.class);
     }
