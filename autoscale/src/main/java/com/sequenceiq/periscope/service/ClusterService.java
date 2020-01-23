@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -125,11 +126,14 @@ public class ClusterService {
     }
 
     public Cluster findById(Long clusterId) {
-        return clusterRepository.findById(clusterId).orElseThrow(notFound("Cluster", clusterId));
+        Cluster cluster = clusterRepository.findById(clusterId).orElseThrow(notFound("Cluster", clusterId));
+        MDCBuilder.buildMdcContext(cluster);
+        return cluster;
     }
 
     public void removeById(Long clusterId) {
         Cluster cluster = findById(clusterId);
+        MDCBuilder.buildMdcContext(cluster);
         failedNodeRepository.deleteByClusterId(clusterId);
         clusterRepository.delete(cluster);
         calculateClusterStateMetrics();
@@ -154,6 +158,7 @@ public class ClusterService {
 
     public Cluster setState(Long clusterId, ClusterState state) {
         Cluster cluster = findById(clusterId);
+        MDCBuilder.buildMdcContext(cluster);
         addPrometheusAlertsToConsul(cluster);
         return setState(cluster, state);
     }
@@ -167,6 +172,7 @@ public class ClusterService {
 
     public Cluster setAutoscaleState(Long clusterId, boolean enableAutoscaling) {
         Cluster cluster = findById(clusterId);
+        MDCBuilder.buildMdcContext(cluster);
         cluster.setAutoscalingEnabled(enableAutoscaling);
         addPrometheusAlertsToConsul(cluster);
         cluster = clusterRepository.save(cluster);

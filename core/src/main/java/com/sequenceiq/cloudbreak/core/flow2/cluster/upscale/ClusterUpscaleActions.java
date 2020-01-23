@@ -442,7 +442,7 @@ public class ClusterUpscaleActions {
                 ClusterUpscaleEvent> stateContext, P payload) {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
             StackView stack = stackService.getViewByIdWithoutAuth(payload.getResourceId());
-            MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), "CLUSTER");
+            MDCBuilder.buildMdcContext(stack.getClusterView());
             return new ClusterUpscaleContext(flowParameters, stack, getHostgroupName(variables), getAdjustment(variables),
                     isSinglePrimaryGateway(variables), getPrimaryGatewayHostName(variables), getClusterManagerType(variables));
         }

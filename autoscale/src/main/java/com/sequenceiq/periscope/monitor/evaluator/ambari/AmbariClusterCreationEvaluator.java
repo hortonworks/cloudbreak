@@ -111,10 +111,10 @@ public class AmbariClusterCreationEvaluator extends ClusterCreationEvaluator {
     }
 
     private void createCluster(AutoscaleStackV4Response stack, MonitoredStack resolvedAmbari) {
-        MDCBuilder.buildMdcContext(stack.getStackId(), stack.getName(), "CLUSTER");
         LOGGER.debug("Creating cluster for Ambari host: {}", resolvedAmbari.getClusterManager().getHost());
         Cluster cluster = clusterService.create(resolvedAmbari, null,
                 new ClusterPertain(stack.getTenant(), stack.getWorkspaceId(), stack.getUserId()));
+        MDCBuilder.buildMdcContext(cluster);
         History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
         notificationSender.send(cluster, history);
     }
