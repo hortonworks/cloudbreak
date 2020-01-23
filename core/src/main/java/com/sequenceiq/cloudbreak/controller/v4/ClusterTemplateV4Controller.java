@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto.ResourceAccessDtoBuilder.aResourceAccessDtoBuilder;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.Objects;
@@ -22,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Responses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -113,9 +112,9 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
         if (Objects.nonNull(names) && !names.isEmpty()) {
             clusterTemplates = clusterTemplateService.deleteMultiple(names, workspaceId);
         } else {
-            ResourceAccessDto dto = aResourceAccessDtoBuilder().withCrn(environmentCrn).withName(environmentName).build();
+            NameOrCrn environmentNameOrCrn = NameOrCrn.ofName(environmentName);
             Set<String> namesByEnv = clusterTemplateService
-                    .findAllByEnvironment(dto)
+                    .findAllByEnvironment(environmentNameOrCrn)
                     .stream()
                     .map(ClusterTemplate::getName)
                     .collect(toSet());

@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto.ResourceAccessDtoBuilder;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
@@ -58,22 +58,22 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     public StackV4Response get(Long workspaceId, String name, Set<String> entries) {
-        return stackOperations.get(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId, entries, null);
+        return stackOperations.get(NameOrCrn.ofName(name), workspaceId, entries, null);
     }
 
     @Override
     public void delete(Long workspaceId, String name, boolean forced) {
-        stackOperations.delete(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId, forced);
+        stackOperations.delete(NameOrCrn.ofName(name), workspaceId, forced);
     }
 
     @Override
     public void sync(Long workspaceId, String name) {
-        stackOperations.sync(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId);
+        stackOperations.sync(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
     public void retry(Long workspaceId, String name) {
-        stackOperations.retry(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId);
+        stackOperations.retry(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
@@ -85,82 +85,82 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     public void putStop(Long workspaceId, String name) {
-        stackOperations.putStop(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId);
+        stackOperations.putStop(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
     public void putStart(Long workspaceId, String name) {
-        stackOperations.putStart(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId);
+        stackOperations.putStart(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
     public void putScaling(Long workspaceId, String name, @Valid StackScaleV4Request updateRequest) {
-        stackOperations.putScaling(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId, updateRequest);
+        stackOperations.putScaling(NameOrCrn.ofName(name), workspaceId, updateRequest);
     }
 
     @Override
     public void repairCluster(Long workspaceId, String name, @Valid ClusterRepairV4Request clusterRepairRequest) {
-        stackOperations.repairCluster(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId, clusterRepairRequest);
+        stackOperations.repairCluster(NameOrCrn.ofName(name), workspaceId, clusterRepairRequest);
     }
 
     @Override
     public void upgradeCluster(Long workspaceId, String name) {
-        stackOperations.upgradeCluster(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId);
+        stackOperations.upgradeCluster(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
     public UpgradeOptionV4Response checkForUpgrade(Long workspaceId, String name) {
-        return stackOperations.checkForUpgrade(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId);
+        return stackOperations.checkForUpgrade(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
     public GeneratedBlueprintV4Response postStackForBlueprint(Long workspaceId, String name, @Valid StackV4Request stackRequest) {
-        return stackOperations.postStackForBlueprint(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId, stackRequest);
+        return stackOperations.postStackForBlueprint(NameOrCrn.ofName(name), workspaceId, stackRequest);
     }
 
     @Override
     public void changeImage(Long workspaceId, String name, @Valid StackImageChangeV4Request stackImageChangeRequest) {
-        stackOperations.changeImage(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId, stackImageChangeRequest);
+        stackOperations.changeImage(NameOrCrn.ofName(name), workspaceId, stackImageChangeRequest);
     }
 
     @Override
     public void deleteWithKerberos(Long workspaceId, String name, boolean forced) {
-        stackOperations.delete(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId, forced);
+        stackOperations.delete(NameOrCrn.ofName(name), workspaceId, forced);
     }
 
     @Override
     public StackV4Request getRequestfromName(Long workspaceId, String name) {
-        return stackOperations.getRequest(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId);
+        return stackOperations.getRequest(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
     public StackStatusV4Response getStatusByName(Long workspaceId, String name) {
-        return stackOperations.getStatus(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId);
+        return stackOperations.getStatus(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
     public void deleteInstance(Long workspaceId, String name, boolean forced, String instanceId) {
-        stackOperations.deleteInstance(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId, forced, instanceId);
+        stackOperations.deleteInstance(NameOrCrn.ofName(name), workspaceId, forced, instanceId);
     }
 
     @Override
     public void deleteMultipleInstances(Long workspaceId, String name, List<String> instanceIds, boolean forced) {
-        stackOperations.deleteInstances(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId, instanceIds, forced);
+        stackOperations.deleteInstances(NameOrCrn.ofName(name), workspaceId, instanceIds, forced);
     }
 
     @Override
     public void putPassword(Long workspaceId, String name, @Valid UserNamePasswordV4Request userNamePasswordJson) {
-        stackOperations.putPassword(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId, userNamePasswordJson);
+        stackOperations.putPassword(NameOrCrn.ofName(name), workspaceId, userNamePasswordJson);
     }
 
     @Override
     public void setClusterMaintenanceMode(Long workspaceId, String name, @NotNull MaintenanceModeV4Request maintenanceMode) {
-        stackOperations.setClusterMaintenanceMode(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId, maintenanceMode);
+        stackOperations.setClusterMaintenanceMode(NameOrCrn.ofName(name), workspaceId, maintenanceMode);
     }
 
     @Override
     public void putCluster(Long workspaceId, String name, @Valid UpdateClusterV4Request updateJson) {
-        stackOperations.putCluster(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(), workspaceId, updateJson);
+        stackOperations.putCluster(NameOrCrn.ofName(name), workspaceId, updateJson);
     }
 
     @Override

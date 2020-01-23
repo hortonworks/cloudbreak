@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto.ResourceAccessDtoBuilder;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
@@ -297,7 +297,7 @@ public class StackCreatorService {
         Set<String> missingRecipes = new LinkedHashSet<>();
         recipeNames.forEach(recipeName -> {
             try {
-                recipeService.get(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(recipeName).build(), workspaceId);
+                recipeService.get(NameOrCrn.ofName(recipeName), workspaceId);
             } catch (NotFoundException ignore) {
                 missingRecipes.add(recipeName);
             }

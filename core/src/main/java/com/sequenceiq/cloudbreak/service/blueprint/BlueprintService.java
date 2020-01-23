@@ -2,9 +2,7 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
-import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,7 +27,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn.NameOrCrnReader;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
@@ -115,19 +114,19 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return super.createForLoggedInUser(blueprint, workspaceId);
     }
 
-    public Blueprint deleteByWorkspace(ResourceAccessDto accessDto, Long workspaceId) {
-        validateDto(accessDto);
-        return isNotEmpty(accessDto.getName())
-                ? super.deleteByNameFromWorkspace(accessDto.getName(), workspaceId)
-                : delete(blueprintRepository.findByResourceCrnAndWorkspaceId(accessDto.getCrn(), workspaceId)
-                .orElseThrow(() -> notFound("blueprint", accessDto.getCrn()).get()));
+    public Blueprint deleteByWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
+        NameOrCrnReader nameOrCrnReader = NameOrCrnReader.create(nameOrCrn);
+        return nameOrCrnReader.hasName()
+                ? super.deleteByNameFromWorkspace(nameOrCrnReader.getName(), workspaceId)
+                : delete(blueprintRepository.findByResourceCrnAndWorkspaceId(nameOrCrnReader.getCrn(), workspaceId)
+                .orElseThrow(() -> notFound("blueprint", nameOrCrn.toString()).get()));
     }
 
-    public Blueprint getByWorkspace(@NotNull ResourceAccessDto accessDto, Long workspaceId) {
-        validateDto(accessDto);
-        return isNotEmpty(accessDto.getName())
-                ? super.getByNameForWorkspaceId(accessDto.getName(), workspaceId)
-                : getByCrnAndWorkspaceIdAndAddToMdc(accessDto.getCrn(), workspaceId);
+    public Blueprint getByWorkspace(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+        NameOrCrnReader nameOrCrnReader = NameOrCrnReader.create(nameOrCrn);
+        return nameOrCrnReader.hasName()
+                ? getByNameForWorkspaceId(nameOrCrnReader.getName(), workspaceId)
+                : getByCrnAndWorkspaceIdAndAddToMdc(nameOrCrnReader.getCrn(), workspaceId);
     }
 
     public void decorateWithCrn(Blueprint bp, String accountId, String creator) {
@@ -396,13 +395,6 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     private boolean hostNamesAreNotUnique(List<String> hostGroupNames) {
         return new HashSet<>(hostGroupNames).size() != hostGroupNames.size();
-    }
-
-    private void validateDto(ResourceAccessDto dto) {
-        throwIfNull(dto, () -> new IllegalArgumentException("BlueprintAccessDto should not be null"));
-        if (dto.isNotValid()) {
-            throw new BadRequestException(INVALID_DTO_MESSAGE);
-        }
     }
 
     private Blueprint getByCrnAndWorkspaceIdAndAddToMdc(String crn, Long workspaceId) {

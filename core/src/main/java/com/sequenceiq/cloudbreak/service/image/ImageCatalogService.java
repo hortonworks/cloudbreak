@@ -35,7 +35,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.ImmutableSet;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn.NameOrCrnReader;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
@@ -113,9 +114,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return imageCatalogs;
     }
 
-    public ImageCatalog delete(ResourceAccessDto imageCatalogAccessDto, Long workspaceId) {
-        ResourceAccessDto.validate(imageCatalogAccessDto);
-        ImageCatalog catalog = get(imageCatalogAccessDto, workspaceId);
+    public ImageCatalog delete(NameOrCrn imageCatalogNameOrCrn, Long workspaceId) {
+        ImageCatalog catalog = get(imageCatalogNameOrCrn, workspaceId);
         return delete(workspaceId, catalog.getName());
     }
 
@@ -135,11 +135,11 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return super.createForLoggedInUser(imageCatalog, workspaceId);
     }
 
-    public ImageCatalog get(ResourceAccessDto accessDto, Long workspaceId) {
-        ResourceAccessDto.validate(accessDto);
-        return isNotEmpty(accessDto.getName())
-                ? get(workspaceId, accessDto.getName())
-                : findByResourceCrn(accessDto.getCrn());
+    public ImageCatalog get(NameOrCrn imageCatalogNameOrCrn, Long workspaceId) {
+        NameOrCrnReader nameOrCrnReader = NameOrCrnReader.create(imageCatalogNameOrCrn);
+        return nameOrCrnReader.hasName()
+                ? get(workspaceId, nameOrCrnReader.getName())
+                : findByResourceCrn(nameOrCrnReader.getCrn());
     }
 
     public ImageCatalog findByResourceCrn(String resourceCrn) {

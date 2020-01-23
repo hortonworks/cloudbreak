@@ -1,7 +1,5 @@
 package com.sequenceiq.distrox.v1.distrox;
 
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-
 import java.util.List;
 import java.util.Set;
 
@@ -15,7 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn.NameOrCrnReader;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
@@ -125,18 +124,18 @@ public class StackOperations {
         return stackV4Response;
     }
 
-    public StackV4Response get(ResourceAccessDto resourceAccessDto, Long workspaceId, Set<String> entries, StackType stackType) {
+    public StackV4Response get(NameOrCrn nameOrCrn, Long workspaceId, Set<String> entries, StackType stackType) {
         LOGGER.info("Validate stack in workspace {}.", workspaceId);
-        ResourceAccessDto.validate(resourceAccessDto);
         StackV4Response stackResponse;
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            stackResponse = stackCommonService.findStackByNameAndWorkspaceId(resourceAccessDto.getName(), workspaceId, entries, stackType);
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        if (reader.hasName()) {
+            stackResponse = stackCommonService.findStackByNameAndWorkspaceId(reader.getName(), workspaceId, entries, stackType);
             LOGGER.info("Query Stack successfully finished with workspace {} name {}. Decorating environmentname and credential",
-                    workspaceId, resourceAccessDto.getName());
+                    workspaceId, nameOrCrn);
         } else {
-            stackResponse = stackCommonService.findStackByCrnAndWorkspaceId(resourceAccessDto.getCrn(), workspaceId, entries, stackType);
+            stackResponse = stackCommonService.findStackByCrnAndWorkspaceId(reader.getCrn(), workspaceId, entries, stackType);
             LOGGER.info("Query Stack successfully finished with workspace {} crn {}. Decorating environmentname and credential",
-                    workspaceId, resourceAccessDto.getCrn());
+                    workspaceId, nameOrCrn);
         }
         LOGGER.info("Adding environment name and credential to the response.");
         environmentServiceDecorator.prepareEnvironmentAndCredentialName(stackResponse);
@@ -146,141 +145,148 @@ public class StackOperations {
         return stackResponse;
     }
 
-    public StackViewV4Response getForInternalCrn(ResourceAccessDto resourceAccessDto, StackType stackType) {
+    public StackViewV4Response getForInternalCrn(NameOrCrn nameOrCrn, StackType stackType) {
         LOGGER.info("Validate stack against internal user.");
-        ResourceAccessDto.validate(resourceAccessDto);
-        StackApiView stackApiView = stackApiViewService.retrieveStackByCrnAndType(resourceAccessDto.getCrn(), stackType);
-        LOGGER.info("Query Stack (view) successfully finished with crn {}", resourceAccessDto.getCrn());
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        StackApiView stackApiView = stackApiViewService.retrieveStackByCrnAndType(reader.getCrn(), stackType);
+        LOGGER.info("Query Stack (view) successfully finished with crn {}", reader.getCrn());
         StackViewV4Response stackViewV4Response = converterUtil.convert(stackApiView, StackViewV4Response.class);
         LOGGER.info("Adding environment name to the response.");
         environmentServiceDecorator.prepareEnvironment(stackViewV4Response);
         return stackViewV4Response;
     }
 
-    public void deleteInstance(@NotNull ResourceAccessDto resourceAccessDto, Long workspaceId, boolean forced, String instanceId) {
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            stackCommonService.deleteInstanceByNameInWorkspace(resourceAccessDto.getName(), workspaceId, instanceId, forced);
+    public void deleteInstance(@NotNull NameOrCrn nameOrCrn, Long workspaceId, boolean forced, String instanceId) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        if (reader.hasName()) {
+            stackCommonService.deleteInstanceByNameInWorkspace(reader.getName(), workspaceId, instanceId, forced);
         } else {
-            stackCommonService.deleteInstanceByCrnInWorkspace(resourceAccessDto.getCrn(), workspaceId, instanceId, forced);
+            stackCommonService.deleteInstanceByCrnInWorkspace(reader.getCrn(), workspaceId, instanceId, forced);
         }
     }
 
-    public void deleteInstances(ResourceAccessDto resourceAccessDto, Long workspaceId, List<String> instanceIds, boolean forced) {
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            stackCommonService.deleteMultipleInstancesByNameInWorkspace(resourceAccessDto.getName(), workspaceId, instanceIds, forced);
+    public void deleteInstances(NameOrCrn nameOrCrn, Long workspaceId, List<String> instanceIds, boolean forced) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        if (reader.hasName()) {
+            stackCommonService.deleteMultipleInstancesByNameInWorkspace(reader.getName(), workspaceId, instanceIds, forced);
         } else {
-            stackCommonService.deleteMultipleInstancesByCrnInWorkspace(resourceAccessDto.getCrn(), workspaceId, instanceIds, forced);
+            stackCommonService.deleteMultipleInstancesByCrnInWorkspace(reader.getCrn(), workspaceId, instanceIds, forced);
         }
     }
 
-    public void sync(ResourceAccessDto resourceAccessDto, Long workspaceId) {
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            stackCommonService.syncInWorkspace(resourceAccessDto.getName(), null, workspaceId);
+    public void sync(NameOrCrn nameOrCrn, Long workspaceId) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        if (reader.hasName()) {
+            stackCommonService.syncInWorkspace(reader.getName(), null, workspaceId);
         } else {
-            stackCommonService.syncInWorkspace(null, resourceAccessDto.getCrn(), workspaceId);
+            stackCommonService.syncInWorkspace(null, reader.getCrn(), workspaceId);
         }
     }
 
-    public void retry(ResourceAccessDto resourceAccessDto, Long workspaceId) {
-        ResourceAccessDto.validate(resourceAccessDto);
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            stackCommonService.retryInWorkspaceByName(resourceAccessDto.getName(), workspaceId);
+    public void retry(NameOrCrn nameOrCrn, Long workspaceId) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        if (reader.hasName()) {
+            stackCommonService.retryInWorkspaceByName(reader.getName(), workspaceId);
         } else {
-            stackCommonService.retryInWorkspaceByCrn(resourceAccessDto.getCrn(), workspaceId);
+            stackCommonService.retryInWorkspaceByCrn(reader.getCrn(), workspaceId);
         }
     }
 
-    public void putStop(ResourceAccessDto resourceAccessDto, Long workspaceId) {
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            stackCommonService.putStopInWorkspaceByName(resourceAccessDto.getName(), workspaceId);
+    public void putStop(NameOrCrn nameOrCrn, Long workspaceId) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        if (reader.hasName()) {
+            stackCommonService.putStopInWorkspaceByName(reader.getName(), workspaceId);
         } else {
-            stackCommonService.putStopInWorkspaceByCrn(resourceAccessDto.getCrn(), workspaceId);
+            stackCommonService.putStopInWorkspaceByCrn(reader.getCrn(), workspaceId);
         }
     }
 
-    public void putStart(ResourceAccessDto resourceAccessDto, Long workspaceId) {
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            stackCommonService.putStartInWorkspaceByName(resourceAccessDto.getName(), workspaceId);
+    public void putStart(NameOrCrn nameOrCrn, Long workspaceId) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        if (reader.hasName()) {
+            stackCommonService.putStartInWorkspaceByName(reader.getName(), workspaceId);
         } else {
-            stackCommonService.putStartInWorkspaceByCrn(resourceAccessDto.getCrn(), workspaceId);
+            stackCommonService.putStartInWorkspaceByCrn(reader.getCrn(), workspaceId);
         }
     }
 
-    public void putScaling(@NotNull ResourceAccessDto resourceAccessDto, Long workspaceId, @Valid StackScaleV4Request updateRequest) {
-        stackCommonService.putScalingInWorkspace(resourceAccessDto.getName(), workspaceId, updateRequest);
+    public void putScaling(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid StackScaleV4Request updateRequest) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        stackCommonService.putScalingInWorkspace(reader.getName(), workspaceId, updateRequest);
     }
 
-    public void repairCluster(@NotNull ResourceAccessDto resourceAccessDto, Long workspaceId, @Valid ClusterRepairV4Request clusterRepairRequest) {
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            stackCommonService.repairClusterByName(workspaceId, resourceAccessDto.getName(), clusterRepairRequest);
+    public void repairCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid ClusterRepairV4Request clusterRepairRequest) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        if (reader.hasName()) {
+            stackCommonService.repairClusterByName(workspaceId, reader.getName(), clusterRepairRequest);
         } else {
-            stackCommonService.repairClusterByCrn(workspaceId, resourceAccessDto.getCrn(), clusterRepairRequest);
+            stackCommonService.repairClusterByCrn(workspaceId, reader.getCrn(), clusterRepairRequest);
         }
     }
 
-    public void upgradeCluster(@NotNull ResourceAccessDto resourceAccessDto, Long workspaceId) {
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            upgradeService.upgradeByStackName(workspaceId, resourceAccessDto.getName());
+    public void upgradeCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        if (reader.hasName()) {
+            upgradeService.upgradeByStackName(workspaceId, reader.getName());
         } else {
+            LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
             throw new BadRequestException("Please provide a stack name for upgrade");
         }
     }
 
-    public UpgradeOptionV4Response checkForUpgrade(@NotNull ResourceAccessDto resourceAccessDto, Long workspaceId) {
+    public UpgradeOptionV4Response checkForUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            return upgradeService.getUpgradeOptionByStackName(workspaceId, resourceAccessDto.getName(), user);
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        if (reader.hasName()) {
+            return upgradeService.getUpgradeOptionByStackName(workspaceId, reader.getName(), user);
         } else {
+            LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
             throw new BadRequestException("Please provide a stack name for upgrade");
         }
     }
 
-    public GeneratedBlueprintV4Response postStackForBlueprint(ResourceAccessDto resourceAccessDto, Long workspaceId, @Valid StackV4Request stackRequest) {
+    public GeneratedBlueprintV4Response postStackForBlueprint(NameOrCrn nameOrCrn, Long workspaceId, @Valid StackV4Request stackRequest) {
         return stackCommonService.postStackForBlueprint(stackRequest);
     }
 
-    public void changeImage(@NotNull ResourceAccessDto resourceAccessDto, Long workspaceId, @Valid StackImageChangeV4Request stackImageChangeRequest) {
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            stackCommonService.changeImageByNameInWorkspace(resourceAccessDto.getName(), workspaceId, stackImageChangeRequest);
+    public void changeImage(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid StackImageChangeV4Request stackImageChangeRequest) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        if (reader.hasName()) {
+            stackCommonService.changeImageByNameInWorkspace(reader.getName(), workspaceId, stackImageChangeRequest);
         } else {
-            stackCommonService.changeImageByCrnInWorkspace(resourceAccessDto.getCrn(), workspaceId, stackImageChangeRequest);
+            stackCommonService.changeImageByCrnInWorkspace(reader.getCrn(), workspaceId, stackImageChangeRequest);
         }
     }
 
-    public void delete(@NotNull ResourceAccessDto resourceAccessDto, Long workspaceId, boolean forced) {
-        ResourceAccessDto.validate(resourceAccessDto);
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            stackCommonService.deleteWithKerberosByNameInWorkspace(resourceAccessDto.getName(), workspaceId, forced);
+    public void delete(@NotNull NameOrCrn nameOrCrn, Long workspaceId, boolean forced) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        if (reader.hasName()) {
+            stackCommonService.deleteWithKerberosByNameInWorkspace(reader.getName(), workspaceId, forced);
         } else {
-            stackCommonService.deleteWithKerberosByCrnInWorkspace(resourceAccessDto.getCrn(), workspaceId, forced);
+            stackCommonService.deleteWithKerberosByCrnInWorkspace(reader.getCrn(), workspaceId, forced);
         }
     }
 
-    public StackV4Request getRequest(@NotNull ResourceAccessDto resourceAccessDto, Long workspaceId) {
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            return stackService.getStackRequestByNameInWorkspaceId(resourceAccessDto.getName(), workspaceId);
-        } else {
-            return stackService.getStackRequestByCrnInWorkspaceId(resourceAccessDto.getCrn(), workspaceId);
-        }
+    public StackV4Request getRequest(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        return reader.hasName()
+                ? stackService.getStackRequestByNameInWorkspaceId(reader.getName(), workspaceId)
+                : stackService.getStackRequestByCrnInWorkspaceId(reader.getCrn(), workspaceId);
     }
 
-    public StackStatusV4Response getStatus(@NotNull ResourceAccessDto resourceAccessDto, Long workspaceId) {
-        Stack stack;
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            stack = stackService.getByNameInWorkspace(resourceAccessDto.getName(), workspaceId);
-        } else {
-            stack = stackService.getByCrnInWorkspace(resourceAccessDto.getCrn(), workspaceId);
-        }
+    public StackStatusV4Response getStatus(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        Stack stack = reader.hasName()
+                ? stackService.getByNameInWorkspace(reader.getName(), workspaceId)
+                : stackService.getByCrnInWorkspace(reader.getCrn(), workspaceId);
         return converterUtil.convert(stack, StackStatusV4Response.class);
     }
 
-    public StackStatusV4Response getStatusByCrn(@NotNull ResourceAccessDto resourceAccessDto, Long workspaceId) {
-        Stack stack;
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            stack = stackService.getByNameInWorkspace(resourceAccessDto.getName(), workspaceId);
-        } else {
-            stack = stackService.getByCrnInWorkspace(resourceAccessDto.getCrn(), workspaceId);
-        }
+    public StackStatusV4Response getStatusByCrn(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        Stack stack = reader.hasName()
+                ? stackService.getByNameInWorkspace(reader.getName(), workspaceId)
+                : stackService.getByCrnInWorkspace(reader.getCrn(), workspaceId);
         return converterUtil.convert(stack, StackStatusV4Response.class);
     }
 
@@ -289,36 +295,30 @@ public class StackOperations {
         return converterUtil.convert(stack, StackStatusV4Response.class);
     }
 
-    public void putPassword(@NotNull ResourceAccessDto resourceAccessDto, Long workspaceId, @Valid UserNamePasswordV4Request userNamePasswordJson) {
-        Stack stack;
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            stack = stackService.getByNameInWorkspace(resourceAccessDto.getName(), workspaceId);
-        } else {
-            stack = stackService.getByCrnInWorkspace(resourceAccessDto.getCrn(), workspaceId);
-        }
+    public void putPassword(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid UserNamePasswordV4Request userNamePasswordJson) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        Stack stack = reader.hasName()
+                ? stackService.getByNameInWorkspace(reader.getName(), workspaceId)
+                : stackService.getByCrnInWorkspace(reader.getCrn(), workspaceId);
         UpdateClusterV4Request updateClusterJson = converterUtil.convert(userNamePasswordJson, UpdateClusterV4Request.class);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         clusterCommonService.put(stack.getResourceCrn(), updateClusterJson, user, workspace);
     }
 
-    public void setClusterMaintenanceMode(@NotNull ResourceAccessDto resourceAccessDto, Long workspaceId, @NotNull MaintenanceModeV4Request maintenanceMode) {
-        Stack stack;
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            stack = stackService.getByNameInWorkspace(resourceAccessDto.getName(), workspaceId);
-        } else {
-            stack = stackService.getByCrnInWorkspace(resourceAccessDto.getCrn(), workspaceId);
-        }
+    public void setClusterMaintenanceMode(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @NotNull MaintenanceModeV4Request maintenanceMode) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        Stack stack = reader.hasName()
+                ? stackService.getByNameInWorkspace(reader.getName(), workspaceId)
+                : stackService.getByCrnInWorkspace(reader.getCrn(), workspaceId);
         clusterCommonService.setMaintenanceMode(stack, maintenanceMode.getStatus());
     }
 
-    public void putCluster(@NotNull ResourceAccessDto resourceAccessDto, Long workspaceId, @Valid UpdateClusterV4Request updateJson) {
-        Stack stack;
-        if (isNotEmpty(resourceAccessDto.getName())) {
-            stack = stackService.getByNameInWorkspace(resourceAccessDto.getName(), workspaceId);
-        } else {
-            stack = stackService.getByCrnInWorkspace(resourceAccessDto.getCrn(), workspaceId);
-        }
+    public void putCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid UpdateClusterV4Request updateJson) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        Stack stack = reader.hasName()
+                ? stackService.getByNameInWorkspace(reader.getName(), workspaceId)
+                : stackService.getByCrnInWorkspace(reader.getCrn(), workspaceId);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         clusterCommonService.put(stack.getResourceCrn(), updateJson, user, workspace);

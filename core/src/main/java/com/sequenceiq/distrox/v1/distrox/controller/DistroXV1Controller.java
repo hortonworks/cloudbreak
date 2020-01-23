@@ -15,8 +15,7 @@ import org.springframework.stereotype.Controller;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto.ResourceAccessDtoBuilder;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
@@ -84,11 +83,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public StackViewV4Responses list(String environmentName, String environmentCrn) {
         StackViewV4Responses stackViewV4Responses;
         List<StackType> stackTypes = List.of(StackType.WORKLOAD);
-        if (!Strings.isNullOrEmpty(environmentName)) {
-            stackViewV4Responses = stackOperations.listByEnvironmentName(workspaceService.getForCurrentUser().getId(), environmentName, stackTypes);
-        } else {
-            stackViewV4Responses = stackOperations.listByEnvironmentCrn(workspaceService.getForCurrentUser().getId(), environmentCrn, stackTypes);
-        }
+        stackViewV4Responses = Strings.isNullOrEmpty(environmentName)
+                ? stackOperations.listByEnvironmentCrn(workspaceService.getForCurrentUser().getId(), environmentCrn, stackTypes)
+                : stackOperations.listByEnvironmentName(workspaceService.getForCurrentUser().getId(), environmentName, stackTypes);
         return stackViewV4Responses;
     }
 
@@ -102,7 +99,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     public StackV4Response getByName(String name, Set<String> entries) {
         return stackOperations.get(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
+                NameOrCrn.ofName(name),
                 workspaceService.getForCurrentUser().getId(),
                 entries,
                 StackType.WORKLOAD);
@@ -111,7 +108,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     public StackV4Response getByCrn(@ResourceCrn String crn, Set<String> entries) {
         return stackOperations.get(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
+                NameOrCrn.ofCrn(crn),
                 workspaceService.getForCurrentUser().getId(),
                 entries,
                 StackType.WORKLOAD);
@@ -119,18 +116,12 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     public void deleteByName(String name, Boolean forced) {
-        stackOperations.delete(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
-                workspaceService.getForCurrentUser().getId(),
-                forced);
+        stackOperations.delete(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId(), forced);
     }
 
     @Override
     public void deleteByCrn(String crn, Boolean forced) {
-        stackOperations.delete(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
-                workspaceService.getForCurrentUser().getId(),
-                forced);
+        stackOperations.delete(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId(), forced);
     }
 
     @Override
@@ -153,41 +144,34 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     private void multideleteByNames(DistroXMultiDeleteV1Request multiDeleteRequest, Boolean forced) {
-        Set<ResourceAccessDto> resourceAccessDtos = multiDeleteRequest.getNames().stream()
-                .map(name -> ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build())
+        Set<NameOrCrn> nameOrCrns = multiDeleteRequest.getNames().stream()
+                .map(name -> NameOrCrn.ofName(name))
                 .collect(Collectors.toSet());
-        resourceAccessDtos
-                .forEach(accessDto -> stackOperations.delete(accessDto, workspaceService.getForCurrentUser().getId(), forced));
+        nameOrCrns.forEach(accessDto -> stackOperations.delete(accessDto, workspaceService.getForCurrentUser().getId(), forced));
     }
 
     private void multideleteByCrn(DistroXMultiDeleteV1Request multiDeleteRequest, Boolean forced) {
-        Set<ResourceAccessDto> resourceAccessDtos = multiDeleteRequest.getCrns().stream()
-                .map(crn -> ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build())
+        Set<NameOrCrn> nameOrCrns = multiDeleteRequest.getCrns().stream()
+                .map(NameOrCrn::ofCrn)
                 .collect(Collectors.toSet());
-        resourceAccessDtos
-                .forEach(accessDto -> stackOperations.delete(accessDto, workspaceService.getForCurrentUser().getId(), forced));
+        nameOrCrns.forEach(accessDto -> stackOperations.delete(accessDto, workspaceService.getForCurrentUser().getId(), forced));
     }
 
     @Override
     public void syncByName(String name) {
-        stackOperations.sync(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
-                workspaceService.getForCurrentUser().getId());
+        stackOperations.sync(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId());
     }
 
     @Override
     public void syncByCrn(String crn) {
-        stackOperations.sync(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
-                workspaceService.getForCurrentUser().getId());
+        stackOperations.sync(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
 
     @Override
     public void retryByName(String name) {
         stackOperations.retry(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
+                NameOrCrn.ofName(name),
                 workspaceService.getForCurrentUser().getId());
-
     }
 
     @Override
@@ -200,25 +184,18 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     public void retryByCrn(String crn) {
-        stackOperations.retry(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
-                workspaceService.getForCurrentUser().getId());
-
+        stackOperations.retry(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
 
     @Override
     public void putStopByName(String name) {
-        stackOperations.putStop(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
-                workspaceService.getForCurrentUser().getId());
+        stackOperations.putStop(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId());
 
     }
 
     @Override
     public void putStopByCrn(String crn) {
-        stackOperations.putStop(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
-                workspaceService.getForCurrentUser().getId());
+        stackOperations.putStop(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
 
     }
 
@@ -234,18 +211,13 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     public void putStartByName(String name) {
-        stackOperations.putStart(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
-                workspaceService.getForCurrentUser().getId());
+        stackOperations.putStart(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId());
 
     }
 
     @Override
     public void putStartByCrn(String crn) {
-        stackOperations.putStart(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
-                workspaceService.getForCurrentUser().getId());
-
+        stackOperations.putStart(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
 
     @Override
@@ -262,44 +234,36 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public void putScalingByName(String name, @Valid DistroXScaleV1Request updateRequest) {
         StackScaleV4Request stackScaleV4Request = scaleRequestConverter.convert(updateRequest);
         stackScaleV4Request.setStackId(stackOperations.getStackByName(name).getId());
-        stackOperations.putScaling(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
-                workspaceService.getForCurrentUser().getId(),
-                stackScaleV4Request);
+        stackOperations.putScaling(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId(), stackScaleV4Request);
     }
 
     @Override
     public void putScalingByCrn(String crn, @Valid DistroXScaleV1Request updateRequest) {
         StackScaleV4Request stackScaleV4Request = scaleRequestConverter.convert(updateRequest);
         stackScaleV4Request.setStackId(stackOperations.getStackByCrn(crn).getId());
-        stackOperations.putScaling(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
-                workspaceService.getForCurrentUser().getId(),
-                stackScaleV4Request);
+        stackOperations.putScaling(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId(), stackScaleV4Request);
     }
 
     @Override
     public void repairClusterByName(String name, @Valid DistroXRepairV1Request clusterRepairRequest) {
         stackOperations.repairCluster(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
+                NameOrCrn.ofName(name),
                 workspaceService.getForCurrentUser().getId(),
                 clusterRepairRequestConverter.convert(clusterRepairRequest));
-
     }
 
     @Override
     public void repairClusterByCrn(String crn, @Valid DistroXRepairV1Request clusterRepairRequest) {
         stackOperations.repairCluster(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
+                NameOrCrn.ofCrn(crn),
                 workspaceService.getForCurrentUser().getId(),
                 clusterRepairRequestConverter.convert(clusterRepairRequest));
-
     }
 
     @Override
     public GeneratedBlueprintV4Response postStackForBlueprintByName(String name, @Valid DistroXV1Request stackRequest) {
         return stackOperations.postStackForBlueprint(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
+                NameOrCrn.ofName(name),
                 workspaceService.getForCurrentUser().getId(),
                 stackRequestConverter.convert(stackRequest));
     }
@@ -307,41 +271,39 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     public GeneratedBlueprintV4Response postStackForBlueprintByCrn(String crn, @Valid DistroXV1Request stackRequest) {
         return stackOperations.postStackForBlueprint(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
+                NameOrCrn.ofCrn(crn),
                 workspaceService.getForCurrentUser().getId(),
                 stackRequestConverter.convert(stackRequest));
     }
 
     @Override
     public Object getRequestfromName(String name) {
-        StackV4Request stackV4Request = getStackV4Request(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build());
+        StackV4Request stackV4Request = getStackV4Request(NameOrCrn.ofName(name));
         return getCreateAWSClusterRequest(stackV4Request);
     }
 
     @Override
     public Object getRequestfromCrn(String crn) {
-        StackV4Request stackV4Request = getStackV4Request(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build());
+        StackV4Request stackV4Request = getStackV4Request(NameOrCrn.ofCrn(crn));
         return getCreateAWSClusterRequest(stackV4Request);
     }
 
     @Override
     public StackStatusV4Response getStatusByName(String name) {
         return stackOperations.getStatus(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
+                NameOrCrn.ofName(name),
                 workspaceService.getForCurrentUser().getId());
     }
 
     @Override
     public StackStatusV4Response getStatusByCrn(String crn) {
-        return stackOperations.getStatusByCrn(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
-                workspaceService.getForCurrentUser().getId());
+        return stackOperations.getStatusByCrn(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
 
     @Override
     public void deleteInstanceByName(String name, Boolean forced, String instanceId) {
         stackOperations.deleteInstance(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
+                NameOrCrn.ofName(name),
                 workspaceService.getForCurrentUser().getId(),
                 forced,
                 instanceId);
@@ -350,7 +312,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     public void deleteInstanceByCrn(String crn, Boolean forced, String instanceId) {
         stackOperations.deleteInstance(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
+                NameOrCrn.ofCrn(crn),
                 workspaceService.getForCurrentUser().getId(),
                 forced,
                 instanceId);
@@ -359,7 +321,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     public void deleteInstancesByName(String name, @NotEmpty List<String> instances, boolean forced) {
         stackOperations.deleteInstances(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
+                NameOrCrn.ofName(name),
                 workspaceService.getForCurrentUser().getId(),
                 instances,
                 forced);
@@ -368,7 +330,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     public void deleteInstancesByCrn(String crn, @NotEmpty List<String> instances, boolean forced) {
         stackOperations.deleteInstances(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
+                NameOrCrn.ofCrn(crn),
                 workspaceService.getForCurrentUser().getId(),
                 instances,
                 forced);
@@ -377,7 +339,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     public void setClusterMaintenanceModeByName(String name, @NotNull DistroXMaintenanceModeV1Request maintenanceMode) {
         stackOperations.setClusterMaintenanceMode(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
+                NameOrCrn.ofName(name),
                 workspaceService.getForCurrentUser().getId(),
                 maintenanceModeConverter.convert(maintenanceMode));
 
@@ -386,7 +348,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     public void setClusterMaintenanceModeByCrn(String crn, @NotNull DistroXMaintenanceModeV1Request maintenanceMode) {
         stackOperations.setClusterMaintenanceMode(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
+                NameOrCrn.ofCrn(crn),
                 workspaceService.getForCurrentUser().getId(),
                 maintenanceModeConverter.convert(maintenanceMode));
     }
@@ -394,7 +356,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     public void deleteWithKerberosByName(String name, boolean forced) {
         stackOperations.delete(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
+                NameOrCrn.ofName(name),
                 workspaceService.getForCurrentUser().getId(),
                 forced);
 
@@ -403,7 +365,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     public void deleteWithKerberosByCrn(String crn, boolean forced) {
         stackOperations.delete(
-                ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
+                NameOrCrn.ofCrn(crn),
                 workspaceService.getForCurrentUser().getId(),
                 forced);
 
@@ -418,7 +380,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         return distroXV1RequestToCreateAWSClusterRequestConverter.convert(request);
     }
 
-    private StackV4Request getStackV4Request(ResourceAccessDto accessDto) {
+    private StackV4Request getStackV4Request(NameOrCrn accessDto) {
         return stackOperations.getRequest(accessDto, workspaceService.getForCurrentUser().getId());
     }
 

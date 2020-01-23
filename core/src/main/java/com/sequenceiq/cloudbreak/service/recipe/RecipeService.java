@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.recipe;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static java.util.Collections.emptySet;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,7 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn.NameOrCrnReader;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -46,18 +46,17 @@ public class RecipeService extends AbstractArchivistService<Recipe> {
     @Inject
     private HostGroupService hostGroupService;
 
-    public Recipe delete(ResourceAccessDto accessDto, Long workspaceId) {
-        ResourceAccessDto.validate(accessDto);
-        Recipe toDelete = get(accessDto, workspaceId);
+    public Recipe delete(NameOrCrn recipeNameOrCrn, Long workspaceId) {
+        Recipe toDelete = get(recipeNameOrCrn, workspaceId);
         return super.delete(toDelete);
     }
 
-    public Recipe get(ResourceAccessDto accessDto, Long workspaceId) {
-        ResourceAccessDto.validate(accessDto);
-        return isNotEmpty(accessDto.getName())
-                ? super.getByNameForWorkspaceId(accessDto.getName(), workspaceId)
-                : recipeRepository.findByResourceCrnAndWorkspaceId(accessDto.getCrn(), workspaceId)
-                .orElseThrow(() -> new NotFoundException("No recipe found with crn: \"" + accessDto.getCrn() + "\""));
+    public Recipe get(NameOrCrn recipeNameOrCrn, Long workspaceId) {
+        NameOrCrnReader nameOrCrnReader = NameOrCrnReader.create(recipeNameOrCrn);
+        return nameOrCrnReader.hasName()
+                ? super.getByNameForWorkspaceId(nameOrCrnReader.getName(), workspaceId)
+                : recipeRepository.findByResourceCrnAndWorkspaceId(nameOrCrnReader.getCrn(), workspaceId)
+                .orElseThrow(() -> new NotFoundException("No recipe found with crn: \"" + recipeNameOrCrn + "\""));
     }
 
     public Set<Recipe> getRecipesByNamesForWorkspace(Workspace workspace, Set<String> recipeNames) {
