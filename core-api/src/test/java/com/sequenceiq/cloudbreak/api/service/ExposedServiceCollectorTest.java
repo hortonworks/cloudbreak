@@ -128,7 +128,6 @@ class ExposedServiceCollectorTest {
                 "HBASEUI",
                 "HDFSUI",
                 "HIVE",
-                "HIVE_INTERACTIVE",
                 "HUE",
                 "IMPALA",
                 "IMPALA_DEBUG_UI",

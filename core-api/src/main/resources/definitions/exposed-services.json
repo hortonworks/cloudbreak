@@ -118,19 +118,6 @@
       "visible": true
     },
     {
-      "name": "HIVE_SERVER_INTERACTIVE",
-      "displayName": "Hive Server Interactive",
-      "serviceName": "",
-      "knoxService": "HIVE_INTERACTIVE",
-      "knoxUrl": "/hive/",
-      "ssoSupported": false,
-      "port": 10501,
-      "tlsPort": 10502,
-      "apiOnly": true,
-      "apiIncluded": true,
-      "visible": true
-    },
-    {
       "name": "ATLAS",
       "displayName": "Atlas",
       "serviceName": "ATLAS_SERVER",

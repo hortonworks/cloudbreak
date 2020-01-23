@@ -24,11 +24,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
+import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
@@ -257,6 +257,9 @@ public class ServiceEndpointCollector {
                 case "KUDU_TABLET_SERVER":
                     // skipping kudu tablet server url because this is not required
                     break;
+                case "HIVE_SERVER":
+                    // there is no HTTP endpoint for Hive server
+                    break;
                 default:
                     urls.add(getExposedServiceUrl(managerIp, gateway, topologyName, exposedService, api));
                     break;
@@ -271,7 +274,6 @@ public class ServiceEndpointCollector {
         if (hasKnoxUrl(exposedService) && managerIp != null) {
             switch (exposedService.getName()) {
                 case "HIVE_SERVER":
-                case "HIVE_SERVER_INTERACTIVE":
                     getHiveJdbcUrl(gateway, managerIp, securityConfig).ifPresent(urls::add);
                     break;
                 case "IMPALA":
