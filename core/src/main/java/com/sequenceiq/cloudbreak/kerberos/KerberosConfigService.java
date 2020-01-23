@@ -8,8 +8,6 @@ import javax.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.vault.VaultException;
 
@@ -25,22 +23,16 @@ import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosCon
 public class KerberosConfigService {
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosConfigService.class);
 
-    private static final int MAX_ATTEMPT = 5;
-
-    private static final int DELAY = 5000;
-
     @Inject
     private KerberosConfigV1Endpoint kerberosConfigV1Endpoint;
 
     @Inject
     private SecretService secretService;
 
-    @Retryable(value = CloudbreakServiceException.class, maxAttempts = MAX_ATTEMPT, backoff = @Backoff(delay = DELAY))
     public boolean isKerberosConfigExistsForEnvironment(String environmentCrn, String clusterName) {
         return describeKerberosConfig(environmentCrn, clusterName).isPresent();
     }
 
-    @Retryable(value = CloudbreakServiceException.class, maxAttempts = MAX_ATTEMPT, backoff = @Backoff(delay = DELAY))
     public Optional<KerberosConfig> get(String environmentCrn, String clusterName) {
         Optional<DescribeKerberosConfigResponse> describeKerberosConfigResponse = describeKerberosConfig(environmentCrn, clusterName);
         return describeKerberosConfigResponse.map(this::convert);

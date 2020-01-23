@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
@@ -328,7 +329,7 @@ public class ClusterService {
         stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
         LOGGER.debug("Cluster delete requested.");
         markVolumesForDeletion(stack);
-        flowManager.triggerClusterTermination(stack, forced);
+        flowManager.triggerClusterTermination(stack, forced, ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     private void markVolumesForDeletion(Stack stack) {
