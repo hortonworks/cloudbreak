@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -49,6 +50,8 @@ import reactor.rx.Promise;
 public class ReactorFlowManagerTest {
 
     private static final Long STACK_ID = 1L;
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:tenantName:user:userName";
 
     @Mock
     private EventBus reactor;
@@ -118,8 +121,8 @@ public class ReactorFlowManagerTest {
         underTest.triggerFullSyncWithoutCheck(STACK_ID);
         underTest.triggerClusterCredentialReplace(STACK_ID, "admin", "admin1");
         underTest.triggerClusterCredentialUpdate(STACK_ID, "admin1");
-        underTest.triggerClusterTermination(stack, false);
-        underTest.triggerClusterTermination(stack, false);
+        underTest.triggerClusterTermination(stack, false, USER_CRN);
+        underTest.triggerClusterTermination(stack, false, USER_CRN);
         underTest.triggerClusterUpgrade(STACK_ID);
         underTest.triggerManualRepairFlow(STACK_ID);
         underTest.triggerStackRepairFlow(STACK_ID, new UnhealthyInstances());
@@ -141,7 +144,7 @@ public class ReactorFlowManagerTest {
 
     @Test
     public void testClusterTerminationOnlyNotSecuredCluster() {
-        underTest.triggerClusterTermination(stack, false);
+        underTest.triggerClusterTermination(stack, false, USER_CRN);
 
         verify(reactor).notify(eq(FlowChainTriggers.TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
@@ -154,14 +157,14 @@ public class ReactorFlowManagerTest {
         when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
         when(kerberosConfigService.isKerberosConfigExistsForEnvironment("env", stack.getName())).thenReturn(true);
 
-        underTest.triggerClusterTermination(stack, false);
+        underTest.triggerClusterTermination(stack, false, USER_CRN);
 
         verify(reactor).notify(eq(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
 
     @Test
     public void testClusterTerminationNotSecuredClusterAndStack() {
-        underTest.triggerClusterTermination(stack, false);
+        underTest.triggerClusterTermination(stack, false, USER_CRN);
 
         verify(reactor).notify(eq(FlowChainTriggers.TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
@@ -174,9 +177,23 @@ public class ReactorFlowManagerTest {
         when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
         when(kerberosConfigService.isKerberosConfigExistsForEnvironment("env", stack.getName())).thenReturn(true);
 
-        underTest.triggerClusterTermination(stack, false);
+        underTest.triggerClusterTermination(stack, false, USER_CRN);
 
         verify(reactor).notify(eq(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT), any(Event.class));
+    }
+
+    @Test
+    public void testClusterTerminationShouldTriggerStackTerminationWhenKerberosConfigCouldNotBeGot() {
+        Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
+        stack.setEnvironmentCrn("env");
+        when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
+        when(kerberosConfigService.isKerberosConfigExistsForEnvironment("env", stack.getName()))
+                .thenThrow(new CloudbreakServiceException("FreeIPA Internal server error...."));
+
+        underTest.triggerClusterTermination(stack, false, USER_CRN);
+
+        verify(reactor).notify(eq(FlowChainTriggers.TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
 
     @Test
