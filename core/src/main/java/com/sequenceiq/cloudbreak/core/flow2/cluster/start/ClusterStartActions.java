@@ -79,7 +79,7 @@ public class ClusterStartActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterStartService.handleClusterStartFailure(context.getStackView(), payload.getException().getMessage());
-                getMetricService().incrementMetricCounter(MetricType.CLUSTER_START_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_START_FAILED, context.getStackView(), payload.getException());
                 sendEvent(context);
             }
 

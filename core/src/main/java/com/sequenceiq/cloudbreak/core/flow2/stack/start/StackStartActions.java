@@ -122,7 +122,7 @@ public class StackStartActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 stackStartStopService.handleStackStartError(context.getStackView(), payload);
-                getMetricService().incrementMetricCounter(MetricType.STACK_START_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.STACK_START_FAILED, context.getStackView(), payload.getException());
                 sendEvent(context);
             }
 
