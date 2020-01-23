@@ -6,11 +6,17 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.converter.TunnelConverter;
+import com.sequenceiq.common.api.type.Tunnel;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -42,6 +48,12 @@ public class StackView extends CompactView {
     private Long terminated;
 
     private String resourceCrn;
+
+    @Convert(converter = TunnelConverter.class)
+    private Tunnel tunnel = Tunnel.DIRECT;
+
+    @Enumerated(EnumType.STRING)
+    private StackType type;
 
     public StackView() {
     }
@@ -118,5 +130,21 @@ public class StackView extends CompactView {
 
     public Long getTerminated() {
         return terminated;
+    }
+
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
+    public void setTunnel(Tunnel tunnel) {
+        this.tunnel = tunnel;
+    }
+
+    public StackType getType() {
+        return type;
+    }
+
+    public void setType(StackType type) {
+        this.type = type;
     }
 }
