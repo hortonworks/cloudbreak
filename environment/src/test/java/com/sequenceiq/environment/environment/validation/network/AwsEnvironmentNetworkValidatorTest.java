@@ -114,9 +114,9 @@ class AwsEnvironmentNetworkValidatorTest {
         assertEquals(2, validationResult.getErrors().size(), validationResult.getFormattedErrors());
         List<String> actual = validationResult.getErrors();
         assertTrue(actual.stream().anyMatch(item ->
-                item.equals("Cannot create environment, there should be at least two subnets in the network")));
+                item.equals("There should be at least two subnets in the network")));
         assertTrue(actual.stream().anyMatch(item ->
-                item.equals("Cannot create environment, the subnets in the vpc should be present at least in two different availability zones")));
+                item.equals("The subnets in the vpc should be present at least in two different availability zones")));
     }
 
     @Test
@@ -163,7 +163,7 @@ class AwsEnvironmentNetworkValidatorTest {
         assertTrue(validationResult.hasError());
         assertEquals(1, validationResult.getErrors().size(), validationResult.getFormattedErrors());
         String actual = validationResult.getErrors().get(0);
-        assertEquals("Cannot create environment, the subnets in the vpc should be present at least in two different availability zones", actual);
+        assertEquals("The subnets in the vpc should be present at least in two different availability zones", actual);
     }
 
     private AwsParams getAwsParams() {

@@ -59,6 +59,10 @@ public class NetworkDto {
         return new Builder();
     }
 
+    public static Builder builder(NetworkDto networkDto) {
+        return new Builder(networkDto);
+    }
+
     public Long getId() {
         return id;
     }
@@ -171,6 +175,22 @@ public class NetworkDto {
         private CloudPlatform cloudPlatform;
 
         private Builder() {
+        }
+
+        private Builder(NetworkDto networkDto) {
+            this.id = networkDto.id;
+            this.name = networkDto.name;
+            this.networkId = networkDto.networkId;
+            this.resourceCrn = networkDto.resourceCrn;
+            this.aws = networkDto.aws;
+            this.azure = networkDto.azure;
+            this.yarn = networkDto.yarn;
+            this.mock = networkDto.mock;
+            this.subnetMetas = networkDto.subnetMetas;
+            this.networkCidr = networkDto.networkCidr;
+            this.privateSubnetCreation = networkDto.privateSubnetCreation;
+            this.registrationType = networkDto.registrationType;
+            this.cloudPlatform = networkDto.cloudPlatform;
         }
 
         public Builder withId(Long id) {

@@ -128,13 +128,14 @@ class AzureEnvironmentNetworkValidatorTest {
         NetworkDto networkDto = testHelper.getNetworkDto(azureParams, null, azureParams.getNetworkId(), null, null);
 
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
-        underTest.validateDuringRequest(networkDto, null, resultBuilder);
+        underTest.validateDuringRequest(networkDto, networkDto.getSubnetMetas(), resultBuilder);
 
         ValidationResult validationResult = resultBuilder.build();
         assertTrue(validationResult.hasError());
         assertEquals(1, validationResult.getErrors().size(), validationResult.getFormattedErrors());
         String actual = validationResult.getErrors().get(0);
-        assertEquals("If subnetId and resourceGroupName are specified then subnet ids must be specified as well.", actual);
+        assertEquals("If networkId (aNetworkId) and resourceGroupName (aResourceGroupId) are specified then subnet ids must be specified as well.",
+                actual);
     }
 
     @Test
@@ -143,7 +144,7 @@ class AzureEnvironmentNetworkValidatorTest {
         NetworkDto networkDto = testHelper.getNetworkDto(azureParams, null, azureParams.getNetworkId(), null, 1);
 
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
-        underTest.validateDuringRequest(networkDto, null, resultBuilder);
+        underTest.validateDuringRequest(networkDto, networkDto.getSubnetMetas(), resultBuilder);
 
         ValidationResult validationResult = resultBuilder.build();
         assertFalse(validationResult.hasError());
