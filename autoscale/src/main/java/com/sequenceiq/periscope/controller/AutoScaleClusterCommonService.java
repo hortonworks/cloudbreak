@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
@@ -47,24 +46,20 @@ public class AutoScaleClusterCommonService {
     }
 
     public AutoscaleClusterResponse getCluster(Long clusterId) {
-        MDCBuilder.buildMdcContext(clusterId, "", "CLUSTER");
         return createClusterJsonResponse(clusterService.findById(clusterId));
     }
 
     public void deleteCluster(Long clusterId) {
-        MDCBuilder.buildMdcContext(clusterId, "", "CLUSTER");
         clusterService.removeById(clusterId);
     }
 
     public AutoscaleClusterResponse setState(Long clusterId, StateJson stateJson) {
-        MDCBuilder.buildMdcContext(clusterId, "", "CLUSTER");
         Cluster cluster = clusterService.setState(clusterId, stateJson.getState());
         createHistoryAndNotification(cluster);
         return createClusterJsonResponse(cluster);
     }
 
     public AutoscaleClusterResponse setAutoscaleState(Long clusterId, AutoscaleClusterState autoscaleState) {
-        MDCBuilder.buildMdcContext(clusterId, "", "CLUSTER");
         Cluster cluster = clusterService.setAutoscaleState(clusterId, autoscaleState.isEnableAutoscaling());
         createHistoryAndNotification(cluster);
         return createClusterJsonResponse(cluster);

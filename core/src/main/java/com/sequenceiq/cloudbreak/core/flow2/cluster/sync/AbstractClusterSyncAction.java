@@ -25,7 +25,7 @@ public abstract class AbstractClusterSyncAction<P extends Payload> extends Abstr
     @Override
     protected ClusterSyncContext createFlowContext(FlowParameters flowParameters, StateContext<ClusterSyncState, ClusterSyncEvent> stateContext, P payload) {
         StackView stack = stackService.getViewByIdWithoutAuth(payload.getResourceId());
-        MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), "CLUSTER");
+        MDCBuilder.buildMdcContext(stack.getClusterView());
         return new ClusterSyncContext(flowParameters, stack);
     }
 

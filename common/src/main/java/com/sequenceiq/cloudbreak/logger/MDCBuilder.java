@@ -79,24 +79,12 @@ public class MDCBuilder {
             MDC.put(LoggerContextKey.WORKSPACE.toString(), getFieldValue(object, "workspace"));
             MdcContext.builder()
                     .resourceCrn(getFieldValues(object, LoggerContextKey.RESOURCE_CRN.toString(), LoggerContextKey.CRN.toString()))
-                    .resourceType(object.getClass().getSimpleName().toUpperCase())
+                    .resourceType(getResourceType(object))
                     .resourceName(getFieldValues(object, LoggerContextKey.NAME.toString(), LoggerContextKey.CLUSTER_NAME.toString()))
                     .environmentCrn(getFieldValues(object, LoggerContextKey.ENVIRONMENT_CRN.toString(), LoggerContextKey.ENV_CRN.toString()))
                     .tenant(getFieldValue(object, LoggerContextKey.ACCOUNT_ID.toString()))
                     .buildMdc();
         }
-    }
-
-    public static void buildMdcContext(Long resourceId, String resourceName, String type) {
-        buildMdcContext(resourceId == null ? "" : String.valueOf(resourceId), resourceName, type);
-    }
-
-    public static void buildMdcContext(String resourceId, String resourceName, String type) {
-        MdcContext.builder()
-                .resourceCrn(resourceId)
-                .resourceName(resourceName)
-                .resourceType(type)
-                .buildMdc();
     }
 
     public static void buildMdc(MdcContext mdcContext) {
@@ -174,6 +162,11 @@ public class MDCBuilder {
 
         }
         return null;
+    }
+
+    private static String getResourceType(Object object) {
+        String typeName = object.getClass().getSimpleName().toUpperCase();
+        return typeName.endsWith("VIEW") ? StringUtils.substringBefore(typeName, "VIEW") : typeName;
     }
 
     public static void cleanupMdc() {
