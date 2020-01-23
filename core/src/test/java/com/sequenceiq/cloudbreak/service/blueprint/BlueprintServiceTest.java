@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.PRE_DELETE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto.ResourceAccessDtoBuilder.aResourceAccessDtoBuilder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
@@ -42,6 +41,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -69,8 +69,6 @@ public class BlueprintServiceTest {
     private static final String INVALID_DTO_MESSAGE = "One and only one value of the crn and name should be filled!";
 
     private static final List<String> INVALID_HOST_GROUP_NAME_LIST = List.of("master", "worker", "master");
-
-    private static final String NULL_DTO_EXCEPTION_MESSAGE = "BlueprintAccessDto should not be null";
 
     private static final String ACCOUNT_ID = "ACCOUNT_ID";
 
@@ -131,8 +129,7 @@ public class BlueprintServiceTest {
         when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.deleteByWorkspace(aResourceAccessDtoBuilder()
-                .withName(blueprint.getName()).build(), blueprint.getWorkspace().getId());
+        Blueprint result = underTest.deleteByWorkspace(NameOrCrn.ofName(blueprint.getName()), blueprint.getWorkspace().getId());
 
         assertEquals(blueprint, result);
         verify(blueprintRepository, times(1))
@@ -148,8 +145,7 @@ public class BlueprintServiceTest {
         when(blueprintRepository.findByResourceCrnAndWorkspaceId(blueprint.getResourceCrn(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.deleteByWorkspace(aResourceAccessDtoBuilder()
-                .withCrn(blueprint.getResourceCrn()).build(), blueprint.getWorkspace().getId());
+        Blueprint result = underTest.deleteByWorkspace(NameOrCrn.ofCrn(blueprint.getResourceCrn()), blueprint.getWorkspace().getId());
 
         assertEquals(blueprint, result);
         verify(blueprintRepository, times(1))
@@ -161,31 +157,11 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testDeleteByWorkspaceWhenNeitherCrnOrNameProvidedThenBadRequestExceptionComes() {
-        exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage(INVALID_DTO_MESSAGE);
-
-        underTest.deleteByWorkspace(aResourceAccessDtoBuilder().build(), blueprint.getWorkspace().getId());
-
-        verify(blueprintRepository, times(0)).findByResourceCrnAndWorkspaceId(anyString(), anyLong());
-        verify(blueprintRepository, times(0)).delete(any());
-    }
-
-    @Test
-    public void testDeleteByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
-        exceptionRule.expect(IllegalArgumentException.class);
-        exceptionRule.expectMessage(NULL_DTO_EXCEPTION_MESSAGE);
-
-        underTest.deleteByWorkspace(null, blueprint.getWorkspace().getId());
-    }
-
-    @Test
     public void testGetByWorkspaceWhenDtoNameFilledThenProperGetCalled() {
         when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.getByWorkspace(aResourceAccessDtoBuilder()
-                .withName(blueprint.getName()).build(), blueprint.getWorkspace().getId());
+        Blueprint result = underTest.getByWorkspace(NameOrCrn.ofName(blueprint.getName()), blueprint.getWorkspace().getId());
 
         assertEquals(blueprint, result);
         verify(blueprintRepository, times(1))
@@ -199,33 +175,13 @@ public class BlueprintServiceTest {
         when(blueprintRepository.findByResourceCrnAndWorkspaceId(blueprint.getResourceCrn(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.getByWorkspace(aResourceAccessDtoBuilder()
-                .withCrn(blueprint.getResourceCrn()).build(), blueprint.getWorkspace().getId());
+        Blueprint result = underTest.getByWorkspace(NameOrCrn.ofCrn(blueprint.getResourceCrn()), blueprint.getWorkspace().getId());
 
         assertEquals(blueprint, result);
         verify(blueprintRepository, times(1))
                 .findByResourceCrnAndWorkspaceId(anyString(), anyLong());
         verify(blueprintRepository, times(1))
                 .findByResourceCrnAndWorkspaceId(blueprint.getResourceCrn(), blueprint.getWorkspace().getId());
-    }
-
-    @Test
-    public void testGetByWorkspaceWhenNeitherCrnOrNameProvidedThenBadRequestExceptionComes() {
-        exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage(INVALID_DTO_MESSAGE);
-
-        underTest.getByWorkspace(aResourceAccessDtoBuilder().build(), blueprint.getWorkspace().getId());
-
-        verify(blueprintRepository, times(0)).findByResourceCrnAndWorkspaceId(anyString(), anyLong());
-        verify(blueprintRepository, times(0)).save(any());
-    }
-
-    @Test
-    public void testGetByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
-        exceptionRule.expect(IllegalArgumentException.class);
-        exceptionRule.expectMessage(NULL_DTO_EXCEPTION_MESSAGE);
-
-        underTest.getByWorkspace(null, blueprint.getWorkspace().getId());
     }
 
     @Test
