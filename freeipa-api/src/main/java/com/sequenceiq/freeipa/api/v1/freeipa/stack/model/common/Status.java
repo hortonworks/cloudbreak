@@ -12,7 +12,6 @@ public enum Status {
     UPDATE_REQUESTED,
     UPDATE_FAILED,
     CREATE_FAILED,
-    ENABLE_SECURITY_FAILED,
     DELETE_IN_PROGRESS,
     DELETE_FAILED,
     DELETE_COMPLETED,
@@ -32,11 +31,14 @@ public enum Status {
 
     public static final Collection<Status> AVAILABLE_STATUSES = List.of(AVAILABLE, MAINTENANCE_MODE_ENABLED);
 
-    public static final Collection<Status> REMOVABLE_STATUSES = List.of(AVAILABLE, UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
+    public static final Collection<Status> REMOVABLE_STATUSES = List.of(AVAILABLE, UPDATE_FAILED, CREATE_FAILED, DELETE_FAILED,
             DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED);
 
-    public static final Collection<Status> FAILED_STATUSES = List.of(UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED, START_FAILED,
+    public static final Collection<Status> FAILED_STATUSES = List.of(UPDATE_FAILED, CREATE_FAILED, DELETE_FAILED, START_FAILED,
             STOP_FAILED);
+
+    public static final Collection<Status> FREEIPA_UNREACHABLE_STATUSES = List.of(REQUESTED, UNREACHABLE, STOPPED, DELETED_ON_PROVIDER_SIDE,
+            DELETE_IN_PROGRESS, DELETE_COMPLETED);
 
     public boolean isRemovableStatus() {
         return REMOVABLE_STATUSES.contains(this);
@@ -60,5 +62,9 @@ public enum Status {
 
     public boolean isStopPhaseActive() {
         return name().contains("STOP");
+    }
+
+    public boolean isFreeIpaUnreachableStatus() {
+        return FREEIPA_UNREACHABLE_STATUSES.contains(this);
     }
 }
