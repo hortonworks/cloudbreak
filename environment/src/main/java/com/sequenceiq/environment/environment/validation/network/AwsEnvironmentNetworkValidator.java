@@ -43,7 +43,7 @@ public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidat
             NetworkDto networkV1Request, Map<String, CloudSubnet> subnetMetas, ValidationResult.ValidationResultBuilder resultBuilder) {
         String message;
         if (networkV1Request.getSubnetIds().size() < 2) {
-            message = "Cannot create environment, there should be at least two subnets in the network";
+            message = "There should be at least two subnets in the network";
             LOGGER.info(message);
             resultBuilder.error(message);
         }
@@ -57,7 +57,7 @@ public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidat
         Map<String, Long> zones = subnetMetas.values().stream()
                 .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone, Collectors.counting()));
         if (zones.size() < 2) {
-            message = "Cannot create environment, the subnets in the vpc should be present at least in two different availability zones";
+            message = "The subnets in the vpc should be present at least in two different availability zones";
             LOGGER.info(message);
             resultBuilder.error(message);
         }

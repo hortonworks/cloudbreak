@@ -32,6 +32,7 @@ public class NetworkCreationValidator {
 
     public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network, Map<String, CloudSubnet> subnetMetas) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        resultBuilder.prefix("Cannot create environment");
         if (network != null && network.getNetworkCidr() == null) {
             EnvironmentNetworkValidator environmentNetworkValidator =
                     environmentNetworkValidatorsByCloudPlatform.get(CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase()));
@@ -40,6 +41,19 @@ public class NetworkCreationValidator {
             }
         }
         validateNetworkIdAndCidr(environment, network, resultBuilder);
+        return resultBuilder;
+    }
+
+    public ValidationResultBuilder validateNetworkEdit(Environment environment, NetworkDto network, Map<String, CloudSubnet> subnetMetas) {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        resultBuilder.prefix("Cannot edit environment");
+        if (network != null) {
+            EnvironmentNetworkValidator environmentNetworkValidator =
+                    environmentNetworkValidatorsByCloudPlatform.get(CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase()));
+            if (environmentNetworkValidator != null) {
+                environmentNetworkValidator.validateDuringRequest(network, subnetMetas, resultBuilder);
+            }
+        }
         return resultBuilder;
     }
 
