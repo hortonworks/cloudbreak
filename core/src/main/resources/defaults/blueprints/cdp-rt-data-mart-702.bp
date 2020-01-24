@@ -105,6 +105,9 @@
             }, {
               "name" : "impala_hdfs_site_conf_safety_valve",
               "value" : "<property><name>fs.s3a.experimental.input.fadvise</name><value>RANDOM</value></property><property><name>fs.s3a.fast.upload</name><value>true</value></property>"
+            }, {
+              "name" : "impala_graceful_shutdown_deadline",
+              "value" : "60"
             } ],
             "base": false
           },
@@ -117,6 +120,9 @@
             }, {
               "name" : "impala_hdfs_site_conf_safety_valve",
               "value" : "<property><name>fs.s3a.experimental.input.fadvise</name><value>RANDOM</value></property><property><name>fs.s3a.fast.upload</name><value>true</value></property>"
+            }, {
+              "name" : "impala_graceful_shutdown_deadline",
+              "value" : "60"
             } ],
             "base": false
           },
