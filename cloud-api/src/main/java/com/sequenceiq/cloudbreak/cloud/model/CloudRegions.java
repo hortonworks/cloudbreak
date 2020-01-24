@@ -44,9 +44,21 @@ public class CloudRegions {
     }
 
     public Set<String> getRegionNames() {
-        return cloudRegions.keySet().stream()
-                .map(Region::getRegionName)
+        Set<String> collect = coordinates.values()
+                .stream()
+                .map(Coordinate::getDisplayName)
                 .collect(Collectors.toSet());
+
+        collect.addAll(coordinates.values()
+                .stream()
+                .map(Coordinate::getKey)
+                .collect(Collectors.toSet()));
+
+        collect.addAll(cloudRegions.keySet()
+                .stream()
+                .map(Region::getRegionName)
+                .collect(Collectors.toSet()));
+        return collect;
     }
 
     public String locationNames() {

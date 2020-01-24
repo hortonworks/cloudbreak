@@ -152,16 +152,16 @@ class EnvironmentServiceTest {
     public void setRegions() {
         environmentServiceUnderTest.setRegions(environment, Set.of("r1"), EnvironmentTestData.getCloudRegions());
         String resultText = environment.getRegions().getValue();
-        assertTrue(resultText.contains("{\"name\":\"r1\",\"displayName\":\"region 1\"}"));
-        assertFalse(resultText.contains("{\"name\":\"r2\",\"displayName\":\"region 2\"}"));
+        assertTrue(resultText.contains("{\"name\":\"region-1\",\"displayName\":\"Here\"}"));
+        assertFalse(resultText.contains("{\"name\":\"region2\",\"displayName\":\"region 2\"}"));
     }
 
     @Test
     public void setRegionsTwoRegions() {
         environmentServiceUnderTest.setRegions(environment, Set.of("r1", "r2"), EnvironmentTestData.getCloudRegions());
         String resultText = environment.getRegions().getValue();
-        assertTrue(resultText.contains("{\"name\":\"r1\",\"displayName\":\"region 1\"}"));
-        assertTrue(resultText.contains("{\"name\":\"r2\",\"displayName\":\"region 2\"}"));
+        assertTrue(resultText.contains("{\"name\":\"region-1\",\"displayName\":\"Here\"}"));
+        assertTrue(resultText.contains("{\"name\":\"region-2\",\"displayName\":\"There\"}"));
     }
 
     @Test

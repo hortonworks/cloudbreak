@@ -8,12 +8,15 @@ public class Coordinate {
 
     private final Double latitude;
 
+    private final String key;
+
     private final boolean k8sSupported;
 
-    private Coordinate(Double longitude, Double latitude, String displayName, boolean k8sSupported) {
+    private Coordinate(Double longitude, Double latitude, String displayName, String key, boolean k8sSupported) {
         this.longitude = longitude;
         this.latitude = latitude;
         this.displayName = displayName;
+        this.key = key;
         this.k8sSupported = k8sSupported;
     }
 
@@ -33,8 +36,12 @@ public class Coordinate {
         return k8sSupported;
     }
 
-    public static Coordinate coordinate(String longitude, String latitude, String  displayName, boolean k8sSupported) {
-        return new Coordinate(Double.parseDouble(longitude), Double.parseDouble(latitude), displayName, k8sSupported);
+    public String getKey() {
+        return key;
+    }
+
+    public static Coordinate coordinate(String longitude, String latitude, String  displayName, String key, boolean k8sSupported) {
+        return new Coordinate(Double.parseDouble(longitude), Double.parseDouble(latitude), displayName, key, k8sSupported);
     }
 
     public static Coordinate defaultCoordinate() {
@@ -42,6 +49,7 @@ public class Coordinate {
                 Double.parseDouble("36.7477169"),
                 Double.parseDouble("-119.7729841"),
                 "California (West US)",
+                "us-west-1",
                 false);
     }
 }
