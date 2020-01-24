@@ -110,6 +110,7 @@ public class GcpPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getLongitude(),
                                 regionCoordinateSpecification.getLatitude(),
                                 regionCoordinateSpecification.getDisplayName(),
+                                regionCoordinateSpecification.getName(),
                                 regionCoordinateSpecification.isK8sSupported()));
             }
         } catch (IOException ignored) {

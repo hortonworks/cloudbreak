@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.service;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -116,13 +115,19 @@ public class EnvironmentService implements ResourceIdProvider {
 
     public void setRegions(Environment environment, Set<String> requestedRegions, CloudRegions cloudRegions) {
         Set<Region> regionSet = new HashSet<>();
-        Map<com.sequenceiq.cloudbreak.cloud.model.Region, String> displayNames = cloudRegions.getDisplayNames();
-        for (com.sequenceiq.cloudbreak.cloud.model.Region r : cloudRegions.getCloudRegions().keySet()) {
-            if (requestedRegions.contains(r.getRegionName())) {
+        for (String requestedRegion : requestedRegions) {
+            Optional<Map.Entry<com.sequenceiq.cloudbreak.cloud.model.Region, Coordinate>> coordinate =
+                    cloudRegions.getCoordinates().entrySet()
+                            .stream()
+                            .filter(e -> e.getKey().getRegionName().equals(requestedRegion)
+                                    || e.getValue().getDisplayName().equals(requestedRegion)
+                                    || e.getValue().getKey().equals(requestedRegion))
+                            .findFirst();
+            if (coordinate.isPresent()) {
                 Region region = new Region();
-                region.setName(r.getRegionName());
-                String displayName = displayNames.get(r);
-                region.setDisplayName(isEmpty(displayName) ? r.getRegionName() : displayName);
+                region.setName(coordinate.get().getValue().getKey());
+                String displayName = coordinate.get().getValue().getDisplayName();
+                region.setDisplayName(isEmpty(displayName) ? coordinate.get().getKey().getRegionName() : displayName);
                 regionSet.add(region);
             }
         }
@@ -139,12 +144,18 @@ public class EnvironmentService implements ResourceIdProvider {
 
     void setLocation(Environment environment, LocationDto requestedLocation, CloudRegions cloudRegions) {
         if (requestedLocation != null) {
-            Coordinate coordinate = cloudRegions.getCoordinates().get(region(requestedLocation.getName()));
-            if (coordinate != null) {
-                environment.setLocation(requestedLocation.getName());
-                environment.setLocationDisplayName(coordinate.getDisplayName());
-                environment.setLatitude(coordinate.getLatitude());
-                environment.setLongitude(coordinate.getLongitude());
+            Optional<Map.Entry<com.sequenceiq.cloudbreak.cloud.model.Region, Coordinate>> coordinate =
+                    cloudRegions.getCoordinates().entrySet()
+                            .stream()
+                            .filter(e -> e.getKey().getRegionName().equals(requestedLocation.getName())
+                                    || e.getValue().getDisplayName().equals(requestedLocation.getName())
+                                    || e.getValue().getKey().equals(requestedLocation.getName()))
+                            .findFirst();
+            if (coordinate.isPresent()) {
+                environment.setLocation(coordinate.get().getValue().getKey());
+                environment.setLocationDisplayName(coordinate.get().getValue().getDisplayName());
+                environment.setLatitude(coordinate.get().getValue().getLatitude());
+                environment.setLongitude(coordinate.get().getValue().getLongitude());
             } else if (requestedLocation.getLatitude() != null && requestedLocation.getLongitude() != null) {
                 environment.setLocation(requestedLocation.getName());
                 environment.setLocationDisplayName(requestedLocation.getDisplayName());
