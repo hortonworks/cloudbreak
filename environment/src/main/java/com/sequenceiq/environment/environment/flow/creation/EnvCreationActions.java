@@ -29,8 +29,6 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFai
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
-import com.sequenceiq.environment.metrics.EnvironmentMetricService;
-import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -47,14 +45,11 @@ public class EnvCreationActions {
 
     private final EnvironmentApiConverter environmentApiConverter;
 
-    private final EnvironmentMetricService metricService;
-
     public EnvCreationActions(EnvironmentService environmentService, NotificationService notificationService,
-            EnvironmentApiConverter environmentApiConverter, EnvironmentMetricService metricService) {
+            EnvironmentApiConverter environmentApiConverter) {
         this.environmentService = environmentService;
         this.notificationService = notificationService;
         this.environmentApiConverter = environmentApiConverter;
-        this.metricService = metricService;
     }
 
     @Bean(name = "ENVIRONMENT_CREATION_VALIDATION_STATE")
@@ -178,7 +173,6 @@ public class EnvCreationActions {
                             Environment result = environmentService.save(environment);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);
                             SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
-                            metricService.incrementMetricCounter(MetricType.ENV_CREATION_FINISHED, environmentDto);
                             notificationService.send(ResourceEvent.ENVIRONMENT_CREATION_FINISHED, simpleResponse, context.getFlowTriggerUserCrn());
                         }, () -> LOGGER.error("Cannot finish the creation of env, because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
@@ -193,17 +187,15 @@ public class EnvCreationActions {
         return new AbstractEnvironmentCreationAction<>(EnvCreationFailureEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvCreationFailureEvent payload, Map<Object, Object> variables) {
-                Exception exception = payload.getException();
-                LOGGER.warn("Failed to create environment", exception);
+                LOGGER.warn("Failed to create environment", payload.getException());
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresentOrElse(environment -> {
-                            environment.setStatusReason(exception.getMessage());
+                            environment.setStatusReason(payload.getException().getMessage());
                             environment.setStatus(EnvironmentStatus.CREATE_FAILED);
                             environmentService.save(environment);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
                             SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
-                            metricService.incrementMetricCounter(MetricType.ENV_CREATION_FAILED, environmentDto, exception);
                             notificationService.send(ResourceEvent.ENVIRONMENT_CREATION_FAILED, simpleResponse, context.getFlowTriggerUserCrn());
                         }, () -> LOGGER.error("Cannot finish the creation of env, because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));

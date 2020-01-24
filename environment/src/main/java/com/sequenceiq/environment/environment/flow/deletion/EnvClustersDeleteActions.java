@@ -26,8 +26,6 @@ import com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDel
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
-import com.sequenceiq.environment.metrics.EnvironmentMetricService;
-import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.Flow;
@@ -45,14 +43,12 @@ public class EnvClustersDeleteActions {
 
     private final EnvironmentApiConverter environmentApiConverter;
 
-    private final EnvironmentMetricService metricService;
-
     public EnvClustersDeleteActions(EnvironmentService environmentService, NotificationService notificationService,
-            EnvironmentApiConverter environmentApiConverter, EnvironmentMetricService metricService) {
+            EnvironmentApiConverter environmentApiConverter) {
+
         this.environmentService = environmentService;
         this.notificationService = notificationService;
         this.environmentApiConverter = environmentApiConverter;
-        this.metricService = metricService;
     }
 
     @Bean(name = "DATAHUB_CLUSTERS_DELETE_STARTED_STATE")
@@ -102,7 +98,6 @@ public class EnvClustersDeleteActions {
                             environment.setStatus(EnvironmentStatus.DELETE_FAILED);
                             Environment result = environmentService.save(environment);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);
-                            metricService.incrementMetricCounter(MetricType.ENV_CLUSTERS_DELETION_FAILED, environmentDto, payload.getException());
                             SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
                             notificationService.send(ResourceEvent.ENVIRONMENT_DELETION_FAILED, simpleResponse, context.getFlowTriggerUserCrn());
                         }, () -> LOGGER.error("Cannot set delete failed to env because the environment does not exist: {}. "

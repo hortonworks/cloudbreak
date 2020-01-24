@@ -11,5 +11,5 @@ public interface MetricService {
 
     void initMicrometerMetricCounter(Metric metric);
 
-    void incrementMetricCounter(Metric metric, String... tags);
+    void incrementMetricCounter(Metric metric);
 }

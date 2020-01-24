@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.common.metrics;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -11,6 +12,8 @@ import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Tag;
 
 public abstract class AbstractMetricService implements MetricService {
+
+    private final Map<String, Double> gaugeCache = new HashMap<>();
 
     /**
      * Set the specified gauge value.
@@ -26,8 +29,10 @@ public abstract class AbstractMetricService implements MetricService {
     @Override
     public void submit(Metric metric, double value, Map<String, String> labels) {
         String metricName = getMetricName(metric);
+        gaugeCache.put(metricName, value);
+
         Iterable<Tag> tags = labels.entrySet().stream().map(label -> Tag.of(label.getKey(), label.getValue().toLowerCase())).collect(Collectors.toList());
-        Metrics.gauge(metricName, tags, value);
+        Metrics.gauge(metricName, tags, gaugeCache, cache -> cache.getOrDefault(metricName, 0.0d));
     }
 
     @Override
@@ -41,12 +46,12 @@ public abstract class AbstractMetricService implements MetricService {
     }
 
     @Override
-    public void incrementMetricCounter(Metric metric, String... tags) {
-        incrementMetricCounter(getMetricName(metric), tags);
+    public void incrementMetricCounter(Metric metric) {
+        incrementMetricCounter(getMetricName(metric));
     }
 
-    protected void incrementMetricCounter(String metric, String... tags) {
-        Counter counter = Metrics.counter(metric, tags);
+    protected void incrementMetricCounter(String metric) {
+        Counter counter = Metrics.counter(metric);
         counter.increment();
     }
 
