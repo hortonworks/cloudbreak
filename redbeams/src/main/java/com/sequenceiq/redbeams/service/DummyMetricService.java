@@ -23,6 +23,6 @@ public class DummyMetricService implements MetricService {
     }
 
     @Override
-    public void incrementMetricCounter(Metric metric, String... tags) {
+    public void incrementMetricCounter(Metric metric) {
     }
 }
