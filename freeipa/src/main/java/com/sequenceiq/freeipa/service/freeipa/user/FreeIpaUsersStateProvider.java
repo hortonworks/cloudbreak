@@ -36,9 +36,13 @@ public class FreeIpaUsersStateProvider {
                 .filter(user -> !IPA_ONLY_USERS.contains(user.getUid()))
                 .forEach(user -> {
                     builder.addUser(fromIpaUser(user));
-                    user.getMemberOfGroup().stream()
-                            .filter(group -> !IPA_ONLY_GROUPS.contains(group))
-                            .forEach(group -> builder.addMemberToGroup(group, user.getUid()));
+                    if (null != user.getMemberOfGroup()) {
+                        user.getMemberOfGroup().stream()
+                                .filter(group -> !IPA_ONLY_GROUPS.contains(group))
+                                .forEach(group -> builder.addMemberToGroup(group, user.getUid()));
+                    } else {
+                        LOGGER.warn("User {} is not a member of any groups.", user.getUid());
+                    }
                 });
 
         freeIpaClient.groupFindAll().stream()
