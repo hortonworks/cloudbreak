@@ -81,7 +81,7 @@ public class User {
                 + ", sn='" + sn + '\''
                 + ", uid='" + uid + '\''
                 + ", givenname='" + givenname + '\''
-                + ", memberOfGroup=" + memberOfGroup + '\''
+                + ", memberOfGroup='" + memberOfGroup + '\''
                 + ", krbPasswordExpiration='" + krbPasswordExpiration + '\''
                 + '}';
     }
