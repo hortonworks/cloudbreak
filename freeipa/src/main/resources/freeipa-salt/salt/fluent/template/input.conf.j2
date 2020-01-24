@@ -90,6 +90,22 @@
   tag {{providerPrefix}}.pki_transactions
   read_from_head true
 </source>
+<source>
+  @type tail
+  format none
+  path /var/log/nginx/access.log
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-nginx-access.log.pos
+  tag {{providerPrefix}}.nginx_access
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/nginx/error.log
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-nginx-error.log.pos
+  tag {{providerPrefix}}.nginx_error
+  read_from_head true
+</source>
 </worker>
 {% else %}
 # DATABUS inputs are disabled
