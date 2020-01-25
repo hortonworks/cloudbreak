@@ -495,7 +495,9 @@ public class AzureClient {
         String imageName = CustomVMImageNameProvider.get(region, vhdName);
         PagedList<VirtualMachineCustomImage> customImageList = getCustomImageList(resourceGroup);
         Optional<VirtualMachineCustomImage> virtualMachineCustomImage = customImageList.stream()
-                .filter(customImage -> customImage.name().equals(imageName) && customImage.region().label().equals(region)).findFirst();
+                .filter(customImage -> customImage.name().equals(imageName)
+                        && (customImage.region().name().equals(region)
+                        || customImage.region().label().equals(region))).findFirst();
         if (virtualMachineCustomImage.isPresent()) {
             LOGGER.debug("Custom image found in '{}' resource group with name '{}'", resourceGroup, imageName);
             return virtualMachineCustomImage.get().id();
@@ -667,7 +669,8 @@ public class AzureClient {
     public List<Identity> listIdentitiesByRegion(String region) {
         return listIdentities()
                 .stream()
-                .filter(identity -> identity.region().label().equalsIgnoreCase(region))
+                .filter(identity -> identity.region().label().equalsIgnoreCase(region)
+                        || identity.region().name().equalsIgnoreCase(region))
                 .collect(Collectors.toList());
     }
 

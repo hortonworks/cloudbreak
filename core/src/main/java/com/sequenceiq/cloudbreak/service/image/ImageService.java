@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 
 import java.io.IOException;
@@ -28,6 +29,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -76,6 +78,9 @@ public class ImageService {
 
     @Inject
     private PreWarmParcelParser preWarmParcelParser;
+
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
 
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         return componentConfigProviderService.getImage(stackId);
@@ -189,9 +194,10 @@ public class ImageService {
     public String determineImageName(String platformString, String region, com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog)
             throws CloudbreakImageNotFoundException {
         Optional<Map<String, String>> imagesForPlatform = findStringKeyWithEqualsIgnoreCase(platformString, imgFromCatalog.getImageSetsByProvider());
+        String translatedRegion = cloudPlatformConnectors.getDefault(platform(platformString.toUpperCase())).regionToDisplayName(region);
         if (imagesForPlatform.isPresent()) {
             Map<String, String> imagesByRegion = imagesForPlatform.get();
-            Optional<String> imageNameOpt = findStringKeyWithEqualsIgnoreCase(region, imagesByRegion);
+            Optional<String> imageNameOpt = findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion);
             if (!imageNameOpt.isPresent()) {
                 imageNameOpt = findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion);
             }
@@ -199,7 +205,7 @@ public class ImageService {
                 return imageNameOpt.get();
             }
             String msg = String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
-                    imgFromCatalog, platformString, region);
+                    imgFromCatalog, platformString, translatedRegion);
             throw new CloudbreakImageNotFoundException(msg);
         }
         String msg = String.format("The selected image: '%s' doesn't contain virtual machine image for the selected platform: '%s'.",
