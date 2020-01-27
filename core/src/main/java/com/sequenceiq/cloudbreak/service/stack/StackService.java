@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGrou
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -129,6 +130,8 @@ public class StackService implements ResourceIdProvider {
     private static final String STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE = "Stack not found by id '%d'";
 
     private static final String STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE = "Stack not found by name '%s'";
+
+    private static final String STACK_NOT_FOUND_BY_NAME_OR_CRN_EXCEPTION_MESSAGE = "Stack not found by name or crn '%s'";
 
     private static final String STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE = "Stack not found by crn '%s'";
 
@@ -228,6 +231,12 @@ public class StackService implements ResourceIdProvider {
 
     public Optional<Stack> findStackByNameAndWorkspaceId(String name, Long workspaceId) {
         return findByNameAndWorkspaceIdWithLists(name, workspaceId);
+    }
+
+    public Optional<Stack> findStackByNameOrCrnAndWorkspaceId(NameOrCrn nameOrCrn, Long workspaceId) {
+        return nameOrCrn.hasName()
+                ? findByNameAndWorkspaceIdWithLists(nameOrCrn.getName(), workspaceId)
+                : findByCrnAndWorkspaceIdWithLists(nameOrCrn.getCrn(), workspaceId);
     }
 
     public StackV4Response getJsonById(Long id, Collection<String> entry) {
@@ -415,30 +424,13 @@ public class StackService implements ResourceIdProvider {
         }
     }
 
-    public StackV4Request getStackRequestByNameInWorkspaceId(String name, Long workspaceId) {
-        try {
-            return transactionService.required(() -> {
-                Optional<Stack> stack = findByNameAndWorkspaceIdWithLists(name, workspaceId);
-                if (stack.isEmpty()) {
-                    throw new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
-                }
-                StackV4Request request = converterUtil.convert(stack.get(), StackV4Request.class);
-                request.getCluster().setName(null);
-                request.setName(name);
-                return request;
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
-    }
-
-    public StackV4Request getStackRequestByCrnInWorkspaceId(String crn, Long workspaceId) {
+    public StackV4Request getStackRequestByNameOrCrnInWorkspaceId(NameOrCrn nameOrCrn, Long workspaceId) {
         try {
             return transactionService.required(() -> {
                 ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
-                Optional<Stack> stack = findByCrnAndWorkspaceIdWithLists(crn, workspaceId, null, showTerminatedClustersAfterConfig);
+                Optional<Stack> stack = findByNameOrCrnAndWorkspaceIdWithLists(nameOrCrn, workspaceId);
                 if (stack.isEmpty()) {
-                    throw new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, crn));
+                    throw new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_OR_CRN_EXCEPTION_MESSAGE, nameOrCrn));
                 }
                 StackV4Request request = converterUtil.convert(stack.get(), StackV4Request.class);
                 request.getCluster().setName(null);
@@ -448,6 +440,13 @@ public class StackService implements ResourceIdProvider {
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
+    }
+
+    public Stack getByNameOrCrnInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
+        Optional<Stack> foundStack = nameOrCrn.hasName()
+                ? stackRepository.findByNameAndWorkspaceId(nameOrCrn.getName(), workspaceId)
+                : stackRepository.findByCrnAndWorkspaceId(nameOrCrn.getCrn(), workspaceId);
+        return foundStack.orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_OR_CRN_EXCEPTION_MESSAGE, nameOrCrn)));
     }
 
     public Stack getByNameInWorkspace(String name, Long workspaceId) {
@@ -679,8 +678,18 @@ public class StackService implements ResourceIdProvider {
                 : stackRepository.findByCrnAndWorkspaceIdWithLists(crn, stackType, workspaceId, config.isActive(), config.showAfterMillisecs());
     }
 
+    private Optional<Stack> findByNameOrCrnAndWorkspaceIdWithLists(NameOrCrn nameOrCrn, Long workspaceId) {
+        return nameOrCrn.hasName()
+                ? stackRepository.findByNameAndWorkspaceIdWithLists(nameOrCrn.getName(), workspaceId, false, 0L)
+                : stackRepository.findByCrnAndWorkspaceIdWithLists(nameOrCrn.getCrn(), workspaceId, false, 0L);
+    }
+
     private Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId) {
         return stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId, false, 0L);
+    }
+
+    private Optional<Stack> findByCrnAndWorkspaceIdWithLists(String name, Long workspaceId) {
+        return stackRepository.findByCrnAndWorkspaceIdWithLists(name, workspaceId, false, 0L);
     }
 
     private InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack, Long workspaceId, User user) {
@@ -1020,6 +1029,12 @@ public class StackService implements ResourceIdProvider {
 
     public Boolean templateInUse(Long id) {
         return stackRepository.findTemplateInUse(id);
+    }
+
+    public Long getIdByNameOrCrnInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
+        return nameOrCrn.hasName()
+                ? stackRepository.findIdByNameAndWorkspaceId(nameOrCrn.getName(), workspaceId).orElseThrow(notFound("Stack", nameOrCrn.getName()))
+                : stackRepository.findIdByCrnAndWorkspaceId(nameOrCrn.getCrn(), workspaceId).orElseThrow(notFound("Stack", nameOrCrn.getCrn()));
     }
 
     public Long getIdByNameInWorkspace(String name, Long workspaceId) {

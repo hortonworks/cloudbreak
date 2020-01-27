@@ -3,9 +3,6 @@ package com.sequenceiq.distrox.v1.distrox;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -106,68 +103,48 @@ public class StackOperationsTest {
     }
 
     @Test
-    public void testDeleteWhenDtoNameFilledAndForcedTrueThenDeleteCalled() {
-        underTest.delete(NameOrCrn.ofName(stack.getName()), stack.getWorkspace().getId(), true);
+    public void testDeleteWhenForcedTrueThenDeleteCalled() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
 
-        verify(stackCommonService, times(1)).deleteWithKerberosByNameInWorkspace(anyString(), anyLong(), anyBoolean());
-        verify(stackCommonService, times(1)).deleteWithKerberosByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), true);
-        verify(stackCommonService, times(0)).deleteWithKerberosByCrnInWorkspace(anyString(), anyLong(), anyBoolean());
+        underTest.delete(nameOrCrn, stack.getWorkspace().getId(), true);
+
+        verify(stackCommonService, times(1)).deleteWithKerberosInWorkspace(nameOrCrn, stack.getWorkspace().getId(), true);
     }
 
     @Test
-    public void testDeleteWhenDtoNameFilledAndForcedFalseThenDeleteCalled() {
-        underTest.delete(NameOrCrn.ofName(stack.getName()), stack.getWorkspace().getId(), false);
+    public void testDeleteWhenForcedFalseThenDeleteCalled() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
 
-        verify(stackCommonService, times(1)).deleteWithKerberosByNameInWorkspace(anyString(), anyLong(), anyBoolean());
-        verify(stackCommonService, times(1)).deleteWithKerberosByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), false);
-        verify(stackCommonService, times(0)).deleteWithKerberosByCrnInWorkspace(anyString(), anyLong(), anyBoolean());
+        underTest.delete(nameOrCrn, stack.getWorkspace().getId(), false);
+
+        verify(stackCommonService, times(1)).deleteWithKerberosInWorkspace(nameOrCrn, stack.getWorkspace().getId(), false);
     }
 
     @Test
-    public void testDeleteWhenDtoCrnFilledAndForcedTrueThenDeleteCalled() {
-        underTest.delete(NameOrCrn.ofCrn(stack.getResourceCrn()), stack.getWorkspace().getId(), true);
-
-        verify(stackCommonService, times(1)).deleteWithKerberosByCrnInWorkspace(anyString(), anyLong(), anyBoolean());
-        verify(stackCommonService, times(1)).deleteWithKerberosByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), true);
-        verify(stackCommonService, times(0)).deleteWithKerberosByNameInWorkspace(anyString(), anyLong(), anyBoolean());
-    }
-
-    @Test
-    public void testDeleteWhenDtoCrnFilledAndForcedFalseThenDeleteCalled() {
-        underTest.delete(NameOrCrn.ofCrn(stack.getResourceCrn()), stack.getWorkspace().getId(), false);
-
-        verify(stackCommonService, times(1)).deleteWithKerberosByCrnInWorkspace(anyString(), anyLong(), anyBoolean());
-        verify(stackCommonService, times(1)).deleteWithKerberosByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), false);
-        verify(stackCommonService, times(0)).deleteWithKerberosByNameInWorkspace(anyString(), anyLong(), anyBoolean());
-    }
-
-    @Test
-    public void testGetWhenDtoNameFilledThenProperGetCalled() {
+    public void testGetWhenNameOrCrnNameFilledThenProperGetCalled() {
         StackV4Response expected = stackResponse();
-        when(stackCommonService.findStackByNameAndWorkspaceId(stack.getName(), stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE))
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
+        when(stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE))
                 .thenReturn(expected);
 
-        StackV4Response result = underTest.get(NameOrCrn.ofName(stack.getName()), stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
+        StackV4Response result = underTest.get(nameOrCrn, stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
 
         assertEquals(expected, result);
-        verify(stackCommonService, times(1)).findStackByNameAndWorkspaceId(anyString(), anyLong(), anySet(), any());
-        verify(stackCommonService, times(1)).findStackByNameAndWorkspaceId(stack.getName(), stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
-        verify(stackCommonService, times(0)).findStackByCrnAndWorkspaceId(anyString(), anyLong(), anySet(), any());
+        verify(stackCommonService, times(1)).findStackByNameOrCrnAndWorkspaceId(nameOrCrn, stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
     }
 
     @Test
-    public void testGetWhenDtoCrnFilledThenProperGetCalled() {
+    public void testGetWhenNameOrCrnCrnFilledThenProperGetCalled() {
         StackV4Response expected = stackResponse();
-        when(stackCommonService.findStackByCrnAndWorkspaceId(stack.getResourceCrn(), stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE))
+        NameOrCrn nameOrCrn = NameOrCrn.ofCrn(stack.getResourceCrn());
+        when(stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE))
                 .thenReturn(expected);
 
-        StackV4Response result = underTest.get(NameOrCrn.ofCrn(stack.getResourceCrn()), stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
+        StackV4Response result = underTest.get(nameOrCrn, stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
 
         assertEquals(expected, result);
-        verify(stackCommonService, times(1)).findStackByCrnAndWorkspaceId(anyString(), anyLong(), anySet(), any());
-        verify(stackCommonService, times(1)).findStackByCrnAndWorkspaceId(
-                stack.getResourceCrn(), stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
-        verify(stackCommonService, times(0)).findStackByNameAndWorkspaceId(anyString(), anyLong(), anySet(), any());
+        verify(stackCommonService, times(1)).findStackByNameOrCrnAndWorkspaceId(
+                nameOrCrn, stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
     }
 
     @Test

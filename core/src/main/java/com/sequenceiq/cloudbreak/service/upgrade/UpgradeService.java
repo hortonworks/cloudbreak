@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
@@ -75,10 +76,10 @@ public class UpgradeService {
     @Inject
     private TransactionService transactionService;
 
-    public UpgradeOptionV4Response getUpgradeOptionByStackName(Long workspaceId, String stackName, User user) {
+    public UpgradeOptionV4Response getUpgradeOptionByStackNameOrCrn(Long workspaceId, NameOrCrn nameOrCrn, User user) {
         try {
             return transactionService.required(() -> {
-                Optional<Stack> stack = stackService.findStackByNameAndWorkspaceId(stackName, workspaceId);
+                Optional<Stack> stack = stackService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId);
                 if (stack.isPresent()) {
                     try {
                         return getUpgradeOption(stack.get(), workspaceId, user);
@@ -86,7 +87,7 @@ public class UpgradeService {
                         throw new BadRequestException(e.getMessage());
                     }
                 } else {
-                    throw notFoundException("Stack", stackName);
+                    throw notFoundException("Stack", nameOrCrn.toString());
                 }
             });
         } catch (TransactionExecutionException e) {

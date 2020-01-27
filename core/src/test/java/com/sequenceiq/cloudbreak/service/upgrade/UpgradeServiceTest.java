@@ -30,6 +30,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
@@ -57,9 +58,15 @@ import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 @ExtendWith(MockitoExtension.class)
 public class UpgradeServiceTest {
 
-    public static final String CLUSTER_NAME = "cluster-name";
+    private static final String CLUSTER_NAME = "cluster-name";
+
+    private static final String CLUSTER_CRN = "cluster-crn";
 
     private static final long WORKSPACE_ID = 0L;
+
+    private final NameOrCrn ofName = NameOrCrn.ofName(CLUSTER_NAME);
+
+    private final NameOrCrn ofCrn = NameOrCrn.ofName(CLUSTER_CRN);
 
     @Mock
     private StackService stackService;
@@ -104,14 +111,13 @@ public class UpgradeServiceTest {
         Stack stack = getStack();
         Image image = getImage("id-1");
         setUpMocks(stack, image, true, "id-1", "id-2");
-
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setBaseUrl("cm-base-url");
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(1L)).thenReturn(clouderaManagerRepo);
 
-        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackName(WORKSPACE_ID, CLUSTER_NAME, user);
+        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
 
-        verify(stackService).findStackByNameAndWorkspaceId(eq(CLUSTER_NAME), eq(WORKSPACE_ID));
+        verify(stackService).findStackByNameOrCrnAndWorkspaceId(eq(ofName), eq(WORKSPACE_ID));
         verify(clusterRepairService).canRepairAll(eq(stack));
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
@@ -126,14 +132,14 @@ public class UpgradeServiceTest {
     public void shouldReturnNoNewImageAndTryUseBaseImage() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Stack stack = getStack();
         Image image = getImage("id-1");
-        when(stackService.findStackByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(stack));
+        when(stackService.findStackByNameOrCrnAndWorkspaceId(ofName, WORKSPACE_ID)).thenReturn(Optional.of(stack));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
         StatedImage currentImageFromCatalog = imageFromCatalog(false, "id-1");
         when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(currentImageFromCatalog);
 
-        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackName(WORKSPACE_ID, CLUSTER_NAME, user);
+        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
 
-        verify(stackService).findStackByNameAndWorkspaceId(eq(CLUSTER_NAME), eq(WORKSPACE_ID));
+        verify(stackService).findStackByNameOrCrnAndWorkspaceId(ofName, WORKSPACE_ID);
         verify(clusterRepairService).canRepairAll(stack);
         verifyNoMoreInteractions(distroXV1Endpoint);
         verifyZeroInteractions(componentConfigProviderService);
@@ -155,9 +161,9 @@ public class UpgradeServiceTest {
         stackViewV4Response.setStatus(Status.AVAILABLE);
         when(distroXV1Endpoint.list(any(), anyString())).thenReturn(new StackViewV4Responses(Set.of(stackViewV4Response)));
 
-        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackName(WORKSPACE_ID, CLUSTER_NAME, user);
+        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
 
-        verify(stackService).findStackByNameAndWorkspaceId(eq(CLUSTER_NAME), eq(WORKSPACE_ID));
+        verify(stackService).findStackByNameOrCrnAndWorkspaceId(ofName, WORKSPACE_ID);
         verify(clusterRepairService).canRepairAll(eq(stack));
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
@@ -185,9 +191,9 @@ public class UpgradeServiceTest {
         stackViewV4Response.setCluster(clusterViewV4Response);
         when(distroXV1Endpoint.list(any(), anyString())).thenReturn(new StackViewV4Responses(Set.of(stackViewV4Response)));
 
-        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackName(WORKSPACE_ID, CLUSTER_NAME, user);
+        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
 
-        verify(stackService).findStackByNameAndWorkspaceId(eq(CLUSTER_NAME), eq(WORKSPACE_ID));
+        verify(stackService).findStackByNameOrCrnAndWorkspaceId(ofName, WORKSPACE_ID);
         verify(clusterRepairService).canRepairAll(eq(stack));
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
@@ -222,9 +228,9 @@ public class UpgradeServiceTest {
         datahubStack3.setStatus(Status.STOPPED);
         when(distroXV1Endpoint.list(any(), anyString())).thenReturn(new StackViewV4Responses(Set.of(datahubStack1, datahubStack2, datahubStack3)));
 
-        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackName(WORKSPACE_ID, CLUSTER_NAME, user);
+        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
 
-        verify(stackService).findStackByNameAndWorkspaceId(eq(CLUSTER_NAME), eq(WORKSPACE_ID));
+        verify(stackService).findStackByNameOrCrnAndWorkspaceId(ofName, WORKSPACE_ID);
         verify(clusterRepairService).canRepairAll(eq(stack));
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
@@ -241,7 +247,7 @@ public class UpgradeServiceTest {
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses();
         stackViewV4Responses.setResponses(List.of());
         when(distroXV1Endpoint.list(eq(null), anyString())).thenReturn(stackViewV4Responses);
-        when(stackService.findStackByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(stack));
+        when(stackService.findStackByNameOrCrnAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(stack));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
         StatedImage currentImageFromCatalog = imageFromCatalog(prewarmedImage, oldImage);
         when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(currentImageFromCatalog);
