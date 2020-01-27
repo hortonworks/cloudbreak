@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
@@ -100,7 +101,7 @@ class ClusterCreationEnvironmentValidatorTest {
         environmentResponse.setCloudPlatform("AWS");
         environmentResponse.setCredential(new CredentialResponse());
         CompactRegionResponse compactRegionResponse = new CompactRegionResponse();
-        compactRegionResponse.setNames(Set.of("region1"));
+        compactRegionResponse.setNames(Lists.newArrayList("region1"));
         environmentResponse.setRegions(compactRegionResponse);
         return environmentResponse;
     }
@@ -143,7 +144,7 @@ class ClusterCreationEnvironmentValidatorTest {
         ProxyConfig proxyConfig = createProxyConfig("proxy");
         clusterRequest.setProxyConfigCrn(proxyConfig.getName());
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
-        environment.getRegions().setNames(Set.of("region1", "region2"));
+        environment.getRegions().setNames(Lists.newArrayList("region1", "region2"));
         environment.setName("env1");
         // WHEN
         ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);

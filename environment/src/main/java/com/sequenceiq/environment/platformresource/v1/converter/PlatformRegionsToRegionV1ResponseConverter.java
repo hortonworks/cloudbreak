@@ -1,13 +1,14 @@
 package com.sequenceiq.environment.platformresource.v1.converter;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -25,14 +26,14 @@ public class PlatformRegionsToRegionV1ResponseConverter extends AbstractConversi
     public RegionResponse convert(CloudRegions source) {
         RegionResponse json = new RegionResponse();
 
-        Set<String> regions = new HashSet<>();
+        List<String> regions = new ArrayList<>();
         for (Region region : source.getCloudRegions().keySet()) {
             regions.add(region.value());
         }
 
-        Map<String, Collection<String>> availabilityZones = new HashMap<>();
+        Map<String, List<String>> availabilityZones = new HashMap<>();
         for (Entry<Region, List<AvailabilityZone>> regionListEntry : source.getCloudRegions().entrySet()) {
-            Collection<String> azs = new ArrayList<>();
+            List<String> azs = new ArrayList<>();
             for (AvailabilityZone availabilityZone : regionListEntry.getValue()) {
                 azs.add(availabilityZone.value());
             }
@@ -44,8 +45,8 @@ public class PlatformRegionsToRegionV1ResponseConverter extends AbstractConversi
             displayNames.put(regionStringEntry.getKey().value(), regionStringEntry.getValue());
         }
 
-        Set<String> locations = new HashSet<>();
-        Set<String> k8sSupportedLocations = new HashSet<>();
+        List<String> locations = new ArrayList<>();
+        List<String> k8sSupportedLocations = new ArrayList<>();
         for (Entry<Region, Coordinate> coordinateEntry : source.getCoordinates().entrySet()) {
             locations.add(coordinateEntry.getKey().getRegionName());
             displayNames.put(coordinateEntry.getKey().getRegionName(), coordinateEntry.getValue().getDisplayName());
@@ -54,12 +55,31 @@ public class PlatformRegionsToRegionV1ResponseConverter extends AbstractConversi
             }
         }
 
+        Collections.sort(regions);
+        Collections.sort(locations);
+        Collections.sort(k8sSupportedLocations);
+
+        availabilityZones = availabilityZones
+                .entrySet()
+                .stream()
+                .sorted(Comparator.comparing(o -> o.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
+        displayNames = displayNames
+                .entrySet()
+                .stream()
+                .sorted(Comparator.comparing(o -> o.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
         json.setNames(regions);
         json.setAvailabilityZones(availabilityZones);
         json.setDefaultRegion(source.getDefaultRegion());
         json.setDisplayNames(displayNames);
         json.setLocations(locations);
         json.setK8sSupportedlocations(k8sSupportedLocations);
+
         return json;
     }
 }

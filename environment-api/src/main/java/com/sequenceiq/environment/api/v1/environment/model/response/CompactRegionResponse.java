@@ -1,10 +1,10 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
@@ -17,21 +17,21 @@ import io.swagger.annotations.ApiModelProperty;
 public class CompactRegionResponse implements Serializable {
 
     @ApiModelProperty(EnvironmentModelDescription.REGIONS)
-    private Set<String> names;
+    private List<String> names;
 
     @ApiModelProperty(EnvironmentModelDescription.REGION_DISPLAYNAMES)
     private Map<String, String> displayNames;
 
     public CompactRegionResponse() {
-        names = new HashSet<>();
+        names = new ArrayList<>();
         displayNames = new HashMap<>();
     }
 
-    public Set<String> getNames() {
+    public List<String> getNames() {
         return names;
     }
 
-    public void setNames(Set<String> names) {
+    public void setNames(List<String> names) {
         this.names = names;
     }
 

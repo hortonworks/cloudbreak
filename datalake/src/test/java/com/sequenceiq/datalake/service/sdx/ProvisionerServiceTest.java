@@ -30,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
@@ -266,7 +267,7 @@ class ProvisionerServiceTest {
         detailedEnvironmentResponse.setName("env");
         detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
         CompactRegionResponse compactRegionResponse = new CompactRegionResponse();
-        compactRegionResponse.setNames(Sets.newHashSet("eu-west-1"));
+        compactRegionResponse.setNames(Lists.newArrayList("eu-west-1"));
         compactRegionResponse.setDisplayNames(Map.of("eu-west-1", "ireland"));
         detailedEnvironmentResponse.setRegions(compactRegionResponse);
         detailedEnvironmentResponse.setCrn(Crn.builder()
