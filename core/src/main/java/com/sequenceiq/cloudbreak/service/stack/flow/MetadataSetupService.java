@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -44,11 +45,24 @@ public class MetadataSetupService {
     @Inject
     private Clock clock;
 
+    public void cleanupRequestedInstances(Long stackId) {
+        Set<InstanceMetaData> allInstanceMetadataByStackId = instanceMetaDataService.findNotTerminatedForStack(stackId);
+        List<InstanceMetaData> requestedInstances = allInstanceMetadataByStackId.stream()
+                .filter(instanceMetaData -> InstanceStatus.REQUESTED.equals(instanceMetaData.getInstanceStatus()))
+                .collect(Collectors.toList());
+        for (InstanceMetaData inst : requestedInstances) {
+            inst.setTerminationDate(clock.getCurrentTimeMillis());
+            inst.setInstanceStatus(InstanceStatus.TERMINATED);
+        }
+        instanceMetaDataService.saveAll(requestedInstances);
+    }
+
     public void cleanupRequestedInstances(Stack stack, String instanceGroupName) {
         Optional<InstanceGroup> ig = instanceGroupService.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
         if (ig.isPresent()) {
             List<InstanceMetaData> requestedInstances = instanceMetaDataService.findAllByInstanceGroupAndInstanceStatus(ig.get(), InstanceStatus.REQUESTED);
             for (InstanceMetaData inst : requestedInstances) {
+                inst.setTerminationDate(clock.getCurrentTimeMillis());
                 inst.setInstanceStatus(InstanceStatus.TERMINATED);
             }
             instanceMetaDataService.saveAll(requestedInstances);

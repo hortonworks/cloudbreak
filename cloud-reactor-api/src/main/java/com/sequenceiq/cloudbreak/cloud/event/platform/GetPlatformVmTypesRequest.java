@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.common.api.type.CdpResourceType;
 
-public class GetPlatformVmTypesRequest  extends CloudPlatformRequest<GetPlatformVmTypesResult> {
+public class GetPlatformVmTypesRequest extends CloudPlatformRequest<GetPlatformVmTypesResult> {
 
     private final String region;
 

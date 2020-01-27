@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.task;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -67,8 +68,10 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
 
     private Optional<Activity> latestActivity;
 
+    private Date checkAfter;
+
     public ASGroupStatusCheckerTask(AuthenticatedContext authenticatedContext, String asGroupName, Integer requiredInstances, AwsClient awsClient,
-            CloudFormationStackUtil cloudFormationStackUtil) {
+            CloudFormationStackUtil cloudFormationStackUtil, Date checkAfter) {
         super(authenticatedContext, true);
         autoScalingGroupName = asGroupName;
         this.requiredInstances = requiredInstances;
@@ -76,8 +79,8 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
         this.cloudFormationStackUtil = cloudFormationStackUtil;
         autoScalingClient = awsClient.createAutoScalingRetryClient(new AwsCredentialView(getAuthenticatedContext().getCloudCredential()),
                 getAuthenticatedContext().getCloudContext().getLocation().getRegion().value());
-        List<Activity> autoScalingActivities = getAutoScalingActivities();
-        latestActivity = autoScalingActivities.stream().findFirst();
+        latestActivity = Optional.empty();
+        this.checkAfter = checkAfter;
     }
 
     @Override
@@ -91,7 +94,7 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
             List<Activity> activities = getAutoScalingActivities();
             if (latestActivity.isPresent()) {
                 checkForSpotRequest(latestActivity.get(), amazonEC2Client);
-                activities = activities.stream().filter(activity -> activity.getStartTime().after(latestActivity.get().getStartTime()))
+                activities = activities.stream().filter(activity -> activity.getStartTime().after(checkAfter))
                         .collect(Collectors.toList());
             }
             updateLatestActivity(activities);
@@ -129,6 +132,7 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
     private void updateLatestActivity(List<Activity> activities) {
         if (!activities.isEmpty()) {
             latestActivity = Optional.ofNullable(activities.get(0));
+            latestActivity.ifPresent(activity -> checkAfter = activity.getStartTime());
         }
     }
 
