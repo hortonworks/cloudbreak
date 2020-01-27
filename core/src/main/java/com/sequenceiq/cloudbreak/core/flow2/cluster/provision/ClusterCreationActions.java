@@ -240,7 +240,7 @@ public class ClusterCreationActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterCreationService.handleClusterCreationFailure(context.getStackView(), payload.getException());
-                getMetricService().incrementMetricCounter(MetricType.CLUSTER_CREATION_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_CREATION_FAILED, context.getStackView(), payload.getException());
                 sendEvent(context);
             }
 

@@ -64,7 +64,7 @@ public class ClusterStopActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterStopService.handleClusterStopFailure(context.getStackView(), payload.getException().getMessage());
-                getMetricService().incrementMetricCounter(MetricType.CLUSTER_STOP_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_STOP_FAILED, context.getStackView(), payload.getException());
                 sendEvent(context);
             }
 

@@ -295,7 +295,7 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 stackCreationService.handleStackCreationFailure(context.getStackView(), payload.getException());
-                getMetricService().incrementMetricCounter(MetricType.STACK_CREATION_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.STACK_CREATION_FAILED, context.getStackView(), payload.getException());
                 sendEvent(context);
             }
 

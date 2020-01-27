@@ -6,5 +6,6 @@ public enum MetricTag {
     ERROR_CODE,
     CLOUD_PROVIDER,
     TARGET_API,
-    TARGET_METHOD
+    TARGET_METHOD,
+    TUNNEL_TYPE
 }

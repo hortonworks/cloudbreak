@@ -401,7 +401,7 @@ public class ClusterUpscaleActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterUpscaleFlowService.clusterUpscaleFailed(context.getStackView().getId(), payload.getException());
-                getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStackView(), payload.getException());
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
             }
         };

@@ -49,7 +49,7 @@ public class StackTerminationFailureAction extends AbstractStackFailureAction<St
         } catch (Exception e) {
             LOGGER.error("Exception occured while Cloudbreak tried to handle stack termination error: ", e);
         }
-        getMetricService().incrementMetricCounter(MetricType.STACK_TERMINATION_FAILED, context.getStackView());
+        getMetricService().incrementMetricCounter(MetricType.STACK_TERMINATION_FAILED, context.getStackView(), payload.getException());
         sendEvent(context);
     }
 
