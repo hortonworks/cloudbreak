@@ -98,7 +98,7 @@ public class StackStopActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 stackStartStopService.handleStackStopError(context.getStackView(), payload);
-                getMetricService().incrementMetricCounter(MetricType.STACK_STOP_FAILED, context.getStackView());
+                getMetricService().incrementMetricCounter(MetricType.STACK_STOP_FAILED, context.getStackView(), payload.getException());
                 sendEvent(context);
             }
 
