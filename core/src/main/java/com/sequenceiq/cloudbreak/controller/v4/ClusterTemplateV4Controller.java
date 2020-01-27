@@ -112,7 +112,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
         if (Objects.nonNull(names) && !names.isEmpty()) {
             clusterTemplates = clusterTemplateService.deleteMultiple(names, workspaceId);
         } else {
-            NameOrCrn environmentNameOrCrn = NameOrCrn.ofName(environmentName);
+            NameOrCrn environmentNameOrCrn = NameOrCrn.ofCrn(environmentCrn);
             Set<String> namesByEnv = clusterTemplateService
                     .findAllByEnvironment(environmentNameOrCrn)
                     .stream()

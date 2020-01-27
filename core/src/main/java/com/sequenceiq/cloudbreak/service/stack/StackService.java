@@ -1,5 +1,38 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_IGNORED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
 import com.cedarsoftware.util.io.JsonReader;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.authorization.resource.AuthorizationResource;
@@ -8,6 +41,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGrou
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn.NameOrCrnReader;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -85,37 +120,6 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.domain.FlowLog;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_IGNORED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
-import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 @Service
 public class StackService implements ResourceIdProvider {
@@ -127,6 +131,8 @@ public class StackService implements ResourceIdProvider {
     private static final String STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE = "Stack not found by id '%d'";
 
     private static final String STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE = "Stack not found by name '%s'";
+
+    private static final String STACK_NOT_FOUND_BY_NAME_OR_CRN_EXCEPTION_MESSAGE = "Stack not found by name or crn '%s'";
 
     private static final String STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE = "Stack not found by crn '%s'";
 
@@ -226,6 +232,13 @@ public class StackService implements ResourceIdProvider {
 
     public Optional<Stack> findStackByNameAndWorkspaceId(String name, Long workspaceId) {
         return findByNameAndWorkspaceIdWithLists(name, workspaceId);
+    }
+
+    public Optional<Stack> findStackByNameOrCrnAndWorkspaceId(NameOrCrn nameOrCrn, Long workspaceId) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        return reader.hasName()
+                ? findByNameAndWorkspaceIdWithLists(reader.getName(), workspaceId)
+                : findByCrnAndWorkspaceIdWithLists(reader.getCrn(), workspaceId);
     }
 
     public StackV4Response getJsonById(Long id, Collection<String> entry) {
@@ -413,30 +426,13 @@ public class StackService implements ResourceIdProvider {
         }
     }
 
-    public StackV4Request getStackRequestByNameInWorkspaceId(String name, Long workspaceId) {
-        try {
-            return transactionService.required(() -> {
-                Optional<Stack> stack = findByNameAndWorkspaceIdWithLists(name, workspaceId);
-                if (stack.isEmpty()) {
-                    throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
-                }
-                StackV4Request request = converterUtil.convert(stack.get(), StackV4Request.class);
-                request.getCluster().setName(null);
-                request.setName(name);
-                return request;
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
-    }
-
-    public StackV4Request getStackRequestByCrnInWorkspaceId(String crn, Long workspaceId) {
+    public StackV4Request getStackRequestByNameOrCrnInWorkspaceId(NameOrCrn nameOrCrn, Long workspaceId) {
         try {
             return transactionService.required(() -> {
                 ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
-                Optional<Stack> stack = findByCrnAndWorkspaceIdWithLists(crn, workspaceId, null, showTerminatedClustersAfterConfig);
+                Optional<Stack> stack = findByNameOrCrnAndWorkspaceIdWithLists(nameOrCrn, workspaceId);
                 if (stack.isEmpty()) {
-                    throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, crn));
+                    throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_OR_CRN_EXCEPTION_MESSAGE, nameOrCrn));
                 }
                 StackV4Request request = converterUtil.convert(stack.get(), StackV4Request.class);
                 request.getCluster().setName(null);
@@ -446,6 +442,14 @@ public class StackService implements ResourceIdProvider {
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
+    }
+
+    public Stack getByNameOrCrnInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        Optional<Stack> foundStack = reader.hasName()
+                ? stackRepository.findByNameAndWorkspaceId(reader.getName(), workspaceId)
+                : stackRepository.findByCrnAndWorkspaceId(reader.getName(), workspaceId);
+        return foundStack.orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_OR_CRN_EXCEPTION_MESSAGE, nameOrCrn)));
     }
 
     public Stack getByNameInWorkspace(String name, Long workspaceId) {
@@ -679,8 +683,19 @@ public class StackService implements ResourceIdProvider {
                 : stackRepository.findByCrnAndWorkspaceIdWithLists(crn, stackType, workspaceId, config.isActive(), config.showAfterMillisecs());
     }
 
+    private Optional<Stack> findByNameOrCrnAndWorkspaceIdWithLists(NameOrCrn nameOrCrn, Long workspaceId) {
+        NameOrCrnReader nameOrCrnReader = NameOrCrnReader.create(nameOrCrn);
+        return nameOrCrnReader.hasName()
+                ? stackRepository.findByNameAndWorkspaceIdWithLists(nameOrCrnReader.getName(), workspaceId, false, 0L)
+                : stackRepository.findByCrnAndWorkspaceIdWithLists(nameOrCrnReader.getCrn(), workspaceId, false, 0L);
+    }
+
     private Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId) {
         return stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId, false, 0L);
+    }
+
+    private Optional<Stack> findByCrnAndWorkspaceIdWithLists(String name, Long workspaceId) {
+        return stackRepository.findByCrnAndWorkspaceIdWithLists(name, workspaceId, false, 0L);
     }
 
     private InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack, Long workspaceId, User user) {
@@ -1061,6 +1076,13 @@ public class StackService implements ResourceIdProvider {
 
     public Boolean templateInUse(Long id) {
         return stackRepository.findTemplateInUse(id);
+    }
+
+    public Long getIdByNameOrCrnInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
+        NameOrCrnReader nameOrCrnReader = NameOrCrnReader.create(nameOrCrn);
+        return nameOrCrnReader.hasName()
+                ? stackRepository.findIdByNameAndWorkspaceId(nameOrCrnReader.getName(), workspaceId).orElseThrow(notFound("Stack", nameOrCrn.toString()))
+                : stackRepository.findIdByCrnAndWorkspaceId(nameOrCrnReader.getCrn(), workspaceId).orElseThrow(notFound("Stack", nameOrCrn.toString()));
     }
 
     public Long getIdByNameInWorkspace(String name, Long workspaceId) {

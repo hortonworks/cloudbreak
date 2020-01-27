@@ -14,13 +14,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.AmbariAddressV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn.NameOrCrnReader;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
@@ -127,12 +128,19 @@ public class StackCommonService {
         return stackService.getJsonByCrn(crn, entries);
     }
 
-    public StackV4Response findStackByNameAndWorkspaceId(String name, Long workspaceId, Set<String> entries, StackType stackType) {
+    public StackV4Response findStackByNameOrCrnAndWorkspaceId(NameOrCrn nameOrCrn, Long workspaceId, Set<String> entries, StackType stackType) {
+        NameOrCrnReader reader = NameOrCrnReader.create(nameOrCrn);
+        return reader.hasName()
+                ? findStackByNameAndWorkspaceId(reader.getName(), workspaceId, entries, stackType)
+                : findStackByCrnAndWorkspaceId(reader.getCrn(), workspaceId, entries, stackType);
+    }
+
+    private StackV4Response findStackByNameAndWorkspaceId(String name, Long workspaceId, Set<String> entries, StackType stackType) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         return stackService.getByNameInWorkspaceWithEntries(name, workspaceId, entries, user, stackType);
     }
 
-    public StackV4Response findStackByCrnAndWorkspaceId(String crn, Long workspaceId, Set<String> entries, StackType stackType) {
+    private StackV4Response findStackByCrnAndWorkspaceId(String crn, Long workspaceId, Set<String> entries, StackType stackType) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         return stackService.getByCrnInWorkspaceWithEntries(crn, workspaceId, entries, user, stackType);
     }
@@ -145,10 +153,10 @@ public class StackCommonService {
         put(stack, updateRequest);
     }
 
-    public void putStopInWorkspaceByName(String name, Long workspaceId) {
+    public void putStopInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         if (!cloudParameterCache.isStartStopSupported(stack.cloudPlatform())) {
             throw new BadRequestException(String.format("Stop is not supported on %s cloudplatform", stack.cloudPlatform()));
@@ -159,29 +167,10 @@ public class StackCommonService {
         put(stack, updateStackJson);
     }
 
-    public void putStopInWorkspaceByCrn(String crn, Long workspaceId) {
+    public void syncInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
-        MDCBuilder.buildMdcContext(stack);
-        if (!cloudParameterCache.isStartStopSupported(stack.cloudPlatform())) {
-            throw new BadRequestException(String.format("Stop is not supported on %s cloudplatform", stack.cloudPlatform()));
-        }
-        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
-        updateStackJson.setStatus(StatusRequest.STOPPED);
-        updateStackJson.setWithClusterEvent(true);
-        put(stack, updateStackJson);
-    }
-
-    public void syncInWorkspace(String name, String crn, Long workspaceId) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        Stack stack;
-        if (!Strings.isNullOrEmpty(name)) {
-            stack = stackService.getByNameInWorkspace(name, workspaceId);
-        } else {
-            stack = stackService.getByCrnInWorkspace(crn, workspaceId);
-        }
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
         updateStackJson.setStatus(StatusRequest.FULL_SYNC);
@@ -189,17 +178,10 @@ public class StackCommonService {
         put(stack, updateStackJson);
     }
 
-    public void putStartInWorkspaceByName(String name, Long workspaceId) {
+    public void putStartInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
-        putStartInWorkspace(stack);
-    }
-
-    public void putStartInWorkspaceByCrn(String crn, Long workspaceId) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         putStartInWorkspace(stack);
     }
 
@@ -214,9 +196,9 @@ public class StackCommonService {
         put(stack, updateStackJson);
     }
 
-    public void putScalingInWorkspace(String name, Long workspaceId, StackScaleV4Request updateRequest) {
+    public void putScalingInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, StackScaleV4Request updateRequest) {
         User user = checkUserPermission();
-        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         updateRequest.setStackId(stack.getId());
         UpdateStackV4Request updateStackJson = converterUtil.convert(updateRequest, UpdateStackV4Request.class);
@@ -237,23 +219,16 @@ public class StackCommonService {
         }
     }
 
-    public void deleteWithKerberosByNameInWorkspace(String name, Long workspaceId, boolean forced) {
+    public void deleteWithKerberosInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, boolean forced) {
         checkUserPermission();
-        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         clusterService.delete(stack.getId(), forced);
     }
 
-    public void deleteWithKerberosByCrnInWorkspace(String crn, Long workspaceId, boolean forced) {
+    public void repairCluster(Long workspaceId, NameOrCrn nameOrCrn, ClusterRepairV4Request clusterRepairRequest) {
         checkUserPermission();
-        Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
-        MDCBuilder.buildMdcContext(stack);
-        clusterService.delete(stack.getId(), forced);
-    }
-
-    public void repairClusterByName(Long workspaceId, String name, ClusterRepairV4Request clusterRepairRequest) {
-        checkUserPermission();
-        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         if (clusterRepairRequest.getHostGroups() != null) {
             clusterRepairService.repairHostGroups(stack.getId(), new HashSet<>(clusterRepairRequest.getHostGroups()), clusterRepairRequest.isRemoveOnly());
         } else {
@@ -264,28 +239,9 @@ public class StackCommonService {
         }
     }
 
-    public void repairClusterByCrn(Long workspaceId, String crn, ClusterRepairV4Request clusterRepairRequest) {
+    public void retryInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
         checkUserPermission();
-        Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
-        if (clusterRepairRequest.getHostGroups() != null) {
-            clusterRepairService.repairHostGroups(stack.getId(), new HashSet<>(clusterRepairRequest.getHostGroups()), clusterRepairRequest.isRemoveOnly());
-        } else {
-            clusterRepairService.repairNodes(stack.getId(),
-                    new HashSet<>(clusterRepairRequest.getNodes().getIds()),
-                    clusterRepairRequest.getNodes().isDeleteVolumes(),
-                    clusterRepairRequest.isRemoveOnly());
-        }
-    }
-
-    public void retryInWorkspaceByName(String name, Long workspaceId) {
-        checkUserPermission();
-        Long stackId = stackService.getIdByNameInWorkspace(name, workspaceId);
-        operationRetryService.retry(stackId);
-    }
-
-    public void retryInWorkspaceByCrn(String crn, Long workspaceId) {
-        checkUserPermission();
-        Long stackId = stackService.getIdByNameInWorkspace(crn, workspaceId);
+        Long stackId = stackService.getIdByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         operationRetryService.retry(stackId);
     }
 
@@ -333,48 +289,22 @@ public class StackCommonService {
         fileSystemValidator.validateFileSystem(stackValidation.getCredential().cloudPlatform(), cloudCredential, request.getFileSystem(), null, null);
     }
 
-    public void deleteInstanceByNameInWorkspace(String name, Long workspaceId, String instanceId, boolean forced) {
+    public void deleteInstanceInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, String instanceId, boolean forced) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         stackService.removeInstance(stack, workspaceId, instanceId, forced, user);
     }
 
-    public void deleteMultipleInstancesByNameInWorkspace(String name, Long workspaceId, List<String> instanceIds, boolean forced) {
+    public void deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, List<String> instanceIds, boolean forced) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         stackService.removeInstances(stack, workspaceId, instanceIds, forced, user);
     }
 
-    public void deleteInstanceByCrnInWorkspace(String crn, Long workspaceId, String instanceId, boolean forced) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
-        stackService.removeInstance(stack, workspaceId, instanceId, forced, user);
-    }
-
-    public void deleteMultipleInstancesByCrnInWorkspace(String crn, Long workspaceId, List<String> instanceIds, boolean forced) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
-        stackService.removeInstances(stack, workspaceId, instanceIds, forced, user);
-    }
-
-    public void changeImageByNameInWorkspace(String name, Long organziationId, StackImageChangeV4Request stackImageChangeRequest) {
-        Stack stack = stackService.getByNameInWorkspace(name, organziationId);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        if (StringUtils.isNotBlank(stackImageChangeRequest.getImageCatalogName())) {
-            ImageCatalog imageCatalog = imageCatalogService.get(organziationId, stackImageChangeRequest.getImageCatalogName());
-            stackService.updateImage(stack.getId(), organziationId, stackImageChangeRequest.getImageId(),
-                    imageCatalog.getName(), imageCatalog.getImageCatalogUrl(), user);
-        } else {
-            stackService.updateImage(stack.getId(), organziationId, stackImageChangeRequest.getImageId(), null, null, user);
-        }
-    }
-
-    public void changeImageByCrnInWorkspace(String crn, Long organziationId, StackImageChangeV4Request stackImageChangeRequest) {
-        Stack stack = stackService.getByCrnInWorkspace(crn, organziationId);
+    public void changeImageInWorkspace(NameOrCrn nameOrCrn, Long organziationId, StackImageChangeV4Request stackImageChangeRequest) {
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, organziationId);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         if (StringUtils.isNotBlank(stackImageChangeRequest.getImageCatalogName())) {
             ImageCatalog imageCatalog = imageCatalogService.get(organziationId, stackImageChangeRequest.getImageCatalogName());
