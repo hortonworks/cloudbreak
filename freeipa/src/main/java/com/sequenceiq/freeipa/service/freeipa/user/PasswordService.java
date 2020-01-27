@@ -26,18 +26,16 @@ import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.configuration.UsersyncConfig;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
-import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationStatus;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordRequest;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordResult;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
-import com.sequenceiq.freeipa.service.operation.OperationStatusService;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -69,15 +67,12 @@ public class PasswordService {
     private AsyncTaskExecutor asyncTaskExecutor;
 
     @Inject
-    private OperationStatusService operationStatusService;
-
-    @Inject
-    private OperationToSyncOperationStatus operationToSyncOperationStatus;
+    private OperationService operationService;
 
     @Inject
     private FreeIpaPasswordValidator freeIpaPasswordValidator;
 
-    public SyncOperationStatus setPassword(String accountId, String actorCrn, String userCrn, String password, Set<String> environmentCrnFilter) {
+    public Operation setPassword(String accountId, String actorCrn, String userCrn, String password, Set<String> environmentCrnFilter) {
         LOGGER.debug("setting password for user {} in account {}", userCrn, accountId);
         freeIpaPasswordValidator.validate(password);
 
@@ -89,13 +84,13 @@ public class PasswordService {
         }
         LOGGER.debug("Found {} matching stacks for accountId {}", stacks.size(), accountId);
 
-        Operation operation = operationStatusService.startOperation(accountId, OperationType.SET_PASSWORD,
+        Operation operation = operationService.startOperation(accountId, OperationType.SET_PASSWORD,
                 environmentCrnFilter, List.of(userCrn));
         if (operation.getStatus() == OperationState.RUNNING) {
             asyncSetPasswords(operation.getOperationId(), accountId, actorCrn, userCrn, password, stacks);
         }
 
-        return operationToSyncOperationStatus.convert(operation);
+        return operation;
     }
 
     private void asyncSetPasswords(String operationId, String accountId, String actorCrn, String userCrn, String password, List<Stack> stacks) {
@@ -128,12 +123,12 @@ public class PasswordService {
                     failure.add(new FailureDetails(request.getEnvironment(), e.getLocalizedMessage()));
                 }
             }
-            operationStatusService.completeOperation(operationId, success, failure);
+            operationService.completeOperation(operationId, success, failure);
         } catch (InterruptedException e) {
-            operationStatusService.failOperation(operationId, e.getLocalizedMessage());
+            operationService.failOperation(operationId, e.getLocalizedMessage());
             Thread.currentThread().interrupt();
         } catch (RuntimeException e) {
-            operationStatusService.failOperation(operationId, e.getLocalizedMessage());
+            operationService.failOperation(operationId, e.getLocalizedMessage());
             throw e;
         }
     }

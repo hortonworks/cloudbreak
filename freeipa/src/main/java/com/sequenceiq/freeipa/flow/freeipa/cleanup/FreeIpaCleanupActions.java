@@ -35,7 +35,7 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.users.RemoveUsersReques
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.users.RemoveUsersResponse;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.vault.RemoveVaultEntriesRequest;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.vault.RemoveVaultEntriesResponse;
-import com.sequenceiq.freeipa.service.operation.OperationStatusService;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 
 @Configuration
 public class FreeIpaCleanupActions {
@@ -155,7 +155,7 @@ public class FreeIpaCleanupActions {
         return new AbstractFreeIpaCleanupAction<>(RemoveRolesResponse.class) {
 
             @Inject
-            private OperationStatusService operationStatusService;
+            private OperationService operationService;
 
             @Override
             protected void doExecute(FreeIpaContext context, RemoveRolesResponse payload, Map<Object, Object> variables) {
@@ -165,7 +165,7 @@ public class FreeIpaCleanupActions {
                 successDetails.getAdditionalDetails().put("Hosts", payload.getHosts() == null ? List.of() : new ArrayList<>(payload.getHosts()));
                 successDetails.getAdditionalDetails().put("Users", payload.getUsers() == null ? List.of() : new ArrayList<>(payload.getUsers()));
                 successDetails.getAdditionalDetails().put("Roles", payload.getRoles() == null ? List.of() : new ArrayList<>(payload.getRoles()));
-                operationStatusService.completeOperation(payload.getOperationId(), List.of(successDetails), Collections.emptyList());
+                operationService.completeOperation(payload.getOperationId(), List.of(successDetails), Collections.emptyList());
                 LOGGER.info("Cleanup successfully finished with: " + successDetails);
                 sendEvent(context, cleanupEvent);
             }
@@ -177,7 +177,7 @@ public class FreeIpaCleanupActions {
         return new AbstractFreeIpaCleanupAction<>(CleanupFailureEvent.class) {
 
             @Inject
-            private OperationStatusService operationStatusService;
+            private OperationService operationService;
 
             @Override
             protected void doExecute(FreeIpaContext context, CleanupFailureEvent payload, Map<Object, Object> variables) {
@@ -190,7 +190,7 @@ public class FreeIpaCleanupActions {
                 if (payload.getFailureDetails() != null) {
                     failureDetails.getAdditionalDetails().putAll(payload.getFailureDetails());
                 }
-                operationStatusService.failOperation(payload.getOperationId(), message, List.of(successDetails), List.of(failureDetails));
+                operationService.failOperation(payload.getOperationId(), message, List.of(successDetails), List.of(failureDetails));
                 sendEvent(context, FreeIpaCleanupEvent.CLEANUP_FAILURE_HANDLED_EVENT.event(), payload);
             }
 
