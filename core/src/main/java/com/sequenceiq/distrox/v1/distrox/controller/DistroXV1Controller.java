@@ -147,7 +147,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         Set<NameOrCrn> nameOrCrns = multiDeleteRequest.getNames().stream()
                 .map(name -> NameOrCrn.ofName(name))
                 .collect(Collectors.toSet());
-        nameOrCrns.forEach(accessDto -> stackOperations.delete(accessDto, workspaceService.getForCurrentUser().getId(), forced));
+        nameOrCrns.forEach(nameOrCrn -> stackOperations.delete(nameOrCrn, workspaceService.getForCurrentUser().getId(), forced));
     }
 
     private void multideleteByCrn(DistroXMultiDeleteV1Request multiDeleteRequest, Boolean forced) {
@@ -380,8 +380,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         return distroXV1RequestToCreateAWSClusterRequestConverter.convert(request);
     }
 
-    private StackV4Request getStackV4Request(NameOrCrn accessDto) {
-        return stackOperations.getRequest(accessDto, workspaceService.getForCurrentUser().getId());
+    private StackV4Request getStackV4Request(NameOrCrn nameOrCrn) {
+        return stackOperations.getRequest(nameOrCrn, workspaceService.getForCurrentUser().getId());
     }
 
     private Object getCreateAWSClusterRequest(StackV4Request stackV4Request) {

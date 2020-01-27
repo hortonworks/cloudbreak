@@ -117,7 +117,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return nameOrCrn.hasName()
                 ? super.deleteByNameFromWorkspace(nameOrCrn.getName(), workspaceId)
                 : delete(blueprintRepository.findByResourceCrnAndWorkspaceId(nameOrCrn.getCrn(), workspaceId)
-                .orElseThrow(() -> notFound("blueprint", nameOrCrn.toString()).get()));
+                .orElseThrow(() -> notFound("blueprint", nameOrCrn.getCrn()).get()));
     }
 
     public Blueprint getByWorkspace(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
