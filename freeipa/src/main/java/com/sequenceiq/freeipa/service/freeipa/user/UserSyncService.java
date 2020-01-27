@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
@@ -47,7 +46,6 @@ import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.configuration.UsersyncConfig;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
-import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationStatus;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
@@ -60,7 +58,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
-import com.sequenceiq.freeipa.service.operation.OperationStatusService;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.KrbKeySetEncoder;
 
@@ -90,10 +88,7 @@ public class UserSyncService {
     private AsyncTaskExecutor asyncTaskExecutor;
 
     @Inject
-    private OperationStatusService operationStatusService;
-
-    @Inject
-    private OperationToSyncOperationStatus operationToSyncOperationStatus;
+    private OperationService operationService;
 
     @Inject
     private UmsEventGenerationIdsProvider umsEventGenerationIdsProvider;
@@ -101,7 +96,7 @@ public class UserSyncService {
     @Inject
     private UserSyncStatusService userSyncStatusService;
 
-    public SyncOperationStatus synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
+    public Operation synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
 
         validateParameters(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
@@ -116,7 +111,7 @@ public class UserSyncService {
         }
 
         Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
-        Operation operation = operationStatusService
+        Operation operation = operationService
                 .startOperation(accountId, OperationType.USER_SYNC, environmentCrns, union(userCrnFilter, machineUserCrnFilter));
 
         LOGGER.info("Starting operation [{}] with status [{}]", operation.getOperationId(), operation.getStatus());
@@ -134,7 +129,7 @@ public class UserSyncService {
             asyncSynchronizeUsers(operation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter, fullSync);
         }
 
-        return operationToSyncOperationStatus.convert(operation);
+        return operation;
     }
 
     private void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks,
@@ -185,10 +180,10 @@ public class UserSyncService {
                     failure.add(new FailureDetails(envCrn, e.getLocalizedMessage()));
                 }
             });
-            operationStatusService.completeOperation(operationId, success, failure);
+            operationService.completeOperation(operationId, success, failure);
         } catch (RuntimeException e) {
             LOGGER.error("User sync operation {} failed with error:", operationId, e);
-            operationStatusService.failOperation(operationId, e.getLocalizedMessage());
+            operationService.failOperation(operationId, e.getLocalizedMessage());
             throw e;
         }
     }
