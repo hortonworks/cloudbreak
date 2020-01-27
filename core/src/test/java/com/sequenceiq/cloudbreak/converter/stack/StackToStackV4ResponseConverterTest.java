@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -25,6 +26,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CloudbreakDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.PlacementSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -56,6 +58,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -96,6 +99,9 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
     @Mock
     private EnvironmentClientService environmentClientService;
 
+    @Mock
+    private ServiceEndpointCollector serviceEndpointCollector;
+
     private CredentialResponse credentialResponse;
 
     @Before
@@ -110,6 +116,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         DatalakeResources datalakeResources = new DatalakeResources();
         datalakeResources.setName("name");
         when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
+        when(serviceEndpointCollector.filterByStackType(any(StackType.class), any(List.class))).thenReturn(new ArrayList());
         credentialResponse = new CredentialResponse();
         credentialResponse.setName("cred-name");
         credentialResponse.setCrn("crn");
@@ -225,6 +232,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         stack.setHostgroupNameAsHostname(false);
         stack.setClusterNameAsSubdomain(false);
         stack.setDatalakeResourceId(1L);
+        stack.setType(StackType.WORKLOAD);
         stack.setParameters(Map.of(PlatformParametersConsts.TTL_MILLIS, String.valueOf(System.currentTimeMillis())));
         Resource s3ArnResource = new Resource(ResourceType.S3_ACCESS_ROLE_ARN, "s3Arn", stack);
         stack.setResources(Collections.singleton(s3ArnResource));

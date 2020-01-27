@@ -24,9 +24,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.GatewayTopologyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
@@ -152,6 +154,17 @@ public class ServiceEndpointCollector {
             result.put(entry.getKey(), views);
         }
         return result;
+    }
+
+    public List<GatewayTopologyV4Response> filterByStackType(StackType stackType, List<GatewayTopologyV4Response> topologies) {
+        for (GatewayTopologyV4Response topology : topologies) {
+            topology.setExposedServices(topology.getExposedServices()
+                    .stream()
+                    .filter(e -> (exposedServiceCollector.getByName(e).isVisibleForDatahub() && stackType.equals(StackType.WORKLOAD))
+                            || (exposedServiceCollector.getByName(e).isVisibleForDatalake() && stackType.equals(StackType.DATALAKE)))
+                    .collect(Collectors.toList()));
+        }
+        return topologies;
     }
 
     private void setImpalaDebugUIToCoordinator(Cluster cluster, Map<String, List<String>> privateIps) {

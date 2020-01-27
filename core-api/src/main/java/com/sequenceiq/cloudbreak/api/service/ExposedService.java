@@ -24,7 +24,9 @@ public class ExposedService {
 
     private boolean apiIncluded;
 
-    private boolean visible;
+    private boolean visibleForDatalake;
+
+    private boolean visibleForDatahub;
 
     public String getName() {
         return name;
@@ -106,12 +108,24 @@ public class ExposedService {
         this.apiIncluded = apiIncluded;
     }
 
-    public boolean isVisible() {
-        return visible;
+    public boolean isVisibleForDatalake() {
+        return visibleForDatalake;
     }
 
-    public void setVisible(boolean visible) {
-        this.visible = visible;
+    public void setVisibleForDatalake(boolean visibleForDatalake) {
+        this.visibleForDatalake = visibleForDatalake;
+    }
+
+    public boolean isVisibleForDatahub() {
+        return visibleForDatahub;
+    }
+
+    public void setVisibleForDatahub(boolean visibleForDatahub) {
+        this.visibleForDatahub = visibleForDatahub;
+    }
+
+    public boolean isVisible() {
+        return isVisibleForDatalake() || isVisibleForDatahub();
     }
 
     //CHECKSTYLE:OFF: CyclomaticComplexity
@@ -127,7 +141,8 @@ public class ExposedService {
         return ssoSupported == that.ssoSupported &&
                 apiOnly == that.apiOnly &&
                 apiIncluded == that.apiIncluded &&
-                visible == that.visible &&
+                visibleForDatalake == that.visibleForDatalake &&
+                visibleForDatahub == that.visibleForDatahub &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(displayName, that.displayName) &&
                 Objects.equals(serviceName, that.serviceName) &&
@@ -140,7 +155,8 @@ public class ExposedService {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, displayName, serviceName, knoxService, knoxUrl, ssoSupported, port, tlsPort, apiOnly, apiIncluded, visible);
+        return Objects.hash(name, displayName, serviceName, knoxService, knoxUrl, ssoSupported, port, tlsPort,
+                apiOnly, apiIncluded, visibleForDatahub, visibleForDatalake);
     }
 
     @Override
@@ -156,7 +172,8 @@ public class ExposedService {
                 ", tlsPort=" + tlsPort +
                 ", apiOnly=" + apiOnly +
                 ", apiIncluded=" + apiIncluded +
-                ", visible=" + visible +
+                ", isVisibleForDatahub=" + visibleForDatahub +
+                ", isVisibleForDatalake=" + visibleForDatalake +
                 '}';
     }
 }

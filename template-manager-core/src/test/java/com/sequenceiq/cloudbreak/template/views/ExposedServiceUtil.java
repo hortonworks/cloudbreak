@@ -19,7 +19,8 @@ public class ExposedServiceUtil {
         exposedService.setServiceName(name);
         exposedService.setSsoSupported(true);
         exposedService.setTlsPort(1);
-        exposedService.setVisible(true);
+        exposedService.setVisibleForDatahub(true);
+        exposedService.setVisibleForDatalake(true);
         return exposedService;
     }
 }

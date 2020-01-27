@@ -95,6 +95,10 @@ public class ExposedServiceCollector {
         return exposedServices.get("RESOURCEMANAGER_WEB");
     }
 
+    public ExposedService getByName(String name) {
+        return exposedServices.get(name);
+    }
+
     public Set<String> getFullServiceListBasedOnList(Collection<String> services) {
         Set<String> result = new HashSet<>(services);
         if (services.contains("ALL")) {
