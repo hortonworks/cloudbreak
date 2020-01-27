@@ -3,6 +3,8 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.openstack;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.OpenStackNetworkV4Parameters;
@@ -36,6 +38,8 @@ import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 
 @Component
 public class OpenStackCloudProvider extends AbstractCloudProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackCloudProvider.class);
 
     @Inject
     private OpenStackProperties openStackProperties;
@@ -205,7 +209,14 @@ public class OpenStackCloudProvider extends AbstractCloudProvider {
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return imageSettings.withImageCatalog(commonCloudProperties().getImageCatalogName());
+        return imageSettings
+                .withImageId(getImageId())
+                .withImageCatalog(getImageCatalogName());
+    }
+
+    @Override
+    public String getImageId() {
+        return openStackProperties.getBaseimage().getImageId();
     }
 
     @Override

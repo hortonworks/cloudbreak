@@ -127,7 +127,11 @@ public interface CloudProvider {
 
     void setImageCatalogUrl(String url);
 
+    String getImageCatalogUrl();
+
     void setImageId(String id);
+
+    String getImageId();
 
     void setInstanceTemplateV1Parameters(InstanceTemplateV1Request instanceTemplateV1Request);
 
