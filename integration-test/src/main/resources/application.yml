@@ -12,7 +12,7 @@ integrationtest:
     sourceCatalogName: v3-dev
     sourceCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-dev-cb-image-catalog.json
   spark:
-    sparkPoolSize: 8
+    sparkPoolSize: 12
   command: suiteurls
   outputdir: .
   publicKeyFile:
@@ -105,7 +105,7 @@ integrationtest:
 
   testsuite:
     pollingInterval: 1000
-    threadPoolSize: 3
+    threadPoolSize: 6
     skipRemainingTestsAfterOneFailed: true
     cleanUpOnFailure: false
 

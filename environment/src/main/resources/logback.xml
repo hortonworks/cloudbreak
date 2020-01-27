@@ -33,7 +33,7 @@
                     <FileNamePattern>environment-log/environment-${nodeid}-%d{yyyy-MM-dd}.log</FileNamePattern>
                 </rollingPolicy>
                 <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-                    <MaxFileSize>30MB</MaxFileSize>
+                    <MaxFileSize>1024MB</MaxFileSize>
                 </triggeringPolicy>
             </appender>
         </sift>

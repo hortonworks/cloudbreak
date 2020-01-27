@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.init.clustertemplate.ClusterTemplateLoaderService;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
@@ -180,7 +181,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         }
 
         if (clusterTemplateRepository.findByNameAndWorkspace(resource.getName(), resource.getWorkspace()).isPresent()) {
-            throw new BadRequestException(
+            throw new DuplicateClusterTemplateException(
                     format("clustertemplate already exists with name '%s' in workspace %s", resource.getName(), resource.getWorkspace().getName()));
         }
 
@@ -292,7 +293,22 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     private Collection<ClusterTemplate> createAll(Iterable<ClusterTemplate> clusterTemplates) {
         return StreamSupport.stream(clusterTemplates.spliterator(), false)
-                .map(ct -> create(ct, ct.getWorkspace(), userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser())))
+                .map(ct -> {
+                    try {
+                        return create(ct, ct.getWorkspace(), userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser()));
+                    } catch (DuplicateClusterTemplateException duplicateClusterTemplateException) {
+                        LOGGER.info("Template was found, try to get it", duplicateClusterTemplateException);
+                        return getByNameForWorkspace(ct.getName(), ct.getWorkspace());
+                    } catch (BadRequestException badRequestException) {
+                        LOGGER.info("Template save failed, but try to get it", badRequestException);
+                        try {
+                            return getByNameForWorkspace(ct.getName(), ct.getWorkspace());
+                        } catch (NotFoundException notFoundException) {
+                            LOGGER.info("Template was not found", notFoundException);
+                            throw notFoundException;
+                        }
+                    }
+                })
                 .collect(Collectors.toList());
     }
 

@@ -1,4 +1,4 @@
-FROM docker-private.infra.cloudera.com/cloudera_base/cldr-java:11.0.5-cldr1-jdk-slim-buster
+FROM docker-private.infra.cloudera.com/cloudera_base/openjdk:11.0.6-jdk-slim-buster
 MAINTAINER info@hortonworks.com
 
 WORKDIR /
