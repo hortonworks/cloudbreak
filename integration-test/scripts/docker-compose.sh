@@ -87,8 +87,9 @@ if [[ "$CIRCLECI" ]]; then
         export INTEGRATIONTEST_THREADCOUNT=4
         export INTEGRATIONTEST_CLOUDPROVIDER="AWS"
     else
-        export INTEGRATIONTEST_PARALLEL=false
-        export INTEGRATIONTEST_THREADCOUNT=2
+        export INTEGRATIONTEST_PARALLEL=methods
+        export INTEGRATIONTEST_THREADCOUNT=6
+        export INTEGRATIONTEST_SPARK_SPARKPOOLSIZE=12
         export INTEGRATIONTEST_CLOUDPROVIDER="MOCK"
     fi
 
@@ -104,7 +105,7 @@ if [[ "$CIRCLECI" ]]; then
     echo -e "\n\033[1;96m--- Start testing... (it may take few minutes to finish.)\033[0m\n"
     rm -rf test-output
 
-    $INTEGCB_LOCATION/.deps/bin/docker-compose up test > test.out
+    $INTEGCB_LOCATION/.deps/bin/docker-compose up test | tee test.out
     echo -e "\n\033[1;96m--- Test finished\033[0m\n"
 
     echo -e "\n\033[1;96m--- Collect docker stats:\033[0m\n"

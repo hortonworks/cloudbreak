@@ -132,7 +132,7 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(desiredWorkerCount).withForced(Boolean.FALSE))
                 .await(StackTestDto.class, STACK_AVAILABLE)
-                .then(MockVerification.verify(POST, ITResponse.MOCK_ROOT + "/cloud_instance_statuses").exactTimes(1))
+                .then(MockVerification.verify(POST, ITResponse.MOCK_ROOT + "/cloud_instance_statuses").atLeast(1))
                 .then(MockVerification.verify(POST, ITResponse.MOCK_ROOT + "/cloud_metadata_statuses")
                         .bodyContains("CREATE_REQUESTED", addedNodes).exactTimes(1))
                 .then(MockVerification.verify(GET, ITResponse.SALT_BOOT_ROOT + "/health").atLeast(1))

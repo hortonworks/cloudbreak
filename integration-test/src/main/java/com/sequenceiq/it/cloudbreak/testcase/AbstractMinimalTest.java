@@ -138,6 +138,7 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
 
     @AfterMethod(alwaysRun = true)
     public void tearDown(Object[] data) {
+        LOGGER.info("Tear down context");
         ((TestContext) data[0]).cleanupTestContext();
     }
 
@@ -148,7 +149,9 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
 
     @DataProvider(name = TEST_CONTEXT_WITH_MOCK)
     public Object[][] testContextWithMock() {
-        MeasuredTestContext tc = createMeasuredTestContext(getBean(MockedTestContext.class));
+        MockedTestContext mockedTestContext = getBean(MockedTestContext.class);
+        mockedTestContext.initModelAndImageCatalogIfNecessary();
+        MeasuredTestContext tc = createMeasuredTestContext(mockedTestContext);
         return new Object[][]{{tc}};
     }
 
