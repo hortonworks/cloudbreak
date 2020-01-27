@@ -11,7 +11,8 @@
       "tlsPort": null,
       "apiOnly": false,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "CLOUDERA_MANAGER",
@@ -24,7 +25,8 @@
       "tlsPort": 7183,
       "apiOnly": true,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "CLOUDERA_MANAGER_UI",
@@ -37,7 +39,8 @@
       "tlsPort": 7183,
       "apiOnly": false,
       "apiIncluded": false,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "HUE",
@@ -50,7 +53,8 @@
       "tlsPort": 8889,
       "apiOnly": false,
       "apiIncluded": false,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "WEBHDFS",
@@ -63,7 +67,8 @@
       "tlsPort": 9871,
       "apiOnly": true,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": false,
+      "visibleForDatahub": true
     },
     {
       "name": "NAMENODE",
@@ -76,7 +81,8 @@
       "tlsPort": 9871,
       "apiOnly": false,
       "apiIncluded": false,
-      "visible": true
+      "visibleForDatalake": false,
+      "visibleForDatahub": true
     },
     {
       "name": "RESOURCEMANAGER_WEB",
@@ -89,7 +95,8 @@
       "tlsPort": 8090,
       "apiOnly": false,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "JOB_HISTORY_SERVER",
@@ -102,7 +109,8 @@
       "tlsPort": 19890,
       "apiOnly": false,
       "apiIncluded": false,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "HIVE_SERVER",
@@ -115,7 +123,8 @@
       "tlsPort": 10001,
       "apiOnly": true,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "ATLAS",
@@ -128,7 +137,8 @@
       "tlsPort": 31443,
       "apiOnly": false,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "SPARK_HISTORY_SERVER",
@@ -141,7 +151,8 @@
       "tlsPort": 18488,
       "apiOnly": false,
       "apiIncluded": false,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "ZEPPELIN",
@@ -154,7 +165,8 @@
       "tlsPort": 8886,
       "apiOnly": false,
       "apiIncluded": false,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "RANGER",
@@ -167,7 +179,8 @@
       "tlsPort": 6182,
       "apiOnly": false,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "LIVY_SERVER",
@@ -180,7 +193,8 @@
       "tlsPort": 8998,
       "apiOnly": false,
       "apiIncluded": false,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "LIVY_SERVER_API",
@@ -193,7 +207,8 @@
       "tlsPort": 8998,
       "apiOnly": true,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "OOZIE_UI",
@@ -206,7 +221,8 @@
       "tlsPort": 11443,
       "apiOnly": false,
       "apiIncluded": true,
-      "visible": false
+      "visibleForDatalake": false,
+      "visibleForDatahub": false
     },
     {
       "name": "SOLR",
@@ -219,7 +235,8 @@
       "tlsPort": 8985,
       "apiOnly": false,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": false,
+      "visibleForDatahub": true
     },
     {
       "name": "HBASE_UI",
@@ -232,7 +249,8 @@
       "tlsPort": 16010,
       "apiOnly": false,
       "apiIncluded": false,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "HBASE_REST",
@@ -245,7 +263,8 @@
       "tlsPort": 20550,
       "apiOnly": true,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "NIFI",
@@ -258,7 +277,8 @@
       "tlsPort": 8443,
       "apiOnly": false,
       "apiIncluded": false,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "NIFI_REGISTRY",
@@ -271,7 +291,8 @@
       "tlsPort": 18433,
       "apiOnly": false,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "NIFI_REST",
@@ -284,7 +305,8 @@
       "tlsPort": 8443,
       "apiOnly": true,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "SMM_UI",
@@ -297,7 +319,8 @@
       "tlsPort": 9991,
       "apiOnly": false,
       "apiIncluded": false,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "SMM_API",
@@ -310,7 +333,8 @@
       "tlsPort": 8587,
       "apiOnly": true,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "SCHEMA_REGISTRY",
@@ -323,7 +347,8 @@
       "tlsPort": 7790,
       "apiOnly": false,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "IMPALA",
@@ -336,7 +361,8 @@
       "tlsPort": 28000,
       "apiOnly": true,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "IMPALA_DEBUG_UI",
@@ -349,7 +375,8 @@
       "tlsPort": 25000,
       "apiOnly": false,
       "apiIncluded": false,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "NAMENODE_HDFS",
@@ -362,7 +389,8 @@
       "tlsPort": 8020,
       "apiOnly": true,
       "apiIncluded": true,
-      "visible": false
+      "visibleForDatalake": false,
+      "visibleForDatahub": false
     },
     {
       "name": "JOBTRACKER",
@@ -375,7 +403,8 @@
       "tlsPort": 8032,
       "apiOnly": true,
       "apiIncluded": true,
-      "visible": false
+      "visibleForDatalake": false,
+      "visibleForDatahub": false
     },
     {
       "name": "PROFILER_ADMIN",
@@ -388,7 +417,8 @@
       "tlsPort": 21700,
       "apiOnly": true,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "PROFILER_METRICS",
@@ -401,7 +431,8 @@
       "tlsPort": 21800,
       "apiOnly": true,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "PROFILER_SCHEDULER",
@@ -414,7 +445,8 @@
       "tlsPort": 21900,
       "apiOnly": true,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "DAS",
@@ -427,7 +459,8 @@
       "tlsPort": 30800,
       "apiOnly": false,
       "apiIncluded": false,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "KUDU",
@@ -440,7 +473,8 @@
       "tlsPort": 8051,
       "apiOnly": false,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "KUDU_TABLET_SERVER",
@@ -453,7 +487,8 @@
       "tlsPort": 8050,
       "apiOnly": false,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     }
   ]
 }

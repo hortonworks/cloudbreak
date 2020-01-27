@@ -8,24 +8,23 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CloudbreakDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.PlacementSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.GatewayTopologyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.AttachedClusterInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.CustomDomainSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.MountedVolumeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
@@ -34,9 +33,6 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
-import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -49,6 +45,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -82,7 +79,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
     private StackService stackService;
 
     @Inject
-    private ResourceAttributeUtil resourceAttributeUtil;
+    private ServiceEndpointCollector serviceEndpointCollector;
 
     @Override
     public StackV4Response convert(Stack source) {
@@ -116,35 +113,19 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         addNodeCount(source, response);
         convertComponentConfig(response, source);
         convertTelemetryComponent(response, source);
-        response.setTags(getTags(response, source.getTags()));
+        response.setTags(getTags(source.getTags()));
         response.setTimeToLive(getStackTimeToLive(source));
         addSharedServiceResponse(source, response);
-
+        filterExposedServicesByType(source.getType(), response.getCluster());
         return response;
     }
 
-    private void addMountedVolumesToInstanceMeatdata(Stack source, StackV4Response response) {
-        source.getDiskResources().stream().forEach(diskResource -> {
-            Optional<VolumeSetAttributes> attributes = resourceAttributeUtil.getTypedAttributes(diskResource, VolumeSetAttributes.class);
-            Optional<InstanceGroupV4Response> instanceGroup = response.getInstanceGroups().stream()
-                    .filter(group -> StringUtils.equals(group.getName(), diskResource.getInstanceGroup()))
-                    .findFirst();
-            if (instanceGroup.isPresent() && attributes.isPresent()) {
-                instanceGroup.get().getMetadata().stream()
-                        .filter(instanceMetadata -> StringUtils.equals(instanceMetadata.getInstanceId(), diskResource.getInstanceId()))
-                        .forEach(instanceMetaData -> attributes.get().getVolumes().stream()
-                                .forEach(volume -> addVolumeToInstanceMetadata(instanceMetaData, volume)));
-            }
-        });
-    }
-
-    private void addVolumeToInstanceMetadata(InstanceMetaDataV4Response instanceMetaData, Volume volume) {
-        MountedVolumeV4Response mountedVolumeV4Response = new MountedVolumeV4Response();
-        mountedVolumeV4Response.setVolumeId(volume.getId());
-        mountedVolumeV4Response.setDevice(volume.getDevice());
-        mountedVolumeV4Response.setVolumeSize(String.valueOf(volume.getSize()));
-        mountedVolumeV4Response.setVolumeType(volume.getType());
-        instanceMetaData.getMountedVolumes().add(mountedVolumeV4Response);
+    private void filterExposedServicesByType(StackType stackType, ClusterV4Response clusterV4Response) {
+        if (clusterV4Response != null && clusterV4Response.getGateway() != null) {
+            List<GatewayTopologyV4Response> gatewayTopologyV4Responses = serviceEndpointCollector
+                    .filterByStackType(stackType, clusterV4Response.getGateway().getTopologies());
+            clusterV4Response.getGateway().setTopologies(gatewayTopologyV4Responses);
+        }
     }
 
     private void addNodeCount(Stack source, StackV4Response stackJson) {
@@ -155,7 +136,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         stackJson.setNodeCount(nodeCount);
     }
 
-    private TagsV4Response getTags(StackV4Response stackV4Response, Json tag) {
+    private TagsV4Response getTags(Json tag) {
         try {
             if (tag != null && tag.getValue() != null) {
                 StackTags stackTag = tag.get(StackTags.class);
