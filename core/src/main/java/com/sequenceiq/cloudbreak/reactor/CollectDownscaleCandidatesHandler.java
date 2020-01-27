@@ -108,7 +108,7 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
                 .collectDownscaleCandidates(hostGroup, request.getScalingAdjustment(), defaultRootVolumeSize, new HashSet<>(metaDatasForInstanceGroup));
         String collectedHostsAsString = collectedCandidates.stream().map(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null ?
                 "FQDN: " + instanceMetaData.getDiscoveryFQDN() : "Private id: " + instanceMetaData.getPrivateId())
-                .collect(Collectors.joining(","));
+                .collect(Collectors.joining(", "));
 
         flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_SELECT_FOR_DOWNSCALE, collectedHostsAsString);
         return collectedCandidates.stream().map(InstanceMetaData::getPrivateId).collect(Collectors.toSet());

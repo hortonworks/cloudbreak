@@ -317,6 +317,7 @@
         </#if>
         </#if>
         "LaunchConfigurationName" : { "Ref" : "AmbariNodeLaunchConfig${group.groupName?replace('_', '')}" },
+        "TerminationPolicies" : [ "NewestInstance" ],
         "MinSize" : 0,
         "MaxSize" : ${group.instanceCount},
         "DesiredCapacity" : ${group.instanceCount},

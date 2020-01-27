@@ -124,6 +124,7 @@ public class ClouderaManagerDecomissioner {
 
             Set<InstanceMetaData> instancesToRemove = instancesForHostGroup.stream()
                     .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() == null)
+                    .limit(Math.abs(scalingAdjustment))
                     .collect(Collectors.toSet());
 
             List<ApiHost> apiHosts = hostRefList.getItems().stream()

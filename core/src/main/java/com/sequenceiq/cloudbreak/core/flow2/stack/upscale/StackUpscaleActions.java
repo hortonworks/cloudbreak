@@ -317,7 +317,7 @@ public class StackUpscaleActions {
         return new AbstractStackFailureAction<StackUpscaleState, StackUpscaleEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                stackUpscaleService.handleStackUpscaleFailure(context.getStackView().getId(), payload);
+                stackUpscaleService.handleStackUpscaleFailure(payload.getException(), payload.getResourceId());
                 getMetricService().incrementMetricCounter(MetricType.STACK_UPSCALE_FAILED, context.getStackView());
                 sendEvent(context);
             }
