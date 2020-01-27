@@ -1,9 +1,9 @@
 package com.sequenceiq.freeipa.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,9 +25,11 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserRequest;
 import com.sequenceiq.freeipa.controller.exception.SyncOperationAlreadyRunningException;
+import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationStatus;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
-import com.sequenceiq.freeipa.service.operation.OperationStatusService;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 
 @ExtendWith(MockitoExtension.class)
 public class UserV1ControllerTest {
@@ -50,37 +52,46 @@ public class UserV1ControllerTest {
     private PasswordService passwordService;
 
     @Mock
-    private OperationStatusService operationStatusService;
+    private OperationService operationService;
+
+    @Mock
+    private OperationToSyncOperationStatus operationToSyncOperationStatus;
 
     @Test
     void synchronizeUser() {
+        Operation operation = mock(Operation.class);
+        when(userSyncService.synchronizeUsers(any(), any(), any(), any(), any())).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
-        when(userSyncService.synchronizeUsers(any(), any(), any(), any(), any())).thenReturn(status);
+        when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
         SynchronizeUserRequest request = mock(SynchronizeUserRequest.class);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.synchronizeUser(request));
+        assertEquals(status, ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.synchronizeUser(request)));
 
         verify(userSyncService, times(1)).synchronizeUsers(ACCOUNT_ID, USER_CRN, Set.of(), Set.of(USER_CRN), Set.of());
     }
 
     @Test
     void synchronizeUserMachineUser() {
+        Operation operation = mock(Operation.class);
+        when(userSyncService.synchronizeUsers(any(), any(), any(), any(), any())).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
-        when(userSyncService.synchronizeUsers(any(), any(), any(), any(), any())).thenReturn(status);
+        when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
         SynchronizeUserRequest request = mock(SynchronizeUserRequest.class);
 
-        ThreadBasedUserCrnProvider.doAs(MACHINE_USER_CRN, () -> underTest.synchronizeUser(request));
+        assertEquals(status, ThreadBasedUserCrnProvider.doAs(MACHINE_USER_CRN, () -> underTest.synchronizeUser(request)));
 
         verify(userSyncService, times(1)).synchronizeUsers(ACCOUNT_ID, MACHINE_USER_CRN, Set.of(), Set.of(), Set.of(MACHINE_USER_CRN));
     }
 
     @Test
     void synchronizeUserRejected() {
+        Operation operation = mock(Operation.class);
+        when(userSyncService.synchronizeUsers(ACCOUNT_ID, USER_CRN, Set.of(), Set.of(USER_CRN), Set.of())).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(status.getStatus()).thenReturn(SynchronizationStatus.REJECTED);
-        when(userSyncService.synchronizeUsers(ACCOUNT_ID, USER_CRN, Set.of(), Set.of(USER_CRN), Set.of())).thenReturn(status);
+        when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
         SynchronizeUserRequest request = mock(SynchronizeUserRequest.class);
 
@@ -97,10 +108,12 @@ public class UserV1ControllerTest {
         request.setUsers(users);
         request.setMachineUsers(machineUsers);
 
+        Operation operation = mock(Operation.class);
+        when(userSyncService.synchronizeUsers(any(), any(), any(), any(), any())).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
-        when(userSyncService.synchronizeUsers(any(), any(), any(), any(), any())).thenReturn(status);
+        when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.synchronizeAllUsers(request));
+        assertEquals(status, ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.synchronizeAllUsers(request)));
 
         verify(userSyncService, times(1)).synchronizeUsers(ACCOUNT_ID, USER_CRN, environments, users, machineUsers);
     }
@@ -113,9 +126,11 @@ public class UserV1ControllerTest {
         request.setEnvironments(environments);
         request.setUsers(users);
 
+        Operation operation = mock(Operation.class);
+        when(userSyncService.synchronizeUsers(ACCOUNT_ID, USER_CRN, environments, users, Set.of())).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(status.getStatus()).thenReturn(SynchronizationStatus.REJECTED);
-        when(userSyncService.synchronizeUsers(ACCOUNT_ID, USER_CRN, environments, users, Set.of())).thenReturn(status);
+        when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
         assertThrows(SyncOperationAlreadyRunningException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.synchronizeAllUsers(request)));
@@ -125,22 +140,14 @@ public class UserV1ControllerTest {
     void getStatus() {
         String operationId = "testId";
 
-        underTest.getSyncOperationStatus(operationId);
-
-        verify(operationStatusService, times(1)).getSyncOperationStatus(operationId);
-    }
-
-    @Test
-    void getStatusRejected() {
-        String operationId = "testId";
-
+        Operation operation = mock(Operation.class);
+        when(operationService.getOperationForAccountIdAndOperationId(ACCOUNT_ID, operationId)).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
-        when(operationStatusService.getSyncOperationStatus(operationId)).thenReturn(status);
+        when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
-        underTest.getSyncOperationStatus(operationId);
+        assertEquals(status, ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getSyncOperationStatus(operationId)));
 
-        verify(operationStatusService, times(1)).getSyncOperationStatus(operationId);
-        verify(status, never()).getStatus();
+        verify(operationService, times(1)).getOperationForAccountIdAndOperationId(ACCOUNT_ID, operationId);
     }
 
     @Test
@@ -149,10 +156,12 @@ public class UserV1ControllerTest {
         SetPasswordRequest request = mock(SetPasswordRequest.class);
         when(request.getPassword()).thenReturn(password);
 
+        Operation operation = mock(Operation.class);
+        when(passwordService.setPassword(any(), any(), any(), any(), any())).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
-        when(passwordService.setPassword(any(), any(), any(), any(), any())).thenReturn(status);
+        when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.setPassword(request));
+        assertEquals(status, ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.setPassword(request)));
 
         verify(passwordService, times(1)).setPassword(ACCOUNT_ID, USER_CRN, USER_CRN, password, new HashSet<>());
     }
@@ -163,9 +172,11 @@ public class UserV1ControllerTest {
         SetPasswordRequest request = mock(SetPasswordRequest.class);
         when(request.getPassword()).thenReturn(password);
 
+        Operation operation = mock(Operation.class);
+        when(passwordService.setPassword(ACCOUNT_ID, USER_CRN, USER_CRN, password, new HashSet<>())).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(status.getStatus()).thenReturn(SynchronizationStatus.REJECTED);
-        when(passwordService.setPassword(ACCOUNT_ID, USER_CRN, USER_CRN, password, new HashSet<>())).thenReturn(status);
+        when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
         assertThrows(SyncOperationAlreadyRunningException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.setPassword(request)));
     }

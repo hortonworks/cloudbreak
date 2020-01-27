@@ -17,29 +17,19 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
-import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
-import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationStatus;
-import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.repository.OperationRepository;
 import com.sequenceiq.freeipa.service.freeipa.user.AcceptResult;
 
 @Service
-public class OperationStatusService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OperationStatusService.class);
+public class OperationService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OperationService.class);
 
     @Inject
     private OperationRepository operationRepository;
-
-    @Inject
-    private OperationToSyncOperationStatus operationToSyncOperationStatus;
-
-    @Inject
-    private OperationToOperationStatusConverter operationToOperationStatusConverter;
 
     @Inject
     private List<OperationAcceptor> operationAcceptorList;
@@ -97,12 +87,13 @@ public class OperationStatusService {
         return failOperation(operationId, failureMessage, Collections.emptyList(), Collections.emptyList());
     }
 
-    public SyncOperationStatus getSyncOperationStatus(String operationId) {
-        return operationToSyncOperationStatus.convert(getOperationForOperationId(operationId));
-    }
-
-    public OperationStatus getOperationStatus(String operationId, String accountId) {
-        return operationToOperationStatusConverter.convert(getOperationForOperationId(operationId));
+    public Operation getOperationForAccountIdAndOperationId(String accountId, String operationId) {
+        Optional<Operation> operationOptional = operationRepository.findByOperationIdAndAccountId(operationId, accountId);
+        if (!operationOptional.isPresent()) {
+            LOGGER.info("Operation [{}] in account [{}] not found", operationId, accountId);
+            throw NotFoundException.notFound("Operation", operationId).get();
+        }
+        return operationOptional.get();
     }
 
     private Operation requestOperation(String accountId, OperationType operationType,
@@ -132,17 +123,8 @@ public class OperationStatusService {
     private Operation getOperationForOperationId(String operationId) {
         Optional<Operation> syncOperationOptional = operationRepository.findByOperationId(operationId);
         if (!syncOperationOptional.isPresent()) {
-            throw NotFoundException.notFound("Operation", "operationId").get();
+            throw NotFoundException.notFound("Operation", operationId).get();
         }
         return syncOperationOptional.get();
-    }
-
-    private Operation getOperationForOperationIdAndAccountId(String operationId, String accountId) {
-        Optional<Operation> operationOptional = operationRepository.findByOperationIdAndAccountId(operationId, accountId);
-        if (!operationOptional.isPresent()) {
-            LOGGER.info("Operation [{}] in account [{}] not found", operationId, accountId);
-            throw NotFoundException.notFound("Operation", "operationId").get();
-        }
-        return operationOptional.get();
     }
 }
