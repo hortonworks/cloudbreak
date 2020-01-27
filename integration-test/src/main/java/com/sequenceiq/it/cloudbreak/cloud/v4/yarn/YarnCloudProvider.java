@@ -3,6 +3,8 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.yarn;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.YarnNetworkV4Parameters;
@@ -40,6 +42,8 @@ import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 
 @Component
 public class YarnCloudProvider extends AbstractCloudProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(YarnCloudProvider.class);
 
     @Inject
     private YarnProperties yarnProperties;
@@ -170,8 +174,14 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return imageSettings.withImageId(yarnProperties.getBaseimage().getImageId())
-                .withImageCatalog(commonCloudProperties().getImageCatalogName());
+        return imageSettings
+                .withImageId(getImageId())
+                .withImageCatalog(getImageCatalogName());
+    }
+
+    @Override
+    public String getImageId() {
+        return yarnProperties.getBaseimage().getImageId();
     }
 
     @Override

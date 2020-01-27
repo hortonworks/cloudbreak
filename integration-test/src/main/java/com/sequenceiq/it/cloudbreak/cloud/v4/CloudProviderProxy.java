@@ -290,8 +290,18 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getImageCatalogUrl() {
+        return delegate.getImageCatalogUrl();
+    }
+
+    @Override
     public void setImageId(String id) {
         delegate.setImageId(id);
+    }
+
+    @Override
+    public String getImageId() {
+        return delegate.getImageId();
     }
 
     @Override

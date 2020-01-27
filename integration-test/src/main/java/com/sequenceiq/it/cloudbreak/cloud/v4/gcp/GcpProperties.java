@@ -21,6 +21,8 @@ public class GcpProperties {
 
     private final Instance instance = new Instance();
 
+    private final Baseimage baseimage = new Baseimage();
+
     public String getAvailabilityZone() {
         return availabilityZone;
     }
@@ -59,6 +61,10 @@ public class GcpProperties {
 
     public Instance getInstance() {
         return instance;
+    }
+
+    public Baseimage getBaseimage() {
+        return baseimage;
     }
 
     public String getBlueprintCdhVersion() {
@@ -160,6 +166,18 @@ public class GcpProperties {
 
         public void setVolumeType(String volumeType) {
             this.volumeType = volumeType;
+        }
+    }
+
+    public static class Baseimage {
+        private String imageId;
+
+        public String getImageId() {
+            return imageId;
+        }
+
+        public void setImageId(String imageId) {
+            this.imageId = imageId;
         }
     }
 }

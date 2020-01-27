@@ -196,6 +196,11 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getImageId() {
+        return mockProperties.getBaseimage().getRedhat7().getImageId();
+    }
+
+    @Override
     public String getPreviousPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         return throwNotImplementedException();
     }

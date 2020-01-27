@@ -19,6 +19,8 @@ public class OpenStackProperties {
 
     private String networkingOption;
 
+    private final Baseimage baseimage = new Baseimage();
+
     private final Instance instance = new Instance();
 
     private final Credential credential = new Credential();
@@ -73,6 +75,10 @@ public class OpenStackProperties {
 
     public void setNetworkingOption(String networkingOption) {
         this.networkingOption = networkingOption;
+    }
+
+    public Baseimage getBaseimage() {
+        return baseimage;
     }
 
     public Instance getInstance() {
@@ -181,5 +187,17 @@ public class OpenStackProperties {
 
     public static class Prewarmed {
 
+    }
+
+    public static class Baseimage {
+        private String imageId;
+
+        public String getImageId() {
+            return imageId;
+        }
+
+        public void setImageId(String imageId) {
+            this.imageId = imageId;
+        }
     }
 }
