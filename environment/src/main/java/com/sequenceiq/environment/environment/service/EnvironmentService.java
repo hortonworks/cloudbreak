@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.cdp.environments.model.CreateAWSEnvironmentRequest;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -256,5 +257,15 @@ public class EnvironmentService implements ResourceIdProvider {
         return environmentRepository.findResourceCrnByNameAndAccountId(environmentName, accountId)
                 .orElseThrow(() -> new BadRequestException(
                         String.format("Environment with name '%s' was not found for account '%s'.", environmentName, accountId)));
+    }
+
+    @Override
+    public Long getResourceIdByResourceCrn(String resourceCrn) {
+        return getByCrnAndAccountId(resourceCrn, ThreadBasedUserCrnProvider.getAccountId()).getId();
+    }
+
+    @Override
+    public Long getResourceIdByResourceName(String resourceName) {
+        return getByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()).getId();
     }
 }

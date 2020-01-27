@@ -22,6 +22,7 @@ dependencies {
   implementation project(':secret-engine')
   implementation project(':structuredevent-model')
   implementation project(':ccm-connector')
+  implementation project(':flow-api')
 
   implementation     group: 'io.opentracing.contrib',        name: 'opentracing-jaxrs2',             version: opentracingJaxrs2Version
   implementation ('io.swagger:swagger-jersey2-jaxrs') {

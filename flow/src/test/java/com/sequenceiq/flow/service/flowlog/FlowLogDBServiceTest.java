@@ -169,13 +169,9 @@ public class FlowLogDBServiceTest {
 
     @Test
     public void testGetFlowLogsWithChainId() {
-        when(resourceIdProvider.getResourceIdByResourceName(anyString())).thenReturn(1L);
-        when(flowLogRepository.findAllByResourceIdOrderByCreatedDesc(anyLong())).thenReturn(Lists.newArrayList(new FlowLog(), createFlowLog("flow")));
+        when(flowLogRepository.findAllByChainIds(any())).thenReturn(Lists.newArrayList(createFlowLog("flow")));
 
-        assertEquals(1, underTest.getFlowLogsByResourceAndChainId("stackName", Lists.newArrayList("flowchain")).size());
-
-        verify(resourceIdProvider, times(1)).getResourceIdByResourceName(anyString());
-        verify(resourceIdProvider, never()).getResourceIdByResourceCrn(anyString());
+        assertEquals(1, underTest.getFlowLogsByChainIds(Lists.newArrayList("flowchain")).size());
     }
 
     @Test

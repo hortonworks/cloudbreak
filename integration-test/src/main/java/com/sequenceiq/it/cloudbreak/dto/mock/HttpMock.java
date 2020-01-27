@@ -88,6 +88,16 @@ public class HttpMock implements CloudbreakTestDto {
     }
 
     @Override
+    public String getLastKnownFlowChainId() {
+        return null;
+    }
+
+    @Override
+    public String getLastKnownFlowId() {
+        return null;
+    }
+
+    @Override
     public CloudbreakTestDto valid() {
         if (testContext instanceof MockedTestContext) {
             MockedTestContext testContext = (MockedTestContext) this.testContext;

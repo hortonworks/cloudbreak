@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.client.AbstractKeyBasedServiceEndpoint;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
+import com.sequenceiq.flow.api.FlowEndpoint;
 
 public class EnvironmentServiceApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint implements EnvironmentClient {
 
@@ -26,5 +27,10 @@ public class EnvironmentServiceApiKeyEndpoints extends AbstractKeyBasedServiceEn
     @Override
     public EnvironmentEndpoint environmentV1Endpoint() {
         return getEndpoint(EnvironmentEndpoint.class);
+    }
+
+    @Override
+    public FlowEndpoint flowEndpoint() {
+        return getEndpoint(FlowEndpoint.class);
     }
 }

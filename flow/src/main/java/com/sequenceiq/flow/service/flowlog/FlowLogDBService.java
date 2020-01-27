@@ -246,16 +246,16 @@ public class FlowLogDBService implements FlowLogService {
         return findAllByResourceIdOrderByCreatedDesc(resourceId);
     }
 
-    public List<FlowLog> getFlowLogsByResourceAndChainId(String resource, List<String> relatedChainIds) {
+    public List<FlowLog> getFlowLogsByChainIds(List<String> relatedChainIds) {
         LOGGER.info("Getting flow logs by these chain ids: {}", Joiner.on(",").join(relatedChainIds));
-        return getFlowLogsByResourceCrnOrName(resource).stream().filter(log -> relatedChainIds.contains(log.getFlowChainId())).collect(Collectors.toList());
+        return flowLogRepository.findAllByChainIds(relatedChainIds);
     }
 
     public Boolean hasPendingFlowEvent(List<FlowLog> flowLogs) {
         return flowLogs.stream().anyMatch(pendingFlowLogPredicate());
     }
 
-    private Predicate<FlowLog> pendingFlowLogPredicate() {
+    public Predicate<FlowLog> pendingFlowLogPredicate() {
         return flowLog -> flowLog.getStateStatus().equals(StateStatus.PENDING) || !flowLog.getFinalized();
     }
 }

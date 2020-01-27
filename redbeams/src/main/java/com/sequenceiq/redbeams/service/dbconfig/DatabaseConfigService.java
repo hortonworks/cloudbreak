@@ -129,6 +129,16 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
         return resourceOpt.get();
     }
 
+    public DatabaseConfig getByName(String name) {
+        Optional<DatabaseConfig> resourceOpt =
+                repository.findByName(name);
+        if (resourceOpt.isEmpty()) {
+            throw new NotFoundException(String.format("No database found with name '%s'", name));
+        }
+        MDCBuilder.buildMdcContext(resourceOpt.get());
+        return resourceOpt.get();
+    }
+
     public Set<DatabaseConfig> deleteMultipleByCrn(Set<String> resourceCrns) {
         // TODO return a MUTLI-STATUS if some of the deletes don't succeed.
         Set<Crn> parsedCrns = resourceCrns.stream()
@@ -251,5 +261,15 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     @Override
     public JpaRepository repository() {
         return repository;
+    }
+
+    @Override
+    public Long getResourceIdByResourceCrn(String resourceCrn) {
+        return getByCrn(resourceCrn).getId();
+    }
+
+    @Override
+    public Long getResourceIdByResourceName(String resourceName) {
+        return getByName(resourceName).getId();
     }
 }

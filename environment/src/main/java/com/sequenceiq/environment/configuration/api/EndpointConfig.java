@@ -15,6 +15,7 @@ import com.sequenceiq.environment.environment.v1.EnvironmentController;
 import com.sequenceiq.environment.platformresource.v1.PlatformResourceController;
 import com.sequenceiq.environment.proxy.v1.controller.ProxyController;
 import com.sequenceiq.environment.util.v1.UtilController;
+import com.sequenceiq.flow.controller.FlowController;
 
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
@@ -31,7 +32,8 @@ public class EndpointConfig extends ResourceConfig {
             ProxyController.class,
             EnvironmentController.class,
             PlatformResourceController.class,
-            UtilController.class);
+            UtilController.class,
+            FlowController.class);
 
     private final String applicationVersion;
 
@@ -62,7 +64,7 @@ public class EndpointConfig extends ResourceConfig {
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(EnvironmentApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
-        swaggerConfig.setResourcePackage("com.sequenceiq.environment.api");
+        swaggerConfig.setResourcePackage("com.sequenceiq.environment.api,com.sequenceiq.flow.api");
         swaggerConfig.setScan(true);
         swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
         swaggerConfig.setPrettyPrint(true);

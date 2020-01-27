@@ -3,6 +3,7 @@ package com.sequenceiq.sdx.client;
 import javax.ws.rs.client.WebTarget;
 
 import com.sequenceiq.cloudbreak.client.AbstractKeyBasedServiceEndpoint;
+import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 
@@ -20,5 +21,10 @@ public class SdxServiceApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint i
     @Override
     public SdxEndpoint sdxEndpoint() {
         return getEndpoint(SdxEndpoint.class);
+    }
+
+    @Override
+    public FlowEndpoint flowEndpoint() {
+        return getEndpoint(FlowEndpoint.class);
     }
 }

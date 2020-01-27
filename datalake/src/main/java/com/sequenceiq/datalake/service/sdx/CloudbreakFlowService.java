@@ -39,7 +39,7 @@ public class CloudbreakFlowService {
         try {
             String actualCbFlowChainId = sdxCluster.getLastCbFlowChainId();
             if (actualCbFlowChainId != null) {
-                return flowEndpoint.hasFlowRunning(sdxCluster.getClusterName(), sdxCluster.getLastCbFlowChainId()).getHasActiveFlow();
+                return flowEndpoint.hasFlowRunningByChainId(sdxCluster.getLastCbFlowChainId()).getHasActiveFlow();
             }
         } catch (NotFoundException e) {
             LOGGER.error("Flow chain id or resource {} not found in CB: {}, so there is no active flow!", sdxCluster.getClusterName(), e.getMessage());

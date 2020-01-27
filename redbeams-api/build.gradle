@@ -41,6 +41,7 @@ dependencies {
   // TODO Why?? :) If we would like use common responses like GeneralCollectionV4Response,
   // TODO please move to some common package instead of use whole core-api dep
   implementation project(':core-api')
+  implementation project(':flow-api')
   implementation project(':common')
   implementation project(':auth-connector')
 }

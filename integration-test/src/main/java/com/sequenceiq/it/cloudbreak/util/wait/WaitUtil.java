@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.NotFoundException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,12 +24,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.i
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.FreeIPAClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
+import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
@@ -179,6 +182,35 @@ public class WaitUtil {
             LOGGER.info("Timeout: Desired tatus(es) are {} for {} but status(es) are {}", desiredStatus, name, currentStatus);
         } else {
             LOGGER.info("{} are in desired status(es) {}", name, currentStatus);
+        }
+        return waitResult;
+    }
+
+    public WaitResult waitBasedOnLastKnownFlow(SdxTestDto sdxTestDto, SdxClient sdxClient) {
+        FlowEndpoint flowEndpoint = sdxClient.getSdxClient().flowEndpoint();
+        return isFlowRunning(flowEndpoint, sdxTestDto.getLastKnownFlowChainId(), sdxTestDto.getLastKnownFlowId());
+    }
+
+    public WaitResult waitBasedOnLastKnownFlow(CloudbreakTestDto distroXTestDto, CloudbreakClient cloudbreakClient) {
+        FlowEndpoint flowEndpoint = cloudbreakClient.getCloudbreakClient().flowEndpoint();
+        return isFlowRunning(flowEndpoint, distroXTestDto.getLastKnownFlowChainId(), distroXTestDto.getLastKnownFlowId());
+    }
+
+    private WaitResult isFlowRunning(FlowEndpoint flowEndpoint, String flowChainId, String flowId) {
+        WaitResult waitResult = WaitResult.SUCCESSFUL;
+        boolean flowRunning = true;
+        int retryCount = 0;
+        while (flowRunning && retryCount < maxRetry) {
+            sleep(pollingInterval);
+            if (StringUtils.isNotBlank(flowChainId)) {
+                flowRunning = flowEndpoint.hasFlowRunningByChainId(flowChainId).getHasActiveFlow();
+            } else {
+                flowRunning = flowEndpoint.hasFlowRunningByFlowId(flowId).getHasActiveFlow();
+            }
+            retryCount++;
+        }
+        if (flowRunning) {
+            waitResult = WaitResult.TIMEOUT;
         }
         return waitResult;
     }

@@ -17,6 +17,7 @@ import com.sequenceiq.datalake.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.datalake.controller.sdx.SdxController;
 import com.sequenceiq.datalake.controller.sdx.SdxInternalController;
 import com.sequenceiq.datalake.controller.util.UtilController;
+import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.sdx.api.SdxApi;
 
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
@@ -29,7 +30,8 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 @Configuration
 public class EndpointConfig extends ResourceConfig {
 
-    private static final List<Class<?>> CONTROLLERS = Arrays.asList(SdxController.class, SdxInternalController.class, UtilController.class);
+    private static final List<Class<?>> CONTROLLERS = Arrays.asList(SdxController.class, SdxInternalController.class,
+            UtilController.class, FlowController.class);
 
     @Value("${info.app.version:unspecified}")
     private String applicationVersion;
@@ -68,7 +70,7 @@ public class EndpointConfig extends ResourceConfig {
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(SdxApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
-        swaggerConfig.setResourcePackage("com.sequenceiq.sdx.api");
+        swaggerConfig.setResourcePackage("com.sequenceiq.sdx.api,com.sequenceiq.flow.api");
         swaggerConfig.setScan(true);
         swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
         swaggerConfig.setPrettyPrint(true);

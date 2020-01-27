@@ -47,6 +47,10 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
 
     private TestContext testContext;
 
+    private String lastKnownFlowChainId;
+
+    private String lastKnownFlowId;
+
     protected AbstractTestDto(String newId) {
         super(newId);
     }
@@ -98,6 +102,24 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
 
     public TestContext getTestContext() {
         return testContext;
+    }
+
+    @Override
+    public String getLastKnownFlowChainId() {
+        return lastKnownFlowChainId;
+    }
+
+    public void setLastKnownFlowChainId(String lastKnownFlowChainId) {
+        this.lastKnownFlowChainId = lastKnownFlowChainId;
+    }
+
+    @Override
+    public String getLastKnownFlowId() {
+        return lastKnownFlowId;
+    }
+
+    public void setLastKnownFlowId(String lastKnownFlowId) {
+        this.lastKnownFlowId = lastKnownFlowId;
     }
 
     @Override
@@ -201,6 +223,10 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
 
     public T await(Map<String, Status> statuses, RunningParameter runningParameter) {
         return testContext.await((T) this, statuses, runningParameter);
+    }
+
+    public T awaitForFlow(RunningParameter runningParameter) {
+        return testContext.awaitForFlow((T) this, runningParameter);
     }
 
     public <E extends Exception> T expect(Class<E> expectedException) {
