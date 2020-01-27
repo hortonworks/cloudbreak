@@ -15,6 +15,10 @@ public interface CloudbreakTestDto extends Orderable {
 
     Logger LOGGER = LoggerFactory.getLogger(CloudbreakTestDto.class);
 
+    String getLastKnownFlowChainId();
+
+    String getLastKnownFlowId();
+
     CloudbreakTestDto valid();
 
     String getName();

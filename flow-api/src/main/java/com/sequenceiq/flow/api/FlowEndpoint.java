@@ -66,16 +66,16 @@ public interface FlowEndpoint {
     List<FlowLogResponse> getFlowLogsByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
 
     @GET
-    @Path("/resource/name/{resourceName}/{chainId}")
+    @Path("/check/chainId/{chainId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get flow logs for resource name and chain id", produces = "application/json", notes = "Flow log operations",
-            nickname = "getFlowLogsByResourceNameAndChainId")
-    List<FlowLogResponse> getFlowLogsByResourceNameAndChainId(@PathParam("resourceName") String resourceName, @PathParam("chainId") String chainId);
+    @ApiOperation(value = "Check if there is a running flow for chain id", produces = "application/json", notes = "Flow log operations",
+            nickname = "hasFlowRunningByChainId")
+    FlowCheckResponse hasFlowRunningByChainId(@PathParam("chainId") String chainId);
 
     @GET
-    @Path("/check/name/{resourceName}/{chainId}")
+    @Path("/check/flowId/{flowId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Check if there is a running flow for resource name and chain id", produces = "application/json", notes = "Flow log operations",
-            nickname = "hasFlowRunning")
-    FlowCheckResponse hasFlowRunning(@PathParam("resourceName") String resourceName, @PathParam("chainId") String chainId);
+    @ApiOperation(value = "Check if there is a running flow for flow id", produces = "application/json", notes = "Flow log operations",
+            nickname = "hasFlowRunningByFlowId")
+    FlowCheckResponse hasFlowRunningByFlowId(@PathParam("flowId") String flowId);
 }

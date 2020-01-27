@@ -23,6 +23,9 @@ public interface DatabaseConfigRepository extends BaseJpaRepository<DatabaseConf
     Optional<DatabaseConfig> findByEnvironmentIdAndName(String environmentId, String name);
 
     @CheckPermission(action = ResourceAction.READ)
+    Optional<DatabaseConfig> findByName(String name);
+
+    @CheckPermission(action = ResourceAction.READ)
     Optional<DatabaseConfig> findByResourceCrn(Crn crn);
 
     @CheckPermission(action = ResourceAction.READ)

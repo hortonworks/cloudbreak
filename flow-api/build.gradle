@@ -1,0 +1,43 @@
+apply plugin: 'java'
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+  maven { url = "$repoUrl" }
+}
+
+jar {
+  baseName = 'flow-api'
+  archiveName = 'flow-api.jar'
+}
+
+dependencies {
+  compile project(':common')
+
+  compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+  compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
+  compile group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
+  compile group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
+  compile group: 'commons-net',                   name: 'commons-net',                    version: '3.6'
+
+  compile group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.1'
+  compile group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
+  compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
+  compile group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
+  compile group: 'org.bouncycastle',              name: 'bcprov-jdk15on',                 version: bouncycastleVersion
+  compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
+
+  compile group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
+  compile (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonVersion) {
+    force = true
+  }
+  compile group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
+  compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
+
+}
+
+task testJar(type: Jar, dependsOn: testClasses) {
+  baseName = "test-${project.archivesBaseName}"
+  from sourceSets.test.output
+  from sourceSets.main.output
+}

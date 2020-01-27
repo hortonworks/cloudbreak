@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
+import com.sequenceiq.flow.api.FlowEndpoint;
 
 public class EnvironmentServiceCrnEndpoints extends AbstractUserCrnServiceEndpoint implements EnvironmentClient {
 
@@ -26,6 +27,11 @@ public class EnvironmentServiceCrnEndpoints extends AbstractUserCrnServiceEndpoi
     @Override
     public EnvironmentEndpoint environmentV1Endpoint() {
         return getEndpoint(EnvironmentEndpoint.class);
+    }
+
+    @Override
+    public FlowEndpoint flowEndpoint() {
+        return getEndpoint(FlowEndpoint.class);
     }
 }
 

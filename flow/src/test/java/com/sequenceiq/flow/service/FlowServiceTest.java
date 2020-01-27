@@ -1,7 +1,8 @@
-package com.sequenceiq.flow;
+package com.sequenceiq.flow.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -27,11 +28,10 @@ import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
-import com.sequenceiq.flow.service.FlowService;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
@@ -168,86 +168,90 @@ public class FlowServiceTest {
     }
 
     @Test
-    public void testGetFlowLogsByResourceNameAndChainIdIfNotFound() {
-        thrown.expect(NotFoundException.class);
-        thrown.expectMessage("FlowChain not found by this flowChainId!");
-
-        when(flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(Optional.empty());
-
-        underTest.getFlowLogsByResourceNameAndChainId("myLittleSdx", "1");
-
-        verify(flowChainLogService).findFirstByFlowChainIdOrderByCreatedDesc(anyString());
-        verifyZeroInteractions(flowLogDBService, conversionService);
-    }
-
-    @Test
     public void testHasFlowRunningIfNotFound() {
-        thrown.expect(NotFoundException.class);
-        thrown.expectMessage("FlowChain not found by this flowChainId!");
-
         when(flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(Optional.empty());
 
-        underTest.hasFlowRunning("myLittleSdx", "1");
+        FlowCheckResponse flowCheckResponse = underTest.hasFlowRunningByChainId("1");
+        assertFalse(flowCheckResponse.getHasActiveFlow());
+        assertNotNull(flowCheckResponse.getFlowChainId());
 
         verify(flowChainLogService).findFirstByFlowChainIdOrderByCreatedDesc(anyString());
         verifyZeroInteractions(flowLogDBService, conversionService);
     }
 
     @Test
-    public void testGetFlowLogsByResourceNameAndChainId() {
-        when(flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(Optional.of(new FlowChainLog()));
-        when(flowChainLogService.collectRelatedFlowChains(any(), any())).thenReturn(Lists.newArrayList(new FlowChainLog()));
-        when(flowLogDBService.getFlowLogsByResourceAndChainId(anyString(), any())).thenReturn(Lists.newArrayList(new FlowLog()));
-
-        underTest.getFlowLogsByResourceNameAndChainId("myLittleSdx", "1");
-
-        verify(flowChainLogService).findFirstByFlowChainIdOrderByCreatedDesc(anyString());
-        verify(flowChainLogService).collectRelatedFlowChains(any(), any());
-        verify(flowLogDBService).getFlowLogsByResourceAndChainId(anyString(), any());
-        verify(conversionService).convert(any(), eq(FlowLogResponse.class));
-    }
-
-    @Test
-    public void testHasFlowRunningBasedOnFlowChains() {
+    public void testHasFlowRunningByChainIdBasedOnFlowChains() {
         mockHasFlowRunningCalls(Boolean.TRUE, Boolean.FALSE);
 
-        assertTrue(underTest.hasFlowRunning("myLittleSdx", "1").getHasActiveFlow());
+        FlowCheckResponse flowCheckResponse = underTest.hasFlowRunningByChainId("1");
+        assertTrue(flowCheckResponse.getHasActiveFlow());
+        assertNotNull(flowCheckResponse.getFlowChainId());
 
         verifyHasFlowRunningCalls();
         verify(flowLogDBService, times(0)).hasPendingFlowEvent(any());
     }
 
     @Test
-    public void testHasFlowRunningBasedOnFlowEvents() {
+    public void testHasFlowRunningByChainIdBasedOnFlowEvents() {
         mockHasFlowRunningCalls(Boolean.FALSE, Boolean.TRUE);
 
-        assertTrue(underTest.hasFlowRunning("myLittleSdx", "1").getHasActiveFlow());
+        FlowCheckResponse flowCheckResponse = underTest.hasFlowRunningByChainId("1");
+        assertTrue(flowCheckResponse.getHasActiveFlow());
+        assertNotNull(flowCheckResponse.getFlowChainId());
 
         verifyHasFlowRunningCalls();
         verify(flowLogDBService).hasPendingFlowEvent(any());
     }
 
     @Test
-    public void testNoFlowRunning() {
+    public void testNoFlowRunningByChainId() {
         mockHasFlowRunningCalls(Boolean.FALSE, Boolean.FALSE);
 
-        assertFalse(underTest.hasFlowRunning("myLittleSdx", "1").getHasActiveFlow());
+        FlowCheckResponse flowCheckResponse = underTest.hasFlowRunningByChainId("1");
+        assertFalse(flowCheckResponse.getHasActiveFlow());
+        assertNotNull(flowCheckResponse.getFlowChainId());
 
         verifyHasFlowRunningCalls();
+        verify(flowLogDBService).hasPendingFlowEvent(any());
+    }
+
+    @Test
+    public void testHasFlowRunningByFlowId() {
+        when(flowLogDBService.findAllByFlowIdOrderByCreatedDesc(anyString())).thenReturn(Lists.newArrayList(new FlowLog()));
+        when(flowLogDBService.hasPendingFlowEvent(any())).thenReturn(Boolean.TRUE);
+
+        FlowCheckResponse flowCheckResponse = underTest.hasFlowRunningByFlowId("1");
+        assertTrue(flowCheckResponse.getHasActiveFlow());
+        assertNotNull(flowCheckResponse.getFlowId());
+
+        verify(flowLogDBService).findAllByFlowIdOrderByCreatedDesc(anyString());
+        verify(flowLogDBService).hasPendingFlowEvent(any());
+    }
+
+    @Test
+    public void testNoFlowRunningByFlowId() {
+        when(flowLogDBService.findAllByFlowIdOrderByCreatedDesc(anyString())).thenReturn(Lists.newArrayList(new FlowLog()));
+        when(flowLogDBService.hasPendingFlowEvent(any())).thenReturn(Boolean.FALSE);
+
+        FlowCheckResponse flowCheckResponse = underTest.hasFlowRunningByFlowId("1");
+        assertFalse(flowCheckResponse.getHasActiveFlow());
+        assertNotNull(flowCheckResponse.getFlowId());
+
+        verify(flowLogDBService).findAllByFlowIdOrderByCreatedDesc(anyString());
         verify(flowLogDBService).hasPendingFlowEvent(any());
     }
 
     private void verifyHasFlowRunningCalls() {
         verify(flowChainLogService).findFirstByFlowChainIdOrderByCreatedDesc(anyString());
         verify(flowChainLogService).collectRelatedFlowChains(any(), any());
-        verify(flowLogDBService).getFlowLogsByResourceAndChainId(anyString(), any());
+        verify(flowLogDBService).getFlowLogsByChainIds(any());
         verify(flowChainLogService).checkIfAnyFlowChainHasEventInQueue(any());
     }
 
     private void mockHasFlowRunningCalls(Boolean hasAnyFlowEventInChain, Boolean hasPengingFlowEvent) {
         when(flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(Optional.of(new FlowChainLog()));
         when(flowChainLogService.collectRelatedFlowChains(any(), any())).thenReturn(Lists.newArrayList(new FlowChainLog()));
-        when(flowLogDBService.getFlowLogsByResourceAndChainId(anyString(), any())).thenReturn(Lists.newArrayList(new FlowLog()));
+        when(flowLogDBService.getFlowLogsByChainIds(any())).thenReturn(Lists.newArrayList(new FlowLog()));
         when(flowChainLogService.checkIfAnyFlowChainHasEventInQueue(any())).thenReturn(hasAnyFlowEventInChain);
         when(flowLogDBService.hasPendingFlowEvent(any())).thenReturn(hasPengingFlowEvent);
     }

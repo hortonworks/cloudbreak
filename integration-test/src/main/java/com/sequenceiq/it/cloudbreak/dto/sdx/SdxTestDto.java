@@ -129,6 +129,10 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         return getTestContext().await(this, status, runningParameter);
     }
 
+    public SdxTestDto awaitForFlow(RunningParameter runningParameter) {
+        return getTestContext().awaitForFlow(this, runningParameter);
+    }
+
     public SdxTestDto withCloudStorage() {
         SdxCloudStorageTestDto cloudStorage = getCloudProvider().cloudStorage(given(SdxCloudStorageTestDto.class));
         if (cloudStorage == null) {

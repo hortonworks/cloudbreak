@@ -30,11 +30,7 @@ public class FlowChainLogService {
     public List<FlowChainLog> collectRelatedFlowChains(List<FlowChainLog> result, FlowChainLog flowChain) {
         result.add(flowChain);
         List<FlowChainLog> childFlowChainLogs = repository.findByParentFlowChainIdOrderByCreatedDesc(flowChain.getFlowChainId());
-        childFlowChainLogs.stream().forEach(flowChainLog -> {
-            if (!result.contains(flowChainLog.getFlowChainId())) {
-                collectRelatedFlowChains(result, flowChainLog);
-            }
-        });
+        childFlowChainLogs.stream().forEach(flowChainLog -> collectRelatedFlowChains(result, flowChainLog));
         return result;
     }
 

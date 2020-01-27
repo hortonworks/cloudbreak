@@ -17,6 +17,7 @@ dependencies {
     implementation     project(":structuredevent-model")
     implementation     project(":common")
     implementation     project(":cloud-api")
+    implementation     project(":flow-api")
     implementation     project(":auth-connector")
     implementation     project(":common-model")
 
