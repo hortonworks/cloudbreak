@@ -11,7 +11,7 @@ import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.network.EnvironmentNetworkService;
-import com.sequenceiq.environment.network.NetworkService;
+import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
@@ -23,19 +23,16 @@ public class NetworkDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
 
     private final EnvironmentService environmentService;
 
-    private final NetworkService networkService;
-
     private final EnvironmentNetworkService environmentNetworkService;
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
     protected NetworkDeleteHandler(EventSender eventSender,
-            EnvironmentService environmentService, NetworkService networkService,
+            EnvironmentService environmentService,
             EnvironmentNetworkService environmentNetworkService,
             EnvironmentDtoConverter environmentDtoConverter) {
         super(eventSender);
         this.environmentService = environmentService;
-        this.networkService = networkService;
         this.environmentNetworkService = environmentNetworkService;
         this.environmentDtoConverter = environmentDtoConverter;
     }
@@ -45,18 +42,16 @@ public class NetworkDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
             environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(environment -> {
-                if (environment.getNetwork() != null) {
-                    RegistrationType registrationType = environment.getNetwork().getRegistrationType();
-                    if (registrationType != null && RegistrationType.CREATE_NEW == registrationType) {
+                BaseNetwork network = environment.getNetwork();
+                if (network != null) {
+                    RegistrationType registrationType = network.getRegistrationType();
+                    if (RegistrationType.CREATE_NEW == registrationType) {
                         environmentNetworkService.deleteNetwork(environmentDtoConverter.environmentToDto(environment));
                     }
-                    environment.setNetwork(null);
+                    network.setName(network.getName() + "_DELETED_@_" + System.currentTimeMillis());
                     environmentService.save(environment);
                 }
             });
-
-            environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(environment -> deleteNetworkIfExists(environment.getId()));
-
             EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
                     .withResourceId(environmentDto.getResourceId())
                     .withResourceName(environmentDto.getName())
@@ -78,10 +73,6 @@ public class NetworkDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
     @Override
     public String selector() {
         return DELETE_NETWORK_EVENT.selector();
-    }
-
-    private void deleteNetworkIfExists(Long environmentId) {
-        networkService.findByEnvironment(environmentId).ifPresent(networkService::delete);
     }
 
 }

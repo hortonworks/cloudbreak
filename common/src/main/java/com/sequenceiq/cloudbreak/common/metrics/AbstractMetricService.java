@@ -26,6 +26,7 @@ public abstract class AbstractMetricService implements MetricService {
     @Override
     public void submit(Metric metric, double value, Map<String, String> labels) {
         String metricName = getMetricName(metric);
+
         Iterable<Tag> tags = labels.entrySet().stream().map(label -> Tag.of(label.getKey(), label.getValue().toLowerCase())).collect(Collectors.toList());
         Metrics.gauge(metricName, tags, value);
     }

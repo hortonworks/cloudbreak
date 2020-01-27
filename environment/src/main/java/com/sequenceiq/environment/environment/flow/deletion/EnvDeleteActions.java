@@ -37,6 +37,8 @@ import com.sequenceiq.environment.environment.flow.start.EnvStartState;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
+import com.sequenceiq.environment.metrics.EnvironmentMetricService;
+import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -55,12 +57,16 @@ public class EnvDeleteActions {
 
     private final EnvironmentStatusUpdateService environmentStatusUpdateService;
 
+    private final EnvironmentMetricService metricService;
+
     public EnvDeleteActions(EnvironmentService environmentService, NotificationService notificationService,
-            EnvironmentApiConverter environmentApiConverter, EnvironmentStatusUpdateService environmentStatusUpdateService) {
+            EnvironmentApiConverter environmentApiConverter, EnvironmentStatusUpdateService environmentStatusUpdateService,
+            EnvironmentMetricService metricService) {
         this.environmentService = environmentService;
         this.notificationService = notificationService;
         this.environmentApiConverter = environmentApiConverter;
         this.environmentStatusUpdateService = environmentStatusUpdateService;
+        this.metricService = metricService;
     }
 
     @Bean(name = "FREEIPA_DELETE_STARTED_STATE")
@@ -186,6 +192,7 @@ public class EnvDeleteActions {
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);
                             SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
                             simpleResponse.setName(originalName);
+                            metricService.incrementMetricCounter(MetricType.ENV_DELETION_FINISHED, environmentDto);
                             notificationService.send(ResourceEvent.ENVIRONMENT_DELETION_FINISHED, simpleResponse, context.getFlowTriggerUserCrn());
                         }, () -> LOGGER.error("Cannot finish the delete flow because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
@@ -204,6 +211,7 @@ public class EnvDeleteActions {
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresentOrElse(environment -> {
+                            metricService.incrementMetricCounter(MetricType.ENV_DELETION_FAILED, environment, payload.getException());
                             environmentStatusUpdateService.updateFailedEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.DELETE_FAILED,
                                     ResourceEvent.ENVIRONMENT_DELETION_FAILED, EnvStartState.ENV_START_FAILED_STATE);
                         }, () -> LOGGER.error("Cannot set delete failed to env because the environment does not exist: {}. "
