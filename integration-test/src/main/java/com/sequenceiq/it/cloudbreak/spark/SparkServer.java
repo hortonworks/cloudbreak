@@ -6,7 +6,6 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Vector;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -31,28 +30,38 @@ public class SparkServer {
 
     private final Service sparkService;
 
-    private String endpoint;
+    private final String endpoint;
 
-    private Integer port;
+    private final boolean printRequestBody;
 
-    private boolean shutdown;
+    private boolean secure;
 
-    public SparkServer() {
+    private int port;
+
+    public SparkServer(int port, File keystoreFile, String endpoint, boolean printRequestBody, boolean secure) {
+        this.port = port;
+        this.endpoint = endpoint;
+        this.printRequestBody = printRequestBody;
         sparkService = Service.ignite();
-        shutdown = true;
-        endpoint = "init";
-        port = -1;
+        sparkService.port(port);
+        sparkService.threadPool(30, 30, 600000);
+        this.secure = secure;
+        if (secure) {
+            sparkService.secure(keystoreFile.getPath(), "secret", null, null);
+        }
     }
 
-    public void reset(String endpoint, File keystoreFile, int port, boolean printRequestBody) {
-        if (!shutdown) {
-            //throw new TestException("Mock is active! Could not reset.");
-            LOGGER.info("Mock is active! Could not reset.");
-        }
-        this.endpoint = endpoint;
-        this.port = port;
-        sparkService.port(port);
-        sparkService.secure(keystoreFile.getPath(), "secret", null, null);
+    public void reset() {
+        stop();
+        awaitStop();
+        init();
+        awaitInitialization();
+    }
+
+    public void init() {
+        callStack.clear();
+        requestResponseMap.clear();
+        sparkService.init();
         sparkService.before((req, res) -> res.type("application/json"));
         sparkService.after(
                 (request, response) -> {
@@ -72,69 +81,73 @@ public class SparkServer {
         return Collections.unmodifiableMap(requestResponseMap);
     }
 
-    public Vector<Call> getCallStack() {
-        return (Vector<Call>) callStack.clone();
-    }
-
     public String getEndpoint() {
-        return endpoint;
-    }
-
-    public Integer getPort() {
-        return port;
+        return (secure ? "https://"  : "http://") + endpoint + ":" + port;
     }
 
     public Service getSparkService() {
         return sparkService;
     }
 
-    public void awaitInitialization() throws InterruptedException {
-        LOGGER.info("Spark service initialization in progress.");
-
+    public void awaitInitialization() {
+        LOGGER.info("Spark service initialization in progress on port: {}.", port);
         sparkService.awaitInitialization();
+        waitEndpointToBeReady(VALIDATIONCALL, null);
+        LOGGER.info("Spark service initialization finished on port {}.", port);
+    }
 
+    public void waitEndpointToBeReady(String path, String expectedResponseBody) {
+        LOGGER.info("Wait endpoint to be ready: {}", path);
         HttpHelper client = HttpHelper.getInstance();
-        String validationEndpoint = getEndpoint() + VALIDATIONCALL;
+        String validationEndpoint = getEndpoint() + path;
         Pair<javax.ws.rs.core.Response.StatusType, String> resultContent = null;
         Exception resultException = null;
         int count = 0;
         do {
             try {
                 resultContent = client.getContent(validationEndpoint);
+                if (expectedResponseBody != null) {
+                    if (!expectedResponseBody.equals(resultContent.getValue())) {
+                        LOGGER.info("Expected body is different. Expected: {}, Result: {}", expectedResponseBody, resultContent.getValue());
+                        throw new TestException("Expected body is different");
+                    }
+                }
             } catch (Exception exception) {
                 resultException = exception;
                 LOGGER.info("Waiting for spark server validation call, {}", validationEndpoint, exception);
                 if (count++ > 30) {
                     break;
                 }
-                Thread.sleep(2000);
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new TestException("Waiting for spark server failed", e);
+                }
             }
         }
         while (resultContent == null);
 
         if (resultContent == null) {
-            throw new TestException("Waiting for spark server failed", resultException);
+            throw new TestException("Waiting for spark server has failed", resultException);
         } else if (!resultContent.getKey().getReasonPhrase().equals("OK")) {
-            throw new TestException("Waiting for spark server failed, http reason: " + resultContent.getKey().getReasonPhrase());
+            throw new TestException("Waiting for spark server has failed, http reason: " + resultContent.getKey().getReasonPhrase());
         }
-        LOGGER.info("Spark service initialization finished.");
     }
 
     public void awaitStop() {
         sparkService.awaitStop();
     }
 
-    public void init() {
-        callStack.clear();
-        requestResponseMap.clear();
-        sparkService.init();
-        shutdown = false;
+    public void stop() {
+        sparkService.stop();
     }
 
-    public void stop() {
-        shutdown = true;
-        endpoint = this + "spark has been stopped ";
-        sparkService.stop();
+    public int getPort() {
+        return port;
+    }
+
+    public boolean isSecure() {
+        return secure;
     }
 
     @Override

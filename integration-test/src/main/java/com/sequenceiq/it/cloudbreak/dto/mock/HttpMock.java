@@ -28,7 +28,7 @@ import com.sequenceiq.it.cloudbreak.dto.mock.answer.RequestData;
 import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.cloudbreak.spark.SparkServer;
-import com.sequenceiq.it.cloudbreak.spark.SparkServerFactory;
+import com.sequenceiq.it.cloudbreak.spark.SparkServerPool;
 
 @Prototype
 public class HttpMock implements CloudbreakTestDto {
@@ -49,7 +49,7 @@ public class HttpMock implements CloudbreakTestDto {
     private String mockServerAddress;
 
     @Inject
-    private SparkServerFactory sparkServerFactory;
+    private SparkServerPool sparkServerPool;
 
     private String name;
 
@@ -96,12 +96,7 @@ public class HttpMock implements CloudbreakTestDto {
             sparkServer = testContext.getSparkServer();
         } else {
             LOGGER.info("Creating HttpMock server");
-            try {
-                sparkServer = sparkServerFactory.construct();
-            } catch (InterruptedException e) {
-                LOGGER.error("Spark server creation failed", e);
-                return null;
-            }
+            sparkServer = sparkServerPool.popSecure();
             LOGGER.info("HttpMock got spark server: {}", sparkServer);
             model = new DefaultModel();
             model.setMockServerAddress(mockServerAddress);

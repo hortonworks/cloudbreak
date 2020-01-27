@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @Service
 public class MockMetadataCollector implements MetadataCollector {
@@ -28,15 +29,17 @@ public class MockMetadataCollector implements MetadataCollector {
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
             List<CloudInstance> knownInstances) {
+        MockCredentialView mockCredentialView = mockCredentialViewFactory.createCredetialView(authenticatedContext.getCloudCredential());
+        LOGGER.info("Collect metadata from mock spi, server address: " + mockCredentialView.getMockEndpoint());
+        String url = mockCredentialView.getMockEndpoint() + "/spi/cloud_metadata_statuses";
         try {
-            MockCredentialView mockCredentialView = mockCredentialViewFactory.createCredetialView(authenticatedContext.getCloudCredential());
-            LOGGER.info("Collect metadata from mock spi, server address: " + mockCredentialView.getMockEndpoint());
-            CloudVmMetaDataStatus[] response = Unirest.post(mockCredentialView.getMockEndpoint() + "/spi/cloud_metadata_statuses")
+            CloudVmMetaDataStatus[] response = Unirest.post(url)
                     .body(vms)
                     .asObject(CloudVmMetaDataStatus[].class).getBody();
             return Arrays.asList(response);
         } catch (UnirestException e) {
-            throw new RuntimeException("can't convert to object", e);
+            LOGGER.error("Url invocation failed: " + url, e);
+            throw new CloudbreakServiceException("can't convert to object", e);
         }
     }
 }
