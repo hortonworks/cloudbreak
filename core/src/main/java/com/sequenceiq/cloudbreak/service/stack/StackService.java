@@ -888,7 +888,9 @@ public class StackService implements ResourceIdProvider {
                     stack.getInstanceMetaDataAsList().stream().filter(im -> !im.isTerminated() && !im.isRunning() && !im.isCreated())
                             .collect(Collectors.toList());
             if (!instanceMetaDataList.isEmpty()) {
-                String ims = instanceMetaDataList.stream().map(im -> im.getInstanceId() + ": " + im.getInstanceStatus()).collect(Collectors.joining(","));
+                String ims = instanceMetaDataList.stream()
+                        .map(im -> im.getInstanceId() != null ? im.getInstanceId() : im.getPrivateId() + ": " + im.getInstanceStatus())
+                        .collect(Collectors.joining(", "));
                 throw new BadRequestException(
                         String.format("Upscale is not allowed because the following instances are not in running state: %s. Please remove them first!", ims));
             }

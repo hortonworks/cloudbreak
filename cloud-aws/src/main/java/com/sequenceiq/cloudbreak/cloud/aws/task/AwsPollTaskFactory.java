@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.task;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -47,8 +48,9 @@ public class AwsPollTaskFactory {
     }
 
     public PollTask<Boolean> newASGroupStatusCheckerTask(AuthenticatedContext authenticatedContext, String asGroupName, Integer requiredInstances,
-            AwsClient awsClient, CloudFormationStackUtil cloudFormationStackUtil) {
-        return createPollTask(ASGroupStatusCheckerTask.NAME, authenticatedContext, asGroupName, requiredInstances, awsClient, cloudFormationStackUtil);
+            AwsClient awsClient, CloudFormationStackUtil cloudFormationStackUtil, Date timeBeforeASUpdate) {
+        return createPollTask(ASGroupStatusCheckerTask.NAME, authenticatedContext, asGroupName, requiredInstances, awsClient, cloudFormationStackUtil,
+                timeBeforeASUpdate);
     }
 
     public PollTask<Boolean> newEbsVolumeStatusCheckerTask(AuthenticatedContext authenticatedContext, AmazonEC2Client amazonEC2Client, String volumeId) {

@@ -88,6 +88,25 @@ class FreeIpaUsersStateProviderTest {
     }
 
     @Test
+    void testGetUserStateUserWithNullGroups() throws Exception {
+        String username = "userNull";
+        Set<com.sequenceiq.freeipa.client.model.User> usersFindAll = Set.of(createIpaUser(username, null));
+
+        Set<com.sequenceiq.freeipa.client.model.Group> groupsFindAll = FreeIpaUsersStateProvider.IPA_ONLY_GROUPS.stream()
+                .map(this::createIpaGroup)
+                .collect(Collectors.toSet());
+
+        when(freeIpaClient.userFindAll()).thenReturn(usersFindAll);
+        when(freeIpaClient.groupFindAll()).thenReturn(groupsFindAll);
+
+        UsersState ipaState = underTest.getUsersState(freeIpaClient);
+
+        assertEquals(1, ipaState.getUsers().size());
+        FmsUser ipaUser = ipaState.getUsers().asList().get(0);
+        assertEquals(username, ipaUser.getName());
+    }
+
+    @Test
     void testFromIpaUser() {
         com.sequenceiq.freeipa.client.model.User ipaUser = createIpaUser("uid", List.of("group1", "group2"));
 
