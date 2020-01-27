@@ -19,6 +19,8 @@ import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartFailedEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartHandlerSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
+import com.sequenceiq.environment.metrics.EnvironmentMetricService;
+import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.CommonContext;
 
 @Configuration
@@ -28,8 +30,11 @@ public class EnvStartActions {
 
     private final EnvironmentStatusUpdateService environmentStatusUpdateService;
 
-    public EnvStartActions(EnvironmentStatusUpdateService environmentStatusUpdateService) {
+    private final EnvironmentMetricService metricService;
+
+    public EnvStartActions(EnvironmentStatusUpdateService environmentStatusUpdateService, EnvironmentMetricService metricService) {
         this.environmentStatusUpdateService = environmentStatusUpdateService;
+        this.metricService = metricService;
     }
 
     @Bean(name = "START_FREEIPA_STATE")
@@ -85,8 +90,10 @@ public class EnvStartActions {
         return new AbstractEnvStartAction<>(ResourceCrnPayload.class) {
             @Override
             protected void doExecute(CommonContext context, ResourceCrnPayload payload, Map<Object, Object> variables) {
-                environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.AVAILABLE,
-                        ResourceEvent.ENVIRONMENT_STARTED, EnvStartState.ENV_START_FINISHED_STATE);
+                EnvironmentDto environmentDto = environmentStatusUpdateService
+                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.AVAILABLE,
+                                ResourceEvent.ENVIRONMENT_STARTED, EnvStartState.ENV_START_FINISHED_STATE);
+                metricService.incrementMetricCounter(MetricType.ENV_START_FINISHED, environmentDto);
                 LOGGER.info("Flow entered into ENV_START_FINISHED_STATE");
                 sendEvent(context, FINALIZE_ENV_START_EVENT.event(), payload);
             }
@@ -100,8 +107,10 @@ public class EnvStartActions {
             protected void doExecute(CommonContext context, EnvStartFailedEvent payload, Map<Object, Object> variables) {
                 LOGGER.warn(String.format("Failed to start environment '%s'. Status: '%s'.",
                         payload.getEnvironmentDto(), payload.getEnvironmentStatus()), payload.getException());
-                environmentStatusUpdateService.updateFailedEnvironmentStatusAndNotify(context, payload, payload.getEnvironmentStatus(),
-                        convertStatus(payload.getEnvironmentStatus()), EnvStartState.ENV_START_FAILED_STATE);
+                EnvironmentDto environmentDto = environmentStatusUpdateService
+                        .updateFailedEnvironmentStatusAndNotify(context, payload, payload.getEnvironmentStatus(),
+                                convertStatus(payload.getEnvironmentStatus()), EnvStartState.ENV_START_FAILED_STATE);
+                metricService.incrementMetricCounter(MetricType.ENV_START_FAILED, environmentDto, payload.getException());
                 sendEvent(context, HANDLED_FAILED_ENV_START_EVENT.event(), payload);
             }
         };
