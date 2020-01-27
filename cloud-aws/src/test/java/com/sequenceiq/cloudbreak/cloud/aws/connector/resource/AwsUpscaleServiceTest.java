@@ -35,7 +35,9 @@ import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
 import com.amazonaws.services.autoscaling.model.Instance;
+import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
@@ -81,6 +83,9 @@ class AwsUpscaleServiceTest {
     @Mock
     private AwsComputeResourceService awsComputeResourceService;
 
+    @Mock
+    private AwsTaggingService awsTaggingService;
+
     @InjectMocks
     private AwsUpscaleService awsUpscaleService;
 
@@ -119,6 +124,7 @@ class AwsUpscaleServiceTest {
                 .thenReturn(describeAutoScalingGroupsResult);
         when(awsClient.createAutoScalingRetryClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonAutoScalingRetryClient);
         when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonCloudFormationRetryClient);
+        when(awsClient.createAccess(any(), any())).thenReturn(new AmazonEC2Client());
 
         when(cfStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationRetryClient.class), eq("worker")))
                 .thenReturn("workerASG");
@@ -153,7 +159,10 @@ class AwsUpscaleServiceTest {
         Group worker = getWorkerGroup(instanceAuthentication);
         groups.add(worker);
 
-        CloudStack cloudStack = new CloudStack(groups, getNetwork(), null, emptyMap(), emptyMap(), null,
+        Map<String, String> tags = new HashMap<>();
+        tags.put("owner", "cbuser");
+        tags.put("created", "yesterday");
+        CloudStack cloudStack = new CloudStack(groups, getNetwork(), null, emptyMap(), tags, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
 
         List<CloudResource> cloudResourceList = Collections.emptyList();
@@ -164,6 +173,7 @@ class AwsUpscaleServiceTest {
         ArgumentCaptor<List<CloudResource>> captor = ArgumentCaptor.forClass(List.class);
         verify(awsComputeResourceService, times(1))
                 .buildComputeResourcesForUpscale(eq(authenticatedContext), eq(cloudStack), anyList(), captor.capture(), any(), any());
+        verify(awsTaggingService, times(1)).tagRootVolumes(eq(authenticatedContext), any(AmazonEC2Client.class), eq(allInstances), eq(tags));
         List<CloudResource> newInstances = captor.getValue();
         assertEquals("Two new instances should be created", 2, newInstances.size());
         assertThat(newInstances, hasItem(workerInstance4));
