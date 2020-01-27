@@ -25,7 +25,7 @@ public class DummyMetricService implements MetricService {
     }
 
     @Override
-    public void incrementMetricCounter(Metric metric) {
+    public void incrementMetricCounter(Metric metric, String... tags) {
 
     }
 }
