@@ -79,6 +79,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
 
+    @ApiModelProperty(value = EnvironmentModelDescription.PARENT_ENVIRONMENT_CRN)
+    private String parentEnvironmentCrn;
+
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
     }
@@ -199,5 +202,13 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setAws(AwsEnvironmentParameters aws) {
         this.aws = aws;
+    }
+
+    public String getParentEnvironmentCrn() {
+        return parentEnvironmentCrn;
+    }
+
+    public void setParentEnvironmentCrn(String parentEnvironmentCrn) {
+        this.parentEnvironmentCrn = parentEnvironmentCrn;
     }
 }

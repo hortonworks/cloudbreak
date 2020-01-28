@@ -117,7 +117,8 @@ public class EnvironmentApiConverter {
                         .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
                         .withTunnel(tunnelConverter.convert(request.getTunnel()))
                         .build())
-                .withParameters(getIfNotNull(request.getAws(), this::awsParamsToParametersDto));
+                .withParameters(getIfNotNull(request.getAws(), this::awsParamsToParametersDto))
+                .withParentEnvironmentCrn(request.getParentEnvironmentCrn());
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));

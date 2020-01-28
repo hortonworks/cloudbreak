@@ -100,7 +100,6 @@ class EnvironmentCreationServiceTest {
                 .withAccountId(ACCOUNT_ID)
                 .build();
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(true);
-
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
 
         verify(environmentService, never()).save(any());
@@ -137,6 +136,7 @@ class EnvironmentCreationServiceTest {
                 .thenReturn(credential);
         when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateNetworkCreation(any(), any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(any())).thenReturn(environment);
@@ -176,6 +176,7 @@ class EnvironmentCreationServiceTest {
                 .thenReturn(credential);
         when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateNetworkCreation(any(), any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(any())).thenReturn(environment);
@@ -219,6 +220,7 @@ class EnvironmentCreationServiceTest {
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(validationResult);
         when(validatorService.validateNetworkCreation(any(), any(), any())).thenReturn(validationResult);
+        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validationResult.merge(any())).thenReturn(ValidationResult.builder().error("nogood"));
         when(environmentService.save(any())).thenReturn(environment);
 
@@ -261,6 +263,7 @@ class EnvironmentCreationServiceTest {
         when(environmentDtoConverter.environmentToLocationDto(any())).thenReturn(LocationDto.builder().withName("loc").build());
         when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(validationResult);
         when(validatorService.validateNetworkCreation(any(), any(), any())).thenReturn(validationResult);
+        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validationResult.merge(any())).thenReturn(ValidationResult.builder().error("nogood"));
         when(environmentService.save(any())).thenReturn(environment);
 
