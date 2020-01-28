@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,6 +47,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -397,6 +399,8 @@ public class ImageCatalogServiceTest {
         when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(null);
         underTest.getImages(ORG_ID, "name", "aws");
 
+        verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
+        verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
         verify(imageCatalogProvider, times(1)).getImageCatalogV2("");
 
     }
@@ -410,6 +414,8 @@ public class ImageCatalogServiceTest {
 
         underTest.getImages(ORG_ID, "verycool", "aws").getImages();
 
+        verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
+        verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
         verify(imageCatalogProvider, times(0)).getImageCatalogV2("");
     }
 
@@ -468,6 +474,9 @@ public class ImageCatalogServiceTest {
 
         underTest.getImagesFromDefault(ORG_ID, null, null, Collections.emptySet());
 
+        verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
+        verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
+
         thrown.expectMessage("Either platform or stackName should be filled in request");
     }
 
@@ -476,6 +485,9 @@ public class ImageCatalogServiceTest {
         thrown.expect(BadRequestException.class);
 
         underTest.getImagesFromDefault(ORG_ID, "stack", "AWS", Collections.emptySet());
+
+        verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
+        verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
 
         thrown.expectMessage("Platform or stackName cannot be filled in the same request");
     }
@@ -498,6 +510,8 @@ public class ImageCatalogServiceTest {
 
         underTest.getImagesFromDefault(ORG_ID, null, "AWS", Collections.emptySet());
 
+        verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
+        verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString(), anyString());
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString());
     }
@@ -508,6 +522,9 @@ public class ImageCatalogServiceTest {
 
         underTest.getImagesByCatalogName(ORG_ID, "catalog", null, null);
 
+        verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
+        verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
+
         thrown.expectMessage("Either platform or stackName should be filled in request");
     }
 
@@ -516,6 +533,9 @@ public class ImageCatalogServiceTest {
         thrown.expect(BadRequestException.class);
 
         underTest.getImagesByCatalogName(ORG_ID, "catalog", "stack", "AWS");
+
+        verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
+        verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
 
         thrown.expectMessage("Platform or stackName cannot be filled in the same request");
     }
@@ -539,6 +559,8 @@ public class ImageCatalogServiceTest {
 
         underTest.getImagesByCatalogName(ORG_ID, "catalog", null, "AWS");
 
+        verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
+        verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString(), anyString());
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString());
     }
