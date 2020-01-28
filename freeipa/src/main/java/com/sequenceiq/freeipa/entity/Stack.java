@@ -48,6 +48,9 @@ public class Stack {
 
     private String environmentCrn;
 
+    @OneToMany(mappedBy = "stack")
+    private List<ChildEnvironment> childEnvironments;
+
     private String accountId;
 
     private String region;
@@ -313,6 +316,20 @@ public class Stack {
         this.environmentCrn = environmentCrn;
     }
 
+    public List<ChildEnvironment> getChildEnvironments() {
+        return childEnvironments;
+    }
+
+    public void setChildEnvironments(List<ChildEnvironment> childEnvironments) {
+        this.childEnvironments = childEnvironments;
+    }
+
+    public List<String> getChildEnvironmentCrns() {
+        return childEnvironments.stream()
+                .map(ChildEnvironment::getChildEnvironmentCrn)
+                .collect(Collectors.toList());
+    }
+
     public String getAccountId() {
         return accountId;
     }
@@ -355,5 +372,12 @@ public class Stack {
 
     public void setMinaSshdServiceId(String minaSshdServiceId) {
         this.minaSshdServiceId = minaSshdServiceId;
+    }
+
+    public void registerChildEnvironment(String childEnvironmentCrn) {
+        ChildEnvironment childEnvironment = new ChildEnvironment();
+        childEnvironment.setChildEnvironmentCrn(childEnvironmentCrn);
+        childEnvironment.setStack(this);
+        childEnvironments.add(childEnvironment);
     }
 }

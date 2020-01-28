@@ -18,11 +18,13 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenvironment.RegisterChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
-import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
+import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
+import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
@@ -39,6 +41,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private FreeIpaCreationService freeIpaCreationService;
+
+    @Inject
+    private ChildEnvironmentService childEnvironmentService;
 
     @Inject
     private FreeIpaDeletionService freeIpaDeletionService;
@@ -62,6 +67,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     private Validator<CreateFreeIpaRequest> createFreeIpaRequestValidator;
 
     @Inject
+    private Validator<RegisterChildEnvironmentRequest> registerChildEnvironmentRequestValidator;
+
+    @Inject
     private FreeIpaStartService freeIpaStartService;
 
     @Inject
@@ -79,6 +87,17 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
         }
         String accountId = crnService.getCurrentAccountId();
         return freeIpaCreationService.launchFreeIpa(request, accountId);
+    }
+
+    @Override
+    public void registerChildEnvironment(RegisterChildEnvironmentRequest request) {
+        ValidationResult validationResult = registerChildEnvironmentRequestValidator.validate(request);
+        if (validationResult.hasError()) {
+            LOGGER.debug("FreeIPA request has validation error(s): {}.", validationResult.getFormattedErrors());
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+        String accountId = crnService.getCurrentAccountId();
+        childEnvironmentService.registerChildEnvironment(request, accountId);
     }
 
     @Override

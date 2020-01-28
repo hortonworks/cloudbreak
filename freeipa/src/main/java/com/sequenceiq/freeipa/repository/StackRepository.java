@@ -68,6 +68,11 @@ public interface StackRepository extends BaseJpaRepository<Stack, Long> {
     Optional<Stack> findByEnvironmentCrnAndAccountIdWithList(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.childEnvironments c LEFT JOIN FETCH s.instanceGroups ig "
+            + "LEFT JOIN FETCH ig.instanceMetaData WHERE c.childEnvironmentCrn = :childEnvironmentCrn AND s.accountId = :accountId AND s.terminated = -1")
+    Optional<Stack> findByChildEnvironmentCrnAndAccountIdWithList(@Param("childEnvironmentCrn") String childEnvironmentCrn, @Param("accountId") String accountId);
+
+    @CheckPermission(action = ResourceAction.READ)
     @Query("SELECT new com.sequenceiq.freeipa.dto.StackIdWithStatus(s.id,s.stackStatus.status) FROM Stack s WHERE s.id IN (:ids)")
     List<StackIdWithStatus> findStackStatusesWithoutAuth(@Param("ids") Set<Long> ids);
 

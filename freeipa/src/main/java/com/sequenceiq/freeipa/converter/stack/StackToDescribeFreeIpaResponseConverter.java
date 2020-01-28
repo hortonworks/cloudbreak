@@ -55,6 +55,7 @@ public class StackToDescribeFreeIpaResponseConverter {
         DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
         describeFreeIpaResponse.setName(stack.getName());
         describeFreeIpaResponse.setEnvironmentCrn(stack.getEnvironmentCrn());
+        describeFreeIpaResponse.setChildEnvironmentCrns(stack.getChildEnvironmentCrns());
         describeFreeIpaResponse.setCrn(stack.getResourceCrn());
         describeFreeIpaResponse.setCloudPlatform(stack.getCloudPlatform());
         describeFreeIpaResponse.setAuthentication(authenticationResponseConverter.convert(stack.getStackAuthentication()));
