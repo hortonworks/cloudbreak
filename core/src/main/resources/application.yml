@@ -339,12 +339,12 @@ cb:
             baseurl: https://archive.cloudera.com/cm6/6.2.0/redhat7/yum/
             gpgkey: https://archive.cloudera.com/cm6/6.2.0/redhat7/yum/RPM-GPG-KEY-cloudera
       7.0:
-        version: 7.x.0
+        version: 7.0.2
         repo:
           redhat7:
-            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1548250/cm7/7.x.0/redhat7/yum/
+            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1717199/cm7/7.0.2/redhat7/yum/
           centos7:
-            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1548250/cm7/7.x.0/redhat7/yum/
+            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1717199/cm7/7.0.2/redhat7/yum/
 
   cdh:
     entries:
@@ -440,13 +440,13 @@ cb:
               - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-121/tars/parcel/NIFI-1.10.0.2.0.0.0-121.jar
               - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-121/tars/parcel/NIFICA-1.10.0.2.0.0.0-121.jar
               - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-121/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-121.jar
-        version: 7.0.2-1.cdh7.0.2.p0.1570147
+        version: 7.0.2-1.cdh7.0.2.p2.1711788
         minCM: 7.0
         repo:
           stack:
             repoid: CDH-7.0.2
-            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1570147/cdh/7.x/parcels/
-            centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1570147/cdh/7.x/parcels/
+            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1711788/cdh/7.x/parcels/
+            centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1711788/cdh/7.x/parcels/
 
 
   ambari:
