@@ -30,13 +30,19 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
             return;
         }
 
+        if (StringUtils.isEmpty(networkDto.getNetworkCidr()) && StringUtils.isEmpty(networkDto.getNetworkId())) {
+            String message = "Either the AZURE network id or cidr needs to be defined!";
+            LOGGER.info(message);
+            resultBuilder.error(message);
+        }
+
         AzureParams azureParams = networkDto.getAzure();
         if (azureParams != null) {
             checkSubnetsProvidedWhenExistingNetwork(resultBuilder, azureParams, subnetMetas);
             checkExistingNetworkParamsProvidedWhenSubnetsPresent(networkDto, resultBuilder);
             checkResourceGroupNameWhenExistingNetwork(resultBuilder, azureParams);
             checkSubnetIdWhenExistingNetwork(resultBuilder, azureParams);
-        } else {
+        } else if (StringUtils.isEmpty(networkDto.getNetworkCidr())) {
             resultBuilder.error(missingParamsErrorMsg(AZURE));
         }
     }
@@ -67,7 +73,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
     private void checkSubnetsProvidedWhenExistingNetwork(ValidationResult.ValidationResultBuilder resultBuilder,
             AzureParams azureParams, Map<String, CloudSubnet> subnetMetas) {
         if (StringUtils.isNotEmpty(azureParams.getNetworkId()) && StringUtils.isNotEmpty(azureParams.getResourceGroupName())
-                && subnetMetas.isEmpty()) {
+                && (subnetMetas == null || subnetMetas.isEmpty())) {
             String message = String.format("If networkId (%s) and resourceGroupName (%s) are specified then subnet ids must be specified as well.",
                     azureParams.getNetworkId(), azureParams.getResourceGroupName());
             LOGGER.info(message);

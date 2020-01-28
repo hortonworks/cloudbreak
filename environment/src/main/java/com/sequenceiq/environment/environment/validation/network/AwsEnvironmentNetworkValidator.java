@@ -42,24 +42,32 @@ public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidat
     public void validateDuringRequest(
             NetworkDto networkV1Request, Map<String, CloudSubnet> subnetMetas, ValidationResult.ValidationResultBuilder resultBuilder) {
         String message;
-        if (networkV1Request.getSubnetIds().size() < 2) {
-            message = "There should be at least two subnets in the network";
-            LOGGER.info(message);
-            resultBuilder.error(message);
-        }
-        if (subnetMetas.size() != networkV1Request.getSubnetIds().size()) {
-            message = String.format("Subnets of the environment (%s) are not found in the vpc (%s). ",
-                    String.join(",", getSubnetDiff(networkV1Request.getSubnetIds(), subnetMetas.keySet())),
-                    Optional.of(networkV1Request).map(NetworkDto::getAws).map(AwsParams::getVpcId).orElse(""));
-            LOGGER.info(message);
-            resultBuilder.error(message);
-        }
-        Map<String, Long> zones = subnetMetas.values().stream()
-                .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone, Collectors.counting()));
-        if (zones.size() < 2) {
-            message = "The subnets in the vpc should be present at least in two different availability zones";
-            LOGGER.info(message);
-            resultBuilder.error(message);
+        if (networkV1Request != null && networkV1Request.getNetworkCidr() == null) {
+            if (StringUtils.isEmpty(networkV1Request.getNetworkCidr()) && StringUtils.isEmpty(networkV1Request.getNetworkId())) {
+                message = String.format("Either the AWS network id or cidr needs to be defined!");
+                LOGGER.info(message);
+                resultBuilder.error(message);
+            }
+
+            if (networkV1Request.getSubnetIds().size() < 2) {
+                message = "There should be at least two subnets in the network";
+                LOGGER.info(message);
+                resultBuilder.error(message);
+            }
+            if (subnetMetas.size() != networkV1Request.getSubnetIds().size()) {
+                message = String.format("Subnets of the environment (%s) are not found in the vpc (%s).",
+                        String.join(",", getSubnetDiff(networkV1Request.getSubnetIds(), subnetMetas.keySet())),
+                        Optional.of(networkV1Request).map(NetworkDto::getAws).map(AwsParams::getVpcId).orElse(""));
+                LOGGER.info(message);
+                resultBuilder.error(message);
+            }
+            Map<String, Long> zones = subnetMetas.values().stream()
+                    .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone, Collectors.counting()));
+            if (zones.size() < 2) {
+                message = "The subnets in the vpc should be present at least in two different availability zones";
+                LOGGER.info(message);
+                resultBuilder.error(message);
+            }
         }
     }
 

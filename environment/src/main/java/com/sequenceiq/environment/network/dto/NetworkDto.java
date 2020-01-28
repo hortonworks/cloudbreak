@@ -15,7 +15,7 @@ public class NetworkDto {
 
     private Long id;
 
-    private String name;
+    private final String name;
 
     private final String networkId;
 
