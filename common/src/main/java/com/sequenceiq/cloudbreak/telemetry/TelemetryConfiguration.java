@@ -14,12 +14,16 @@ public class TelemetryConfiguration {
 
     private final boolean meteringEnabled;
 
+    private final boolean reportDeploymentLogsDefaultValue;
+
     public TelemetryConfiguration(AltusDatabusConfiguration altusDatabusConfiguration,
             @Value("${cluster.deployment.logs.report:false}") boolean reportDeploymentLogs,
-            @Value("${metering.enabled:false}") boolean meteringEnabled) {
+            @Value("${metering.enabled:false}") boolean meteringEnabled,
+            @Value("${cluster.deployment.logs.report.default:false}") boolean reportDeploymentLogsDefaultValue) {
         this.altusDatabusConfiguration = altusDatabusConfiguration;
         this.reportDeploymentLogs = reportDeploymentLogs;
         this.meteringEnabled = meteringEnabled;
+        this.reportDeploymentLogsDefaultValue = reportDeploymentLogsDefaultValue;
     }
 
     public AltusDatabusConfiguration getAltusDatabusConfiguration() {
@@ -32,5 +36,9 @@ public class TelemetryConfiguration {
 
     public boolean isMeteringEnabled() {
         return meteringEnabled;
+    }
+
+    public boolean getReportDeploymentLogsDefaultValue() {
+        return reportDeploymentLogsDefaultValue;
     }
 }

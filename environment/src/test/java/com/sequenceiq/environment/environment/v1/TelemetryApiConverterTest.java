@@ -33,8 +33,8 @@ public class TelemetryApiConverterTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration("", true, "****", "****");
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true);
+        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration("", true, false, "****", "****");
+        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true, false);
         underTest = new TelemetryApiConverter(telemetryConfiguration);
     }
 
@@ -172,6 +172,21 @@ public class TelemetryApiConverterTest {
         assertNotNull(result.getFeatures());
         assertFalse(result.getFeatures().getReportDeploymentLogs().isEnabled());
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
+    }
+
+    @Test
+    public void testConvertWithDefaultFeatureValues() {
+        // GIVEN
+        AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration("", true, true, "****", "****");
+        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true, true);
+        TelemetryApiConverter converter = new TelemetryApiConverter(telemetryConfiguration);
+        TelemetryRequest telemetryRequest = new TelemetryRequest();
+        telemetryRequest.setFeatures(new FeaturesRequest());
+        // WHEN
+        EnvironmentTelemetry result = converter.convert(telemetryRequest);
+        // THEN
+        assertNotNull(result.getFeatures());
+        assertTrue(result.getFeatures().getReportDeploymentLogs().isEnabled());
     }
 
 }

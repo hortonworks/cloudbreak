@@ -29,9 +29,16 @@ public class TelemetryApiConverter {
 
     private final boolean useSharedAltusCredential;
 
+    private final boolean reportDeploymentLogsDefaultValue;
+
+    private final boolean useSharedAltusCredentialDefaultValue;
+
     public TelemetryApiConverter(TelemetryConfiguration configuration) {
         this.reportDeploymentLogs = configuration.isReportDeploymentLogs();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
+        this.reportDeploymentLogsDefaultValue = configuration.getReportDeploymentLogsDefaultValue();
+        this.useSharedAltusCredentialDefaultValue = configuration.getAltusDatabusConfiguration()
+                .getUseSharedAltusCredentialDefaultValue();
     }
 
     public EnvironmentTelemetry convert(TelemetryRequest request) {
@@ -119,7 +126,14 @@ public class TelemetryApiConverter {
         if (featuresRequest != null) {
             features = new EnvironmentFeatures();
             if (useSharedAltusCredential) {
-                features.setUseSharedAltusCredential(featuresRequest.getUseSharedAltusCredential());
+                final FeatureSetting useSharedAltusCredentialFeature;
+                if (featuresRequest.getUseSharedAltusCredential() != null) {
+                    useSharedAltusCredentialFeature = featuresRequest.getUseSharedAltusCredential();
+                } else {
+                    useSharedAltusCredentialFeature = new FeatureSetting();
+                    useSharedAltusCredentialFeature.setEnabled(useSharedAltusCredentialDefaultValue);
+                }
+                features.setUseSharedAltusCredential(useSharedAltusCredentialFeature);
             }
             if (reportDeploymentLogs) {
                 final FeatureSetting reportDeploymentLogs;
@@ -127,7 +141,7 @@ public class TelemetryApiConverter {
                     reportDeploymentLogs = featuresRequest.getReportDeploymentLogs();
                 } else {
                     reportDeploymentLogs = new FeatureSetting();
-                    reportDeploymentLogs.setEnabled(false);
+                    reportDeploymentLogs.setEnabled(reportDeploymentLogsDefaultValue);
                 }
                 features.setReportDeploymentLogs(reportDeploymentLogs);
             }
