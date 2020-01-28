@@ -87,7 +87,7 @@ public class KerberosMgmtRoleComponentV1Test {
     @Test
     public void testAddRoleAndPrivilegesForServiceWithoutRole() throws Exception {
         Service service = new Service();
-        service.setKrbprincipalname(SERVICE);
+        service.setKrbprincipalname(List.of(SERVICE));
         RoleRequest roleRequest = null;
         new KerberosMgmtRoleComponent().addRoleAndPrivileges(Optional.of(service), Optional.empty(), roleRequest, mockIpaClient);
         Mockito.verifyZeroInteractions(mockIpaClient);
@@ -96,7 +96,8 @@ public class KerberosMgmtRoleComponentV1Test {
     @Test
     public void testAddRoleAndPrivilegesForServiceWithRole() throws Exception {
         Service service = new Service();
-        service.setKrbprincipalname(SERVICE);
+        service.setKrbprincipalname(List.of(SERVICE));
+        service.setKrbcanonicalname(SERVICE);
         RoleRequest roleRequest = new RoleRequest();
         roleRequest.setRoleName(ROLE);
         Set<String> privileges = new HashSet<>();

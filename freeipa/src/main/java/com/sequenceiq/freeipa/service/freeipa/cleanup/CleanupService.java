@@ -149,12 +149,9 @@ public class CleanupService {
     }
 
     private void removeHostRelatedServices(FreeIpaClient client, Set<String> hostsToRemove) throws FreeIpaClientException {
-        Map<String, String> principalCanonicalMap = client.findAllService().stream()
-                .collect(Collectors.toMap(com.sequenceiq.freeipa.client.model.Service::getKrbprincipalname,
-                        com.sequenceiq.freeipa.client.model.Service::getKrbcanonicalname));
+        Map<String, String> principalCanonicalMap = createPrincipalCanonicalNameMap(client);
         for (String host : hostsToRemove) {
-            Set<String> services = principalCanonicalMap.entrySet().stream().filter(e -> e.getKey().contains(host))
-                    .map(Entry::getValue).collect(Collectors.toSet());
+            Set<String> services = filterForServicesCanonicalNameForDeletion(principalCanonicalMap, host);
             LOGGER.debug("Services to delete: {}", services);
             for (String service : services) {
                 try {
@@ -166,6 +163,18 @@ public class CleanupService {
                 }
             }
         }
+    }
+
+    private Set<String> filterForServicesCanonicalNameForDeletion(Map<String, String> principalCanonicalMap, String host) {
+        return principalCanonicalMap.entrySet().stream().filter(e -> e.getKey().contains(host))
+                .map(Entry::getValue).collect(Collectors.toSet());
+    }
+
+    private Map<String, String> createPrincipalCanonicalNameMap(FreeIpaClient client) throws FreeIpaClientException {
+        return client.findAllService().stream()
+                .flatMap(service -> service.getKrbprincipalname().stream()
+                        .map(principal -> Map.entry(principal, service.getKrbcanonicalname())))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     public Pair<Set<String>, Map<String, String>> removeUsers(Long stackId, Set<String> users, String clusterName) throws FreeIpaClientException {

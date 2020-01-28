@@ -52,11 +52,11 @@ public class KerberosMgmtRoleComponent {
             addPrivilegesToRole(roleRequest.getPrivileges(), ipaClient, role);
             role = ipaClient.showRole(role.getCn());
             Set<String> servicesToAssignRole = service.stream()
-                    .filter(s -> !s.getMemberOfRole().stream().anyMatch(member -> member.contains(roleRequest.getRoleName())))
-                    .map(Service::getKrbprincipalname)
+                    .filter(s -> s.getMemberOfRole().stream().noneMatch(member -> member.contains(roleRequest.getRoleName())))
+                    .map(Service::getKrbcanonicalname)
                     .collect(Collectors.toSet());
             Set<String> hostsToAssignRole = host.stream()
-                    .filter(h -> !h.getMemberOfRole().stream().anyMatch(member -> member.contains(roleRequest.getRoleName())))
+                    .filter(h -> h.getMemberOfRole().stream().noneMatch(member -> member.contains(roleRequest.getRoleName())))
                     .map(Host::getFqdn)
                     .collect(Collectors.toSet());
             ipaClient.addRoleMember(role.getCn(), null, null, hostsToAssignRole, null, servicesToAssignRole);
