@@ -19,12 +19,15 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairFailedEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairSuccessEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairWaitRequest;
+import com.sequenceiq.datalake.metric.MetricType;
+import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -42,6 +45,9 @@ public class SdxRepairActions {
 
     @Inject
     private SdxRepairService repairService;
+
+    @Inject
+    private SdxMetricService metricService;
 
     @Bean(name = "SDX_REPAIR_START_STATE")
     public Action<?, ?> sdxDeletion() {
@@ -105,8 +111,9 @@ public class SdxRepairActions {
             @Override
             protected void doExecute(SdxContext context, SdxRepairSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Datalake repair finalized: {}", payload.getResourceId());
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.SDX_REPAIR_FINISHED, "Repair finished, Datalake is running", payload.getResourceId());
+                metricService.incrementMetricCounter(MetricType.SDX_REPAIR_FINISHED, sdxCluster);
                 sendEvent(context, SDX_REPAIR_FINALIZED_EVENT.event(), payload);
             }
 
@@ -134,8 +141,9 @@ public class SdxRepairActions {
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_FAILED,
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_FAILED,
                         ResourceEvent.SDX_REPAIR_FAILED, statusReason, payload.getResourceId());
+                metricService.incrementMetricCounter(MetricType.SDX_REPAIR_FAILED, sdxCluster);
                 sendEvent(context, SDX_REPAIR_FAILED_HANDLED_EVENT.event(), payload);
             }
 
