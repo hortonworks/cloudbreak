@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -20,6 +22,9 @@ public class ListFreeIpaResponse {
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
+    @ApiModelProperty(ModelDescriptions.CHILD_ENVIRONMENT_CRN_LIST)
+    private List<String> childEnvironmentCrns;
+
     @NotNull
     @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_NAME, required = true)
     private String name;
@@ -39,6 +44,14 @@ public class ListFreeIpaResponse {
 
     public void setEnvironmentCrn(String environmentCrn) {
         this.environmentCrn = environmentCrn;
+    }
+
+    public List<String> getChildEnvironmentCrns() {
+        return childEnvironmentCrns;
+    }
+
+    public void setChildEnvironmentCrns(List<String> childEnvironmentCrns) {
+        this.childEnvironmentCrns = childEnvironmentCrns;
     }
 
     public String getName() {
