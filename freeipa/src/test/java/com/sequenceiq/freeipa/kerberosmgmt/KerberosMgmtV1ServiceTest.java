@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -120,7 +121,7 @@ public class KerberosMgmtV1ServiceTest {
         host.setFqdn(HOST);
         host.setKrbprincipalname(HOST_PRINCIPAL);
         service = new Service();
-        service.setKrbprincipalname(SERVICE_PRINCIPAL);
+        service.setKrbprincipalname(List.of(SERVICE_PRINCIPAL));
         service.setKrbcanonicalname(SERVICE_PRINCIPAL);
         keytab = new Keytab();
         keytab.setKeytab(KEYTAB);

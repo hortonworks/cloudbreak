@@ -13,8 +13,7 @@ public class Service {
 
     private String dn;
 
-    @JsonDeserialize(using = ListFlatteningDeserializer.class)
-    private String krbprincipalname;
+    private List<String> krbprincipalname;
 
     @JsonDeserialize(using = ListFlatteningDeserializer.class)
     private String krbcanonicalname;
@@ -33,11 +32,11 @@ public class Service {
         this.dn = dn;
     }
 
-    public String getKrbprincipalname() {
+    public List<String> getKrbprincipalname() {
         return krbprincipalname;
     }
 
-    public void setKrbprincipalname(String krbprincipalname) {
+    public void setKrbprincipalname(List<String> krbprincipalname) {
         this.krbprincipalname = krbprincipalname;
     }
 

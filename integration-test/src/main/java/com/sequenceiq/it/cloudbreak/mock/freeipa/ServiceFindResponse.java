@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.mock.freeipa;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
@@ -20,7 +21,7 @@ public class ServiceFindResponse extends AbstractFreeIpaResponse<Set<Service>> {
     protected Set<Service> handleInternal(Request request, Response response) {
         Service service = new Service();
         service.setDn("admin");
-        service.setKrbprincipalname("dummy");
+        service.setKrbprincipalname(List.of("dummy"));
         service.setKrbcanonicalname("dummy");
         return Set.of(service);
     }

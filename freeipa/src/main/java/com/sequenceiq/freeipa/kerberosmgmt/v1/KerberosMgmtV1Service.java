@@ -91,12 +91,12 @@ public class KerberosMgmtV1Service {
         com.sequenceiq.freeipa.client.model.Service service = serviceAdd(request, realm, ipaClient);
         String serviceKeytab;
         if (service.getHasKeytab() && request.getDoNotRecreateKeytab()) {
-            serviceKeytab = getExistingKeytab(service.getKrbprincipalname(), ipaClient);
+            serviceKeytab = getExistingKeytab(service.getKrbcanonicalname(), ipaClient);
         } else {
-            serviceKeytab = getKeytab(service.getKrbprincipalname(), ipaClient);
+            serviceKeytab = getKeytab(service.getKrbcanonicalname(), ipaClient);
         }
         response.setKeytab(vaultComponent.getSecretResponseForKeytab(request, accountId, serviceKeytab));
-        response.setServicePrincipal(vaultComponent.getSecretResponseForPrincipal(request, accountId, service.getKrbprincipalname()));
+        response.setServicePrincipal(vaultComponent.getSecretResponseForPrincipal(request, accountId, service.getKrbcanonicalname()));
         return response;
     }
 
@@ -202,7 +202,7 @@ public class KerberosMgmtV1Service {
         LOGGER.debug("Request to delete host for account {}: {}", accountId, request);
 
         Set<String> services = ipaClient.findAllService().stream()
-                .filter(s -> s.getKrbprincipalname().contains(request.getServerHostName()))
+                .filter(s -> s.getKrbcanonicalname().contains(request.getServerHostName()))
                 .map(f -> f.getKrbcanonicalname()).collect(Collectors.toSet());
         LOGGER.debug("Services count on the given host: {}", services.size());
         for (String service : services) {
@@ -265,7 +265,8 @@ public class KerberosMgmtV1Service {
         Host host;
         try {
             try {
-                host = ipaClient.addHost(hostname);
+                Optional<Host> optionalHost = fetchHostIfExists(hostname, ipaClient);
+                host = optionalHost.isEmpty() ? ipaClient.addHost(hostname) : optionalHost.get();
             } catch (FreeIpaClientException e) {
                 if (!FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
                     LOGGER.error(HOST_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
@@ -282,6 +283,11 @@ public class KerberosMgmtV1Service {
         return host;
     }
 
+    private Optional<Host> fetchHostIfExists(String hostname, FreeIpaClient ipaClient) throws FreeIpaClientException {
+        Set<Host> allHost = ipaClient.findAllHost();
+        return allHost.stream().filter(host -> hostname.equals(host.getFqdn())).findAny();
+    }
+
     private com.sequenceiq.freeipa.client.model.Service serviceAdd(ServiceKeytabRequest request, String realm, FreeIpaClient ipaClient)
             throws KeytabCreationException {
         String canonicalPrincipal = constructPrincipal(request.getServiceName(), request.getServerHostName(), realm);
@@ -290,11 +296,12 @@ public class KerberosMgmtV1Service {
             service = serviceAdd(canonicalPrincipal, ipaClient);
             if (request.getServerHostNameAlias() != null) {
                 String aliasPrincipal = constructPrincipal(request.getServiceName(), request.getServerHostNameAlias(), realm);
-                if (!aliasPrincipal.equals(canonicalPrincipal)) {
+                boolean aliasAlreadyExists = service.getKrbprincipalname().stream().anyMatch(aliasPrincipal::equals);
+                if (!aliasAlreadyExists) {
                     service = addServiceAlias(canonicalPrincipal, aliasPrincipal, ipaClient);
                 }
             }
-            allowServiceKeytabRetrieval(service.getKrbprincipalname(), freeIpaClientFactory.getAdminUser(), ipaClient);
+            allowServiceKeytabRetrieval(service.getKrbcanonicalname(), freeIpaClientFactory.getAdminUser(), ipaClient);
             roleComponent.addRoleAndPrivileges(Optional.of(service), Optional.empty(), request.getRoleRequest(), ipaClient);
         } catch (FreeIpaClientException e) {
             LOGGER.error(SERVICE_PRINCIPAL_CREATION_FAILED + ' ' + e.getLocalizedMessage(), e);
@@ -304,16 +311,31 @@ public class KerberosMgmtV1Service {
     }
 
     private com.sequenceiq.freeipa.client.model.Service serviceAdd(String canonicalPrincipal, FreeIpaClient ipaClient) throws FreeIpaClientException {
-        com.sequenceiq.freeipa.client.model.Service service;
+        com.sequenceiq.freeipa.client.model.Service service = null;
         try {
-            service = ipaClient.addService(canonicalPrincipal);
+            Optional<com.sequenceiq.freeipa.client.model.Service> optionalService = fetchServiceIfAlreadyExist(canonicalPrincipal, ipaClient);
+            service = optionalService.isEmpty() ? ipaClient.addService(canonicalPrincipal) : optionalService.get();
         } catch (FreeIpaClientException e) {
             if (!FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
                 throw e;
             }
+        }
+        service = fetchServiceIfNull(canonicalPrincipal, ipaClient, service);
+        return service;
+    }
+
+    private com.sequenceiq.freeipa.client.model.Service fetchServiceIfNull(String canonicalPrincipal, FreeIpaClient ipaClient,
+            com.sequenceiq.freeipa.client.model.Service service) throws FreeIpaClientException {
+        if (service == null) {
             service = ipaClient.showService(canonicalPrincipal);
         }
         return service;
+    }
+
+    private Optional<com.sequenceiq.freeipa.client.model.Service> fetchServiceIfAlreadyExist(String canonicalPrincipal, FreeIpaClient ipaClient)
+            throws FreeIpaClientException {
+        Set<com.sequenceiq.freeipa.client.model.Service> allService = ipaClient.findAllService();
+        return allService.stream().filter(service -> canonicalPrincipal.equals(service.getKrbcanonicalname())).findAny();
     }
 
     private com.sequenceiq.freeipa.client.model.Service addServiceAlias(String canonicalPrincipal, String aliasPrincipal, FreeIpaClient ipaClient)
