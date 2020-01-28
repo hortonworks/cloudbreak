@@ -19,6 +19,7 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitRequest;
@@ -29,6 +30,8 @@ import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
 import com.sequenceiq.datalake.job.SdxClusterJobAdapter;
+import com.sequenceiq.datalake.metric.MetricType;
+import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -50,6 +53,9 @@ public class SdxCreateActions {
 
     @Inject
     private JobService jobService;
+
+    @Inject
+    private SdxMetricService metricService;
 
     @Bean(name = "SDX_CREATION_WAIT_ENV_STATE")
     public Action<?, ?> envWaitInProgress() {
@@ -160,8 +166,9 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, StackCreationSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.SDX_CLUSTER_CREATED,
-                        "Datalake is running", payload.getResourceId());
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
+                        ResourceEvent.SDX_CLUSTER_CREATED, "Datalake is running", payload.getResourceId());
+                metricService.incrementMetricCounter(MetricType.SDX_CREATION_FINISHED, sdxCluster);
                 jobService.schedule(context.getSdxId(), SdxClusterJobAdapter.class);
                 sendEvent(context, SDX_CREATE_FINALIZED_EVENT.event(), payload);
             }
@@ -190,8 +197,9 @@ public class SdxCreateActions {
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.PROVISIONING_FAILED, ResourceEvent.SDX_CLUSTER_CREATION_FAILED,
-                        statusReason, payload.getResourceId());
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.PROVISIONING_FAILED,
+                        ResourceEvent.SDX_CLUSTER_CREATION_FAILED, statusReason, payload.getResourceId());
+                metricService.incrementMetricCounter(MetricType.SDX_CREATION_FAILED, sdxCluster);
                 sendEvent(context, SDX_CREATE_FAILED_HANDLED_EVENT.event(), payload);
             }
 

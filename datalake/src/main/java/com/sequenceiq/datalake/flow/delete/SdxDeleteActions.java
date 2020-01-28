@@ -18,6 +18,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionWaitRequest;
@@ -25,8 +26,11 @@ import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
 import com.sequenceiq.datalake.flow.delete.event.StackDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.StackDeletionWaitRequest;
+import com.sequenceiq.datalake.metric.MetricType;
+import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
+import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -46,6 +50,12 @@ public class SdxDeleteActions {
 
     @Inject
     private JobService jobService;
+
+    @Inject
+    private SdxService sdxService;
+
+    @Inject
+    private SdxMetricService metricService;
 
     @Bean(name = "SDX_DELETION_START_STATE")
     public Action<?, ?> sdxDeletion() {
@@ -126,7 +136,12 @@ public class SdxDeleteActions {
 
             @Override
             protected void doExecute(SdxContext context, RdsDeletionSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Datalake delete finalized: {}", payload.getResourceId());
+                Long datalakeId = payload.getResourceId();
+                LOGGER.info("Datalake delete finalized: {}", datalakeId);
+                SdxCluster sdxCluster = sdxService.getById(datalakeId);
+                if (sdxCluster != null) {
+                    metricService.incrementMetricCounter(MetricType.SDX_DELETION_FINISHED, sdxCluster);
+                }
                 sendEvent(context, SDX_DELETE_FINALIZED_EVENT.event(), payload);
             }
 
@@ -154,8 +169,9 @@ public class SdxDeleteActions {
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_FAILED,
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_FAILED,
                         ResourceEvent.SDX_CLUSTER_DELETION_FAILED, statusReason, payload.getResourceId());
+                metricService.incrementMetricCounter(MetricType.SDX_DELETION_FAILED, sdxCluster);
                 sendEvent(context, SDX_DELETE_FAILED_HANDLED_EVENT.event(), payload);
             }
 
