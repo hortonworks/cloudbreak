@@ -11,6 +11,8 @@ import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest;
 import com.amazonaws.services.autoscaling.model.ResumeProcessesResult;
 import com.amazonaws.services.autoscaling.model.SuspendProcessesRequest;
 import com.amazonaws.services.autoscaling.model.SuspendProcessesResult;
+import com.amazonaws.services.autoscaling.model.TerminateInstanceInAutoScalingGroupRequest;
+import com.amazonaws.services.autoscaling.model.TerminateInstanceInAutoScalingGroupResult;
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupResult;
 import com.sequenceiq.cloudbreak.service.Retry;
@@ -48,5 +50,10 @@ public class AmazonAutoScalingRetryClient extends AmazonRetryClient {
 
     public DescribeScalingActivitiesResult describeScalingActivities(DescribeScalingActivitiesRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> mapThrottlingError(() -> client.describeScalingActivities(request)));
+    }
+
+    public TerminateInstanceInAutoScalingGroupResult terminateInstance(TerminateInstanceInAutoScalingGroupRequest terminateInstanceInAutoScalingGroupRequest) {
+        return retry.testWith2SecDelayMax15Times(() -> mapThrottlingError(() ->
+                client.terminateInstanceInAutoScalingGroup(terminateInstanceInAutoScalingGroupRequest)));
     }
 }

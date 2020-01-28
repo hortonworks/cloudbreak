@@ -30,10 +30,10 @@ public class SdxCloudStorageTests extends BasicSdxTests {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a basic SDX create request with Cloud Storage has been sent",
-            then = "SDX should be available AND deletable along with the created Cloud storage objects"
+            when = "a basic SDX create request with FreeIPA and DataLake Cloud Storage has been sent",
+            then = "SDX should be available along with the created Cloud storage objects"
     )
-    public void testSDXWithCloudStorageCanBeCreatedThenDeletedSuccessfully(TestContext testContext) {
+    public void testSDXWithDataLakeAndFreeIPAStorageCanBeCreatedSuccessfully(TestContext testContext) {
         CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
         String sdx = resourcePropertyProvider().getName();
 
@@ -45,11 +45,11 @@ public class SdxCloudStorageTests extends BasicSdxTests {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
                 .then((tc, testDto, client) -> {
-                    cloudFunctionality.cloudStorageListContainer(getBaseLocation(testDto));
+                    cloudFunctionality.cloudStorageListContainerDataLake(getBaseLocation(testDto));
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
-                    cloudFunctionality.cloudStorageDeleteContainer(getBaseLocation(testDto));
+                    cloudFunctionality.cloudStorageListContainerFreeIPA(getBaseLocation(testDto));
                     return testDto;
                 })
                 .validate();

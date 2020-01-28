@@ -39,4 +39,12 @@ public class AzureCloudBlobUtil {
     public void listAllFoldersInAContaier(String baseLocation) {
         azureCloudBlobClientActions.listAllFolders(baseLocation);
     }
+
+    public void listDataLakeFoldersInAContaier(String baseLocation) {
+        azureCloudBlobClientActions.listSelectedDirectory(baseLocation, "datalake", false);
+    }
+
+    public void listFreeIPAFoldersInAContaier(String baseLocation) {
+        azureCloudBlobClientActions.listSelectedDirectory(baseLocation, "freeipa", false);
+    }
 }

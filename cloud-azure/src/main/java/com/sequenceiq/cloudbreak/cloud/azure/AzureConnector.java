@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
@@ -147,6 +148,16 @@ public class AzureConnector implements CloudConnector<Map<String, Map<String, Ob
     @Override
     public NetworkConnector networkConnector() {
         return azureNetworkConnector;
+    }
+
+    @Override
+    public String regionToDisplayName(String region) {
+        return Region.findByLabelOrName(region).label();
+    }
+
+    @Override
+    public String displayNameToRegion(String displayName) {
+        return Region.findByLabelOrName(displayName).name();
     }
 
     @Override

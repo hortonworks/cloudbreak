@@ -23,6 +23,8 @@ public class ClouderaManagerApiClientProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerApiClientProvider.class);
 
+    private static final Integer CLUSTER_PROXY_TIMEOUT = 90000;
+
     public ApiClient getDefaultClient(Integer gatewayPort, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
         ApiClient client = getClouderaManagerClient(clientConfig, gatewayPort, "admin", "admin");
         if (clientConfig.isClusterProxyEnabled()) {
@@ -66,6 +68,7 @@ public class ClouderaManagerApiClientProvider {
             if (clientConfig.isClusterProxyEnabled()) {
                 cmClient.setBasePath(clientConfig.getClusterProxyUrl() + "/proxy/" + clientConfig.getClusterCrn() + "/cb-internal" + context);
                 cmClient.addDefaultHeader("Proxy-Ignore-Auth", "true");
+                cmClient.addDefaultHeader("Proxy-With-Timeout", CLUSTER_PROXY_TIMEOUT.toString());
             } else if (port != null) {
                 cmClient.setBasePath("https://" + clientConfig.getApiAddress() + ':' + port + context);
             } else {

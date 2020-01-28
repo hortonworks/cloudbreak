@@ -22,11 +22,15 @@ import java.util.function.Function;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
@@ -49,6 +53,7 @@ import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClusterUpdateTriggerEvent;
@@ -72,6 +77,7 @@ import reactor.rx.Promise;
  */
 @Service
 public class ReactorFlowManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReactorFlowManager.class);
 
     private static final long WAIT_FOR_ACCEPT = 10L;
 
@@ -241,14 +247,6 @@ public class ReactorFlowManager {
         notifyWithoutCheck(stackId, selector, new StackEvent(selector, stackId));
     }
 
-    public void triggerClusterTermination(Stack stack, boolean forced) {
-        Long stackId = stack.getId();
-        boolean secure = kerberosConfigService.isKerberosConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName());
-        String selector = secure ? FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT : FlowChainTriggers.TERMINATION_TRIGGER_EVENT;
-        notify(stackId, selector, new TerminationEvent(selector, stackId, forced));
-        cancelRunningFlows(stackId);
-    }
-
     public void triggerManualRepairFlow(Long stackId) {
         String selector = MANUAL_STACK_REPAIR_TRIGGER_EVENT.event();
         notify(stackId, selector, new StackEvent(selector, stackId));
@@ -282,6 +280,32 @@ public class ReactorFlowManager {
     public void triggerClusterCertificationRenewal(Long stackId) {
         String selector = CLUSTER_CERTIFICATE_REISSUE_EVENT.event();
         notify(stackId, selector, new StackEvent(selector, stackId));
+    }
+
+    @Async
+    public void triggerClusterTermination(Stack stack, boolean forced, String userCrn) {
+        MDCBuilder.buildMdcContext(stack);
+        ThreadBasedUserCrnProvider.doAs(userCrn, () -> {
+            LOGGER.debug("Async termination flow trigger for stack: '{}', forced: '{}'", stack.getName(), forced);
+            long startedAt = System.currentTimeMillis();
+            Long stackId = stack.getId();
+            boolean secure = isKerberosConfigAvailableForCluster(stack);
+            String selector = secure ? FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT : FlowChainTriggers.TERMINATION_TRIGGER_EVENT;
+            notify(stackId, selector, new TerminationEvent(selector, stackId, forced));
+            cancelRunningFlows(stackId);
+            LOGGER.debug("Async termination flow trigger for stack: '{}' took '{}' ms", stack.getName(), System.currentTimeMillis() - startedAt);
+        });
+        MDCBuilder.cleanupMdc();
+    }
+
+    private boolean isKerberosConfigAvailableForCluster(Stack stack) {
+        boolean result = false;
+        try {
+            result = kerberosConfigService.isKerberosConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName());
+        } catch (Exception ex) {
+            LOGGER.warn("Failed to get Kerberos config from FreeIPA service.", ex);
+        }
+        return result;
     }
 
     private void notify(Long stackId, String selector, Acceptable acceptable) {
@@ -318,6 +342,11 @@ public class ReactorFlowManager {
     }
 
     private Map<String, Object> createEventParameters(Long stackId) {
+        String userCrn = getUserCrn(stackId);
+        return Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
+    }
+
+    private String getUserCrn(Long stackId) {
         String userCrn = null;
         try {
             userCrn = authenticatedUserService.getUserCrn();
@@ -325,7 +354,7 @@ public class ReactorFlowManager {
             userCrn = stackService.findById(stackId).map(Stack::getCreator).map(User::getUserCrn)
                     .orElseThrow(() -> new IllegalStateException("No authentication found neither in the SecurityContextHolder nor in the Stack!"));
         }
-        return Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
+        return userCrn;
     }
 
     private Consumer<Status> isTriggerAllowedInMaintenance(String selector) {

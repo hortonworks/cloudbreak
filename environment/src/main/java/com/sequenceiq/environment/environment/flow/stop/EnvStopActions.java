@@ -19,7 +19,6 @@ import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopFailedEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopHandlerSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
-import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.flow.core.CommonContext;
 
 @Configuration
@@ -29,11 +28,8 @@ public class EnvStopActions {
 
     private final EnvironmentStatusUpdateService environmentStatusUpdateService;
 
-    private final EnvironmentMetricService metricService;
-
-    public EnvStopActions(EnvironmentStatusUpdateService environmentStatusUpdateService, EnvironmentMetricService metricService) {
+    public EnvStopActions(EnvironmentStatusUpdateService environmentStatusUpdateService) {
         this.environmentStatusUpdateService = environmentStatusUpdateService;
-        this.metricService = metricService;
     }
 
     @Bean(name = "STOP_DATAHUB_STATE")
