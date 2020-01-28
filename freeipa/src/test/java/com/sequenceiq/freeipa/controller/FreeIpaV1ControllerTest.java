@@ -21,11 +21,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.validation.Validator;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
+import com.sequenceiq.freeipa.controller.validation.CreateFreeIpaRequestValidator;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
@@ -62,7 +62,7 @@ class FreeIpaV1ControllerTest {
     private CrnService crnService;
 
     @Mock
-    private Validator<CreateFreeIpaRequest> createFreeIpaRequestValidatior;
+    private CreateFreeIpaRequestValidator createFreeIpaRequestValidatior;
 
     @Test
     void create() {

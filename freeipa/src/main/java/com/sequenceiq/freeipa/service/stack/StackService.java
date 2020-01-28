@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenvironment.RegisterChildEnvironmentRequest;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -82,6 +83,7 @@ public class StackService {
 
     public Stack getByEnvironmentCrnAndAccountIdWithLists(String environmentCrn, String accountId) {
         return stackRepository.findByEnvironmentCrnAndAccountIdWithList(environmentCrn, accountId)
+                .or(() -> stackRepository.findByChildEnvironmentCrnAndAccountIdWithList(environmentCrn, accountId))
                 .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
     }
 
@@ -107,5 +109,13 @@ public class StackService {
         } else {
             return stackRepository.findMultipleByEnvironmentCrnAndAccountIdWithStatuses(environmentCrns, accountId, statuses);
         }
+    }
+
+    public void registerChildEnvironment(RegisterChildEnvironmentRequest request, String accountId) {
+        String environmentCrn = request.getParentEnvironmentCrn();
+        Stack stack = stackRepository.findByEnvironmentCrnAndAccountIdWithList(environmentCrn, accountId)
+                .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
+        stack.registerChildEnvironment(request.getChildEnvironmentCrn());
+        stackRepository.save(stack);
     }
 }
