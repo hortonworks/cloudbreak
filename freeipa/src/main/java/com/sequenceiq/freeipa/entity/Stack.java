@@ -8,6 +8,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.ST
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STOP_REQUESTED;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,6 +18,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -47,6 +49,9 @@ public class Stack {
     private String name;
 
     private String environmentCrn;
+
+    @OneToMany(mappedBy = "stack", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChildEnvironment> childEnvironments = new ArrayList<>();
 
     private String accountId;
 
@@ -313,6 +318,20 @@ public class Stack {
         this.environmentCrn = environmentCrn;
     }
 
+    public List<ChildEnvironment> getChildEnvironments() {
+        return childEnvironments;
+    }
+
+    public void setChildEnvironments(List<ChildEnvironment> childEnvironments) {
+        this.childEnvironments = childEnvironments;
+    }
+
+    public List<String> getChildEnvironmentCrns() {
+        return childEnvironments.stream()
+                .map(ChildEnvironment::getEnvironmentCrn)
+                .collect(Collectors.toList());
+    }
+
     public String getAccountId() {
         return accountId;
     }
@@ -355,5 +374,12 @@ public class Stack {
 
     public void setMinaSshdServiceId(String minaSshdServiceId) {
         this.minaSshdServiceId = minaSshdServiceId;
+    }
+
+    public void registerChildEnvironment(String childEnvironmentCrn) {
+        ChildEnvironment childEnvironment = new ChildEnvironment();
+        childEnvironment.setEnvironmentCrn(childEnvironmentCrn);
+        childEnvironment.setStack(this);
+        childEnvironments.add(childEnvironment);
     }
 }

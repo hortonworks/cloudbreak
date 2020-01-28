@@ -107,4 +107,14 @@ class StackServiceTest {
         Stack stackByEnvironmentCrn = underTest.getByEnvironmentCrnAndAccountId(ENVIRONMENT_CRN, ACCOUNT_ID);
         assertEquals(stack, stackByEnvironmentCrn);
     }
+
+    @Test
+    void getByEnvironmentCrnAndAccountIdWithLists() {
+        // TODO
+    }
+
+    @Test
+    void registerChildEnvironment() {
+        // TODO
+    }
 }

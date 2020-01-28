@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.api.v1.freeipa.stack.doc;
 
 public final class FreeIpaOperationDescriptions {
     public static final String CREATE = "Create FreeIpa stack";
+    public static final String REGISTER_CHILD_ENVIRONMENT = "Register a child environment";
     public static final String GET_BY_ENVID = "Get FreeIPA stack by envid";
     public static final String LIST_BY_ACCOUNT = "List all FreeIPA stacks by account";
     public static final String GET_ROOTCERTIFICATE_BY_ENVID = "Get FreeIPA root certificate by envid";
