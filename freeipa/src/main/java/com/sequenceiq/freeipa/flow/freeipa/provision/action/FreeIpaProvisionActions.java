@@ -27,6 +27,8 @@ import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.StackFailureContext;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.action.AbstractStackProvisionAction;
+import com.sequenceiq.freeipa.metrics.FreeIpaMetricService;
+import com.sequenceiq.freeipa.metrics.MetricType;
 import com.sequenceiq.freeipa.service.config.AbstractConfigRegister;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
@@ -35,6 +37,9 @@ public class FreeIpaProvisionActions {
 
     @Inject
     private StackUpdater stackUpdater;
+
+    @Inject
+    private FreeIpaMetricService metricService;
 
     @Bean(name = "BOOTSTRAPPING_MACHINES_STATE")
     public Action<?, ?> bootstrappingMachinesAction() {
@@ -114,6 +119,7 @@ public class FreeIpaProvisionActions {
             protected void doExecute(StackContext context, PostInstallFreeIpaSuccess payload, Map<Object, Object> variables) {
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
                 configRegisters.forEach(configProvider -> configProvider.register(context.getStack().getId()));
+                metricService.incrementMetricCounter(MetricType.FREEIPA_CREATION_FINISHED, context.getStack());
                 sendEvent(context);
             }
 
@@ -132,6 +138,7 @@ public class FreeIpaProvisionActions {
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 String errorReason = payload.getException() == null ? "Unknown error" : payload.getException().getMessage();
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISION_FAILED, errorReason);
+                metricService.incrementMetricCounter(MetricType.FREEIPA_CREATION_FAILED, context.getStack(), payload.getException());
                 sendEvent(context);
             }
 
