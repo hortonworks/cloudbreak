@@ -36,6 +36,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse;
@@ -193,7 +194,6 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @VisibleForTesting
     void initializeActorWorkloadCredentials() {
-
         GetActorWorkloadCredentialsResponse.Builder builder = GetActorWorkloadCredentialsResponse.newBuilder();
         try {
             JsonFormat.parser().merge(Resources.toString(
@@ -229,12 +229,14 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     public void listUsers(ListUsersRequest request, StreamObserver<ListUsersResponse> responseObserver) {
         Builder userBuilder = ListUsersResponse.newBuilder();
         if (request.getUserIdOrCrnCount() == 0) {
-            if (isNotEmpty(request.getAccountId())) {
-                ofNullable(accountUsers.get(request.getAccountId())).orElse(Set.of()).stream()
-                        .map(userName -> createUser(request.getAccountId(), userName))
+            String accountId = request.getAccountId();
+            if (isNotEmpty(accountId)) {
+                validateAccountId(accountId);
+                ofNullable(accountUsers.get(accountId)).orElse(Set.of()).stream()
+                        .map(userName -> createUser(accountId, userName))
                         .forEach(userBuilder::addUser);
                 for (int i = 0; i < MOCK_USER_COUNT; i++) {
-                    User user = createUser(request.getAccountId(), "fakeMockUser" + i);
+                    User user = createUser(accountId, "fakeMockUser" + i);
                     userBuilder.addUser(user);
                 }
             }
@@ -256,6 +258,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     public void getRights(GetRightsRequest request, StreamObserver<GetRightsResponse> responseObserver) {
         String actorCrn = request.getActorCrn();
         String accountId = Crn.fromString(actorCrn).getAccountId();
+        validateAccountId(accountId);
         List<Group> groups = List.copyOf(mockGroupManagementService.getOrCreateGroups(accountId));
         PolicyStatement policyStatement = PolicyStatement.newBuilder()
                 .addRight(ALL_RIGHTS_AND_RESOURCES)
@@ -299,6 +302,10 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Override
     public void listGroups(ListGroupsRequest request, StreamObserver<ListGroupsResponse> responseObserver) {
+        String accountId = request.getAccountId();
+        if (isNotEmpty(accountId)) {
+            validateAccountId(accountId);
+        }
         mockGroupManagementService.listGroups(request, responseObserver);
     }
 
@@ -311,6 +318,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
             String[] splittedCrn = machineUserIdOrCrn.split(":");
             String userName;
             String accountId = request.getAccountId();
+            validateAccountId(accountId);
             String crnString;
             if (splittedCrn.length > 1) {
                 userName = splittedCrn[6];
@@ -334,6 +342,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Override
     public void getAccount(GetAccountRequest request, StreamObserver<GetAccountResponse> responseObserver) {
+        validateAccountId(request.getAccountId());
         UserManagementProto.Account.Builder builder = UserManagementProto.Account.newBuilder();
         if (enableCcm) {
             builder.addEntitlements(createEntitlement(REVERSE_SSH_TUNNEL));
@@ -393,6 +402,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     public void assignResourceRole(UserManagementProto.AssignResourceRoleRequest request,
             StreamObserver<UserManagementProto.AssignResourceRoleResponse> responseObserver) {
+        validateAccountId(request.getAssignee().getAccountId());
         responseObserver.onNext(UserManagementProto.AssignResourceRoleResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
@@ -400,18 +410,21 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     @Override
     public void unassignResourceRole(UserManagementProto.UnassignResourceRoleRequest request,
             StreamObserver<UserManagementProto.UnassignResourceRoleResponse> responseObserver) {
+        validateAccountId(request.getAssignee().getAccountId());
         responseObserver.onNext(UserManagementProto.UnassignResourceRoleResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
 
     @Override
     public void assignRole(UserManagementProto.AssignRoleRequest request, StreamObserver<UserManagementProto.AssignRoleResponse> responseObserver) {
+        validateAccountId(request.getAssignee().getAccountId());
         responseObserver.onNext(UserManagementProto.AssignRoleResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
 
     @Override
     public void unassignRole(UserManagementProto.UnassignRoleRequest request, StreamObserver<UserManagementProto.UnassignRoleResponse> responseObserver) {
+        validateAccountId(request.getAssignee().getAccountId());
         responseObserver.onNext(UserManagementProto.UnassignRoleResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
@@ -428,6 +441,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     @Override
     public void listResourceAssignees(UserManagementProto.ListResourceAssigneesRequest request,
             StreamObserver<UserManagementProto.ListResourceAssigneesResponse> responseObserver) {
+        validateAccountId(request.getAccountId());
         responseObserver.onNext(UserManagementProto.ListResourceAssigneesResponse.newBuilder()
                 .setResourceAssignee(0, createResourceAssignee(request.getResourceCrn()))
                 .build());
@@ -444,6 +458,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     @Override
     public void createAccessKey(UserManagementProto.CreateAccessKeyRequest request,
             StreamObserver<UserManagementProto.CreateAccessKeyResponse> responseObserver) {
+        validateAccountId(request.getAccountId());
         String accessKeyId = null;
         String privateKey = null;
         AltusCredential altusCredential = UserManagementProto.AccessKeyType.Value.UNSET.equals(request.getType())
@@ -466,6 +481,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Override
     public void listAccessKeys(UserManagementProto.ListAccessKeysRequest request, StreamObserver<UserManagementProto.ListAccessKeysResponse> responseObserver) {
+        validateAccountId(request.getAccountId());
         responseObserver.onNext(UserManagementProto.ListAccessKeysResponse.newBuilder()
                 .addAccessKey(0, UserManagementProto.AccessKey.newBuilder()
                         .setAccessKeyId(UUID.randomUUID().toString())
@@ -478,6 +494,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     @Override
     public void deleteAccessKey(UserManagementProto.DeleteAccessKeyRequest request,
             StreamObserver<UserManagementProto.DeleteAccessKeyResponse> responseObserver) {
+        validateAccountId(request.getAccountId());
         responseObserver.onNext(UserManagementProto.DeleteAccessKeyResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
@@ -486,6 +503,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     public void createMachineUser(UserManagementProto.CreateMachineUserRequest request,
             StreamObserver<UserManagementProto.CreateMachineUserResponse> responseObserver) {
         String accountId = Crn.fromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn()).getAccountId();
+        validateAccountId(accountId);
         String name = request.getMachineUserName();
         responseObserver.onNext(UserManagementProto.CreateMachineUserResponse.newBuilder()
                 .setMachineUser(MachineUser.newBuilder()
@@ -499,6 +517,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     @Override
     public void deleteMachineUser(UserManagementProto.DeleteMachineUserRequest request,
             StreamObserver<UserManagementProto.DeleteMachineUserResponse> responseObserver) {
+        validateAccountId(request.getAccountId());
         responseObserver.onNext(UserManagementProto.DeleteMachineUserResponse.newBuilder()
                 .build());
         responseObserver.onCompleted();
@@ -508,12 +527,14 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     public void getIdPMetadataForWorkloadSSO(
             UserManagementProto.GetIdPMetadataForWorkloadSSORequest request,
             StreamObserver<UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> responseObserver) {
-        checkArgument(!Strings.isNullOrEmpty(request.getAccountId()));
+        String accountId = request.getAccountId();
+        checkArgument(!Strings.isNullOrEmpty(accountId));
+        validateAccountId(accountId);
         try {
             String metadata = Resources.toString(
                     Resources.getResource("sso/cdp-idp-metadata.xml"),
                     Charsets.UTF_8).trim();
-            metadata = metadata.replace("accountId_REPLACE_ME", request.getAccountId());
+            metadata = metadata.replace("accountId_REPLACE_ME", accountId);
             metadata = metadata.replace("hostname_REPLACE_ME", "localhost");
             responseObserver.onNext(
                     GetIdPMetadataForWorkloadSSOResponse.newBuilder()
@@ -530,6 +551,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Override
     public void listRoles(UserManagementProto.ListRolesRequest request, StreamObserver<UserManagementProto.ListRolesResponse> responseObserver) {
+        validateAccountId(request.getAccountId());
         responseObserver.onNext(UserManagementProto.ListRolesResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
@@ -541,10 +563,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
      * Hashed value used internally is sha256 hash of <i>Password123!</i>.
      */
     @Override
-    public void getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request,
-            io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement
-                    .UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
-
+    public void getActorWorkloadCredentials(GetActorWorkloadCredentialsRequest request,
+            io.grpc.stub.StreamObserver<GetActorWorkloadCredentialsResponse> responseObserver) {
         GetActorWorkloadCredentialsResponse.Builder builder = GetActorWorkloadCredentialsResponse.newBuilder(actorWorkloadCredentialsResponse);
         builder.setPasswordHashExpirationDate(System.currentTimeMillis() + PASSWORD_LIFETIME);
 
@@ -631,6 +651,13 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                 .setResourceCrn(resourceCrn)
                 .setResourceRoleCrn(mockCrnService.createCrn(assigneeCrn, Crn.ResourceType.RESOURCE_ROLE, "WorkspaceManager").toString())
                 .build();
+    }
+
+    private void validateAccountId(String accountId) {
+        boolean accountExists = accountUsers.keySet().stream().anyMatch(id -> id.equals(accountId));
+        if (!accountExists) {
+            throw Status.UNKNOWN.withDescription("Invalid account id is specied: " + accountId).asRuntimeException();
+        }
     }
 
     @VisibleForTesting
