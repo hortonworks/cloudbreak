@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -92,30 +93,44 @@ public class AzurePlatformResources implements PlatformResources {
     public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
-
-        for (Network network : client.getNetworks()) {
-            String actualRegionLabel = network.region().label();
-            String actualRegionName = network.region().name();
-
-            if (regionMatch(actualRegionLabel, region) || regionMatch(actualRegionName, region)) {
-                Set<CloudSubnet> subnets = new HashSet<>();
-                for (Entry<String, Subnet> subnet : network.subnets().entrySet()) {
-                    subnets.add(new CloudSubnet(subnet.getKey(), subnet.getKey(), null, subnet.getValue().addressPrefix()));
-                }
-                Map<String, Object> properties = new HashMap<>();
-                properties.put("addressSpaces", network.addressSpaces());
-                properties.put("dnsServerIPs", network.dnsServerIPs());
-                properties.put("resourceGroupName", network.resourceGroupName());
-
-                CloudNetwork cloudNetwork = new CloudNetwork(network.name(), network.id(), subnets, properties);
-                result.computeIfAbsent(actualRegionLabel, s -> new HashSet<>()).add(cloudNetwork);
-                result.computeIfAbsent(actualRegionName, s -> new HashSet<>()).add(cloudNetwork);
+        String networkId = filters.get("networkId");
+        String resourceGroupName = filters.get("resourceGroupName");
+        if (!StringUtils.isEmpty(networkId) && !StringUtils.isEmpty(resourceGroupName)) {
+            Network network = client.getNetworkByResourceGroup(resourceGroupName, networkId);
+            addToResultIfRegionsAreMatch(region, result, network);
+        } else {
+            for (Network network : client.getNetworks()) {
+                addToResultIfRegionsAreMatch(region, result, network);
             }
         }
         if (result.isEmpty() && Objects.nonNull(region)) {
             result.put(region.value(), new HashSet<>());
         }
         return new CloudNetworks(result);
+    }
+
+    private void addToResultIfRegionsAreMatch(Region region, Map<String, Set<CloudNetwork>> result, Network network) {
+        String actualRegionLabel = network.region().label();
+        String actualRegionName = network.region().name();
+
+        if (regionMatch(actualRegionLabel, region) || regionMatch(actualRegionName, region)) {
+            CloudNetwork cloudNetwork = convertToCloudNetwork(network);
+            result.computeIfAbsent(actualRegionLabel, s -> new HashSet<>()).add(cloudNetwork);
+            result.computeIfAbsent(actualRegionName, s -> new HashSet<>()).add(cloudNetwork);
+        }
+    }
+
+    private CloudNetwork convertToCloudNetwork(Network network) {
+        Set<CloudSubnet> subnets = new HashSet<>();
+        for (Entry<String, Subnet> subnet : network.subnets().entrySet()) {
+            subnets.add(new CloudSubnet(subnet.getKey(), subnet.getKey(), null, subnet.getValue().addressPrefix()));
+        }
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("addressSpaces", network.addressSpaces());
+        properties.put("dnsServerIPs", network.dnsServerIPs());
+        properties.put("resourceGroupName", network.resourceGroupName());
+
+        return new CloudNetwork(network.name(), network.id(), subnets, properties);
     }
 
     @Override

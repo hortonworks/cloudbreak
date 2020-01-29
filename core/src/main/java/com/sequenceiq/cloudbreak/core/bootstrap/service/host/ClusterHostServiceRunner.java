@@ -30,10 +30,11 @@ import org.springframework.util.CollectionUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
+import com.sequenceiq.cloudbreak.api.service.ExposedService;
+import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -183,6 +184,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private GrainPropertiesService grainPropertiesService;
+
+    @Inject
+    private ExposedServiceCollector exposedServiceCollector;
 
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, List<String> candidateAddresses) {
         try {
@@ -486,11 +490,12 @@ public class ClusterHostServiceRunner {
         addGatewayUserFacingCertAndFqdn(gatewayConfig, cluster, gateway);
         gateway.put("kerberos", kerberosConfig != null);
 
-        List<String> rangerLocations = serviceLocations.get(ExposedService.RANGER.getServiceName());
+        ExposedService rangerService = exposedServiceCollector.getRangerService();
+        List<String> rangerLocations = serviceLocations.get(rangerService.getServiceName());
         if (!CollectionUtils.isEmpty(rangerLocations)) {
-            serviceLocations.put(ExposedService.RANGER.getServiceName(), getSingleRangerFqdn(gatewayConfig.getHostname(), rangerLocations));
+            serviceLocations.put(rangerService.getServiceName(), getSingleRangerFqdn(gatewayConfig.getHostname(), rangerLocations));
         }
-        serviceLocations.put(ExposedService.CLOUDERA_MANAGER.getServiceName(), asList(gatewayConfig.getHostname()));
+        serviceLocations.put(exposedServiceCollector.getClouderaManagerService().getServiceName(), asList(gatewayConfig.getHostname()));
         gateway.put("location", serviceLocations);
         servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
     }
@@ -514,14 +519,16 @@ public class ClusterHostServiceRunner {
     }
 
     private Map<String, List<String>> getServiceLocations(Cluster cluster) {
-        List<String> serviceNames = ExposedService.getAllServiceName();
+        List<String> serviceNames = exposedServiceCollector.getAllServiceNames();
         Map<String, List<String>> componentLocation = componentLocator.getComponentLocation(cluster, serviceNames);
-        if (componentLocation.containsKey(ExposedService.IMPALA.getServiceName())) {
+        ExposedService impalaService = exposedServiceCollector.getImpalaService();
+        if (componentLocation.containsKey(impalaService.getServiceName())) {
             // IMPALA_DEBUG_UI role is not a valid role, but we need to distinguish the 2 roles in order to generate the Knox topology file
-            componentLocation.put(ExposedService.IMPALA_DEBUG_UI.getServiceName(), List.copyOf(componentLocation.get(ExposedService.IMPALA.getServiceName())));
+            componentLocation.put(exposedServiceCollector.getImpalaDebugUIService().getServiceName(),
+                    List.copyOf(componentLocation.get(impalaService.getServiceName())));
             Map<String, List<String>> impalaLocations = componentLocator.getImpalaCoordinatorLocations(cluster);
             List<String> locations = impalaLocations.values().stream().flatMap(List::stream).collect(Collectors.toList());
-            componentLocation.replace(ExposedService.IMPALA.getServiceName(), locations);
+            componentLocation.replace(impalaService.getServiceName(), locations);
         }
         return componentLocation;
     }
@@ -551,10 +558,11 @@ public class ClusterHostServiceRunner {
         topology.put("name", gt.getTopologyName());
         Json exposedJson = gt.getExposedServices();
         if (exposedJson != null && StringUtils.isNotEmpty(exposedJson.getValue())) {
-            List<String> exposedServices = exposedJson.get(ExposedServices.class).getFullServiceList();
+            ExposedServices exposedServicesDomain = exposedJson.get(ExposedServices.class);
+            Set<String> exposedServices = exposedServiceCollector.getFullServiceListBasedOnList(exposedServicesDomain.getServices());
             topology.put("exposed", exposedServices);
         } else {
-            topology.put("exposed", new ArrayList<>());
+            topology.put("exposed", new HashSet<>());
         }
         return topology;
     }

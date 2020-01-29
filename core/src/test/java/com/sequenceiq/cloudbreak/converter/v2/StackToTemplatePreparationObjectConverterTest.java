@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
@@ -78,13 +80,13 @@ import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse.Builder;
-import com.sequenceiq.cloudbreak.util.TestConstants;
 
 public class StackToTemplatePreparationObjectConverterTest {
 
@@ -201,6 +203,9 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Mock
     private VirtualGroupService virtualGroupService;
 
+    @Mock
+    private ExposedServiceCollector exposedServiceCollector;
+
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
@@ -238,6 +243,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(awsMockAccountMappingService.getUserMappings(REGION, credential)).thenReturn(MOCK_USER_MAPPINGS);
         when(ldapConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
         when(clusterService.getById(anyLong())).thenReturn(cluster);
+        when(exposedServiceCollector.getAllKnoxExposed()).thenReturn(Set.of());
     }
 
     @Test

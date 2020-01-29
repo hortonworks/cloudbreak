@@ -11,27 +11,35 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class ValidationResult {
 
     private final State state;
 
     private final List<String> errors;
 
-    private final String formattedErrors;
+    private String formattedErrors = "";
 
-    private ValidationResult(State state, SortedSet<String> errors) {
+    private final String prefix;
+
+    private ValidationResult(State state, SortedSet<String> errors, String prefix) {
         this.state = state;
         this.errors = new ArrayList<>(errors);
-        formattedErrors = IntStream.range(0, this.errors.size())
+        this.prefix = prefix;
+        if (!StringUtils.isEmpty(prefix)) {
+            formattedErrors = prefix + ": \n";
+        }
+        formattedErrors += IntStream.range(0, this.errors.size())
                 .mapToObj(i -> i + 1 + ". " + this.errors.get(i))
-                .collect(Collectors.joining("\n "));
+                .collect(Collectors.joining("\n"));
     }
 
     public ValidationResult merge(ValidationResult other) {
         State mergeState = state == ERROR || other.state == ERROR ? ERROR : VALID;
         SortedSet<String> mergedError = new TreeSet<>(this.errors);
         mergedError.addAll(other.errors);
-        return new ValidationResult(mergeState, mergedError);
+        return new ValidationResult(mergeState, mergedError, other.prefix);
     }
 
     public State getState() {
@@ -68,11 +76,18 @@ public class ValidationResult {
 
         private final SortedSet<String> errors = new TreeSet<>();
 
+        private String prefix;
+
         public ValidationResultBuilder error(String error) {
             if (state == VALID) {
                 state = ERROR;
             }
             errors.add(error);
+            return this;
+        }
+
+        public ValidationResultBuilder prefix(String prefix) {
+            this.prefix = prefix;
             return this;
         }
 
@@ -89,7 +104,7 @@ public class ValidationResult {
         }
 
         public ValidationResult build() {
-            return new ValidationResult(state, errors);
+            return new ValidationResult(state, errors, prefix);
         }
     }
 }

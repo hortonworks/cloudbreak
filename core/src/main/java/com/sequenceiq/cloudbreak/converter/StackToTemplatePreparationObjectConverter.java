@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
@@ -123,6 +124,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Inject
     private VirtualGroupService virtualGroupService;
 
+    @Inject
+    private ExposedServiceCollector exposedServiceCollector;
+
     @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
@@ -151,7 +155,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()))
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
                     .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
-                    .withGateway(gateway, gatewaySignKey)
+                    .withGateway(gateway, gatewaySignKey, exposedServiceCollector.getAllKnoxExposed())
                     .withCustomInputs(stackInputs.getCustomInputs() == null ? new HashMap<>() : stackInputs.getCustomInputs())
                     .withFixInputs(fixInputs)
                     .withBlueprintView(blueprintViewProvider.getBlueprintView(cluster.getBlueprint()))

@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repos
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
+import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -120,6 +121,9 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     @Inject
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
+    @Inject
+    private ExposedServiceCollector exposedServiceCollector;
+
     @Override
     public TemplatePreparationObject convert(StackV4Request source) {
         try {
@@ -147,7 +151,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                     .withCloudPlatform(source.getCloudPlatform())
                     .withRdsConfigs(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
-                    .withGateway(gateway, gatewaySignKey)
+                    .withGateway(gateway, gatewaySignKey, exposedServiceCollector.getAllKnoxExposed())
                     .withBlueprintView(blueprintView)
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigs)

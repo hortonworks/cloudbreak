@@ -159,7 +159,7 @@ class EnvironmentValidatorServiceTest {
 
         assertTrue(validationResult.hasError());
         assertEquals("1. Please add the default or knox security groups, we cannot edit with empty value.\n" +
-                " 2. The CIDR could not be updated in the environment", validationResult.getFormattedErrors());
+                "2. The CIDR could not be updated in the environment", validationResult.getFormattedErrors());
     }
 
     @Test

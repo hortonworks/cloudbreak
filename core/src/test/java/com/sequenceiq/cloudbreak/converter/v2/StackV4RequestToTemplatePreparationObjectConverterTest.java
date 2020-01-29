@@ -24,11 +24,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.template.views.ProductDetailsView;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -40,10 +35,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.general.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.StackInfoService;
@@ -78,6 +78,8 @@ import com.sequenceiq.cloudbreak.template.model.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.ProductDetailsView;
+import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
@@ -87,7 +89,6 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.cloudbreak.util.TestConstants;
 
 public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
@@ -213,6 +214,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Mock
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
+    @Mock
+    private ExposedServiceCollector exposedServiceCollector;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -245,6 +249,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(placementSettings.getAvailabilityZone()).thenReturn(AVAILABILITY_ZONE);
         when(awsMockAccountMappingService.getGroupMappings(REGION, credential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
         when(awsMockAccountMappingService.getUserMappings(REGION, credential)).thenReturn(MOCK_USER_MAPPINGS);
+        when(exposedServiceCollector.getAllKnoxExposed()).thenReturn(Set.of());
     }
 
     @Test

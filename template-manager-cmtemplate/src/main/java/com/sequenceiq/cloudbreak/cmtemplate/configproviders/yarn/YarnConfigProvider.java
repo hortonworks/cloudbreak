@@ -5,11 +5,13 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import java.util.List;
 import java.util.Objects;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
+import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
@@ -20,6 +22,9 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 public class YarnConfigProvider implements CmTemplateComponentConfigProvider {
 
     private static final String YARN_SITE_SERVICE_SAFETY_VALVE = "yarn_service_config_safety_valve";
+
+    @Inject
+    private ExposedServiceCollector exposedServiceCollector;
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
@@ -44,7 +49,7 @@ public class YarnConfigProvider implements CmTemplateComponentConfigProvider {
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
-                && source.getGatewayView().getExposedServices().contains(ExposedService.RESOURCEMANAGER_WEB.getKnoxService());
+                && source.getGatewayView().getExposedServices().contains(exposedServiceCollector.getResourceManagerWebService().getKnoxService());
     }
 
     private String getYarnSiteServiceValveValue() {

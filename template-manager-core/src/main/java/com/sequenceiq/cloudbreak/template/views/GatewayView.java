@@ -49,13 +49,14 @@ public class GatewayView {
 
     private final String masterSecret;
 
-    public GatewayView(@Nonnull Gateway gateway, String signKey) {
+    public GatewayView(@Nonnull Gateway gateway, String signKey, Set<String> fullServiceList) {
         gatewayType = gateway.getGatewayType();
         path = gateway.getPath();
         gatewayTopologies = CollectionUtils.isEmpty(gateway.getTopologies())
                 ? emptyMap()
                 : gateway.getTopologies().stream()
-                .collect(Collectors.toMap(GatewayTopology::getTopologyName, s -> convertToFullExposedServices(s.getExposedServices())));
+                .collect(Collectors.toMap(GatewayTopology::getTopologyName,
+                        s -> convertToFullExposedServices(s.getExposedServices(), fullServiceList)));
         ssoType = gateway.getSsoType();
         ssoConfigured = SSOType.SSO_PROVIDER.equals(gateway.getSsoType());
         ssoProvider = gateway.getSsoProvider();
@@ -66,13 +67,16 @@ public class GatewayView {
         this.signKey = signKey;
     }
 
-    private Set<String> convertToFullExposedServices(Json json) {
+    private Set<String> convertToFullExposedServices(Json json, Set<String> fullServiceList) {
         try {
             ExposedServices exposedServices = json.get(ExposedServices.class);
             if (exposedServices == null || exposedServices.getServices().isEmpty()) {
                 return new HashSet<>();
             }
-            return new HashSet<>(exposedServices.getFullServiceList());
+            if (exposedServices.getServices().contains("ALL")) {
+                return fullServiceList;
+            }
+            return new HashSet<>(exposedServices.getServices());
         } catch (IOException e) {
             LOGGER.info("Cannot deserialize the exposed services: json: {}", json.getValue(), e);
         }

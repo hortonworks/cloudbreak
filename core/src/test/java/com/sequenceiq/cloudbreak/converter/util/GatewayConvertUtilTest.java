@@ -24,8 +24,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 @RunWith(MockitoJUnitRunner.class)
 public class GatewayConvertUtilTest {
 
-    private static final String DEPRECATED_TOPOLOGY_NAME = "deprecated";
-
     @Mock
     private ConverterUtil converterUtil;
 
