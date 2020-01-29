@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
@@ -30,6 +31,8 @@ import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDa
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.UpdateDatabaseServerRegistrationRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.UpdateDatabaseServerRegistrationSuccess;
+import com.sequenceiq.redbeams.metrics.MetricType;
+import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 
@@ -43,6 +46,9 @@ public class RedbeamsProvisionActions {
 
     @Inject
     private DBResourceService dbResourceService;
+
+    @Inject
+    private RedbeamsMetricService metricService;
 
     @Bean(name = "ALLOCATE_DATABASE_SERVER_STATE")
     public Action<?, ?> allocateDatabaseServer() {
@@ -86,7 +92,8 @@ public class RedbeamsProvisionActions {
 
             @Override
             protected void prepareExecution(UpdateDatabaseServerRegistrationSuccess payload, Map<Object, Object> variables) {
-                dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.AVAILABLE);
+                DBStack dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.AVAILABLE);
+                metricService.incrementMetricCounter(MetricType.DB_PROVISION_FINISHED, dbStack);
             }
 
             @Override
@@ -114,7 +121,8 @@ public class RedbeamsProvisionActions {
                 } else {
                     // StackCreationActions / StackCreationService only update status if stack isn't mid-deletion
                     String errorReason = failureException == null ? "Unknown error" : failureException.getMessage();
-                    dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.PROVISION_FAILED, errorReason);
+                    DBStack dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.PROVISION_FAILED, errorReason);
+                    metricService.incrementMetricCounter(MetricType.DB_PROVISION_FAILED, dbStack);
                 }
 
             }

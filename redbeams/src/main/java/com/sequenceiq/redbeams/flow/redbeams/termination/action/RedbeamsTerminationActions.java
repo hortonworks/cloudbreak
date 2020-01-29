@@ -1,23 +1,5 @@
 package com.sequenceiq.redbeams.flow.redbeams.termination.action;
 
-import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
-import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
-import com.sequenceiq.redbeams.flow.redbeams.termination.AbstractRedbeamsTerminationAction;
-import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationEvent;
-import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationState;
-import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerRequest;
-import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerSuccess;
-import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.TerminateDatabaseServerRequest;
-import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.TerminateDatabaseServerSuccess;
-import com.sequenceiq.redbeams.service.stack.DBStackService;
-import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
-
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -30,6 +12,27 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.flow.core.Flow;
+import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
+import com.sequenceiq.redbeams.flow.redbeams.termination.AbstractRedbeamsTerminationAction;
+import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationEvent;
+import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationState;
+import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerRequest;
+import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerSuccess;
+import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.TerminateDatabaseServerRequest;
+import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.TerminateDatabaseServerSuccess;
+import com.sequenceiq.redbeams.metrics.MetricType;
+import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
+import com.sequenceiq.redbeams.service.stack.DBStackService;
+import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
+
 @Configuration
 public class RedbeamsTerminationActions {
 
@@ -40,6 +43,9 @@ public class RedbeamsTerminationActions {
 
     @Inject
     private DBStackStatusUpdater dbStackStatusUpdater;
+
+    @Inject
+    private RedbeamsMetricService metricService;
 
     @Bean(name = "DEREGISTER_DATABASE_SERVER_STATE")
     public Action<?, ?> deregisterDatabaseServer() {
@@ -91,6 +97,7 @@ public class RedbeamsTerminationActions {
             protected Selectable createRequest(RedbeamsContext context) {
                 // Delete the DB stack here instead of deregistration so that we can keep track of its status
                 // through the termination
+                metricService.incrementMetricCounter(MetricType.DB_TERMINATION_FINISHED, context.getDBStack());
                 dbStackService.delete(context.getDBStack());
                 return new RedbeamsEvent(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_FINISHED_EVENT.name(), 0L);
             }
@@ -115,7 +122,8 @@ public class RedbeamsTerminationActions {
                 } else {
                     // StackCreationActions / StackCreationService only update status if stack isn't mid-deletion
                     String errorReason = failureException == null ? "Unknown error" : failureException.getMessage();
-                    dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.DELETE_FAILED, errorReason);
+                    DBStack dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.DELETE_FAILED, errorReason);
+                    metricService.incrementMetricCounter(MetricType.DB_TERMINATION_FAILED, dbStack);
                 }
 
             }
