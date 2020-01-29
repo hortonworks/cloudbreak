@@ -115,17 +115,14 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     @Override
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
-        //TODO Why? Necessary informations are available in the environmentDto
         Optional<Environment> environmentOptional = environmentService.findEnvironmentById(environmentDto.getId());
         try {
             if (environmentOptional.isPresent()) {
                 Environment environment = environmentOptional.get();
                 if (Objects.nonNull(environment.getParentEnvironment())) {
                     attachParentFreeIpaToChild(environmentDtoEvent, environmentDto);
-                } else if (environmentOptional.get().isCreateFreeIpa()) {
-                    if (supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())) {
-                        createFreeIpa(environmentDtoEvent, environmentDto);
-                    }
+                } else if (environment.isCreateFreeIpa() && supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())) {
+                    createFreeIpa(environmentDtoEvent, environmentDto);
                 }
             }
             eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
@@ -160,13 +157,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         Optional<DescribeFreeIpaResponse> freeIpa = freeIpaService.describe(environmentDto.getParentEnvironmentCrn());
         if (freeIpa.isPresent()) {
             LOGGER.info("Using FreeIpa of parent environmentCrn '{}' .", environmentDto.getParentEnvironmentCrn());
-
             //TODO Register parent's FreeIPA to the child - new FreeIpaSvc api method
-
-            if (CREATE_IN_PROGRESS == freeIpa.get().getStatus()) {
-                awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
-            }
-
             //TODO Register reverse dns zone
         }
     }
