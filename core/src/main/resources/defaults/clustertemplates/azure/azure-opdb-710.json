@@ -1,9 +1,9 @@
 {
-  "name": "Operational Database with SQL for AWS",
+  "name": "Operational Database with SQL for Azure",
   "description": "",
   "type": "OPERATIONALDATABASE",
   "featureState": "PREVIEW",
-  "cloudPlatform": "AWS",
+  "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {
       "blueprintName": "CDP 1.2 - Operational Database: Apache HBase, Phoenix"
@@ -18,19 +18,21 @@
             {
               "count": 1,
               "size": 100,
-              "type": "standard"
+              "type": "StandardSSD_LRS"
             }
           ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
             }
           },
-          "instanceType": "m5.2xlarge",
+          "instanceType": "Standard_D8_v3",
           "rootVolume": {
             "size": 50
           },
-          "cloudPlatform": "AWS"
+          "cloudPlatform": "AZURE"
         },
         "type": "CORE"
       },
@@ -43,19 +45,21 @@
             {
               "count": 1,
               "size": 100,
-              "type": "standard"
+              "type": "StandardSSD_LRS"
             }
           ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
             }
           },
-          "instanceType": "m5.2xlarge",
+          "instanceType": "Standard_D8_v3",
           "rootVolume": {
             "size": 50
           },
-          "cloudPlatform": "AWS"
+          "cloudPlatform": "AZURE"
         },
         "type": "GATEWAY"
       },
@@ -68,19 +72,21 @@
             {
               "count": 1,
               "size": 100,
-              "type": "standard"
+              "type": "StandardSSD_LRS"
             }
           ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
             }
           },
-          "instanceType": "m5.2xlarge",
+          "instanceType": "Standard_D8_v3",
           "rootVolume": {
             "size": 50
           },
-          "cloudPlatform": "AWS"
+          "cloudPlatform": "AZURE"
         },
         "type": "CORE"
       },
@@ -93,19 +99,21 @@
             {
               "count": 1,
               "size": 100,
-              "type": "standard"
+              "type": "StandardSSD_LRS"
             }
           ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
             }
           },
-          "instanceType": "m5.2xlarge",
+          "instanceType": "Standard_D8_v3",
           "rootVolume": {
             "size": 50
           },
-          "cloudPlatform": "AWS"
+          "cloudPlatform": "AZURE"
         },
         "type": "CORE"
       }
