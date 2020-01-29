@@ -7,14 +7,28 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 
 public abstract class ImageValidatorE2ETest extends AbstractE2ETest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImageValidatorE2ETest.class);
+
+    @Value("${integrationtest.imageValidation.sourceCatalogName}")
+    private String sourceImageCatalogName;
+
+    @Value("${integrationtest.imageValidation.sourceCatalogUrl}")
+    private String sourceImageCatalogUrl;
+
+    @BeforeMethod
+    public void createSourceCatalogIfNotExists(Object[] data) {
+        TestContext testContext = (TestContext) data[0];
+        createImageValidationSourceCatalog(testContext, sourceImageCatalogUrl, sourceImageCatalogName);
+    }
 
     @AfterMethod
     public void setImageId(Object[] data, ITestResult result) {
