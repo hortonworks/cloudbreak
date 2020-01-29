@@ -26,4 +26,11 @@ public class PlatformNetworksResponse implements Serializable {
     public void setNetworks(Map<String, Set<PlatformNetworkResponse>> networks) {
         this.networks = networks;
     }
+
+    @Override
+    public String toString() {
+        return "PlatformNetworksResponse{" +
+                "networks=" + networks +
+                '}';
+    }
 }

@@ -26,4 +26,11 @@ public class PlatformSshKeysResponse implements Serializable {
     public void setSshKeys(Map<String, Set<PlatformSshKeyResponse>> sshKeys) {
         this.sshKeys = sshKeys;
     }
+
+    @Override
+    public String toString() {
+        return "PlatformSshKeysResponse{" +
+                "sshKeys=" + sshKeys +
+                '}';
+    }
 }

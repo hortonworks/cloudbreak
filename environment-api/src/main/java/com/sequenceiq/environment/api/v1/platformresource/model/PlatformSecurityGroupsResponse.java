@@ -26,4 +26,11 @@ public class PlatformSecurityGroupsResponse implements Serializable {
     public void setSecurityGroups(Map<String, Set<PlatformSecurityGroupResponse>> securityGroups) {
         this.securityGroups = securityGroups;
     }
+
+    @Override
+    public String toString() {
+        return "PlatformSecurityGroupsResponse{" +
+                "securityGroups=" + securityGroups +
+                '}';
+    }
 }

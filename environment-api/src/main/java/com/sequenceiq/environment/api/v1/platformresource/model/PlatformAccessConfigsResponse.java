@@ -18,4 +18,11 @@ public class PlatformAccessConfigsResponse implements Serializable {
     public void setAccessConfigs(List<AccessConfigResponse> accessConfigs) {
         this.accessConfigs = accessConfigs;
     }
+
+    @Override
+    public String toString() {
+        return "PlatformAccessConfigsResponse{" +
+                "accessConfigs=" + accessConfigs +
+                '}';
+    }
 }

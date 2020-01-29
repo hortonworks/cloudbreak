@@ -30,4 +30,11 @@ public class PlatformNoSqlTablesResponse implements Serializable {
     public void setNoSqlTables(List<PlatformNoSqlTableResponse> noSqlTables) {
         this.noSqlTables = noSqlTables;
     }
+
+    @Override
+    public String toString() {
+        return "PlatformNoSqlTablesResponse{" +
+                "noSqlTables=" + noSqlTables +
+                '}';
+    }
 }
