@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 
 public class StatedImage {
 
-    private final com.sequenceiq.cloudbreak.cloud.model.catalog.Image image;
+    private final Image image;
 
     private final String imageCatalogUrl;
 
