@@ -21,7 +21,7 @@ public class SyncPollingScheduler<T> {
 
     private static final int POLLING_INTERVAL = 1000;
 
-    private static final int MAX_POLLING_ATTEMPT = 1000;
+    private static final int MAX_POLLING_ATTEMPT = 5000;
 
     private static final int FAILURE_TOLERANT_ATTEMPT = 3;
 
