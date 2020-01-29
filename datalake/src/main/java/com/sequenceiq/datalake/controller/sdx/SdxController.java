@@ -158,7 +158,13 @@ public class SdxController implements SdxEndpoint {
         SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
         StackV4Response stackV4Response = sdxService.getDetail(name, entries);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
-        return new SdxClusterDetailResponse(sdxClusterResponse, stackV4Response);
+        SdxClusterDetailResponse sdxClusterDetailResponse = new SdxClusterDetailResponse(sdxClusterResponse, stackV4Response);
+
+        return SdxClusterDetailResponseFilter.on(sdxClusterDetailResponse)
+            .apply(SdxClusterDetailResponseFilter.REMOVE_NAMENODE_DETAILS)
+            .apply(SdxClusterDetailResponseFilter.REMOVE_SOLR_DETAILS)
+            .apply(SdxClusterDetailResponseFilter.REMOVE_WEBHDFS_DETAILS)
+            .filter();
     }
 
     @Override
