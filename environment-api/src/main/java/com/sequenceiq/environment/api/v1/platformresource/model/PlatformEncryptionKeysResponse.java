@@ -18,4 +18,11 @@ public class PlatformEncryptionKeysResponse implements Serializable {
     public void setEncryptionKeyConfigs(Set<EncryptionKeyConfigResponse> encryptionKeyConfigs) {
         this.encryptionKeyConfigs = encryptionKeyConfigs;
     }
+
+    @Override
+    public String toString() {
+        return "PlatformEncryptionKeysResponse{" +
+                "encryptionKeyConfigs=" + encryptionKeyConfigs +
+                '}';
+    }
 }

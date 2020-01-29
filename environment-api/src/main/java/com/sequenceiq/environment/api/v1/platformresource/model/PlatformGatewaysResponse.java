@@ -26,4 +26,11 @@ public class PlatformGatewaysResponse implements Serializable {
     public void setGateways(Map<String, Set<CloudGatewayRequest>> gateways) {
         this.gateways = gateways;
     }
+
+    @Override
+    public String toString() {
+        return "PlatformGatewaysResponse{" +
+                "gateways=" + gateways +
+                '}';
+    }
 }

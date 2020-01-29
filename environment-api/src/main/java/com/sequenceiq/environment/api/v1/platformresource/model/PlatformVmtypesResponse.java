@@ -25,4 +25,11 @@ public class PlatformVmtypesResponse implements Serializable {
     public void setVmTypes(Map<String, VirtualMachinesResponse> vmTypes) {
         this.vmTypes = vmTypes;
     }
+
+    @Override
+    public String toString() {
+        return "PlatformVmtypesResponse{" +
+                "vmTypes=" + vmTypes +
+                '}';
+    }
 }

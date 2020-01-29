@@ -26,4 +26,11 @@ public class PlatformIpPoolsResponse implements Serializable {
     public void setIppools(Map<String, Set<IpPoolResponse>> ippools) {
         this.ippools = ippools;
     }
+
+    @Override
+    public String toString() {
+        return "PlatformIpPoolsResponse{" +
+                "ippools=" + ippools +
+                '}';
+    }
 }

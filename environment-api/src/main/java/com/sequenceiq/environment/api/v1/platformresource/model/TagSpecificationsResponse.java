@@ -26,4 +26,10 @@ public class TagSpecificationsResponse {
         this.specifications = specifications;
     }
 
+    @Override
+    public String toString() {
+        return "TagSpecificationsResponse{" +
+                "specifications=" + specifications +
+                '}';
+    }
 }
