@@ -253,7 +253,8 @@ public class EnvironmentApiConverter {
                 .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())
                 .withIdBrokerMappingSource(environmentDto.getExperimentalFeatures().getIdBrokerMappingSource())
                 .withAdminGroupName(environmentDto.getAdminGroupName())
-                .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams));
+                .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams))
+                .withParentEnvironmentCrn(environmentDto.getParentEnvironmentCrn());
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network ->
                 builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel())));

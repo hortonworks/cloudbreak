@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.util.TestConstants.CRN;
 import static com.sequenceiq.cloudbreak.util.TestConstants.USER;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.getCloudRegions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -21,6 +22,7 @@ import javax.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
@@ -47,6 +49,8 @@ import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
+
+import java.util.Optional;
 
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = {
@@ -187,6 +191,58 @@ class EnvironmentCreationServiceTest {
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
+    }
+
+    @Test
+    void testCreateWithParentEnvironment() {
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
+        final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
+                .withName(ENVIRONMENT_NAME)
+                .withCreator(CRN)
+                .withAccountId(ACCOUNT_ID)
+                .withAuthentication(AuthenticationDto.builder().build())
+                .withParameters(parametersDto)
+                .withLocation(LocationDto.builder()
+                        .withName("test")
+                        .withDisplayName("test")
+                        .withLatitude(0.1)
+                        .withLongitude(0.1)
+                        .build())
+                .withParentEnvironmentCrn("parentCrn")
+                .build();
+        final Environment environment = new Environment();
+        environment.setName(ENVIRONMENT_NAME);
+        environment.setId(1L);
+        environment.setAccountId(ACCOUNT_ID);
+        final Environment parentEnvironment = new Environment();
+        parentEnvironment.setName(ENVIRONMENT_NAME);
+        parentEnvironment.setId(2L);
+        parentEnvironment.setAccountId(ACCOUNT_ID);
+
+        Credential credential = new Credential();
+        credential.setCloudPlatform("platform");
+
+        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
+
+        when(environmentService.findByResourceCrnAndAccountIdAndArchivedIsFalse(any(), eq(ACCOUNT_ID))).thenReturn(Optional.of(parentEnvironment));
+        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
+        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
+        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(CRN)))
+                .thenReturn(credential);
+        when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateNetworkCreation(any(), any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
+        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
+        when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
+        when(environmentService.save(environmentArgumentCaptor.capture())).thenReturn(environment);
+
+        environmentCreationServiceUnderTest.create(environmentCreationDto);
+
+        verify(environmentService, times(2)).save(any());
+        verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
+        verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any());
+        verify(reactorFlowManager).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
+        assertEquals(environmentArgumentCaptor.getValue().getParentEnvironment(), parentEnvironment);
     }
 
     @Test
