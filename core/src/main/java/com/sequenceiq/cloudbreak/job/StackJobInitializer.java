@@ -27,7 +27,7 @@ public class StackJobInitializer implements JobInitializer {
         Iterable<Stack> clusters = stackService.getAllAliveWithInstanceGroups();
         jobService.deleteAll();
         for (Stack cluster : clusters) {
-            if (!cluster.isStackInDeletionOrFailedPhase()) {
+            if (!cluster.isStackInDeletionPhase()) {
                 jobService.schedule(new StackJobAdapter(cluster));
             }
         }

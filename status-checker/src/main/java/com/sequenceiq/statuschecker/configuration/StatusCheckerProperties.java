@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class StatusCheckerProperties {
 
-    @Value("${statuschecker.intervalsec:60}")
+    @Value("${statuschecker.intervalsec:180}")
     private int intervalInSeconds;
 
-    @Value("${statuschecker.enabled:false}")
+    @Value("${statuschecker.enabled:true}")
     private boolean autoSyncEnabled;
 
     public boolean isAutoSyncEnabled() {
