@@ -1,18 +1,16 @@
 {
-  "name": "Operational Database with Phoenix for AWS",
+  "name": "Real-time Data Mart for AWS",
   "description": "",
-  "type": "OPERATIONALDATABASE",
-  "featureState": "PREVIEW",
+  "type": "DATAMART",
+  "featureState": "RELEASED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "CDP 1.3 - Operational Database: Apache HBase, Phoenix"
+      "blueprintName": "CDP 1.3 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark"
     },
     "instanceGroups": [
       {
-        "name": "master",
-        "nodeCount": 2,
-        "recoveryMode": "MANUAL",
+        "name": "master1",
         "template": {
           "attachedVolumes": [
             {
@@ -26,18 +24,17 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge",
+          "instanceType": "r5.2xlarge",
           "rootVolume": {
             "size": 50
-          },
-          "cloudPlatform": "AWS"
+          }
         },
-        "type": "CORE"
-      },
-      {
-        "name": "gateway",
         "nodeCount": 1,
-        "recoveryMode": "MANUAL",
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "master2",
         "template": {
           "attachedVolumes": [
             {
@@ -51,18 +48,17 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge",
+          "instanceType": "r5.2xlarge",
           "rootVolume": {
             "size": 50
-          },
-          "cloudPlatform": "AWS"
+          }
         },
-        "type": "GATEWAY"
-      },
-      {
-        "name": "leader",
         "nodeCount": 1,
-        "recoveryMode": "MANUAL",
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "master3",
         "template": {
           "attachedVolumes": [
             {
@@ -76,38 +72,62 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge",
+          "instanceType": "r5.2xlarge",
           "rootVolume": {
             "size": 50
-          },
-          "cloudPlatform": "AWS"
+          }
         },
-        "type": "CORE"
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
       },
       {
-        "name": "worker",
+        "name": "coordinator",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 2,
+              "size": 1900,
+              "type": "ephemeral"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "i3.4xlarge",
+          "rootVolume": {
+            "size": 50
+          }
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "executor",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 2,
+              "size": 1900,
+              "type": "ephemeral"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "i3.4xlarge",
+          "rootVolume": {
+            "size": 50
+          }
+        },
         "nodeCount": 3,
-        "recoveryMode": "MANUAL",
-        "template": {
-          "attachedVolumes": [
-            {
-              "count": 1,
-              "size": 100,
-              "type": "standard"
-            }
-          ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
-            }
-          },
-          "instanceType": "m5.2xlarge",
-          "rootVolume": {
-            "size": 50
-          },
-          "cloudPlatform": "AWS"
-        },
-        "type": "CORE"
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
       }
     ]
   }

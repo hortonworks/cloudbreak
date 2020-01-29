@@ -1,6 +1,6 @@
 {
   "cluster": {
-    "blueprintName": "CDP 1.2 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas",
+    "blueprintName": "CDP 1.3 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas",
     "validateBlueprint": false
   },
   "gatewayPort": 9401,

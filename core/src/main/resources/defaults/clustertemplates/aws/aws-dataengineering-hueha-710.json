@@ -1,18 +1,16 @@
 {
-  "name": "Operational Database with Phoenix for AWS",
+  "name": "Data Engineering Hue HA for AWS",
   "description": "",
-  "type": "OPERATIONALDATABASE",
-  "featureState": "PREVIEW",
+  "type": "DATAENGINEERING",
+  "featureState": "RELEASED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "CDP 1.3 - Operational Database: Apache HBase, Phoenix"
+      "blueprintName": "CDP 1.3 - Data Engineering Hue HA: Apache Spark, Apache Hive, Hue, Apache Oozie"
     },
     "instanceGroups": [
       {
         "name": "master",
-        "nodeCount": 2,
-        "recoveryMode": "MANUAL",
         "template": {
           "attachedVolumes": [
             {
@@ -29,15 +27,14 @@
           "instanceType": "m5.2xlarge",
           "rootVolume": {
             "size": 50
-          },
-          "cloudPlatform": "AWS"
+          }
         },
-        "type": "CORE"
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
       },
       {
-        "name": "gateway",
-        "nodeCount": 1,
-        "recoveryMode": "MANUAL",
+        "name": "compute",
         "template": {
           "attachedVolumes": [
             {
@@ -54,40 +51,14 @@
           "instanceType": "m5.2xlarge",
           "rootVolume": {
             "size": 50
-          },
-          "cloudPlatform": "AWS"
+          }
         },
-        "type": "GATEWAY"
-      },
-      {
-        "name": "leader",
-        "nodeCount": 1,
-        "recoveryMode": "MANUAL",
-        "template": {
-          "attachedVolumes": [
-            {
-              "count": 1,
-              "size": 100,
-              "type": "standard"
-            }
-          ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
-            }
-          },
-          "instanceType": "m5.2xlarge",
-          "rootVolume": {
-            "size": 50
-          },
-          "cloudPlatform": "AWS"
-        },
-        "type": "CORE"
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
       },
       {
         "name": "worker",
-        "nodeCount": 3,
-        "recoveryMode": "MANUAL",
         "template": {
           "attachedVolumes": [
             {
@@ -104,10 +75,35 @@
           "instanceType": "m5.2xlarge",
           "rootVolume": {
             "size": 50
-          },
-          "cloudPlatform": "AWS"
+          }
         },
-        "type": "CORE"
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "gateway",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.2xlarge",
+          "rootVolume": {
+            "size": 50
+          }
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
       }
     ]
   }

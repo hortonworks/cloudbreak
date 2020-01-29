@@ -1,8 +1,8 @@
 {
-  "description": "CDP 1.0 Data Engineering with Apache Hive LLAP",
+  "description": "CDP 1.3 Data Engineering",
   "blueprint": {
-    "cdhVersion": "7.0.0",
-    "displayName": "de-llap",
+    "cdhVersion": "7.1.0",
+    "displayName": "dataengineering",
     "services": [
       {
         "refName": "zookeeper",
@@ -22,7 +22,17 @@
           {
             "refName": "hdfs-NAMENODE-BASE",
             "roleType": "NAMENODE",
-            "base": true
+            "base": true,
+	    "configs": [
+              {
+                "name": "fs_trash_interval",
+                "value": "0"
+              },
+	      {
+	        "name": "fs_trash_checkpoint_interval",
+	        "value": "0"
+              }
+            ]
           },
           {
             "refName": "hdfs-SECONDARYNAMENODE-BASE",
@@ -44,11 +54,35 @@
       {
         "refName": "yarn",
         "serviceType": "YARN",
+        "serviceConfigs": [
+          {
+            "name": "yarn_admin_acl",
+            "value": "yarn,hive,hdfs"
+          }
+        ],
         "roleConfigGroups": [
           {
             "refName": "yarn-RESOURCEMANAGER-BASE",
             "roleType": "RESOURCEMANAGER",
-            "base": true
+            "base": true,
+            "configs": [
+            	{
+	   		        "name": "resourcemanager_config_safety_valve",
+	   		        "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>file</value></property>"
+	   	   	    },
+              {
+                "name": "yarn_resourcemanager_scheduler_class",
+                "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
+              },
+              {
+                "name": "yarn_scheduler_capacity_resource_calculator",
+                "value": "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
+              },
+              {
+                "name": "resourcemanager_capacity_scheduler_configuration",
+                "value": "<configuration><property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value> </value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value> </value></property><property><name>yarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property><property><name>yarn.scheduler.capacity.root.default.minimum-user-limit-percent</name><value>100</value></property><property><name>yarn.scheduler.capacity.maximum-am-resource-percent</name><value>0.33</value></property><property><name>yarn.scheduler.capacity.node-locality-delay</name><value>0</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.maximum-threads</name><value>1</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name><value>10</value></property><property><name>yarn.scheduler.capacity.per-node-heartbeat.maximum-offswitch-assignments</name><value>4</value></property></configuration>"
+              }
+            ]
           },
           {
             "refName": "yarn-NODEMANAGER-WORKER",
@@ -90,8 +124,24 @@
           {
             "name": "yarn_service",
             "ref": "yarn"
-          }
-        ],
+          },
+          {
+            "name": "tez.am.container.reuse.non-local-fallback.enabled",
+            "value": "true"
+          },
+          {
+            "name": "tez.am.container.reuse.locality.delay-allocation-millis",
+            "value": "0"
+          },
+	  {
+            "name": "tez.am.launch.cmd-opts",
+            "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
+	  },
+	  {
+            "name": "tez.task.launch.cmd-opts",
+	    "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
+	  }
+	],
         "roleConfigGroups": [
           {
             "refName": "tez-GATEWAY-BASE",
@@ -137,6 +187,10 @@
           {
             "name": "mapreduce_yarn_service",
             "ref": "yarn"
+          },
+          {
+            "name": "tez_container_size",
+            "value": "4096"
           }
         ],
         "roleConfigGroups": [
@@ -159,54 +213,14 @@
         ]
       },
       {
-        "refName": "llap",
-        "serviceType": "HIVE_LLAP",
-        "displayName": "LLAP",
-        "serviceConfigs": [
-          {
-            "name": "hms_connector",
-            "ref": "hms"
-          },
-          {
-            "name": "tez_service",
-            "ref": "tez"
-          },
-          {
-            "name": "zookeeper_service",
-            "ref": "zookeeper"
-          },
-          {
-            "name": "mapreduce_yarn_service",
-            "ref": "yarn"
-          }
-        ],
-        "roleConfigGroups": [
-          {
-            "refName": "llap-GATEWAY-BASE",
-            "roleType": "GATEWAY",
-            "base": true
-          },
-          {
-            "refName": "llap-HIVESERVER2-BASE",
-            "roleType": "HIVESERVER2",
-            "base": true,
-            "configs": [
-              {
-                 "name": "hive_server2_transport_mode",
-                 "value": "http"
-              }
-            ]
-          },
-          {
-            "refName": "llap-LLAPPROXY-BASE",
-            "roleType": "LLAPPROXY",
-            "base": true
-          }
-        ]
-      },
-      {
         "refName": "hue",
         "serviceType": "HUE",
+        "serviceConfigs": [
+          {
+            "name": "hue_service_safety_valve",
+            "value": "[desktop]\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,pig"
+          }
+        ],
         "roleConfigGroups": [
           {
             "refName": "hue-HUE_SERVER-BASE",
@@ -262,6 +276,28 @@
         ]
       },
       {
+        "refName": "das",
+        "serviceType": "DAS",
+        "roleConfigGroups": [
+          {
+            "refName": "das-DAS_WEBAPP",
+            "roleType": "DAS_WEBAPP",
+            "base": true,
+            "configs": [
+              {
+                "name": "data_analytics_studio_admin_users",
+                "value": "*"
+              }
+            ]
+          },
+          {
+            "refName": "das-DAS_EVENT_PROCESSOR",
+            "roleType": "DAS_EVENT_PROCESSOR",
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "oozie",
         "serviceType": "OOZIE",
         "roleConfigGroups": [
@@ -285,9 +321,6 @@
           "hms-HIVEMETASTORE-BASE",
           "hive_on_tez-HIVESERVER2-BASE",
           "hive_on_tez-GATEWAY-BASE",
-          "llap-HIVESERVER2-BASE",
-          "llap-GATEWAY-BASE",
-          "llap-LLAPPROXY-BASE",
           "hue-HUE_LOAD_BALANCER-BASE",
           "hue-HUE_SERVER-BASE",
           "tez-GATEWAY-BASE",
@@ -298,17 +331,18 @@
           "oozie-OOZIE_SERVER-BASE",
           "yarn-JOBHISTORY-BASE",
           "yarn-RESOURCEMANAGER-BASE",
-          "zookeeper-SERVER-BASE"
+          "zookeeper-SERVER-BASE",
+          "das-DAS_WEBAPP",
+          "das-DAS_EVENT_PROCESSOR"
         ]
       },
       {
         "refName": "worker",
-        "cardinality": 1,
+        "cardinality": 3,
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
           "hms-GATEWAY-BASE",
           "hive_on_tez-GATEWAY-BASE",
-          "llap-GATEWAY-BASE",
           "tez-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "livy-GATEWAY-BASE",
@@ -321,7 +355,6 @@
         "roleConfigGroupsRefNames": [
           "hms-GATEWAY-BASE",
           "hive_on_tez-GATEWAY-BASE",
-          "llap-GATEWAY-BASE",
           "tez-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "yarn-NODEMANAGER-COMPUTE"
@@ -333,11 +366,10 @@
         "roleConfigGroupsRefNames": [
           "hms-GATEWAY-BASE",
           "hive_on_tez-GATEWAY-BASE",
-          "llap-GATEWAY-BASE",
           "tez-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "livy-GATEWAY-BASE"
-        ]
+         ]
       }
     ]
   }
