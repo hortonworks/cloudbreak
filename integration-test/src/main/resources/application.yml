@@ -8,6 +8,9 @@ logging:
     path: ${integrationtest.outputdir}
 
 integrationtest:
+  imageValidation:
+    sourceCatalogName: v3-dev
+    sourceCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-dev-cb-image-catalog.json
   spark:
     sparkPoolSize: 8
   command: suiteurls
