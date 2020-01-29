@@ -18,6 +18,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
@@ -26,17 +28,16 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 
 public class ParcelAccessibilityTest {
 
+    private static Map<String, Object> appYaml;
+
+    @BeforeAll
+    public static void setUp() throws IOException, URISyntaxException {
+        appYaml = readCoreAppYaml();
+    }
+
     @Test
-    public void testParcelAccessibility() throws URISyntaxException, IOException {
-        URL url = ParcelAccessibilityTest.class.getResource("/application.yml");
-        if (url.toString().endsWith("test/resources/application.yml")) {
-            throw new RuntimeException("We should validate the main/resources application.yml");
-        }
-        Path resPath = Paths.get(url.toURI());
-        String appYml = new String(Files.readAllBytes(resPath), "UTF8");
-        Yaml yaml = new Yaml();
-        Map<String, Object> load = yaml.load(appYml);
-        List<DefaultCDHInfo> defaultCDHInfo = getCsds(load);
+    public void testParcelAccessibility() {
+        List<DefaultCDHInfo> defaultCDHInfo = getCsds(appYaml);
         defaultCDHInfo.stream()
                 .filter(s -> !s.getParcels().isEmpty())
                 .flatMap(s -> s.getParcels().stream())
@@ -44,11 +45,30 @@ public class ParcelAccessibilityTest {
                 .forEach(this::validateUrl);
     }
 
-    private List<DefaultCDHInfo> getCsds(Map<String, Object> load) {
-        Map<String, Object> entries = load;
-        for (String s : Arrays.asList("cb", "cdh", "entries")) {
-            entries = (Map<String, Object>) entries.get(s);
+    @Test
+    void validateParcelUrls() {
+        List<DefaultCDHInfo> defaultCDHInfo = getCsds(appYaml);
+        defaultCDHInfo.stream()
+                .filter(s -> !s.getRepo().getStack().isEmpty())
+                .flatMap(s -> s.getRepo().getStack().entrySet().stream())
+                .map(s -> s.getValue() + "manifest.json")
+                .filter(s -> s.startsWith("http"))
+                .forEach(this::validateUrl);
+    }
+
+    private static Map<String, Object> readCoreAppYaml() throws URISyntaxException, IOException {
+        URL url = ParcelAccessibilityTest.class.getResource("/application.yml");
+        if (url.toString().endsWith("test/resources/application.yml")) {
+            throw new RuntimeException("We should validate the main/resources application.yml");
         }
+        Path resPath = Paths.get(url.toURI());
+        String appYml = new String(Files.readAllBytes(resPath), "UTF8");
+        Yaml yaml = new Yaml();
+        return yaml.load(appYml);
+    }
+
+    private List<DefaultCDHInfo> getCsds(Map<String, Object> load) {
+        Map<String, Object> entries = getCDHVersions(load);
         List<DefaultCDHInfo> defaultCDHInfos = new ArrayList<>();
         entries.forEach((key, value) -> {
             DefaultCDHInfo defaultCDHInfo = Json.silent(value).getSilent(DefaultCDHInfo.class);
@@ -56,6 +76,14 @@ public class ParcelAccessibilityTest {
             defaultCDHInfos.add(defaultCDHInfo);
         });
         return defaultCDHInfos;
+    }
+
+    private Map<String, Object> getCDHVersions(Map<String, Object> load) {
+        Map<String, Object> entries = load;
+        for (String s : Arrays.asList("cb", "cdh", "entries")) {
+            entries = (Map<String, Object>) entries.get(s);
+        }
+        return entries;
     }
 
     private void validateUrl(String url) {
@@ -66,11 +94,18 @@ public class ParcelAccessibilityTest {
             URI target = new URL(url).toURI();
             CloseableHttpResponse execute = client.execute(new HttpHead(target));
             if (execute.getStatusLine().getStatusCode() != 200) {
-                throw new RuntimeException("CSD cannot find on the " + url);
+                Assertions.fail(
+                        String.format("URL %s did not respond with 200 OK. It might be an obsolete entry in application.yml. " +
+                                "If you hadn't made any changes to them, it's possible that it got outdated. " +
+                                "Please check if there any update avaiable.", url));
             }
             int length = getContentLength(execute);
             if (length <= 0) {
-                throw new RuntimeException("CSD has not length: " + url);
+                Assertions.fail(
+                        String.format("URL %s was reachable but the file had a Context of 0 bytes. It might be an obsolete entry in application.yml " +
+                                "If you hadn't made any changes to them, it's possible that it got outdated. " +
+                                "Please check if there any update avaiable.", url));
+                throw new RuntimeException("CSD has no length: " + url);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
