@@ -12,7 +12,6 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
-import com.sequenceiq.cloudbreak.validation.Validator;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
@@ -22,6 +21,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenvironmen
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
+import com.sequenceiq.freeipa.controller.validation.CreateFreeIpaRequestValidator;
+import com.sequenceiq.freeipa.controller.validation.RegisterChildEnvironmentRequestValidator;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
 import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
@@ -64,10 +65,10 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     private CrnService crnService;
 
     @Inject
-    private Validator<CreateFreeIpaRequest> createFreeIpaRequestValidator;
+    private CreateFreeIpaRequestValidator createFreeIpaRequestValidator;
 
     @Inject
-    private Validator<RegisterChildEnvironmentRequest> registerChildEnvironmentRequestValidator;
+    private RegisterChildEnvironmentRequestValidator registerChildEnvironmentRequestValidator;
 
     @Inject
     private FreeIpaStartService freeIpaStartService;
@@ -90,7 +91,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    public void registerChildEnvironment(RegisterChildEnvironmentRequest request) {
+    public void registerChildEnvironment(@Valid RegisterChildEnvironmentRequest request) {
         ValidationResult validationResult = registerChildEnvironmentRequestValidator.validate(request);
         if (validationResult.hasError()) {
             LOGGER.debug("FreeIPA request has validation error(s): {}.", validationResult.getFormattedErrors());
