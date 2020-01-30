@@ -15,7 +15,18 @@ import io.swagger.annotations.ApiModelProperty;
 public class YarnParameters implements Serializable {
 
     @ApiModelProperty(required = true)
+    private String ambariUser;
+
+    @ApiModelProperty(required = true)
     private String endpoint;
+
+    public String getAmbariUser() {
+        return ambariUser;
+    }
+
+    public void setAmbariUser(String ambariUser) {
+        this.ambariUser = ambariUser;
+    }
 
     public String getEndpoint() {
         return endpoint;
