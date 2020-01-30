@@ -34,6 +34,7 @@ import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Component
@@ -62,18 +63,18 @@ public class SdxStartService {
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
 
-    public void triggerStartIfClusterNotRunning(SdxCluster cluster) {
+    public FlowIdentifier triggerStartIfClusterNotRunning(SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
         checkFreeipaRunning(cluster.getEnvCrn());
-        sdxReactorFlowManager.triggerSdxStartFlow(cluster.getId());
+        return sdxReactorFlowManager.triggerSdxStartFlow(cluster.getId());
     }
 
     public void start(Long sdxId) {
         SdxCluster sdxCluster = sdxService.getById(sdxId);
         try {
             LOGGER.info("Triggering start flow for cluster {}", sdxCluster.getClusterName());
-            stackV4Endpoint.putStart(0L, sdxCluster.getClusterName());
-            cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(sdxCluster);
+            FlowIdentifier flowIdentifier = stackV4Endpoint.putStart(0L, sdxCluster.getClusterName());
+            cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.START_IN_PROGRESS, ResourceEvent.SDX_START_STARTED,
                     "Datalake start in progress", sdxCluster);
         } catch (NotFoundException e) {

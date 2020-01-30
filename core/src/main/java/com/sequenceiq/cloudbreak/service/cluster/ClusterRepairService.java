@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.StateStatus;
 
@@ -113,7 +114,7 @@ public class ClusterRepairService {
     @Inject
     private RdsConfigService rdsConfigService;
 
-    public void repairAll(Long stackId) {
+    public FlowIdentifier repairAll(Long stackId) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
                 repair(ManualClusterRepairMode.ALL, stackId, Set.of(), NOT_DELETE_VOLUMES);
         Set<String> repairableHostGroups;
@@ -126,19 +127,19 @@ public class ClusterRepairService {
         } else {
             repairableHostGroups = Set.of();
         }
-        triggerRepairOrThrowBadRequest(stackId, repairStart, NOT_REMOVE_ONLY, repairableHostGroups);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, NOT_REMOVE_ONLY, repairableHostGroups);
     }
 
-    public void repairHostGroups(Long stackId, Set<String> hostGroups, boolean removeOnly) {
+    public FlowIdentifier repairHostGroups(Long stackId, Set<String> hostGroups, boolean removeOnly) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
                 repair(ManualClusterRepairMode.HOST_GROUP, stackId, hostGroups, NOT_DELETE_VOLUMES);
-        triggerRepairOrThrowBadRequest(stackId, repairStart, removeOnly, hostGroups);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, removeOnly, hostGroups);
     }
 
-    public void repairNodes(Long stackId, Set<String> nodeIds, boolean deleteVolumes, boolean removeOnly) {
+    public FlowIdentifier repairNodes(Long stackId, Set<String> nodeIds, boolean deleteVolumes, boolean removeOnly) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
                 repair(ManualClusterRepairMode.NODE_ID, stackId, nodeIds, deleteVolumes);
-        triggerRepairOrThrowBadRequest(stackId, repairStart, removeOnly, nodeIds);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, removeOnly, nodeIds);
     }
 
     public boolean canRepairAll(Stack stack) {
@@ -358,15 +359,16 @@ public class ClusterRepairService {
         }
     }
 
-    private void triggerRepairOrThrowBadRequest(Long stackId, Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairValidationResult,
-            boolean removeOnly,
-            Set<String> recoveryMessageArgument) {
+    private FlowIdentifier triggerRepairOrThrowBadRequest(Long stackId, Result<Map<HostGroupName, Set<InstanceMetaData>>,
+            RepairValidation> repairValidationResult, boolean removeOnly, Set<String> recoveryMessageArgument) {
         if (repairValidationResult.isError()) {
             throw new BadRequestException(String.join(" ", repairValidationResult.getError().getValidationErrors()));
         } else {
             if (!repairValidationResult.getSuccess().isEmpty()) {
-                flowManager.triggerClusterRepairFlow(stackId, toStringMap(repairValidationResult.getSuccess()), removeOnly);
+                FlowIdentifier flowIdentifier = flowManager.triggerClusterRepairFlow(stackId, toStringMap(repairValidationResult.getSuccess()),
+                        removeOnly);
                 eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_REQUESTED, recoveryMessageArgument);
+                return flowIdentifier;
             } else {
                 throw new BadRequestException(String.format("Could not trigger cluster repair  for stack %s, because node list is incorrect", stackId));
             }

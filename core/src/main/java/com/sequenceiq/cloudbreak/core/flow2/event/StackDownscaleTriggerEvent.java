@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.event;
 
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+
 import reactor.rx.Promise;
 
 public class StackDownscaleTriggerEvent extends StackScaleTriggerEvent {
@@ -18,7 +20,7 @@ public class StackDownscaleTriggerEvent extends StackScaleTriggerEvent {
         this.privateIds = privateIds;
     }
 
-    public StackDownscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Set<Long> privateIds, Promise<Boolean> accepted) {
+    public StackDownscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Set<Long> privateIds, Promise<AcceptResult> accepted) {
         super(selector, stackId, instanceGroup, null, accepted);
         this.privateIds = privateIds;
     }

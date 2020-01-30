@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 
 @Component
@@ -94,8 +93,8 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     public void putCluster(@ResourceCrn String crn, String userId, @Valid UpdateClusterV4Request updateRequest) {
         setupIdentityForAutoscale(crn, userId);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        clusterCommonService.put(crn, updateRequest, user, workspace);
+        workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        clusterCommonService.put(crn, updateRequest);
     }
 
     @Override

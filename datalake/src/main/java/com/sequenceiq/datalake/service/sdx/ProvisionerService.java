@@ -62,7 +62,7 @@ public class ProvisionerService {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             try {
                 stackV4Endpoint.delete(0L, sdxCluster.getClusterName(), forced);
-                cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(sdxCluster);
+                cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, null);
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETION_IN_PROGRESS,
                         ResourceEvent.SDX_CLUSTER_DELETION_STARTED, "Datalake stack deletion in progress", sdxCluster);
             } catch (NotFoundException e) {
@@ -128,7 +128,7 @@ public class ProvisionerService {
                 sdxCluster.setStackId(stackV4Response.getId());
                 sdxCluster.setStackCrn(stackV4Response.getCrn());
                 sdxClusterRepository.save(sdxCluster);
-                cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(sdxCluster);
+                cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, stackV4Response.getFlowIdentifier());
                 LOGGER.info("Sdx cluster updated");
             } catch (ClientErrorException e) {
                 String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);

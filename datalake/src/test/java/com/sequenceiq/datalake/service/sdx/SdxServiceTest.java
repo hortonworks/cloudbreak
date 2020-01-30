@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.SDX_CLUSTER_DELETION
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -20,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -54,6 +57,8 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -182,7 +187,8 @@ class SdxServiceTest {
         });
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE);
-        SdxCluster createdSdxCluster = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        SdxCluster createdSdxCluster = result.getLeft();
         Assertions.assertEquals(id, createdSdxCluster.getId());
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
@@ -221,7 +227,8 @@ class SdxServiceTest {
             return sdxWithId;
         });
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
-        SdxCluster createdSdxCluster = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        SdxCluster createdSdxCluster = result.getLeft();
         Assertions.assertEquals("s3a://some/dir", createdSdxCluster.getCloudStorageBaseLocation());
     }
 
@@ -244,7 +251,8 @@ class SdxServiceTest {
             return sdxWithId;
         });
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
-        SdxCluster createdSdxCluster = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        SdxCluster createdSdxCluster = result.getLeft();
         Assertions.assertEquals("s3a://some/dir", createdSdxCluster.getCloudStorageBaseLocation());
     }
 
@@ -295,6 +303,7 @@ class SdxServiceTest {
     void deleteSdxWhenCorrectNameIsProvided() {
         SdxCluster sdxCluster = getSdxClusterForDeletionTest();
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxReactorFlowManager.triggerSdxDeletion(anyLong(), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         mockCBCallForDistroXClusters(Sets.newHashSet());
         underTest.deleteSdx(USER_CRN, "sdx-cluster-name", true);
         verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(SDX_ID, true);

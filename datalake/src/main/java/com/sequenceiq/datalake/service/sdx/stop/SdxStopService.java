@@ -35,6 +35,7 @@ import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Component
@@ -66,20 +67,20 @@ public class SdxStopService {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    public void triggerStopIfClusterNotStopped(SdxCluster cluster) {
+    public FlowIdentifier triggerStopIfClusterNotStopped(SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
         checkFreeipaRunning(cluster.getEnvCrn());
-        sdxReactorFlowManager.triggerSdxStopFlow(cluster.getId());
+        return sdxReactorFlowManager.triggerSdxStopFlow(cluster.getId());
     }
 
     public void stop(Long sdxId) {
         SdxCluster sdxCluster = sdxService.getById(sdxId);
         try {
             LOGGER.info("Triggering stop flow for cluster {}", sdxCluster.getClusterName());
-            stackV4Endpoint.putStop(0L, sdxCluster.getClusterName());
+            FlowIdentifier flowIdentifier = stackV4Endpoint.putStop(0L, sdxCluster.getClusterName());
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS, ResourceEvent.SDX_STOP_STARTED, "Datalake stop in progress",
                     sdxCluster);
-            cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(sdxCluster);
+            cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (NotFoundException e) {
             LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
         } catch (ClientErrorException e) {

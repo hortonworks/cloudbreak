@@ -1,5 +1,6 @@
 package com.sequenceiq.flow.reactor.api.event;
 
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -13,13 +14,13 @@ public class BaseFlowEvent implements Selectable, Acceptable, ResourceCrnPayload
 
     private final String resourceCrn;
 
-    private final Promise<Boolean> accepted;
+    private final Promise<AcceptResult> accepted;
 
     public BaseFlowEvent(String selector, Long resourceId, String resourceCrn) {
         this(selector, resourceId, resourceCrn, new Promise<>());
     }
 
-    public BaseFlowEvent(String selector, Long resourceId, String resourceCrn, Promise<Boolean> accepted) {
+    public BaseFlowEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted) {
         this.selector = selector;
         this.resourceId = resourceId;
         this.resourceCrn = resourceCrn;
@@ -37,7 +38,7 @@ public class BaseFlowEvent implements Selectable, Acceptable, ResourceCrnPayload
     }
 
     @Override
-    public Promise<Boolean> accepted() {
+    public Promise<AcceptResult> accepted() {
         return accepted;
     }
 

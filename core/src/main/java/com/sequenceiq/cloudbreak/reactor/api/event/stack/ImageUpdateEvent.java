@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.stack;
 
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 
@@ -14,7 +15,7 @@ public class ImageUpdateEvent extends StackEvent {
         this.image = image;
     }
 
-    public ImageUpdateEvent(String selector, Long stackId, Promise<Boolean> accepted, StatedImage image) {
+    public ImageUpdateEvent(String selector, Long stackId, Promise<AcceptResult> accepted, StatedImage image) {
         super(selector, stackId, accepted);
         this.image = image;
     }

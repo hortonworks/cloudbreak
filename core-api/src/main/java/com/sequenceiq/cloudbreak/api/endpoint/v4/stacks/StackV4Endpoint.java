@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -92,20 +93,21 @@ public interface StackV4Endpoint {
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DELETE_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "deleteStackInWorkspaceV4")
-    void delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") boolean forced);
+    void delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @POST
     @Path("{name}/sync")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = SYNC_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "syncStackInWorkspaceV4")
-    void sync(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    FlowIdentifier sync(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("{name}/retry")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RETRY_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.RETRY_STACK_NOTES,
             nickname = "retryStackInWorkspaceV4")
-    void retry(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    FlowIdentifier retry(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @GET
     @Path("{name}/retry")
@@ -118,34 +120,35 @@ public interface StackV4Endpoint {
     @Path("{name}/stop")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = STOP_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "stopStackInWorkspaceV4")
-    void putStop(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    FlowIdentifier putStop(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @PUT
     @Path("{name}/start")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = START_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "startStackInWorkspaceV4")
-    void putStart(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    FlowIdentifier putStart(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @PUT
     @Path("{name}/scaling")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = SCALE_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "putScalingStackInWorkspaceV4")
-    void putScaling(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid StackScaleV4Request updateRequest);
+    FlowIdentifier putScaling(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid StackScaleV4Request updateRequest);
 
     @POST
     @Path("{name}/manual_repair")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = REPAIR_CLUSTER_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
             nickname = "repairStackInWorkspaceV4")
-    void repairCluster(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid ClusterRepairV4Request clusterRepairRequest);
+    FlowIdentifier repairCluster(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @Valid ClusterRepairV4Request clusterRepairRequest);
 
     @POST
     @Path("{name}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UPGRADE_CLUSTER_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_UPGRADE_NOTES,
             nickname = "upgradeClusterInWorkspaceV4")
-    void upgradeCluster(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    FlowIdentifier upgradeCluster(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @GET
     @Path("{name}/check_for_upgrade")
@@ -167,7 +170,8 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CHECK_IMAGE_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON,
             notes = Notes.STACK_NOTES, nickname = "changeImageStackInWorkspaceV4")
-    void changeImage(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid StackImageChangeV4Request stackImageChangeRequest);
+    FlowIdentifier changeImage(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @Valid StackImageChangeV4Request stackImageChangeRequest);
 
     @DELETE
     @Path("{name}/cluster")
@@ -195,7 +199,7 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DELETE_INSTANCE_BY_ID_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstanceStackV4")
-    void deleteInstance(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+    FlowIdentifier deleteInstance(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("forced") @DefaultValue("false") boolean forced, @QueryParam("instanceId") String instanceId);
 
     @DELETE
@@ -203,7 +207,7 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteMultipleInstancesStackV4")
-    void deleteMultipleInstances(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+    FlowIdentifier deleteMultipleInstances(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("id") @NotEmpty List<String> instances,
             @QueryParam("forced") @DefaultValue("false") boolean forced);
 
@@ -212,21 +216,22 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = PUT_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "putpasswordStackV4")
-    void putPassword(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid UserNamePasswordV4Request userNamePasswordJson);
+    FlowIdentifier putPassword(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @Valid UserNamePasswordV4Request userNamePasswordJson);
 
     @PUT
     @Path("{name}/maintenance")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = SET_MAINTENANCE_MODE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.MAINTENANCE_NOTES,
             nickname = "setClusterMaintenanceMode")
-    void setClusterMaintenanceMode(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+    FlowIdentifier setClusterMaintenanceMode(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @NotNull MaintenanceModeV4Request maintenanceMode);
 
     @PUT
     @Path("{name}/cluster")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = PUT_BY_STACK_ID, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_NOTES, nickname = "putClusterV4")
-    void putCluster(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid UpdateClusterV4Request updateJson);
+    FlowIdentifier putCluster(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid UpdateClusterV4Request updateJson);
 
     @GET
     @Path("{name}/inventory")

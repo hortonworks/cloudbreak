@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.flow;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -15,7 +16,7 @@ public class SdxEvent implements Selectable, Acceptable {
 
     private final String userId;
 
-    private final Promise<Boolean> accepted;
+    private final Promise<AcceptResult> accepted;
 
     public SdxEvent(Long sdxId, String userId) {
         this(null, sdxId, userId);
@@ -36,7 +37,7 @@ public class SdxEvent implements Selectable, Acceptable {
         this(selector, context.getSdxId(), context.getUserId());
     }
 
-    public SdxEvent(String selector, Long sdxId, String userId, Promise<Boolean> accepted) {
+    public SdxEvent(String selector, Long sdxId, String userId, Promise<AcceptResult> accepted) {
         this.selector = selector;
         this.sdxId = sdxId;
         this.userId = userId;
@@ -58,7 +59,7 @@ public class SdxEvent implements Selectable, Acceptable {
     }
 
     @Override
-    public Promise<Boolean> accepted() {
+    public Promise<AcceptResult> accepted() {
         return accepted;
     }
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow.deletion.event;
 
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 import reactor.rx.Promise;
@@ -10,7 +11,7 @@ public class EnvDeleteEvent extends BaseNamedFlowEvent {
         super(selector, resourceId, resourceName, resourceCrn);
     }
 
-    public EnvDeleteEvent(String selector, Long resourceId, Promise<Boolean> accepted, String resourceName, String resourceCrn) {
+    public EnvDeleteEvent(String selector, Long resourceId, Promise<AcceptResult> accepted, String resourceName, String resourceCrn) {
         super(selector, resourceId, accepted, resourceName, resourceCrn);
     }
 
@@ -27,7 +28,7 @@ public class EnvDeleteEvent extends BaseNamedFlowEvent {
 
         private Long resourceId;
 
-        private Promise<Boolean> accepted;
+        private Promise<AcceptResult> accepted;
 
         private EnvDeleteEventBuilder() {
         }
@@ -47,7 +48,7 @@ public class EnvDeleteEvent extends BaseNamedFlowEvent {
             return this;
         }
 
-        public EnvDeleteEventBuilder withAccepted(Promise<Boolean> accepted) {
+        public EnvDeleteEventBuilder withAccepted(Promise<AcceptResult> accepted) {
             this.accepted = accepted;
             return this;
         }

@@ -33,6 +33,7 @@ import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 import reactor.bus.Event;
@@ -76,8 +77,8 @@ public class SdxSyncHandler implements EventHandler<SdxSyncWaitRequest> {
         try {
             LOGGER.debug("Polling stack sync process for id: {}", sdxId);
             SdxCluster sdxCluster = sdxService.getById(sdxId);
-            sdxService.sync(sdxCluster.getClusterName());
-            cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(sdxCluster);
+            FlowIdentifier flowIdentifier = sdxService.sync(sdxCluster.getClusterName());
+            cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
             StackV4Response stackV4Response = pollingSync(sdxCluster);
             updateSdxStatus(sdxCluster, stackV4Response);
             response = new SdxSyncSuccessEvent(sdxId, userId);

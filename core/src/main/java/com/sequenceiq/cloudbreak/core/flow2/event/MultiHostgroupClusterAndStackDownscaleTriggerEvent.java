@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.event;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
@@ -16,7 +17,7 @@ public class MultiHostgroupClusterAndStackDownscaleTriggerEvent extends StackEve
     private final ClusterDownscaleDetails details;
 
     public MultiHostgroupClusterAndStackDownscaleTriggerEvent(String selector, Long stackId, Map<String, Set<Long>> instanceIdsByHostgroupMap,
-            ClusterDownscaleDetails details, ScalingType scalingType, Promise<Boolean> accepted) {
+            ClusterDownscaleDetails details, ScalingType scalingType, Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.instanceIdsByHostgroupMap = instanceIdsByHostgroupMap;
         this.details = details;

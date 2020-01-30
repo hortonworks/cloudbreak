@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -121,6 +122,9 @@ public class StackV4Response extends StackV4Base {
 
     @ApiModelProperty(StackModelDescription.TUNNEL)
     private Tunnel tunnel = Tunnel.DIRECT;
+
+    @ApiModelProperty(StackModelDescription.FLOW_ID)
+    private FlowIdentifier flowIdentifier;
 
     public Long getId() {
         return id;
@@ -344,5 +348,13 @@ public class StackV4Response extends StackV4Base {
 
     public void setTunnel(Tunnel tunnel) {
         this.tunnel = tunnel;
+    }
+
+    public FlowIdentifier getFlowIdentifier() {
+        return flowIdentifier;
+    }
+
+    public void setFlowIdentifier(FlowIdentifier flowIdentifier) {
+        this.flowIdentifier = flowIdentifier;
     }
 }
