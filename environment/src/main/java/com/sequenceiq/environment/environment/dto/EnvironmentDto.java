@@ -68,6 +68,8 @@ public class EnvironmentDto implements Payload {
 
     private ExperimentalFeatures experimentalFeatures = new ExperimentalFeatures();
 
+    private String parentEnvironmentCrn;
+
     @Override
     public Long getResourceId() {
         return id;
@@ -277,6 +279,14 @@ public class EnvironmentDto implements Payload {
         this.experimentalFeatures = experimentalFeatures;
     }
 
+    public String getParentEnvironmentCrn() {
+        return parentEnvironmentCrn;
+    }
+
+    public void setParentEnvironmentCrn(String parentEnvironmentCrn) {
+        this.parentEnvironmentCrn = parentEnvironmentCrn;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentDto{"
@@ -341,6 +351,8 @@ public class EnvironmentDto implements Payload {
         private ParametersDto parameters;
 
         private ExperimentalFeatures experimentalFeatures;
+
+        private String parentEnvironmentCrn;
 
         private Builder() {
         }
@@ -470,6 +482,11 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
+        public Builder withParentEnvironmentCrn(String parentEnvironmentCrn) {
+            this.parentEnvironmentCrn = parentEnvironmentCrn;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setId(id);
@@ -497,6 +514,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setAdminGroupName(adminGroupName);
             environmentDto.setParameters(parameters);
             environmentDto.setExperimentalFeatures(experimentalFeatures);
+            environmentDto.setParentEnvironmentCrn(parentEnvironmentCrn);
             return environmentDto;
         }
     }

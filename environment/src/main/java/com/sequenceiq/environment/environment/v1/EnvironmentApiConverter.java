@@ -116,7 +116,8 @@ public class EnvironmentApiConverter {
                         .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
                         .withTunnel(tunnelConverter.convert(request.getTunnel()))
                         .build())
-                .withParameters(getIfNotNull(request.getAws(), this::awsParamsToParametersDto));
+                .withParameters(getIfNotNull(request.getAws(), this::awsParamsToParametersDto))
+                .withParentEnvironmentCrn(request.getParentEnvironmentCrn());
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
@@ -246,7 +247,8 @@ public class EnvironmentApiConverter {
                 .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())
                 .withIdBrokerMappingSource(environmentDto.getExperimentalFeatures().getIdBrokerMappingSource())
                 .withAdminGroupName(environmentDto.getAdminGroupName())
-                .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams));
+                .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams))
+                .withParentEnvironmentCrn(environmentDto.getParentEnvironmentCrn());
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network ->
                 builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel())));
