@@ -1,4 +1,5 @@
 {%- from 'sssd/settings.sls' import ipa with context %}
+{%- from 'metadata/settings.sls' import metadata with context %}
 
 ipa_packages_install:
   pkg.installed:
@@ -11,7 +12,7 @@ ipa_packages_install:
 
 join_ipa:
   cmd.run:
-{% if not salt['file.directory_exists']('/yarn-private') %}
+{% if metadata.platform != 'YARN' %}
     - name: |
         ipa-client-install --realm={{salt['pillar.get']('sssd-ipa:realm')}} \
           --domain={{salt['pillar.get']('sssd-ipa:domain')}} --mkhomedir --principal={{salt['pillar.get']('sssd-ipa:principal')}} \
@@ -34,7 +35,7 @@ join_ipa:
     - env:
         - PW: "{{salt['pillar.get']('sssd-ipa:password')}}"
 
-{% if salt['file.directory_exists']('/yarn-private') %}
+{% if metadata.platform == 'YARN'and not metadata.cluster_in_childenvironment %}
 dns_remove_script:
   file.managed:
     - source: salt://sssd/ycloud/dns_cleanup.sh
@@ -57,7 +58,7 @@ add_dns_record:
     - env:
         - PW: "{{salt['pillar.get']('sssd-ipa:password')}}"
 
-{% if not salt['file.directory_exists']('/yarn-private') %}
+{% if metadata.platform != 'YARN' %}
 
 restart_sssd_if_reconfigured:
   service.running:
@@ -76,7 +77,7 @@ restart_sssd_if_reconfigured:
     - user: root
     - group: root
 
-{% if salt['file.directory_exists']('/yarn-private') %}
+{% if metadata.platform == 'YARN'and not metadata.cluster_in_childenvironment %}
 
 backup_systemctl:
   file.copy:
@@ -111,7 +112,7 @@ restore_systemctl:
 include:
     - sssd.ssh
 
-{% if salt['file.directory_exists']('/yarn-private') %}
+{% if metadata.platform == 'YARN'and not metadata.cluster_in_childenvironment %}
 {%- if "manager_server" in grains.get('roles', []) %}
 
 create_cm_keytab_generation_script:
@@ -126,11 +127,7 @@ create_cm_keytab_generation_script:
 
 generate_cm_freeipa_keytab:
   cmd.run:
-{% if not salt['file.directory_exists']('/yarn-private') %}
-    - name: sh /opt/salt/scripts/generate_cm_keytab.sh 2>&1 | tee -a /var/log/generate_cm_keytab.log && exit ${PIPESTATUS[0]}
-{% else %}
     - name: newgrp root && sh /opt/salt/scripts/generate_cm_keytab.sh 2>&1 | tee -a /var/log/generate_cm_keytab.log && exit ${PIPESTATUS[0]}
-{% endif %}
     - runas: root
     - env:
         - password: "{{salt['pillar.get']('sssd-ipa:password')}}"
