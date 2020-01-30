@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Query statistics</title>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.2/js/jquery.tablesorter.min.js"
+            integrity="sha256-WX1A5tGpPfZZ48PgoZX2vpOojjCXsytpCvgPcRPnFKU=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
+          integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous"/>
+    <style>
+    html {
+      font-size: 1rem;
+    }
+
+    html,
+    body {
+      height: 100vh;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: sans-serif;
+    }
+
+    table {
+      border-collapse: collapse;
+      position: relative;
+    }
+
+    th {
+      max-width: 40rem;
+      text-transform: uppercase;
+      padding: 0.75rem;
+      background-color: gray;
+      color: white;
+      position: sticky;
+      top: 0;
+    }
+
+    th:hover {
+      background-color: black;
+    }
+
+    th[align="center"] {
+      text-align: center;
+    }
+
+    td {
+      max-width: 40rem;
+      padding: 0.5rem;
+    }
+
+    td[align="right"] {
+      text-align: right;
+    }
+
+    td[align="left"] {
+      text-align: left;
+    }
+
+    .layout {
+      display: grid;
+      padding: 1rem;
+      grid-template-areas:
+        "desc"
+        "navigator"
+        "tabView";
+      height: 100%;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto 1fr;
+    }
+
+    .desc {
+      grid-area: desc;
+      padding: 0 0.5rem;
+    }
+
+    .navigator {
+      grid-area: navigator;
+    }
+
+    .tab {
+      padding: 0.7rem;
+    }
+
+    .tab:hover {
+      background-color: cornflowerblue;
+    }
+
+    .query-table {
+      grid-area: tabView;
+      overflow: scroll;
+      display: none;
+      border: 1px solid black;
+    }
+
+    .docker-stat {
+      grid-area: tabView;
+      overflow: scroll;
+      display: none;
+    }
+
+    .query-table:target {
+      display: block;
+    }
+
+    .docker-stat:target {
+      display: block;
+    }
+
+    .docker-stat>pre {
+      background-color: rgb(240, 240, 240);
+      padding: 1rem;
+    }
+    </style>
+</head>
+
+<body>
+<div class="layout">
+    <p class="desc">Database query statistics. Exported from the <a
+            href="https://www.postgresql.org/docs/9.6/pgstatstatements.html">pg_stat_statements</a> table.</p>
+    <p class="navigator">
+        <a class="tab" href="#cbdb">cbdb stat</a>
+        <a class="tab" href="#docker_stats">docker stats</a>
+    <div id="cbdb" class="query-table">
+        CB_PG_STAT
+    </div>
+    <div id="docker_stats" class="docker-stat">
+        <pre>DOCKER_STAT_RESULT</pre>
+    </div>
+</div>
+
+<script>
+    $(function () {
+      let table = document.querySelector("#cbdb>table");
+      let theaderRow = table.querySelector("tbody>tr");
+      document.querySelector("#cbdb>table>tbody").removeChild(theaderRow);
+      let theader = document.createElement("thead");
+      theader.appendChild(theaderRow);
+      table.insertBefore(theader, table.querySelector("tbody"));
+
+      $("#cbdb>table").tablesorter();
+    });
+</script>
+</body>
+
+</html>
