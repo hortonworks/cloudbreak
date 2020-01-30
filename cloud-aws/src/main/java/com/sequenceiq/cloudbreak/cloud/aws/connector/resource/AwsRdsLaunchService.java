@@ -113,6 +113,7 @@ public class AwsRdsLaunchService {
         }
 
         List<CloudResource> databaseResources = getCreatedOutputs(ac, stack, cFStackName, cfRetryClient, resourceNotifier);
+        databaseResources.forEach(dbr -> resourceNotifier.notifyAllocation(dbr, ac.getCloudContext()));
         // FIXME: For now, just return everything wrapped in a status object
         return databaseResources.stream()
                 .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
@@ -125,26 +126,12 @@ public class AwsRdsLaunchService {
             PersistenceNotifier resourceNotifier) {
         List<CloudResource> resources = new ArrayList<>();
 
-        String hostname = getHostname(cFStackName, client);
-        CloudResource hostnameResource = new Builder().type(ResourceType.RDS_HOSTNAME).name(hostname).build();
-        resourceNotifier.notifyAllocation(hostnameResource, ac.getCloudContext());
-        resources.add(hostnameResource);
+        Map<String, String> outputs = getCfStackOutputs(cFStackName, client);
 
-        String port = getPort(cFStackName, client);
-        CloudResource portResource = new Builder().type(ResourceType.RDS_PORT).name(port).build();
-        resourceNotifier.notifyAllocation(portResource, ac.getCloudContext());
-        resources.add(portResource);
-
-        String dbInstanceId = getCreatedDBInstance(cFStackName, client);
-        CloudResource dbInstance = new Builder().type(ResourceType.RDS_INSTANCE).name(dbInstanceId).build();
-        resourceNotifier.notifyAllocation(dbInstance, ac.getCloudContext());
-        resources.add(dbInstance);
-
-        String dbSubnetGroupId = getCreatedDBSubnetGroup(cFStackName, client);
-        CloudResource dbSubnetGroup = new Builder().type(ResourceType.RDS_DB_SUBNET_GROUP).name(dbSubnetGroupId).build();
-        resourceNotifier.notifyAllocation(dbSubnetGroup, ac.getCloudContext());
-        resources.add(dbSubnetGroup);
-
+        resources.add(new Builder().type(ResourceType.RDS_HOSTNAME).name(getHostname(outputs, cFStackName)).build());
+        resources.add(new Builder().type(ResourceType.RDS_PORT).name(getPort(outputs, cFStackName)).build());
+        resources.add(new Builder().type(ResourceType.RDS_INSTANCE).name(getCreatedDBInstance(outputs, cFStackName)).build());
+        resources.add(new Builder().type(ResourceType.RDS_DB_SUBNET_GROUP).name(getCreatedDBSubnetGroup(outputs, cFStackName)).build());
         // The idea here is to record the CloudFormation stack name so that we can later manipulate it.
         // This may be unnecessary, but for now this is trivial to add.
         CloudResource cfNameResource = new Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
@@ -153,29 +140,32 @@ public class AwsRdsLaunchService {
         return resources;
     }
 
-    private String getHostname(String cFStackName, AmazonCloudFormationRetryClient client) {
-        return getOutput(cFStackName, HOSTNAME, client, "DB hostname");
+    private String getHostname(Map<String, String> outputs, String cFStackName) {
+        return getOutput(outputs, HOSTNAME, "DB hostname", cFStackName);
     }
 
-    private String getPort(String cFStackName, AmazonCloudFormationRetryClient client) {
-        return getOutput(cFStackName, PORT, client, "DB port");
+    private String getPort(Map<String, String> outputs, String cFStackName) {
+        return getOutput(outputs, PORT, "DB port", cFStackName);
     }
 
-    private String getCreatedDBInstance(String cFStackName, AmazonCloudFormationRetryClient client) {
-        return getOutput(cFStackName, CREATED_DB_INSTANCE, client, "DB instance");
+    private String getCreatedDBInstance(Map<String, String> outputs, String cFStackName) {
+        return getOutput(outputs, CREATED_DB_INSTANCE, "DB instance", cFStackName);
     }
 
-    private String getCreatedDBSubnetGroup(String cFStackName, AmazonCloudFormationRetryClient client) {
-        return getOutput(cFStackName, CREATED_DB_SUBNET_GROUP, client, "DB subnet group");
+    private String getCreatedDBSubnetGroup(Map<String, String> outputs, String cFStackName) {
+        return getOutput(outputs, CREATED_DB_SUBNET_GROUP, "DB subnet group", cFStackName);
     }
 
-    private String getOutput(String cFStackName, String key, AmazonCloudFormationRetryClient client, String friendlyName) {
-        Map<String, String> outputs = cfStackUtil.getOutputs(cFStackName, client);
+    private String getOutput(Map<String, String> outputs, String key, String friendlyName, String cFStackName) {
         if (outputs.containsKey(key)) {
             return outputs.get(key);
         } else {
             String outputKeyNotFound = String.format(friendlyName + " could not be found in the Cloudformation stack('%s') output.", cFStackName);
             throw new CloudConnectorException(outputKeyNotFound);
         }
+    }
+
+    private Map<String, String> getCfStackOutputs(String cFStackName, AmazonCloudFormationRetryClient client) {
+        return cfStackUtil.getOutputs(cFStackName, client);
     }
 }

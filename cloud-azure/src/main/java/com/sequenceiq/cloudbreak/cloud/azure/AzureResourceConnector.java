@@ -159,7 +159,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier) {
-        return azureDatabaseResourceService.buildDatabaseResourcesForLaunch(authenticatedContext, stack);
+        return azureDatabaseResourceService.buildDatabaseResourcesForLaunch(authenticatedContext, stack, persistenceNotifier);
     }
 
     @Override
