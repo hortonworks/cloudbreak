@@ -1,6 +1,7 @@
 {%- from 'sssd/settings.sls' import ipa with context %}
+{%- from 'metadata/settings.sls' import metadata with context %}
 
-{% if salt['file.directory_exists']('/yarn-private') %}
+{% if metadata.platform == 'YARN'and not metadata.cluster_in_childenvironment %}
 {%- if "manager_server" in grains.get('roles', []) %}
 
 create_remove_cm_sa_script:
@@ -27,7 +28,7 @@ remove_cm_service_account:
 
 leave-ipa:
   cmd.run:
-{% if not salt['file.directory_exists']('/yarn-private') %}
+{% if metadata.platform != 'YARN' %}
     - name: ipa host-del {{ salt['grains.get']('fqdn') }} --updatedns && ipa-client-install --uninstall -U
 {% else %}
     - name: runuser -l root -c 'ipa host-del {{ salt['grains.get']('fqdn') }} --updatedns && ipa-client-install --uninstall -U'
