@@ -17,11 +17,23 @@ public class FeaturesResponse extends FeaturesBase {
     @ApiModelProperty(TelemetryModelDescription.TELEMETRY_METERING)
     private FeatureSetting metering;
 
+    @JsonProperty("useSharedAltusCredential")
+    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_USE_SHARED_ALTUS_CREDENTIAL_ENABLED)
+    private FeatureSetting useSharedAltusCredential;
+
     public FeatureSetting getMetering() {
         return metering;
     }
 
     public void setMetering(FeatureSetting metering) {
         this.metering = metering;
+    }
+
+    public FeatureSetting getUseSharedAltusCredential() {
+        return useSharedAltusCredential;
+    }
+
+    public void setUseSharedAltusCredential(FeatureSetting useSharedAltusCredential) {
+        this.useSharedAltusCredential = useSharedAltusCredential;
     }
 }

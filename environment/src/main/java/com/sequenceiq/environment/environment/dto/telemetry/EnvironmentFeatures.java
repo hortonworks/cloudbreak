@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.dto.telemetry;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.api.type.FeatureSetting;
@@ -38,5 +39,23 @@ public class EnvironmentFeatures implements Serializable {
 
     public void setUseSharedAltusCredential(FeatureSetting useSharedAltusCredential) {
         this.useSharedAltusCredential = useSharedAltusCredential;
+    }
+
+    @JsonIgnore
+    public void addWorkloadAnalytics(boolean enabled) {
+        workloadAnalytics = new FeatureSetting();
+        workloadAnalytics.setEnabled(enabled);
+    }
+
+    @JsonIgnore
+    public void addReportDeploymentLogs(boolean enabled) {
+        reportDeploymentLogs = new FeatureSetting();
+        reportDeploymentLogs.setEnabled(enabled);
+    }
+
+    @JsonIgnore
+    public void addUseSharedAltusredential(boolean enabled) {
+        useSharedAltusCredential = new FeatureSetting();
+        useSharedAltusCredential.setEnabled(enabled);
     }
 }
