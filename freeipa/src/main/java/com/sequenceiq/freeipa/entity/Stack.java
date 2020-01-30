@@ -50,7 +50,7 @@ public class Stack {
 
     private String environmentCrn;
 
-    @OneToMany(mappedBy = "stack", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "stack", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChildEnvironment> childEnvironments = new ArrayList<>();
 
     private String accountId;
