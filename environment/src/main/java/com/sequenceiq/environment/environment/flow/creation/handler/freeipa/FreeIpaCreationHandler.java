@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -114,12 +115,17 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     @Override
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
+        //TODO Why? Necessary informations are available in the environmentDto
         Optional<Environment> environmentOptional = environmentService.findEnvironmentById(environmentDto.getId());
         try {
-            if (environmentOptional.isPresent() && environmentOptional.get().isCreateFreeIpa()) {
+            if (environmentOptional.isPresent()) {
                 Environment environment = environmentOptional.get();
-                if (supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())) {
-                    createFreeIpa(environmentDtoEvent, environmentDto, environment);
+                if (Objects.nonNull(environment.getParentEnvironment())) {
+                    attachParentFreeIpaToChild(environmentDtoEvent, environmentDto);
+                } else if (environmentOptional.get().isCreateFreeIpa()) {
+                    if (supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())) {
+                        createFreeIpa(environmentDtoEvent, environmentDto);
+                    }
                 }
             }
             eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
@@ -131,10 +137,10 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         }
     }
 
-    private void createFreeIpa(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environmentDto, Environment environment) throws Exception {
-        Optional<DescribeFreeIpaResponse> freeIpa = freeIpaService.describe(environment.getResourceCrn());
+    private void createFreeIpa(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environmentDto) throws Exception {
+        Optional<DescribeFreeIpaResponse> freeIpa = freeIpaService.describe(environmentDto.getResourceCrn());
         if (freeIpa.isEmpty()) {
-            LOGGER.info("FreeIpa for environmentCrn '{}' was not found, creating a new one.", environment.getResourceCrn());
+            LOGGER.info("FreeIpa for environmentCrn '{}' was not found, creating a new one.", environmentDto.getResourceCrn());
             CreateFreeIpaRequest createFreeIpaRequest = createFreeIpaRequest(environmentDto);
             freeIpaService.create(createFreeIpaRequest);
             awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
@@ -143,10 +149,25 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                 dnsV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
             }
         } else {
-            LOGGER.info("FreeIpa for environmentCrn '{}' already exists. Using this one.", environment.getResourceCrn());
+            LOGGER.info("FreeIpa for environmentCrn '{}' already exists. Using this one.", environmentDto.getResourceCrn());
             if (CREATE_IN_PROGRESS == freeIpa.get().getStatus()) {
                 awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
             }
+        }
+    }
+
+    private void attachParentFreeIpaToChild(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environmentDto) {
+        Optional<DescribeFreeIpaResponse> freeIpa = freeIpaService.describe(environmentDto.getParentEnvironmentCrn());
+        if (freeIpa.isPresent()) {
+            LOGGER.info("Using FreeIpa of parent environmentCrn '{}' .", environmentDto.getParentEnvironmentCrn());
+
+            //TODO Register parent's FreeIPA to the child - new FreeIpaSvc api method
+
+            if (CREATE_IN_PROGRESS == freeIpa.get().getStatus()) {
+                awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
+            }
+
+            //TODO Register reverse dns zone
         }
     }
 
@@ -166,8 +187,9 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private CreateFreeIpaRequest createFreeIpaRequest(EnvironmentDto environment) {
-        CreateFreeIpaRequest createFreeIpaRequest = initFreeIpaRequest(environment);
+        CreateFreeIpaRequest createFreeIpaRequest = new CreateFreeIpaRequest();
         createFreeIpaRequest.setEnvironmentCrn(environment.getResourceCrn());
+        createFreeIpaRequest.setName(environment.getName() + "-freeipa");
 
         FreeIpaServerRequest freeIpaServerRequest = freeIpaServerRequestProvider.create(environment);
         createFreeIpaRequest.setFreeIpa(freeIpaServerRequest);
@@ -177,13 +199,6 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         setTelemetry(environment, createFreeIpaRequest);
         doIfNotNull(environment.getSecurityAccess(), securityAccess -> setSecurityAccess(securityAccess, createFreeIpaRequest));
         setUseCcm(environment.getExperimentalFeatures().getTunnel(), createFreeIpaRequest);
-        return createFreeIpaRequest;
-    }
-
-    private CreateFreeIpaRequest initFreeIpaRequest(EnvironmentDto environment) {
-        CreateFreeIpaRequest createFreeIpaRequest = new CreateFreeIpaRequest();
-        createFreeIpaRequest.setEnvironmentCrn(environment.getResourceCrn());
-        createFreeIpaRequest.setName(environment.getName() + "-freeipa");
         return createFreeIpaRequest;
     }
 
@@ -264,7 +279,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private void awaitFreeIpaCreation(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environment) {
         Pair<PollingResult, Exception> pollWithTimeout = freeIpaPollingService.pollWithTimeout(
                 new FreeIpaCreationRetrievalTask(freeIpaService),
-                new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn()),
+                new FreeIpaPollerObject(environment.getId(),
+                        environment.getParentEnvironmentCrn() != null ? environment.getParentEnvironmentCrn() : environment.getResourceCrn()),
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_INTERVAL,
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_COUNT,
                 FreeIpaCreationRetrievalTask.FREEIPA_FAILURE_COUNT);

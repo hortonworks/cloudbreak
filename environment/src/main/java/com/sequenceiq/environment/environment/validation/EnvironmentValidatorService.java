@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.isEmpty;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -65,6 +66,23 @@ public class EnvironmentValidatorService {
 
     public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network, Map<String, CloudSubnet> subnetMetas) {
         return networkCreationValidator.validateNetworkCreation(environment, network, subnetMetas);
+    }
+
+    public ValidationResult validateParentChildRelation(Environment environment, String parentEnvironmentCrn) {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+
+        resultBuilder.ifError(() -> Objects.nonNull(parentEnvironmentCrn) && Objects.isNull(environment.getParentEnvironment()),
+                String.format("Active parent environment with crn '%s' is not available in account '%s'.", parentEnvironmentCrn, environment.getAccountId()));
+        if (Objects.nonNull(environment.getParentEnvironment())) {
+            resultBuilder.ifError(() -> Objects.nonNull(environment.getParentEnvironment().getParentEnvironment()),
+        "Parent environment is already a child environment.");
+            resultBuilder.ifError(() -> !CloudPlatform.YARN.name().equalsIgnoreCase(environment.getCloudPlatform()),
+                    String.format("Parent environment is not supported for '%s' platform.", environment.getCloudPlatform()));
+            resultBuilder.ifError(() -> !CloudPlatform.AWS.name().equalsIgnoreCase(environment.getParentEnvironment().getCloudPlatform()),
+                    String.format("'%s' platform is not supported for parent environment.", environment.getParentEnvironment().getCloudPlatform()));
+        }
+
+        return resultBuilder.build();
     }
 
     public ValidationResult validateAwsEnvironmentRequest(EnvironmentRequest environmentRequest, String cloudPlatform) {
