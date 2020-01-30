@@ -1,3 +1,5 @@
+{%- from 'metadata/settings.sls' import metadata with context %}
+
 {% set configure_remote_db = salt['pillar.get']('postgres:configure_remote_db', 'None') %}
 
 {% if 'None' != configure_remote_db %}
@@ -77,7 +79,7 @@ init-services-db:
       - cmd: configure-listen-address
       - cmd: configure-max-connections
 
-{% if not salt['file.directory_exists']('/yarn-private') %}  # FIXME (BUG-92637): must be disabled for YCloud
+{% if metadata.platform != 'YARN' %}  # FIXME (BUG-92637): must be disabled for YCloud
 
 restart-pgsql-if-reconfigured:
   service.running:
