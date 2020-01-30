@@ -55,12 +55,15 @@ public class EnvironmentCreationDto {
 
     private final Map<String, String> tags;
 
+    private final String parentEnvironmentCrn;
+
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             String creator, LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
             Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, AuthenticationDto authentication,
             Long created, EnvironmentTelemetry telemetry, SecurityAccessDto securityAccess, String adminGroupName,
-            ParametersDto parameters, ExperimentalFeatures experimentalFeatures, Map<String, String> tags, String crn) {
+            ParametersDto parameters, ExperimentalFeatures experimentalFeatures, Map<String, String> tags, String crn,
+            String parentEnvironmentCrn) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -94,6 +97,7 @@ public class EnvironmentCreationDto {
             this.tags = tags;
         }
         this.crn = crn;
+        this.parentEnvironmentCrn = parentEnvironmentCrn;
     }
 
     public static Builder builder() {
@@ -180,6 +184,10 @@ public class EnvironmentCreationDto {
         return crn;
     }
 
+    public String getParentEnvironmentCrn() {
+        return parentEnvironmentCrn;
+    }
+
     public static final class Builder {
         private String name;
 
@@ -220,6 +228,8 @@ public class EnvironmentCreationDto {
         private Map<String, String> tags = new HashMap<>();
 
         private String crn;
+
+        private String parentEnvironmentCrn;
 
         private Builder() {
         }
@@ -324,10 +334,16 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        public Builder withParentEnvironmentCrn(String parentEnvironmentCrn) {
+            this.parentEnvironmentCrn = parentEnvironmentCrn;
+            return this;
+        }
+
         public EnvironmentCreationDto build() {
             return new EnvironmentCreationDto(name, description, cloudPlatform, accountId, creator,
                     location, network, credential, regions, proxyNames, createFreeIpa, authentication,
-                    created, telemetry, securityAccess, adminGroupName, parameters, experimentalFeatures, tags, crn);
+                    created, telemetry, securityAccess, adminGroupName, parameters, experimentalFeatures, tags, crn,
+                    parentEnvironmentCrn);
         }
     }
 }
