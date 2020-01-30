@@ -1,12 +1,13 @@
-package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenvironment;
+package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenv;
+
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
-import javax.validation.constraints.NotNull;
 
 @ApiModel("RegisterChildEnvironmentV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
