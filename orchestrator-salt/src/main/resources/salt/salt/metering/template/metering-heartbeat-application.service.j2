@@ -1,0 +1,15 @@
+{%- from 'metering/settings.sls' import metering with context %}
+[Unit]
+Description=Metering heartbeat application
+StartLimitIntervalSec=0
+After=td-agent.service
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/opt/metering-heartbeat --configFile /etc/metering/generate_heartbeats.ini
+PIDFile=/var/run/heartbeat_producer.pid
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
