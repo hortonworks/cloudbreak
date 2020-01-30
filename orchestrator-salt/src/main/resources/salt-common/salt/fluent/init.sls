@@ -245,6 +245,21 @@ copy_td_agent_conf:
 {% endif %}
 
 {%- if fluent.is_systemd %}
+/etc/systemd/system/td-agent.d:
+  file.directory:
+    - name: /etc/systemd/system/td-agent.d
+    - user: "{{ fluent.user }}"
+    - group: "{{ fluent.group }}"
+    - mode: 740
+
+/etc/systemd/system/td-agent.d/override.conf:
+   file.managed:
+    - source: salt://fluent/template/override.conf.j2
+    - template: jinja
+    - user: "{{ fluent.user }}"
+    - group: "{{ fluent.group }}"
+    - file_mode: 640
+
 fluentd_start_with_update_systemd_units:
   file.copy:
     - name: /etc/systemd/system/td-agent.service
