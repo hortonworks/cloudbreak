@@ -21,6 +21,7 @@ import com.sequenceiq.environment.environment.validation.network.EnvironmentNetw
 import com.sequenceiq.environment.environment.validation.network.TestHelper;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.network.dto.YarnParams;
 
 public class NetworkCreationValidatorTest {
 
@@ -44,7 +45,7 @@ public class NetworkCreationValidatorTest {
     @Test
     void testValidateWhenAzureSpecificValidationIsCalled() {
         AzureParams azureParams = testHelper.getAzureParams(true, true, true);
-        NetworkDto networkDto = testHelper.getNetworkDto(azureParams, null, azureParams.getNetworkId(), null, 1);
+        NetworkDto networkDto = testHelper.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), null, 1);
         environment.setCloudPlatform("aZuRe");
         environment.setCidr(null);
 
@@ -58,7 +59,7 @@ public class NetworkCreationValidatorTest {
     @Test
     void testValidateWhenNetworkCidrAndNetworkIdOnAzure() {
         AzureParams azureParams = testHelper.getAzureParams(true, true, true);
-        NetworkDto networkDto = testHelper.getNetworkDto(azureParams, null, azureParams.getNetworkId(), "0.0.0.0/0", 1);
+        NetworkDto networkDto = testHelper.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), "0.0.0.0/0", 1);
         environment.setCloudPlatform(CloudPlatform.AZURE.name());
         environment.setCidr(null);
 
@@ -73,12 +74,12 @@ public class NetworkCreationValidatorTest {
     @Test
     void testValidateWhenNoNetworkCidrAndNetworkIdOnAzure() {
         AzureParams azureParams = testHelper.getAzureParams(true, true, true);
-        NetworkDto networkDto = testHelper.getNetworkDto(azureParams, null, azureParams.getNetworkId(), null, 1);
-
+        NetworkDto networkDto = testHelper.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), null, 1);
         environment.setCloudPlatform(CloudPlatform.AZURE.name());
         environment.setCidr(null);
 
         ValidationResult.ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto, null);
+
         ValidationResult validationResult = resultBuilder.build();
         assertFalse(validationResult.hasError());
     }
@@ -86,7 +87,7 @@ public class NetworkCreationValidatorTest {
     @Test
     void testValidateWhenNetworkCidrAndNoNetworkIdOnAzure() {
         AzureParams azureParams = testHelper.getAzureParams(true, false, false);
-        NetworkDto networkDto = testHelper.getNetworkDto(azureParams, null, null, "0.0.0.0/0", 1);
+        NetworkDto networkDto = testHelper.getNetworkDto(azureParams, null, null, null, "0.0.0.0/0", 1);
         environment.setCloudPlatform(CloudPlatform.AZURE.name());
         environment.setCidr(null);
 
@@ -96,17 +97,13 @@ public class NetworkCreationValidatorTest {
     }
 
     @Test
-    void testValidateWhenNoNetworkCidrAndNoNetworkIdOnAzure() {
-        AzureParams azureParams = testHelper.getAzureParams(true, false, true);
-        NetworkDto networkDto = testHelper.getNetworkDto(azureParams, null, azureParams.getNetworkId(), null, 1);
-        environment.setCloudPlatform(CloudPlatform.AZURE.name());
+    void testValidateWhenNoNetworkCidrAndNoNetworkIdOnYarn() {
+        NetworkDto networkDto = testHelper.getNetworkDto(null, null, new YarnParams(), null, null, 1);
+        environment.setCloudPlatform(CloudPlatform.YARN.name());
         environment.setCidr(null);
 
         ValidationResult.ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto, null);
         ValidationResult validationResult = resultBuilder.build();
-        assertTrue(validationResult.hasError());
-        assertEquals(1, validationResult.getErrors().size(), validationResult.getFormattedErrors());
-        String actual = validationResult.getErrors().get(0);
-        assertEquals("Either the AZURE network id or cidr needs to be defined!", actual);
+        assertFalse(validationResult.hasError());
     }
 }

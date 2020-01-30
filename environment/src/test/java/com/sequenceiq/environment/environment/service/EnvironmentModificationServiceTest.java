@@ -133,7 +133,6 @@ class EnvironmentModificationServiceTest {
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentService).save(environmentArgumentCaptor.capture());
-        verify(networkService).saveNetwork(any(), any(), any(), any());
     }
 
     @Test

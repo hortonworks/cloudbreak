@@ -24,11 +24,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
+import com.sequenceiq.cloudbreak.api.service.ExposedService;
+import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -62,6 +63,9 @@ public class ServiceEndpointCollector {
     @Inject
     private ComponentLocatorService componentLocatorService;
 
+    @Inject
+    private ExposedServiceCollector exposedServiceCollector;
+
     public Collection<ExposedServiceV4Response> getKnoxServices(Long workspaceId, String blueprintName) {
         Blueprint blueprint = blueprintService.getByNameForWorkspaceId(blueprintName, workspaceId);
         return getKnoxServices(blueprint);
@@ -75,7 +79,7 @@ public class ServiceEndpointCollector {
             } else {
                 Gateway gateway = cluster.getGateway();
                 if (gateway != null) {
-                    ExposedService exposedService = ExposedService.CLOUDERA_MANAGER_UI;
+                    ExposedService exposedService = exposedServiceCollector.getClouderaManagerUIService();
                     Optional<GatewayTopology> gatewayTopology = getGatewayTopologyForService(gateway, exposedService);
                     Optional<String> managerUrl = gatewayTopology
                             .map(t -> getExposedServiceUrl(managerIp, gateway, t.getTopologyName(), exposedService, false));
@@ -98,7 +102,7 @@ public class ServiceEndpointCollector {
                 Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServiceMap = new HashMap<>();
                 Map<String, List<String>> privateIps = componentLocatorService.getComponentLocation(cluster.getId(), processor,
                         knownExposedServices.stream().map(ExposedService::getServiceName).collect(Collectors.toSet()));
-                if (privateIps.containsKey(ExposedService.IMPALA.getServiceName())) {
+                if (privateIps.containsKey(exposedServiceCollector.getImpalaService().getServiceName())) {
                     setImpalaDebugUIToCoordinator(cluster, privateIps);
                 }
                 if (gateway != null) {
@@ -112,12 +116,12 @@ public class ServiceEndpointCollector {
                         boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
                         SecurityConfig securityConfig = cluster.getStack().getSecurityConfig();
                         for (ExposedService exposedService : knownExposedServices) {
-                            if (exposedService.isUISupported()) {
+                            if (!exposedService.isApiOnly()) {
                                 List<ClusterExposedServiceV4Response> uiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
                                         managerIp, privateIps, exposedServicesInTopology, false, autoTlsEnabled, securityConfig);
                                 uiServices.addAll(uiServiceOnPrivateIps);
                             }
-                            if (exposedService.isAPISupported()) {
+                            if (exposedService.isApiIncluded()) {
                                 List<ClusterExposedServiceV4Response> apiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
                                         managerIp, privateIps, exposedServicesInTopology, true, autoTlsEnabled, securityConfig);
                                 apiServices.addAll(apiServiceOnPrivateIps);
@@ -153,7 +157,7 @@ public class ServiceEndpointCollector {
     private void setImpalaDebugUIToCoordinator(Cluster cluster, Map<String, List<String>> privateIps) {
         List<String> impalaCoordinators = componentLocatorService.getImpalaCoordinatorLocations(cluster)
                 .values().stream().flatMap(List::stream).collect(Collectors.toList());
-        privateIps.put(ExposedService.IMPALA_DEBUG_UI.getServiceName(), impalaCoordinators);
+        privateIps.put(exposedServiceCollector.getImpalaDebugUIService().getServiceName(), impalaCoordinators);
     }
 
     private List<ClusterExposedServiceV4Response> createServiceEntries(ExposedService exposedService, Gateway gateway, GatewayTopology gatewayTopology,
@@ -188,7 +192,7 @@ public class ServiceEndpointCollector {
     }
 
     private SSOType getSSOType(ExposedService exposedService, Gateway gateway) {
-        return exposedService.isSSOSupported() ? gateway.getSsoType() : SSOType.NONE;
+        return exposedService.isSsoSupported() ? gateway.getSsoType() : SSOType.NONE;
     }
 
     /**
@@ -201,7 +205,7 @@ public class ServiceEndpointCollector {
         String blueprintText = blueprint.getBlueprintText();
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
         List<String> components = processor.getAllComponents().stream().map(ServiceComponent::getComponent).collect(Collectors.toList());
-        return ExposedService.knoxServicesForComponents(components)
+        return exposedServiceCollector.knoxServicesForComponents(components)
                 .stream()
                 .filter(ExposedService::isVisible)
                 .collect(Collectors.toList());
@@ -214,7 +218,8 @@ public class ServiceEndpointCollector {
     private Stream<String> getExposedServiceStream(GatewayTopology gatewayTopology) {
         if (gatewayTopology.getExposedServices() != null && gatewayTopology.getExposedServices().getValue() != null) {
             try {
-                return gatewayTopology.getExposedServices().get(ExposedServices.class).getFullServiceList().stream();
+                ExposedServices exposedServices = gatewayTopology.getExposedServices().get(ExposedServices.class);
+                return exposedServiceCollector.getFullServiceListBasedOnList(exposedServices.getServices()).stream();
             } catch (IOException e) {
                 LOGGER.debug("Failed to get exposed services from Json.", e);
             }
@@ -227,30 +232,33 @@ public class ServiceEndpointCollector {
             String topologyName, Map<String, List<String>> privateIps, boolean api, boolean autoTlsEnabled) {
         List<String> urls = new ArrayList<>();
         if (hasKnoxUrl(exposedService) && managerIp != null) {
-            switch (exposedService) {
-                case NAMENODE:
+            switch (exposedService.getName()) {
+                case "NAMENODE":
                     addNameNodeUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls);
                     break;
-                case HBASE_UI:
+                case "HBASE_UI":
                     addHbaseUrl(managerIp, gateway, privateIps, urls);
                     break;
-                case RESOURCEMANAGER_WEB:
+                case "RESOURCEMANAGER_WEB":
                     addResourceManagerUrl(exposedService, managerIp, gateway, topologyName, api, urls);
                     break;
-                case NAMENODE_HDFS:
+                case "NAMENODE_HDFS":
                     urls.add(buildKnoxUrlWithProtocol("hdfs", managerIp, exposedService, autoTlsEnabled));
                     break;
-                case JOBTRACKER:
+                case "JOBTRACKER":
                     urls.add(buildKnoxUrlWithProtocol("rpc", managerIp, exposedService, autoTlsEnabled));
                     break;
-                case IMPALA_DEBUG_UI:
+                case "IMPALA_DEBUG_UI":
                     addImplaDebugUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls);
                     break;
-                case KUDU:
+                case "KUDU":
                     addKuduUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls);
                     break;
-                case KUDU_TABLET_SERVER:
+                case "KUDU_TABLET_SERVER":
                     // skipping kudu tablet server url because this is not required
+                    break;
+                case "HIVE_SERVER":
+                    // there is no HTTP endpoint for Hive server
                     break;
                 default:
                     urls.add(getExposedServiceUrl(managerIp, gateway, topologyName, exposedService, api));
@@ -264,12 +272,11 @@ public class ServiceEndpointCollector {
     private List<String> getJdbcUrlsForService(ExposedService exposedService, String managerIp, Gateway gateway, SecurityConfig securityConfig) {
         List<String> urls = new ArrayList<>();
         if (hasKnoxUrl(exposedService) && managerIp != null) {
-            switch (exposedService) {
-                case HIVE_SERVER:
-                case HIVE_SERVER_INTERACTIVE:
+            switch (exposedService.getName()) {
+                case "HIVE_SERVER":
                     getHiveJdbcUrl(gateway, managerIp, securityConfig).ifPresent(urls::add);
                     break;
-                case IMPALA:
+                case "IMPALA":
                     getImpalaJdbcUrl(gateway, managerIp).ifPresent(urls::add);
                     break;
                 default:
@@ -284,7 +291,7 @@ public class ServiceEndpointCollector {
     }
 
     private void addNameNodeUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, boolean autoTlsEnabled, List<String> urls) {
-        List<String> hdfsUrls = privateIps.get(ExposedService.NAMENODE.getServiceName())
+        List<String> hdfsUrls = privateIps.get(exposedServiceCollector.getNameNodeService().getServiceName())
                 .stream()
                 .map(namenodeIp -> getHdfsUIUrl(gateway, managerIp, namenodeIp, autoTlsEnabled))
                 .flatMap(Optional::stream)
@@ -293,7 +300,7 @@ public class ServiceEndpointCollector {
     }
 
     private void addHbaseUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, List<String> urls) {
-        List<String> hbaseUrls = privateIps.get(ExposedService.HBASE_UI.getServiceName())
+        List<String> hbaseUrls = privateIps.get(exposedServiceCollector.getHBaseUIService().getServiceName())
                 .stream()
                 .map(hbaseIp -> getHBaseServiceUrl(gateway, managerIp, hbaseIp))
                 .flatMap(Optional::stream)
@@ -308,7 +315,7 @@ public class ServiceEndpointCollector {
     }
 
     private void addImplaDebugUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, boolean autoTlsEnabled, List<String> urls) {
-        Optional<String> coordinatorUrl = privateIps.get(ExposedService.IMPALA_DEBUG_UI.getServiceName())
+        Optional<String> coordinatorUrl = privateIps.get(exposedServiceCollector.getImpalaDebugUIService().getServiceName())
                 .stream()
                 .map(coordinator -> getImpalaCoordinatorUrl(gateway, managerIp, coordinator, autoTlsEnabled))
                 .flatMap(Optional::stream)
@@ -319,7 +326,7 @@ public class ServiceEndpointCollector {
     }
 
     private void addKuduUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, boolean autoTlsEnabled, List<String> urls) {
-        Optional<String> coordinatorUrl = privateIps.get(ExposedService.KUDU.getServiceName())
+        Optional<String> coordinatorUrl = privateIps.get(exposedServiceCollector.getKuduService().getServiceName())
                 .stream()
                 .map(coordinator -> getKuduUrl(gateway, managerIp, coordinator, autoTlsEnabled))
                 .flatMap(Optional::stream)
@@ -338,7 +345,7 @@ public class ServiceEndpointCollector {
     }
 
     private Optional<GatewayTopology> getGatewayTopologyWithHive(Gateway gateway) {
-        return getGatewayTopology(ExposedService.HIVE_SERVER, gateway);
+        return getGatewayTopology(exposedServiceCollector.getHiveServerService(), gateway);
     }
 
     private Optional<GatewayTopology> getGatewayTopologyWithExposedService(Gateway gateway, ExposedService exposedService) {
@@ -349,7 +356,7 @@ public class ServiceEndpointCollector {
         return gateway.getTopologies().stream()
                 .filter(gt -> getExposedServiceStream(gt)
                         .anyMatch(es -> exposedService.getServiceName().equalsIgnoreCase(es)
-                                || exposedService.name().equalsIgnoreCase(es)
+                                || exposedService.getName().equalsIgnoreCase(es)
                                 || exposedService.getKnoxService().equalsIgnoreCase(es)))
                 .findFirst();
     }
@@ -385,22 +392,22 @@ public class ServiceEndpointCollector {
     }
 
     private Optional<String> getHdfsUIUrl(Gateway gateway, String managerIp, String nameNodePrivateIp, boolean autoTlsEnabled) {
-        return getGatewayTopologyWithExposedService(gateway, ExposedService.NAMENODE)
+        return getGatewayTopologyWithExposedService(gateway, exposedServiceCollector.getNameNodeService())
                 .map(gt -> getHdfsUIUrlWithHostParameterFromGatewayTopology(managerIp, gt, nameNodePrivateIp, autoTlsEnabled));
     }
 
     private Optional<String> getImpalaCoordinatorUrl(Gateway gateway, String managerIp, String coordinatorPrivateIps, boolean autoTlsEnabled) {
-        return getGatewayTopologyWithExposedService(gateway, ExposedService.IMPALA_DEBUG_UI)
+        return getGatewayTopologyWithExposedService(gateway, exposedServiceCollector.getImpalaDebugUIService())
                 .map(gt -> getImpalaCoordinatorUrlWithHostFromGatewayTopology(managerIp, gt, coordinatorPrivateIps, autoTlsEnabled));
     }
 
     private Optional<String> getKuduUrl(Gateway gateway, String managerIp, String coordinatorPrivateIps, boolean autoTlsEnabled) {
-        return getGatewayTopologyWithExposedService(gateway, ExposedService.KUDU)
+        return getGatewayTopologyWithExposedService(gateway, exposedServiceCollector.getKuduService())
                 .map(gt -> getKuduUrlWithHostFromGatewayTopology(managerIp, gt, coordinatorPrivateIps, autoTlsEnabled));
     }
 
     private Optional<String> getHBaseServiceUrl(Gateway gateway, String managerIp, String hbaseMasterPrivateIp) {
-        return getGatewayTopologyWithExposedService(gateway, ExposedService.HBASE_UI)
+        return getGatewayTopologyWithExposedService(gateway, exposedServiceCollector.getHBaseUIService())
                 .map(gt -> getHBaseUIUrlWithHostParameterFromGatewayTopology(managerIp, gt, hbaseMasterPrivateIp));
     }
 
@@ -410,7 +417,7 @@ public class ServiceEndpointCollector {
     }
 
     private Optional<String> getImpalaJdbcUrl(Gateway gateway, String ambariIp) {
-        return getGatewayTopology(ExposedService.IMPALA, gateway)
+        return getGatewayTopology(exposedServiceCollector.getImpalaService(), gateway)
                 .map(gt -> getImpalaJdbcUrlFromGatewayTopology(ambariIp, gt));
     }
 
@@ -441,48 +448,52 @@ public class ServiceEndpointCollector {
 
     private String getHdfsUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String nameNodePrivateIp, boolean autoTlsEnabled) {
         Gateway gateway = gt.getGateway();
-        Integer port = autoTlsEnabled ? ExposedService.NAMENODE.getTlsPort() : ExposedService.NAMENODE.getPort();
+        ExposedService namenode = exposedServiceCollector.getNameNodeService();
+        Integer port = autoTlsEnabled ? namenode.getTlsPort() : namenode.getPort();
         if (gatewayListeningOnHttpsPort(gateway)) {
             return String.format("https://%s/%s/%s%s?host=%s://%s:%s", managerIp, gateway.getPath(), gt.getTopologyName(),
-                    ExposedService.NAMENODE.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), nameNodePrivateIp, port);
+                    namenode.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), nameNodePrivateIp, port);
         } else {
             return String.format("https://%s:%s/%s/%s%s?host=%s://%s:%s", managerIp, gateway.getGatewayPort(), gateway.getPath(), gt.getTopologyName(),
-                    ExposedService.NAMENODE.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), nameNodePrivateIp, port);
+                    namenode.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), nameNodePrivateIp, port);
         }
     }
 
     private String getHBaseUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String nameNodePrivateIp) {
         Gateway gateway = gt.getGateway();
+        ExposedService hbaseUi = exposedServiceCollector.getHBaseUIService();
         if (gatewayListeningOnHttpsPort(gateway)) {
             return String.format("https://%s/%s/%s%s?host=%s&port=%s", managerIp, gateway.getPath(), gt.getTopologyName(),
-                    ExposedService.HBASE_UI.getKnoxUrl(), nameNodePrivateIp, ExposedService.HBASE_UI.getPort());
+                    hbaseUi.getKnoxUrl(), nameNodePrivateIp, hbaseUi.getPort());
         } else {
             return String.format("https://%s:%s/%s/%s%s?host=%s&port=%s", managerIp, gateway.getGatewayPort(), gateway.getPath(), gt.getTopologyName(),
-                    ExposedService.HBASE_UI.getKnoxUrl(), nameNodePrivateIp, ExposedService.HBASE_UI.getPort());
+                    hbaseUi.getKnoxUrl(), nameNodePrivateIp, hbaseUi.getPort());
         }
     }
 
     private String getImpalaCoordinatorUrlWithHostFromGatewayTopology(String managerIp, GatewayTopology gt, String impalaPrivateIp, boolean autoTlsEnabled) {
         Gateway gateway = gt.getGateway();
-        Integer port = autoTlsEnabled ? ExposedService.IMPALA_DEBUG_UI.getTlsPort() : ExposedService.IMPALA_DEBUG_UI.getPort();
+        ExposedService impalaDebugUi = exposedServiceCollector.getImpalaDebugUIService();
+        Integer port = autoTlsEnabled ? impalaDebugUi.getTlsPort() : impalaDebugUi.getPort();
         if (gatewayListeningOnHttpsPort(gateway)) {
             return String.format("https://%s/%s/%s%s?scheme=%s&host=%s&port=%s", managerIp, gateway.getPath(), gt.getTopologyName(),
-                    ExposedService.IMPALA_DEBUG_UI.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), impalaPrivateIp, port);
+                    impalaDebugUi.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), impalaPrivateIp, port);
         } else {
             return String.format("https://%s:%s/%s/%s%s?scheme=%s&host=%s&port=%s", managerIp, gateway.getGatewayPort(), gateway.getPath(),
-                    gt.getTopologyName(), ExposedService.IMPALA_DEBUG_UI.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), impalaPrivateIp, port);
+                    gt.getTopologyName(), impalaDebugUi.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), impalaPrivateIp, port);
         }
     }
 
     private String getKuduUrlWithHostFromGatewayTopology(String managerIp, GatewayTopology gt, String kuduPrivateIp, boolean autoTlsEnabled) {
         Gateway gateway = gt.getGateway();
-        Integer port = autoTlsEnabled ? ExposedService.KUDU.getTlsPort() : ExposedService.KUDU.getPort();
+        ExposedService kudu = exposedServiceCollector.getKuduService();
+        Integer port = autoTlsEnabled ? kudu.getTlsPort() : kudu.getPort();
         if (gatewayListeningOnHttpsPort(gateway)) {
             return String.format("https://%s/%s/%s%s?scheme=%s&host=%s&port=%s", managerIp, gateway.getPath(), gt.getTopologyName(),
-                    ExposedService.KUDU.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), kuduPrivateIp, port);
+                    kudu.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), kuduPrivateIp, port);
         } else {
             return String.format("https://%s:%s/%s/%s%s?scheme=%s&host=%s&port=%s", managerIp, gateway.getGatewayPort(), gateway.getPath(),
-                    gt.getTopologyName(), ExposedService.KUDU.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), kuduPrivateIp, port);
+                    gt.getTopologyName(), kudu.getKnoxUrl(), getHttpProtocol(autoTlsEnabled), kuduPrivateIp, port);
         }
     }
 

@@ -129,6 +129,13 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/server_conncheck", freeIpaRouteHandler);
     }
 
+    protected void createImageValidationSourceCatalog(TestContext testContext, String url, String name) {
+        testContext.given(ImageCatalogTestDto.class)
+                .withUrl(url)
+                .withName(name)
+                .when(imageCatalogTestClient.createIfNotExistV4());
+    }
+
     protected void createDefaultEnvironment(TestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(Boolean.FALSE)

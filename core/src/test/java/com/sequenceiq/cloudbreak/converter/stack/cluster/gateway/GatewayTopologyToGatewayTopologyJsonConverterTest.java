@@ -1,17 +1,21 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster.gateway;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.GatewayTopologyToGatewayTopologyV4RequestConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
+@RunWith(MockitoJUnitRunner.class)
 public class GatewayTopologyToGatewayTopologyJsonConverterTest {
 
     private final GatewayTopologyToGatewayTopologyV4RequestConverter underTest = new GatewayTopologyToGatewayTopologyV4RequestConverter();
@@ -22,13 +26,13 @@ public class GatewayTopologyToGatewayTopologyJsonConverterTest {
         GatewayTopology gatewayTopology = new GatewayTopology();
         gatewayTopology.setTopologyName(topologyName);
         ExposedServices exposedServices = new ExposedServices();
-        exposedServices.setServices(ExposedService.getAllKnoxExposed());
+        exposedServices.setServices(List.of("SERVICE1", "SERVICE2"));
         gatewayTopology.setExposedServices(new Json(exposedServices));
 
         GatewayTopologyV4Request result = underTest.convert(gatewayTopology);
 
         assertEquals(topologyName, result.getTopologyName());
-        assertEquals(ExposedService.getAllKnoxExposed().size(), result.getExposedServices().size());
-        assertTrue(result.getExposedServices().containsAll(ExposedService.getAllKnoxExposed()));
+        assertEquals(2, result.getExposedServices().size());
+        assertTrue(result.getExposedServices().containsAll(List.of("SERVICE1", "SERVICE2")));
     }
 }

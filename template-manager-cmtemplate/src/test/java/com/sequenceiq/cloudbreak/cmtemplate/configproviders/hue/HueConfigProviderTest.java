@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -73,7 +74,7 @@ public class HueConfigProviderTest {
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("private-gateway.cloudera.site"));
         TemplatePreparationObject tpo = new Builder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
-                .withGateway(new Gateway(), "")
+                .withGateway(new Gateway(), "", new HashSet<>())
                 .build();
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
         Map<String, String> paramToVariable =
@@ -148,7 +149,7 @@ public class HueConfigProviderTest {
 
         TemplatePreparationObject tpo = new Builder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
-                .withGateway(new Gateway(), "")
+                .withGateway(new Gateway(), "", new HashSet<>())
                 .withBlueprintView(blueprintView)
                 .withRdsConfigs(Set.of(rdsConfig))
                 .build();
@@ -193,7 +194,7 @@ public class HueConfigProviderTest {
 
         TemplatePreparationObject tpo = new Builder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
-                .withGateway(new Gateway(), "")
+                .withGateway(new Gateway(), "", new HashSet<>())
                 .withBlueprintView(blueprintView)
                 .withRdsConfigs(Set.of(rdsConfig))
                 .build();

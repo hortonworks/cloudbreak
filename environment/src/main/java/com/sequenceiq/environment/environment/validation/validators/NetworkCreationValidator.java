@@ -1,7 +1,5 @@
 package com.sequenceiq.environment.environment.validation.validators;
 
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
-
 import java.util.Map;
 import java.util.Objects;
 
@@ -32,31 +30,35 @@ public class NetworkCreationValidator {
 
     public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network, Map<String, CloudSubnet> subnetMetas) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
-        if (network != null && network.getNetworkCidr() == null) {
+        resultBuilder.prefix("Cannot create environment");
+        validateNetwork(environment, network, subnetMetas, resultBuilder);
+        validateNetworkIdAndCidr(environment, network, resultBuilder);
+        return resultBuilder;
+    }
+
+    public ValidationResultBuilder validateNetworkEdit(Environment environment, NetworkDto network, Map<String, CloudSubnet> subnetMetas) {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        resultBuilder.prefix("Cannot edit environment");
+        validateNetwork(environment, network, subnetMetas, resultBuilder);
+        return resultBuilder;
+    }
+
+    private void validateNetwork(Environment environment, NetworkDto network, Map<String, CloudSubnet> subnetMetas, ValidationResultBuilder resultBuilder) {
+        if (network != null) {
             EnvironmentNetworkValidator environmentNetworkValidator =
                     environmentNetworkValidatorsByCloudPlatform.get(CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase()));
             if (environmentNetworkValidator != null) {
                 environmentNetworkValidator.validateDuringRequest(network, subnetMetas, resultBuilder);
             }
         }
-        validateNetworkIdAndCidr(environment, network, resultBuilder);
-        return resultBuilder;
     }
 
     private void validateNetworkIdAndCidr(Environment environment, NetworkDto network, ValidationResultBuilder resultBuilder) {
-        if (Objects.nonNull(network)) {
-            if (StringUtils.isNotEmpty(network.getNetworkCidr()) && StringUtils.isNotEmpty(network.getNetworkId())) {
-                String message = String.format("The %s network id ('%s') must not be defined if cidr ('%s') is defined!",
-                        environment.getCloudPlatform(), network.getNetworkId(), network.getNetworkCidr());
-                LOGGER.info(message);
-                resultBuilder.error(message);
-            }
-            if (!MOCK.name().equalsIgnoreCase(environment.getCloudPlatform())
-                    && StringUtils.isEmpty(network.getNetworkCidr()) && StringUtils.isEmpty(network.getNetworkId())) {
-                String message = String.format("Either the %s network id or cidr needs to be defined!", environment.getCloudPlatform());
-                LOGGER.info(message);
-                resultBuilder.error(message);
-            }
+        if (Objects.nonNull(network) && StringUtils.isNotEmpty(network.getNetworkCidr()) && StringUtils.isNotEmpty(network.getNetworkId())) {
+            String message = String.format("The %s network id ('%s') must not be defined if cidr ('%s') is defined!",
+                    environment.getCloudPlatform(), network.getNetworkId(), network.getNetworkCidr());
+            LOGGER.info(message);
+            resultBuilder.error(message);
         }
     }
 }
