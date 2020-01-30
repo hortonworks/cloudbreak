@@ -135,6 +135,22 @@
             "NatGatewayId" : { "Ref" : "NatGateway${subnet?index}" }
           }
     },
+    "S3Endpoint${subnet?index}" : {
+      "Type" : "AWS::EC2::VPCEndpoint",
+      "Properties" : {
+        "RouteTableIds" : [ {"Ref" : "PrivateRouteTable${subnet?index}"} ],
+        "ServiceName" : { "Fn::Sub": "com.amazonaws.${r"${AWS::Region}"}.s3" },
+        "VpcId" : {"Ref" : "VPC"}
+      }
+    },
+    "DDBEndpoint${subnet?index}" : {
+      "Type" : "AWS::EC2::VPCEndpoint",
+      "Properties" : {
+        "RouteTableIds" : [ {"Ref" : "PrivateRouteTable${subnet?index}"} ],
+        "ServiceName" : { "Fn::Sub": "com.amazonaws.${r"${AWS::Region}"}.dynamodb" },
+        "VpcId" : {"Ref" : "VPC"}
+      }
+    },
     </#if>
     "PublicSubnetRouteTableAssociation${subnet?index}" : {
       "Type" : "AWS::EC2::SubnetRouteTableAssociation",
