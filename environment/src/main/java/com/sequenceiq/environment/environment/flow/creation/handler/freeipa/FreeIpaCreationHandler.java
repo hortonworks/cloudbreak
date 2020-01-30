@@ -8,6 +8,7 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_IN_PROGRESS;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -71,6 +73,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private static final List<String> DEFAULT_SECURITY_GROUP_PORTS = List.of("22");
 
+    private static final String YARN_NETWORK_CIDR = "172.27.0.0/16";
+
     private final EnvironmentService environmentService;
 
     private final FreeIpaService freeIpaService;
@@ -120,7 +124,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             if (environmentOptional.isPresent()) {
                 Environment environment = environmentOptional.get();
                 if (Objects.nonNull(environment.getParentEnvironment())) {
-                    attachParentFreeIpaToChild(environmentDtoEvent, environmentDto);
+                    attachParentFreeIpa(environmentDto);
                 } else if (environment.isCreateFreeIpa() && supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())) {
                     createFreeIpa(environmentDtoEvent, environmentDto);
                 }
@@ -153,12 +157,18 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         }
     }
 
-    private void attachParentFreeIpaToChild(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environmentDto) {
+    private void attachParentFreeIpa(EnvironmentDto environmentDto) throws Exception {
         Optional<DescribeFreeIpaResponse> freeIpa = freeIpaService.describe(environmentDto.getParentEnvironmentCrn());
-        if (freeIpa.isPresent()) {
+        if (freeIpa.isPresent() && CloudPlatform.YARN.name().equalsIgnoreCase(environmentDto.getCloudPlatform())) {
             LOGGER.info("Using FreeIpa of parent environmentCrn '{}' .", environmentDto.getParentEnvironmentCrn());
+
             //TODO Register parent's FreeIPA to the child - new FreeIpaSvc api method
-            //TODO Register reverse dns zone
+
+            AddDnsZoneForSubnetsRequest addDnsZoneForSubnetsRequest = new AddDnsZoneForSubnetsRequest();
+            addDnsZoneForSubnetsRequest.setEnvironmentCrn(environmentDto.getResourceCrn());
+            addDnsZoneForSubnetsRequest.setSubnets(Collections.singletonList(YARN_NETWORK_CIDR));
+
+            dnsV1Endpoint.addDnsZoneForSubnets(addDnsZoneForSubnetsRequest);
         }
     }
 
@@ -270,8 +280,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private void awaitFreeIpaCreation(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environment) {
         Pair<PollingResult, Exception> pollWithTimeout = freeIpaPollingService.pollWithTimeout(
                 new FreeIpaCreationRetrievalTask(freeIpaService),
-                new FreeIpaPollerObject(environment.getId(),
-                        environment.getParentEnvironmentCrn() != null ? environment.getParentEnvironmentCrn() : environment.getResourceCrn()),
+                new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn()),
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_INTERVAL,
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_COUNT,
                 FreeIpaCreationRetrievalTask.FREEIPA_FAILURE_COUNT);
