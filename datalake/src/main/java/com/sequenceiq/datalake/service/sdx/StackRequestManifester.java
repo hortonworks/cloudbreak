@@ -178,7 +178,6 @@ public class StackRequestManifester {
             if (envTelemetry.getFeatures() != null) {
                 FeaturesRequest featuresRequest = new FeaturesRequest();
                 featuresRequest.setReportDeploymentLogs(envTelemetry.getFeatures().getReportDeploymentLogs());
-                featuresRequest.setUseSharedAltusCredential(envTelemetry.getFeatures().getUseSharedAltusCredential());
                 telemetryRequest.setFeatures(featuresRequest);
             }
             if (envTelemetry.getFluentAttributes() != null) {

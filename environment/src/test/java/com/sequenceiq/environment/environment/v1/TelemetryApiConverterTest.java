@@ -18,7 +18,6 @@ import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
-import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentLogging;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
@@ -49,15 +48,8 @@ public class TelemetryApiConverterTest {
         telemetryRequest.setLogging(loggingRequest);
         telemetryRequest.setWorkloadAnalytics(new WorkloadAnalyticsRequest());
         FeaturesRequest fr = new FeaturesRequest();
-        FeatureSetting fsReportLogs = new FeatureSetting();
-        fsReportLogs.setEnabled(true);
-        FeatureSetting fsWorladAnalytics = new FeatureSetting();
-        fsWorladAnalytics.setEnabled(true);
-        FeatureSetting fsUseSharedCredential = new FeatureSetting();
-        fsUseSharedCredential.setEnabled(true);
-        fr.setReportDeploymentLogs(fsReportLogs);
-        fr.setWorkloadAnalytics(fsWorladAnalytics);
-        fr.setUseSharedAltusCredential(fsUseSharedCredential);
+        fr.addReportDeploymentLogs(true);
+        fr.addWorkloadAnalytics(true);
         telemetryRequest.setFeatures(fr);
         // WHEN
         EnvironmentTelemetry result = underTest.convert(telemetryRequest);
@@ -95,9 +87,7 @@ public class TelemetryApiConverterTest {
         // GIVEN
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         FeaturesRequest fr = new FeaturesRequest();
-        FeatureSetting waFeature = new FeatureSetting();
-        waFeature.setEnabled(true);
-        fr.setWorkloadAnalytics(waFeature);
+        fr.addWorkloadAnalytics(true);
         telemetryRequest.setFeatures(fr);
         // WHEN
         EnvironmentTelemetry result = underTest.convert(telemetryRequest);
@@ -110,9 +100,7 @@ public class TelemetryApiConverterTest {
         // GIVEN
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         FeaturesRequest fr = new FeaturesRequest();
-        FeatureSetting waFeature = new FeatureSetting();
-        waFeature.setEnabled(false);
-        fr.setWorkloadAnalytics(waFeature);
+        fr.addWorkloadAnalytics(false);
         telemetryRequest.setFeatures(fr);
         // WHEN
         EnvironmentTelemetry result = underTest.convert(telemetryRequest);
@@ -160,9 +148,7 @@ public class TelemetryApiConverterTest {
         s3Params.setInstanceProfile(INSTANCE_PROFILE_VALUE);
         logging.setS3(s3Params);
         EnvironmentFeatures features = new EnvironmentFeatures();
-        FeatureSetting reportDeploymentLogs = new FeatureSetting();
-        reportDeploymentLogs.setEnabled(false);
-        features.setReportDeploymentLogs(reportDeploymentLogs);
+        features.addReportDeploymentLogs(false);
         EnvironmentTelemetry telemetry = new EnvironmentTelemetry();
         telemetry.setLogging(logging);
         telemetry.setFeatures(features);

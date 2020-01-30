@@ -88,7 +88,7 @@ public class TelemetryConverter {
             telemetry.setWorkloadAnalytics(workloadAnalytics);
             setWorkloadAnalyticsFeature(telemetry, features);
             setReportDeploymentLogs(request, features);
-            setUseSharedAltusCredential(request, features);
+            setUseSharedAltusCredential(features);
             telemetry.setFluentAttributes(request.getFluentAttributes());
         }
         setMeteringFeature(type, features);
@@ -112,8 +112,6 @@ public class TelemetryConverter {
             if (featuresResponse != null) {
                 LOGGER.debug("Setting report deployment logs response (telemetry) based on environment response.");
                 featuresRequest.setReportDeploymentLogs(featuresResponse.getReportDeploymentLogs());
-                LOGGER.debug("Setting use shared altus credential feature based on environment response.");
-                featuresRequest.setUseSharedAltusCredential(featuresResponse.getUseSharedAltusCredential());
             }
             telemetryRequest.setFluentAttributes(response.getFluentAttributes());
         }
@@ -206,7 +204,6 @@ public class TelemetryConverter {
             featuresRequest = new FeaturesRequest();
             featuresRequest.setWorkloadAnalytics(features.getWorkloadAnalytics());
             featuresRequest.setReportDeploymentLogs(features.getReportDeploymentLogs());
-            featuresRequest.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
         }
         return featuresRequest;
     }
@@ -237,9 +234,7 @@ public class TelemetryConverter {
     private void setMeteringFeature(StackType type, Features features) {
         if (meteringEnabled && StackType.WORKLOAD.equals(type)) {
             LOGGER.debug("Setting metering for workload cluster (as metering is enabled)");
-            FeatureSetting metering = new FeatureSetting();
-            metering.setEnabled(true);
-            features.setMetering(metering);
+            features.addMetering(true);
         } else {
             LOGGER.debug("Metering feature is disabled - global setting; {}, stack type: {}", meteringEnabled, type);
         }
@@ -248,9 +243,7 @@ public class TelemetryConverter {
     private void setWorkloadAnalyticsFeature(Telemetry telemetry, Features features) {
         if (telemetry.getWorkloadAnalytics() != null) {
             LOGGER.debug("Setting workload analytics feature settings as workload analytics request exists.");
-            FeatureSetting waFeature = new FeatureSetting();
-            waFeature.setEnabled(true);
-            features.setWorkloadAnalytics(waFeature);
+            features.addWorkloadAnalytics(true);
         } else {
             LOGGER.debug("Workload analytics feature is not enabled.");
         }
@@ -355,22 +348,18 @@ public class TelemetryConverter {
                 features.setReportDeploymentLogs(request.getFeatures().getReportDeploymentLogs());
             } else {
                 LOGGER.debug("Auto-filling report deployment logs telemetry settings as it is set, but missing from the request.");
-                FeatureSetting reportDeploymentLogsFeature = new FeatureSetting();
-                reportDeploymentLogsFeature.setEnabled(false);
-                features.setReportDeploymentLogs(reportDeploymentLogsFeature);
+                features.addReportDeploymentLogs(false);
             }
         } else {
             LOGGER.debug("Report deployment logs feature is disabled. Set feature as false.");
-            FeatureSetting reportDeploymentLogsFeature = new FeatureSetting();
-            reportDeploymentLogsFeature.setEnabled(false);
-            features.setReportDeploymentLogs(reportDeploymentLogsFeature);
+            features.addReportDeploymentLogs(false);
         }
     }
 
-    private void setUseSharedAltusCredential(TelemetryRequest request, Features features) {
-        if (useSharedAltusCredential && request.getFeatures() != null && request.getFeatures().getUseSharedAltusCredential() != null) {
-            LOGGER.debug("Fill shared altus credential setting from telemetry feature request");
-            features.setUseSharedAltusCredential(request.getFeatures().getUseSharedAltusCredential());
+    private void setUseSharedAltusCredential(Features features) {
+        if (useSharedAltusCredential) {
+            LOGGER.debug("Fill shared altus credential setting as that is enabled globally");
+            features.addUseSharedAltusCredential(true);
         }
     }
 }

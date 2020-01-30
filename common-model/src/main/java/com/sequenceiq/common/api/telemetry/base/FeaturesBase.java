@@ -2,6 +2,7 @@ package com.sequenceiq.common.api.telemetry.base;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.api.telemetry.doc.TelemetryModelDescription;
 import com.sequenceiq.common.api.type.FeatureSetting;
@@ -17,10 +18,6 @@ public abstract class FeaturesBase implements Serializable {
     @JsonProperty("reportDeploymentLogs")
     @ApiModelProperty(TelemetryModelDescription.TELEMETRY_REPORT_DEPLOYMENT_LOGS_ENABLED)
     private FeatureSetting reportDeploymentLogs;
-
-    @JsonProperty("useSharedAltusCredential")
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_USE_SHARED_ALTUS_CREDENTIAL_ENABLED)
-    private FeatureSetting useSharedAltusCredential;
 
     public FeatureSetting getWorkloadAnalytics() {
         return workloadAnalytics;
@@ -38,11 +35,15 @@ public abstract class FeaturesBase implements Serializable {
         this.reportDeploymentLogs = reportDeploymentLogs;
     }
 
-    public FeatureSetting getUseSharedAltusCredential() {
-        return useSharedAltusCredential;
+    @JsonIgnore
+    public void addWorkloadAnalytics(boolean enabled) {
+        workloadAnalytics = new FeatureSetting();
+        workloadAnalytics.setEnabled(enabled);
     }
 
-    public void setUseSharedAltusCredential(FeatureSetting useSharedAltusCredential) {
-        this.useSharedAltusCredential = useSharedAltusCredential;
+    @JsonIgnore
+    public void addReportDeploymentLogs(boolean enabled) {
+        reportDeploymentLogs = new FeatureSetting();
+        reportDeploymentLogs.setEnabled(enabled);
     }
 }

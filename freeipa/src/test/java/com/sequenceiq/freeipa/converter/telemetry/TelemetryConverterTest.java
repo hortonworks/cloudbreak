@@ -1,8 +1,8 @@
 package com.sequenceiq.freeipa.converter.telemetry;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,6 @@ import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
-import com.sequenceiq.common.api.type.FeatureSetting;
 
 public class TelemetryConverterTest {
 
@@ -40,9 +39,7 @@ public class TelemetryConverterTest {
         LoggingRequest logging = new LoggingRequest();
         logging.setS3(new S3CloudStorageV1Parameters());
         FeaturesRequest featuresRequest = new FeaturesRequest();
-        FeatureSetting reportDeploymentLogs = new FeatureSetting();
-        reportDeploymentLogs.setEnabled(false);
-        featuresRequest.setReportDeploymentLogs(reportDeploymentLogs);
+        featuresRequest.addReportDeploymentLogs(false);
         telemetryRequest.setLogging(logging);
         telemetryRequest.setFeatures(featuresRequest);
         // WHEN

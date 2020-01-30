@@ -15,7 +15,6 @@ import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.telemetry.response.WorkloadAnalyticsResponse;
-import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentLogging;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
@@ -86,7 +85,6 @@ public class TelemetryApiConverter {
         if (features != null) {
             featuresRequest = new FeaturesRequest();
             featuresRequest.setReportDeploymentLogs(features.getReportDeploymentLogs());
-            featuresRequest.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
         }
         return featuresRequest;
     }
@@ -119,17 +117,14 @@ public class TelemetryApiConverter {
         if (featuresRequest != null) {
             features = new EnvironmentFeatures();
             if (useSharedAltusCredential) {
-                features.setUseSharedAltusCredential(featuresRequest.getUseSharedAltusCredential());
+                features.addUseSharedAltusredential(true);
             }
             if (reportDeploymentLogs) {
-                final FeatureSetting reportDeploymentLogs;
                 if (featuresRequest.getReportDeploymentLogs() != null) {
-                    reportDeploymentLogs = featuresRequest.getReportDeploymentLogs();
+                    features.setReportDeploymentLogs(featuresRequest.getReportDeploymentLogs());
                 } else {
-                    reportDeploymentLogs = new FeatureSetting();
-                    reportDeploymentLogs.setEnabled(false);
+                    features.addReportDeploymentLogs(false);
                 }
-                features.setReportDeploymentLogs(reportDeploymentLogs);
             }
             if (featuresRequest.getWorkloadAnalytics() != null) {
                 features.setWorkloadAnalytics(featuresRequest.getWorkloadAnalytics());

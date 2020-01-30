@@ -18,7 +18,6 @@ import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
-import com.sequenceiq.common.api.type.FeatureSetting;
 
 @Component
 public class TelemetryConverter {
@@ -119,14 +118,11 @@ public class TelemetryConverter {
                 LOGGER.debug("Fill report deployment log settings from feature request");
             } else {
                 LOGGER.debug("Auto-fill report deployment logs settings with defaults. (disabled)");
-                FeatureSetting reportDeploymentLogsFeature = new FeatureSetting();
-                reportDeploymentLogsFeature.setEnabled(false);
-                features.setReportDeploymentLogs(reportDeploymentLogsFeature);
+                features.addReportDeploymentLogs(false);
             }
         }
-        if (useSharedAltusCredential && featuresRequest != null
-                && featuresRequest.getUseSharedAltusCredential() != null) {
-            features.setUseSharedAltusCredential(featuresRequest.getUseSharedAltusCredential());
+        if (useSharedAltusCredential) {
+            features.addUseSharedAltusCredential(true);
         }
         return features;
     }

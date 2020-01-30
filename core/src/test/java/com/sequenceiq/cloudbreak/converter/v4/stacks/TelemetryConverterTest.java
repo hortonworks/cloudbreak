@@ -27,7 +27,6 @@ import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
 import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
-import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 public class TelemetryConverterTest {
@@ -68,12 +67,7 @@ public class TelemetryConverterTest {
         logging.setS3(new S3CloudStorageV1Parameters());
         WorkloadAnalyticsRequest workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
         FeaturesRequest featuresRequest = new FeaturesRequest();
-        FeatureSetting reportDeploymentLogs = new FeatureSetting();
-        reportDeploymentLogs.setEnabled(false);
-        featuresRequest.setReportDeploymentLogs(reportDeploymentLogs);
-        FeatureSetting useSharedCredential = new FeatureSetting();
-        useSharedCredential.setEnabled(true);
-        featuresRequest.setUseSharedAltusCredential(useSharedCredential);
+        featuresRequest.addReportDeploymentLogs(false);
         telemetryRequest.setLogging(logging);
         telemetryRequest.setFeatures(featuresRequest);
         telemetryRequest.setWorkloadAnalytics(workloadAnalyticsRequest);
@@ -99,10 +93,8 @@ public class TelemetryConverterTest {
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         Features features = new Features();
-        FeatureSetting reportDeploymentLogs = new FeatureSetting();
-        reportDeploymentLogs.setEnabled(true);
         features.setWorkloadAnalytics(null);
-        features.setReportDeploymentLogs(reportDeploymentLogs);
+        features.addReportDeploymentLogs(true);
         telemetry.setFeatures(features);
         // WHEN
         TelemetryResponse result = underTest.convert(telemetry);
@@ -141,10 +133,8 @@ public class TelemetryConverterTest {
     public void testConvertFromRequestWithFeatures() {
         // GIVEN
         TelemetryRequest telemetryRequest = new TelemetryRequest();
-        FeatureSetting reportDeploymentLog = new FeatureSetting();
-        reportDeploymentLog.setEnabled(true);
         FeaturesRequest features = new FeaturesRequest();
-        features.setReportDeploymentLogs(reportDeploymentLog);
+        features.addReportDeploymentLogs(true);
         telemetryRequest.setFeatures(features);
         // WHEN
         Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD);
@@ -236,9 +226,7 @@ public class TelemetryConverterTest {
         sdxClusterResponse.setCrn("crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
         sdxClusterResponse.setName("sdxName");
         FeaturesResponse featuresResponse = new FeaturesResponse();
-        FeatureSetting waSetting = new FeatureSetting();
-        waSetting.setEnabled(false);
-        featuresResponse.setWorkloadAnalytics(waSetting);
+        featuresResponse.addWorkloadAnalytics(false);
         response.setFeatures(featuresResponse);
         // WHEN
         TelemetryRequest result = underTest.convert(response, sdxClusterResponse);
@@ -267,10 +255,8 @@ public class TelemetryConverterTest {
     public void testConvertFromEnvAndSdxResponseWithReportDeploymentLogsEnabled() {
         // GIVEN
         TelemetryResponse response = new TelemetryResponse();
-        FeatureSetting reportDeploymentLogs = new FeatureSetting();
-        reportDeploymentLogs.setEnabled(true);
         FeaturesResponse featuresResponse = new FeaturesResponse();
-        featuresResponse.setReportDeploymentLogs(reportDeploymentLogs);
+        featuresResponse.addReportDeploymentLogs(true);
         response.setFeatures(featuresResponse);
         // WHEN
         TelemetryRequest result = underTest.convert(response, null);
@@ -282,10 +268,8 @@ public class TelemetryConverterTest {
     public void testConvertFromEnvAndSdxResponseWithReportDeploymentLogsDisabled() {
         // GIVEN
         TelemetryResponse response = new TelemetryResponse();
-        FeatureSetting reportDeploymentLogs = new FeatureSetting();
-        reportDeploymentLogs.setEnabled(false);
         FeaturesResponse featuresResponse = new FeaturesResponse();
-        featuresResponse.setReportDeploymentLogs(reportDeploymentLogs);
+        featuresResponse.addReportDeploymentLogs(false);
         response.setFeatures(featuresResponse);
         // WHEN
         TelemetryRequest result = underTest.convert(response, null);
@@ -302,9 +286,7 @@ public class TelemetryConverterTest {
         logging.setS3(new S3CloudStorageV1Parameters());
         telemetry.setLogging(logging);
         Features features = new Features();
-        FeatureSetting reportDeploymentLogs = new FeatureSetting();
-        reportDeploymentLogs.setEnabled(true);
-        features.setReportDeploymentLogs(reportDeploymentLogs);
+        features.addReportDeploymentLogs(true);
         telemetry.setFeatures(features);
         WorkloadAnalytics workloadAnalytics = new WorkloadAnalytics();
         Map<String, Object> waAttributes = new HashMap<>();
