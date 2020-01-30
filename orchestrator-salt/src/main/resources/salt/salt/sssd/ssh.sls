@@ -1,5 +1,7 @@
+{%- from 'metadata/settings.sls' import metadata with context %}
+
 {%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" not in grains.get('roles', []) %}
-{% if not salt['file.directory_exists']('/yarn-private') %}
+{% if metadata.platform != 'YARN' %}
 restart-sshd-if-reconfigured:
   service.running:
     - enable: True
