@@ -22,7 +22,7 @@ public class ProperTerminationFlowEventChainFactory implements FlowEventChainFac
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(TerminationEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(new StackEvent(ClusterTerminationEvent.PROPER_TERMINATION_EVENT.event(), event.getResourceId(), null));
+        flowEventChain.add(new StackEvent(ClusterTerminationEvent.PROPER_TERMINATION_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new TerminationEvent(StackTerminationEvent.TERMINATION_EVENT.event(), event.getResourceId(), event.getForced()));
         return flowEventChain;
     }

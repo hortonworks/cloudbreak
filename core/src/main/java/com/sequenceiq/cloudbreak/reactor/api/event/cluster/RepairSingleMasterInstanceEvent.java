@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster;
 
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 import reactor.rx.Promise;
@@ -9,7 +10,7 @@ public class RepairSingleMasterInstanceEvent extends StackEvent {
         super(selector, stackId);
     }
 
-    public RepairSingleMasterInstanceEvent(String selector, Long stackId, Promise<Boolean> accepted) {
+    public RepairSingleMasterInstanceEvent(String selector, Long stackId, Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
     }
 

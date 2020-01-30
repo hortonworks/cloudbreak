@@ -4,6 +4,7 @@ import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -11,15 +12,14 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import javax.ws.rs.NotFoundException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -28,11 +28,15 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.api.model.StateStatus;
 
 @ExtendWith(MockitoExtension.class)
 public class CloudbreakFlowServiceTest {
+
+    private static final String FLOW_ID = "flowId";
 
     private static final String FLOW_CHAIN_ID = "flowChainId";
 
@@ -48,6 +52,9 @@ public class CloudbreakFlowServiceTest {
 
     @InjectMocks
     private CloudbreakFlowService underTest;
+
+    @Captor
+    private ArgumentCaptor<SdxCluster> clusterCaptor;
 
     @Test
     public void testActiveFlowCheck() {
@@ -106,27 +113,99 @@ public class CloudbreakFlowServiceTest {
     }
 
     @Test
-    public void testSaveFlowChainId() {
+    public void testFlowCheckBasedOnFlowId() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setLastCbFlowId(FLOW_ID);
+        cluster.setInitiatorUserCrn(USER_CRN);
+        cluster.setClusterName(CLUSTER_NAME);
+
+        FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
+        flowCheckResponse.setHasActiveFlow(TRUE);
+
+        when(flowEndpoint.hasFlowRunningByFlowId(anyString()))
+                .thenReturn(flowCheckResponse);
+
+        boolean result = underTest.isLastKnownFlowRunning(cluster);
+
+        assertTrue(result);
+        verify(flowEndpoint).hasFlowRunningByFlowId(FLOW_ID);
+    }
+
+    @Test
+    public void testSaveFlowIdWhenNoFlowIdentifierIsPresent() {
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
         cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
+        FlowLogResponse response = new FlowLogResponse();
+        response.setStateStatus(StateStatus.SUCCESSFUL);
+        response.setFinalized(true);
+        response.setFlowId(FLOW_ID);
         when(flowEndpoint.getLastFlowByResourceName(anyString()))
-                .thenReturn(createFlowLogResponse(StateStatus.SUCCESSFUL, true, null));
+                .thenReturn(response);
         when(sdxClusterRepository.save(any())).thenReturn(cluster);
 
-        underTest.getAndSaveLastCloudbreakFlowChainId(cluster);
+        underTest.saveLastCloudbreakFlowChainId(cluster, null);
 
         verify(flowEndpoint).getLastFlowByResourceName(anyString());
 
-        ArgumentCaptor<SdxCluster> sdxCaptor = ArgumentCaptor.forClass(SdxCluster.class);
-        verify(sdxClusterRepository).save(sdxCaptor.capture());
-        assertEquals(FLOW_CHAIN_ID, sdxCaptor.getValue().getLastCbFlowChainId());
+        verify(sdxClusterRepository).save(clusterCaptor.capture());
+        assertEquals(FLOW_ID, clusterCaptor.getValue().getLastCbFlowId());
+        assertNull(clusterCaptor.getValue().getLastCbFlowChainId());
     }
 
     @Test
-    public void testSaveFlowChainIdWhenThereIsNoFlow() {
+    public void testSaveFlowChainIdWhenNoFlowIdentifierIsPresent() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
+        cluster.setInitiatorUserCrn(USER_CRN);
+        cluster.setClusterName(CLUSTER_NAME);
+
+        FlowLogResponse response = new FlowLogResponse();
+        response.setStateStatus(StateStatus.SUCCESSFUL);
+        response.setFinalized(true);
+        response.setFlowChainId(FLOW_CHAIN_ID);
+        when(flowEndpoint.getLastFlowByResourceName(anyString()))
+                .thenReturn(response);
+        when(sdxClusterRepository.save(any())).thenReturn(cluster);
+
+        underTest.saveLastCloudbreakFlowChainId(cluster, null);
+
+        verify(flowEndpoint).getLastFlowByResourceName(anyString());
+
+        verify(sdxClusterRepository).save(clusterCaptor.capture());
+        assertEquals(FLOW_CHAIN_ID, clusterCaptor.getValue().getLastCbFlowChainId());
+        assertNull(clusterCaptor.getValue().getLastCbFlowId());
+    }
+
+    @Test
+    public void testSaveFlowChainIdWhenNoFlowIdentifierIsPresentAndBothFlowIdAndFlowChainIdIsPresentInFlowLog() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
+        cluster.setInitiatorUserCrn(USER_CRN);
+        cluster.setClusterName(CLUSTER_NAME);
+
+        FlowLogResponse response = new FlowLogResponse();
+        response.setStateStatus(StateStatus.SUCCESSFUL);
+        response.setFinalized(true);
+        response.setFlowId(FLOW_ID);
+        response.setFlowChainId(FLOW_CHAIN_ID);
+        when(flowEndpoint.getLastFlowByResourceName(anyString()))
+                .thenReturn(response);
+        when(sdxClusterRepository.save(any())).thenReturn(cluster);
+
+        underTest.saveLastCloudbreakFlowChainId(cluster, null);
+
+        verify(flowEndpoint).getLastFlowByResourceName(anyString());
+
+        verify(sdxClusterRepository).save(clusterCaptor.capture());
+        assertEquals(FLOW_CHAIN_ID, clusterCaptor.getValue().getLastCbFlowChainId());
+        assertNull(clusterCaptor.getValue().getLastCbFlowId());
+    }
+
+    @Test
+    public void testSaveFlowInfoResetWhenThereIsNoFlow() {
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
         cluster.setInitiatorUserCrn(USER_CRN);
@@ -134,20 +213,60 @@ public class CloudbreakFlowServiceTest {
 
         when(flowEndpoint.getLastFlowByResourceName(anyString())).thenThrow(new NotFoundException("something"));
 
-        Assertions.assertThrows(NotFoundException.class,
-                () -> underTest.getAndSaveLastCloudbreakFlowChainId(cluster));
+        underTest.saveLastCloudbreakFlowChainId(cluster, null);
 
         verify(flowEndpoint).getLastFlowByResourceName(anyString());
-        verifyZeroInteractions(sdxClusterRepository);
+        verify(sdxClusterRepository).save(clusterCaptor.capture());
+        assertNull(clusterCaptor.getValue().getLastCbFlowId());
+        assertNull(clusterCaptor.getValue().getLastCbFlowChainId());
     }
 
-    private FlowLogResponse createFlowLogResponse(StateStatus stateStatus, boolean finalized, String nextEvent) {
-        FlowLogResponse response = new FlowLogResponse();
-        response.setStateStatus(stateStatus);
-        response.setFinalized(finalized);
-        response.setNextEvent(nextEvent);
-        response.setFlowChainId(FLOW_CHAIN_ID);
-        return response;
+    @Test
+    public void testSaveFlowIdWhenFlowTypeIsFlow() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
+        cluster.setInitiatorUserCrn(USER_CRN);
+        cluster.setClusterName(CLUSTER_NAME);
+
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, FLOW_ID);
+
+        underTest.saveLastCloudbreakFlowChainId(cluster, flowIdentifier);
+
+        verify(sdxClusterRepository).save(clusterCaptor.capture());
+        assertEquals(FLOW_ID, clusterCaptor.getValue().getLastCbFlowId());
+        assertNull(clusterCaptor.getValue().getLastCbFlowChainId());
+    }
+
+    @Test
+    public void testSaveFlowChainIdWhenFlowTypeIsFlowChain() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
+        cluster.setInitiatorUserCrn(USER_CRN);
+        cluster.setClusterName(CLUSTER_NAME);
+
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_CHAIN_ID);
+
+        underTest.saveLastCloudbreakFlowChainId(cluster, flowIdentifier);
+
+        verify(sdxClusterRepository).save(clusterCaptor.capture());
+        assertEquals(FLOW_CHAIN_ID, clusterCaptor.getValue().getLastCbFlowChainId());
+        assertNull(clusterCaptor.getValue().getLastCbFlowId());
+    }
+
+    @Test
+    public void testResetCbFlowInfoWhenNotTriggeredFlow() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
+        cluster.setInitiatorUserCrn(USER_CRN);
+        cluster.setClusterName(CLUSTER_NAME);
+
+        FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
+
+        underTest.saveLastCloudbreakFlowChainId(cluster, flowIdentifier);
+
+        verify(sdxClusterRepository).save(clusterCaptor.capture());
+        assertNull(clusterCaptor.getValue().getLastCbFlowId());
+        assertNull(clusterCaptor.getValue().getLastCbFlowChainId());
     }
 
     private FlowCheckResponse createFlowCheckResponse(Boolean hasActiveFlow) {

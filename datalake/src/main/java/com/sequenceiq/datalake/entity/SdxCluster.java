@@ -96,6 +96,8 @@ public class SdxCluster implements AccountIdAwareResource {
 
     private String lastCbFlowChainId;
 
+    private String lastCbFlowId;
+
     public Long getId() {
         return id;
     }
@@ -262,6 +264,14 @@ public class SdxCluster implements AccountIdAwareResource {
 
     public void setLastCbFlowChainId(String lastCbFlowChainId) {
         this.lastCbFlowChainId = lastCbFlowChainId;
+    }
+
+    public String getLastCbFlowId() {
+        return lastCbFlowId;
+    }
+
+    public void setLastCbFlowId(String lastCbFlowId) {
+        this.lastCbFlowId = lastCbFlowId;
     }
 
     //CHECKSTYLE:OFF

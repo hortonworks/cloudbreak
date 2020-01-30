@@ -118,6 +118,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class ClusterService {
@@ -393,7 +394,7 @@ public class ClusterService {
         return clusterApiConnectors.getConnector(stack).clusterModificationService().getStackRepositoryJson(repoDetails, stackRepoId);
     }
 
-    public void updateHosts(Long stackId, HostGroupAdjustmentV4Request hostGroupAdjustment) {
+    public FlowIdentifier updateHosts(Long stackId, HostGroupAdjustmentV4Request hostGroupAdjustment) {
         Stack stack = stackService.getById(stackId);
         Cluster cluster = stack.getCluster();
         if (cluster == null) {
@@ -402,38 +403,40 @@ public class ClusterService {
         boolean downscaleRequest = validateRequest(stack, hostGroupAdjustment);
         if (downscaleRequest) {
             updateClusterStatusByStackId(stackId, UPDATE_REQUESTED);
-            flowManager.triggerClusterDownscale(stackId, hostGroupAdjustment);
+            return flowManager.triggerClusterDownscale(stackId, hostGroupAdjustment);
         } else {
-            flowManager.triggerClusterUpscale(stackId, hostGroupAdjustment);
+            return flowManager.triggerClusterUpscale(stackId, hostGroupAdjustment);
         }
     }
 
-    public void updateStatus(Long stackId, StatusRequest statusRequest) {
+    public FlowIdentifier updateStatus(Long stackId, StatusRequest statusRequest) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        updateStatus(stack, statusRequest);
+        return updateStatus(stack, statusRequest);
     }
 
-    public void updateStatus(Stack stack, StatusRequest statusRequest) {
+    public FlowIdentifier updateStatus(Stack stack, StatusRequest statusRequest) {
         Cluster cluster = stack.getCluster();
         if (cluster == null) {
             throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stack.getName()));
         }
+        FlowIdentifier flowIdentifier;
         switch (statusRequest) {
             case SYNC:
-                sync(stack);
+                flowIdentifier = sync(stack);
                 break;
             case STOPPED:
-                stop(stack, cluster);
+                flowIdentifier = stop(stack, cluster);
                 break;
             case STARTED:
-                start(stack, cluster);
+                flowIdentifier = start(stack, cluster);
                 break;
             default:
                 throw new BadRequestException("Cannot update the status of cluster because status request not valid");
         }
+        return flowIdentifier;
     }
 
-    public void updateUserNamePassword(Long stackId, UserNamePasswordV4Request userNamePasswordJson) {
+    public FlowIdentifier updateUserNamePassword(Long stackId, UserNamePasswordV4Request userNamePasswordJson) {
         Stack stack = stackService.getById(stackId);
         Cluster cluster = stack.getCluster();
         String oldUserName = cluster.getUserName();
@@ -441,9 +444,9 @@ public class ClusterService {
         String newUserName = userNamePasswordJson.getUserName();
         String newPassword = userNamePasswordJson.getPassword();
         if (!newUserName.equals(oldUserName)) {
-            flowManager.triggerClusterCredentialReplace(stack.getId(), userNamePasswordJson.getUserName(), userNamePasswordJson.getPassword());
+            return flowManager.triggerClusterCredentialReplace(stack.getId(), userNamePasswordJson.getUserName(), userNamePasswordJson.getPassword());
         } else if (!newPassword.equals(oldPassword)) {
-            flowManager.triggerClusterCredentialUpdate(stack.getId(), userNamePasswordJson.getPassword());
+            return flowManager.triggerClusterCredentialUpdate(stack.getId(), userNamePasswordJson.getPassword());
         } else {
             throw new BadRequestException("The request may not change credential");
         }
@@ -613,11 +616,12 @@ public class ClusterService {
         });
     }
 
-    private void sync(Stack stack) {
-        flowManager.triggerClusterSync(stack.getId());
+    private FlowIdentifier sync(Stack stack) {
+        return flowManager.triggerClusterSync(stack.getId());
     }
 
-    private void start(Stack stack, Cluster cluster) {
+    private FlowIdentifier start(Stack stack, Cluster cluster) {
+        FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
         if (stack.isStartInProgress()) {
             eventService.fireCloudbreakEvent(stack.getId(), START_REQUESTED.name(), CLUSTER_START_REQUESTED);
             updateClusterStatusByStackId(stack.getId(), START_REQUESTED);
@@ -632,13 +636,15 @@ public class ClusterService {
                         String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", cluster.getId()));
             } else {
                 updateClusterStatusByStackId(stack.getId(), START_REQUESTED);
-                flowManager.triggerClusterStart(stack.getId());
+                flowIdentifier = flowManager.triggerClusterStart(stack.getId());
             }
         }
+        return flowIdentifier;
     }
 
-    private void stop(Stack stack, Cluster cluster) {
+    private FlowIdentifier stop(Stack stack, Cluster cluster) {
         StopRestrictionReason reason = stack.isInfrastructureStoppable();
+        FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
         if (cluster.isStopped()) {
             eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), CLUSTER_STOP_IGNORED);
         } else if (reason != StopRestrictionReason.NONE) {
@@ -652,8 +658,9 @@ public class ClusterService {
                     String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", cluster.getId()));
         } else if (cluster.isAvailable() || cluster.isStopFailed()) {
             updateClusterStatusByStackId(stack.getId(), STOP_REQUESTED);
-            flowManager.triggerClusterStop(stack.getId());
+            flowIdentifier = flowManager.triggerClusterStop(stack.getId());
         }
+        return flowIdentifier;
     }
 
     public Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason) {
@@ -763,8 +770,8 @@ public class ClusterService {
                 }).collect(Collectors.toList());
     }
 
-    public Cluster recreate(Stack stack, String blueprintName, Set<HostGroup> hostGroups, boolean validateBlueprint,
-            StackRepoDetails stackRepoDetails) throws TransactionExecutionException {
+    public FlowIdentifier recreate(Stack stack, String blueprintName, Set<HostGroup> hostGroups, boolean validateBlueprint)
+            throws TransactionExecutionException {
         return transactionService.required(() -> {
             checkBlueprintIdAndHostGroups(blueprintName, hostGroups);
             Stack stackWithLists = stackService.getByIdWithListsInTransaction(stack.getId());
@@ -789,11 +796,10 @@ public class ClusterService {
 
             try {
                 cluster = prepareCluster(hostGroups, blueprint, stackWithLists, cluster);
-                triggerClusterInstall(stackWithLists, cluster);
+                return triggerClusterInstall(stackWithLists, cluster);
             } catch (CloudbreakException e) {
                 throw new CloudbreakServiceException(e);
             }
-            return stackWithLists.getCluster();
         });
     }
 
@@ -824,12 +830,12 @@ public class ClusterService {
                 .orElseThrow(notFound("Cluster", clusterId));
     }
 
-    private void triggerClusterInstall(Stack stack, Cluster cluster) throws CloudbreakException {
+    private FlowIdentifier triggerClusterInstall(Stack stack, Cluster cluster) throws CloudbreakException {
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
         if (orchestratorType.containerOrchestrator() && cluster.getContainers().isEmpty()) {
-            flowManager.triggerClusterInstall(stack.getId());
+            return flowManager.triggerClusterInstall(stack.getId());
         } else {
-            flowManager.triggerClusterReInstall(stack.getId());
+            return flowManager.triggerClusterReInstall(stack.getId());
         }
     }
 
@@ -952,8 +958,8 @@ public class ClusterService {
         return repository.findNamesByRdsConfig(rdsConfigId);
     }
 
-    public void triggerMaintenanceModeValidation(Stack stack) {
-        flowManager.triggerMaintenanceModeValidationFlow(stack.getId());
+    public FlowIdentifier triggerMaintenanceModeValidation(Stack stack) {
+        return flowManager.triggerMaintenanceModeValidationFlow(stack.getId());
     }
 
     public void pureDelete(Cluster cluster) {

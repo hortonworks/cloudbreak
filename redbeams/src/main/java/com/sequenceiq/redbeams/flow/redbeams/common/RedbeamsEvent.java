@@ -1,10 +1,11 @@
 package com.sequenceiq.redbeams.flow.redbeams.common;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-
-import org.apache.commons.lang3.StringUtils;
 
 import reactor.rx.Promise;
 
@@ -13,7 +14,7 @@ public class RedbeamsEvent implements Selectable, Acceptable {
 
     private final Long resourceId;
 
-    private final Promise<Boolean> accepted;
+    private final Promise<AcceptResult> accepted;
 
     private final boolean forced;
 
@@ -33,7 +34,7 @@ public class RedbeamsEvent implements Selectable, Acceptable {
         this(selector, resourceId, new Promise<>(), forced);
     }
 
-    public RedbeamsEvent(String selector, Long resourceId, Promise<Boolean> accepted, boolean forced) {
+    public RedbeamsEvent(String selector, Long resourceId, Promise<AcceptResult> accepted, boolean forced) {
         this.selector = selector;
         this.resourceId = resourceId;
         this.accepted = accepted;
@@ -51,7 +52,7 @@ public class RedbeamsEvent implements Selectable, Acceptable {
     }
 
     @Override
-    public Promise<Boolean> accepted() {
+    public Promise<AcceptResult> accepted() {
         return accepted;
     }
 

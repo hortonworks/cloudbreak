@@ -1,5 +1,7 @@
 package com.sequenceiq.flow.reactor.api.event;
 
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+
 import reactor.rx.Promise;
 
 public class BaseNamedFlowEvent extends BaseFlowEvent {
@@ -11,7 +13,7 @@ public class BaseNamedFlowEvent extends BaseFlowEvent {
         this.resourceName = resourceName;
     }
 
-    public BaseNamedFlowEvent(String selector, Long resourceId, Promise<Boolean> accepted, String resourceName, String resourceCrn) {
+    public BaseNamedFlowEvent(String selector, Long resourceId, Promise<AcceptResult> accepted, String resourceName, String resourceCrn) {
         super(selector, resourceId, resourceCrn, accepted);
         this.resourceName = resourceName;
     }

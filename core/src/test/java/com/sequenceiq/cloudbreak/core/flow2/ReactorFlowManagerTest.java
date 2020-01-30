@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGrou
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
+import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.reactor.config.EventBusStatisticReporter;
 
@@ -232,9 +234,9 @@ public class ReactorFlowManagerTest {
 
     private static class TestAcceptable implements Acceptable {
         @Override
-        public Promise<Boolean> accepted() {
-            Promise<Boolean> a = new Promise<>();
-            a.accept(true);
+        public Promise<AcceptResult> accepted() {
+            Promise<AcceptResult> a = new Promise<>();
+            a.accept(FlowAcceptResult.runningInFlow("FLOW_ID"));
             return a;
         }
 

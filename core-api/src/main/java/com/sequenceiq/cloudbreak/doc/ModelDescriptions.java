@@ -224,6 +224,7 @@ public class ModelDescriptions {
         public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for stack";
         public static final String CLOUD_PLATFORM = "Cloudplatform of the stack";
         public static final String TUNNEL = "Configuration that the connection going directly or with cluster proxy or with ccm and cluster proxy.";
+        public static final String FLOW_ID = "Flow identifier for the current stack creation. Only returned during the stack create request/response.";
     }
 
     public static class ClusterModelDescription {
@@ -536,6 +537,7 @@ public class ModelDescriptions {
         public static final String PROTOCOL = "protocol of the rule";
         public static final String MODIFIABLE = "flag for making the rule modifiable";
     }
+
     public static class LdapConfigModelDescription {
         public static final String REQUEST = "LDAP config request";
         public static final String RESPONSE = "LDAP config response";

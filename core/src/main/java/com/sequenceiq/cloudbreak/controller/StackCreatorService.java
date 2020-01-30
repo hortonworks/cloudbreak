@@ -83,6 +83,7 @@ import com.sequenceiq.cloudbreak.validation.Validator;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class StackCreatorService {
@@ -275,7 +276,8 @@ public class StackCreatorService {
 
         LOGGER.info("Generated stack response after creation: {}", JsonUtil.writeValueAsStringSilentSafe(response));
 
-        flowManager.triggerProvisioning(savedStack.getId());
+        FlowIdentifier flowIdentifier = flowManager.triggerProvisioning(savedStack.getId());
+        response.setFlowIdentifier(flowIdentifier);
 
         metricService.submit(STACK_PREPARATION, System.currentTimeMillis() - start);
 

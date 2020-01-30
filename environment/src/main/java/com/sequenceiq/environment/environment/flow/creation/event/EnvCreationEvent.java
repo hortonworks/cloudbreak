@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow.creation.event;
 
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 import reactor.rx.Promise;
@@ -10,7 +11,7 @@ public class EnvCreationEvent extends BaseNamedFlowEvent {
         super(selector, resourceId, resourceName, resourceCrn);
     }
 
-    public EnvCreationEvent(String selector, Long resourceId, Promise<Boolean> accepted, String resourceName, String resourceCrn) {
+    public EnvCreationEvent(String selector, Long resourceId, Promise<AcceptResult> accepted, String resourceName, String resourceCrn) {
         super(selector, resourceId, accepted, resourceName, resourceCrn);
     }
 
@@ -27,7 +28,7 @@ public class EnvCreationEvent extends BaseNamedFlowEvent {
 
         private Long resourceId;
 
-        private Promise<Boolean> accepted;
+        private Promise<AcceptResult> accepted;
 
         private EnvCreationEventBuilder() {
         }
@@ -52,7 +53,7 @@ public class EnvCreationEvent extends BaseNamedFlowEvent {
             return this;
         }
 
-        public EnvCreationEventBuilder withAccepted(Promise<Boolean> accepted) {
+        public EnvCreationEventBuilder withAccepted(Promise<AcceptResult> accepted) {
             this.accepted = accepted;
             return this;
         }

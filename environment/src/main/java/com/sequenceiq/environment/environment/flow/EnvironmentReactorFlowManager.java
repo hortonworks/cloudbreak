@@ -25,6 +25,7 @@ import com.sequenceiq.flow.reactor.api.event.EventSender;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
+import reactor.rx.Promise;
 
 @Service
 public class EnvironmentReactorFlowManager {
@@ -46,6 +47,7 @@ public class EnvironmentReactorFlowManager {
     public void triggerCreationFlow(long envId, String envName, String userCrn, String envCrn) {
         LOGGER.info("Trigger flow creation");
         EnvCreationEvent envCreationEvent = EnvCreationEvent.builder()
+                .withAccepted(new Promise<>())
                 .withSelector(START_ENVIRONMENT_VALIDATION_EVENT.selector())
                 .withResourceId(envId)
                 .withResourceName(envName)
@@ -60,6 +62,7 @@ public class EnvironmentReactorFlowManager {
         LOGGER.info("Trigger flow deletion: {}", environment.getName());
         cancelRunningFlows(environment.getId(), environment.getName(), environment.getResourceCrn());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
+                .withAccepted(new Promise<>())
                 .withSelector(START_FREEIPA_DELETE_EVENT.selector())
                 .withResourceId(environment.getId())
                 .withResourceName(environment.getName())
@@ -73,6 +76,7 @@ public class EnvironmentReactorFlowManager {
         LOGGER.info("Trigger forced deletion flow: {}", environment.getName());
         cancelRunningFlows(environment.getId(), environment.getName(), environment.getResourceCrn());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
+                .withAccepted(new Promise<>())
                 .withSelector(ENV_DELETE_CLUSTERS_TRIGGER_EVENT)
                 .withResourceId(environment.getId())
                 .withResourceName(environment.getName())
@@ -85,6 +89,7 @@ public class EnvironmentReactorFlowManager {
     public void triggerStopFlow(long envId, String envName, String userCrn) {
         LOGGER.info("Trigger stop flow");
         EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
+                .withAccepted(new Promise<>())
                 .withSelector(EnvStopStateSelectors.ENV_STOP_DATAHUB_EVENT.selector())
                 .withResourceId(envId)
                 .withResourceName(envName)
@@ -97,6 +102,7 @@ public class EnvironmentReactorFlowManager {
     public void triggerStartFlow(long envId, String envName, String userCrn) {
         LOGGER.info("Trigger start flow");
         EnvStartEvent envSrartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
+                .withAccepted(new Promise<>())
                 .withSelector(EnvStartStateSelectors.ENV_START_FREEIPA_EVENT.selector())
                 .withResourceId(envId)
                 .withResourceName(envName)

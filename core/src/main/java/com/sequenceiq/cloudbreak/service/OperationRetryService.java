@@ -20,6 +20,8 @@ import org.springframework.util.CollectionUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -50,7 +52,7 @@ public class OperationRetryService {
     @Resource
     private List<FlowConfiguration<?>> flowConfigs;
 
-    public void retry(Long stackId) {
+    public FlowIdentifier retry(Long stackId) {
         if (isFlowPending(stackId)) {
             LOGGER.info("Retry cannot be performed, because there is already an active flow. stackId: {}", stackId);
             throw new BadRequestException("Retry cannot be performed, because there is already an active flow.");
@@ -67,8 +69,18 @@ public class OperationRetryService {
         eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), STACK_RETRY_FLOW_START, List.of(name));
 
         Optional<FlowLog> failedFlowLog = getMostRecentFailedLog(flowLogs);
-        failedFlowLog.map(log -> getLastSuccessfulStateLog(log.getCurrentState(), flowLogs))
-                .ifPresent(flow2Handler::restartFlow);
+        Optional<FlowLog> lastSuccessfulStateFlowLog = failedFlowLog.map(log -> getLastSuccessfulStateLog(log.getCurrentState(), flowLogs));
+        if (lastSuccessfulStateFlowLog.isPresent()) {
+            flow2Handler.restartFlow(lastSuccessfulStateFlowLog.get());
+            if (lastSuccessfulStateFlowLog.get().getFlowChainId() != null) {
+                return new FlowIdentifier(FlowType.FLOW_CHAIN, lastSuccessfulStateFlowLog.get().getFlowChainId());
+            } else {
+                return new FlowIdentifier(FlowType.FLOW, lastSuccessfulStateFlowLog.get().getFlowId());
+            }
+        } else {
+            LOGGER.info("Cannot restart previous flow because there is no successful state in the flow. stackId: {}", stackId);
+            throw new BadRequestException("Cannot restart previous flow because there is no successful state in the flow.");
+        }
     }
 
     private FlowLog getLastSuccessfulStateLog(String failedState, List<FlowLog> flowLogs) {

@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Component
 public class UpgradeService {
@@ -93,13 +94,12 @@ public class UpgradeService {
         }
     }
 
-    public void upgradeByStackName(Long workspaceId, String stackName) {
+    public FlowIdentifier upgradeByStackName(Long workspaceId, String stackName) {
         try {
-            transactionService.required(() -> {
+            return transactionService.required(() -> {
                 Optional<Stack> stack = stackService.findStackByNameAndWorkspaceId(stackName, workspaceId);
                 if (stack.isPresent()) {
-                    clusterRepairService.repairAll(stack.get().getId());
-                    return null;
+                    return clusterRepairService.repairAll(stack.get().getId());
                 } else {
                     throw notFoundException("Stack", stackName);
                 }
