@@ -59,6 +59,14 @@ stop_metering_heartbeat_application:
     - group: "root"
     - file_mode: 640
 
+/etc/systemd/system/metering-heartbeat-application.service:
+  file.managed:
+    - source: salt://metering/template/metering-heartbeat-application.service.j2
+    - template: jinja
+    - user: "root"
+    - group: "root"
+    - file_mode: 640
+
 start_metering_heartbeat_application:
   service.running:
     - enable: True
