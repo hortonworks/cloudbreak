@@ -11,10 +11,10 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
-import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 
 import io.swagger.annotations.ApiModel;
@@ -84,6 +84,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.TAGS)
     private Map<String, String> tags = new HashMap<>();
+
+    @ApiModelProperty(value = EnvironmentModelDescription.PARENT_ENVIRONMENT_CRN)
+    private String parentEnvironmentCrn;
 
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
@@ -213,5 +216,13 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setTags(Map<String, String> tags) {
         this.tags = tags;
+    }
+
+    public String getParentEnvironmentCrn() {
+        return parentEnvironmentCrn;
+    }
+
+    public void setParentEnvironmentCrn(String parentEnvironmentCrn) {
+        this.parentEnvironmentCrn = parentEnvironmentCrn;
     }
 }

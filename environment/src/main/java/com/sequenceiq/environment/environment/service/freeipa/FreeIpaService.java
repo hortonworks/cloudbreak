@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenv.RegisterChildEnvironmentRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,17 @@ public class FreeIpaService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to delete FreeIpa cluster for environment '%s' due to: '%s'", environmentCrn, errorMessage), e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public void registerChildEnvironment(RegisterChildEnvironmentRequest registerChildEnvironmentRequest) {
+        try {
+            freeIpaV1Endpoint.registerChildEnvironment(registerChildEnvironmentRequest);
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error(String.format("Failed to register child environment '%s' for '%s' due to: '%s'",
+                    registerChildEnvironmentRequest.getChildEnvironmentCrn(), registerChildEnvironmentRequest.getParentEnvironmentCrn(), errorMessage), e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }

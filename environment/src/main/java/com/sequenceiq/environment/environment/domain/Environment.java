@@ -125,6 +125,10 @@ public class Environment implements AuthResource {
     @Column(columnDefinition = "TEXT")
     private Json tags;
 
+    @ManyToOne
+    @JoinColumn(name = "parent_environment_id", referencedColumnName = "id")
+    private Environment parentEnvironment;
+
     public Environment() {
         regions = new Json(new HashSet<Region>());
         tags = new Json(new EnvironmentTags(new HashMap<>(), new HashMap<>()));
@@ -398,5 +402,13 @@ public class Environment implements AuthResource {
                     .orElse(new EnvironmentTags(new HashMap<>(), new HashMap<>()));
         }
         return new EnvironmentTags(new HashMap<>(), new HashMap<>());
+    }
+
+    public Environment getParentEnvironment() {
+        return parentEnvironment;
+    }
+
+    public void setParentEnvironment(Environment parentEnvironment) {
+        this.parentEnvironment = parentEnvironment;
     }
 }
