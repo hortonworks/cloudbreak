@@ -10,12 +10,14 @@ class YarnCredentialV1ParametersToAwsYarnAttributesConverter {
 
     public YarnCredentialAttributes convert(YarnParameters source) {
         YarnCredentialAttributes response = new YarnCredentialAttributes();
+        response.setAmbariUser(source.getAmbariUser());
         response.setEndpoint(source.getEndpoint());
         return response;
     }
 
     public YarnParameters convert(YarnCredentialAttributes source) {
         YarnParameters response = new YarnParameters();
+        response.setAmbariUser(source.getAmbariUser());
         response.setEndpoint(source.getEndpoint());
         return response;
     }
