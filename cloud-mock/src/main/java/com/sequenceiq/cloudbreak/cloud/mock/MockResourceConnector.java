@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -59,36 +60,24 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier) {
-        CloudResourceStatus rdshost = new CloudResourceStatus(
+        List<CloudResource> cloudResources = List.of(
                 new Builder()
                         .type(ResourceType.RDS_HOSTNAME)
                         .status(CommonStatus.CREATED)
                         .name(MOCK_RDS_HOST)
                         .persistent(true)
                         .build(),
-                CREATED);
-        CloudResourceStatus rdsport = new CloudResourceStatus(
                 new Builder()
                         .type(ResourceType.RDS_PORT)
                         .status(CommonStatus.CREATED)
                         .name(MOCK_RDS_PORT)
                         .persistent(true)
-                        .build(),
-                CREATED);
-        List<CloudResourceStatus> cloudResourceStatuses = List.of(rdshost, rdsport);
-        // for (Group group : stack.getGroups()) {
-        //     for (int i = 0; i < group.getInstancesSize(); i++) {
-        //         CloudResource cloudResource = new Builder()
-        //                 .type(ResourceType.MOCK_INSTANCE)
-        //                 .status(CommonStatus.CREATED)
-        //                 .name("cloudinstance" + cloudResourceStatuses.size())
-        //                 .reference("")
-        //                 .persistent(true)
-        //                 .build();
-        //         cloudResourceStatuses.add(new CloudResourceStatus(cloudResource, CREATED));
-        //     }
-        // }
-        return cloudResourceStatuses;
+                        .build()
+        );
+        cloudResources.forEach(cr -> persistenceNotifier.notifyAllocation(cr, authenticatedContext.getCloudContext()));
+        return cloudResources.stream()
+                .map(cr -> new CloudResourceStatus(cr, CREATED))
+                .collect(Collectors.toList());
     }
 
     @Override
