@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
@@ -101,8 +102,10 @@ class OrchestratorRecipeExecutor {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
-            hostOrchestrator.preCluserManagerStartRecipes(gatewayConfig, stackUtil.collectNodes(stack),
+            hostOrchestrator.preClusterManagerStartRecipes(gatewayConfig, stackUtil.collectNodes(stack),
                     clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+        } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
+            throw new CloudbreakException("Pre cluster manager start" + getRecipeTimeoutErrorMessage(timeoutException), timeoutException);
         } catch (CloudbreakOrchestratorFailedException e) {
             String message = getRecipeExecutionFaiureMessage(stack, e);
             throw new CloudbreakException(message);
@@ -115,6 +118,8 @@ class OrchestratorRecipeExecutor {
         try {
             hostOrchestrator.postClusterManagerStartRecipes(gatewayConfig, stackUtil.collectNodes(stack),
                     clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+        } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
+            throw new CloudbreakException("Post cluster manager start" + getRecipeTimeoutErrorMessage(timeoutException), timeoutException);
         } catch (CloudbreakOrchestratorFailedException e) {
             String message = getRecipeExecutionFaiureMessage(stack, e);
             throw new CloudbreakException(message, e);
@@ -127,6 +132,8 @@ class OrchestratorRecipeExecutor {
         try {
             hostOrchestrator.postInstallRecipes(gatewayConfig, stackUtil.collectNodes(stack),
                     clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+        } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
+            throw new CloudbreakException("Post install" + getRecipeTimeoutErrorMessage(timeoutException), timeoutException);
         } catch (CloudbreakOrchestratorFailedException e) {
             String message = getRecipeExecutionFaiureMessage(stack, e);
             throw new CloudbreakException(message, e);
@@ -149,10 +156,17 @@ class OrchestratorRecipeExecutor {
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
             hostOrchestrator.preTerminationRecipes(gatewayConfig, nodes, ClusterDeletionBasedExitCriteriaModel.nonCancellableModel(), forced);
+        } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
+            throw new CloudbreakException("Pre-termination" + getRecipeTimeoutErrorMessage(timeoutException), timeoutException);
         } catch (CloudbreakOrchestratorFailedException e) {
             String message = getRecipeExecutionFaiureMessage(stack, e);
             throw new CloudbreakException(message, e);
         }
+    }
+
+    private String getRecipeTimeoutErrorMessage(CloudbreakOrchestratorTimeoutException timeoutException) {
+        return " recipe(s) failed to finish in " + timeoutException.getTimeoutMinutes() +
+                " minute(s), please check your recipe(s) and recipe logs on the machines under /var/log/recipes! Reason:" + timeoutException.getMessage();
     }
 
     private String getRecipeExecutionFaiureMessage(Stack stack, CloudbreakOrchestratorException exception) {

@@ -115,12 +115,14 @@ public class SaltStates {
         Multimap<String, String> missingTargetsWithErrors = ArrayListMultimap.create();
         for (Entry<String, List<RunnerInfo>> stringMapEntry : stringRunnerInfoObjectMap.entrySet()) {
             LOGGER.debug("Collect missing targets from host: {}", stringMapEntry.getKey());
-            logRunnerInfos(stringMapEntry);
-            for (RunnerInfo targetObject : stringMapEntry.getValue()) {
-                if (!targetObject.getResult()) {
-                    LOGGER.info("SaltStates: State id: {} job state has failed. Name: {} Reason: {}", targetObject.getStateId(), targetObject.getName(),
-                            targetObject.getComment());
-                    missingTargetsWithErrors.put(stringMapEntry.getKey(), targetObject.getErrorResultSummary());
+            if  (stringMapEntry.getValue() != null) {
+                logRunnerInfos(stringMapEntry);
+                for (RunnerInfo targetObject : stringMapEntry.getValue()) {
+                    if (!targetObject.getResult()) {
+                        LOGGER.info("SaltStates: State id: {} job state has failed. Name: {} Reason: {}", targetObject.getStateId(), targetObject.getName(),
+                                targetObject.getComment());
+                        missingTargetsWithErrors.put(stringMapEntry.getKey(), targetObject.getErrorResultSummary());
+                    }
                 }
             }
         }

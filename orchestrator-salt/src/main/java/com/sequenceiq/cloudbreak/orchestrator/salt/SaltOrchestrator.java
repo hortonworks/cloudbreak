@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -643,29 +644,29 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void preCluserManagerStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorFailedException {
+    public void preClusterManagerStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
         LOGGER.debug("Executing pre-cloudera-manager-start recipes.");
         executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_CLOUDERA_MANAGER_START, false);
     }
 
     @Override
     public void postClusterManagerStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorFailedException {
+            throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
         LOGGER.debug("Executing post-cloudera-manager-start recipes.");
         executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_CLOUDERA_MANAGER_START, false);
     }
 
     @Override
     public void postInstallRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorFailedException {
+            throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
         LOGGER.debug("Executing post-cluster-install recipes.");
         executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_CLUSTER_INSTALL, false);
     }
 
     @Override
     public void preTerminationRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, boolean forced)
-            throws CloudbreakOrchestratorFailedException {
+            throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
         LOGGER.debug("Executing pre-termination recipes.");
         executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_TERMINATION, forced);
     }
@@ -796,7 +797,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     private void executeRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, RecipeExecutionPhase phase, boolean forced)
-            throws CloudbreakOrchestratorFailedException {
+            throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
         boolean postRecipe = phase.isPostRecipe();
         int maxRetry = forced ? maxRetryRecipeForced : maxRetryRecipe;
         try (SaltConnector sc = createSaltConnector(gatewayConfig)) {
@@ -814,8 +815,14 @@ public class SaltOrchestrator implements HostOrchestrator {
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
             runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry);
             runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryRecipe, true);
+        } catch (CloudbreakOrchestratorTimeoutException e) {
+            LOGGER.info("Recipe execution timeout. {}", phase, e);
+            throw e;
+        } catch (CloudbreakOrchestratorFailedException e) {
+            LOGGER.info("Orchestration error occurred during executing highstate (for recipes).", e);
+            throw e;
         } catch (Exception e) {
-            LOGGER.info("Error occurred during executing highstate (for recipes).", e);
+            LOGGER.info("Unknown error occurred during executing highstate (for recipes).", e);
             throw new CloudbreakOrchestratorFailedException(e);
         } finally {
             try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
