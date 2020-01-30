@@ -70,6 +70,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private AwsEnvironmentParameters aws;
 
+        private String parentEnvironmentCrn;
+
         private Builder() {
         }
 
@@ -177,6 +179,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withParentEnvironmentCrn(String parentEnvironmentCrn) {
+            this.parentEnvironmentCrn = parentEnvironmentCrn;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -199,6 +206,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setIdBrokerMappingSource(idBrokerMappingSource);
             detailedEnvironmentResponse.setAdminGroupName(adminGroupName);
             detailedEnvironmentResponse.setAws(aws);
+            detailedEnvironmentResponse.setParentEnvironmentCrn(parentEnvironmentCrn);
             return detailedEnvironmentResponse;
         }
     }

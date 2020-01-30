@@ -120,6 +120,10 @@ public class Environment implements AuthResource {
     @Column(name = "experimentalfeatures", columnDefinition = "TEXT")
     private Json experimentalFeaturesJson;
 
+    @ManyToOne
+    @JoinColumn(name = "parent_environment_id", referencedColumnName = "id")
+    private Environment parentEnvironment;
+
     public Environment() {
         regions = new Json(new HashSet<Region>());
         experimentalFeaturesJson = new Json(new ExperimentalFeatures());
@@ -394,5 +398,13 @@ public class Environment implements AuthResource {
 
     public void setParameters(BaseParameters parameters) {
         this.parameters = parameters;
+    }
+
+    public Environment getParentEnvironment() {
+        return parentEnvironment;
+    }
+
+    public void setParentEnvironment(Environment parentEnvironment) {
+        this.parentEnvironment = parentEnvironment;
     }
 }

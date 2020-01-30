@@ -3,6 +3,8 @@ package com.sequenceiq.environment.environment.service;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -92,7 +94,14 @@ public class EnvironmentCreationService {
             throw new BadRequestException(String.format("Environment with name '%s' already exists in account '%s'.",
                     creationDto.getName(), creationDto.getAccountId()));
         }
+
         Environment environment = initializeEnvironment(creationDto);
+        if (Objects.nonNull(creationDto.getParentEnvironmentCrn())) {
+            Optional<Environment> parentEnvironment = environmentService.
+                    findByResourceCrnAndAccountIdAndArchivedIsFalse(creationDto.getParentEnvironmentCrn(), creationDto.getAccountId());
+            parentEnvironment.ifPresent(environment::setParentEnvironment);
+        }
+
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
         if (!createVirtualGroups(creationDto, environment.getResourceCrn())) {
             // To keep backward compatibility, if somebody passes the group name, then we shall just use it
@@ -166,6 +175,9 @@ public class EnvironmentCreationService {
                 .validateRegionsAndLocation(creationDto.getLocation().getName(), creationDto.getRegions(), environment, cloudRegions);
         ValidationResultBuilder networkValidation = validatorService.validateNetworkCreation(environment, creationDto.getNetwork(), subnetMetas);
         validationBuilder = validationBuilder.merge(networkValidation.build());
+
+        ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentCrn());
+        validationBuilder.merge(parentChildValidation);
 
         validationBuilder.ifError(() -> isTunnelInvalid(creationDto.getCreator(), creationDto.getExperimentalFeatures().getTunnel()),
                 "Reverse SSH tunnel is not enabled for this account.");

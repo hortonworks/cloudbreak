@@ -69,6 +69,9 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
 
+    @ApiModelProperty(EnvironmentModelDescription.PARENT_ENVIRONMENT_CRN)
+    private String parentEnvironmentCrn;
+
     public String getCrn() {
         return crn;
     }
@@ -219,5 +222,13 @@ public abstract class EnvironmentBaseResponse {
 
     public void setAws(AwsEnvironmentParameters aws) {
         this.aws = aws;
+    }
+
+    public String getParentEnvironmentCrn() {
+        return parentEnvironmentCrn;
+    }
+
+    public void setParentEnvironmentCrn(String parentEnvironmentCrn) {
+        this.parentEnvironmentCrn = parentEnvironmentCrn;
     }
 }
