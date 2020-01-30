@@ -72,6 +72,9 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.TAGS)
     private TagResponse tags;
 
+    @ApiModelProperty(EnvironmentModelDescription.PARENT_ENVIRONMENT_CRN)
+    private String parentEnvironmentCrn;
+
     public String getCrn() {
         return crn;
     }
@@ -230,5 +233,13 @@ public abstract class EnvironmentBaseResponse {
 
     public void setTags(TagResponse tags) {
         this.tags = tags;
+    }
+
+    public String getParentEnvironmentCrn() {
+        return parentEnvironmentCrn;
+    }
+
+    public void setParentEnvironmentCrn(String parentEnvironmentCrn) {
+        this.parentEnvironmentCrn = parentEnvironmentCrn;
     }
 }
