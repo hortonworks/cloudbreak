@@ -12,13 +12,11 @@ import com.sequenceiq.environment.network.dto.YarnParams;
 
 public class YarnEnvironmentNetworkValidatorTest {
 
-    private final TestHelper testHelper = new TestHelper();
-
     private YarnEnvironmentNetworkValidator underTest = new YarnEnvironmentNetworkValidator();
 
     @Test
     void testValidateWhenNoNetworkCidrAndNoNetworkId() {
-        NetworkDto networkDto = testHelper.getNetworkDto(null, null, new YarnParams(), null, null, 1);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, new YarnParams(), null, null, 1);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
         underTest.validateDuringRequest(networkDto, null, resultBuilder);
@@ -28,12 +26,12 @@ public class YarnEnvironmentNetworkValidatorTest {
 
     @Test
     void testValidateDuringFlowWhenNoQueueInYarnParams() {
-        NetworkDto networkDto = testHelper.getNetworkDto(null, null, new YarnParams(), null, null, 1);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, new YarnParams(), null, null, 1);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
         underTest.validateDuringFlow(networkDto, resultBuilder);
 
-        testHelper.checkErrorsPresent(resultBuilder, List.of(
+        NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
                 "The 'Queue(queue)' parameter should be specified for the 'YARN' environment specific network!"
         ));
     }

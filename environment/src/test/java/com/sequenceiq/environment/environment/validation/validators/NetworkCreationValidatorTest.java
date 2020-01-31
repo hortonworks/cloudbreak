@@ -18,14 +18,12 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.EnvironmentTestData;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
-import com.sequenceiq.environment.environment.validation.network.TestHelper;
+import com.sequenceiq.environment.environment.validation.network.NetworkTestUtils;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.dto.YarnParams;
 
 public class NetworkCreationValidatorTest {
-
-    private TestHelper testHelper = new TestHelper();
 
     private EnvironmentNetworkValidator environmentNetworkValidatorMock = mock(EnvironmentNetworkValidator.class);
 
@@ -44,8 +42,8 @@ public class NetworkCreationValidatorTest {
 
     @Test
     void testValidateWhenAzureSpecificValidationIsCalled() {
-        AzureParams azureParams = testHelper.getAzureParams(true, true, true);
-        NetworkDto networkDto = testHelper.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), null, 1);
+        AzureParams azureParams = NetworkTestUtils.getAzureParams(true, true, true);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), null, 1);
         environment.setCloudPlatform("aZuRe");
         environment.setCidr(null);
 
@@ -58,8 +56,8 @@ public class NetworkCreationValidatorTest {
 
     @Test
     void testValidateWhenNetworkCidrAndNetworkIdOnAzure() {
-        AzureParams azureParams = testHelper.getAzureParams(true, true, true);
-        NetworkDto networkDto = testHelper.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), "0.0.0.0/0", 1);
+        AzureParams azureParams = NetworkTestUtils.getAzureParams(true, true, true);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), "0.0.0.0/0", 1);
         environment.setCloudPlatform(CloudPlatform.AZURE.name());
         environment.setCidr(null);
 
@@ -73,8 +71,8 @@ public class NetworkCreationValidatorTest {
 
     @Test
     void testValidateWhenNoNetworkCidrAndNetworkIdOnAzure() {
-        AzureParams azureParams = testHelper.getAzureParams(true, true, true);
-        NetworkDto networkDto = testHelper.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), null, 1);
+        AzureParams azureParams = NetworkTestUtils.getAzureParams(true, true, true);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), null, 1);
         environment.setCloudPlatform(CloudPlatform.AZURE.name());
         environment.setCidr(null);
 
@@ -86,8 +84,8 @@ public class NetworkCreationValidatorTest {
 
     @Test
     void testValidateWhenNetworkCidrAndNoNetworkIdOnAzure() {
-        AzureParams azureParams = testHelper.getAzureParams(true, false, false);
-        NetworkDto networkDto = testHelper.getNetworkDto(azureParams, null, null, null, "0.0.0.0/0", 1);
+        AzureParams azureParams = NetworkTestUtils.getAzureParams(true, false, false);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, null, "0.0.0.0/0", 1);
         environment.setCloudPlatform(CloudPlatform.AZURE.name());
         environment.setCidr(null);
 
@@ -98,7 +96,7 @@ public class NetworkCreationValidatorTest {
 
     @Test
     void testValidateWhenNoNetworkCidrAndNoNetworkIdOnYarn() {
-        NetworkDto networkDto = testHelper.getNetworkDto(null, null, new YarnParams(), null, null, 1);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, new YarnParams(), null, null, 1);
         environment.setCloudPlatform(CloudPlatform.YARN.name());
         environment.setCidr(null);
 

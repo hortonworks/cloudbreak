@@ -14,9 +14,12 @@ import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.dto.YarnParams;
 
-public class TestHelper {
+public class NetworkTestUtils {
 
-    public NetworkDto getNetworkDto(
+    private NetworkTestUtils() {
+    }
+
+    public static NetworkDto getNetworkDto(
             AzureParams azureParams, AwsParams awsParams, YarnParams yarnParams, String networkId, String networkCidr, Integer numberOfSubnets) {
         return NetworkDto.builder()
                 .withId(1L)
@@ -31,7 +34,7 @@ public class TestHelper {
                 .build();
     }
 
-    Map<String, CloudSubnet> getSubnetMetas(Integer numberOfSubnets) {
+    static Map<String, CloudSubnet> getSubnetMetas(Integer numberOfSubnets) {
         if (numberOfSubnets == null) {
             return null;
         }
@@ -43,11 +46,11 @@ public class TestHelper {
         return subnetMetas;
     }
 
-    CloudSubnet getCloudSubnet(String availabilityZone) {
+    static CloudSubnet getCloudSubnet(String availabilityZone) {
         return new CloudSubnet("eu-west-1", "name", availabilityZone, "cidr");
     }
 
-    public AzureParams getAzureParams(boolean noPublicIp, boolean withNetworkId, boolean withResourceGroupName) {
+    public static AzureParams getAzureParams(boolean noPublicIp, boolean withNetworkId, boolean withResourceGroupName) {
         AzureParams.AzureParamsBuilder azureParamsBuilder = AzureParams.AzureParamsBuilder
                 .anAzureParams();
         if (withNetworkId) {
@@ -63,7 +66,7 @@ public class TestHelper {
                 .build();
     }
 
-    public void checkErrorsPresent(ValidationResult.ValidationResultBuilder resultBuilder, List<String> errorMessages) {
+    public static void checkErrorsPresent(ValidationResult.ValidationResultBuilder resultBuilder, List<String> errorMessages) {
         ValidationResult validationResult = resultBuilder.build();
         assertEquals(errorMessages.size(), validationResult.getErrors().size(), validationResult.getFormattedErrors());
         List<String> actual = validationResult.getErrors();
