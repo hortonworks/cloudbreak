@@ -31,9 +31,9 @@ public class AwsNetworkCfTemplateProvider {
     @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
-    public String provide(String vpcCidr, List<SubnetRequest> subnets, boolean privateSubnetEnabled) {
+    public String provide(String envName, Long envId, String vpcCidr, List<SubnetRequest> subnets, boolean privateSubnetEnabled) {
 
-        Map<String, Object> model = createModel(vpcCidr, subnets, privateSubnetEnabled);
+        Map<String, Object> model = createModel(envName, envId, vpcCidr, subnets, privateSubnetEnabled);
         try {
             String freeMarkerTemplate = freemarkerConfiguration.getTemplate(cloudFormationNetworkTemplatePath, "UTF-8").toString();
             Template template = new Template("aws-template", freeMarkerTemplate, freemarkerConfiguration);
@@ -43,8 +43,10 @@ public class AwsNetworkCfTemplateProvider {
         }
     }
 
-    private Map<String, Object> createModel(String vpcCidr, List<SubnetRequest> subnets, boolean privateSubnetEnabled) {
+    private Map<String, Object> createModel(String envName, Long envId, String vpcCidr, List<SubnetRequest> subnets, boolean privateSubnetEnabled) {
         Map<String, Object> model = new HashMap<>();
+        model.put("environmentName", envName);
+        model.put("environmentId", envId);
         model.put("vpcCidr", vpcCidr);
         model.put("subnetDetails", subnets);
         model.put("privateSubnetEnabled", privateSubnetEnabled);

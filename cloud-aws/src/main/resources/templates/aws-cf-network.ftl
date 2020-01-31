@@ -29,10 +29,7 @@
         "EnableDnsHostnames" : "true",
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-          { "Key" : "Network", "Value" : "Public" },
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" },
-          { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
-          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
+          { "Key" : "Name", "Value" : "VPC-${environmentId}" }
         ]
       }
     },
@@ -41,10 +38,7 @@
       "Properties" : {
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-          { "Key" : "Network", "Value" : "Public" },
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" },
-          { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
-          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
+          { "Key" : "Name", "Value" : "ig-${environmentId}" }
         ]
       }
     },
@@ -57,7 +51,8 @@
     },
 
     <#list subnetDetails as subnet>
-    "PublicSubnet${subnet?index}" : {
+    <#if subnet.publicSubnetCidr?has_content>
+    "PubS${subnet.index}" : {
       "Type" : "AWS::EC2::Subnet",
       "Properties" : {
         "MapPublicIpOnLaunch" : "true",
@@ -66,100 +61,107 @@
         "AvailabilityZone" : "${subnet.availabilityZone}",
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-          { "Key" : "Network", "Value" : "Public" },
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" },
           { "Key" : "kubernetes.io/role/elb", "Value" : "1" },
-          { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
-          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
+          { "Key" : "Name", "Value" : "ps{subnet.index}-${environmentId}" }
         ]
       }
     },
-    <#if privateSubnetEnabled == true>
-    "PrivateSubnet${subnet?index}" : {
-      "Type" : "AWS::EC2::Subnet",
-      "Properties" : {
-        "MapPublicIpOnLaunch" : "false",
-        "CidrBlock" : "${subnet.privateSubnetCidr}",
-        "VpcId" : { "Ref" : "VPC" },
-        "AvailabilityZone" : "${subnet.availabilityZone}",
-        "Tags" : [
-          { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-          { "Key" : "Network", "Value" : "Private" },
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" },
-          { "Key" : "kubernetes.io/role/elb", "Value" : "1" },
-          { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
-          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
-        ]
-      }
-    },
-    "NatGateway${subnet?index}EIP" : {
-      "Type" : "AWS::EC2::EIP",
-      "DependsOn" : "AttachGateway",
-      "Properties" : {
-        "Domain" : { "Ref" : "VPC" }
-      }
-    },
-    "NatGateway${subnet?index}" : {
-      "Type" : "AWS::EC2::NatGateway",
-      "Properties" : {
-        "AllocationId" : { "Fn::GetAtt" : [ "NatGateway${subnet?index}EIP", "AllocationId" ] },
-        "SubnetId" : { "Ref" : "PublicSubnet${subnet?index}" }
-      }
-    },
-    "PrivateRouteTable${subnet?index}" : {
-      "Type" : "AWS::EC2::RouteTable",
-      "Properties" : {
-        "VpcId" : { "Ref" : "VPC" },
-        "Tags" : [
-          { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-          { "Key" : "Network", "Value" : "Private" },
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" },
-          { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
-          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
-        ]
-      }
-    },
-    "PrivateSubnetRouteTableAssociation${subnet?index}" : {
+    "PubSRTA${subnet.index}" : {
       "Type" : "AWS::EC2::SubnetRouteTableAssociation",
       "Properties" : {
-        "SubnetId" : { "Ref" : "PrivateSubnet${subnet?index}" },
-        "RouteTableId" : { "Ref" : "PrivateRouteTable${subnet?index}" }
+        "SubnetId" : { "Ref" : "PubS${subnet.index}" },
+        "RouteTableId" : { "Ref" : "PublicRouteTable" }
       }
     },
-    "PrivateRoute${subnet?index}" : {
-          "Type" : "AWS::EC2::Route",
-          "DependsOn" : [ "PrivateRouteTable${subnet?index}", "AttachGateway" ],
-          "Properties" : {
-            "DestinationCidrBlock" : "0.0.0.0/0",
-            "RouteTableId" : { "Ref" : "PrivateRouteTable${subnet?index}" },
-            "NatGatewayId" : { "Ref" : "NatGateway${subnet?index}" }
-          }
+    "NG${subnet.index}EIP" : {
+        "Type" : "AWS::EC2::EIP",
+        "DependsOn" : "AttachGateway",
+        "Properties" : {
+            "Domain" : { "Ref" : "VPC" }
+        }
     },
-    "S3Endpoint${subnet?index}" : {
+    "NG${subnet.index}" : {
+        "Type" : "AWS::EC2::NatGateway",
+        "Properties" : {
+            "AllocationId" : { "Fn::GetAtt" : [ "NG${subnet.index}EIP", "AllocationId" ] },
+            "SubnetId" : { "Ref" : "PubS${subnet.index}" }
+        }
+    },
+    </#if>
+    <#if subnet.privateSubnetCidr?has_content>
+    "PrvS${subnet.index}" : {
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+            "MapPublicIpOnLaunch" : "false",
+            "CidrBlock" : "${subnet.privateSubnetCidr}",
+            "VpcId" : { "Ref" : "VPC" },
+            "AvailabilityZone" : "${subnet.availabilityZone}",
+            "Tags" : [
+              { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
+              { "Key" : "kubernetes.io/role/elb", "Value" : "1" },
+              { "Key" : "Name", "Value" : "ps${subnet.index}-${environmentId}" }
+            ]
+        }
+    },
+    "PRT${subnet.index}" : {
+        "Type" : "AWS::EC2::RouteTable",
+        "Properties" : {
+            "VpcId" : { "Ref" : "VPC" },
+            "Tags" : [
+              { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
+              { "Key" : "Name", "Value" : "prt${subnet.index}-${environmentId}" }
+            ]
+        }
+    },
+    "PSRTA${subnet.index}" : {
+        "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties" : {
+            "SubnetId" : { "Ref" : "PrvS${subnet.index}" },
+            "RouteTableId" : { "Ref" : "PRT${subnet.index}" }
+        }
+    },
+    "PRt${subnet.index}" : {
+        "Type" : "AWS::EC2::Route",
+        "DependsOn" : [ "PRT${subnet.index}", "AttachGateway" ],
+        "Properties" : {
+            "DestinationCidrBlock" : "0.0.0.0/0",
+            "RouteTableId" : { "Ref" : "PRT${subnet.index}" },
+            "NatGatewayId" : { "Ref" : "NG${subnet.subnetGroup}" }
+        }
+    },
+    </#if>
+    </#list>
+
+    <#if privateSubnetEnabled == true>
+    "S3Endpoint" : {
       "Type" : "AWS::EC2::VPCEndpoint",
       "Properties" : {
-        "RouteTableIds" : [ {"Ref" : "PrivateRouteTable${subnet?index}"} ],
+        "RouteTableIds" : [
+        <#list subnetDetails as subnet>
+            <#if subnet.privateSubnetCidr?has_content>
+             {"Ref" : "PRT${subnet.index}"}<#if subnet_has_next>,</#if>
+            </#if>
+        </#list>
+        ],
         "ServiceName" : { "Fn::Sub": "com.amazonaws.${r"${AWS::Region}"}.s3" },
         "VpcId" : {"Ref" : "VPC"}
       }
     },
-    "DDBEndpoint${subnet?index}" : {
+    "DDBEndpoint" : {
       "Type" : "AWS::EC2::VPCEndpoint",
       "Properties" : {
-        "RouteTableIds" : [ {"Ref" : "PrivateRouteTable${subnet?index}"} ],
+        "RouteTableIds" : [
+        <#list subnetDetails as subnet>
+            <#if subnet.privateSubnetCidr?has_content>
+             {"Ref" : "PRT${subnet.index}"}<#if subnet_has_next>,</#if>
+            </#if>
+        </#list>
+        ],
         "ServiceName" : { "Fn::Sub": "com.amazonaws.${r"${AWS::Region}"}.dynamodb" },
         "VpcId" : {"Ref" : "VPC"}
       }
     },
     </#if>
-    "PublicSubnetRouteTableAssociation${subnet?index}" : {
-      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties" : {
-        "SubnetId" : { "Ref" : "PublicSubnet${subnet?index}" },
-        "RouteTableId" : { "Ref" : "PublicRouteTable" }
-      }
-    },
-    </#list>
 
     "PublicRouteTable" : {
       "Type" : "AWS::EC2::RouteTable",
@@ -167,10 +169,7 @@
         "VpcId" : { "Ref" : "VPC" },
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-          { "Key" : "Network", "Value" : "Public" },
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" },
-          { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
-          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
+          { "Key" : "Name", "Value" : "prt-${environmentName}-${environmentId}" }
         ]
       }
     },
@@ -187,23 +186,16 @@
 
   "Outputs" : {
     <#list subnetDetails as subnet>
-    "PublicSubnetId${subnet?index}" : {
-        "Value" :  { "Ref" : "PublicSubnet${subnet?index}" }
-    },
-    "PublicSubnetCidr${subnet?index}" : {
-        "Value" : "${subnet.publicSubnetCidr}"
-    },
-    <#if privateSubnetEnabled == true>
-    "PrivateSubnetId${subnet?index}" : {
-        "Value" :  { "Ref" : "PrivateSubnet${subnet?index}" }
-    },
-    "PrivateSubnetCidr${subnet?index}" : {
-        "Value" : "${subnet.privateSubnetCidr}"
+    <#if subnet.publicSubnetCidr?has_content>
+    "id${subnet.index}" : {
+        "Value" :  { "Ref" : "PubS${subnet.index}" }
     },
     </#if>
-    "Az${subnet?index}" : {
-        "Value" : {"Fn::GetAtt" : ["PublicSubnet${subnet?index}", "AvailabilityZone"] }
+    <#if subnet.privateSubnetCidr?has_content>
+    "id${subnet.index}" : {
+        "Value" :  { "Ref" : "PrvS${subnet.index}" }
     },
+    </#if>
     </#list>
     "CreatedVpc": {
         "Value" : { "Ref" : "VPC" }
