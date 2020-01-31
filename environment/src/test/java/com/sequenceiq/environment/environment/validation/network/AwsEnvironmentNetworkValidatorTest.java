@@ -23,8 +23,6 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 @ExtendWith(MockitoExtension.class)
 class AwsEnvironmentNetworkValidatorTest {
 
-    private final TestHelper testHelper = new TestHelper();
-
     private AwsEnvironmentNetworkValidator underTest;
 
     @BeforeEach
@@ -76,7 +74,7 @@ class AwsEnvironmentNetworkValidatorTest {
 
         underTest.validateDuringFlow(networkDto, validationResultBuilder);
 
-        testHelper.checkErrorsPresent(validationResultBuilder, List.of(
+        NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
                 "The 'VPC identifier(vpcId)' parameter should be specified for the 'AWS' environment specific network!"));
     }
 
@@ -102,22 +100,22 @@ class AwsEnvironmentNetworkValidatorTest {
 
     @Test
     void testValidateDuringRequestWhenNetworkHasCidr() {
-        NetworkDto networkDto = testHelper.getNetworkDto(null, null, null, null, "1.2.3.4/16", 1);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, null, null, "1.2.3.4/16", 1);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
-        underTest.validateDuringRequest(networkDto, testHelper.getSubnetMetas(1), validationResultBuilder);
+        underTest.validateDuringRequest(networkDto, NetworkTestUtils.getSubnetMetas(1), validationResultBuilder);
 
         assertFalse(validationResultBuilder.build().hasError());
     }
 
     @Test
     void testValidateDuringRequestWhenNetworkHasNoNetworkIdAndNoCidr() {
-        NetworkDto networkDto = testHelper.getNetworkDto(null, getAwsParams(), null, null, null, 1);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, getAwsParams(), null, null, null, 1);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
-        underTest.validateDuringRequest(networkDto, testHelper.getSubnetMetas(1), validationResultBuilder);
+        underTest.validateDuringRequest(networkDto, NetworkTestUtils.getSubnetMetas(1), validationResultBuilder);
 
-        testHelper.checkErrorsPresent(validationResultBuilder, List.of(
+        NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
                 "There should be at least two subnets in the network",
                 "The subnets in the vpc should be present at least in two different availability zones",
                 "Either the AWS network id or cidr needs to be defined!"));
@@ -126,12 +124,12 @@ class AwsEnvironmentNetworkValidatorTest {
     @Test
     void testValidateDuringRequestWhenNetworkHasOneSubnet() {
         AwsParams awsParams = getAwsParams();
-        NetworkDto networkDto = testHelper.getNetworkDto(null, getAwsParams(), null, awsParams.getVpcId(), null, 1);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, getAwsParams(), null, awsParams.getVpcId(), null, 1);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
-        underTest.validateDuringRequest(networkDto, testHelper.getSubnetMetas(1), validationResultBuilder);
+        underTest.validateDuringRequest(networkDto, NetworkTestUtils.getSubnetMetas(1), validationResultBuilder);
 
-        testHelper.checkErrorsPresent(validationResultBuilder, List.of(
+        NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
                 "There should be at least two subnets in the network",
                 "The subnets in the vpc should be present at least in two different availability zones")
         );
@@ -140,11 +138,11 @@ class AwsEnvironmentNetworkValidatorTest {
     @Test
     void testValidateDuringRequestWhenNetworkHasTwoSubnet() {
         AwsParams awsParams = getAwsParams();
-        NetworkDto networkDto = testHelper.getNetworkDto(null, getAwsParams(), null, awsParams.getVpcId(), null, 2);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, getAwsParams(), null, awsParams.getVpcId(), null, 2);
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
-        underTest.validateDuringRequest(networkDto, testHelper.getSubnetMetas(2), validationResultBuilder);
+        underTest.validateDuringRequest(networkDto, NetworkTestUtils.getSubnetMetas(2), validationResultBuilder);
 
         ValidationResult validationResult = validationResultBuilder.build();
         assertFalse(validationResult.hasError(), validationResult.getFormattedErrors());
@@ -153,12 +151,12 @@ class AwsEnvironmentNetworkValidatorTest {
     @Test
     void testValidateDuringRequestWhenNetworkHasTwoSubnetSubnetMetasHasThreeSubnets() {
         AwsParams awsParams = getAwsParams();
-        NetworkDto networkDto = testHelper.getNetworkDto(null, getAwsParams(), null, awsParams.getVpcId(), null, 2);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, getAwsParams(), null, awsParams.getVpcId(), null, 2);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
-        underTest.validateDuringRequest(networkDto, testHelper.getSubnetMetas(3), validationResultBuilder);
+        underTest.validateDuringRequest(networkDto, NetworkTestUtils.getSubnetMetas(3), validationResultBuilder);
 
-        testHelper.checkErrorsPresent(validationResultBuilder, List.of(
+        NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
                 "Subnets of the environment () are not found in the vpc (vpcId)."
         ));
     }
@@ -166,16 +164,16 @@ class AwsEnvironmentNetworkValidatorTest {
     @Test
     void testValidateDuringRequestWhenNetworkHasTwoSubnetsWithSameAvailabilityZone() {
         AwsParams awsParams = getAwsParams();
-        NetworkDto networkDto = testHelper.getNetworkDto(null, getAwsParams(), null, awsParams.getVpcId(), null, 2);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, getAwsParams(), null, awsParams.getVpcId(), null, 2);
         Map<String, CloudSubnet> subnetMetas = new HashMap<>();
         for (int i = 0; i < 2; i++) {
-            subnetMetas.put("key" + i, testHelper.getCloudSubnet("eu-west-1-a"));
+            subnetMetas.put("key" + i, NetworkTestUtils.getCloudSubnet("eu-west-1-a"));
         }
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
         underTest.validateDuringRequest(networkDto, subnetMetas, validationResultBuilder);
 
-        testHelper.checkErrorsPresent(validationResultBuilder, List.of(
+        NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
                 "The subnets in the vpc should be present at least in two different availability zones"
         ));
     }
