@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.network.service;
 
+import static com.sequenceiq.environment.network.service.Cidrs.cidrs;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
@@ -23,14 +26,14 @@ public class DefaultSubnetCidrProvider implements SubnetCidrProvider {
     private static final int SUBNETS = 3;
 
     @Override
-    public Set<String> provide(String networkCidr) {
+    public Cidrs provide(String networkCidr) {
         Set<String> result = new HashSet<>();
 
         for (int i = 0; i < SUBNETS; i++) {
             String subnet = calculateSubnet(networkCidr, result);
             result.add(subnet);
         }
-        return result;
+        return cidrs(result, Sets.newHashSet());
     }
 
     private String calculateSubnet(String networkCidr, Iterable<String> subnetCidrs) {

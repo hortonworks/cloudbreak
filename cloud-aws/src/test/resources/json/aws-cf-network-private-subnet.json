@@ -30,24 +30,8 @@
             }
           },
           {
-            "Key": "Network",
-            "Value": "Public"
-          },
-          {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
-          },
-          {
-            "Key": "owner",
-            "Value": {
-              "Ref": "stackowner"
-            }
-          },
-          {
-            "Key": "Owner",
-            "Value": {
-              "Ref": "StackOwner"
-            }
+            "Key": "Name",
+            "Value": "VPC-1"
           }
         ]
       }
@@ -63,24 +47,8 @@
             }
           },
           {
-            "Key": "Network",
-            "Value": "Public"
-          },
-          {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
-          },
-          {
-            "Key": "owner",
-            "Value": {
-              "Ref": "stackowner"
-            }
-          },
-          {
-            "Key": "Owner",
-            "Value": {
-              "Ref": "StackOwner"
-            }
+            "Key": "Name",
+            "Value": "ig-1"
           }
         ]
       }
@@ -96,7 +64,7 @@
         }
       }
     },
-    "PublicSubnet0": {
+    "PubS0": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "MapPublicIpOnLaunch": "true",
@@ -113,33 +81,51 @@
             }
           },
           {
-            "Key": "Network",
-            "Value": "Public"
-          },
-          {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
-          },
-          {
             "Key": "kubernetes.io/role/elb",
             "Value": "1"
           },
           {
-            "Key": "owner",
-            "Value": {
-              "Ref": "stackowner"
-            }
-          },
-          {
-            "Key": "Owner",
-            "Value": {
-              "Ref": "StackOwner"
-            }
+            "Key": "Name",
+            "Value": "ps{subnet.index}-1"
           }
         ]
       }
     },
-    "PrivateSubnet0": {
+    "PubSRTA0": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "PubS0"
+        },
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        }
+      }
+    },
+    "NG0EIP": {
+      "Type": "AWS::EC2::EIP",
+      "DependsOn": "AttachGateway",
+      "Properties": {
+        "Domain": {
+          "Ref": "VPC"
+        }
+      }
+    },
+    "NG0": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "NG0EIP",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "PubS0"
+        }
+      }
+    },
+    "PrvS0": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "MapPublicIpOnLaunch": "false",
@@ -156,56 +142,17 @@
             }
           },
           {
-            "Key": "Network",
-            "Value": "Private"
-          },
-          {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
-          },
-          {
             "Key": "kubernetes.io/role/elb",
             "Value": "1"
           },
           {
-            "Key": "owner",
-            "Value": {
-              "Ref": "stackowner"
-            }
-          },
-          {
-            "Key": "Owner",
-            "Value": {
-              "Ref": "StackOwner"
-            }
+            "Key": "Name",
+            "Value": "ps0-1"
           }
         ]
       }
     },
-    "NatGateway0EIP": {
-      "Type": "AWS::EC2::EIP",
-      "DependsOn": "AttachGateway",
-      "Properties": {
-        "Domain": {
-          "Ref": "VPC"
-        }
-      }
-    },
-    "NatGateway0": {
-      "Type": "AWS::EC2::NatGateway",
-      "Properties": {
-        "AllocationId": {
-          "Fn::GetAtt": [
-            "NatGateway0EIP",
-            "AllocationId"
-          ]
-        },
-        "SubnetId": {
-          "Ref": "PublicSubnet0"
-        }
-      }
-    },
-    "PrivateRouteTable0": {
+    "PRT0": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "VpcId": {
@@ -219,99 +166,40 @@
             }
           },
           {
-            "Key": "Network",
-            "Value": "Private"
-          },
-          {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
-          },
-          {
-            "Key": "owner",
-            "Value": {
-              "Ref": "stackowner"
-            }
-          },
-          {
-            "Key": "Owner",
-            "Value": {
-              "Ref": "StackOwner"
-            }
+            "Key": "Name",
+            "Value": "prt0-1"
           }
         ]
       }
     },
-    "PrivateSubnetRouteTableAssociation0": {
+    "PSRTA0": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "SubnetId": {
-          "Ref": "PrivateSubnet0"
+          "Ref": "PrvS0"
         },
         "RouteTableId": {
-          "Ref": "PrivateRouteTable0"
+          "Ref": "PRT0"
         }
       }
     },
-    "PrivateRoute0": {
+    "PRt0": {
       "Type": "AWS::EC2::Route",
       "DependsOn": [
-        "PrivateRouteTable0",
+        "PRT0",
         "AttachGateway"
       ],
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
         "RouteTableId": {
-          "Ref": "PrivateRouteTable0"
+          "Ref": "PRT0"
         },
         "NatGatewayId": {
-          "Ref": "NatGateway0"
+          "Ref": "NG0"
         }
       }
     },
-    "S3Endpoint0": {
-      "Type": "AWS::EC2::VPCEndpoint",
-      "Properties": {
-        "RouteTableIds": [
-          {
-            "Ref": "PrivateRouteTable0"
-          }
-        ],
-        "ServiceName": {
-          "Fn::Sub": "com.amazonaws.${AWS::Region}.s3"
-        },
-        "VpcId": {
-          "Ref": "VPC"
-        }
-      }
-    },
-    "DDBEndpoint0": {
-      "Type": "AWS::EC2::VPCEndpoint",
-      "Properties": {
-        "RouteTableIds": [
-          {
-            "Ref": "PrivateRouteTable0"
-          }
-        ],
-        "ServiceName": {
-          "Fn::Sub": "com.amazonaws.${AWS::Region}.dynamodb"
-        },
-        "VpcId": {
-          "Ref": "VPC"
-        }
-      }
-    },
-    "PublicSubnetRouteTableAssociation0": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "SubnetId": {
-          "Ref": "PublicSubnet0"
-        },
-        "RouteTableId": {
-          "Ref": "PublicRouteTable"
-        }
-      }
-    },
-    "PublicSubnet1": {
+    "PubS1": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "MapPublicIpOnLaunch": "true",
@@ -328,33 +216,51 @@
             }
           },
           {
-            "Key": "Network",
-            "Value": "Public"
-          },
-          {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
-          },
-          {
             "Key": "kubernetes.io/role/elb",
             "Value": "1"
           },
           {
-            "Key": "owner",
-            "Value": {
-              "Ref": "stackowner"
-            }
-          },
-          {
-            "Key": "Owner",
-            "Value": {
-              "Ref": "StackOwner"
-            }
+            "Key": "Name",
+            "Value": "ps{subnet.index}-1"
           }
         ]
       }
     },
-    "PrivateSubnet1": {
+    "PubSRTA1": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "PubS1"
+        },
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        }
+      }
+    },
+    "NG1EIP": {
+      "Type": "AWS::EC2::EIP",
+      "DependsOn": "AttachGateway",
+      "Properties": {
+        "Domain": {
+          "Ref": "VPC"
+        }
+      }
+    },
+    "NG1": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "NG1EIP",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "PubS1"
+        }
+      }
+    },
+    "PrvS1": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "MapPublicIpOnLaunch": "false",
@@ -371,56 +277,17 @@
             }
           },
           {
-            "Key": "Network",
-            "Value": "Private"
-          },
-          {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
-          },
-          {
             "Key": "kubernetes.io/role/elb",
             "Value": "1"
           },
           {
-            "Key": "owner",
-            "Value": {
-              "Ref": "stackowner"
-            }
-          },
-          {
-            "Key": "Owner",
-            "Value": {
-              "Ref": "StackOwner"
-            }
+            "Key": "Name",
+            "Value": "ps1-1"
           }
         ]
       }
     },
-    "NatGateway1EIP": {
-      "Type": "AWS::EC2::EIP",
-      "DependsOn": "AttachGateway",
-      "Properties": {
-        "Domain": {
-          "Ref": "VPC"
-        }
-      }
-    },
-    "NatGateway1": {
-      "Type": "AWS::EC2::NatGateway",
-      "Properties": {
-        "AllocationId": {
-          "Fn::GetAtt": [
-            "NatGateway1EIP",
-            "AllocationId"
-          ]
-        },
-        "SubnetId": {
-          "Ref": "PublicSubnet1"
-        }
-      }
-    },
-    "PrivateRouteTable1": {
+    "PRT1": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "VpcId": {
@@ -434,61 +301,48 @@
             }
           },
           {
-            "Key": "Network",
-            "Value": "Private"
-          },
-          {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
-          },
-          {
-            "Key": "owner",
-            "Value": {
-              "Ref": "stackowner"
-            }
-          },
-          {
-            "Key": "Owner",
-            "Value": {
-              "Ref": "StackOwner"
-            }
+            "Key": "Name",
+            "Value": "prt1-1"
           }
         ]
       }
     },
-    "PrivateSubnetRouteTableAssociation1": {
+    "PSRTA1": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "SubnetId": {
-          "Ref": "PrivateSubnet1"
+          "Ref": "PrvS1"
         },
         "RouteTableId": {
-          "Ref": "PrivateRouteTable1"
+          "Ref": "PRT1"
         }
       }
     },
-    "PrivateRoute1": {
+    "PRt1": {
       "Type": "AWS::EC2::Route",
       "DependsOn": [
-        "PrivateRouteTable1",
+        "PRT1",
         "AttachGateway"
       ],
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
         "RouteTableId": {
-          "Ref": "PrivateRouteTable1"
+          "Ref": "PRT1"
         },
         "NatGatewayId": {
-          "Ref": "NatGateway1"
+          "Ref": "NG0"
         }
       }
     },
-    "S3Endpoint1": {
+    "S3Endpoint": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "RouteTableIds": [
           {
-            "Ref": "PrivateRouteTable1"
+            "Ref": "PRT0"
+          },
+          {
+            "Ref": "PRT1"
           }
         ],
         "ServiceName": {
@@ -499,12 +353,15 @@
         }
       }
     },
-    "DDBEndpoint1": {
+    "DDBEndpoint": {
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "RouteTableIds": [
           {
-            "Ref": "PrivateRouteTable1"
+            "Ref": "PRT0"
+          },
+          {
+            "Ref": "PRT1"
           }
         ],
         "ServiceName": {
@@ -512,17 +369,6 @@
         },
         "VpcId": {
           "Ref": "VPC"
-        }
-      }
-    },
-    "PublicSubnetRouteTableAssociation1": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "SubnetId": {
-          "Ref": "PublicSubnet1"
-        },
-        "RouteTableId": {
-          "Ref": "PublicRouteTable"
         }
       }
     },
@@ -540,24 +386,8 @@
             }
           },
           {
-            "Key": "Network",
-            "Value": "Public"
-          },
-          {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
-          },
-          {
-            "Key": "owner",
-            "Value": {
-              "Ref": "stackowner"
-            }
-          },
-          {
-            "Key": "Owner",
-            "Value": {
-              "Ref": "StackOwner"
-            }
+            "Key": "Name",
+            "Value": "prt-envName-1"
           }
         ]
       }
@@ -580,52 +410,14 @@
     }
   },
   "Outputs": {
-    "PublicSubnetId0": {
+    "id0": {
       "Value": {
-        "Ref": "PublicSubnet0"
+        "Ref": "PrvS0"
       }
     },
-    "PublicSubnetCidr0": {
-      "Value": "2.2.2.2/24"
-    },
-    "PrivateSubnetId0": {
+    "id1": {
       "Value": {
-        "Ref": "PrivateSubnet0"
-      }
-    },
-    "PrivateSubnetCidr0": {
-      "Value": "2.2.2.2/24"
-    },
-    "Az0": {
-      "Value": {
-        "Fn::GetAtt": [
-          "PublicSubnet0",
-          "AvailabilityZone"
-        ]
-      }
-    },
-    "PublicSubnetId1": {
-      "Value": {
-        "Ref": "PublicSubnet1"
-      }
-    },
-    "PublicSubnetCidr1": {
-      "Value": "2.2.2.2/24"
-    },
-    "PrivateSubnetId1": {
-      "Value": {
-        "Ref": "PrivateSubnet1"
-      }
-    },
-    "PrivateSubnetCidr1": {
-      "Value": "2.2.2.2/24"
-    },
-    "Az1": {
-      "Value": {
-        "Fn::GetAtt": [
-          "PublicSubnet1",
-          "AvailabilityZone"
-        ]
+        "Ref": "PrvS1"
       }
     },
     "CreatedVpc": {

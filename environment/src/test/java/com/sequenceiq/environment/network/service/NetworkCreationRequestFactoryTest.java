@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.network.service;
 
+import static com.sequenceiq.environment.network.service.Cidrs.cidrs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -7,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -52,7 +55,7 @@ class NetworkCreationRequestFactoryTest {
         CloudCredential cloudCredential = new CloudCredential("1", "asd");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
-        when(defaultSubnetCidrProvider.provide(NETWORK_CIDR)).thenReturn(SUBNET_CIDRS);
+        when(defaultSubnetCidrProvider.provide(NETWORK_CIDR)).thenReturn(cidrs(SUBNET_CIDRS, new HashSet<>()));
 
         NetworkCreationRequest actual = underTest.create(environmentDto);
 
@@ -64,7 +67,7 @@ class NetworkCreationRequestFactoryTest {
         assertEquals(CLOUD_PLATFORM, actual.getVariant());
         assertEquals(REGION, actual.getRegion().value());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
-        assertEquals(SUBNET_CIDRS, actual.getSubnetCidrs());
+        assertEquals(SUBNET_CIDRS, actual.getPublicSubnetCidrs());
         assertFalse(actual.isNoPublicIp());
     }
 
@@ -74,7 +77,7 @@ class NetworkCreationRequestFactoryTest {
         CloudCredential cloudCredential = new CloudCredential("1", "asd");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
-        when(defaultSubnetCidrProvider.provide(NETWORK_CIDR)).thenReturn(SUBNET_CIDRS);
+        when(defaultSubnetCidrProvider.provide(NETWORK_CIDR)).thenReturn(cidrs(SUBNET_CIDRS, new HashSet<>()));
 
         NetworkCreationRequest actual = underTest.create(environmentDto);
 
@@ -87,7 +90,7 @@ class NetworkCreationRequestFactoryTest {
         assertEquals(CLOUD_PLATFORM, actual.getVariant());
         assertEquals(REGION, actual.getRegion().value());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
-        assertEquals(SUBNET_CIDRS, actual.getSubnetCidrs());
+        assertEquals(SUBNET_CIDRS, actual.getPublicSubnetCidrs());
         assertTrue(actual.isNoPublicIp());
     }
 
@@ -110,6 +113,15 @@ class NetworkCreationRequestFactoryTest {
                         .build())
                 .build());
         return builder;
+    }
+
+    public SubnetRequest publicSubnetRequest(String cidr, int index) {
+        SubnetRequest subnetRequest = new SubnetRequest();
+        subnetRequest.setIndex(index);
+        subnetRequest.setPublicSubnetCidr(cidr);
+        subnetRequest.setSubnetGroup(index % 3);
+        subnetRequest.setAvailabilityZone("az");
+        return subnetRequest;
     }
 
 }
