@@ -1,6 +1,19 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.action;
 
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.StateContext;
+import org.springframework.statemachine.action.Action;
+
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -17,20 +30,8 @@ import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDa
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.UpdateDatabaseServerRegistrationRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.UpdateDatabaseServerRegistrationSuccess;
+import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
-
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
-import org.springframework.statemachine.action.Action;
 
 @Configuration
 public class RedbeamsProvisionActions {
@@ -39,6 +40,9 @@ public class RedbeamsProvisionActions {
 
     @Inject
     private DBStackStatusUpdater dbStackStatusUpdater;
+
+    @Inject
+    private DBResourceService dbResourceService;
 
     @Bean(name = "ALLOCATE_DATABASE_SERVER_STATE")
     public Action<?, ?> allocateDatabaseServer() {
@@ -61,17 +65,17 @@ public class RedbeamsProvisionActions {
     public Action<?, ?> updateDatabaseServerRegistration() {
         return new AbstractRedbeamsProvisionAction<>(AllocateDatabaseServerSuccess.class) {
 
-            private List<CloudResource> dbResources;
-
             @Override
-            protected void prepareExecution(AllocateDatabaseServerSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(RedbeamsContext context, AllocateDatabaseServerSuccess payload, Map<Object, Object> variables) {
                 dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.PROVISIONED);
-                dbResources = ResourceLists.transform(payload.getResults());
-            }
-
-            @Override
-            protected Selectable createRequest(RedbeamsContext context) {
-                return new UpdateDatabaseServerRegistrationRequest(context.getCloudContext(), context.getDBStack(), dbResources);
+                List<CloudResourceStatus> dbResourcesList = dbResourceService.getAllAsCloudResourceStatus(payload.getResourceId());
+                sendEvent(context,
+                        new UpdateDatabaseServerRegistrationRequest(
+                                context.getCloudContext(),
+                                context.getDBStack(),
+                                ResourceLists.transform(dbResourcesList)
+                        )
+                );
             }
         };
     }
@@ -117,7 +121,7 @@ public class RedbeamsProvisionActions {
 
             @Override
             protected RedbeamsContext createFlowContext(FlowParameters flowParameters,
-                StateContext<RedbeamsProvisionState, RedbeamsProvisionEvent> stateContext, RedbeamsFailureEvent payload) {
+                    StateContext<RedbeamsProvisionState, RedbeamsProvisionEvent> stateContext, RedbeamsFailureEvent payload) {
 
                 Flow flow = getFlow(flowParameters.getFlowId());
                 flow.setFlowFailed(payload.getException());

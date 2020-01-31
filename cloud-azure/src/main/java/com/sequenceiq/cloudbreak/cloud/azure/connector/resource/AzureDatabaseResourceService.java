@@ -1,5 +1,15 @@
 package com.sequenceiq.cloudbreak.cloud.azure.connector.resource;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.google.common.collect.Lists;
 import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
@@ -16,18 +26,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.common.api.type.ResourceType;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 @Service
 public class AzureDatabaseResourceService {
@@ -54,7 +55,7 @@ public class AzureDatabaseResourceService {
     @Inject
     private DefaultCostTaggingService defaultCostTaggingService;
 
-    public List<CloudResourceStatus> buildDatabaseResourcesForLaunch(AuthenticatedContext ac, DatabaseStack stack) {
+    public List<CloudResourceStatus> buildDatabaseResourcesForLaunch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier persistenceNotifier) {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
 
@@ -87,11 +88,17 @@ public class AzureDatabaseResourceService {
         }
 
         Deployment deployment = client.getTemplateDeployment(resourceGroupName, stackName);
-
         String fqdn = (String) ((Map) ((Map) deployment.outputs()).get(DATABASE_SERVER_FQDN)).get("value");
 
-        List<CloudResource> databaseResources = Lists.newArrayList();
+        List<CloudResource> databaseResources = createCloudResources(resourceGroupName, fqdn);
+        databaseResources.forEach(dbr -> persistenceNotifier.notifyAllocation(dbr, cloudContext));
+        return databaseResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .collect(Collectors.toList());
+    }
 
+    private List<CloudResource> createCloudResources(String resourceGroupName, String fqdn) {
+        List<CloudResource> databaseResources = Lists.newArrayList();
         databaseResources.add(CloudResource.builder()
                 .type(ResourceType.RDS_HOSTNAME)
                 .name(fqdn)
@@ -104,10 +111,7 @@ public class AzureDatabaseResourceService {
                 .type(ResourceType.AZURE_RESOURCE_GROUP)
                 .name(resourceGroupName)
                 .build());
-
-        return databaseResources.stream()
-                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
-                .collect(Collectors.toList());
+        return databaseResources;
     }
 
     public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext ac, DatabaseStack stack, boolean force) {
