@@ -180,10 +180,10 @@ public class UserSyncService {
                     failure.add(new FailureDetails(envCrn, e.getLocalizedMessage()));
                 }
             });
-            operationService.completeOperation(operationId, success, failure);
+            operationService.completeOperation(accountId, operationId, success, failure);
         } catch (RuntimeException e) {
             LOGGER.error("User sync operation {} failed with error:", operationId, e);
-            operationService.failOperation(operationId, e.getLocalizedMessage());
+            operationService.failOperation(accountId, operationId, e.getLocalizedMessage());
             throw e;
         }
     }

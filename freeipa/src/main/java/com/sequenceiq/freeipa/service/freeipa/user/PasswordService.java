@@ -123,12 +123,12 @@ public class PasswordService {
                     failure.add(new FailureDetails(request.getEnvironment(), e.getLocalizedMessage()));
                 }
             }
-            operationService.completeOperation(operationId, success, failure);
+            operationService.completeOperation(accountId, operationId, success, failure);
         } catch (InterruptedException e) {
-            operationService.failOperation(operationId, e.getLocalizedMessage());
+            operationService.failOperation(accountId, operationId, e.getLocalizedMessage());
             Thread.currentThread().interrupt();
         } catch (RuntimeException e) {
-            operationService.failOperation(operationId, e.getLocalizedMessage());
+            operationService.failOperation(accountId, operationId, e.getLocalizedMessage());
             throw e;
         }
     }
