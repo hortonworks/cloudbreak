@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.UmsEventGenerationIdsProvider;
@@ -121,7 +121,7 @@ public class UserSyncPoller {
                     cooldownChecker.isCooldownExpired(userSyncStatus, cooldownThresholdTime)) {
                 LOGGER.debug("Environment {} in Account {} is not in sync.",
                         stack.getEnvironmentCrn(), stack.getAccountId());
-                SyncOperationStatus operation = userSyncService.synchronizeUsers(stack.getAccountId(), INTERNAL_ACTOR_CRN,
+                Operation operation = userSyncService.synchronizeUsers(stack.getAccountId(), INTERNAL_ACTOR_CRN,
                         Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
                 LOGGER.debug("User Sync request resulted in operation {}", operation);
             } else {

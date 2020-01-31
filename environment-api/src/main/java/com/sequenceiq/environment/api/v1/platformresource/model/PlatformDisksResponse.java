@@ -63,4 +63,14 @@ public class PlatformDisksResponse implements Serializable {
     public void setDisplayNames(Map<String, Map<String, String>> displayNames) {
         this.displayNames = displayNames;
     }
+
+    @Override
+    public String toString() {
+        return "PlatformDisksResponse{" +
+                "diskTypes=" + diskTypes +
+                ", defaultDisks=" + defaultDisks +
+                ", diskMappings=" + diskMappings +
+                ", displayNames=" + displayNames +
+                '}';
+    }
 }

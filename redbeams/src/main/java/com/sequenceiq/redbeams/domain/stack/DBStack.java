@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.domain.stack;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -12,6 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MapKeyColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -54,6 +56,9 @@ public class DBStack {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @SecretValue
     private DatabaseServer databaseServer;
+
+    @OneToMany(mappedBy = "dbStack", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Set<DBResource> databaseResources;
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")

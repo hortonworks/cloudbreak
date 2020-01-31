@@ -19,9 +19,10 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersReque
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.exception.SyncOperationAlreadyRunningException;
+import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
-import com.sequenceiq.freeipa.service.operation.OperationStatusService;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 
 @Controller
 public class UserV1Controller implements UserV1Endpoint {
@@ -35,7 +36,10 @@ public class UserV1Controller implements UserV1Endpoint {
     private PasswordService passwordService;
 
     @Inject
-    private OperationStatusService operationStatusService;
+    private OperationService operationService;
+
+    @Inject
+    private OperationToSyncOperationStatus operationToSyncOperationStatus;
 
     @Override
     public SyncOperationStatus synchronizeUser(SynchronizeUserRequest request) {
@@ -56,8 +60,10 @@ public class UserV1Controller implements UserV1Endpoint {
             default:
                 throw new BadRequestException(String.format("UserCrn %s is not of resoure type USER or MACHINE_USER", userCrn));
         }
-        return checkOperationRejected(userSyncService.synchronizeUsers(accountId, userCrn, environmentCrnFilter,
-                userCrnFilter, machineUserCrnFilter));
+        return checkOperationRejected(
+                operationToSyncOperationStatus.convert(
+                        userSyncService.synchronizeUsers(accountId, userCrn, environmentCrnFilter,
+                userCrnFilter, machineUserCrnFilter)));
     }
 
     @Override
@@ -66,8 +72,10 @@ public class UserV1Controller implements UserV1Endpoint {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         LOGGER.debug("synchronizeAllUsers() requested for account {}", accountId);
 
-        return checkOperationRejected(userSyncService.synchronizeUsers(accountId, userCrn, nullToEmpty(request.getEnvironments()),
-                nullToEmpty(request.getUsers()), nullToEmpty(request.getMachineUsers())));
+        return checkOperationRejected(
+                operationToSyncOperationStatus.convert(
+                        userSyncService.synchronizeUsers(accountId, userCrn, nullToEmpty(request.getEnvironments()),
+                                nullToEmpty(request.getUsers()), nullToEmpty(request.getMachineUsers()))));
     }
 
     @Override
@@ -76,14 +84,18 @@ public class UserV1Controller implements UserV1Endpoint {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         LOGGER.debug("setPassword() requested for user {} in account {}", userCrn, accountId);
 
-        return checkOperationRejected(passwordService.setPassword(accountId, userCrn, userCrn, request.getPassword(),
-                nullToEmpty(request.getEnvironments())));
+        return checkOperationRejected(
+                operationToSyncOperationStatus.convert(
+                        passwordService.setPassword(accountId, userCrn, userCrn, request.getPassword(), nullToEmpty(request.getEnvironments()))));
     }
 
     @Override
     public SyncOperationStatus getSyncOperationStatus(@NotNull String operationId) {
-        LOGGER.debug("getSyncOperationStatus() requested for operation {}", operationId);
-        return operationStatusService.getSyncOperationStatus(operationId);
+        checkUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        LOGGER.debug("getSyncOperationStatus() requested for operation '{}' in account '{}'", operationId, accountId);
+        return operationToSyncOperationStatus.convert(
+                operationService.getOperationForAccountIdAndOperationId(accountId, operationId));
     }
 
     private SyncOperationStatus checkOperationRejected(SyncOperationStatus syncOperationStatus) {

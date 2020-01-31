@@ -77,4 +77,17 @@ public class PlatformResourceRequest {
     public void setCdpResourceType(CdpResourceType cdpResourceType) {
         this.cdpResourceType = cdpResourceType;
     }
+
+    @Override
+    public String toString() {
+        return "PlatformResourceRequest{" +
+                "credential=" + credential +
+                ", region='" + region + '\'' +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", platformVariant='" + platformVariant + '\'' +
+                ", availabilityZone='" + availabilityZone + '\'' +
+                ", cdpResourceType=" + cdpResourceType +
+                ", filters=" + filters +
+                '}';
+    }
 }

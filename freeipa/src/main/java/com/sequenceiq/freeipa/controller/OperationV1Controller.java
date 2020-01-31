@@ -5,23 +5,24 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
-import com.sequenceiq.freeipa.service.operation.OperationStatusService;
-import com.sequenceiq.freeipa.util.CrnService;
+import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 
 @Controller
 public class OperationV1Controller implements OperationV1Endpoint {
 
     @Inject
-    private OperationStatusService operationService;
+    private OperationService operationService;
 
     @Inject
-    private CrnService crnService;
+    private OperationToOperationStatusConverter operationToOperationStatusConverter;
 
     @Override
     public OperationStatus getOperationStatus(@NotNull String operationId) {
-        String accountId = crnService.getCurrentAccountId();
-        return operationService.getOperationStatus(operationId, accountId);
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        return operationToOperationStatusConverter.convert(operationService.getOperationForAccountIdAndOperationId(accountId, operationId));
     }
 }

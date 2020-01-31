@@ -1,5 +1,13 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.handler;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -19,14 +27,6 @@ import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
-
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -71,9 +71,9 @@ public class AllocateDatabaseServerHandler implements EventHandler<AllocateDatab
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);
             ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatuses);
             if (!task.completed(statePollerResult)) {
-                statePollerResult = syncPollingScheduler.schedule(task);
+                syncPollingScheduler.schedule(task);
             }
-            RedbeamsEvent success = new AllocateDatabaseServerSuccess(request.getResourceId(), statePollerResult.getResults());
+            RedbeamsEvent success = new AllocateDatabaseServerSuccess(request.getResourceId());
             // request.getResult().onNext(success);
             eventBus.notify(success.selector(), new Event<>(event.getHeaders(), success));
             LOGGER.debug("Launching the database stack successfully finished for {}", cloudContext);

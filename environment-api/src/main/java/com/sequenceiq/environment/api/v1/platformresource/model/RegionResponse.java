@@ -73,4 +73,13 @@ public class RegionResponse extends CompactRegionResponse {
     public void setLocations(List<String> locations) {
         this.locations = locations;
     }
+
+    @Override
+    public String toString() {
+        return "RegionResponse{" +
+                "availabilityZones=" + availabilityZones +
+                ", defaultRegion='" + defaultRegion + '\'' +
+                ", locations=" + locations +
+                '}';
+    }
 }

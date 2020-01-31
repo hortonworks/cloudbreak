@@ -7,6 +7,8 @@ import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
@@ -46,6 +48,8 @@ import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 @Transactional(TxType.NEVER)
 public class PlatformResourceController implements PlatformResourceEndpoint {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PlatformResourceController.class);
+
     @Inject
     @Named("conversionService")
     private ConversionService convertersionService;
@@ -71,9 +75,11 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
                 availabilityZone,
                 null,
                 cdpResourceType);
-
+        LOGGER.info("Get /platform_resources/machine_types, request: {}", request);
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
-        return convertersionService.convert(cloudVmTypes, PlatformVmtypesResponse.class);
+        PlatformVmtypesResponse response = convertersionService.convert(cloudVmTypes, PlatformVmtypesResponse.class);
+        LOGGER.info("Resp /platform_resources/machine_types, request: {}, cloudVmTypes: {}, response: {}", request, cloudVmTypes, response);
+        return response;
     }
 
     @Override
@@ -91,14 +97,20 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
                 region,
                 platformVariant,
                 availabilityZone);
+        LOGGER.info("Get /platform_resources/regions, request: {}", request);
         CloudRegions regions = platformParameterService.getRegionsByCredential(request);
-        return convertersionService.convert(regions, RegionResponse.class);
+        RegionResponse response = convertersionService.convert(regions, RegionResponse.class);
+        LOGGER.info("Resp /platform_resources/regions, request: {}, regions: {}, response: {}", request, regions, response);
+        return response;
     }
 
     @Override
     public PlatformDisksResponse getDisktypes() {
+        LOGGER.info("Get /platform_resources/disk_types");
         PlatformDisks disks = platformParameterService.getDiskTypes();
-        return convertersionService.convert(disks, PlatformDisksResponse.class);
+        PlatformDisksResponse response = convertersionService.convert(disks, PlatformDisksResponse.class);
+        LOGGER.info("Resp /platform_resources/disk_types, disks: {}, response: {}", disks, response);
+        return response;
     }
 
     @Override
@@ -116,8 +128,12 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
                 region,
                 platformVariant,
                 availabilityZone);
+        LOGGER.info("Get /platform_resources/networks, request: {}", request);
         CloudNetworks networks = platformParameterService.getCloudNetworks(request);
-        return convertersionService.convert(networks, PlatformNetworksResponse.class);
+        PlatformNetworksResponse response = convertersionService.convert(networks, PlatformNetworksResponse.class);
+        LOGGER.info("Resp /platform_resources/networks, request: {}, networks: {}, response: {}", request, networks, response);
+        return response;
+
     }
 
     @Override
@@ -135,8 +151,11 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
                 region,
                 platformVariant,
                 availabilityZone);
+        LOGGER.info("Get /platform_resources/ip_pools, request: {}", request);
         CloudIpPools ipPools = platformParameterService.getIpPoolsCredentialId(request);
-        return convertersionService.convert(ipPools, PlatformIpPoolsResponse.class);
+        PlatformIpPoolsResponse response = convertersionService.convert(ipPools, PlatformIpPoolsResponse.class);
+        LOGGER.info("Resp /platform_resources/ip_pools, request: {}, ipPools: {}, response: {}", request, ipPools, response);
+        return response;
     }
 
     @Override
@@ -154,8 +173,12 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
                 region,
                 platformVariant,
                 availabilityZone);
-        CloudGateWays gateWays = platformParameterService.getGatewaysCredentialId(request);
-        return convertersionService.convert(gateWays, PlatformGatewaysResponse.class);
+        LOGGER.info("Get /platform_resources/gateways, request: {}", request);
+        CloudGateWays gateways = platformParameterService.getGatewaysCredentialId(request);
+        PlatformGatewaysResponse response = convertersionService.convert(gateways, PlatformGatewaysResponse.class);
+        LOGGER.info("Resp /platform_resources/gateways, request: {}, ipPools: {}, response: {}", request, gateways, response);
+        return response;
+
     }
 
     @Override
@@ -173,8 +196,11 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
                 region,
                 platformVariant,
                 availabilityZone);
+        LOGGER.info("Get /platform_resources/encryption_keys, request: {}", request);
         CloudEncryptionKeys encryptionKeys = platformParameterService.getEncryptionKeys(request);
-        return convertersionService.convert(encryptionKeys, PlatformEncryptionKeysResponse.class);
+        PlatformEncryptionKeysResponse response = convertersionService.convert(encryptionKeys, PlatformEncryptionKeysResponse.class);
+        LOGGER.info("Resp /platform_resources/encryption_keys, request: {}, ipPools: {}, response: {}", request, encryptionKeys, response);
+        return response;
     }
 
     @Override
@@ -192,8 +218,11 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
                 region,
                 platformVariant,
                 availabilityZone);
+        LOGGER.info("Get /platform_resources/security_groups, request: {}", request);
         CloudSecurityGroups securityGroups = platformParameterService.getSecurityGroups(request);
-        return convertersionService.convert(securityGroups, PlatformSecurityGroupsResponse.class);
+        PlatformSecurityGroupsResponse response = convertersionService.convert(securityGroups, PlatformSecurityGroupsResponse.class);
+        LOGGER.info("Resp /platform_resources/security_groups, request: {}, securityGroups: {}, response: {}", request, securityGroups, response);
+        return response;
     }
 
     @Override
@@ -211,8 +240,11 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
                 region,
                 platformVariant,
                 availabilityZone);
+        LOGGER.info("Get /platform_resources/ssh_keys, request: {}", request);
         CloudSshKeys sshKeys = platformParameterService.getCloudSshKeys(request);
-        return convertersionService.convert(sshKeys, PlatformSshKeysResponse.class);
+        PlatformSshKeysResponse response = convertersionService.convert(sshKeys, PlatformSshKeysResponse.class);
+        LOGGER.info("Resp /platform_resources/ssh_keys, request: {}, sshKeys: {}, response: {}", request, sshKeys, response);
+        return response;
     }
 
     @Override
@@ -232,14 +264,20 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
                 platformVariant,
                 availabilityZone,
                 accessConfigType);
+        LOGGER.info("Get /platform_resources/access_configs, request: {}", request);
         CloudAccessConfigs accessConfigs = platformParameterService.getAccessConfigs(request);
-        return convertersionService.convert(accessConfigs, PlatformAccessConfigsResponse.class);
+        PlatformAccessConfigsResponse response = convertersionService.convert(accessConfigs, PlatformAccessConfigsResponse.class);
+        LOGGER.info("Resp /platform_resources/access_configs, request: {}, accessConfigs: {}, response: {}", request, accessConfigs, response);
+        return response;
     }
 
     @Override
     public TagSpecificationsResponse getTagSpecifications() {
+        LOGGER.info("Get /platform_resources/tag_specifications");
         Map<Platform, PlatformParameters> platformParameters = platformParameterService.getPlatformParameters();
-        return convertersionService.convert(platformParameters, TagSpecificationsResponse.class);
+        TagSpecificationsResponse response = convertersionService.convert(platformParameters, TagSpecificationsResponse.class);
+        LOGGER.info("Resp /platform_resources/tag_specifications, platformParameters: {}, response: {}", platformParameters, response);
+        return response;
     }
 
     @Override
@@ -249,7 +287,6 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
             String region,
             String platformVariant,
             String availabilityZone) {
-
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -258,8 +295,11 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
                 region,
                 platformVariant,
                 availabilityZone);
+        LOGGER.info("Get /platform_resources/nosql_tables, request: {}", request);
         CloudNoSqlTables noSqlTables = platformParameterService.getNoSqlTables(request);
-        return convertersionService.convert(noSqlTables, PlatformNoSqlTablesResponse.class);
+        PlatformNoSqlTablesResponse response = convertersionService.convert(noSqlTables, PlatformNoSqlTablesResponse.class);
+        LOGGER.info("Resp /platform_resources/nosql_tables, request: {}, noSqlTables: {}, response: {}", request, noSqlTables, response);
+        return response;
     }
 
     private String getAccountId() {

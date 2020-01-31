@@ -45,7 +45,7 @@ import com.sequenceiq.freeipa.ldap.LdapConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.host.HostDeletionService;
-import com.sequenceiq.freeipa.service.operation.OperationStatusService;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -66,7 +66,7 @@ public class CleanupService {
     private FreeIpaFlowManager flowManager;
 
     @Inject
-    private OperationStatusService operationStatusService;
+    private OperationService operationService;
 
     @Inject
     private OperationToOperationStatusConverter operationToOperationStatusConverter;
@@ -84,7 +84,7 @@ public class CleanupService {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);
         MDCBuilder.buildMdcContext(stack);
         Operation operation =
-                operationStatusService.startOperation(accountId, OperationType.CLEANUP, Set.of(stack.getEnvironmentCrn()), Collections.emptySet());
+                operationService.startOperation(accountId, OperationType.CLEANUP, Set.of(stack.getEnvironmentCrn()), Collections.emptySet());
         CleanupEvent cleanupEvent = new CleanupEvent(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), stack.getId(), request.getUsers(),
                 request.getHosts(), request.getRoles(), operation.getOperationId(), request.getClusterName());
         flowManager.notify(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), cleanupEvent);

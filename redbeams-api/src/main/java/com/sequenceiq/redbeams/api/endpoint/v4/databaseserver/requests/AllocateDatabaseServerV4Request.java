@@ -41,6 +41,7 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
     @ApiModelProperty(DBStack.NETWORK)
     private NetworkV4StackRequest network;
 
+    @NotNull
     @Valid
     @ApiModelProperty(value = DBStack.DATABASE_SERVER, required = true)
     private DatabaseServerV4StackRequest databaseServer;
