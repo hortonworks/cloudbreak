@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBa
 import static java.util.Collections.singletonMap;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -83,6 +84,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -188,6 +190,9 @@ public class ClusterHostServiceRunner {
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
 
+    @Inject
+    private EnvironmentConfigProvider environmentConfigProvider;
+
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, List<String> candidateAddresses) {
         try {
             Set<Node> nodes = stackUtil.collectNodes(stack);
@@ -247,8 +252,9 @@ public class ClusterHostServiceRunner {
         saveCustomNameservers(stack, kerberosConfig, servicePillar);
         addKerberosConfig(servicePillar, kerberosConfig);
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
-        servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls",
-                singletonMap("cluster", singletonMap("name", stack.getCluster().getName()))));
+        Map<String, ? extends Serializable> clusterProperties = Map.of("name", stack.getCluster().getName(),
+                "deployedInChildEnvironment", environmentConfigProvider.isChildEnvironment(stack.getEnvironmentCrn()));
+        servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
         Map<String, List<String>> serviceLocations = getServiceLocations(cluster);
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
