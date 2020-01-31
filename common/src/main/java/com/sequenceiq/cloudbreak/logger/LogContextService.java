@@ -13,7 +13,7 @@ public class LogContextService {
             String paramName = paramNames[i].toLowerCase();
             Object paramValue = args[i];
             String paramString = paramValue != null ? paramValue.toString() : "";
-            if (paramName.contains("name")) {
+            if (paramName.contains("name") || paramName.contains("resourceName")) {
                 builder.resourceName(paramString);
             } else if (paramName.contains("request")) {
                 builder.environmentCrn(MDCBuilder.getFieldValue(paramValue, LoggerContextKey.ENVIRONMENT_CRN.toString()))
@@ -21,7 +21,7 @@ public class LogContextService {
                         .resourceName(MDCBuilder.getFieldValue(paramValue, LoggerContextKey.NAME.toString()));
             } else if (paramName.contains("environmentcrn")) {
                 builder.environmentCrn(paramString);
-            } else if (paramName.contains("crn")) {
+            } else if (paramName.contains("crn") || paramName.contains("resourceCrn")) {
                 builder.resourceCrn(paramString);
             }
         }
