@@ -17,6 +17,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -29,6 +30,7 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaRootCertificateService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStartService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStopService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -48,6 +50,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private FreeIpaListService freeIpaListService;
+
+    @Inject
+    private FreeIpaHealthDetailsService freeIpaHealthDetailsService;
 
     @Inject
     private FreeIpaRootCertificateService freeIpaRootCertificateService;
@@ -91,6 +96,12 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public List<ListFreeIpaResponse> list() {
         String accountId = crnService.getCurrentAccountId();
         return freeIpaListService.list(accountId);
+    }
+
+    @Override
+    public HealthDetailsFreeIpaResponse healthDetails(String environmentCrn) {
+        String accountId = crnService.getCurrentAccountId();
+        return freeIpaHealthDetailsService.getHealthDetails(environmentCrn, accountId);
     }
 
     @Override

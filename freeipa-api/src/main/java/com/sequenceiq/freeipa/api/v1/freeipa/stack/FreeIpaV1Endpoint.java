@@ -20,6 +20,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 
@@ -51,6 +52,13 @@ public interface FreeIpaV1Endpoint {
     @ApiOperation(value = FreeIpaOperationDescriptions.LIST_BY_ACCOUNT, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "listFreeIpaClustersByAccountV1")
     List<ListFreeIpaResponse> list();
+
+    @GET
+    @Path("health")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.HEALTH, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "healthV1")
+    HealthDetailsFreeIpaResponse healthDetails(@QueryParam("environment") @NotEmpty String environmentCrn);
 
     @GET
     @Path("ca.crt")
