@@ -26,7 +26,7 @@ public class TelemetryConverter {
 
     private final boolean freeIpaTelemetryEnabled;
 
-    private final boolean reportDeplymentLogs;
+    private final boolean clusterLogsCollection;
 
     private final boolean useSharedAltusCredential;
 
@@ -35,7 +35,7 @@ public class TelemetryConverter {
     public TelemetryConverter(TelemetryConfiguration configuration,
             @Value("${freeipa.telemetry.enabled:true}") boolean freeIpaTelemetryEnabled) {
         this.freeIpaTelemetryEnabled = freeIpaTelemetryEnabled;
-        this.reportDeplymentLogs = configuration.isReportDeploymentLogs();
+        this.clusterLogsCollection = configuration.isClusterLogsCollection();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
         this.databusEndpoint = configuration.getAltusDatabusConfiguration().getAltusDatabusEndpoint();
     }
@@ -112,13 +112,13 @@ public class TelemetryConverter {
 
     private Features createFeaturesFromRequest(FeaturesRequest featuresRequest) {
         Features features = new Features();
-        if (reportDeplymentLogs) {
-            if (featuresRequest != null && featuresRequest.getReportDeploymentLogs() != null) {
-                features.setReportDeploymentLogs(featuresRequest.getReportDeploymentLogs());
+        if (clusterLogsCollection) {
+            if (featuresRequest != null && featuresRequest.getClusterLogsCollection() != null) {
+                features.setClusterLogsCollection(featuresRequest.getClusterLogsCollection());
                 LOGGER.debug("Fill report deployment log settings from feature request");
             } else {
                 LOGGER.debug("Auto-fill report deployment logs settings with defaults. (disabled)");
-                features.addReportDeploymentLogs(false);
+                features.addClusterLogsCollection(false);
             }
         }
         if (useSharedAltusCredential) {
@@ -131,7 +131,7 @@ public class TelemetryConverter {
         FeaturesResponse featuresResponse = null;
         if (features != null) {
             featuresResponse = new FeaturesResponse();
-            featuresResponse.setReportDeploymentLogs(features.getReportDeploymentLogs());
+            featuresResponse.setClusterLogsCollection(features.getClusterLogsCollection());
             featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
         }
         return featuresResponse;

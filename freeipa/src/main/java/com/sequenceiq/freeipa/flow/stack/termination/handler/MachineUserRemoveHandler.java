@@ -50,7 +50,7 @@ public class MachineUserRemoveHandler implements EventHandler<RemoveMachineUserR
     private void cleanupMachineUser(Long stackId) {
         Stack stack = stackService.getStackById(stackId);
         Telemetry telemetry = stack.getTelemetry();
-        if (telemetry != null && telemetry.isReportDeploymentLogsFeatureEnabled()) {
+        if (telemetry != null && telemetry.isClusterLogsCollectionEnabled()) {
             altusMachineUserService.cleanupMachineUser(stack, telemetry);
         } else {
             LOGGER.info("Machine user cleanup is not needed.");

@@ -75,9 +75,9 @@ public class Telemetry implements Serializable {
     }
 
     @JsonIgnore
-    public boolean isReportDeploymentLogsFeatureEnabled() {
-        return features != null && features.getReportDeploymentLogs() != null
-                && features.getReportDeploymentLogs().isEnabled();
+    public boolean isClusterLogsCollectionEnabled() {
+        return features != null && features.getClusterLogsCollection() != null
+                && features.getClusterLogsCollection().isEnabled();
     }
 
     @JsonIgnore

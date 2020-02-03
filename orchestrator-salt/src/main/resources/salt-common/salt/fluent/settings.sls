@@ -39,16 +39,16 @@
 {% set azore_storage_account = salt['pillar.get']('fluent:azureStorageAccount') %}
 {% set azure_storage_access_key = salt['pillar.get']('fluent:azureStorageAccessKey') %}
 
-{% if salt['pillar.get']('fluent:dbusReportDeploymentLogs') %}
-    {% set dbus_report_deployment_logs_enabled = True %}
+{% if salt['pillar.get']('fluent:dbusClusterLogsCollection') %}
+    {% set dbus_cluster_logs_collection_enabled = True %}
 {% else %}
-    {% set dbus_report_deployment_logs_enabled = False %}
+    {% set dbus_cluster_logs_collection_enabled = False %}
 {% endif %}
 
-{% if salt['pillar.get']('fluent:dbusReportDeploymentLogsDisableStop') %}
-    {% set dbus_report_deployment_logs_disable_stop = True %}
+{% if salt['pillar.get']('fluent:dbusClusterLogsCollectionDisableStop') %}
+    {% set dbus_cluster_logs_collection_disable_stop = True %}
 {% else %}
-    {% set dbus_report_deployment_logs_disable_stop = False %}
+    {% set dbus_cluster_logs_collection_disable_stop = False %}
 {% endif %}
 
 {% if salt['pillar.get']('fluent:dbusMeteringEnabled') %}
@@ -76,7 +76,7 @@
 {% set number_of_workers=0 %}
 {% set cloud_storage_worker_index=0 %}
 {% set metering_worker_index=0 %}
-{% set report_deployment_logs_worker_index=0 %}
+{% set cluster_logs_collection_worker_index=0 %}
 {% if cloud_storage_logging_enabled or cloud_logging_service_enabled %}
 {%   set cloud_storage_worker_index=number_of_workers %}
 {%   set number_of_workers=number_of_workers+1 %}
@@ -85,8 +85,8 @@
 {%   set metering_worker_index=number_of_workers %}
 {%   set number_of_workers=number_of_workers+1 %}
 {% endif %}
-{% if dbus_report_deployment_logs_enabled %}
-{%   set report_deployment_logs_worker_index=number_of_workers %}
+{% if dbus_cluster_logs_collection_enabled %}
+{%   set cluster_logs_collection_worker_index=number_of_workers %}
 {%   set number_of_workers=number_of_workers+1 %}
 {% endif %}
 
@@ -116,8 +116,8 @@
     "azureContainer": azure_container,
     "azureInstanceMsi": azure_storage_instance_msi,
     "azureStorageAccessKey": azure_storage_access_key,
-    "dbusReportDeploymentLogs": dbus_report_deployment_logs_enabled,
-    "dbusReportDeploymentLogsDisableStop": dbus_report_deployment_logs_disable_stop,
+    "dbusClusterLogsCollection": dbus_cluster_logs_collection_enabled,
+    "dbusClusterLogsCollectionDisableStop": dbus_cluster_logs_collection_disable_stop,
     "dbusMeteringEnabled": dbus_metering_enabled,
     "clouderaPublicGemRepo": cloudera_public_gem_repo,
     "clouderaAzurePluginVersion": cloudera_azure_plugin_version,
@@ -126,7 +126,7 @@
     "numberOfWorkers": number_of_workers,
     "cloudStorageWorkerIndex": cloud_storage_worker_index,
     "meteringWorkerIndex": metering_worker_index,
-    "reportDeploymentLogsWorkerIndex": report_deployment_logs_worker_index,
+    "clusterLogsCollectionWorkerIndex": cluster_logs_collection_worker_index,
     "region": region,
     "platform": platform
 }) %}

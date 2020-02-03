@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.common.api.type.FeatureSetting;
 
 public class AltusMachineUserServiceTest {
 
@@ -51,10 +50,8 @@ public class AltusMachineUserServiceTest {
         cluster.setId(1L);
         stack.setCluster(cluster);
         telemetry = new Telemetry();
-        FeatureSetting reportDeploymentLogs = new FeatureSetting();
-        reportDeploymentLogs.setEnabled(true);
         Features features = new Features();
-        features.setReportDeploymentLogs(reportDeploymentLogs);
+        features.addClusterLogsCollection(true);
         telemetry.setFeatures(features);
         underTest = new AltusMachineUserService(altusIAMService);
     }

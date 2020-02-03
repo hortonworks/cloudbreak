@@ -48,14 +48,14 @@ public class TelemetryApiConverterTest {
         telemetryRequest.setLogging(loggingRequest);
         telemetryRequest.setWorkloadAnalytics(new WorkloadAnalyticsRequest());
         FeaturesRequest fr = new FeaturesRequest();
-        fr.addReportDeploymentLogs(true);
+        fr.addClusterLogsCollection(true);
         fr.addWorkloadAnalytics(true);
         telemetryRequest.setFeatures(fr);
         // WHEN
         EnvironmentTelemetry result = underTest.convert(telemetryRequest);
         // THEN
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
-        assertTrue(result.getFeatures().getReportDeploymentLogs().isEnabled());
+        assertTrue(result.getFeatures().getClusterLogsCollection().isEnabled());
         assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
         assertTrue(result.getFeatures().getUseSharedAltusCredential().isEnabled());
     }
@@ -148,7 +148,7 @@ public class TelemetryApiConverterTest {
         s3Params.setInstanceProfile(INSTANCE_PROFILE_VALUE);
         logging.setS3(s3Params);
         EnvironmentFeatures features = new EnvironmentFeatures();
-        features.addReportDeploymentLogs(false);
+        features.addClusterLogsCollection(false);
         EnvironmentTelemetry telemetry = new EnvironmentTelemetry();
         telemetry.setLogging(logging);
         telemetry.setFeatures(features);
@@ -156,7 +156,7 @@ public class TelemetryApiConverterTest {
         TelemetryRequest result = underTest.convertToRequest(telemetry);
         // THEN
         assertNotNull(result.getFeatures());
-        assertFalse(result.getFeatures().getReportDeploymentLogs().isEnabled());
+        assertFalse(result.getFeatures().getClusterLogsCollection().isEnabled());
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
     }
 

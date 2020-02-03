@@ -67,7 +67,7 @@ public class TelemetryConverterTest {
         logging.setS3(new S3CloudStorageV1Parameters());
         WorkloadAnalyticsRequest workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
         FeaturesRequest featuresRequest = new FeaturesRequest();
-        featuresRequest.addReportDeploymentLogs(false);
+        featuresRequest.addClusterLogsCollection(false);
         telemetryRequest.setLogging(logging);
         telemetryRequest.setFeatures(featuresRequest);
         telemetryRequest.setWorkloadAnalytics(workloadAnalyticsRequest);
@@ -75,7 +75,7 @@ public class TelemetryConverterTest {
         Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD);
         // THEN
         assertNotNull(result.getFeatures().getWorkloadAnalytics());
-        assertFalse(result.getFeatures().getReportDeploymentLogs().isEnabled());
+        assertFalse(result.getFeatures().getClusterLogsCollection().isEnabled());
         assertTrue(result.getFeatures().getMetering().isEnabled());
         assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
         assertTrue(result.getFeatures().getUseSharedAltusCredential().isEnabled());
@@ -84,7 +84,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertToResponseWithEnabledReportDeploymentLogFeatures() {
+    public void testConvertToResponseWithEnabledClusterLogsCollectionFeatures() {
         // GIVEN
         Logging logging = new Logging();
         S3CloudStorageV1Parameters s3Params = new S3CloudStorageV1Parameters();
@@ -94,13 +94,13 @@ public class TelemetryConverterTest {
         telemetry.setLogging(logging);
         Features features = new Features();
         features.setWorkloadAnalytics(null);
-        features.addReportDeploymentLogs(true);
+        features.addClusterLogsCollection(true);
         telemetry.setFeatures(features);
         // WHEN
         TelemetryResponse result = underTest.convert(telemetry);
         // THEN
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
-        assertTrue(result.getFeatures().getReportDeploymentLogs().isEnabled());
+        assertTrue(result.getFeatures().getClusterLogsCollection().isEnabled());
         assertNull(result.getFeatures().getWorkloadAnalytics());
         assertNull(result.getFeatures().getMetering());
     }
@@ -125,7 +125,7 @@ public class TelemetryConverterTest {
         // WHEN
         Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD);
         // THEN
-        assertFalse(result.getFeatures().getReportDeploymentLogs().isEnabled());
+        assertFalse(result.getFeatures().getClusterLogsCollection().isEnabled());
         assertTrue(result.getFeatures().getMetering().isEnabled());
     }
 
@@ -134,12 +134,12 @@ public class TelemetryConverterTest {
         // GIVEN
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         FeaturesRequest features = new FeaturesRequest();
-        features.addReportDeploymentLogs(true);
+        features.addClusterLogsCollection(true);
         telemetryRequest.setFeatures(features);
         // WHEN
         Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD);
         // THEN
-        assertTrue(result.getFeatures().getReportDeploymentLogs().isEnabled());
+        assertTrue(result.getFeatures().getClusterLogsCollection().isEnabled());
         assertTrue(result.getFeatures().getMetering().isEnabled());
     }
 
@@ -150,7 +150,7 @@ public class TelemetryConverterTest {
         // WHEN
         Telemetry result = underTest.convert(telemetryRequest, StackType.DATALAKE);
         // THEN
-        assertFalse(result.getFeatures().getReportDeploymentLogs().isEnabled());
+        assertFalse(result.getFeatures().getClusterLogsCollection().isEnabled());
         assertNull(result.getFeatures().getMetering());
     }
 
@@ -252,29 +252,29 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertFromEnvAndSdxResponseWithReportDeploymentLogsEnabled() {
+    public void testConvertFromEnvAndSdxResponseWithClusterLogsCollectionEnabled() {
         // GIVEN
         TelemetryResponse response = new TelemetryResponse();
         FeaturesResponse featuresResponse = new FeaturesResponse();
-        featuresResponse.addReportDeploymentLogs(true);
+        featuresResponse.addClusterLogsCollection(true);
         response.setFeatures(featuresResponse);
         // WHEN
         TelemetryRequest result = underTest.convert(response, null);
         // THEN
-        assertTrue(result.getFeatures().getReportDeploymentLogs().isEnabled());
+        assertTrue(result.getFeatures().getClusterLogsCollection().isEnabled());
     }
 
     @Test
-    public void testConvertFromEnvAndSdxResponseWithReportDeploymentLogsDisabled() {
+    public void testConvertFromEnvAndSdxResponseWithClusterLogsCollectionDisabled() {
         // GIVEN
         TelemetryResponse response = new TelemetryResponse();
         FeaturesResponse featuresResponse = new FeaturesResponse();
-        featuresResponse.addReportDeploymentLogs(false);
+        featuresResponse.addClusterLogsCollection(false);
         response.setFeatures(featuresResponse);
         // WHEN
         TelemetryRequest result = underTest.convert(response, null);
         // THEN
-        assertFalse(result.getFeatures().getReportDeploymentLogs().isEnabled());
+        assertFalse(result.getFeatures().getClusterLogsCollection().isEnabled());
     }
 
     @Test
@@ -286,7 +286,7 @@ public class TelemetryConverterTest {
         logging.setS3(new S3CloudStorageV1Parameters());
         telemetry.setLogging(logging);
         Features features = new Features();
-        features.addReportDeploymentLogs(true);
+        features.addClusterLogsCollection(true);
         telemetry.setFeatures(features);
         WorkloadAnalytics workloadAnalytics = new WorkloadAnalytics();
         Map<String, Object> waAttributes = new HashMap<>();
@@ -302,7 +302,7 @@ public class TelemetryConverterTest {
         assertNotNull(result.getLogging().getS3());
         assertEquals("myValue", result.getFluentAttributes().get("myKey"));
         assertEquals("myWAValue", result.getWorkloadAnalytics().getAttributes().get("myWAKey"));
-        assertTrue(result.getFeatures().getReportDeploymentLogs().isEnabled());
+        assertTrue(result.getFeatures().getClusterLogsCollection().isEnabled());
     }
 
     @Test

@@ -64,7 +64,7 @@ public class TelemetryTestDto extends AbstractCloudbreakTestDto<TelemetryRequest
 
     public TelemetryTestDto withReportClusterLogs() {
         FeaturesRequest featuresRequest = new FeaturesRequest();
-        featuresRequest.addReportDeploymentLogs(true);
+        featuresRequest.addClusterLogsCollection(true);
         getRequest().setFeatures(featuresRequest);
         return this;
     }

@@ -24,12 +24,12 @@ import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParame
 @Component
 public class TelemetryApiConverter {
 
-    private final boolean reportDeploymentLogs;
+    private final boolean clusterLogsCollection;
 
     private final boolean useSharedAltusCredential;
 
     public TelemetryApiConverter(TelemetryConfiguration configuration) {
-        this.reportDeploymentLogs = configuration.isReportDeploymentLogs();
+        this.clusterLogsCollection = configuration.isClusterLogsCollection();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
     }
 
@@ -84,7 +84,7 @@ public class TelemetryApiConverter {
         FeaturesRequest featuresRequest = null;
         if (features != null) {
             featuresRequest = new FeaturesRequest();
-            featuresRequest.setReportDeploymentLogs(features.getReportDeploymentLogs());
+            featuresRequest.setClusterLogsCollection(features.getClusterLogsCollection());
         }
         return featuresRequest;
     }
@@ -93,7 +93,7 @@ public class TelemetryApiConverter {
         FeaturesResponse featuresResponse = null;
         if (features != null) {
             featuresResponse = new FeaturesResponse();
-            featuresResponse.setReportDeploymentLogs(features.getReportDeploymentLogs());
+            featuresResponse.setClusterLogsCollection(features.getClusterLogsCollection());
             featuresResponse.setWorkloadAnalytics(features.getWorkloadAnalytics());
             featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
         }
@@ -119,11 +119,11 @@ public class TelemetryApiConverter {
             if (useSharedAltusCredential) {
                 features.addUseSharedAltusredential(true);
             }
-            if (reportDeploymentLogs) {
-                if (featuresRequest.getReportDeploymentLogs() != null) {
-                    features.setReportDeploymentLogs(featuresRequest.getReportDeploymentLogs());
+            if (clusterLogsCollection) {
+                if (featuresRequest.getClusterLogsCollection() != null) {
+                    features.setClusterLogsCollection(featuresRequest.getClusterLogsCollection());
                 } else {
-                    features.addReportDeploymentLogs(false);
+                    features.addClusterLogsCollection(false);
                 }
             }
             if (featuresRequest.getWorkloadAnalytics() != null) {

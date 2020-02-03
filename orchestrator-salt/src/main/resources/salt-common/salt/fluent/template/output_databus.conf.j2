@@ -1,7 +1,7 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {%- from 'databus/settings.sls' import databus with context %}
-{%- if databus.valid and fluent.dbusReportDeploymentLogs %}
-<worker {{ fluent.reportDeploymentLogsWorkerIndex }}>
+{%- if databus.valid and fluent.dbusClusterLogsCollection %}
+<worker {{ fluent.clusterLogsCollectionWorkerIndex }}>
 <match logs.**>
   @type copy
   <store ignore_error>
@@ -27,7 +27,7 @@
   </store>
 </match>
 </worker>
-{% elif fluent.dbusReportDeploymentLogs %}
+{% elif fluent.dbusClusterLogsCollection %}
 # DBUS settings are not valid - check dbus credentials file
 {% else %}
 # DBUS report bundle is disabled
