@@ -456,4 +456,84 @@ class GatewayPublicEndpointManagementServiceTest {
                 .createDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
                         eq(List.of(gatewayIp)));
     }
+
+    @Test
+    void testUpdateDnsEntryShouldCallDnsManagementServiceWithGatewayInstanceShortHostnameAsEndpointName() {
+        String gatewayIp = "10.191.192.193";
+        Cluster cluster = TestUtil.cluster();
+        Stack stack = cluster.getStack();
+        stack.setCluster(cluster);
+        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        String endpointName = primaryGatewayInstance.getShortHostname();
+        String envName = "anEnvName";
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
+                .builder()
+                .withName(envName)
+                .build();
+        when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
+        when(dnsManagementService.createDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
+                eq(List.of(gatewayIp)))).thenReturn(Boolean.TRUE);
+        String accountWorkloadSubdomain = "aWorkloadSubdomain";
+        UserManagementProto.Account umsAccount = UserManagementProto.Account.newBuilder()
+                .setWorkloadSubdomain(accountWorkloadSubdomain)
+                .build();
+        when(grpcUmsClient.getAccountDetails(USER_CRN, "123", Optional.empty())).thenReturn(umsAccount);
+        String fqdn = endpointName + ".anenvname.xcu2-8y8x.dev.cldr.work";
+        when(domainNameProvider.getFullyQualifiedEndpointName(endpointName, envName, accountWorkloadSubdomain)).thenReturn(fqdn);
+
+        String result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateDnsEntry(stack, gatewayIp));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(fqdn, result);
+        verify(dnsManagementService, times(1))
+                .createDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
+                        eq(List.of(gatewayIp)));
+    }
+
+    @Test
+    void testDeleteDnsEntryShouldCallDnsManagementServiceWithGatewayInstanceShortHostnameAsEndpointNameWhenEnvNameIsSpecified() {
+        Cluster cluster = TestUtil.cluster();
+        Stack stack = cluster.getStack();
+        stack.setCluster(cluster);
+        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        String endpointName = primaryGatewayInstance.getShortHostname();
+        String gatewayIp = primaryGatewayInstance.getPublicIpWrapper();
+        String envName = "anEnvName";
+        when(dnsManagementService.deleteDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
+                eq(List.of(gatewayIp)))).thenReturn(Boolean.TRUE);
+
+        String result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.deleteDnsEntry(stack, envName));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(gatewayIp, result);
+        verify(dnsManagementService, times(1))
+                .deleteDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
+                        eq(List.of(gatewayIp)));
+    }
+
+    @Test
+    void testDeleteDnsEntryShouldCallDnsManagementServiceWithGatewayInstanceShortHostnameAsEndpointNameWhenEnvNameIsNotSpecified() {
+        Cluster cluster = TestUtil.cluster();
+        Stack stack = cluster.getStack();
+        stack.setCluster(cluster);
+        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        String endpointName = primaryGatewayInstance.getShortHostname();
+        String gatewayIp = primaryGatewayInstance.getPublicIpWrapper();
+        String envName = "anEnvName";
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
+                .builder()
+                .withName(envName)
+                .build();
+        when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
+        when(dnsManagementService.deleteDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
+                eq(List.of(gatewayIp)))).thenReturn(Boolean.TRUE);
+
+        String result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.deleteDnsEntry(stack, null));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(gatewayIp, result);
+        verify(dnsManagementService, times(1))
+                .deleteDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
+                        eq(List.of(gatewayIp)));
+    }
 }

@@ -74,7 +74,8 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
                 gatewayIp = gateway.get().getPublicIpWrapper();
             }
         }
-        String endpointName = stack.getPrimaryGatewayInstance().getShortHostname();
+        String endpointName = getEndpointNameForStack(stack);
+        LOGGER.info("Creating DNS entry with endpoint name: '{}', environment name: '{}' and gateway IP: '{}'", endpointName, environment.getName(), gatewayIp);
         boolean success = getDnsManagementService().createDnsEntryWithIp(userCrn, accountId, endpointName, environment.getName(), false, List.of(gatewayIp));
         if (success) {
             try {
@@ -107,7 +108,9 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         if (ip == null) {
             return null;
         }
-        getDnsManagementService().deleteDnsEntryWithIp(actorCrn, accountId, stack.getName(), environmentName, false, List.of(ip));
+        String endpointName = getEndpointNameForStack(stack);
+        LOGGER.info("Deleting DNS entry with endpoint name: '{}', environment name: '{}' and gateway IP: '{}'", endpointName, environmentName, ip);
+        getDnsManagementService().deleteDnsEntryWithIp(actorCrn, accountId, endpointName, environmentName, false, List.of(ip));
         return ip;
     }
 
@@ -128,7 +131,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         SecurityConfig securityConfig = stack.getSecurityConfig();
         try {
             KeyPair keyPair = getKeyPairForStack(stack);
-            String endpointName = stack.getPrimaryGatewayInstance().getShortHostname();
+            String endpointName = getEndpointNameForStack(stack);
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
             String environmentName = environment.getName();
             String workloadSubdomain = getWorkloadSubdomain(userCrn);
@@ -171,5 +174,9 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             clusterService.save(cluster);
             LOGGER.info("The '{}' domain name has been generated, registered through PEM service and saved for the cluster.", fqdn);
         }
+    }
+
+    private String getEndpointNameForStack(Stack stack) {
+        return stack.getPrimaryGatewayInstance().getShortHostname();
     }
 }

@@ -700,7 +700,7 @@ public class TestUtil {
     }
 
     public static Gateway gatewayEnabledWithExposedKnoxServices(String... exposedKnoxServices) {
-        Gateway gateway =  gatewayEnabled();
+        Gateway gateway = gatewayEnabled();
         GatewayTopology gatewayTopology = new GatewayTopology();
         gatewayTopology.setExposedServices(new Json(exposedKnoxServices));
         gateway.setTopologies(Sets.newHashSet(gatewayTopology));
