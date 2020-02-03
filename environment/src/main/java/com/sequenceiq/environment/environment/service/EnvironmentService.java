@@ -34,7 +34,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
-import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.v1.EnvironmentDtoToCreateAWSEnvironmentRequestConverter;
 import com.sequenceiq.environment.environment.v1.EnvironmentRequestToCreateAWSEnvironmentRequestConverter;
@@ -59,10 +58,6 @@ public class EnvironmentService implements ResourceIdProvider {
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
-    private final EnvironmentResourceDeletionService environmentResourceDeletionService;
-
-    private final EnvironmentReactorFlowManager reactorFlowManager;
-
     private final EnvironmentRequestToCreateAWSEnvironmentRequestConverter environmentRequestToCreateAWSEnvironmentRequestConverter;
 
     private final EnvironmentDtoToCreateAWSEnvironmentRequestConverter environmentDtoToCreateAWSEnvironmentRequestConverter;
@@ -72,16 +67,12 @@ public class EnvironmentService implements ResourceIdProvider {
             EnvironmentRepository environmentRepository,
             PlatformParameterService platformParameterService,
             EnvironmentDtoConverter environmentDtoConverter,
-            EnvironmentResourceDeletionService environmentResourceDeletionService,
-            EnvironmentReactorFlowManager reactorFlowManager,
             EnvironmentRequestToCreateAWSEnvironmentRequestConverter environmentRequestToCreateAWSEnvironmentRequestConverter,
             EnvironmentDtoToCreateAWSEnvironmentRequestConverter environmentDtoToCreateAWSEnvironmentRequestConverter) {
         this.validatorService = validatorService;
         this.environmentRepository = environmentRepository;
         this.platformParameterService = platformParameterService;
         this.environmentDtoConverter = environmentDtoConverter;
-        this.environmentResourceDeletionService = environmentResourceDeletionService;
-        this.reactorFlowManager = reactorFlowManager;
         this.environmentRequestToCreateAWSEnvironmentRequestConverter = environmentRequestToCreateAWSEnvironmentRequestConverter;
         this.environmentDtoToCreateAWSEnvironmentRequestConverter = environmentDtoToCreateAWSEnvironmentRequestConverter;
     }

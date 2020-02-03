@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud;
 
+import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyDescribeRequest;
 import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyRegisterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyUnregisterRequest;
 
@@ -12,4 +13,5 @@ public interface PublicKeyConnector extends CloudPlatformAware {
 
     void unregister(PublicKeyUnregisterRequest request);
 
+    boolean exists(PublicKeyDescribeRequest request);
 }
