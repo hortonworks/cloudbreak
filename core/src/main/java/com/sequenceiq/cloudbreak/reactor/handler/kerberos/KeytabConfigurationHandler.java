@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationF
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
@@ -63,6 +64,9 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
 
     @Inject
     private KeytabProvider keytabProvider;
+
+    @Inject
+    private EnvironmentConfigProvider environmentConfigProvider;
 
     @Override
     public String selector() {
