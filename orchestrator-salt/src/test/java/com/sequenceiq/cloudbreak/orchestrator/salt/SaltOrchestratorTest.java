@@ -5,6 +5,9 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -26,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
@@ -52,15 +56,18 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.grain.GrainUploader;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltCommandTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUpload;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.MineUpdateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncAllRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltCommandRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -85,6 +92,15 @@ public class SaltOrchestratorTest {
     @Mock
     private HostDiscoveryService hostDiscoveryService;
 
+    @Mock
+    private SaltRunner saltRunner;
+
+    @Mock
+    private SaltCommandRunner saltCommandRunner;
+
+    @Mock
+    private GrainUploader grainUploader;
+
     @InjectMocks
     private SaltOrchestrator saltOrchestrator;
 
@@ -102,6 +118,10 @@ public class SaltOrchestratorTest {
         when(hostDiscoveryService.determineDomain("test", "test", false)).thenReturn(".example.com");
         exitCriteria = mock(ExitCriteria.class);
         exitCriteriaModel = mock(ExitCriteriaModel.class);
+        Callable<Boolean> callable = mock(Callable.class);
+        when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(callable);
+        when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), anyInt(), anyBoolean()))
+                .thenReturn(callable);
     }
 
     @Test
@@ -116,11 +136,8 @@ public class SaltOrchestratorTest {
 
         saltOrchestrator.bootstrap(Collections.singletonList(gatewayConfig), targets, bootstrapParams, exitCriteriaModel);
 
-        verifyNew(OrchestratorBootstrapRunner.class, times(1))
-                .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
+        verify(saltRunner, times(4)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         // salt.zip, master_sign.pem, master_sign.pub
-        verifyNew(OrchestratorBootstrapRunner.class, times(3))
-                .withArguments(any(SaltUpload.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
         verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(Collections.singletonList(gatewayConfig)), eq(targets),
                 eq(bootstrapParams));
     }
@@ -136,8 +153,7 @@ public class SaltOrchestratorTest {
         saltOrchestrator.init(exitCriteria);
         saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
 
-        verifyNew(OrchestratorBootstrapRunner.class, times(1))
-                .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
+        verify(saltRunner, times(2)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector),
                 eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
     }
@@ -184,25 +200,19 @@ public class SaltOrchestratorTest {
         saltOrchestrator.initServiceRun(Collections.singletonList(gatewayConfig), targets, saltConfig, exitCriteriaModel);
         saltOrchestrator.runService(Collections.singletonList(gatewayConfig), targets, saltConfig, exitCriteriaModel);
 
-        // verify pillar save
-        verifyNew(OrchestratorBootstrapRunner.class, times(1))
-                .withArguments(eq(pillarSave), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
-
         Set<String> allNodes = targets.stream().map(Node::getHostname).collect(Collectors.toSet());
-        // verify two OrchestratorBootstrapRunner call with rolechecker command tracker
-        verifyNew(OrchestratorBootstrapRunner.class, times(2))
-                .withArguments(eq(roleCheckerSaltCommandTracker), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
 
         // verify syncgrains command
         verifyNew(SyncAllRunner.class, times(1)).withArguments(eq(allNodes), eq(targets));
-        verifyNew(SaltCommandTracker.class, times(1)).withArguments(eq(saltConnector), eq(syncAllRunner));
-        verifyNew(OrchestratorBootstrapRunner.class, times(1))
-                .withArguments(eq(syncGrainsCheckerSaltCommandTracker), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
 
         // verify run new service
         verifyNew(HighStateRunner.class, atLeastOnce()).withArguments(eq(allNodes),
                 eq(targets));
         verifyNew(SaltJobIdTracker.class, atLeastOnce()).withArguments(eq(saltConnector), eq(highStateRunner), eq(true));
+        verify(saltCommandRunner, times(4)).runSaltCommand(any(SaltConnector.class), any(BaseSaltJobRunner.class),
+                any(ExitCriteriaModel.class), any(ExitCriteria.class));
+        verify(grainUploader, times(1)).uploadGrains(anySet(), anyList(), any(ExitCriteriaModel.class), any(SaltConnector.class),
+                any(ExitCriteria.class));
     }
 
     @Test
