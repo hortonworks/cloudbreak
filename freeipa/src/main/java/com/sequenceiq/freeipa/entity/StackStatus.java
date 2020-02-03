@@ -89,6 +89,10 @@ public class StackStatus {
         return statusString;
     }
 
+    public void setStatusString(String statusString) {
+        this.statusString = statusString;
+    }
+
     public void setStatusReason(String statusReason) {
         this.statusReason = statusReason;
     }
