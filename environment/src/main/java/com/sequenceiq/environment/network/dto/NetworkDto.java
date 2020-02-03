@@ -31,7 +31,7 @@ public class NetworkDto {
 
     private final String networkCidr;
 
-    private final Map<String, CloudSubnet> subnetMetas;
+    private Map<String, CloudSubnet> subnetMetas;
 
     private final PrivateSubnetCreation privateSubnetCreation;
 
@@ -105,6 +105,10 @@ public class NetworkDto {
 
     public Map<String, CloudSubnet> getSubnetMetas() {
         return subnetMetas;
+    }
+
+    public void setSubnetMetas(Map<String, CloudSubnet> subnetMetas) {
+        this.subnetMetas = subnetMetas;
     }
 
     public String getName() {

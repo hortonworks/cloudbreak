@@ -22,16 +22,14 @@ public class NetworkCreationValidator {
 
     private final Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform;
 
-    public NetworkCreationValidator(
-            Map<CloudPlatform, EnvironmentNetworkValidator> envNetworkValidators
-    ) {
-        this.environmentNetworkValidatorsByCloudPlatform = envNetworkValidators;
+    public NetworkCreationValidator(Map<CloudPlatform, EnvironmentNetworkValidator> envNetworkValidators) {
+        environmentNetworkValidatorsByCloudPlatform = envNetworkValidators;
     }
 
-    public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network, Map<String, CloudSubnet> subnetMetas) {
+    public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         resultBuilder.prefix("Cannot create environment");
-        validateNetwork(environment, network, subnetMetas, resultBuilder);
+        validateNetwork(environment, network, resultBuilder);
         validateNetworkIdAndCidr(environment, network, resultBuilder);
         return resultBuilder;
     }
@@ -43,12 +41,22 @@ public class NetworkCreationValidator {
         return resultBuilder;
     }
 
+    private void validateNetwork(Environment environment, NetworkDto network, ValidationResultBuilder resultBuilder) {
+        if (network != null) {
+            EnvironmentNetworkValidator environmentNetworkValidator =
+                    environmentNetworkValidatorsByCloudPlatform.get(CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase()));
+            if (environmentNetworkValidator != null) {
+                environmentNetworkValidator.validateDuringRequest(network, resultBuilder);
+            }
+        }
+    }
+
     private void validateNetwork(Environment environment, NetworkDto network, Map<String, CloudSubnet> subnetMetas, ValidationResultBuilder resultBuilder) {
         if (network != null) {
             EnvironmentNetworkValidator environmentNetworkValidator =
                     environmentNetworkValidatorsByCloudPlatform.get(CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase()));
             if (environmentNetworkValidator != null) {
-                environmentNetworkValidator.validateDuringRequest(network, subnetMetas, resultBuilder);
+                environmentNetworkValidator.validateDuringRequest(network, resultBuilder);
             }
         }
     }
@@ -61,4 +69,5 @@ public class NetworkCreationValidator {
             resultBuilder.error(message);
         }
     }
+
 }
