@@ -68,6 +68,7 @@
 {% set cloudera_azure_plugin_version = '1.0.1' %}
 {% set cloudera_azure_gen2_plugin_version = '0.2.4' %}
 {% set cloudera_databus_plugin_version = '1.0.3' %}
+{% set redaction_plugin_version = '0.1.1' %}
 {% set platform = salt['pillar.get']('fluent:platform') %}
 
 {% set service_path_log_suffix = '%Y-%m-%d/%H/\${tag[1]}-#{Socket.gethostname}-%M' %}
@@ -123,6 +124,7 @@
     "clouderaAzurePluginVersion": cloudera_azure_plugin_version,
     "clouderaAzureGen2PluginVersion": cloudera_azure_gen2_plugin_version,
     "clouderaDatabusPluginVersion": cloudera_databus_plugin_version,
+    "redactionPluginVersion": redaction_plugin_version,
     "numberOfWorkers": number_of_workers,
     "cloudStorageWorkerIndex": cloud_storage_worker_index,
     "meteringWorkerIndex": metering_worker_index,

@@ -45,8 +45,9 @@ function main() {
   check_and_install_plugin "fluent-plugin-azurestorage" "true" "{{ fluent.clouderaAzurePluginVersion }}"
   check_and_install_plugin "fluent-plugin-azurestorage-gen2" "false" "{{ fluent.clouderaAzureGen2PluginVersion }}"
   {% endif %}
-  check_and_install_plugin "fluent-plugin-databus" "true" "{{ fluent.clouderaDatabusPluginVersion }}"
+  check_and_install_plugin "fluent-plugin-redaction" "false" "{{ fluent.redactionPluginVersion }}"
   check_and_install_plugin "fluent-plugin-detect-exceptions" "false" ""
+  check_and_install_plugin "fluent-plugin-databus" "true" "{{ fluent.clouderaDatabusPluginVersion }}"
 }
 
 main ${1+"$@"}
