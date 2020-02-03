@@ -63,6 +63,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private TagResponse tags;
 
+        private String parentEnvironmentCrn;
+
         private Builder() {
         }
 
@@ -156,6 +158,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withParentEnvironmentCrn(String parentEnvironmentCrn) {
+            this.parentEnvironmentCrn = parentEnvironmentCrn;
+            return this;
+        }
+
         public SimpleEnvironmentResponse build() {
             SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();
             simpleEnvironmentResponse.setCrn(crn);
@@ -176,6 +183,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setAws(aws);
             simpleEnvironmentResponse.setAdminGroupName(adminGroupName);
             simpleEnvironmentResponse.setTags(tags);
+            simpleEnvironmentResponse.setParentEnvironmentCrn(parentEnvironmentCrn);
             return simpleEnvironmentResponse;
         }
     }
