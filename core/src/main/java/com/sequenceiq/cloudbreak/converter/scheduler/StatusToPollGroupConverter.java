@@ -32,6 +32,11 @@ public class StatusToPollGroupConverter extends AbstractConversionServiceAwareCo
             case PRE_DELETE_IN_PROGRESS:
             case DELETE_FAILED:
             case DELETE_IN_PROGRESS:
+            case EXTERNAL_DATABASE_CREATION_FAILED:
+            case EXTERNAL_DATABASE_CREATION_IN_PROGRESS:
+            case EXTERNAL_DATABASE_DELETION_FAILED:
+            case EXTERNAL_DATABASE_DELETION_FINISHED:
+            case EXTERNAL_DATABASE_DELETION_IN_PROGRESS:
                 return PollGroup.POLLABLE;
             case DELETE_COMPLETED:
                 return PollGroup.CANCELLED;

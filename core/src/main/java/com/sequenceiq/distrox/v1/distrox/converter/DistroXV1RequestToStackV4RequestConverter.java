@@ -70,6 +70,9 @@ public class DistroXV1RequestToStackV4RequestConverter {
     @Inject
     private SdxClientService sdxClientService;
 
+    @Inject
+    private DistroXDatabaseRequestToStackDatabaseRequestConverter databaseRequestConverter;
+
     public StackV4Request convert(DistroXV1Request source) {
         DetailedEnvironmentResponse environment = Optional.ofNullable(environmentClientService.getByName(source.getEnvironmentName()))
                 .orElseThrow(() -> new BadRequestException("No environment name provided hence unable to obtain some important data"));
@@ -98,6 +101,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setTimeToLive(source.getTimeToLive());
         request.setTelemetry(getTelemetryRequest(source, environment, sdxClusterResponse));
         request.setGatewayPort(source.getGatewayPort());
+        request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
         return request;
     }
 
@@ -132,6 +136,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setSharedService(getIfNotNull(sdxClusterResponse, sdx -> sdxConverter.getSharedServiceV4Request(sdx)));
         request.setTimeToLive(source.getTimeToLive());
         request.setTelemetry(getTelemetryRequest(source, environment, sdxClusterResponse));
+        request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
         return request;
     }
 
@@ -201,6 +206,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSdx(getIfNotNull(source.getSharedService(), sdxConverter::getSdx));
         request.setGatewayPort(source.getGatewayPort());
+        request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
         return request;
     }
 

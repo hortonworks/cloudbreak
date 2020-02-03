@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.CustomDomainSettingsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.hardware.HardwareInfoGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
@@ -125,6 +126,9 @@ public class StackV4Response extends StackV4Base {
 
     @ApiModelProperty(StackModelDescription.FLOW_ID)
     private FlowIdentifier flowIdentifier;
+
+    @ApiModelProperty(StackModelDescription.EXTERNAL_DATABASE)
+    private DatabaseResponse externalDatabase;
 
     public Long getId() {
         return id;
@@ -356,5 +360,13 @@ public class StackV4Response extends StackV4Base {
 
     public void setFlowIdentifier(FlowIdentifier flowIdentifier) {
         this.flowIdentifier = flowIdentifier;
+    }
+
+    public DatabaseResponse getExternalDatabase() {
+        return externalDatabase;
+    }
+
+    public void setExternalDatabase(DatabaseResponse externalDatabase) {
+        this.externalDatabase = externalDatabase;
     }
 }

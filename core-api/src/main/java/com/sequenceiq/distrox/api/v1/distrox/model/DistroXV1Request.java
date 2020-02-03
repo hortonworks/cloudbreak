@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.image.DistroXImageV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
@@ -36,6 +37,9 @@ public class DistroXV1Request extends DistroXV1Base {
     private DistroXClusterV1Request cluster;
 
     private SdxV1Request sdx;
+
+    @Valid
+    private DistroXDatabaseRequest externalDatabase;
 
     private TagsV1Request tags;
 
@@ -98,6 +102,14 @@ public class DistroXV1Request extends DistroXV1Base {
 
     public void setSdx(SdxV1Request sdx) {
         this.sdx = sdx;
+    }
+
+    public DistroXDatabaseRequest getExternalDatabase() {
+        return externalDatabase;
+    }
+
+    public void setExternalDatabase(DistroXDatabaseRequest externalDatabase) {
+        this.externalDatabase = externalDatabase;
     }
 
     public TagsV1Request getTags() {

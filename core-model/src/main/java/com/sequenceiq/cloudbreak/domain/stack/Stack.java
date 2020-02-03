@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -194,6 +195,9 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     private boolean clusterProxyRegistered;
 
     private String minaSshdServiceId;
+
+    @Enumerated(EnumType.STRING)
+    private DatabaseAvailabilityType externalDatabaseCreationType;
 
     public String getResourceCrn() {
         return resourceCrn;
@@ -756,5 +760,13 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setMinaSshdServiceId(String minaSshdServiceId) {
         this.minaSshdServiceId = minaSshdServiceId;
+    }
+
+    public DatabaseAvailabilityType getExternalDatabaseCreationType() {
+        return externalDatabaseCreationType;
+    }
+
+    public void setExternalDatabaseCreationType(DatabaseAvailabilityType externalDatabaseCreationType) {
+        this.externalDatabaseCreationType = externalDatabaseCreationType;
     }
 }

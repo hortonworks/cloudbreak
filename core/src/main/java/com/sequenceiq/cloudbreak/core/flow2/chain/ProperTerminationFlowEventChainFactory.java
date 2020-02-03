@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
+import static com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationEvent.START_EXTERNAL_DATABASE_TERMINATION_EVENT;
+
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -24,6 +26,7 @@ public class ProperTerminationFlowEventChainFactory implements FlowEventChainFac
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new StackEvent(ClusterTerminationEvent.PROPER_TERMINATION_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new TerminationEvent(StackTerminationEvent.TERMINATION_EVENT.event(), event.getResourceId(), event.getForced()));
+        flowEventChain.add(new TerminationEvent(START_EXTERNAL_DATABASE_TERMINATION_EVENT.event(), event.getResourceId(), event.getForced(), event.accepted()));
         return flowEventChain;
     }
 }
