@@ -3,6 +3,10 @@ package com.sequenceiq.environment.environment.validation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,13 +14,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
+import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
 import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentLogStorageLocationValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentRegionValidator;
 import com.sequenceiq.environment.parameters.validation.validators.AwsParameterProcessor;
@@ -32,6 +40,9 @@ class EnvironmentValidatorServiceTest {
 
     @Mock
     private AwsParameterProcessor awsParameterProcessor;
+
+    @Mock
+    private EnvironmentResourceService environmentResourceService;
 
     @InjectMocks
     private EnvironmentValidatorService underTest;
@@ -173,5 +184,71 @@ class EnvironmentValidatorServiceTest {
 
         assertTrue(validationResult.hasError());
         assertEquals("1. The CIDR could not be updated in the environment", validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void testValidateAuthenticationModificationWhenNotAwsAndHasPublicKeyId() {
+        Environment environment = new Environment();
+        environment.setCloudPlatform("AZURE");
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withAuthentication(AuthenticationDto.builder()
+                        .withPublicKeyId("pub-key-id")
+                        .build())
+                .build();
+
+        when(environmentResourceService.getPublicKeyConnector(environment.getCloudPlatform())).thenReturn(Optional.empty());
+
+        ValidationResult validationResult = underTest.validateAuthenticationModification(environmentEditDto, environment);
+        assertEquals("1. The change of publicKeyId is not supported on AZURE", validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void testValidateAuthenticationModificationWhenHasPublicKeyAndPublicKeyIdAsWell() {
+        Environment environment = new Environment();
+        environment.setCloudPlatform("AWS");
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withAuthentication(AuthenticationDto.builder()
+                        .withPublicKeyId("pub-key-id")
+                        .withPublicKey("ssh-key")
+                        .build())
+                .build();
+        PublicKeyConnector connector = mock(PublicKeyConnector.class);
+
+        when(environmentResourceService.isPublicKeyIdExists(environment, "pub-key-id")).thenReturn(true);
+        when(environmentResourceService.getPublicKeyConnector(environment.getCloudPlatform())).thenReturn(Optional.of(connector));
+
+        ValidationResult validationResult = underTest.validateAuthenticationModification(environmentEditDto, environment);
+        assertEquals("1. You should define either publicKey or publicKeyId only", validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void testValidateAuthenticationModificationWhenPublicKeyAndPublicKeyIdIsEmptyAsWell() {
+        Environment environment = new Environment();
+        environment.setCloudPlatform("AWS");
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withAuthentication(AuthenticationDto.builder().build())
+                .build();
+
+        ValidationResult validationResult = underTest.validateAuthenticationModification(environmentEditDto, environment);
+        assertEquals("1. You should define publicKey or publicKeyId", validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void testValidateAuthenticationModificationWhenHasPublicKeyIdButNotExists() {
+        Environment environment = new Environment();
+        environment.setCloudPlatform("AWS");
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withAuthentication(AuthenticationDto.builder()
+                        .withPublicKeyId("pub-key-id")
+                        .build())
+                .build();
+
+        PublicKeyConnector connector = mock(PublicKeyConnector.class);
+        when(environmentResourceService.isPublicKeyIdExists(environment, "pub-key-id")).thenReturn(false);
+        when(environmentResourceService.getPublicKeyConnector(environment.getCloudPlatform())).thenReturn(Optional.of(connector));
+
+
+        ValidationResult validationResult = underTest.validateAuthenticationModification(environmentEditDto, environment);
+        assertEquals("1. The publicKeyId with name of 'pub-key-id' does not exists on the provider", validationResult.getFormattedErrors());
     }
 }
