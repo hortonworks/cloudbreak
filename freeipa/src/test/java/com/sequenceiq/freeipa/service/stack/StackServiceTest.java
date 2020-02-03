@@ -2,10 +2,13 @@ package com.sequenceiq.freeipa.service.stack;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenv.RegisterChildEnvironmentRequest;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
@@ -21,6 +25,8 @@ import com.sequenceiq.freeipa.repository.StackRepository;
 class StackServiceTest {
 
     private static final String ENVIRONMENT_CRN = "test:environment:crn";
+
+    private static final String CHILD_ENVIRONMENT_CRN = "test:environment:child-crn";
 
     private static final Long STACK_ID = 1L;
 
@@ -109,12 +115,61 @@ class StackServiceTest {
     }
 
     @Test
-    void getByEnvironmentCrnAndAccountIdWithLists() {
-        // TODO
+    void getByEnvironmentCrnAndAccountIdWithListsShouldReturnByEnvironmentCrn() {
+        when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.of(stack));
+
+        Stack result = underTest.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID);
+
+        verify(stackRepository).findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID);
+        verify(stackRepository, never()).findByChildEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID);
+        assertEquals(stack, result);
     }
 
     @Test
-    void registerChildEnvironment() {
-        // TODO
+    void getByEnvironmentCrnAndAccountIdWithListsShouldReturnByChildEnvironmentCrn() {
+        when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(stackRepository.findByChildEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.of(stack));
+
+        Stack result = underTest.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID);
+
+        verify(stackRepository).findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID);
+        verify(stackRepository).findByChildEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID);
+        assertEquals(stack, result);
+    }
+
+    @Test
+    void getByEnvironmentCrnAndAccountIdWithListsShouldFailAsFallback() {
+        when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(stackRepository.findByChildEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> underTest.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID));
+        verify(stackRepository).findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID);
+        verify(stackRepository).findByChildEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID);
+    }
+
+    @Test
+    void registerChildEnvironmentShouldSucceed() {
+        RegisterChildEnvironmentRequest registerChildEnvironmentRequest = createRegisterChildEnvironmentRequest();
+        when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.of(stack));
+
+        underTest.registerChildEnvironment(registerChildEnvironmentRequest, ACCOUNT_ID);
+
+        Assertions.assertThat(stack.getChildEnvironmentCrns()).contains(CHILD_ENVIRONMENT_CRN);
+        verify(stackRepository).save(stack);
+    }
+
+    @Test
+    void registerChildEnvironmentShouldFail() {
+        RegisterChildEnvironmentRequest registerChildEnvironmentRequest = createRegisterChildEnvironmentRequest();
+        when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> underTest.registerChildEnvironment(registerChildEnvironmentRequest, ACCOUNT_ID));
+    }
+
+    private RegisterChildEnvironmentRequest createRegisterChildEnvironmentRequest() {
+        RegisterChildEnvironmentRequest registerChildEnvironmentRequest = new RegisterChildEnvironmentRequest();
+        registerChildEnvironmentRequest.setParentEnvironmentCrn(ENVIRONMENT_CRN);
+        registerChildEnvironmentRequest.setChildEnvironmentCrn(CHILD_ENVIRONMENT_CRN);
+        return registerChildEnvironmentRequest;
     }
 }

@@ -1,10 +1,11 @@
 package com.sequenceiq.freeipa.service.stack;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenvironment.RegisterChildEnvironmentRequest;
-import com.sequenceiq.freeipa.repository.ChildEnvironmentRepository;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenv.RegisterChildEnvironmentRequest;
+import com.sequenceiq.freeipa.repository.ChildEnvironmentRepository;
 
 @Service
 public class ChildEnvironmentService {
