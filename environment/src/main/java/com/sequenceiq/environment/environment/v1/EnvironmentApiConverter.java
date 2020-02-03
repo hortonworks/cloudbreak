@@ -278,7 +278,8 @@ public class EnvironmentApiConverter {
                 .withAdminGroupName(environmentDto.getAdminGroupName())
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
-                .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams));
+                .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams))
+                .withParentEnvironmentCrn(environmentDto.getParentEnvironmentCrn());
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network ->
                 builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel())));
