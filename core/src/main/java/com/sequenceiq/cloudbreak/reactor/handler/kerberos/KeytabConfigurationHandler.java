@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationF
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
@@ -65,6 +66,9 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
     @Inject
     private KeytabProvider keytabProvider;
 
+    @Inject
+    private EnvironmentConfigProvider environmentConfigProvider;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(KeytabConfigurationRequest.class);
@@ -78,8 +82,7 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             Optional<KerberosConfig> kerberosConfigOptional = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
             // TODO remove Cloudplatform check when FreeIPA registration is ready
-            if ((CloudPlatform.AWS.name().equals(stack.cloudPlatform()) || CloudPlatform.AZURE.name().equals(stack.cloudPlatform()))
-                    && kerberosConfigOptional.isPresent() && kerberosDetailService.isIpaJoinable(kerberosConfigOptional.get())) {
+            if (keytabsShouldBeUploaded(stack, kerberosConfigOptional)) {
                 GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
                 ServiceKeytabResponse serviceKeytabResponse = keytabProvider.getServiceKeytabResponse(stack, primaryGatewayConfig);
                 KeytabModel keytabModel = buildKeytabModel(serviceKeytabResponse);
@@ -93,6 +96,19 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
             response = new KeytabConfigurationFailed(stackId, configurationException);
         }
         eventBus.notify(response.selector(), new Event<>(keytabConfigurationRequestEvent.getHeaders(), response));
+    }
+
+    private boolean keytabsShouldBeUploaded(Stack stack, Optional<KerberosConfig> kerberosConfigOptional) {
+        boolean yarnChildEnvironment = CloudPlatform.YARN.name().equals(stack.cloudPlatform())
+                && environmentConfigProvider.isChildEnvironment(stack.getEnvironmentCrn());
+
+        boolean supportedOnCloudPlatform = CloudPlatform.AWS.name().equals(stack.cloudPlatform())
+                || CloudPlatform.AZURE.name().equals(stack.cloudPlatform())
+                || yarnChildEnvironment;
+
+        return supportedOnCloudPlatform
+                && kerberosConfigOptional.isPresent()
+                && kerberosDetailService.isIpaJoinable(kerberosConfigOptional.get());
     }
 
     private KeytabModel buildKeytabModel(ServiceKeytabResponse serviceKeytabResponse) {

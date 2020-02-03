@@ -30,17 +30,20 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
 
     @Override
     public void register(Long stackId) {
-        createKerberosConfig(stackId, FREEIPA_DEFAULT_ADMIN, null, null);
+        createKerberosConfig(stackId, FREEIPA_DEFAULT_ADMIN, null, null, null);
     }
 
-    public KerberosConfig createKerberosConfig(Long stackId, String dn, String password, String clusterName) {
+    public KerberosConfig createKerberosConfig(Long stackId, String dn, String password, String clusterName, String environmentCrn) {
         FreeIpa freeIpa = getFreeIpaService().findByStackId(stackId);
         Stack stack = getStackWithInstanceMetadata(stackId);
+        if (StringUtils.isEmpty(environmentCrn)) {
+            environmentCrn = stack.getEnvironmentCrn();
+        }
         KerberosConfig kerberosConfig = new KerberosConfig();
         InstanceMetaData master = getMasterInstance(stack);
         kerberosConfig.setAdminUrl(master.getDiscoveryFQDN());
         kerberosConfig.setDomain(freeIpa.getDomain());
-        kerberosConfig.setEnvironmentCrn(stack.getEnvironmentCrn());
+        kerberosConfig.setEnvironmentCrn(environmentCrn);
         kerberosConfig.setName(stack.getName());
         kerberosConfig.setPrincipal(dn);
         kerberosConfig.setRealm(freeIpa.getDomain().toUpperCase());

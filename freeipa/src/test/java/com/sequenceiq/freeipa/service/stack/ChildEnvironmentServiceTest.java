@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.regchildenv.RegisterChildEnvironmentRequest;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.ChildEnvironmentRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,7 +35,7 @@ class ChildEnvironmentServiceTest {
 
     @Test
     void isChildEnvironmentFalse() {
-        when(repository.findParentByChildEnvironmentCrn(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(repository.findParentStackByChildEnvironmentCrn(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
 
         boolean result = underTest.isChildEnvironment(ENVIRONMENT_CRN, ACCOUNT_ID);
 
@@ -43,7 +44,7 @@ class ChildEnvironmentServiceTest {
 
     @Test
     void isChildEnvironmentTrue() {
-        when(repository.findParentByChildEnvironmentCrn(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.of("id"));
+        when(repository.findParentStackByChildEnvironmentCrn(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.of(new Stack()));
 
         boolean result = underTest.isChildEnvironment(ENVIRONMENT_CRN, ACCOUNT_ID);
 
