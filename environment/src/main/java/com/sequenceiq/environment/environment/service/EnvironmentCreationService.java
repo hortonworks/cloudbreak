@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.Map;
 import java.util.Objects;
@@ -19,7 +20,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
-import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -32,7 +32,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
-import com.sequenceiq.environment.network.NetworkService;
+import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
@@ -58,8 +58,6 @@ public class EnvironmentCreationService {
 
     private final ParametersService parametersService;
 
-    private final NetworkService networkService;
-
     private final EntitlementService entitlementService;
 
     private final VirtualGroupService virtualGroupService;
@@ -72,17 +70,15 @@ public class EnvironmentCreationService {
             EnvironmentReactorFlowManager reactorFlowManager,
             AuthenticationDtoConverter authenticationDtoConverter,
             ParametersService parametersService,
-            NetworkService networkService,
             EntitlementService entitlementService,
             VirtualGroupService virtualGroupService) {
         this.environmentService = environmentService;
-        this.validatorService = environmentValidatorService;
+        validatorService = environmentValidatorService;
         this.environmentResourceService = environmentResourceService;
         this.environmentDtoConverter = environmentDtoConverter;
         this.reactorFlowManager = reactorFlowManager;
         this.authenticationDtoConverter = authenticationDtoConverter;
         this.parametersService = parametersService;
-        this.networkService = networkService;
         this.entitlementService = entitlementService;
         this.virtualGroupService = virtualGroupService;
     }
@@ -109,11 +105,11 @@ public class EnvironmentCreationService {
         environmentService.assignEnvironmentAdminRole(creationDto.getCreator(), environmentCrnForVirtualGroups);
 
         CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
-        Map<String, CloudSubnet> subnetMetas = networkService.retrieveSubnetMetadata(environment, creationDto.getNetwork());
-        validateCreation(creationDto, environment, cloudRegions, subnetMetas);
+        validateCreation(creationDto, environment, cloudRegions);
         try {
             environment = environmentService.save(environment);
-            environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), creationDto.getAccountId(), subnetMetas);
+            environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), creationDto.getAccountId(),
+                    getIfNotNull(creationDto.getNetwork(), NetworkDto::getSubnetMetas));
             createAndSetParameters(environment, creationDto.getParameters());
             environmentService.save(environment);
             reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creationDto.getCreator(), environment.getResourceCrn());
@@ -168,11 +164,10 @@ public class EnvironmentCreationService {
         environment.setParameters(parametersService.saveParameters(environment, parameters));
     }
 
-    private void validateCreation(EnvironmentCreationDto creationDto, Environment environment, CloudRegions cloudRegions,
-            Map<String, CloudSubnet> subnetMetas) {
+    private void validateCreation(EnvironmentCreationDto creationDto, Environment environment, CloudRegions cloudRegions) {
         ValidationResultBuilder validationBuilder = validatorService
                 .validateRegionsAndLocation(creationDto.getLocation().getName(), creationDto.getRegions(), environment, cloudRegions);
-        ValidationResultBuilder networkValidation = validatorService.validateNetworkCreation(environment, creationDto.getNetwork(), subnetMetas);
+        ValidationResultBuilder networkValidation = validatorService.validateNetworkCreation(environment, creationDto.getNetwork());
         validationBuilder = validationBuilder.merge(networkValidation.build());
 
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());

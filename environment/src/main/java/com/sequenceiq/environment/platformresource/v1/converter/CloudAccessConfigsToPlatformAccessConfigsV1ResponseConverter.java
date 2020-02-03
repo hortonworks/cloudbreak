@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.platformresource.v1.converter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -25,8 +24,9 @@ public class CloudAccessConfigsToPlatformAccessConfigsV1ResponseConverter
             AccessConfigResponse actual = new AccessConfigResponse(entry.getName(), entry.getId(), entry.getProperties());
             result.add(actual);
         }
-        Collections.sort(result, new AccessConfigResponseComparator());
+        result.sort(new AccessConfigResponseComparator());
         platformAccessConfigsResponse.setAccessConfigs(result);
         return platformAccessConfigsResponse;
     }
+
 }

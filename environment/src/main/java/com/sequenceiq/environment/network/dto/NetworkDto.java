@@ -31,7 +31,7 @@ public class NetworkDto {
 
     private final String networkCidr;
 
-    private final Map<String, CloudSubnet> subnetMetas;
+    private Map<String, CloudSubnet> subnetMetas;
 
     private final Map<String, CloudSubnet> cbSubnets;
 
@@ -46,22 +46,22 @@ public class NetworkDto {
     private final CloudPlatform cloudPlatform;
 
     public NetworkDto(Builder builder) {
-        this.id = builder.id;
-        this.resourceCrn = builder.resourceCrn;
-        this.name = builder.name;
-        this.aws = builder.aws;
-        this.azure = builder.azure;
-        this.yarn = builder.yarn;
-        this.mock = builder.mock;
-        this.subnetMetas = MapUtils.isEmpty(builder.subnetMetas) ? new HashMap<>() : builder.subnetMetas;
-        this.cbSubnets = builder.cbSubnets;
-        this.dwxSubnets = builder.dwxSubnets;
-        this.mlxSubnets = builder.mlxSubnets;
-        this.networkCidr = builder.networkCidr;
-        this.networkId = builder.networkId;
-        this.privateSubnetCreation = builder.privateSubnetCreation;
-        this.registrationType = builder.registrationType;
-        this.cloudPlatform = builder.cloudPlatform;
+        id = builder.id;
+        resourceCrn = builder.resourceCrn;
+        name = builder.name;
+        aws = builder.aws;
+        azure = builder.azure;
+        yarn = builder.yarn;
+        mock = builder.mock;
+        subnetMetas = MapUtils.isEmpty(builder.subnetMetas) ? new HashMap<>() : builder.subnetMetas;
+        cbSubnets = builder.cbSubnets;
+        dwxSubnets = builder.dwxSubnets;
+        mlxSubnets = builder.mlxSubnets;
+        networkCidr = builder.networkCidr;
+        networkId = builder.networkId;
+        privateSubnetCreation = builder.privateSubnetCreation;
+        registrationType = builder.registrationType;
+        cloudPlatform = builder.cloudPlatform;
     }
 
     public static Builder builder() {
@@ -114,6 +114,10 @@ public class NetworkDto {
 
     public Map<String, CloudSubnet> getSubnetMetas() {
         return subnetMetas;
+    }
+
+    public void setSubnetMetas(Map<String, CloudSubnet> subnetMetas) {
+        this.subnetMetas = subnetMetas;
     }
 
     public Map<String, CloudSubnet> getCbSubnets() {
@@ -205,22 +209,22 @@ public class NetworkDto {
         }
 
         private Builder(NetworkDto networkDto) {
-            this.id = networkDto.id;
-            this.name = networkDto.name;
-            this.networkId = networkDto.networkId;
-            this.resourceCrn = networkDto.resourceCrn;
-            this.aws = networkDto.aws;
-            this.azure = networkDto.azure;
-            this.yarn = networkDto.yarn;
-            this.mock = networkDto.mock;
-            this.subnetMetas = networkDto.subnetMetas;
-            this.networkCidr = networkDto.networkCidr;
-            this.privateSubnetCreation = networkDto.privateSubnetCreation;
-            this.registrationType = networkDto.registrationType;
-            this.cloudPlatform = networkDto.cloudPlatform;
-            this.cbSubnets = networkDto.cbSubnets;
-            this.mlxSubnets = networkDto.mlxSubnets;
-            this.dwxSubnets = networkDto.dwxSubnets;
+            id = networkDto.id;
+            name = networkDto.name;
+            networkId = networkDto.networkId;
+            resourceCrn = networkDto.resourceCrn;
+            aws = networkDto.aws;
+            azure = networkDto.azure;
+            yarn = networkDto.yarn;
+            mock = networkDto.mock;
+            subnetMetas = networkDto.subnetMetas;
+            networkCidr = networkDto.networkCidr;
+            privateSubnetCreation = networkDto.privateSubnetCreation;
+            registrationType = networkDto.registrationType;
+            cloudPlatform = networkDto.cloudPlatform;
+            cbSubnets = networkDto.cbSubnets;
+            mlxSubnets = networkDto.mlxSubnets;
+            dwxSubnets = networkDto.dwxSubnets;
         }
 
         public Builder withId(Long id) {

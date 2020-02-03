@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.validation;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.isEmpty;
 
@@ -18,10 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
-import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
-import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
@@ -78,8 +76,8 @@ public class EnvironmentValidatorService {
         return regionValidationResult.merge(locationValidationResult.build());
     }
 
-    public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network, Map<String, CloudSubnet> subnetMetas) {
-        return networkCreationValidator.validateNetworkCreation(environment, network, subnetMetas);
+    public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network) {
+        return networkCreationValidator.validateNetworkCreation(environment, network);
     }
 
     public ValidationResult validateParentChildRelation(Environment environment, String parentEnvironmentName) {
@@ -103,7 +101,7 @@ public class EnvironmentValidatorService {
 
     public ValidationResult validateAwsEnvironmentRequest(EnvironmentRequest environmentRequest) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
-        resultBuilder.ifError(() -> !CloudPlatform.AWS.name().equalsIgnoreCase(environmentRequest.getCloudPlatform()),
+        resultBuilder.ifError(() -> !AWS.name().equalsIgnoreCase(environmentRequest.getCloudPlatform()),
                 "Environment request is not for AWS.");
 
         resultBuilder.ifError(() -> StringUtils.isBlank(Optional.ofNullable(environmentRequest.getAws())
@@ -116,15 +114,15 @@ public class EnvironmentValidatorService {
     public ValidationResult validateSecurityAccessModification(SecurityAccessDto securityAccessDto, Environment environment) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         resultBuilder.ifError(() -> isNotEmpty(securityAccessDto.getCidr()), "The CIDR could not be updated in the environment");
-        resultBuilder.ifError(() -> isNotEmpty(environment.getCidr()) && anySecGroupMissing(securityAccessDto),
+        resultBuilder.ifError(() -> isNotEmpty(environment.getCidr()) && isAnySecurityGroupMissing(securityAccessDto),
                 "The CIDR can be replaced with the default and knox security groups, please add to the request");
-        resultBuilder.ifError(() -> allSecGroupMissing(securityAccessDto),
+        resultBuilder.ifError(() -> isAllSecurityGroupMissing(securityAccessDto),
                 "Please add the default or knox security groups, we cannot edit with empty value.");
         return resultBuilder.build();
     }
 
     public ValidationResult validateSecurityGroups(EnvironmentEditDto editDto, Environment environment) {
-        ValidationResult.ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
         getSecurityGroupIdSet(editDto).forEach(sg -> {
             try {
                 fetchSecurityGroup(editDto, environment, sg);
@@ -163,7 +161,7 @@ public class EnvironmentValidatorService {
         return validationResultBuilder.build();
     }
 
-    private CloudSecurityGroups fetchSecurityGroup(EnvironmentEditDto editDto, Environment environment, String securityGroupId) {
+    private void fetchSecurityGroup(EnvironmentEditDto editDto, Environment environment, String securityGroupId) {
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 editDto.getAccountId(),
                 environment.getCredential().getName(),
@@ -172,22 +170,23 @@ public class EnvironmentValidatorService {
                 environment.getCloudPlatform(),
                 null);
         request.setFilters(Map.of("groupId", securityGroupId));
-        return platformParameterService.getSecurityGroups(request);
+        platformParameterService.getSecurityGroups(request);
     }
 
     private Set<String> getSecurityGroupIdSet(EnvironmentEditDto editDto) {
         return Set.of(editDto.getSecurityAccess().getSecurityGroupIdForKnox(), editDto.getSecurityAccess().getDefaultSecurityGroupId());
     }
 
-    private boolean anySecGroupMissing(SecurityAccessDto securityAccessDto) {
+    private boolean isAnySecurityGroupMissing(SecurityAccessDto securityAccessDto) {
         return isEmpty(securityAccessDto.getDefaultSecurityGroupId()) || isEmpty(securityAccessDto.getSecurityGroupIdForKnox());
     }
 
-    private boolean allSecGroupMissing(SecurityAccessDto securityAccessDto) {
+    private boolean isAllSecurityGroupMissing(SecurityAccessDto securityAccessDto) {
         return isEmpty(securityAccessDto.getDefaultSecurityGroupId()) && isEmpty(securityAccessDto.getSecurityGroupIdForKnox());
     }
 
     private boolean platformEnabled(Set<String> cloudPlatforms, String cloudPlatform) {
         return cloudPlatforms.stream().anyMatch(p -> p.equalsIgnoreCase(cloudPlatform));
     }
+
 }
