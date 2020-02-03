@@ -160,12 +160,12 @@ public class FreeIpaCleanupActions {
             @Override
             protected void doExecute(FreeIpaContext context, RemoveRolesResponse payload, Map<Object, Object> variables) {
                 CleanupEvent cleanupEvent = new CleanupEvent(FreeIpaCleanupEvent.CLEANUP_FINISHED_EVENT.event(), payload.getResourceId(), payload.getUsers(),
-                        payload.getHosts(), payload.getRoles(), payload.getOperationId(), payload.getClusterName());
+                        payload.getHosts(), payload.getRoles(), payload.getAccountId(), payload.getOperationId(), payload.getClusterName());
                 SuccessDetails successDetails = new SuccessDetails(context.getStack().getEnvironmentCrn());
                 successDetails.getAdditionalDetails().put("Hosts", payload.getHosts() == null ? List.of() : new ArrayList<>(payload.getHosts()));
                 successDetails.getAdditionalDetails().put("Users", payload.getUsers() == null ? List.of() : new ArrayList<>(payload.getUsers()));
                 successDetails.getAdditionalDetails().put("Roles", payload.getRoles() == null ? List.of() : new ArrayList<>(payload.getRoles()));
-                operationService.completeOperation(payload.getOperationId(), List.of(successDetails), Collections.emptyList());
+                operationService.completeOperation(payload.getAccountId(), payload.getOperationId(), List.of(successDetails), Collections.emptyList());
                 LOGGER.info("Cleanup successfully finished with: " + successDetails);
                 sendEvent(context, cleanupEvent);
             }
@@ -190,7 +190,7 @@ public class FreeIpaCleanupActions {
                 if (payload.getFailureDetails() != null) {
                     failureDetails.getAdditionalDetails().putAll(payload.getFailureDetails());
                 }
-                operationService.failOperation(payload.getOperationId(), message, List.of(successDetails), List.of(failureDetails));
+                operationService.failOperation(payload.getAccountId(), payload.getOperationId(), message, List.of(successDetails), List.of(failureDetails));
                 sendEvent(context, FreeIpaCleanupEvent.CLEANUP_FAILURE_HANDLED_EVENT.event(), payload);
             }
 

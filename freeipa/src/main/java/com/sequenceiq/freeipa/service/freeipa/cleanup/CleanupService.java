@@ -86,7 +86,7 @@ public class CleanupService {
         Operation operation =
                 operationService.startOperation(accountId, OperationType.CLEANUP, Set.of(stack.getEnvironmentCrn()), Collections.emptySet());
         CleanupEvent cleanupEvent = new CleanupEvent(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), stack.getId(), request.getUsers(),
-                request.getHosts(), request.getRoles(), operation.getOperationId(), request.getClusterName());
+                request.getHosts(), request.getRoles(), accountId, operation.getOperationId(), request.getClusterName());
         flowManager.notify(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), cleanupEvent);
         return operationToOperationStatusConverter.convert(operation);
     }

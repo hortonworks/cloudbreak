@@ -64,8 +64,8 @@ public class OperationService {
         return operationRepository.save(operation);
     }
 
-    public Operation completeOperation(String operationId, Collection<SuccessDetails> success, Collection<FailureDetails> failure) {
-        Operation operation = getOperationForOperationId(operationId);
+    public Operation completeOperation(String accountId, String operationId, Collection<SuccessDetails> success, Collection<FailureDetails> failure) {
+        Operation operation = getOperationForAccountIdAndOperationId(accountId, operationId);
         operation.setStatus(OperationState.COMPLETED);
         operation.setSuccessList(List.copyOf(success));
         operation.setFailureList(List.copyOf(failure));
@@ -73,8 +73,9 @@ public class OperationService {
         return operationRepository.save(operation);
     }
 
-    public Operation failOperation(String operationId, String failureMessage, Collection<SuccessDetails> success, Collection<FailureDetails> failure) {
-        Operation operation = getOperationForOperationId(operationId);
+    public Operation failOperation(String accountId, String operationId, String failureMessage, Collection<SuccessDetails> success,
+            Collection<FailureDetails> failure) {
+        Operation operation = getOperationForAccountIdAndOperationId(accountId, operationId);
         operation.setStatus(OperationState.FAILED);
         operation.setError(failureMessage);
         operation.setEndTime(System.currentTimeMillis());
@@ -83,8 +84,8 @@ public class OperationService {
         return operationRepository.save(operation);
     }
 
-    public Operation failOperation(String operationId, String failureMessage) {
-        return failOperation(operationId, failureMessage, Collections.emptyList(), Collections.emptyList());
+    public Operation failOperation(String accountId, String operationId, String failureMessage) {
+        return failOperation(accountId, operationId, failureMessage, Collections.emptyList(), Collections.emptyList());
     }
 
     public Operation getOperationForAccountIdAndOperationId(String accountId, String operationId) {
@@ -118,13 +119,5 @@ public class OperationService {
         operation.setEndTime(System.currentTimeMillis());
         operation.setError(reason);
         return operation;
-    }
-
-    private Operation getOperationForOperationId(String operationId) {
-        Optional<Operation> syncOperationOptional = operationRepository.findByOperationId(operationId);
-        if (!syncOperationOptional.isPresent()) {
-            throw NotFoundException.notFound("Operation", operationId).get();
-        }
-        return syncOperationOptional.get();
     }
 }
