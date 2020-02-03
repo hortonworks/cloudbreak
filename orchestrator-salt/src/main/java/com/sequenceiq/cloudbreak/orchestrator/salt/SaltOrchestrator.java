@@ -21,9 +21,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.retry.annotation.Retryable;
@@ -37,14 +38,12 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.model.GrainProperties;
 import com.sequenceiq.cloudbreak.orchestrator.model.KeytabModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
@@ -56,10 +55,10 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.grain.GrainUploader;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltCommandTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUpload;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
@@ -67,6 +66,8 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainRemoveRun
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.MineUpdateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncAllRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltCommandRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -113,6 +114,15 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${rest.debug}")
     private boolean restDebug;
 
+    @Inject
+    private SaltRunner saltRunner;
+
+    @Inject
+    private SaltCommandRunner saltCommandRunner;
+
+    @Inject
+    private GrainUploader grainUploader;
+
     private ExitCriteria exitCriteria;
 
     @Override
@@ -131,7 +141,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Set<String> allTargets = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             uploadSignKey(sc, primaryGateway, gatewayTargets, allTargets, exitModel);
             OrchestratorBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, targets, params);
-            Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitModel);
+            Callable<Boolean> saltBootstrapRunner = saltRunner.runner(saltBootstrap, exitCriteria, exitModel);
             saltBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during the salt bootstrap", e);
@@ -164,10 +174,10 @@ public class SaltOrchestrator implements HostOrchestrator {
             SaltPillarProperties mounDiskProperties = new SaltPillarProperties("/mount/disk.sls", Collections.singletonMap("mount_data", hostnameDiskMountMap));
 
             OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargetIpAddresses, mounDiskProperties);
-            saltPillarRunner = runner(pillarSave, exitCriteria, exitModel);
+            saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
             saltPillarRunner.call();
 
-            runSaltCommand(sc, new GrainAddRunner(hostnameDiskMountMap.keySet(), allNodes, "mount_disks"), exitModel);
+            saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(hostnameDiskMountMap.keySet(), allNodes, "mount_disks"), exitModel, exitCriteria);
 
             BaseSaltJobRunner baseSaltJobRunner = new BaseSaltJobRunner(gatewayTargetIpAddresses, allNodes) {
                 @Override
@@ -176,12 +186,12 @@ public class SaltOrchestrator implements HostOrchestrator {
                 }
             };
             OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner);
-            Callable<Boolean> saltJobRunBootstrapRunner = runner(saltJobIdTracker, exitCriteria, exitModel);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel);
             saltJobRunBootstrapRunner.call();
 
             Map<String, String> uuidResponse = SaltStates.getUuidList(sc);
 
-            runSaltCommand(sc, new GrainRemoveRunner(hostnameDiskMountMap.keySet(), allNodes, "mount_disks"), exitModel);
+            saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(hostnameDiskMountMap.keySet(), allNodes, "mount_disks"), exitModel, exitCriteria);
             Map<String, String> fstabResponse = SaltStates.runCommandOnHosts(sc, allHosts, "cat /etc/fstab");
             return nodes.stream()
                     .map(node -> {
@@ -198,7 +208,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private void initializePillar(Set<Node> allNodes, ExitCriteriaModel exitModel, Set<String> gatewayTargetIpAddresses, SaltConnector sc) throws Exception {
         OrchestratorBootstrap hostSave = new PillarSave(sc, gatewayTargetIpAddresses, allNodes);
-        Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitModel);
+        Callable<Boolean> saltPillarRunner = saltRunner.runner(hostSave, exitCriteria, exitModel);
         saltPillarRunner.call();
     }
 
@@ -267,7 +277,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             // if there is a new salt master then re-bootstrap all nodes
             Set<Node> nodes = gatewayTargets.isEmpty() ? targets : allNodes;
             OrchestratorBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, nodes, params);
-            Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitModel);
+            Callable<Boolean> saltBootstrapRunner = saltRunner.runner(saltBootstrap, exitCriteria, exitModel);
             saltBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during salt upscale", e);
@@ -286,12 +296,12 @@ public class SaltOrchestrator implements HostOrchestrator {
         Set<String> allNodeHostname = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         try (SaltConnector sc = createSaltConnector(primaryGateway)) {
             OrchestratorBootstrap hostSave = new PillarSave(sc, gatewayTargetIpAddresses, allNodes);
-            Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitModel);
+            Callable<Boolean> saltPillarRunner = saltRunner.runner(hostSave, exitCriteria, exitModel);
             saltPillarRunner.call();
 
             for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
                 OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargetIpAddresses, propertiesEntry.getValue());
-                saltPillarRunner = runner(pillarSave, exitCriteria, exitModel);
+                saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
                 saltPillarRunner.call();
             }
 
@@ -300,7 +310,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             // knox
             if (primaryGateway.getKnoxGatewayEnabled()) {
-                runSaltCommand(sc, new GrainAddRunner(gatewayTargetHostnames, allNodes, "gateway"), exitModel);
+                saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(gatewayTargetHostnames, allNodes, "gateway"), exitModel, exitCriteria);
             }
 
             setPostgreRoleIfNeeded(allNodes, saltConfig, exitModel, sc, serverHostname);
@@ -309,12 +319,12 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             // kerberos
             if (saltConfig.getServicePillarConfig().containsKey("kerberos")) {
-                runSaltCommand(sc, new GrainAddRunner(allNodeHostname, allNodes, "kerberized"), exitModel);
+                saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(allNodeHostname, allNodes, "kerberized"), exitModel, exitCriteria);
             }
-            uploadGrains(allNodes, saltConfig.getGrainsProperties(), exitModel, sc);
+            grainUploader.uploadGrains(allNodes, saltConfig.getGrainsProperties(), exitModel, sc, exitCriteria);
 
-            runSaltCommand(sc, new SyncAllRunner(allNodeHostname, allNodes), exitModel);
-            runSaltCommand(sc, new MineUpdateRunner(gatewayTargetHostnames, allNodes), exitModel);
+            saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allNodeHostname, allNodes), exitModel, exitCriteria);
+            saltCommandRunner.runSaltCommand(sc, new MineUpdateRunner(gatewayTargetHostnames, allNodes), exitModel, exitCriteria);
         } catch (ExecutionException e) {
             LOGGER.warn("Error occurred during bootstrap", e);
             if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
@@ -335,12 +345,12 @@ public class SaltOrchestrator implements HostOrchestrator {
         Set<String> gatewayTargets = getGatewayPrivateIps(allGateway);
         try (SaltConnector sc = createSaltConnector(primaryGateway)) {
             OrchestratorBootstrap hostSave = new PillarSave(sc, gatewayTargets, allNodes);
-            Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitModel);
+            Callable<Boolean> saltPillarRunner = saltRunner.runner(hostSave, exitCriteria, exitModel);
             saltPillarRunner.call();
 
             for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
                 OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargets, propertiesEntry.getValue());
-                saltPillarRunner = runner(pillarSave, exitCriteria, exitModel);
+                saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
                 saltPillarRunner.call();
             }
         } catch (ExecutionException e) {
@@ -358,21 +368,21 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private void addClusterManagerRoles(Set<Node> allNodes, ExitCriteriaModel exitModel,
             SaltConnector sc, Set<String> serverHostnames, Set<String> allNodeHostname) throws Exception {
-        runSaltCommand(sc, new GrainAddRunner(allNodeHostname, allNodes, "manager_agent"), exitModel);
-        runSaltCommand(sc, new GrainAddRunner(serverHostnames, allNodes, "manager_server"), exitModel);
+        saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(allNodeHostname, allNodes, "manager_agent"), exitModel, exitCriteria);
+        saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(serverHostnames, allNodes, "manager_server"), exitModel, exitCriteria);
     }
 
     private void setAdMemberRoleIfNeeded(Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, SaltConnector sc, Set<String> allHostnames)
             throws Exception {
         if (saltConfig.getServicePillarConfig().containsKey("sssd-ad")) {
-            runSaltCommand(sc, new GrainAddRunner(allHostnames, allNodes, "ad_member"), exitModel);
+            saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(allHostnames, allNodes, "ad_member"), exitModel, exitCriteria);
         }
     }
 
     private void setIpaMemberRoleIfNeeded(Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, SaltConnector sc, Set<String> allHostnames)
             throws Exception {
         if (saltConfig.getServicePillarConfig().containsKey("sssd-ipa")) {
-            runSaltCommand(sc, new GrainAddRunner(allHostnames, allNodes, "ipa_member"), exitModel);
+            saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(allHostnames, allNodes, "ipa_member"), exitModel, exitCriteria);
         }
     }
 
@@ -410,22 +420,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     private void setPostgreRoleIfNeeded(Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, SaltConnector sc, Set<String> serverHostname)
             throws Exception {
         if (saltConfig.getServicePillarConfig().containsKey("postgresql-server")) {
-            runSaltCommand(sc, new GrainAddRunner(serverHostname, allNodes, "postgresql_server"), exitModel);
-        }
-    }
-
-    private void uploadGrains(Set<Node> allNodes, List<GrainProperties> grainsProperties, ExitCriteriaModel exitModel, SaltConnector sc)
-            throws Exception {
-        if (!grainsProperties.isEmpty()) {
-            for (GrainProperties properties : grainsProperties) {
-                for (Entry<String, Map<String, String>> hostGrains : properties.getProperties().entrySet()) {
-                    for (Entry<String, String> hostGrain : hostGrains.getValue().entrySet()) {
-                        LOGGER.debug("upload grains to host: " + hostGrain);
-                        runSaltCommand(sc, new GrainAddRunner(Collections.singleton(hostGrains.getKey()), allNodes, hostGrain.getKey(), hostGrain.getValue()
-                        ), exitModel);
-                    }
-                }
-            }
+            saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(serverHostname, allNodes, "postgresql_server"), exitModel, exitCriteria);
         }
     }
 
@@ -448,11 +443,11 @@ public class SaltOrchestrator implements HostOrchestrator {
 
         try (SaltConnector sc = createSaltConnector(primaryGateway)) {
             LOGGER.debug("Set primary FreeIPA: {}", primaryServerHostname);
-            runSaltCommand(sc, new GrainAddRunner(primaryServerHostname, allNodes, "freeipa_primary"), exitCriteriaModel);
+            saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(primaryServerHostname, allNodes, "freeipa_primary"), exitCriteriaModel, exitCriteria);
             runNewService(sc, new HighStateRunner(primaryServerHostname, allNodes), exitCriteriaModel);
 
             LOGGER.debug("Set replica FreeIPA: {}", replicaServersHostnames);
-            runSaltCommand(sc, new GrainAddRunner(replicaServersHostnames, allNodes, "freeipa_replica"), exitCriteriaModel);
+            saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(replicaServersHostnames, allNodes, "freeipa_replica"), exitCriteriaModel, exitCriteria);
             runNewService(sc, new HighStateRunner(replicaServersHostnames, allNodes), exitCriteriaModel);
         } catch (ExecutionException e) {
             LOGGER.warn("Error occurred during FreeIPA installation", e);
@@ -499,7 +494,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             SaltStates.stopMinions(saltConnector, removeNodePrivateIPsByFQDN);
             if (!CollectionUtils.isEmpty(remainingNodes)) {
                 OrchestratorBootstrap hostSave = new PillarSave(saltConnector, gatewayTargetIpAddresses, remainingNodes);
-                Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitModel);
+                Callable<Boolean> saltPillarRunner = saltRunner.runner(hostSave, exitCriteria, exitModel);
                 saltPillarRunner.call();
             }
         } catch (Exception e) {
@@ -571,7 +566,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
         try (SaltConnector sc = createSaltConnector(primaryGateway)) {
             OrchestratorBootstrap scriptPillarSave = new PillarSave(sc, gatewayTargets, recipes, calculateRecipeExecutionTimeout());
-            Callable<Boolean> saltPillarRunner = runner(scriptPillarSave, exitCriteria, exitModel);
+            Callable<Boolean> saltPillarRunner = saltRunner.runner(scriptPillarSave, exitCriteria, exitModel);
             saltPillarRunner.call();
 
             for (List<RecipeModel> recipeList : recipes.values()) {
@@ -601,7 +596,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             }
             SaltPillarProperties saltPillarProperties = new SaltPillarProperties("/kerberos/keytab.sls", Collections.singletonMap("keytab", properties));
             OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargets, saltPillarProperties);
-            Callable<Boolean> runner = runner(pillarSave, exitCriteria, exitModel);
+            Callable<Boolean> runner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
             runner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during keytab upload", e);
@@ -679,24 +674,29 @@ public class SaltOrchestrator implements HostOrchestrator {
             if (!responsiveNodes.isEmpty()) {
                 LOGGER.debug("Applying role 'cloudera_manager_agent_stop' on nodes: [{}]", responsiveNodes);
                 Set<String> targetHostnames = responsiveNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-                runSaltCommand(sc, new GrainAddRunner(targetHostnames, responsiveNodes, "roles", "cloudera_manager_agent_stop"), exitCriteriaModel);
+                saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(targetHostnames, responsiveNodes, "roles", "cloudera_manager_agent_stop"),
+                        exitCriteriaModel, exitCriteria);
                 if (adJoinable || ipaJoinable) {
                     String identityRole = adJoinable ? "ad_leave" : "ipa_leave";
                     LOGGER.debug("Applying role '{}' on nodes: [{}]", identityRole, responsiveNodes);
-                    runSaltCommand(sc, new GrainAddRunner(targetHostnames, responsiveNodes, "roles", identityRole), exitCriteriaModel);
+                    saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(targetHostnames, responsiveNodes, "roles", identityRole), exitCriteriaModel,
+                            exitCriteria);
                     String removeIdentityRole = adJoinable ? "ad_member" : "ipa_member";
                     LOGGER.debug("Removing role '{}' on nodes: [{}]", removeIdentityRole, responsiveNodes);
-                    runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodes, "roles", removeIdentityRole), exitCriteriaModel);
+                    saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodes, "roles", removeIdentityRole),
+                            exitCriteriaModel, exitCriteria);
                 }
 
                 Set<String> allHostnames = responsiveNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-                runSaltCommand(sc, new SyncAllRunner(allHostnames, responsiveNodes), exitCriteriaModel);
+                saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, responsiveNodes), exitCriteriaModel, exitCriteria);
                 runNewService(sc, new HighStateRunner(allHostnames, responsiveNodes), exitCriteriaModel, maxRetry, true);
 
-                runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodes, "roles", "cloudera_manager_agent_stop"), exitCriteriaModel);
+                saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodes, "roles", "cloudera_manager_agent_stop"),
+                        exitCriteriaModel, exitCriteria);
                 if (adJoinable || ipaJoinable) {
                     String identityRole = adJoinable ? "ad_leave" : "ipa_leave";
-                    runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodes, "roles", identityRole), exitCriteriaModel);
+                    saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodes, "roles", identityRole), exitCriteriaModel,
+                            exitCriteria);
                 }
             }
         } catch (Exception e) {
@@ -709,10 +709,12 @@ public class SaltOrchestrator implements HostOrchestrator {
             throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = createSaltConnector(gatewayConfig)) {
             Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "roles", roleToAdd), exitCriteriaModel, maxRetryLeave);
-            runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "roles", roleToRemove), exitCriteriaModel, maxRetryLeave);
+            saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "roles", roleToAdd), exitCriteriaModel, maxRetryLeave,
+                    exitCriteria);
+            saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "roles", roleToRemove), exitCriteriaModel, maxRetryLeave,
+                    exitCriteria);
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryLeave);
+            saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryLeave, exitCriteria);
             runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryLeave, true);
         } catch (Exception e) {
             LOGGER.info("Error occurred during executing highstate (for recipes).", e);
@@ -779,20 +781,8 @@ public class SaltOrchestrator implements HostOrchestrator {
     private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel, int maxRetry, boolean retryOnFail)
             throws Exception {
         OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner, retryOnFail);
-        Callable<Boolean> saltJobRunBootstrapRunner = runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry, true);
+        Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry, true);
         saltJobRunBootstrapRunner.call();
-    }
-
-    private void runSaltCommand(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws Exception {
-        OrchestratorBootstrap saltCommandTracker = new SaltCommandTracker(sc, baseSaltJobRunner);
-        Callable<Boolean> saltCommandRunBootstrapRunner = runner(saltCommandTracker, exitCriteria, exitCriteriaModel);
-        saltCommandRunBootstrapRunner.call();
-    }
-
-    private void runSaltCommand(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel, int retry) throws Exception {
-        OrchestratorBootstrap saltCommandTracker = new SaltCommandTracker(sc, baseSaltJobRunner);
-        Callable<Boolean> saltCommandRunBootstrapRunner = runner(saltCommandTracker, exitCriteria, exitCriteriaModel, retry, false);
-        saltCommandRunBootstrapRunner.call();
     }
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
@@ -803,17 +793,20 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = createSaltConnector(gatewayConfig)) {
             // add 'recipe' grain to all nodes
             Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", phase.value()), exitCriteriaModel, maxRetry);
+            saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", phase.value()), exitCriteriaModel, maxRetry,
+                    exitCriteria);
 
             // Add Deprecated 'PRE/POST' recipe execution for backward compatibility (since version 2.2.0)
             if (postRecipe) {
-                runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", RecipeExecutionPhase.POST.value()), exitCriteriaModel, maxRetry);
+                saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", RecipeExecutionPhase.POST.value()),
+                        exitCriteriaModel, maxRetry, exitCriteria);
             } else {
-                runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", RecipeExecutionPhase.PRE.value()), exitCriteriaModel, maxRetry);
+                saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", RecipeExecutionPhase.PRE.value()),
+                        exitCriteriaModel, maxRetry, exitCriteria);
             }
 
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry);
+            saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry, exitCriteria);
             runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryRecipe, true);
         } catch (CloudbreakOrchestratorTimeoutException e) {
             LOGGER.info("Recipe execution timeout. {}", phase, e);
@@ -828,31 +821,22 @@ public class SaltOrchestrator implements HostOrchestrator {
             try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
                 // remove 'recipe' grain from all nodes
                 Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-                runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "recipes", phase.value()), exitCriteriaModel, maxRetry);
+                saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "recipes", phase.value()), exitCriteriaModel,
+                        maxRetry, exitCriteria);
 
                 // Remove Deprecated 'PRE/POST' recipe execution for backward compatibility (since version 2.2.0)
                 if (postRecipe) {
-                    runSaltCommand(sc, new GrainRemoveRunner(
-                            targetHostnames, allNodes, "recipes", RecipeExecutionPhase.POST.value()), exitCriteriaModel, maxRetry);
+                    saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(
+                            targetHostnames, allNodes, "recipes", RecipeExecutionPhase.POST.value()), exitCriteriaModel, maxRetry, exitCriteria);
                 } else {
-                    runSaltCommand(sc, new GrainRemoveRunner(
-                            targetHostnames, allNodes, "recipes", RecipeExecutionPhase.PRE.value()), exitCriteriaModel, maxRetry);
+                    saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(
+                            targetHostnames, allNodes, "recipes", RecipeExecutionPhase.PRE.value()), exitCriteriaModel, maxRetry, exitCriteria);
                 }
             } catch (Exception e) {
                 LOGGER.info("Error occurred during removing recipe roles.", e);
                 throw new CloudbreakOrchestratorFailedException(e);
             }
         }
-    }
-
-    private Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {
-        return runner(bootstrap, exitCriteria, exitCriteriaModel, maxRetry, false);
-    }
-
-    private Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel, int maxRetry,
-            boolean usingErrorCount) {
-        return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap(), maxRetry, SLEEP_TIME,
-                usingErrorCount ? maxRetryOnError : maxRetry);
     }
 
     private void uploadSaltConfig(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel)
@@ -901,7 +885,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             String path, String fileName, byte[] content) throws CloudbreakOrchestratorFailedException {
         try {
             OrchestratorBootstrap saltUpload = new SaltUpload(saltConnector, targets, path, fileName, content);
-            Callable<Boolean> saltUploadRunner = runner(saltUpload, exitCriteria, exitCriteriaModel);
+            Callable<Boolean> saltUploadRunner = saltRunner.runner(saltUpload, exitCriteria, exitCriteriaModel);
             saltUploadRunner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during file distribute to gateway nodes", e);

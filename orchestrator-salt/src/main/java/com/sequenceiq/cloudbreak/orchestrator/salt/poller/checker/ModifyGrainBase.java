@@ -143,9 +143,18 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
         return !addGrain && foundGrain;
     }
 
+    public String getKey() {
+        return key;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("ModifyGrainBase{");
+        sb.append(super.toString());
         sb.append("key='").append(key).append('\'');
         sb.append(", value='").append(value).append('\'');
         sb.append(", addGrain=").append(addGrain);
