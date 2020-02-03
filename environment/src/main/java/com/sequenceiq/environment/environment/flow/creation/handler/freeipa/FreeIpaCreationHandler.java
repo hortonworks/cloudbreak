@@ -159,18 +159,19 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private void attachParentFreeIpa(EnvironmentDto environmentDto) throws Exception {
-        Optional<DescribeFreeIpaResponse> freeIpa = freeIpaService.describe(environmentDto.getParentEnvironmentCrn());
+        String parentEnvironmentCrn = environmentDto.getParentEnvironmentCrn();
+        Optional<DescribeFreeIpaResponse> freeIpa = freeIpaService.describe(parentEnvironmentCrn);
         if (freeIpa.isPresent() && CloudPlatform.YARN.name().equalsIgnoreCase(environmentDto.getCloudPlatform())) {
-            LOGGER.info("Using FreeIpa of parent environment '{}' .", environmentDto.getParentEnvironmentCrn());
+            LOGGER.info("Using FreeIpa of parent environment '{}' .", parentEnvironmentCrn);
 
             RegisterChildEnvironmentRequest registerChildEnvironmentRequest = new RegisterChildEnvironmentRequest();
             registerChildEnvironmentRequest.setChildEnvironmentCrn(environmentDto.getResourceCrn());
-            registerChildEnvironmentRequest.setParentEnvironmentCrn(environmentDto.getParentEnvironmentCrn());
+            registerChildEnvironmentRequest.setParentEnvironmentCrn(parentEnvironmentCrn);
 
             freeIpaService.registerChildEnvironment(registerChildEnvironmentRequest);
 
             AddDnsZoneForSubnetsRequest addDnsZoneForSubnetsRequest = new AddDnsZoneForSubnetsRequest();
-            addDnsZoneForSubnetsRequest.setEnvironmentCrn(environmentDto.getResourceCrn());
+            addDnsZoneForSubnetsRequest.setEnvironmentCrn(parentEnvironmentCrn);
             addDnsZoneForSubnetsRequest.setSubnets(Collections.singletonList(YARN_NETWORK_CIDR));
 
             dnsV1Endpoint.addDnsZoneForSubnets(addDnsZoneForSubnetsRequest);

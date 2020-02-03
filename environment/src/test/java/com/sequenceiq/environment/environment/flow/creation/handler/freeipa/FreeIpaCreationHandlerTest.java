@@ -99,7 +99,7 @@ public class FreeIpaCreationHandlerTest {
         verify(freeIpaService).registerChildEnvironment(registerChildEnvironmentRequestArgumentCaptor.capture());
         verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
 
-        assertEquals(ENVIRONMENT_CRN, addDnsZoneForSubnetsRequestArgumentCaptor.getValue().getEnvironmentCrn());
+        assertEquals(PARENT_ENVIRONMENT_CRN, addDnsZoneForSubnetsRequestArgumentCaptor.getValue().getEnvironmentCrn());
         assertEquals(Collections.singletonList(YARN_NETWORK_CIDR), addDnsZoneForSubnetsRequestArgumentCaptor.getValue().getSubnets());
         assertEquals(ENVIRONMENT_CRN, registerChildEnvironmentRequestArgumentCaptor.getValue().getChildEnvironmentCrn());
         assertEquals(PARENT_ENVIRONMENT_CRN, registerChildEnvironmentRequestArgumentCaptor.getValue().getParentEnvironmentCrn());
