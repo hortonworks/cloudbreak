@@ -124,7 +124,7 @@ public class FreeIpaInstallService {
     private void decoratePillarsWithTelemetryConfigs(Stack stack, Map<String, SaltPillarProperties> servicePillarConfig) {
         Telemetry telemetry = stack.getTelemetry();
         if (telemetry != null) {
-            boolean databusEnabled = telemetry.isReportDeploymentLogsFeatureEnabled();
+            boolean databusEnabled = telemetry.isClusterLogsCollectionEnabled();
             final FluentClusterDetails clusterDetails = FluentClusterDetails.Builder.builder()
                     .withOwner(stack.getOwner())
                     .withName(stack.getName())

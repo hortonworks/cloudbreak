@@ -15,9 +15,9 @@ public abstract class FeaturesBase implements Serializable {
     @ApiModelProperty(TelemetryModelDescription.TELEMETRY_WORKLOAD_ANALYTICS)
     private FeatureSetting workloadAnalytics;
 
-    @JsonProperty("reportDeploymentLogs")
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_REPORT_DEPLOYMENT_LOGS_ENABLED)
-    private FeatureSetting reportDeploymentLogs;
+    @JsonProperty("clusterLogsCollection")
+    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_CLUSTER_LOGS_COLLECTION_ENABLED)
+    private FeatureSetting clusterLogsCollection;
 
     public FeatureSetting getWorkloadAnalytics() {
         return workloadAnalytics;
@@ -27,12 +27,12 @@ public abstract class FeaturesBase implements Serializable {
         this.workloadAnalytics = workloadAnalytics;
     }
 
-    public FeatureSetting getReportDeploymentLogs() {
-        return reportDeploymentLogs;
+    public FeatureSetting getClusterLogsCollection() {
+        return clusterLogsCollection;
     }
 
-    public void setReportDeploymentLogs(FeatureSetting reportDeploymentLogs) {
-        this.reportDeploymentLogs = reportDeploymentLogs;
+    public void setClusterLogsCollection(FeatureSetting clusterLogsCollection) {
+        this.clusterLogsCollection = clusterLogsCollection;
     }
 
     @JsonIgnore
@@ -42,8 +42,8 @@ public abstract class FeaturesBase implements Serializable {
     }
 
     @JsonIgnore
-    public void addReportDeploymentLogs(boolean enabled) {
-        reportDeploymentLogs = new FeatureSetting();
-        reportDeploymentLogs.setEnabled(enabled);
+    public void addClusterLogsCollection(boolean enabled) {
+        clusterLogsCollection = new FeatureSetting();
+        clusterLogsCollection.setEnabled(enabled);
     }
 }

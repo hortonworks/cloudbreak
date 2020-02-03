@@ -3,18 +3,18 @@
 <system>
   workers {{ numberOfWorkers }}
 </system>
-{% if databusReportDeploymentLogs == "true" %}# DATABUS - CLUSTER BUNDLE LOGS ENABLED - do not edit{% endif %}
+{% if databusClusterLogsCollection == "true" %}# DATABUS - CLUSTER BUNDLE LOGS ENABLED - do not edit{% endif %}
 {% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
 @include input.conf
 {% endif %}
-{% if databusReportDeploymentLogs == "true" %}
+{% if databusClusterLogsCollection == "true" %}
 @include input_databus.conf
 {% endif %}
 @include databus_metering.conf
 {% if fluent.cloudLoggingServiceEnabled %}
 @include filter.conf
 {% endif %}
-{% if databusReportDeploymentLogs == "true" %}
+{% if databusClusterLogsCollection == "true" %}
 @include filter_databus.conf
 @include output_databus.conf
 {% endif %}

@@ -23,7 +23,7 @@ fluent:
   azureContainer:
   azureInstanceMsi:
   azureStorageAccessKey:
-  dbusReportDeploymentLogs: false
-  dbusReportDeploymentLogsDisableStop: false
+  dbusClusterLogsCollection: false
+  dbusClusterLogsCollectionDisableStop: false
   dbusMeteringEnabled: false
 

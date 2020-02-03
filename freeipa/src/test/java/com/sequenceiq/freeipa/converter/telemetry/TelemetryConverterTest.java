@@ -39,14 +39,14 @@ public class TelemetryConverterTest {
         LoggingRequest logging = new LoggingRequest();
         logging.setS3(new S3CloudStorageV1Parameters());
         FeaturesRequest featuresRequest = new FeaturesRequest();
-        featuresRequest.addReportDeploymentLogs(false);
+        featuresRequest.addClusterLogsCollection(false);
         telemetryRequest.setLogging(logging);
         telemetryRequest.setFeatures(featuresRequest);
         // WHEN
         Telemetry result = underTest.convert(telemetryRequest);
         // THEN
         assertThat(result.getFeatures().getWorkloadAnalytics(), nullValue());
-        assertThat(result.getFeatures().getReportDeploymentLogs().isEnabled(), is(false));
+        assertThat(result.getFeatures().getClusterLogsCollection().isEnabled(), is(false));
         assertThat(result.getDatabusEndpoint(), is(DATABUS_ENDPOINT));
     }
 

@@ -1,6 +1,6 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 # CONFIGURED BY SALT - do not edit
-{% if providerPrefix != "databus" or fluent.dbusReportDeploymentLogs %}
+{% if providerPrefix != "databus" or fluent.dbusClusterLogsCollection %}
 <worker {{ workerIndex }}>
 <source>
   @type tail

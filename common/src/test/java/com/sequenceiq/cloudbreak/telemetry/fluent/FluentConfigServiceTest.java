@@ -15,7 +15,6 @@ import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.common.api.type.FeatureSetting;
 
 public class FluentConfigServiceTest {
 
@@ -228,28 +227,28 @@ public class FluentConfigServiceTest {
     }
 
     @Test
-    public void testCreateFluentConfigReportDeploymentLogs() {
+    public void testCreateFluentConfigClusterLogsCollection() {
         // GIVEN
         Telemetry telemetry = new Telemetry();
-        setReportDeploymentLogs(telemetry);
+        setClusterLogsCollection(telemetry);
         // WHEN
         FluentConfigView result = underTest.createFluentConfigs(DEFAULT_FLUENT_CLUSTER_DETAILS, true, false, telemetry);
         // THEN
         assertTrue(result.isEnabled());
-        assertTrue(result.isReportClusterDeploymentLogs());
+        assertTrue(result.isClusterLogsCollection());
     }
 
     @Test
-    public void testCreateFluentConfigReportDeploymentLogsWithoutDatabus() {
+    public void testCreateFluentConfigClusterLogsCollectionWithoutDatabus() {
         // GIVEN
         Telemetry telemetry = new Telemetry();
-        setReportDeploymentLogs(telemetry);
+        setClusterLogsCollection(telemetry);
         // WHEN
         FluentConfigView result = underTest.createFluentConfigs(
                 DEFAULT_FLUENT_CLUSTER_DETAILS, false, true, telemetry);
         // THEN
         assertFalse(result.isEnabled());
-        assertFalse(result.isReportClusterDeploymentLogs());
+        assertFalse(result.isClusterLogsCollection());
     }
 
     @Test(expected = CloudbreakServiceException.class)
@@ -280,17 +279,13 @@ public class FluentConfigServiceTest {
 
     private void setMetering(Telemetry telemetry) {
         Features features = new Features();
-        FeatureSetting metering = new FeatureSetting();
-        metering.setEnabled(true);
-        features.setMetering(metering);
+        features.addMetering(true);
         telemetry.setFeatures(features);
     }
 
-    private void setReportDeploymentLogs(Telemetry telemetry) {
+    private void setClusterLogsCollection(Telemetry telemetry) {
         Features features = new Features();
-        FeatureSetting reportDeploymentLogs = new FeatureSetting();
-        reportDeploymentLogs.setEnabled(true);
-        features.setReportDeploymentLogs(reportDeploymentLogs);
+        features.addClusterLogsCollection(true);
         telemetry.setFeatures(features);
     }
 }

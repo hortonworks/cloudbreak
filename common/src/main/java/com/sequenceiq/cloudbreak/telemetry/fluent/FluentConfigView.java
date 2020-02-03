@@ -19,7 +19,7 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private static final String EMPTY_CONFIG_DEFAULT = "";
 
-    private static final Boolean DBUS_DISABLE_STOP_REPORTING_DEFAULT = false;
+    private static final Boolean DBUS_DISABLE_STOP_CLUSTER_LOG_COLLECTION_DEFAULT = false;
 
     private static final Integer PARTITION_INTERVAL_DEFAULT = 5;
 
@@ -29,7 +29,7 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private final boolean cloudLoggingServiceEnabled;
 
-    private final boolean reportClusterDeploymentLogs;
+    private final boolean clusterLogsCollection;
 
     private final boolean meteringEnabled;
 
@@ -71,7 +71,7 @@ public class FluentConfigView implements TelemetryConfigView {
         this.enabled = builder.enabled;
         this.cloudStorageLoggingEnabled = builder.cloudStorageLoggingEnabled;
         this.cloudLoggingServiceEnabled = builder.cloudLoggingServiceEnabled;
-        this.reportClusterDeploymentLogs = builder.reportClusterDeploymentLogs;
+        this.clusterLogsCollection = builder.clusterLogsCollection;
         this.meteringEnabled = builder.meteringEnabled;
         this.clusterDetails = builder.clusterDetails;
         this.user = builder.user;
@@ -168,8 +168,8 @@ public class FluentConfigView implements TelemetryConfigView {
         return cloudLoggingServiceEnabled;
     }
 
-    public boolean isReportClusterDeploymentLogs() {
-        return reportClusterDeploymentLogs;
+    public boolean isClusterLogsCollection() {
+        return clusterLogsCollection;
     }
 
     public boolean isMeteringEnabled() {
@@ -187,8 +187,8 @@ public class FluentConfigView implements TelemetryConfigView {
         map.put("cloudStorageLoggingEnabled", this.cloudStorageLoggingEnabled);
         map.put("cloudLoggingServiceEnabled", this.cloudLoggingServiceEnabled);
         map.put("dbusMeteringEnabled", this.meteringEnabled);
-        map.put("dbusReportDeploymentLogs", this.reportClusterDeploymentLogs);
-        map.put("dbusReportDeploymentLogsDisableStop", DBUS_DISABLE_STOP_REPORTING_DEFAULT);
+        map.put("dbusClusterLogsCollection", this.clusterLogsCollection);
+        map.put("dbusClusterLogsCollectionDisableStop", DBUS_DISABLE_STOP_CLUSTER_LOG_COLLECTION_DEFAULT);
         map.put("user", ObjectUtils.defaultIfNull(this.user, TD_AGENT_USER_DEFAULT));
         map.put("group", ObjectUtils.defaultIfNull(this.group, TD_AGENT_GROUP_DEFAULT));
         map.put("providerPrefix", ObjectUtils.defaultIfNull(this.providerPrefix, PROVIDER_PREFIX_DEFAULT));
@@ -227,7 +227,7 @@ public class FluentConfigView implements TelemetryConfigView {
 
         private boolean cloudLoggingServiceEnabled;
 
-        private boolean reportClusterDeploymentLogs;
+        private boolean clusterLogsCollection;
 
         private boolean meteringEnabled;
 
@@ -349,8 +349,8 @@ public class FluentConfigView implements TelemetryConfigView {
             return this;
         }
 
-        public Builder withReportClusterDeploymentLogs(boolean reportClusterDeploymentLogs) {
-            this.reportClusterDeploymentLogs = reportClusterDeploymentLogs;
+        public Builder withClusterLogsCollection(boolean clusterLogsCollection) {
+            this.clusterLogsCollection = clusterLogsCollection;
             return this;
         }
 

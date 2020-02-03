@@ -84,22 +84,22 @@ public class FluentConfigService {
         }
         builder.withCloudStorageLoggingEnabled(cloudStorageLoggingEnabled)
                 .withCloudLoggingServiceEnabled(cloudLogServiceLoggingEnabled);
-        boolean databusLogEnabled = fillMeteringAndDeploymentReportConfigs(telemetry, databusEnabled, meteringEnabled, builder);
+        boolean databusLogEnabled = fillMeteringAndClusterLogCollectionConfigs(telemetry, databusEnabled, meteringEnabled, builder);
         return cloudStorageLoggingEnabled || databusLogEnabled || cloudLogServiceLoggingEnabled;
     }
 
-    private boolean fillMeteringAndDeploymentReportConfigs(Telemetry telemetry, boolean databusEnabled,
+    private boolean fillMeteringAndClusterLogCollectionConfigs(Telemetry telemetry, boolean databusEnabled,
             boolean meteringEnabled, FluentConfigView.Builder builder) {
         boolean validDatabusLogging = false;
-        if (meteringEnabled || telemetry.isReportDeploymentLogsFeatureEnabled()) {
+        if (meteringEnabled || telemetry.isClusterLogsCollectionEnabled()) {
             if (databusEnabled && meteringEnabled) {
                 builder.withMeteringEnabled(true);
                 LOGGER.debug("Fluent will be configured to send metering events.");
                 validDatabusLogging = true;
             }
-            if (databusEnabled && telemetry.isReportDeploymentLogsFeatureEnabled()) {
-                builder.withReportClusterDeploymentLogs(true);
-                LOGGER.debug("Fluent based metering is enabled.");
+            if (databusEnabled && telemetry.isClusterLogsCollectionEnabled()) {
+                builder.withClusterLogsCollection(true);
+                LOGGER.debug("Fluent based cluster log collection is enabled.");
                 validDatabusLogging = true;
             }
         }

@@ -195,16 +195,6 @@ public class ModelDescriptions {
         public static final String DEFAULT_TAGS = "stack related default tags";
         public static final String USERDEFINED_TAGS = "stack related userdefined tags";
         public static final String TELEMETRY = "stack related telemetry settings";
-        public static final String TELEMETRY_LOGGING = "stack related telemetry - logging settings";
-        public static final String TELEMETRY_COMPONENT_ENABLED = "enable telemetry component";
-        public static final String TELEMETRY_COMPONENT_ATTRIBUTES = "stack related telemetry component attributes";
-        public static final String TELEMETRY_LOGGING_OUTPUT_TYPE = "telemetry - logging output type";
-        public static final String TELEMETRY_WA = "stack related telemetry - workload analytics settings";
-        public static final String TELEMETRY_WA_DATABUS_ENDPOINT = "telemetry - workload altus service (databus) endpoint url";
-        public static final String TELEMETRY_WA_ACCESS_KEY = "telemetry - workload altus access key - for non-production usage only";
-        public static final String TELEMETRY_WA_PRIVATE_KEY = "telemetry - workload altus private key (RSA) - for non-production usage only";
-        public static final String REPORT_DEPLOYMENT_LOGS = "enable cluster deployment log reporting.";
-        public static final String WORKLOAD_ANALYTICS = "enable workload analytics for the cluser";
         public static final String CREDENTIAL = "stack related credential";
         public static final String AUTHENTICATION = "stack related authentication";
         public static final String FILESYSTEM = "cluster related filesystem";

@@ -177,7 +177,7 @@ public class StackRequestManifester {
             telemetryRequest.setLogging(loggingRequest);
             if (envTelemetry.getFeatures() != null) {
                 FeaturesRequest featuresRequest = new FeaturesRequest();
-                featuresRequest.setReportDeploymentLogs(envTelemetry.getFeatures().getReportDeploymentLogs());
+                featuresRequest.setClusterLogsCollection(envTelemetry.getFeatures().getClusterLogsCollection());
                 telemetryRequest.setFeatures(featuresRequest);
             }
             if (envTelemetry.getFluentAttributes() != null) {

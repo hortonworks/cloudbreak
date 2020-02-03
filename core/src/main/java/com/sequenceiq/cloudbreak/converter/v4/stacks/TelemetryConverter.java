@@ -47,7 +47,7 @@ public class TelemetryConverter {
 
     private final boolean meteringEnabled;
 
-    private final boolean reportDeploymentLogs;
+    private final boolean clusterLogsCollection;
 
     private final boolean useSharedAltusCredential;
 
@@ -59,7 +59,7 @@ public class TelemetryConverter {
         this.databusEndpoint = configuration.getAltusDatabusConfiguration().getAltusDatabusEndpoint();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
         this.meteringEnabled = configuration.isMeteringEnabled();
-        this.reportDeploymentLogs = configuration.isReportDeploymentLogs();
+        this.clusterLogsCollection = configuration.isClusterLogsCollection();
     }
 
     public TelemetryResponse convert(Telemetry telemetry) {
@@ -87,7 +87,7 @@ public class TelemetryConverter {
             telemetry.setLogging(logging);
             telemetry.setWorkloadAnalytics(workloadAnalytics);
             setWorkloadAnalyticsFeature(telemetry, features);
-            setReportDeploymentLogs(request, features);
+            setClusterLogsCollection(request, features);
             setUseSharedAltusCredential(features);
             telemetry.setFluentAttributes(request.getFluentAttributes());
         }
@@ -110,8 +110,8 @@ public class TelemetryConverter {
             telemetryRequest.setLogging(loggingRequest);
             FeaturesResponse featuresResponse = response.getFeatures();
             if (featuresResponse != null) {
-                LOGGER.debug("Setting report deployment logs response (telemetry) based on environment response.");
-                featuresRequest.setReportDeploymentLogs(featuresResponse.getReportDeploymentLogs());
+                LOGGER.debug("Setting cluster logs collection response (telemetry) based on environment response.");
+                featuresRequest.setClusterLogsCollection(featuresResponse.getClusterLogsCollection());
             }
             telemetryRequest.setFluentAttributes(response.getFluentAttributes());
         }
@@ -203,7 +203,7 @@ public class TelemetryConverter {
         if (features != null) {
             featuresRequest = new FeaturesRequest();
             featuresRequest.setWorkloadAnalytics(features.getWorkloadAnalytics());
-            featuresRequest.setReportDeploymentLogs(features.getReportDeploymentLogs());
+            featuresRequest.setClusterLogsCollection(features.getClusterLogsCollection());
         }
         return featuresRequest;
     }
@@ -305,7 +305,7 @@ public class TelemetryConverter {
             LOGGER.debug("Setting feature telemetry response.");
             FeaturesResponse featuresResponse = new FeaturesResponse();
             featuresResponse.setWorkloadAnalytics(features.getWorkloadAnalytics());
-            featuresResponse.setReportDeploymentLogs(features.getReportDeploymentLogs());
+            featuresResponse.setClusterLogsCollection(features.getClusterLogsCollection());
             featuresResponse.setMetering(features.getMetering());
             featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
             response.setFeatures(featuresResponse);
@@ -341,18 +341,18 @@ public class TelemetryConverter {
         return newAttributes;
     }
 
-    private void setReportDeploymentLogs(TelemetryRequest request, Features features) {
-        if (reportDeploymentLogs) {
-            if (request.getFeatures() != null && request.getFeatures().getReportDeploymentLogs() != null) {
-                LOGGER.debug("Fill report deployment logs setting from telemetry feature request");
-                features.setReportDeploymentLogs(request.getFeatures().getReportDeploymentLogs());
+    private void setClusterLogsCollection(TelemetryRequest request, Features features) {
+        if (clusterLogsCollection) {
+            if (request.getFeatures() != null && request.getFeatures().getClusterLogsCollection() != null) {
+                LOGGER.debug("Fill cluster logs collection setting from telemetry feature request");
+                features.setClusterLogsCollection(request.getFeatures().getClusterLogsCollection());
             } else {
-                LOGGER.debug("Auto-filling report deployment logs telemetry settings as it is set, but missing from the request.");
-                features.addReportDeploymentLogs(false);
+                LOGGER.debug("Auto-filling cluster logs collection telemetry settings as it is set, but missing from the request.");
+                features.addClusterLogsCollection(false);
             }
         } else {
-            LOGGER.debug("Report deployment logs feature is disabled. Set feature as false.");
-            features.addReportDeploymentLogs(false);
+            LOGGER.debug("Cluster logs collection feature is disabled. Set feature as false.");
+            features.addClusterLogsCollection(false);
         }
     }
 

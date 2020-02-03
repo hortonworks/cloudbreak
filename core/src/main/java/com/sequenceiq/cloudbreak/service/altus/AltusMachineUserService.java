@@ -47,7 +47,7 @@ public class AltusMachineUserService {
 
     // for datalake metering is not supported/required right now
     private boolean isMeteringOrDeploymentReportingSupported(Stack stack, Telemetry telemetry) {
-        return telemetry != null && (telemetry.isReportDeploymentLogsFeatureEnabled() || (telemetry.isMeteringFeatureEnabled()
+        return telemetry != null && (telemetry.isClusterLogsCollectionEnabled() || (telemetry.isMeteringFeatureEnabled()
                 && !StackType.DATALAKE.equals(stack.getType())));
     }
 
