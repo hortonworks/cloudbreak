@@ -93,12 +93,13 @@ public class KerberosConfigV1Service {
     public DescribeKerberosConfigResponse getForCluster(String environmentCrn, String accountId, String clusterName) throws FreeIpaClientException {
         Optional<Stack> stack = stackService.findByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         if (stack.isPresent()) {
+            Stack existingStack = stack.get();
             Optional<KerberosConfig> existingKerberosConfig = kerberosConfigService.find(environmentCrn, accountId, clusterName);
             KerberosConfig kerberosConfig;
             if (existingKerberosConfig.isPresent()) {
                 kerberosConfig = existingKerberosConfig.get();
             } else {
-                FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack.get());
+                FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(existingStack);
                 String bindUser = "kerberosbind-" + clusterName;
                 Optional<User> existinguser = freeIpaClient.userFind(bindUser);
                 User user = existinguser.isPresent() ? existinguser.get() : freeIpaClient.userAdd(bindUser, "service", "account");
@@ -106,7 +107,7 @@ public class KerberosConfigV1Service {
                 freeIpaClient.userSetPasswordWithExpiration(user.getUid(), password, Optional.empty());
                 freeIpaClient.addRoleMember("Enrollment Administrator", Set.of(user.getUid()), null, null, null, null);
                 freeIpaPermissionService.setPermissions(freeIpaClient);
-                kerberosConfig = kerberosConfigRegisterService.createKerberosConfig(stack.get().getId(), user.getUid(), password, clusterName);
+                kerberosConfig = kerberosConfigRegisterService.createKerberosConfig(existingStack.getId(), user.getUid(), password, clusterName, environmentCrn);
             }
             return convertKerberosConfigToDescribeKerberosConfigResponse(kerberosConfig);
         } else {

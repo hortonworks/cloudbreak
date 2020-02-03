@@ -23,6 +23,9 @@ public class StackService {
     @Inject
     private StackRepository stackRepository;
 
+    @Inject
+    private ChildEnvironmentService childEnvironmentService;
+
     public List<Stack> findAllRunning() {
         return stackRepository.findAllRunning();
     }
@@ -47,14 +50,14 @@ public class StackService {
         return stackRepository.save(stack);
     }
 
-    public Stack getByAccountIdEnvironmentAndName(String accountId, String environment, String name) {
-        return stackRepository.findByAccountIdEnvironmentCrnAndName(accountId, environment, name)
-                .orElseThrow(() -> new NotFoundException(String.format("Stack [%s] in environment [%s] not found", name, environment)));
+    public Stack getByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
+        return findByEnvironmentCrnAndAccountId(environmentCrn, accountId)
+                .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
     }
 
-    public Stack getByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
+    public Optional<Stack> findByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
         return stackRepository.findByEnvironmentCrnAndAccountId(environmentCrn, accountId)
-                .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
+                .or(() -> childEnvironmentService.findParentByEnvironmentCrnAndAccountId(environmentCrn, accountId));
     }
 
     public List<Stack> getMultipleByEnvironmentCrnAndAccountId(Collection<String> environmentCrns, String accountId) {
@@ -63,10 +66,6 @@ public class StackService {
         } else {
             return stackRepository.findMultipleByEnvironmentCrnAndAccountId(environmentCrns, accountId);
         }
-    }
-
-    public Optional<Stack> findByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
-        return stackRepository.findByEnvironmentCrnAndAccountId(environmentCrn, accountId);
     }
 
     public List<Stack> findAllByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
