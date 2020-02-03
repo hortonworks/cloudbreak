@@ -40,14 +40,23 @@ class StackToDescribeFreeIpaResponseConverterTest {
     private static final String RESOURCE_CRN = "crn1";
 
     private static final String CHILD_ENVIRONMENT_CRN = "crn:child";
-    public static final String CLOUD_PLATFORM = "AWS";
-    public static final StackAuthenticationResponse STACK_AUTHENTICATION_RESPONSE = new StackAuthenticationResponse();
-    public static final ImageSettingsResponse IMAGE_SETTINGS_RESPONSE = new ImageSettingsResponse();
-    public static final FreeIpaServerResponse FREE_IPA_SERVER_RESPONSE = new FreeIpaServerResponse();
-    public static final List<InstanceGroupResponse> INSTANCE_GROUP_RESPONSES = List.of(new InstanceGroupResponse());
-    public static final Status STATUS = Status.AVAILABLE;
-    public static final String STATUS_REASON = "Because reasons";
-    public static final String APP_VERSION = "appVersion";
+
+    private static final String CLOUD_PLATFORM = "AWS";
+
+    private static final StackAuthenticationResponse STACK_AUTHENTICATION_RESPONSE = new StackAuthenticationResponse();
+
+    private static final ImageSettingsResponse IMAGE_SETTINGS_RESPONSE = new ImageSettingsResponse();
+
+    private static final FreeIpaServerResponse FREE_IPA_SERVER_RESPONSE = new FreeIpaServerResponse();
+
+    private static final List<InstanceGroupResponse> INSTANCE_GROUP_RESPONSES = List.of(new InstanceGroupResponse());
+
+    private static final Status STATUS = Status.AVAILABLE;
+
+    private static final String STATUS_REASON = "Because reasons";
+
+    private static final String APP_VERSION = "appVersion";
+
     private static final String STATUS_STRING = "Status string";
 
     @InjectMocks

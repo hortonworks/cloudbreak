@@ -24,7 +24,9 @@ import com.sequenceiq.freeipa.util.CrnService;
 class RegisterChildEnvironmentRequestValidatorTest {
 
     private static final String ACCOUNT_ID = "accountId";
+
     private static final String CHILD_ENVIRONMENT_CRN = "crn:child";
+
     private static final String PARENT_ENVIRONMENT_CRN = "crn:parent";
 
     private static final RegisterChildEnvironmentRequest REQUEST = new RegisterChildEnvironmentRequest();
@@ -52,7 +54,7 @@ class RegisterChildEnvironmentRequestValidatorTest {
     }
 
     @Test
-    void validate_shouldContainErrors() {
+    void validateShouldContainErrors() {
         when(stackService.findAllByEnvironmentCrnAndAccountId(PARENT_ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(List.of());
         when(stackService.findAllByEnvironmentCrnAndAccountId(CHILD_ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(List.of(new Stack()));
         when(childEnvironmentService.isChildEnvironment(PARENT_ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(true);
@@ -69,7 +71,7 @@ class RegisterChildEnvironmentRequestValidatorTest {
     }
 
     @Test
-    void validate_shouldNotContainErrors() {
+    void validateShouldNotContainErrors() {
         when(stackService.findAllByEnvironmentCrnAndAccountId(PARENT_ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(List.of(new Stack()));
         when(stackService.findAllByEnvironmentCrnAndAccountId(CHILD_ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(List.of());
         when(childEnvironmentService.isChildEnvironment(PARENT_ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(false);

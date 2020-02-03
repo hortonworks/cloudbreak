@@ -20,6 +20,7 @@ import com.sequenceiq.freeipa.repository.ChildEnvironmentRepository;
 class ChildEnvironmentServiceTest {
 
     private static final String ENVIRONMENT_CRN = "test:environment:crn";
+
     private static final String ACCOUNT_ID = "account:id";
 
     @InjectMocks
@@ -32,7 +33,7 @@ class ChildEnvironmentServiceTest {
     private StackService stackService;
 
     @Test
-    void isChildEnvironment_false() {
+    void isChildEnvironmentFalse() {
         when(repository.findParentByChildEnvironmentCrn(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
 
         boolean result = underTest.isChildEnvironment(ENVIRONMENT_CRN, ACCOUNT_ID);
@@ -41,7 +42,7 @@ class ChildEnvironmentServiceTest {
     }
 
     @Test
-    void isChildEnvironment_true() {
+    void isChildEnvironmentTrue() {
         when(repository.findParentByChildEnvironmentCrn(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.of("id"));
 
         boolean result = underTest.isChildEnvironment(ENVIRONMENT_CRN, ACCOUNT_ID);

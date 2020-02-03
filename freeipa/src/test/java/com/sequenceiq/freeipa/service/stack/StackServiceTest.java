@@ -115,7 +115,7 @@ class StackServiceTest {
     }
 
     @Test
-    void getByEnvironmentCrnAndAccountIdWithLists_shouldReturnByEnvironmentCrn() {
+    void getByEnvironmentCrnAndAccountIdWithListsShouldReturnByEnvironmentCrn() {
         when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.of(stack));
 
         Stack result = underTest.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID);
@@ -126,7 +126,7 @@ class StackServiceTest {
     }
 
     @Test
-    void getByEnvironmentCrnAndAccountIdWithLists_shouldReturnByChildEnvironmentCrn() {
+    void getByEnvironmentCrnAndAccountIdWithListsShouldReturnByChildEnvironmentCrn() {
         when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
         when(stackRepository.findByChildEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.of(stack));
 
@@ -138,7 +138,7 @@ class StackServiceTest {
     }
 
     @Test
-    void getByEnvironmentCrnAndAccountIdWithLists_shouldFailAsFallback() {
+    void getByEnvironmentCrnAndAccountIdWithListsShouldFailAsFallback() {
         when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
         when(stackRepository.findByChildEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
 
@@ -148,7 +148,7 @@ class StackServiceTest {
     }
 
     @Test
-    void registerChildEnvironment_shouldSucceed() {
+    void registerChildEnvironmentShouldSucceed() {
         RegisterChildEnvironmentRequest registerChildEnvironmentRequest = createRegisterChildEnvironmentRequest();
         when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.of(stack));
 
@@ -159,7 +159,7 @@ class StackServiceTest {
     }
 
     @Test
-    void registerChildEnvironment_shouldFail() {
+    void registerChildEnvironmentShouldFail() {
         RegisterChildEnvironmentRequest registerChildEnvironmentRequest = createRegisterChildEnvironmentRequest();
         when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
 
