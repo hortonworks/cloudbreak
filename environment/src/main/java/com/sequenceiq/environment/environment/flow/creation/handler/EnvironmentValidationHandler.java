@@ -25,21 +25,21 @@ import reactor.bus.Event;
 @Component
 public class EnvironmentValidationHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
+    private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
     private final EnvironmentFlowValidatorService validatorService;
 
     private final EnvironmentService environmentService;
 
-    private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
-
     protected EnvironmentValidationHandler(
             EventSender eventSender,
-            EnvironmentFlowValidatorService validatorService,
             EnvironmentService environmentService,
-            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
+            EnvironmentFlowValidatorService validatorService,
+            WebApplicationExceptionMessageExtractor messageExtractor) {
         super(eventSender);
         this.validatorService = validatorService;
         this.environmentService = environmentService;
-        this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
+        webApplicationExceptionMessageExtractor = messageExtractor;
     }
 
     @Override
@@ -57,17 +57,16 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
                                 validationResult = validationResult.merge(validatorService.validateNetworkWithProvider(environmentDto));
                                 if (validationResult.hasError()) {
                                     goToFailedState(environmentDtoEvent, validationResult.getFormattedErrors());
+                                } else {
+                                    goToNetworkCreationState(environmentDtoEvent, environmentDto);
                                 }
-                                goToNetworkCreationState(environmentDtoEvent, environmentDto);
                             } catch (WebApplicationException e) {
                                 String responseMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
                                 goToFailedState(environmentDtoEvent, e.getMessage() + ". " + responseMessage);
                             } catch (Exception e) {
                                 goToFailedState(environmentDtoEvent, e.getMessage());
                             }
-                        }, () -> {
-                            goToFailedState(environmentDtoEvent, String.format("Environment was not found with id '%s'.", environmentDto.getId()));
-                        }
+                        }, () -> goToFailedState(environmentDtoEvent, String.format("Environment was not found with id '%s'.", environmentDto.getId()))
                 );
     }
 
@@ -103,4 +102,5 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
     public String selector() {
         return VALIDATE_ENVIRONMENT_EVENT.selector();
     }
+
 }

@@ -8,6 +8,9 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,11 +18,14 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
+import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.EnvironmentNetworkService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
+import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -28,11 +34,17 @@ import reactor.bus.Event;
 @Component
 public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetworkCreationHandler.class);
+
     private final EnvironmentService environmentService;
 
     private final NetworkService networkService;
 
     private final EnvironmentNetworkService environmentNetworkService;
+
+    private final EnvironmentResourceService environmentResourceService;
+
+    private final CloudNetworkService cloudNetworkService;
 
     private final Set<String> enabledPlatforms;
 
@@ -40,19 +52,37 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
             EnvironmentService environmentService,
             NetworkService networkService,
             EnvironmentNetworkService environmentNetworkService,
+            CloudNetworkService cloudNetworkService,
+            EnvironmentResourceService environmentResourceService,
             @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
         super(eventSender);
         this.environmentService = environmentService;
         this.networkService = networkService;
         this.environmentNetworkService = environmentNetworkService;
         this.enabledPlatforms = enabledPlatforms;
+        this.cloudNetworkService = cloudNetworkService;
+        this.environmentResourceService = environmentResourceService;
     }
 
     @Override
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            createNetwork(environmentDto);
+            environmentService.findEnvironmentById(environmentDto.getId())
+                    .ifPresent(environment -> {
+                        setChildEnvironmentNetworkIfItHasParent(environmentDto);
+                        if (environmentDto.getNetwork() != null) {
+                            LOGGER.debug("Environment ({}) dto has network, hence we're filling it's related subnet fields", environment.getName());
+                            environmentDto.getNetwork().setSubnetMetas(cloudNetworkService.retrieveSubnetMetadata(environmentDto,
+                                    environmentDto.getNetwork()));
+                            environmentResourceService.createAndSetNetwork(environment, environmentDto.getNetwork(), environment.getAccountId(),
+                                    environmentDto.getNetwork().getSubnetMetas());
+                        } else {
+                            LOGGER.debug("Environment ({}) dto has no network!", environment.getName());
+                        }
+                        createCloudNetworkIfNeeded(environmentDto, environment);
+                        environmentService.save(environment);
+                    });
             initiateNextStep(environmentDtoEvent, environmentDto);
         } catch (Exception e) {
             EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
@@ -64,12 +94,15 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
         }
     }
 
-    private void createNetwork(EnvironmentDto environmentDto) {
-        environmentService.findEnvironmentById(environmentDto.getId())
-                .ifPresent(environment -> {
-                    createCloudNetworkIfNeeded(environmentDto, environment);
-                    environmentService.save(environment);
-                });
+    private void setChildEnvironmentNetworkIfItHasParent(EnvironmentDto currentEnvDto) {
+        String parentEnvName = currentEnvDto.getParentEnvironmentName();
+        if (StringUtils.isNotEmpty(parentEnvName)) {
+            LOGGER.debug("Parent environment (with name: {} ) has detected, going to fetch it for it's network for the child.", parentEnvName);
+            EnvironmentDto parentEnvDto = environmentService.getByNameAndAccountId(parentEnvName, currentEnvDto.getAccountId());
+            NetworkDto parentNetworkDto = parentEnvDto.getNetwork();
+            parentNetworkDto.setId(currentEnvDto.getNetwork().getId());
+            currentEnvDto.setNetwork(parentNetworkDto);
+        }
     }
 
     private void createCloudNetworkIfNeeded(EnvironmentDto environmentDto, Environment environment) {

@@ -26,6 +26,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
+import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Component
@@ -51,7 +52,7 @@ public class EnvironmentNetworkProviderValidator {
         String cloudPlatform = environmentDto.getCloudPlatform();
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         validateNetworkHasTheSamePropertyFilledAsTheDesiredCloudPlatform(network, cloudPlatform, resultBuilder);
-        validateNetwork(network, cloudPlatform, resultBuilder);
+        validateNetwork(network, cloudPlatform, resultBuilder, environmentDto);
         validateSecurityGroup(environmentDto, cloudPlatform, resultBuilder);
         return resultBuilder.build();
     }
@@ -66,9 +67,9 @@ public class EnvironmentNetworkProviderValidator {
                     MOCK, optional(networkDto.getMock()),
                     YARN, optional(networkDto.getYarn())
             );
-
+            String supportedPlatforms = String.join(", ", providerNetworkParamPair.keySet().stream().map(Enum::name).collect(Collectors.toSet()));
             LOGGER.debug("About to validate network properties for cloud platform \"{}\" against the following supported platforms: {}",
-                    cloudPlatform, String.join(", ", providerNetworkParamPair.keySet().stream().map(Enum::name).collect(Collectors.toSet())));
+                    cloudPlatform, supportedPlatforms);
 
             providerNetworkParamPair.keySet().stream()
                     .filter(cloudProviderName -> cloudProviderName.name().equalsIgnoreCase(cloudPlatform))
@@ -88,17 +89,24 @@ public class EnvironmentNetworkProviderValidator {
         return Optional.ofNullable(o);
     }
 
-    private void validateNetwork(NetworkDto networkDto, String cloudPlatform, ValidationResultBuilder resultBuilder) {
-        if (networkDto != null && Strings.isNullOrEmpty(networkDto.getNetworkCidr())) {
-            EnvironmentNetworkValidator environmentNetworkValidator = environmentNetworkValidatorsByCloudPlatform.get(valueOf(cloudPlatform));
-            if (networkDto.getNetworkCidr() != null && isInvalidNetworkMask(networkDto.getNetworkCidr())) {
-                resultBuilder.error(String.format("The netmask must be /%s.", EXPECTED_NETWORK_MASK));
-            }
-            if (environmentNetworkValidator != null) {
-                environmentNetworkValidator.validateDuringFlow(networkDto, resultBuilder);
+    private void validateNetwork(NetworkDto networkDto, String cloudPlatform, ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto) {
+        if (networkDto != null) {
+            if (Strings.isNullOrEmpty(networkDto.getNetworkCidr()) || RegistrationType.EXISTING.equals(networkDto.getRegistrationType())) {
+                EnvironmentNetworkValidator environmentNetworkValidator = environmentNetworkValidatorsByCloudPlatform.get(valueOf(cloudPlatform));
+                if (environmentNetworkValidator != null) {
+                    LOGGER.debug("Going to validate environment ({}) network in flow", environmentDto.getName());
+                    environmentNetworkValidator.validateDuringFlow(environmentDto, networkDto, resultBuilder);
+                } else {
+                    resultBuilder.error(String.format("Environment specific network is not supported for cloud platform: '%s'!", cloudPlatform));
+                }
             } else {
-                resultBuilder.error(String.format("Environment specific network is not supported for cloud platform: '%s'!", cloudPlatform));
+                LOGGER.debug("Checking wheter the provided network cidr is valid or not.");
+                if (!networkDto.getNetworkCidr().split("/")[1].equals(EXPECTED_NETWORK_MASK)) {
+                    resultBuilder.error(String.format("The netmask must be /%s.", EXPECTED_NETWORK_MASK));
+                }
             }
+        } else {
+            LOGGER.debug("Nothing to validate since the provided NetworkDto instance was null.");
         }
     }
 
@@ -119,4 +127,5 @@ public class EnvironmentNetworkProviderValidator {
             }
         }
     }
+
 }

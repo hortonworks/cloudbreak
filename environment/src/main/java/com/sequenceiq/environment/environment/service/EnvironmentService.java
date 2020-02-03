@@ -303,4 +303,5 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
             LOGGER.warn(String.format("EnvironmentAdmin role of %s environment cannot be assigned to the %s user", environmentCrn, userCrn), rex);
         }
     }
+
 }
