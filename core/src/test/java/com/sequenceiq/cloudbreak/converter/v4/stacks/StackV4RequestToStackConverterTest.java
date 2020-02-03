@@ -191,7 +191,8 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
                 Arrays.asList("description", "cluster", "environmentCrn", "gatewayPort", "useCcm", "network", "securityConfig",
                         "version", "created", "platformVariant", "cloudPlatform",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
-                        "environmentCrn", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy", "resourceCrn", "minaSshdServiceId"));
+                        "environmentCrn", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy", "resourceCrn", "minaSshdServiceId",
+                        "externalDatabaseCreationType"));
         assertEquals("eu-west-1", stack.getRegion());
         assertEquals("AWS", stack.getCloudPlatform());
         assertEquals("mystack", stack.getName());
@@ -219,7 +220,8 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
                 Arrays.asList("description", "cluster", "environmentCrn", "gatewayPort", "useCcm", "network", "securityConfig",
                         "version", "created", "platformVariant", "cloudPlatform", "resourceCrn",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
-                        "environmentCrn", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy", "minaSshdServiceId"));
+                        "environmentCrn", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy", "minaSshdServiceId",
+                        "externalDatabaseCreationType"));
         assertEquals("eu-west-1", stack.getRegion());
         assertEquals("AWS", stack.getCloudPlatform());
         assertEquals("mystack", stack.getName());

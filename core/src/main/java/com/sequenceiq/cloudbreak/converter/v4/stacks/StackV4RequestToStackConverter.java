@@ -28,6 +28,7 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
@@ -150,6 +151,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         if (!isTemplate(source)) {
             gatewaySecurityGroupDecorator.extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack, environment.getTunnel());
         }
+        stack.setExternalDatabaseCreationType(getIfNotNull(source.getExternalDatabase(), DatabaseRequest::getAvailabilityType));
         return stack;
     }
 

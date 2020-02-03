@@ -136,7 +136,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier"));
+                "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "externalDatabase"));
     }
 
     @Test
@@ -158,7 +158,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("cluster", "gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier"));
+                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "externalDatabase"));
 
         assertNull(result.getCluster());
     }
@@ -182,7 +182,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("network", "gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier"));
+                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "externalDatabase"));
 
         assertNull(result.getNetwork());
     }

@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.S
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
@@ -89,6 +90,10 @@ public class StackV4Request extends StackV4Base {
 
     @ApiModelProperty(StackModelDescription.INPUTS)
     private Map<String, Object> inputs = new HashMap<>();
+
+    @Valid
+    @ApiModelProperty(StackModelDescription.EXTERNAL_DATABASE)
+    private DatabaseRequest externalDatabase;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -207,5 +212,13 @@ public class StackV4Request extends StackV4Base {
 
     public void setTelemetry(TelemetryRequest telemetry) {
         this.telemetry = telemetry;
+    }
+
+    public DatabaseRequest getExternalDatabase() {
+        return externalDatabase;
+    }
+
+    public void setExternalDatabase(DatabaseRequest externalDatabase) {
+        this.externalDatabase = externalDatabase;
     }
 }

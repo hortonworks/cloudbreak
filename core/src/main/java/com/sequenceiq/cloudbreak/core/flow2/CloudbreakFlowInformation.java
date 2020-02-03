@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.UNKNOWN;
+import static com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationEvent.START_EXTERNAL_DATABASE_TERMINATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.TERMINATION_EVENT;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminati
 import com.sequenceiq.cloudbreak.core.flow2.cluster.upgrade.ClusterUpgradeFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd.ClusterCredentialChangeFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination.InstanceTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
@@ -42,7 +43,7 @@ import com.sequenceiq.flow.domain.FlowLog;
 @Component
 public class CloudbreakFlowInformation implements ApplicationFlowInformation {
 
-    private static final List<String> ALLOWED_PARALLEL_FLOWS = Collections.singletonList(TERMINATION_EVENT.event());
+    private static final List<String> ALLOWED_PARALLEL_FLOWS = List.of(TERMINATION_EVENT.event(), START_EXTERNAL_DATABASE_TERMINATION_EVENT.event());
 
     private static final List<Class<? extends FlowConfiguration<?>>> RESTARTABLE_FLOWS = Arrays.asList(
             StackCreationFlowConfig.class,
@@ -73,7 +74,7 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
 
     @Override
     public List<Class<? extends FlowConfiguration<?>>> getTerminationFlow() {
-        return Arrays.asList(StackTerminationFlowConfig.class, ClusterTerminationFlowConfig.class);
+        return Arrays.asList(StackTerminationFlowConfig.class, ClusterTerminationFlowConfig.class, ExternalDatabaseTerminationFlowConfig.class);
     }
 
     @Override

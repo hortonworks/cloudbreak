@@ -45,7 +45,7 @@ public class StackTerminationFailureAction extends AbstractStackFailureAction<St
     protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
         boolean forced = variables.get("FORCEDTERMINATION") != null && Boolean.valueOf(variables.get("FORCEDTERMINATION").toString());
         try {
-            stackTerminationService.handleStackTerminationError(context.getStackView(), payload, forced);
+            stackTerminationService.handleStackTerminationError(context.getStackView().getId(), payload.getException(), forced);
         } catch (Exception e) {
             LOGGER.error("Exception occured while Cloudbreak tried to handle stack termination error: ", e);
         }

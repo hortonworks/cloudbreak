@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.AttachedClusterInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.CustomDomainSettingsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
@@ -115,6 +118,8 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         convertTelemetryComponent(response, source);
         response.setTags(getTags(source.getTags()));
         response.setTimeToLive(getStackTimeToLive(source));
+        response.setExternalDatabase(getIfNotNull(source.getExternalDatabaseCreationType(),
+                ed -> getConversionService().convert(ed, DatabaseResponse.class)));
         addSharedServiceResponse(source, response);
         filterExposedServicesByType(source.getType(), response.getCluster());
         return response;

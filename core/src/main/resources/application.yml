@@ -168,6 +168,7 @@ cb:
     cf.template.newdb.path: templates/aws-cf-dbstack.ftl
     default.inbound.security.group:
     vpc:
+    externaldatabase.retentionperiod: 0
 
   azure:
     host.name.prefix.length: 255

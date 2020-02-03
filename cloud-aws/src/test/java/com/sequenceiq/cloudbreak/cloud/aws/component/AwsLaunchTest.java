@@ -45,7 +45,6 @@ import com.amazonaws.services.ec2.model.VolumeState;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConnector;
-import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsCreateStackStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -80,9 +79,6 @@ public class AwsLaunchTest extends AwsComponentTest {
 
     @Inject
     private AmazonCloudFormationRetryClient amazonCloudFormationRetryClient;
-
-    @Inject
-    private EncryptedImageCopyService encryptedImageCopyService;
 
     @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;

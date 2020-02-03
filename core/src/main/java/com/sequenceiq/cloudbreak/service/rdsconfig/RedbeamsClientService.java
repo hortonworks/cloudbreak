@@ -10,10 +10,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
 @Service
 public class RedbeamsClientService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsClientService.class);
 
     @Inject
@@ -23,7 +26,27 @@ public class RedbeamsClientService {
         try {
             return redbeamsServerEndpoint.getByCrn(dbCrn);
         } catch (WebApplicationException | ProcessingException e) {
-            String message = String.format("Failed to GET DatabseServer properties by dbCrn: %s", dbCrn);
+            String message = String.format("Failed to GET DatabaseServer properties by dbCrn: %s", dbCrn);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    public DatabaseServerStatusV4Response create(AllocateDatabaseServerV4Request request) {
+        try {
+            return redbeamsServerEndpoint.create(request);
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to create DatabaseServer %s", request.getName());
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    public DatabaseServerV4Response deleteByCrn(String crn, boolean force) {
+        try {
+            return redbeamsServerEndpoint.deleteByCrn(crn, force);
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to delete DatabaseServer with CRN %s", crn);
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }

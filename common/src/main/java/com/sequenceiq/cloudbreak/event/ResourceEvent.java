@@ -254,6 +254,13 @@ public enum ResourceEvent {
     CLUSTER_CERTIFICATE_RENEWAL_FINISHED("cluster.certificate.renewal.finished"),
     CLUSTER_CERTIFICATE_RENEWAL_FAILED("cluster.certificate.renewal.failed"),
 
+    CLUSTER_EXTERNAL_DATABASE_DELETION_STARTED("cluster.externaldatabase.deletion.started"),
+    CLUSTER_EXTERNAL_DATABASE_DELETION_FAILED("cluster.externaldatabase.deletion.failed"),
+    CLUSTER_EXTERNAL_DATABASE_DELETION_FINISHED("cluster.externaldatabase.deletion.finished"),
+    CLUSTER_EXTERNAL_DATABASE_CREATION_STARTED("cluster.externaldatabase.creation.started"),
+    CLUSTER_EXTERNAL_DATABASE_CREATION_FAILED("cluster.externaldatabase.creation.failed"),
+    CLUSTER_EXTERNAL_DATABASE_CREATION_FINISHED("cluster.externaldatabase.creation.finished"),
+
     STACK_METADATA_COLLECTED("stack.metadata.collected"),
     STACK_PROVISIONED("stack.provisioned"),
     STACK_RETRY_FLOW_START("retry.flow.start"),
