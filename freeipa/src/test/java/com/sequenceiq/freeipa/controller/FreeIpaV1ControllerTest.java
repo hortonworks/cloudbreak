@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,8 +26,11 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenv.RegisterChildEnvironmentRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.validation.CreateFreeIpaRequestValidator;
+import com.sequenceiq.freeipa.controller.validation.RegisterChildEnvironmentRequestValidator;
+import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
@@ -50,6 +55,9 @@ class FreeIpaV1ControllerTest {
     private FreeIpaCreationService creationService;
 
     @Mock
+    private ChildEnvironmentService childEnvironmentService;
+
+    @Mock
     private FreeIpaDescribeService describeService;
 
     @Mock
@@ -64,14 +72,31 @@ class FreeIpaV1ControllerTest {
     @Mock
     private CreateFreeIpaRequestValidator createFreeIpaRequestValidatior;
 
+    @Mock
+    private RegisterChildEnvironmentRequestValidator registerChildEnvironmentRequestValidator;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+    }
+
     @Test
     void create() {
-        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         CreateFreeIpaRequest freeIpaRequest = new CreateFreeIpaRequest();
         when(createFreeIpaRequestValidatior.validate(freeIpaRequest)).thenReturn(ValidationResult.builder().build());
         assertNull(underTest.create(freeIpaRequest));
 
         verify(creationService, times(1)).launchFreeIpa(freeIpaRequest, ACCOUNT_ID);
+    }
+
+    @Test
+    void registerChildEnvironment() {
+        RegisterChildEnvironmentRequest registerChildEnvironmentRequest = new RegisterChildEnvironmentRequest();
+        when(registerChildEnvironmentRequestValidator.validate(registerChildEnvironmentRequest)).thenReturn(ValidationResult.builder().build());
+
+        underTest.registerChildEnvironment(registerChildEnvironmentRequest);
+
+        verify(childEnvironmentService, times(1)).registerChildEnvironment(registerChildEnvironmentRequest, ACCOUNT_ID);
     }
 
     @Test
@@ -120,13 +145,11 @@ class FreeIpaV1ControllerTest {
 
     @Test
     void describe() {
-        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         assertNull(underTest.describe(ENVIRONMENT_CRN));
     }
 
     @Test
     void list() {
-        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         List<ListFreeIpaResponse> responseList = Collections.singletonList(new ListFreeIpaResponse());
         when(freeIpaListService.list(ACCOUNT_ID)).thenReturn(responseList);
 
@@ -139,14 +162,12 @@ class FreeIpaV1ControllerTest {
 
     @Test
     void getRootCertificate() throws Exception {
-        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         underTest.getRootCertificate(ENVIRONMENT_CRN);
         verify(rootCertificateService, times(1)).getRootCertificate(ENVIRONMENT_CRN, ACCOUNT_ID);
     }
 
     @Test
     void delete() {
-        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         underTest.delete(ENVIRONMENT_CRN);
 
         verify(deletionService, times(1)).delete(ENVIRONMENT_CRN, ACCOUNT_ID);
