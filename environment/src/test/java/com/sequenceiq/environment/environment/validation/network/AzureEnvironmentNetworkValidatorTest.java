@@ -1,16 +1,23 @@
 package com.sequenceiq.environment.environment.validation.network;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.dto.AzureParams;
+import com.sequenceiq.environment.network.dto.AzureParams.AzureParamsBuilder;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @ExtendWith(MockitoExtension.class)
@@ -18,26 +25,30 @@ class AzureEnvironmentNetworkValidatorTest {
 
     private AzureEnvironmentNetworkValidator underTest;
 
+    @Mock
+    private CloudNetworkService cloudNetworkService;
+
     @BeforeEach
     void setUp() {
-        underTest = new AzureEnvironmentNetworkValidator();
+        MockitoAnnotations.initMocks(this);
+        underTest = new AzureEnvironmentNetworkValidator(cloudNetworkService);
     }
 
     @Test
     void testValidateDuringFlowWhenTheNetworkIsNull() {
-        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
-        underTest.validateDuringFlow(null, validationResultBuilder);
+        underTest.validateDuringFlow(null, null, validationResultBuilder);
 
-        assertFalse(validationResultBuilder.build().hasError());
+        assertTrue(validationResultBuilder.build().hasError());
     }
 
     @Test
     void testValidateDuringRequestWhenTheNetworkDoesNotContainAzureNetworkParams() {
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, null, null, null, 1);
-        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
-        underTest.validateDuringRequest(networkDto, null, validationResultBuilder);
+        underTest.validateDuringRequest(networkDto, validationResultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
                 "The 'AZURE' related network parameters should be specified!",
@@ -48,9 +59,9 @@ class AzureEnvironmentNetworkValidatorTest {
     void testValidateDuringRequestWhenTheAzureNetworkParamsDoesNotResourceGroupId() {
         AzureParams azureParams = NetworkTestUtils.getAzureParams(true, true, false);
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), null, 1);
-        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
-        underTest.validateDuringRequest(networkDto, null, validationResultBuilder);
+        underTest.validateDuringRequest(networkDto, validationResultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
                 "If networkId is specified, then resourceGroupName must be specified too."));
@@ -60,9 +71,9 @@ class AzureEnvironmentNetworkValidatorTest {
     void testValidateDuringRequestWhenTheAzureNetworkParamsDoesNotContainNetworkId() {
         AzureParams azureParams = NetworkTestUtils.getAzureParams(true, false, true);
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), null, 1);
-        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
-        underTest.validateDuringRequest(networkDto, null, validationResultBuilder);
+        underTest.validateDuringRequest(networkDto, validationResultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
                 "If resourceGroupName is specified, then networkId must be specified too.",
@@ -72,8 +83,8 @@ class AzureEnvironmentNetworkValidatorTest {
 
     @Test
     void testValidateDuringFlowWhenTheAzureNetworkParamsContainsRequiredFields() {
-        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-        AzureParams azureParams = AzureParams.AzureParamsBuilder
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        AzureParams azureParams = AzureParamsBuilder
                 .anAzureParams()
                 .withNetworkId("aNetworkId")
                 .withResourceGroupName("aResourceGroupId")
@@ -86,7 +97,9 @@ class AzureEnvironmentNetworkValidatorTest {
                 .withAzure(azureParams)
                 .build();
 
-        underTest.validateDuringFlow(networkDto, validationResultBuilder);
+        EnvironmentDto environmentDto = new EnvironmentDto();
+
+        underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
 
         assertFalse(validationResultBuilder.build().hasError());
     }
@@ -96,8 +109,8 @@ class AzureEnvironmentNetworkValidatorTest {
         AzureParams azureParams = NetworkTestUtils.getAzureParams(true, true, true);
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), null, null);
 
-        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
-        underTest.validateDuringRequest(networkDto, networkDto.getSubnetMetas(), resultBuilder);
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateDuringRequest(networkDto, resultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
                 "If networkId (aNetworkId) and resourceGroupName (aResourceGroupId) are specified then subnet ids must be specified as well."));
@@ -108,8 +121,8 @@ class AzureEnvironmentNetworkValidatorTest {
         AzureParams azureParams = NetworkTestUtils.getAzureParams(true, false, true);
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, null, null, 2);
 
-        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
-        underTest.validateDuringRequest(networkDto, networkDto.getSubnetMetas(), resultBuilder);
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateDuringRequest(networkDto, resultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of("Either the AZURE network id or cidr needs to be defined!",
                 "If resourceGroupName is specified, then networkId must be specified too.",
@@ -121,8 +134,8 @@ class AzureEnvironmentNetworkValidatorTest {
         AzureParams azureParams = NetworkTestUtils.getAzureParams(true, true, true);
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), null, 1);
 
-        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
-        underTest.validateDuringRequest(networkDto, networkDto.getSubnetMetas(), resultBuilder);
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateDuringRequest(networkDto, resultBuilder);
 
         ValidationResult validationResult = resultBuilder.build();
         assertFalse(validationResult.hasError());
@@ -132,8 +145,8 @@ class AzureEnvironmentNetworkValidatorTest {
     void testValidateWhenNoNetworkCidrAndNoNetworkId() {
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(new AzureParams(), null, null, null, null, 1);
 
-        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
-        underTest.validateDuringRequest(networkDto, null, resultBuilder);
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateDuringRequest(networkDto, resultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
                 "If AZURE subnet ids were provided then network id and resource group name have to be specified, too.",
@@ -147,8 +160,8 @@ class AzureEnvironmentNetworkValidatorTest {
         AzureParams azureParams = NetworkTestUtils.getAzureParams(true, false, false);
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, null, "0.0.0.0/0", null);
 
-        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
-        underTest.validateDuringRequest(networkDto, null, resultBuilder);
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateDuringRequest(networkDto, resultBuilder);
 
         ValidationResult validationResult = resultBuilder.build();
         assertFalse(validationResult.hasError(), validationResult.getFormattedErrors());
@@ -158,8 +171,8 @@ class AzureEnvironmentNetworkValidatorTest {
     void testValidateDuringRequestWhenNetworkCidrAndNoAzureParams() {
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, null, null, "0.0.0.0/0", null);
 
-        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
-        underTest.validateDuringRequest(networkDto, null, resultBuilder);
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateDuringRequest(networkDto, resultBuilder);
 
         ValidationResult validationResult = resultBuilder.build();
         assertFalse(validationResult.hasError(), validationResult.getFormattedErrors());
@@ -169,8 +182,8 @@ class AzureEnvironmentNetworkValidatorTest {
     void testValidateDuringRequestWhenNoNetworkCidrAndNoAzureParams() {
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, null, null, null, 1);
 
-        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
-        underTest.validateDuringRequest(networkDto, null, resultBuilder);
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateDuringRequest(networkDto, resultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
                 "The 'AZURE' related network parameters should be specified!",
@@ -183,8 +196,8 @@ class AzureEnvironmentNetworkValidatorTest {
         AzureParams azureParams = NetworkTestUtils.getAzureParams(true, false, true);
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), null, 1);
 
-        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
-        underTest.validateDuringRequest(networkDto, null, resultBuilder);
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateDuringRequest(networkDto, resultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
                 "If resourceGroupName is specified, then networkId must be specified too.",
@@ -198,8 +211,8 @@ class AzureEnvironmentNetworkValidatorTest {
         AzureParams azureParams = NetworkTestUtils.getAzureParams(true, true, false);
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), null, 1);
 
-        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
-        underTest.validateDuringRequest(networkDto, null, resultBuilder);
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateDuringRequest(networkDto, resultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
                 "If networkId is specified, then resourceGroupName must be specified too."));

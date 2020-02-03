@@ -13,7 +13,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
@@ -22,12 +24,19 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureEnvironmentNetworkValidator.class);
 
-    @Override
-    public void validateDuringFlow(NetworkDto networkDto, ValidationResult.ValidationResultBuilder resultBuilder) {
+    private final CloudNetworkService cloudNetworkService;
+
+    public AzureEnvironmentNetworkValidator(CloudNetworkService cloudNetworkService) {
+        this.cloudNetworkService = cloudNetworkService;
     }
 
     @Override
-    public void validateDuringRequest(NetworkDto networkDto, Map<String, CloudSubnet> subnetMetas, ValidationResult.ValidationResultBuilder resultBuilder) {
+    public void validateDuringFlow(EnvironmentDto environmentDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
+        checkSubnetIdsAreTheSameAsTheSubnetMetasFromProvider(environmentDto, networkDto, resultBuilder);
+    }
+
+    @Override
+    public void validateDuringRequest(NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
         if (networkDto == null) {
             return;
         }
@@ -40,7 +49,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
 
         AzureParams azureParams = networkDto.getAzure();
         if (azureParams != null) {
-            checkSubnetsProvidedWhenExistingNetwork(resultBuilder, azureParams, subnetMetas);
+            checkSubnetsProvidedWhenExistingNetwork(resultBuilder, azureParams, networkDto.getSubnetMetas());
             checkExistingNetworkParamsProvidedWhenSubnetsPresent(networkDto, resultBuilder);
             checkResourceGroupNameWhenExistingNetwork(resultBuilder, azureParams);
             checkNetworkIdWhenExistingNetwork(resultBuilder, azureParams);
@@ -50,37 +59,25 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         }
     }
 
-    private void checkSubnetsProvidedWhenExistingNetwork(ValidationResult.ValidationResultBuilder resultBuilder,
-            AzureParams azureParams, Map<String, CloudSubnet> subnetMetas) {
-        if (StringUtils.isNotEmpty(azureParams.getNetworkId()) && StringUtils.isNotEmpty(azureParams.getResourceGroupName())
-                && MapUtils.isEmpty(subnetMetas)) {
-            String message = String.format("If networkId (%s) and resourceGroupName (%s) are specified then subnet ids must be specified as well.",
-                    azureParams.getNetworkId(), azureParams.getResourceGroupName());
-            LOGGER.info(message);
-            resultBuilder.error(message);
-        }
-    }
-
-    private void checkNetworkIdWhenExistingNetwork(ValidationResult.ValidationResultBuilder resultBuilder, AzureParams azureParams) {
+    private void checkSubnetIdWhenExistingNetwork(ValidationResultBuilder resultBuilder, AzureParams azureParams) {
         if (StringUtils.isEmpty(azureParams.getNetworkId()) && StringUtils.isNotEmpty(azureParams.getResourceGroupName())) {
             resultBuilder.error("If resourceGroupName is specified, then networkId must be specified too.");
         }
     }
 
-    private void checkResourceGroupNameWhenExistingNetwork(ValidationResult.ValidationResultBuilder resultBuilder, AzureParams azureParams) {
-        if (StringUtils.isEmpty(azureParams.getResourceGroupName()) && StringUtils.isNotEmpty(azureParams.getNetworkId())) {
+    private void checkResourceGroupNameWhenExistingNetwork(ValidationResultBuilder resultBuilder, AzureParams azureParams) {
+        if (StringUtils.isNotEmpty(azureParams.getNetworkId()) && StringUtils.isEmpty(azureParams.getResourceGroupName())) {
             resultBuilder.error("If networkId is specified, then resourceGroupName must be specified too.");
         }
     }
 
-    private void checkNetworkIdIsSpecifiedWhenSubnetIdsArePresent(ValidationResult.ValidationResultBuilder resultBuilder,
-            AzureParams azureParams, NetworkDto networkDto) {
-        if (StringUtils.isEmpty(azureParams.getNetworkId()) && CollectionUtils.isNotEmpty(networkDto.getSubnetIds())) {
-            resultBuilder.error("If subnetIds are specified, then networkId must be specified too.");
+    private void checkNetworkIdWhenExistingNetwork(ValidationResultBuilder resultBuilder, AzureParams azureParams) {
+        if (StringUtils.isEmpty(azureParams.getNetworkId()) && StringUtils.isNotEmpty(azureParams.getResourceGroupName())) {
+            resultBuilder.error("If resourceGroupName is specified, then networkId must be specified too.");
         }
     }
 
-    private void checkExistingNetworkParamsProvidedWhenSubnetsPresent(NetworkDto networkDto, ValidationResult.ValidationResultBuilder resultBuilder) {
+    private void checkExistingNetworkParamsProvidedWhenSubnetsPresent(NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
         if (!networkDto.getSubnetIds().isEmpty()
                 && StringUtils.isEmpty(networkDto.getAzure().getNetworkId())
                 && StringUtils.isEmpty(networkDto.getAzure().getResourceGroupName())) {
@@ -91,8 +88,43 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         }
     }
 
+    private void checkNetworkIdIsSpecifiedWhenSubnetIdsArePresent(ValidationResultBuilder resultBuilder,
+            AzureParams azureParams, NetworkDto networkDto) {
+        if (StringUtils.isEmpty(azureParams.getNetworkId()) && CollectionUtils.isNotEmpty(networkDto.getSubnetIds())) {
+            resultBuilder.error("If subnetIds are specified, then networkId must be specified too.");
+        }
+    }
+
+    private void checkSubnetsProvidedWhenExistingNetwork(ValidationResultBuilder resultBuilder,
+            AzureParams azureParams, Map<String, CloudSubnet> subnetMetas) {
+        if (StringUtils.isNotEmpty(azureParams.getNetworkId()) && StringUtils.isNotEmpty(azureParams.getResourceGroupName())
+                && MapUtils.isEmpty(subnetMetas)) {
+            String message = String.format("If networkId (%s) and resourceGroupName (%s) are specified then subnet ids must be specified as well.",
+                    azureParams.getNetworkId(), azureParams.getResourceGroupName());
+            LOGGER.info(message);
+            resultBuilder.error(message);
+        }
+    }
+
+    private void checkSubnetIdsAreTheSameAsTheSubnetMetasFromProvider(EnvironmentDto environmentDto, NetworkDto networkDto,
+            ValidationResultBuilder resultBuilder) {
+        if (environmentDto == null || networkDto == null) {
+            LOGGER.warn("EnvironmentDto or NetworkDto. Neither them can be null!");
+            resultBuilder.error("Internal validation error");
+            return;
+        }
+        Map<String, CloudSubnet> cloudmetadata = cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto);
+        if (networkDto.getSubnetMetas().size() != cloudmetadata.size()) {
+            String message = String.format("The following network id(s) couldn't be found on provider side: %s",
+                    String.join(", ", getSubnetDiff(networkDto.getSubnetIds(), cloudmetadata.keySet())));
+            LOGGER.info(message);
+            resultBuilder.error(message);
+        }
+    }
+
     @Override
     public CloudPlatform getCloudPlatform() {
         return AZURE;
     }
+
 }

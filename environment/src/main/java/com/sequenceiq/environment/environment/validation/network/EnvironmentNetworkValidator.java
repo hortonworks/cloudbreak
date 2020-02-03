@@ -1,17 +1,18 @@
 package com.sequenceiq.environment.environment.validation.network;
 
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 public interface EnvironmentNetworkValidator {
 
-    void validateDuringFlow(NetworkDto networkV1Request, ValidationResult.ValidationResultBuilder resultBuilder);
+    void validateDuringFlow(EnvironmentDto environmentDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder);
 
-    void validateDuringRequest(NetworkDto networkV1Request, Map<String, CloudSubnet> subnetMetas, ValidationResult.ValidationResultBuilder resultBuilder);
+    void validateDuringRequest(NetworkDto networkDto, ValidationResultBuilder resultBuilder);
 
     CloudPlatform getCloudPlatform();
 
@@ -22,4 +23,15 @@ public interface EnvironmentNetworkValidator {
     default String missingParamsErrorMsg(CloudPlatform cloudPlatform) {
         return String.format("The '%s' related network parameters should be specified!", cloudPlatform);
     }
+
+    default Set<String> getSubnetDiff(Set<String> subnets, Set<String> subnetMetaKeys) {
+        Set<String> diff = new HashSet<>();
+        for (String envSubnet : subnets) {
+            if (!subnetMetaKeys.contains(envSubnet)) {
+                diff.add(envSubnet);
+            }
+        }
+        return diff;
+    }
+
 }

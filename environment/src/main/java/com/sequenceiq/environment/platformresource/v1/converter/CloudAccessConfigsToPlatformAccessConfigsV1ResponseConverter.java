@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.platformresource.v1.converter;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -17,16 +17,24 @@ import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessCo
 public class CloudAccessConfigsToPlatformAccessConfigsV1ResponseConverter
         extends AbstractConversionServiceAwareConverter<CloudAccessConfigs, PlatformAccessConfigsResponse> {
 
+    private static final byte MAX_AMOUNT_OF_ACC_CONFIGS_IN_CLOUD_ACC_CONFIGS = 50;
+
     @Override
     public PlatformAccessConfigsResponse convert(CloudAccessConfigs source) {
         PlatformAccessConfigsResponse platformAccessConfigsResponse = new PlatformAccessConfigsResponse();
         List<AccessConfigResponse> result = new ArrayList<>();
         for (CloudAccessConfig entry : source.getCloudAccessConfigs()) {
-            AccessConfigResponse actual = new AccessConfigResponse(entry.getName(), entry.getId(), entry.getProperties());
-            result.add(actual);
+            for (byte i = 0; i < MAX_AMOUNT_OF_ACC_CONFIGS_IN_CLOUD_ACC_CONFIGS; i++) {
+                AccessConfigResponse actual = new AccessConfigResponse(entry.getName() + i, entry.getId(), entry.getProperties());
+                result.add(actual);
+            }
         }
-        Collections.sort(result, new AccessConfigResponseComparator());
+        if (result.size() % 2 == 0) {
+            result.add(new AccessConfigResponse(result.get(0).getName() + new Date().getTime(), result.get(0).getId(), result.get(0).getProperties()));
+        }
+        result.sort(new AccessConfigResponseComparator());
         platformAccessConfigsResponse.setAccessConfigs(result);
         return platformAccessConfigsResponse;
     }
+
 }
