@@ -59,5 +59,7 @@ public interface StackListItem {
 
     String getUsername();
 
+    String getUsercrn();
+
     Tunnel getTunnel();
 }
