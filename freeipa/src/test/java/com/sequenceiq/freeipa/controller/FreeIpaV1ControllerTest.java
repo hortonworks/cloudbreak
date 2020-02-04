@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.deregisterchildenv.DeregisterChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenv.RegisterChildEnvironmentRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.validation.CreateFreeIpaRequestValidator;
@@ -171,5 +173,16 @@ class FreeIpaV1ControllerTest {
         underTest.delete(ENVIRONMENT_CRN);
 
         verify(deletionService, times(1)).delete(ENVIRONMENT_CRN, ACCOUNT_ID);
+    }
+
+    @Test
+    void deregisterChildEnvironment() {
+        DeregisterChildEnvironmentRequest request = mock(DeregisterChildEnvironmentRequest.class);
+
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+
+        underTest.deregisterChildEnvironment(request);
+
+        verify(childEnvironmentService).deregisterChildEnvironment(request, ACCOUNT_ID);
     }
 }

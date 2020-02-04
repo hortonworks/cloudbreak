@@ -16,8 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.deregisterchildenv.DeregisterChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenv.RegisterChildEnvironmentRequest;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
+import com.sequenceiq.freeipa.entity.ChildEnvironment;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
 
@@ -166,10 +168,49 @@ class StackServiceTest {
         assertThrows(NotFoundException.class, () -> underTest.registerChildEnvironment(registerChildEnvironmentRequest, ACCOUNT_ID));
     }
 
+    @Test
+    void unregisterChildEnvironmentShouldSucceed() {
+        ChildEnvironment childEnvironment = new ChildEnvironment();
+        childEnvironment.setEnvironmentCrn(CHILD_ENVIRONMENT_CRN);
+        childEnvironment.setStack(stack);
+        stack.getChildEnvironments().add(childEnvironment);
+
+        DeregisterChildEnvironmentRequest deregisterChildEnvironmentRequest = createDeregisterChildEnvironmentRequest();
+        when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.of(stack));
+
+        underTest.deregisterChildEnvironment(deregisterChildEnvironmentRequest, ACCOUNT_ID);
+
+        Assertions.assertThat(stack.getChildEnvironmentCrns()).doesNotContain(CHILD_ENVIRONMENT_CRN);
+        verify(stackRepository).save(stack);
+    }
+
+    @Test
+    void deregisterChildEnvironmentShouldFailOnMissingParent() {
+        DeregisterChildEnvironmentRequest deregisterChildEnvironmentRequest = createDeregisterChildEnvironmentRequest();
+        when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> underTest.deregisterChildEnvironment(deregisterChildEnvironmentRequest, ACCOUNT_ID));
+    }
+
+    @Test
+    void deregisterChildEnvironmentShouldFailOnMissingChild() {
+        DeregisterChildEnvironmentRequest deregisterChildEnvironmentRequest = createDeregisterChildEnvironmentRequest();
+        when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.of(stack));
+
+        assertThrows(NotFoundException.class, () -> underTest.deregisterChildEnvironment(deregisterChildEnvironmentRequest, ACCOUNT_ID));
+    }
+
     private RegisterChildEnvironmentRequest createRegisterChildEnvironmentRequest() {
         RegisterChildEnvironmentRequest registerChildEnvironmentRequest = new RegisterChildEnvironmentRequest();
         registerChildEnvironmentRequest.setParentEnvironmentCrn(ENVIRONMENT_CRN);
         registerChildEnvironmentRequest.setChildEnvironmentCrn(CHILD_ENVIRONMENT_CRN);
         return registerChildEnvironmentRequest;
+    }
+
+    private DeregisterChildEnvironmentRequest createDeregisterChildEnvironmentRequest() {
+        DeregisterChildEnvironmentRequest deregisterChildEnvironmentRequest = new DeregisterChildEnvironmentRequest();
+        deregisterChildEnvironmentRequest.setParentEnvironmentCrn(ENVIRONMENT_CRN);
+        deregisterChildEnvironmentRequest.setChildEnvironmentCrn(CHILD_ENVIRONMENT_CRN);
+        return deregisterChildEnvironmentRequest;
     }
 }

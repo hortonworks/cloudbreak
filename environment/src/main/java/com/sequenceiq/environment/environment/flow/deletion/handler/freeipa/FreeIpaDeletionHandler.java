@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_RDBMS_DELETE_EVENT;
+import static java.util.Objects.isNull;
 
 import java.util.Optional;
 
@@ -24,6 +25,7 @@ import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.deregisterchildenv.DeregisterChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 import reactor.bus.Event;
@@ -52,24 +54,29 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
     @Override
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
-        Optional<Environment> env = environmentService.findEnvironmentById(environmentDto.getId());
+        Optional<Environment> envOptional = environmentService.findEnvironmentById(environmentDto.getId());
         try {
-            if (env.isPresent() && freeIpaExistsForEnvironment(env.get())) {
-                freeIpaService.delete(env.get().getResourceCrn());
-                Pair<PollingResult, Exception> result = freeIpaPollingService.pollWithTimeout(
-                        new FreeIpaDeletionRetrievalTask(freeIpaService),
-                        new FreeIpaPollerObject(env.get().getId(), env.get().getResourceCrn()),
-                        FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_INTERVAL,
-                        FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_COUNT,
-                        SINGLE_FAILURE);
-                if (isSuccess(result.getLeft())) {
-                    eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
+            if (envOptional.isPresent() && freeIpaExistsForEnvironment(envOptional.get())) {
+                Environment environment = envOptional.get();
+                if (isNull(environment.getParentEnvironment())) {
+                    freeIpaService.delete(environment.getResourceCrn());
+                    Pair<PollingResult, Exception> result = freeIpaPollingService.pollWithTimeout(
+                            new FreeIpaDeletionRetrievalTask(freeIpaService),
+                            new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn()),
+                            FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_INTERVAL,
+                            FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_COUNT,
+                            SINGLE_FAILURE);
+                    if (!isSuccess(result.getLeft())) {
+                        throw new FreeIpaOperationFailedException("Failed to delete FreeIpa! " + getIfNotNull(result.getRight(), Throwable::getMessage));
+                    }
                 } else {
-                    throw new FreeIpaOperationFailedException("Failed to delete FreeIpa! " + getIfNotNull(result.getRight(), Throwable::getMessage));
+                    DeregisterChildEnvironmentRequest deregisterChildEnvironmentRequest = new DeregisterChildEnvironmentRequest();
+                    deregisterChildEnvironmentRequest.setParentEnvironmentCrn(environment.getParentEnvironment().getResourceCrn());
+                    deregisterChildEnvironmentRequest.setChildEnvironmentCrn(environment.getResourceCrn());
+                    freeIpaService.deregisterChildEnvironment(deregisterChildEnvironmentRequest);
                 }
-            } else {
-                eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
             }
+            eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
         } catch (Exception e) {
             EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
                     .withEnvironmentID(environmentDto.getId())

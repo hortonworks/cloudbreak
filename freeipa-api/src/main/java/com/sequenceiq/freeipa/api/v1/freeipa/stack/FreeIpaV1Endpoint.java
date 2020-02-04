@@ -21,6 +21,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescripti
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.deregisterchildenv.DeregisterChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenv.RegisterChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 
@@ -45,6 +46,13 @@ public interface FreeIpaV1Endpoint {
     @ApiOperation(value = FreeIpaOperationDescriptions.REGISTER_CHILD_ENVIRONMENT, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "registerChildEnvironmentV1")
     void registerChildEnvironment(@Valid RegisterChildEnvironmentRequest request);
+
+    @POST
+    @Path("/deregister_child_environment")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.DEREGISTER_CHILD_ENVIRONMENT, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "deregisterChildEnvironmentV1")
+    void deregisterChildEnvironment(@Valid DeregisterChildEnvironmentRequest request);
 
     @GET
     @Path("")
