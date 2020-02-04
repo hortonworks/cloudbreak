@@ -3,8 +3,6 @@ package com.sequenceiq.caas.grpc.service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -95,10 +93,9 @@ public class MockUserManagementServiceTest {
         Path licenseFilePath = Files.createTempFile("license", "txt");
         Files.writeString(licenseFilePath, VALID_LICENSE);
         ReflectionTestUtils.setField(underTest, "cmLicenseFilePath", licenseFilePath.toString());
-        ReflectionTestUtils.setField(underTest, "accountUsers", Map.of("test", Set.of("user1", "user2")));
         underTest.init();
 
-        GetAccountRequest req = GetAccountRequest.newBuilder().setAccountId("test").build();
+        GetAccountRequest req = GetAccountRequest.getDefaultInstance();
         StreamRecorder<GetAccountResponse> observer = StreamRecorder.create();
         underTest.getAccount(req, observer);
         Assert.assertEquals(1, observer.getValues().size());
@@ -108,22 +105,5 @@ public class MockUserManagementServiceTest {
         Assert.assertTrue(account.hasPasswordPolicy());
         WorkloadPasswordPolicy passwordPolicy = account.getPasswordPolicy();
         Assert.assertEquals(MockUserManagementService.PASSWORD_LIFETIME, passwordPolicy.getWorkloadPasswordMaxLifetime());
-    }
-
-    @Test
-    public void testGetAccountForInvalidAccount() throws IOException {
-        Path licenseFilePath = Files.createTempFile("license", "txt");
-        Files.writeString(licenseFilePath, VALID_LICENSE);
-        ReflectionTestUtils.setField(underTest, "cmLicenseFilePath", licenseFilePath.toString());
-        ReflectionTestUtils.setField(underTest, "accountUsers", Map.of("test", Set.of("user1", "user2")));
-        underTest.init();
-
-        GetAccountRequest req = GetAccountRequest.newBuilder().setAccountId("invalidAccount").build();
-        StreamRecorder<GetAccountResponse> observer = StreamRecorder.create();
-        try {
-            underTest.getAccount(req, observer);
-        } catch (io.grpc.StatusRuntimeException e) {
-            Assert.assertEquals("UNKNOWN", e.getStatus().getCode().name());
-        }
     }
 }
