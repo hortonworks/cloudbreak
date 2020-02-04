@@ -92,10 +92,10 @@ public class CloudbreakFlowServiceTest {
         when(flowEndpoint.getFlowLogsByResourceNameAndChainId(anyString(), eq(FLOW_CHAIN_ID)))
                 .thenReturn(Lists.newArrayList(createFlowLogResponse(StateStatus.SUCCESSFUL, true, null)))
                 .thenReturn(Lists.newArrayList(createFlowLogResponse(StateStatus.PENDING, true, null)));
-        assertTrue(underTest.hasActiveFlow(cluster));
+        assertTrue(underTest.isLastKnownFlowRunning(cluster));
 
         cluster.setLastCbFlowChainId(null);
-        assertFalse(underTest.hasActiveFlow(cluster));
+        assertFalse(underTest.isLastKnownFlowRunning(cluster));
 
         verify(flowEndpoint, atLeast(2)).getFlowLogsByResourceNameAndChainId(eq(CLUSTER_NAME), eq(FLOW_CHAIN_ID));
     }
