@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenv.RegisterChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.regchildenv.RegisterChildEnvironmentRequest;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
 import com.sequenceiq.freeipa.service.stack.StackService;

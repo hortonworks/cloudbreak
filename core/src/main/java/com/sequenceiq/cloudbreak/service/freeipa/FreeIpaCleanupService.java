@@ -12,14 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
-import com.sequenceiq.cloudbreak.type.KerberosType;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
+import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
@@ -54,10 +54,17 @@ public class FreeIpaCleanupService {
     @Inject
     private KerberosConfigService kerberosConfigService;
 
+    @Inject
+    private KerberosDetailService kerberosDetailService;
+
+    @Inject
+    private EnvironmentConfigProvider environmentConfigProvider;
+
     public void cleanup(Stack stack, boolean hostOnly, Set<String> hostNames) {
         Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
-        if (!CloudPlatform.YARN.name().equals(stack.getCloudPlatform())
-                && kerberosConfig.isPresent() && KerberosType.FREEIPA.equals(kerberosConfig.get().getType())) {
+        boolean childEnvironment = environmentConfigProvider.isChildEnvironment(stack.getEnvironmentCrn());
+
+        if (kerberosDetailService.keytabsShouldBeUpdated(stack.cloudPlatform(), childEnvironment, kerberosConfig)) {
             OperationStatus operationStatus = sendCleanupRequest(stack, hostOnly, hostNames);
             pollCleanupOperation(operationStatus);
         }
