@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -77,7 +79,25 @@ public class CloudbreakFlowServiceTest {
         cluster.setLastCbFlowChainId(null);
         assertFalse(underTest.isLastKnownFlowRunning(cluster));
 
-        verify(flowEndpoint, times(1)).getFlowLogsByResourceNameAndChainId(eq(CLUSTER_NAME), eq(FLOW_CHAIN_ID));
+        verify(flowEndpoint, atLeastOnce()).getFlowLogsByResourceNameAndChainId(eq(CLUSTER_NAME), eq(FLOW_CHAIN_ID));
+    }
+
+    @Test
+    public void testFlowCheckFalseResult() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
+        cluster.setInitiatorUserCrn(USER_CRN);
+        cluster.setClusterName(CLUSTER_NAME);
+
+        when(flowEndpoint.getFlowLogsByResourceNameAndChainId(anyString(), eq(FLOW_CHAIN_ID)))
+                .thenReturn(Lists.newArrayList(createFlowLogResponse(StateStatus.SUCCESSFUL, true, null)))
+                .thenReturn(Lists.newArrayList(createFlowLogResponse(StateStatus.PENDING, true, null)));
+        assertTrue(underTest.hasActiveFlow(cluster));
+
+        cluster.setLastCbFlowChainId(null);
+        assertFalse(underTest.hasActiveFlow(cluster));
+
+        verify(flowEndpoint, atLeast(2)).getFlowLogsByResourceNameAndChainId(eq(CLUSTER_NAME), eq(FLOW_CHAIN_ID));
     }
 
     @Test
