@@ -13,6 +13,8 @@ public class UserViewV4Response implements JsonEntity {
 
     private String userId;
 
+    private String userCrn;
+
     public String getUserName() {
         return userName;
     }
@@ -27,5 +29,13 @@ public class UserViewV4Response implements JsonEntity {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getUserCrn() {
+        return userCrn;
+    }
+
+    public void setUserCrn(String userCrn) {
+        this.userCrn = userCrn;
     }
 }

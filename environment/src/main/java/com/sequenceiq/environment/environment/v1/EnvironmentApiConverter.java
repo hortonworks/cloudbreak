@@ -268,6 +268,7 @@ public class EnvironmentApiConverter {
                 .withCloudPlatform(environmentDto.getCloudPlatform())
                 .withCredentialView(credentialViewConverter.convert(environmentDto.getCredentialView()))
                 .withEnvironmentStatus(environmentDto.getStatus().getResponseStatus())
+                .withCreator(environmentDto.getCreator())
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
                 .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
                 .withStatusReason(environmentDto.getStatusReason())
