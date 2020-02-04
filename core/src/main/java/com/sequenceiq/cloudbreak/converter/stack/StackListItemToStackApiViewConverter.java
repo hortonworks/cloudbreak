@@ -50,6 +50,7 @@ public class StackListItemToStackApiViewConverter {
         userView.setId(item.getUserDOId());
         userView.setUserId(item.getUserId());
         userView.setUserName(item.getUsername());
+        userView.setUserCrn(item.getUsercrn());
         return userView;
     }
 
