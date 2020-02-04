@@ -24,6 +24,9 @@ public class UserView implements ProvisionEntity {
     @Column(name = "userid")
     private String userId;
 
+    @Column(name = "usercrn")
+    private String userCrn;
+
     public Long getId() {
         return id;
     }
@@ -48,4 +51,11 @@ public class UserView implements ProvisionEntity {
         this.userId = userId;
     }
 
+    public String getUserCrn() {
+        return userCrn;
+    }
+
+    public void setUserCrn(String userCrn) {
+        this.userCrn = userCrn;
+    }
 }
