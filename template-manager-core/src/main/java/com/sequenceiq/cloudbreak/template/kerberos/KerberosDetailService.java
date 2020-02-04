@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
@@ -98,5 +99,18 @@ public class KerberosDetailService {
 
     public boolean isIpaJoinable(KerberosConfig kerberosConfig) {
         return kerberosConfig != null && kerberosConfig.getType() == KerberosType.FREEIPA;
+    }
+
+    // TODO remove Cloudplatform check when FreeIPA registration is ready
+    public boolean keytabsShouldBeUpdated(String cloudPlatform, boolean childEnvironment, Optional<KerberosConfig> kerberosConfigOptional) {
+        boolean yarnChildEnvironment = CloudPlatform.YARN.name().equals(cloudPlatform)
+                && childEnvironment;
+
+        boolean supportedOnCloudPlatform = CloudPlatform.AWS.name().equals(cloudPlatform)
+                || CloudPlatform.AZURE.name().equals(cloudPlatform)
+                || yarnChildEnvironment;
+
+        return supportedOnCloudPlatform
+                && kerberosConfigOptional.isPresent() && isIpaJoinable(kerberosConfigOptional.get());
     }
 }
