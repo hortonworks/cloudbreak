@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.task;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -11,9 +12,11 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstanceConsoleOutputResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.InstancesStatusResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 @Component
 public class PollTaskFactory {
@@ -27,6 +30,12 @@ public class PollTaskFactory {
             List<CloudResource> cloudResource, boolean cancellable) {
         CloudConnector<Object> connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatformVariant());
         return createPollTask(PollResourcesStateTask.NAME, authenticatedContext, connector.resources(), cloudResource, cancellable);
+    }
+
+    public PollTask<InstancesStatusResult> newPollInstanceStateTask(AuthenticatedContext authenticatedContext, List<CloudInstance> instances,
+            Set<InstanceStatus> completedStatuses) {
+        CloudConnector<Object> connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatformVariant());
+        return createPollTask(PollInstancesStateTask.NAME, authenticatedContext, connector.instances(), instances, completedStatuses);
     }
 
     public PollTask<InstanceConsoleOutputResult> newPollConsoleOutputTask(InstanceConnector instanceConnector,
