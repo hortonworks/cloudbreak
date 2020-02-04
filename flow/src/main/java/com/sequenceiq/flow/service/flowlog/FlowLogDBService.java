@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -236,5 +237,13 @@ public class FlowLogDBService implements FlowLogService {
     public List<FlowLog> getFlowLogsByResourceAndChainId(String resource, List<String> relatedChainIds) {
         LOGGER.info("Getting flow logs by these chain ids: {}", Joiner.on(",").join(relatedChainIds));
         return getFlowLogsByResourceCrnOrName(resource).stream().filter(log -> relatedChainIds.contains(log.getFlowChainId())).collect(Collectors.toList());
+    }
+
+    public Boolean hasPendingFlowEvent(List<FlowLog> flowLogs) {
+        return flowLogs.stream().anyMatch(pendingFlowLogPredicate());
+    }
+
+    private Predicate<FlowLog> pendingFlowLogPredicate() {
+        return flowLog -> flowLog.getStateStatus().equals(StateStatus.PENDING) || !flowLog.getFinalized();
     }
 }

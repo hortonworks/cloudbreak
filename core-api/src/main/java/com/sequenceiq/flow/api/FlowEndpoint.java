@@ -10,6 +10,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.jerseyclient.retry.RetryingRestClient;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 
 import io.swagger.annotations.Api;
@@ -70,4 +71,11 @@ public interface FlowEndpoint {
     @ApiOperation(value = "Get flow logs for resource name and chain id", produces = "application/json", notes = "Flow log operations",
             nickname = "getFlowLogsByResourceNameAndChainId")
     List<FlowLogResponse> getFlowLogsByResourceNameAndChainId(@PathParam("resourceName") String resourceName, @PathParam("chainId") String chainId);
+
+    @GET
+    @Path("/check/name/{resourceName}/{chainId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Check if there is a running flow for resource name and chain id", produces = "application/json", notes = "Flow log operations",
+            nickname = "hasFlowRunning")
+    FlowCheckResponse hasFlowRunning(@PathParam("resourceName") String resourceName, @PathParam("chainId") String chainId);
 }

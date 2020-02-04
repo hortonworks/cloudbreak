@@ -246,6 +246,25 @@ public class FlowLogDBServiceTest {
         verify(flowLogRepository, times(0)).updateLastLogStatusInFlow(eq(10L), eq(StateStatus.SUCCESSFUL));
     }
 
+    @Test
+    public void testNoPendingFlowEvent() {
+        Boolean actual = underTest.hasPendingFlowEvent(Lists.newArrayList(createFlowLog(false, "1"), createFlowLog(false, "2")));
+        assertEquals(Boolean.FALSE, actual);
+    }
+
+    @Test
+    public void testHasPendingFlowEvent() {
+        Boolean actual = underTest.hasPendingFlowEvent(Lists.newArrayList(createFlowLog(true, "1"), createFlowLog(false, "2")));
+        assertEquals(Boolean.TRUE, actual);
+    }
+
+    private FlowLog createFlowLog(boolean pending, String flowId) {
+        FlowLog flowLog = createFlowLog(flowId);
+        flowLog.setFinalized(!pending);
+        flowLog.setStateStatus(pending ? StateStatus.PENDING : StateStatus.SUCCESSFUL);
+        return flowLog;
+    }
+
     private FlowLog createFlowLog(String flowId) {
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowId(flowId);

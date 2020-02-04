@@ -9,13 +9,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class FlowRestUrlParser extends RestUrlParser {
 
-    public static final int RESOURCE_CRN_GROUP_NUMBER = 7;
+    public static final int RESOURCE_CRN_GROUP_NUMBER = 8;
 
-    public static final int RESOURCE_NAME_GROUP_NUMBER = 4;
+    public static final int RESOURCE_NAME_GROUP_NUMBER = 5;
 
-    public static final int FLOW_ID_GROUP_NUMBER = 8;
+    public static final int FLOW_ID_GROUP_NUMBER = 9;
 
-    private static final Pattern PATTERN = Pattern.compile("flow_logs/(resource/((name/([^\\/]+)(/([^\\/]+))?|crn/([^/]+)))|([^/]+))(/last)?");
+    private static final Pattern PATTERN = Pattern.compile("flow_logs/((resource/|check/)((name/([^\\/]+)(/([^\\/]+))?|crn/([^/]+)))|([^/]+))(/last)?");
 
     @Override
     public Pattern getPattern() {
