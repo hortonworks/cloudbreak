@@ -34,10 +34,10 @@ public class AppConfig {
     @Inject
     private List<HostOrchestrator> hostOrchestrators;
 
-    @Value("${freeipa.autosync.threadpool.core.size:50}")
+    @Value("${freeipa.autosync.threadpool.core.size:5}")
     private int corePoolSize;
 
-    @Value("${freeipa.autosync.threadpool.max.size:500}")
+    @Value("${freeipa.autosync.threadpool.max.size:15}")
     private int maxPoolSize;
 
     @Value("${freeipa.autosync.threadpool.queue.size:1000}")

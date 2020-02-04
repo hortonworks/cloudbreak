@@ -76,7 +76,7 @@ public class FreeipaSyncService {
         }
         checkedMeasure(() -> {
             var list = new ArrayList<Future>();
-            List<Stack> allRunning = stackService.findAllForAutoSync();
+            List<Stack> allRunning = checkedMeasure(() -> stackService.findAllForAutoSync(), LOGGER, ":::Auto sync::: stacks are fetched from db in {}ms");
             for (Stack stack : allRunning) {
                 list.add(executorService.submit(() -> {
                     prepareMdcContextWithStack(stack);
@@ -99,12 +99,12 @@ public class FreeipaSyncService {
     }
 
     private void waitForFinish(ArrayList<Future> list) {
-        LOGGER.info(":::Auto sync updater::: wait for finish: {}", list.size());
+        LOGGER.info(":::Auto sync::: wait for finish: {}", list.size());
         list.forEach(l -> {
             try {
                 l.get();
             } catch (InterruptedException | ExecutionException e) {
-                LOGGER.error(":::Auto sync updater::: " + e.getMessage(), e);
+                LOGGER.error(":::Auto sync::: " + e.getMessage(), e);
             }
         });
     }
@@ -120,18 +120,18 @@ public class FreeipaSyncService {
 
                     int alreadyDeletedCount = notTerminatedForStack.size() - checkableInstances.size();
                     if (alreadyDeletedCount > 0) {
-                        LOGGER.info(":::Auto sync updater::: Count of already in deleted on provider side state: {}", alreadyDeletedCount);
+                        LOGGER.info(":::Auto sync::: Count of already in deleted on provider side state: {}", alreadyDeletedCount);
                     }
                     if (!checkableInstances.isEmpty()) {
-                        SyncResult syncResult = freeipaChecker.getStatus(stack);
-                        List<ProviderSyncResult> results = providerChecker.updateAndGetStatuses(stack);
+                        SyncResult syncResult = freeipaChecker.getStatus(stack, checkableInstances);
+                        List<ProviderSyncResult> results = providerChecker.updateAndGetStatuses(stack, checkableInstances);
                         updateStackStatus(stack, syncResult, results);
                     }
                 });
                 return null;
-            }, LOGGER, ":::Auto sync measure::: freeipa stack sync in {}ms");
+            }, LOGGER, ":::Auto sync::: freeipa stack sync in {}ms");
         } catch (Exception e) {
-            LOGGER.info(":::Auto sync updater::: Error occurred during freeipa sync: {}", e.getMessage(), e);
+            LOGGER.info(":::Auto sync::: Error occurred during freeipa sync: {}", e.getMessage(), e);
         }
     }
 
@@ -141,7 +141,7 @@ public class FreeipaSyncService {
             if (updateStatus) {
                 stackUpdater.updateStackStatus(stack, status, result.getMessage());
             } else {
-                LOGGER.info(":::Auto sync updater::: The stack status would be had to update from {} to {}",
+                LOGGER.info(":::Auto sync::: The stack status would be had to update from {} to {}",
                         stack.getStackStatus().getDetailedStackStatus(), status);
             }
         }
