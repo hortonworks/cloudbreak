@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenv;
+package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.regchildenv;
 
 import javax.validation.constraints.NotNull;
 
