@@ -249,7 +249,7 @@
       "tlsPort": 16010,
       "apiOnly": false,
       "apiIncluded": false,
-      "visibleForDatalake": true,
+      "visibleForDatalake": false,
       "visibleForDatahub": true
     },
     {
@@ -263,7 +263,7 @@
       "tlsPort": 20550,
       "apiOnly": true,
       "apiIncluded": true,
-      "visibleForDatalake": true,
+      "visibleForDatalake": false,
       "visibleForDatahub": true
     },
     {
