@@ -7,8 +7,6 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import javax.inject.Inject;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
@@ -41,7 +40,7 @@ public class SecurityConfigServiceTest {
     @Mock
     private TransactionService transactionService;
 
-    @Inject
+    @Mock
     private SaltSecurityConfigService saltSecurityConfigService;
 
     private Stack stack;
@@ -70,6 +69,7 @@ public class SecurityConfigServiceTest {
         SecurityConfig createdSecurityConfig = new SecurityConfig();
         when(tlsSecurityService.generateSecurityKeys(any(Workspace.class))).thenReturn(createdSecurityConfig);
         when(securityConfigRepository.save(any(SecurityConfig.class))).then(AdditionalAnswers.returnsFirstArg());
+        when(saltSecurityConfigService.save(any(SaltSecurityConfig.class))).then(AdditionalAnswers.returnsFirstArg());
 
         SecurityConfig securityConfig = underTest.generateAndSaveSecurityConfig(stack);
 
