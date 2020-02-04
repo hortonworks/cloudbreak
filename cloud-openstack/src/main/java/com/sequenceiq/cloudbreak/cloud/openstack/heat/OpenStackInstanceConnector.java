@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
@@ -15,8 +17,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.event.instance.InstancesStatusResult;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -24,6 +29,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.status.NovaInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 
 @Service
 public class OpenStackInstanceConnector implements InstanceConnector {
@@ -34,6 +42,12 @@ public class OpenStackInstanceConnector implements InstanceConnector {
 
     @Inject
     private OpenStackClient openStackClient;
+
+    @Inject
+    private PollTaskFactory statusCheckFactory;
+
+    @Inject
+    private SyncPollingScheduler<InstancesStatusResult> syncPollingScheduler;
 
     @Value("${cb.openstack.hostkey.verify:}")
     private boolean verifyHostKey;
@@ -49,12 +63,36 @@ public class OpenStackInstanceConnector implements InstanceConnector {
 
     @Override
     public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
-        return executeAction(ac, vms, Action.START);
+        List<CloudVmInstanceStatus> result = executeAction(ac, vms, Action.START);
+        PollTask<InstancesStatusResult> task = statusCheckFactory.newPollInstanceStateTask(ac, vms,
+                Sets.newHashSet(InstanceStatus.STARTED, InstanceStatus.FAILED));
+        InstancesStatusResult statusResult = new InstancesStatusResult(ac.getCloudContext(), result);
+        if (!task.completed(statusResult)) {
+            try {
+                statusResult = syncPollingScheduler.schedule(task);
+            } catch (ExecutionException | InterruptedException | TimeoutException e) {
+                LOGGER.warn("Exception during waiting for instances to be started.", e);
+                throw new CloudConnectorException("Exception during waiting for instances to be started.", e);
+            }
+        }
+        return statusResult.getResults();
     }
 
     @Override
     public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
-        return executeAction(ac, vms, Action.STOP);
+        List<CloudVmInstanceStatus> result = executeAction(ac, vms, Action.STOP);
+        PollTask<InstancesStatusResult> task = statusCheckFactory.newPollInstanceStateTask(ac, vms,
+        Sets.newHashSet(InstanceStatus.STOPPED, InstanceStatus.FAILED));
+        InstancesStatusResult statusResult = new InstancesStatusResult(ac.getCloudContext(), result);
+        if (!task.completed(statusResult)) {
+            try {
+                statusResult = syncPollingScheduler.schedule(task);
+            } catch (ExecutionException | InterruptedException | TimeoutException e) {
+                LOGGER.warn("Exception during waiting for instances to be stopped.", e);
+                throw new CloudConnectorException("Exception during waiting for instances to be stopped.", e);
+            }
+        }
+        return statusResult.getResults();
     }
 
     @Override
