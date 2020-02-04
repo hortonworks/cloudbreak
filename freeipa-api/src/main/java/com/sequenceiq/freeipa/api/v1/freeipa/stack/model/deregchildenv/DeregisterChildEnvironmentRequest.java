@@ -8,7 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
 
-@ApiModel("RegisterChildEnvironmentV1Request")
+@ApiModel("DeregisterChildEnvironmentV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeregisterChildEnvironmentRequest {
