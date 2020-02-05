@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainRemoveRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.MineUpdateRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
@@ -168,13 +169,8 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             runSaltCommand(sc, new GrainAddRunner(hostnameDiskMountMap.keySet(), allNodes, "mount_disks"), exitModel);
 
-            BaseSaltJobRunner baseSaltJobRunner = new BaseSaltJobRunner(gatewayTargetIpAddresses, allNodes) {
-                @Override
-                public String submit(SaltConnector saltConnector) {
-                    return SaltStates.mountDisks(saltConnector);
-                }
-            };
-            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner);
+            StateAllRunner stateAllRunner = new StateAllRunner(gatewayTargetIpAddresses, allNodes, "disks.format-and-mount");
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateAllRunner);
             Callable<Boolean> saltJobRunBootstrapRunner = runner(saltJobIdTracker, exitCriteria, exitModel);
             saltJobRunBootstrapRunner.call();
 
@@ -191,6 +187,22 @@ public class SaltOrchestrator implements HostOrchestrator {
                     .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
         } catch (Exception e) {
             LOGGER.info("Error occurred during the salt bootstrap", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    @Override
+    public void stopTelemetryAgent(List<GatewayConfig> allGateway, Set<Node> nodes, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
+        Set<String> gatewayTargets = getGatewayPrivateIps(allGateway);
+        try (SaltConnector sc = createSaltConnector(primaryGateway)) {
+            StateAllRunner stateAllJobRunner = new StateAllRunner(gatewayTargets, nodes, "fluent.agent-stop");
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateAllJobRunner);
+            Callable<Boolean> saltJobRunBootstrapRunner = runner(saltJobIdTracker, exitCriteria, exitModel);
+            saltJobRunBootstrapRunner.call();
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during telemetry agent stop", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }

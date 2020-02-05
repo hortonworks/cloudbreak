@@ -11,6 +11,10 @@ public class StackBasedExitCriteriaModel extends ExitCriteriaModel {
         this.stackId = stackId;
     }
 
+    public static ExitCriteriaModel nonCancellableModel() {
+        return new StackBasedExitCriteriaModel(null);
+    }
+
     public Optional<Long> getStackId() {
         return Optional.ofNullable(stackId);
     }
