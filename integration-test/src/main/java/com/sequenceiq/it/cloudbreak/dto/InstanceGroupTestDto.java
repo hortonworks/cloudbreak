@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.dto;
 
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription.RECOVERY_MODE;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.COMPUTE;
-import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.GATEWAY;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.WORKER;
@@ -57,7 +56,7 @@ public class InstanceGroupTestDto extends AbstractCloudbreakTestDto<InstanceGrou
     }
 
     public static List<InstanceGroupTestDto> defaultHostGroup(TestContext testContext) {
-        return withHostGroup(testContext, MASTER, COMPUTE, WORKER, GATEWAY);
+        return withHostGroup(testContext, MASTER, COMPUTE, WORKER);
     }
 
     public static List<InstanceGroupTestDto> sdxHostGroup(TestContext testContext) {
