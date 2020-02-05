@@ -155,8 +155,8 @@ integrationtest:
     defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     blueprintCdhVersion: 7.0.2
     availabilityZone:
-    region: westus
-    location: westus
+    region: West US
+    location: West US
     network:
       networkId: CDP-Build-US-W
       noPublicIp: false
