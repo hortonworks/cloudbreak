@@ -18,6 +18,7 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiEcho;
+import com.cloudera.api.swagger.model.ApiHealthCheck;
 import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
@@ -279,7 +280,7 @@ public class ClouderaManagerMock extends AbstractModelMock {
 
     private void getClusterServices() {
         dynamicRouteStack.get(CLUSTER_SERVICES, new ProfileAwareRoute((request, response)
-                -> new ApiServiceList().items(List.of(new ApiService().name("service1"))), activeProfiles));
+                -> new ApiServiceList().items(List.of(new ApiService().name("service1").serviceState(ApiServiceState.STARTED))), activeProfiles));
     }
 
     private void getClusterHosts() {
@@ -437,6 +438,9 @@ public class ClouderaManagerMock extends AbstractModelMock {
                         .hostId(entry.getValue().getCloudVmInstanceStatus().getCloudInstance().getInstanceId())
                         .hostname(HostNameUtil.generateHostNameByIp(entry.getValue().getMetaData().getPrivateIp()))
                         .ipAddress(entry.getValue().getMetaData().getPrivateIp())
+                        .healthChecks(List.of(new ApiHealthCheck()
+                                .name("HOST_SCM_HEALTH")
+                                .summary(ApiHealthSummary.GOOD)))
                         .lastHeartbeat(Instant.now().toString());
                 apiHostList.addItemsItem(apiHost);
             }
@@ -476,6 +480,9 @@ public class ClouderaManagerMock extends AbstractModelMock {
                 .hostname(HostNameUtil.generateHostNameByIp(cloudVmMetaDataStatus.getMetaData().getPrivateIp()))
                 .ipAddress(cloudVmMetaDataStatus.getMetaData().getPrivateIp())
                 .lastHeartbeat(Instant.now().plusSeconds(60000L).toString())
-                .healthSummary(ApiHealthSummary.GOOD);
+                .healthSummary(ApiHealthSummary.GOOD)
+                .healthChecks(List.of(new ApiHealthCheck()
+                        .name("HOST_SCM_HEALTH")
+                        .summary(ApiHealthSummary.GOOD)));
     }
 }
