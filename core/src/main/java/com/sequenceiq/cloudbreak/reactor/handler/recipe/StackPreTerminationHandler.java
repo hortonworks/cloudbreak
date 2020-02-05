@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationReq
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.flow.PreTerminationStateExecutor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.cluster.flow.telemetry.TelemetryAgentService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -39,6 +40,9 @@ public class StackPreTerminationHandler implements EventHandler<StackPreTerminat
     private RecipeEngine recipeEngine;
 
     @Inject
+    private TelemetryAgentService telemetryAgentService;
+
+    @Inject
     private HostGroupService hostGroupService;
 
     @Inject
@@ -52,6 +56,7 @@ public class StackPreTerminationHandler implements EventHandler<StackPreTerminat
             Cluster cluster = stack.getCluster();
             if (cluster != null) {
                 Set<Recipe> recipesByCluster = hostGroupService.getRecipesByCluster(cluster.getId());
+                telemetryAgentService.stopTelemetryAgent(stack);
                 recipeEngine.executePreTerminationRecipes(stack, recipesByCluster, request.getForced());
                 preTerminationStateExecutor.runPreteraminationTasks(stack);
             }
