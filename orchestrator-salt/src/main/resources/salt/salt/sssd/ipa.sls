@@ -77,7 +77,7 @@ restart_sssd_if_reconfigured:
     - user: root
     - group: root
 
-{% if metadata.platform == 'YARN'and not metadata.cluster_in_childenvironment %}
+{% if metadata.platform == 'YARN' %}
 
 backup_systemctl:
   file.copy:

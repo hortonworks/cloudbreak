@@ -48,16 +48,19 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
 
     @Override
     public void register(Long stackId) {
-        createLdapConfig(stackId, null, null, null);
+        createLdapConfig(stackId, null, null, null, null);
     }
 
-    public LdapConfig createLdapConfig(Long stackId, String bindDn, String bindPassword, String clusterName) {
+    public LdapConfig createLdapConfig(Long stackId, String bindDn, String bindPassword, String clusterName, String environmentCrn) {
         Stack stack = getStackWithInstanceMetadata(stackId);
+        if (StringUtils.isEmpty(environmentCrn)) {
+            environmentCrn = stack.getEnvironmentCrn();
+        }
         FreeIpa freeIpa = getFreeIpaService().findByStackId(stackId);
         String adminGroupName = StringUtils.isNotEmpty(freeIpa.getAdminGroupName()) ? freeIpa.getAdminGroupName() : "";
         LdapConfig ldapConfig = new LdapConfig();
         ldapConfig.setName(stack.getName());
-        ldapConfig.setEnvironmentCrn(stack.getEnvironmentCrn());
+        ldapConfig.setEnvironmentCrn(environmentCrn);
         ldapConfig.setAdminGroup(adminGroupName);
         ldapConfig.setUserGroup(USER_GROUP);
         String domainComponent = generateDomainComponent(freeIpa);
