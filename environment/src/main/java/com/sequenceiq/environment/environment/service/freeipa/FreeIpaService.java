@@ -14,7 +14,8 @@ import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenv.RegisterChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.deregchildenv.DeregisterChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.regchildenv.RegisterChildEnvironmentRequest;
 
 @Service
 public class FreeIpaService {
@@ -72,6 +73,17 @@ public class FreeIpaService {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to register child environment '%s' for '%s' due to: '%s'",
                     registerChildEnvironmentRequest.getChildEnvironmentCrn(), registerChildEnvironmentRequest.getParentEnvironmentCrn(), errorMessage), e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public void deregisterChildEnvironment(DeregisterChildEnvironmentRequest deregisterChildEnvironmentRequest) {
+        try {
+            freeIpaV1Endpoint.deregisterChildEnvironment(deregisterChildEnvironmentRequest);
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error(String.format("Failed to deregister child environment '%s' due to: '%s'",
+                    deregisterChildEnvironmentRequest.getChildEnvironmentCrn(), errorMessage), e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }

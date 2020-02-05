@@ -17,7 +17,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.registerchildenv.RegisterChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.deregchildenv.DeregisterChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.regchildenv.RegisterChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
@@ -99,6 +100,12 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
         }
         String accountId = crnService.getCurrentAccountId();
         childEnvironmentService.registerChildEnvironment(request, accountId);
+    }
+
+    @Override
+    public void deregisterChildEnvironment(@Valid DeregisterChildEnvironmentRequest request) {
+        String accountId = crnService.getCurrentAccountId();
+        childEnvironmentService.deregisterChildEnvironment(request, accountId);
     }
 
     @Override
