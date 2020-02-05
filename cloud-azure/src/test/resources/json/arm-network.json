@@ -4,15 +4,11 @@
     "parameters": {
         "subnet0Prefix": {
             "type": "string",
-            "defaultValue": "10.0.1.0/24"
+            "defaultValue": "2.2.2.2/24"
         },
         "subnet1Prefix": {
             "type": "string",
-            "defaultValue": "10.0.1.0/24"
-        },
-        "subnet2Prefix": {
-            "type": "string",
-            "defaultValue": "10.0.1.0/24"
+            "defaultValue": "3.3.3.3/24"
         },
         "virtualNetworkNamePrefix": {
             "type": "string",
@@ -34,7 +30,6 @@
     "variables": {
         "subnetID0": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/subnet0')]",
         "subnetID1": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/subnet1')]",
-        "subnetID2": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/subnet2')]",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
     },
     "resources": [
@@ -58,12 +53,12 @@
                         "properties": {
                             "addressPrefix": "[parameters('subnet0Prefix')]",
                             "serviceEndpoints": [
-                                {
-                                    "service": "Microsoft.Sql"
-                                },
-                                {
-                                    "service": "Microsoft.Storage"
-                                }
+                              {
+                                "service": "Microsoft.Sql"
+                              },
+                              {
+                                "service": "Microsoft.Storage"
+                              }
                             ]
                         }
                     },
@@ -72,26 +67,12 @@
                         "properties": {
                             "addressPrefix": "[parameters('subnet1Prefix')]",
                             "serviceEndpoints": [
-                                {
-                                    "service": "Microsoft.Sql"
-                                },
-                                {
-                                    "service": "Microsoft.Storage"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "subnet2",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet2Prefix')]",
-                            "serviceEndpoints": [
-                                {
-                                    "service": "Microsoft.Sql"
-                                },
-                                {
-                                    "service": "Microsoft.Storage"
-                                }
+                              {
+                                "service": "Microsoft.Sql"
+                              },
+                              {
+                                "service": "Microsoft.Storage"
+                              }
                             ]
                         }
                     }
@@ -104,13 +85,17 @@
             "type": "string",
             "value": "[variables('subnetID0')]"
         },
+        "subnetCidr0": {
+            "type": "string",
+            "value": "2.2.2.2/24"
+        },
         "subnetId1": {
             "type": "string",
             "value": "[variables('subnetID1')]"
         },
-        "subnetId2": {
+        "subnetCidr1": {
             "type": "string",
-            "value": "[variables('subnetID2')]"
+            "value": "3.3.3.3/24"
         },
         "networkId": {
             "type": "string",

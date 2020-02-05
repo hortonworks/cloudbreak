@@ -1,37 +1,39 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
-import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 
 @Component
 class AwsCreatedSubnetProvider {
 
-    Set<CreatedSubnet> provide(Map<String, String> output, List<SubnetRequest> subnetRequests) {
+    Set<CreatedSubnet> provide(Map<String, String> output, int numberOfSubnets, boolean privateSubnetEnabled) {
         Set<CreatedSubnet> subnets = new HashSet<>();
-        for (SubnetRequest subnetRequest : subnetRequests) {
+        for (int i = 0; i < numberOfSubnets / 2; i++) {
             CreatedSubnet createdPublicSubnet = new CreatedSubnet();
-            createdPublicSubnet.setSubnetId(getValue(output, "id" + subnetRequest.getIndex()));
-            createdPublicSubnet.setAvailabilityZone(subnetRequest.getAvailabilityZone());
-            if (!Strings.isNullOrEmpty(subnetRequest.getPrivateSubnetCidr())) {
-                createdPublicSubnet.setCidr(subnetRequest.getPrivateSubnetCidr());
-                createdPublicSubnet.setPublicSubnet(false);
-                createdPublicSubnet.setMapPublicIpOnLaunch(false);
-            } else {
-                createdPublicSubnet.setCidr(subnetRequest.getPublicSubnetCidr());
-                createdPublicSubnet.setPublicSubnet(true);
-                createdPublicSubnet.setMapPublicIpOnLaunch(true);
-            }
+            createdPublicSubnet.setSubnetId(getValue(output, "PublicSubnetId" + i));
+            createdPublicSubnet.setCidr(getValue(output, "PublicSubnetCidr" + i));
+            createdPublicSubnet.setAvailabilityZone(getValue(output, "Az" + i));
+            createdPublicSubnet.setPublicSubnet(true);
+            createdPublicSubnet.setMapPublicIpOnLaunch(true);
             createdPublicSubnet.setIgwAvailable(true);
             subnets.add(createdPublicSubnet);
+
+            if (privateSubnetEnabled) {
+                CreatedSubnet createdPrivateSubnet = new CreatedSubnet();
+                createdPrivateSubnet.setSubnetId(getValue(output, "PrivateSubnetId" + i));
+                createdPrivateSubnet.setCidr(getValue(output, "PrivateSubnetCidr" + i));
+                createdPrivateSubnet.setAvailabilityZone(getValue(output, "Az" + i));
+                createdPrivateSubnet.setPublicSubnet(false);
+                createdPrivateSubnet.setMapPublicIpOnLaunch(false);
+                createdPrivateSubnet.setIgwAvailable(true);
+                subnets.add(createdPrivateSubnet);
+            }
         }
         return subnets;
     }

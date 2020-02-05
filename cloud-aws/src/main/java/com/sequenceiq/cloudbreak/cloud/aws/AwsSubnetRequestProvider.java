@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AvailabilityZone;
@@ -13,30 +14,23 @@ import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 @Component
 public class AwsSubnetRequestProvider {
 
-    public List<SubnetRequest> provide(AmazonEC2Client ec2Client, List<String> publicSubnetCidrs,  List<String> privateSubnetCidrs) {
+    public List<SubnetRequest> provide(AmazonEC2Client ec2Client, List<String> subnetCidrs) {
+        Assert.isTrue(subnetCidrs.size() % 2 == 0, "The number of the subnets should be even!");
         List<String> az = getAvailabilityZones(ec2Client);
         List<SubnetRequest> subnets = new ArrayList<>();
-        int index = 0;
-
-        for (int i = 0; i < publicSubnetCidrs.size(); i++) {
+        int sunetIndex = 0;
+        for (int i = 0; i < subnetCidrs.size() / 2; i++) {
             SubnetRequest subnetRequest = new SubnetRequest();
-            subnetRequest.setPublicSubnetCidr(publicSubnetCidrs.get(i));
-            subnetRequest.setAvailabilityZone(az.get(i % az.size()));
-            subnetRequest.setSubnetGroup(i % publicSubnetCidrs.size());
-            subnetRequest.setIndex(index++);
+            subnetRequest.setPublicSubnetCidr(subnetCidrs.get(sunetIndex));
+            subnetRequest.setPrivateSubnetCidr(subnetCidrs.get(sunetIndex + 1));
+            sunetIndex += 2;
+            if (i < az.size()) {
+                subnetRequest.setAvailabilityZone(az.get(i));
+            } else {
+                subnetRequest.setAvailabilityZone(az.get(az.size() - 1));
+            }
             subnets.add(subnetRequest);
         }
-
-        for (int i = 0; i < privateSubnetCidrs.size(); i++) {
-            SubnetRequest subnetRequest = new SubnetRequest();
-            subnetRequest.setPrivateSubnetCidr(privateSubnetCidrs.get(i));
-            subnetRequest.setAvailabilityZone(az.get(i % az.size()));
-            // we will create 3 public subnet for nat gateways so we need to loadbalance between the public subnets
-            subnetRequest.setSubnetGroup(i % publicSubnetCidrs.size());
-            subnetRequest.setIndex(index++);
-            subnets.add(subnetRequest);
-        }
-
         return subnets;
     }
 

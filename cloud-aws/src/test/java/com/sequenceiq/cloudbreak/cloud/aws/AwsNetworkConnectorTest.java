@@ -157,19 +157,20 @@ public class AwsNetworkConnectorTest {
         Set<CreatedSubnet> createdSubnets = Set.of(new CreatedSubnet(), new CreatedSubnet(), new CreatedSubnet());
 
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
-        when(awsSubnetRequestProvider.provide(ec2Client, new ArrayList<>(subnetCidrs), new ArrayList<>(subnetCidrs))).thenReturn(subnetRequestList);
+        when(awsSubnetRequestProvider.provide(ec2Client, new ArrayList<>(subnetCidrs))).thenReturn(subnetRequestList);
         when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cloudFormationRetryClient);
-        when(awsNetworkCfTemplateProvider.provide("testEnv", 1L, networkCidr, subnetRequestList, true)).thenReturn(CF_TEMPLATE);
+        when(awsNetworkCfTemplateProvider.provide(networkCidr, subnetRequestList, true)).thenReturn(CF_TEMPLATE);
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cfClient);
         when(awsPollTaskFactory.newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest))
                 .thenReturn(pollTask);
         when(cfStackUtil.getOutputs(NETWORK_ID, cloudFormationRetryClient)).thenReturn(output);
-        when(awsCreatedSubnetProvider.provide(output, subnetRequestList)).thenReturn(createdSubnets);
+        when(awsCreatedSubnetProvider.provide(output, networkCreationRequest.getSubnetCidrs().size(), networkCreationRequest.isPrivateSubnetEnabled()))
+                .thenReturn(createdSubnets);
 
         CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest, "creatorUser");
 
         verify(awsClient).createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()));
-        verify(awsNetworkCfTemplateProvider).provide("testEnv", 1L, networkCidr, subnetRequestList, true);
+        verify(awsNetworkCfTemplateProvider).provide(networkCidr, subnetRequestList, true);
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest);
         verify(cfStackUtil).getOutputs(NETWORK_ID, cloudFormationRetryClient);
@@ -197,18 +198,19 @@ public class AwsNetworkConnectorTest {
         Set<CreatedSubnet> createdSubnets = Set.of(new CreatedSubnet(), new CreatedSubnet(), new CreatedSubnet());
 
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
-        when(awsSubnetRequestProvider.provide(ec2Client, new ArrayList<>(subnetCidrs), new ArrayList<>(subnetCidrs))).thenReturn(subnetRequestList);
+        when(awsSubnetRequestProvider.provide(ec2Client, new ArrayList<>(subnetCidrs))).thenReturn(subnetRequestList);
         when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cloudFormationRetryClient);
+        when(awsNetworkCfTemplateProvider.provide(networkCidr, subnetRequestList, true)).thenReturn(CF_TEMPLATE);
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cfClient);
         when(awsPollTaskFactory.newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest))
                 .thenReturn(pollTask);
         when(cfStackUtil.getOutputs(NETWORK_ID, cloudFormationRetryClient)).thenReturn(output);
-        when(awsCreatedSubnetProvider.provide(output, subnetRequestList)).thenReturn(createdSubnets);
-
+        when(awsCreatedSubnetProvider.provide(output, networkCreationRequest.getSubnetCidrs().size(), networkCreationRequest.isPrivateSubnetEnabled()))
+                .thenReturn(createdSubnets);
         CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest, "creatorUser");
 
         verify(awsClient).createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()));
-        verify(awsNetworkCfTemplateProvider).provide("testEnv", 1L, networkCidr, subnetRequestList, true);
+        verify(awsNetworkCfTemplateProvider).provide(networkCidr, subnetRequestList, true);
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest);
         verify(defaultCostTaggingService).prepareDefaultTags(eq("creatorUser"), any(), eq(CloudConstants.AWS), any());
@@ -349,13 +351,11 @@ public class AwsNetworkConnectorTest {
         return new NetworkCreationRequest.Builder()
                 .withStackName(STACK_NAME)
                 .withEnvName(ENV_NAME)
-                .withEnvId(1L)
                 .withEnvCrn(ENV_CRN)
                 .withCloudCredential(new CloudCredential("1", "credential"))
                 .withRegion(REGION)
                 .withNetworkCidr(networkCidr)
-                .withPrivateSubnetCidrs(subnetCidrs)
-                .withPublicSubnetCidrs(subnetCidrs)
+                .withSubnetCidrs(subnetCidrs)
                 .withPrivateSubnetEnabled(true)
                 .build();
     }

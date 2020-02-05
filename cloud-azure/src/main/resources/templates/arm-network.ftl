@@ -3,16 +3,10 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters" : {
-        <#list subnetDetails as subnet>
-        "subnet${subnet.index}Prefix": {
+        <#list subnetPrefixList as subnetPrefix>
+        "subnet${subnetPrefix?index}Prefix": {
            "type": "string",
-           <#if subnet.publicSubnetCidr?has_content>
-           "defaultValue": "${subnet.publicSubnetCidr}"
-           </#if>
-           <#if subnet.privateSubnetCidr?has_content>
-           "defaultValue": "${subnet.privateSubnetCidr}"
-           </#if>
-
+           "defaultValue": "${subnetPrefix}"
         },
         </#list>
         "virtualNetworkNamePrefix" : {
@@ -33,8 +27,8 @@
         }
     },
   	"variables" : {
-      <#list subnetDetails as subnet>
-      "subnetID${subnet.index}": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/subnet${subnet.index}')]",
+      <#list subnetPrefixList as subnetPrefix>
+      "subnetID${subnetPrefix?index}": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/subnet${subnetPrefix?index}')]",
       </#list>
       "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
   	},
@@ -54,11 +48,11 @@
                          ]
                      },
                      "subnets": [
-                         <#list subnetDetails as subnet>
+                         <#list subnetPrefixList as subnetPrefix>
                          {
-                             "name": "subnet${subnet.index}",
+                             "name": "subnet${subnetPrefix?index}",
                              "properties": {
-                                 "addressPrefix": "[parameters('subnet${subnet.index}Prefix')]",
+                                 "addressPrefix": "[parameters('subnet${subnetPrefix?index}Prefix')]",
                                  "serviceEndpoints": [
                                      {
                                          "service": "Microsoft.Sql"
@@ -68,17 +62,21 @@
                                     }
                                  ]
                              }
-                         }<#if subnet_has_next>,</#if>
+                         }<#if subnetPrefix_has_next>,</#if>
                          </#list>
                      ]
                  }
             }
      ],
     "outputs": {
-         <#list subnetDetails as subnet>
-         "subnetId${subnet.index}": {
+         <#list subnetPrefixList as subnetPrefix>
+         "subnetId${subnetPrefix?index}": {
            "type": "string",
-           "value": "[variables('subnetID${subnet.index}')]"
+           "value": "[variables('subnetID${subnetPrefix?index}')]"
+         },
+         "subnetCidr${subnetPrefix?index}": {
+           "type": "string",
+           "value": "${subnetPrefix}"
          },
          </#list>
          "networkId": {

@@ -21,9 +21,7 @@ public class NetworkCreationRequest {
 
     private final String networkCidr;
 
-    private final Set<String> publicSubnetCidrs;
-
-    private final Set<String> privateSubnetCidrs;
+    private final Set<String> subnetCidrs;
 
     private final boolean noPublicIp;
 
@@ -39,8 +37,7 @@ public class NetworkCreationRequest {
         variant = builder.variant;
         region = builder.region;
         networkCidr = builder.networkCidr;
-        publicSubnetCidrs = builder.publicSubnetCidrs;
-        privateSubnetCidrs = builder.privateSubnetCidrs;
+        subnetCidrs = builder.subnetCidrs;
         noPublicIp = builder.noPublicIp;
         stackName = builder.stackName;
         privateSubnetEnabled = builder.privateSubnetEnabled;
@@ -70,12 +67,8 @@ public class NetworkCreationRequest {
         return networkCidr;
     }
 
-    public Set<String> getPrivateSubnetCidrs() {
-        return privateSubnetCidrs;
-    }
-
-    public Set<String> getPublicSubnetCidrs() {
-        return publicSubnetCidrs;
+    public Set<String> getSubnetCidrs() {
+        return subnetCidrs;
     }
 
     public boolean isNoPublicIp() {
@@ -109,9 +102,7 @@ public class NetworkCreationRequest {
 
         private String networkCidr;
 
-        private Set<String> publicSubnetCidrs;
-
-        private Set<String> privateSubnetCidrs;
+        private Set<String> subnetCidrs;
 
         private boolean noPublicIp;
 
@@ -154,13 +145,8 @@ public class NetworkCreationRequest {
             return this;
         }
 
-        public Builder withPublicSubnetCidrs(Set<String> subnetCidrs) {
-            this.publicSubnetCidrs = subnetCidrs;
-            return this;
-        }
-
-        public Builder withPrivateSubnetCidrs(Set<String> subnetCidrs) {
-            this.privateSubnetCidrs = subnetCidrs;
+        public Builder withSubnetCidrs(Set<String> subnetCidrs) {
+            this.subnetCidrs = subnetCidrs;
             return this;
         }
 

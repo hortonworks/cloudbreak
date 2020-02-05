@@ -23,10 +23,8 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
-import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
@@ -74,10 +72,7 @@ public class AzureNetworkTemplateBuilderTest {
         when(defaultCostTaggingService.prepareNetworkTagging()).thenReturn(Collections.emptyMap());
         when(freeMarkerTemplateUtils.processTemplateIntoString(any(), any())).thenCallRealMethod();
 
-        String actual = underTest.build(networkCreationRequest, Lists.newArrayList(
-                publicSubnetRequest("10.0.1.0/24", 0),
-                publicSubnetRequest("10.0.1.0/24", 1),
-                publicSubnetRequest("10.0.1.0/24", 2)));
+        String actual = underTest.build(networkCreationRequest);
 
         JsonNode json = objectMapper.readTree(actual);
         assertEquals(expectedJson, json);
@@ -91,8 +86,7 @@ public class AzureNetworkTemplateBuilderTest {
                 .withEnvCrn(ENV_CRN)
                 .withRegion(Region.region(REGION))
                 .withNetworkCidr(NETWORK_CIDR)
-                .withPublicSubnetCidrs(createSubnetCidrs())
-                .withPrivateSubnetCidrs(createSubnetCidrs())
+                .withSubnetCidrs(createSubnetCidrs())
                 .withNoPublicIp(false)
                 .withStackName(STACK_NAME)
                 .build();
@@ -103,14 +97,5 @@ public class AzureNetworkTemplateBuilderTest {
         subnetCidrs.add("2.2.2.2/24");
         subnetCidrs.add("3.3.3.3/24");
         return subnetCidrs;
-    }
-
-    public SubnetRequest publicSubnetRequest(String cidr, int index) {
-        SubnetRequest subnetRequest = new SubnetRequest();
-        subnetRequest.setIndex(index);
-        subnetRequest.setPublicSubnetCidr(cidr);
-        subnetRequest.setSubnetGroup(index % 3);
-        subnetRequest.setAvailabilityZone("az");
-        return subnetRequest;
     }
 }

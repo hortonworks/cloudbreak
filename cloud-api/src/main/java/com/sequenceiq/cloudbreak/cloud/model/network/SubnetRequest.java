@@ -8,10 +8,6 @@ public class SubnetRequest {
 
     private String availabilityZone;
 
-    private int subnetGroup;
-
-    private int index;
-
     public String getPublicSubnetCidr() {
         return publicSubnetCidr;
     }
@@ -34,21 +30,5 @@ public class SubnetRequest {
 
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
-    }
-
-    public int getSubnetGroup() {
-        return subnetGroup;
-    }
-
-    public void setSubnetGroup(int subnetGroup) {
-        this.subnetGroup = subnetGroup;
-    }
-
-    public int getIndex() {
-        return index;
-    }
-
-    public void setIndex(int index) {
-        this.index = index;
     }
 }

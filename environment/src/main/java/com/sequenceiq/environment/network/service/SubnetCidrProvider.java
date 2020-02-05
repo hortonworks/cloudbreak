@@ -1,9 +1,11 @@
 package com.sequenceiq.environment.network.service;
 
+import java.util.Set;
+
 /**
  * Provider for calculate subnet CIDRs.
  */
 public interface SubnetCidrProvider {
 
-    Cidrs provide(String networkCidr);
+    Set<String> provide(String networkCidr);
 }

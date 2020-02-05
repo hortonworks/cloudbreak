@@ -61,7 +61,7 @@ public class AwsNetworkCfTemplateProviderTest {
 
         when(freeMarkerTemplateUtils.processTemplateIntoString(any(), any())).thenCallRealMethod();
 
-        String actual = underTest.provide("envName", 1L, VPC_CIDR, subnetRequestList, true);
+        String actual = underTest.provide(VPC_CIDR, subnetRequestList, true);
 
         JsonNode json = objectMapper.readTree(actual);
         assertEquals(expectedJson, json);
@@ -76,7 +76,7 @@ public class AwsNetworkCfTemplateProviderTest {
 
         when(freeMarkerTemplateUtils.processTemplateIntoString(any(), any())).thenCallRealMethod();
 
-        String actual = underTest.provide("envName", 1L, VPC_CIDR, subnetRequestList, false);
+        String actual = underTest.provide(VPC_CIDR, subnetRequestList, false);
 
         JsonNode json = objectMapper.readTree(actual);
         assertEquals(expectedJson, json);
@@ -87,7 +87,7 @@ public class AwsNetworkCfTemplateProviderTest {
     public void testProvideShouldThrowExceptionWhenTemplateProcessHasFailed() throws IOException, TemplateException {
         when(freeMarkerTemplateUtils.processTemplateIntoString(any(Template.class), anyMap())).thenThrow(TemplateException.class);
 
-        underTest.provide("envName", 1L, VPC_CIDR, subnetRequestList, true);
+        underTest.provide(VPC_CIDR, subnetRequestList, true);
 
         verify(freeMarkerTemplateUtils).processTemplateIntoString(any(Template.class), anyMap());
     }
@@ -96,13 +96,11 @@ public class AwsNetworkCfTemplateProviderTest {
         SubnetRequest subnetRequest1 = new SubnetRequest();
         subnetRequest1.setPublicSubnetCidr("2.2.2.2/24");
         subnetRequest1.setPrivateSubnetCidr("2.2.2.2/24");
-        subnetRequest1.setIndex(0);
         subnetRequest1.setAvailabilityZone("az1");
 
         SubnetRequest subnetRequest2 = new SubnetRequest();
         subnetRequest2.setPublicSubnetCidr("2.2.2.2/24");
         subnetRequest2.setPrivateSubnetCidr("2.2.2.2/24");
-        subnetRequest2.setIndex(1);
         subnetRequest2.setAvailabilityZone("az2");
 
         return List.of(subnetRequest1, subnetRequest2);

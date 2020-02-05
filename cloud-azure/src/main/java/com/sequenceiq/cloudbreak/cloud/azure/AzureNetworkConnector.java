@@ -16,8 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
@@ -34,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
-import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 
 @Service
 public class AzureNetworkConnector implements NetworkConnector {
@@ -56,17 +53,10 @@ public class AzureNetworkConnector implements NetworkConnector {
     @Inject
     private AzureUtils azureUtils;
 
-    @Inject
-    private AzureSubnetRequestProvider azureSubnetRequestProvider;
-
     @Override
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest, String creatorUser) {
         AzureClient azureClient = azureClientService.getClient(networkRequest.getCloudCredential());
-        List<SubnetRequest> subnetRequests = azureSubnetRequestProvider.provide(
-                networkRequest.getRegion().value(),
-                Lists.newArrayList(networkRequest.getPublicSubnetCidrs()),
-                Lists.newArrayList(networkRequest.getPrivateSubnetCidrs()));
-        String template = azureNetworkTemplateBuilder.build(networkRequest, subnetRequests);
+        String template = azureNetworkTemplateBuilder.build(networkRequest);
         String envName = networkRequest.getEnvName();
         Deployment templateDeployment;
         ResourceGroup resourceGroup;
@@ -90,10 +80,7 @@ public class AzureNetworkConnector implements NetworkConnector {
         }
         Map<String, Map> outputMap = (HashMap) templateDeployment.outputs();
         String networkName = cropId((String) outputMap.get(NETWORK_ID_KEY).get("value"));
-        Set<CreatedSubnet> subnets = createSubnets(
-                subnetRequests,
-                outputMap,
-                networkRequest.getRegion().value());
+        Set<CreatedSubnet> subnets = createSubnets(networkRequest.getSubnetCidrs().size(), outputMap, networkRequest.getRegion().value());
         return new CreatedCloudNetwork(networkRequest.getStackName(), networkName, subnets,
                 createProperties(resourceGroup.name(), networkRequest.getStackName()));
     }
@@ -161,17 +148,13 @@ public class AzureNetworkConnector implements NetworkConnector {
         return AzureConstants.VARIANT;
     }
 
-    private Set<CreatedSubnet> createSubnets(List<SubnetRequest> subnetRequests, Map<String, Map> outputMap, String region) {
-        Set<CreatedSubnet> createdSubnets = new HashSet<>();
-        for (SubnetRequest subnetRequest : subnetRequests) {
-            if (outputMap.containsKey(SUBNET_ID_KEY + subnetRequest.getIndex())) {
+    private Set<CreatedSubnet> createSubnets(int numberOfSubnets, Map<String, Map> outputMap, String region) {
+        Set<CreatedSubnet> createdSubnets = new HashSet<>(numberOfSubnets);
+        for (int i = 0; i < numberOfSubnets; i++) {
+            if (outputMap.containsKey(SUBNET_ID_KEY + i)) {
                 CreatedSubnet createdSubnet = new CreatedSubnet();
-                createdSubnet.setSubnetId(cropId((String) outputMap.get(SUBNET_ID_KEY + subnetRequest.getIndex()).get("value")));
-                if (!Strings.isNullOrEmpty(subnetRequest.getPrivateSubnetCidr())) {
-                    createdSubnet.setCidr(subnetRequest.getPrivateSubnetCidr());
-                } else {
-                    createdSubnet.setCidr(subnetRequest.getPublicSubnetCidr());
-                }
+                createdSubnet.setSubnetId(cropId((String) outputMap.get(SUBNET_ID_KEY + i).get("value")));
+                createdSubnet.setCidr((String) outputMap.get(SUBNET_CIDR_KEY + i).get("value"));
                 createdSubnet.setAvailabilityZone(region);
                 createdSubnets.add(createdSubnet);
             } else {
