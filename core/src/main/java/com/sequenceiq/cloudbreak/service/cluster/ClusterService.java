@@ -5,6 +5,9 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPO_ID_TAG;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AUTORECOVERY_REQUESTED;
@@ -367,7 +370,7 @@ public class ClusterService {
                     hostGroupService.getByClusterIdAndName(clusterId, hostGroupEntry.getKey()).ifPresent(hostGroup -> {
                         hostGroup.getInstanceGroup().getUnattachedInstanceMetaDataSet()
                                 .forEach(instanceMetaData -> {
-                                    instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
+                                    instanceMetaData.setInstanceStatus(SERVICES_RUNNING);
                                     instanceMetaDataService.save(instanceMetaData);
                                 });
                     });
@@ -495,15 +498,15 @@ public class ClusterService {
             boolean hasAutoRecoverableNodes = !autoRecoveryNodesMap.isEmpty();
             if (hasAutoRecoverableNodes) {
                 flowManager.triggerClusterRepairFlow(cluster.getStack().getId(), autoRecoveryNodesMap, false);
-                updateChangedHosts(cluster, autoRecoveryHostMetadata.keySet(), InstanceStatus.SERVICES_HEALTHY, InstanceStatus.WAITING_FOR_REPAIR,
+                updateChangedHosts(cluster, autoRecoveryHostMetadata.keySet(), Set.of(SERVICES_HEALTHY), InstanceStatus.WAITING_FOR_REPAIR,
                         CLUSTER_AUTORECOVERY_REQUESTED);
             }
             if (!failedHostMetadata.isEmpty()) {
-                updateChangedHosts(cluster, failedHostMetadata.keySet(), InstanceStatus.SERVICES_HEALTHY, InstanceStatus.SERVICES_UNHEALTHY,
+                updateChangedHosts(cluster, failedHostMetadata.keySet(), Set.of(SERVICES_HEALTHY), SERVICES_UNHEALTHY,
                         CLUSTER_FAILED_NODES_REPORTED);
             }
             if (!newHealthyNodes.isEmpty()) {
-                updateChangedHosts(cluster, newHealthyNodes, InstanceStatus.SERVICES_UNHEALTHY, InstanceStatus.SERVICES_HEALTHY,
+                updateChangedHosts(cluster, newHealthyNodes, Set.of(SERVICES_UNHEALTHY, SERVICES_RUNNING), SERVICES_HEALTHY,
                         CLUSTER_RECOVERED_NODES_REPORTED);
             }
 
@@ -582,14 +585,14 @@ public class ClusterService {
         return (rdsConfig == null || ResourceStatus.DEFAULT == rdsConfig.getStatus()) && cluster.getDatabaseServerCrn() == null;
     }
 
-    private void updateChangedHosts(Cluster cluster, Set<String> hostNames, InstanceStatus expectedState,
+    private void updateChangedHosts(Cluster cluster, Set<String> hostNames, Set<InstanceStatus> expectedState,
             InstanceStatus newState, ResourceEvent resourceEvent) throws TransactionExecutionException {
         String recoveryMessage = cloudbreakMessagesService.getMessage(resourceEvent.getMessage(), hostNames);
         Set<InstanceMetaData> notTerminatedInstanceMetaDatasForStack = instanceMetaDataService.findNotTerminatedForStack(cluster.getStack().getId());
         Collection<InstanceMetaData> changedHosts = new HashSet<>();
         transactionService.required(() -> {
             for (InstanceMetaData host : notTerminatedInstanceMetaDatasForStack) {
-                if (host.getInstanceStatus() == expectedState && hostNames.contains(host.getDiscoveryFQDN())) {
+                if (expectedState.contains(host.getInstanceStatus()) && hostNames.contains(host.getDiscoveryFQDN())) {
                     host.setInstanceStatus(newState);
                     host.setStatusReason(recoveryMessage);
                     changedHosts.add(host);
@@ -598,7 +601,7 @@ public class ClusterService {
             if (!changedHosts.isEmpty()) {
                 LOGGER.info(recoveryMessage);
                 String eventType;
-                if (InstanceStatus.SERVICES_HEALTHY.equals(newState)) {
+                if (SERVICES_HEALTHY.equals(newState)) {
                     eventType = AVAILABLE.name();
                 } else {
                     eventType = RECOVERY;
@@ -733,7 +736,7 @@ public class ClusterService {
     private InstanceMetaData updateClusterManagerHostStatus(Set<InstanceMetaData> notTerminatedInstanceMetaDatas) {
         InstanceMetaData cmInstance = notTerminatedInstanceMetaDatas.stream().filter(InstanceMetaData::getClusterManagerServer).findFirst()
                 .orElseThrow(() -> new CloudbreakServiceException("Cluster manager inaccessible, and the corresponding instance metadata not found."));
-        cmInstance.setInstanceStatus(InstanceStatus.SERVICES_UNHEALTHY);
+        cmInstance.setInstanceStatus(SERVICES_UNHEALTHY);
         cmInstance.setStatusReason("Cluster manager inaccessible.");
         instanceMetaDataService.save(cmInstance);
         return cmInstance;
@@ -749,11 +752,11 @@ public class ClusterService {
     private List<InstanceMetaData> updateInstanceStatuses(Set<InstanceMetaData> notTerminatedInstanceMetaDatas, Map<HostName,
             ClusterManagerState> hostStatuses) {
         return notTerminatedInstanceMetaDatas.stream()
-                .filter(instanceMetaData -> InstanceStatus.SERVICES_RUNNING.equals(instanceMetaData.getInstanceStatus()))
+                .filter(instanceMetaData -> SERVICES_RUNNING.equals(instanceMetaData.getInstanceStatus()))
                 .map(instanceMetaData -> {
                     ClusterManagerState clusterManagerState = hostStatuses.get(hostName(instanceMetaData.getDiscoveryFQDN()));
                     InstanceStatus newState = ClusterManagerStatus.HEALTHY.equals(clusterManagerState.getClusterManagerStatus()) ?
-                            InstanceStatus.SERVICES_HEALTHY : InstanceStatus.SERVICES_UNHEALTHY;
+                            SERVICES_HEALTHY : SERVICES_UNHEALTHY;
                     instanceMetaData.setInstanceStatus(newState);
                     instanceMetaData.setStatusReason(clusterManagerState.getStatusReason());
                     return instanceMetaData;

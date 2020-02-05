@@ -15,6 +15,7 @@ public class UserViewToUserViewV4ResponseConverter extends AbstractConversionSer
         UserViewV4Response userViewResponse = new UserViewV4Response();
         userViewResponse.setUserId(source.getUserId());
         userViewResponse.setUserName(source.getUserName());
+        userViewResponse.setUserCrn(source.getUserCrn());
         return userViewResponse;
     }
 }

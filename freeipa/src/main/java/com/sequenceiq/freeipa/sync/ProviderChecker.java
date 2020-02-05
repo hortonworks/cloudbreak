@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -67,15 +66,8 @@ public class ProviderChecker {
     @Value("${freeipa.autosync.update.status:true}")
     private boolean updateStatus;
 
-    public List<ProviderSyncResult> updateAndGetStatuses(Stack stack) {
+    public List<ProviderSyncResult> updateAndGetStatuses(Stack stack, Set<InstanceMetaData> checkableInstances) {
         return checkedMeasure(() -> {
-            Set<InstanceMetaData> notTerminatedForStack = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
-            Set<InstanceMetaData> checkableInstances = notTerminatedForStack.stream().filter(i -> !i.isDeletedOnProvider()).collect(Collectors.toSet());
-
-            int alreadyDeletedCount = notTerminatedForStack.size() - checkableInstances.size();
-            if (alreadyDeletedCount > 0) {
-                LOGGER.info(":::Auto sync updater::: Count of already in deleted on provider side state: {}", alreadyDeletedCount);
-            }
             List<ProviderSyncResult> results = new ArrayList<>();
             List<CloudVmInstanceStatus> statuses = checkStatus(stack, checkableInstances);
             statuses.forEach(s -> {
@@ -88,7 +80,7 @@ public class ProviderChecker {
                         results.add(new ProviderSyncResult("", instanceStatus, false, s.getCloudInstance().getInstanceId()));
                     }
                 } else {
-                    LOGGER.info(":::Auto sync updater::: Cannot find instanceMetaData");
+                    LOGGER.info(":::Auto sync::: Cannot find instanceMetaData");
                 }
             });
             checkableInstances.forEach(instanceMetaData -> {
@@ -100,11 +92,11 @@ public class ProviderChecker {
                 }
             });
             return results;
-        }, LOGGER, ":::Auto sync measure::: provider is checked in {}ms");
+        }, LOGGER, ":::Auto sync::: provider is checked in {}ms");
     }
 
     private InstanceStatus updateStatuses(CloudVmInstanceStatus vmInstanceStatus, InstanceMetaData instanceMetaData) {
-        LOGGER.info(":::Auto sync updater::: {} instance metadata status update in progress, new status: {}",
+        LOGGER.info(":::Auto sync::: {} instance metadata status update in progress, new status: {}",
                 instanceMetaData.getShortHostname(), vmInstanceStatus);
         InstanceStatus status = null;
         switch (vmInstanceStatus.getStatus()) {
@@ -125,7 +117,7 @@ public class ProviderChecker {
                 status = InstanceStatus.DELETED_ON_PROVIDER_SIDE;
                 break;
             default:
-                LOGGER.info(":::Auto sync updater::: the '{}' status is not converted", vmInstanceStatus.getStatus());
+                LOGGER.info(":::Auto sync::: the '{}' status is not converted", vmInstanceStatus.getStatus());
         }
         if (updateStatus) {
             instanceMetaDataService.save(instanceMetaData);
@@ -137,9 +129,9 @@ public class ProviderChecker {
         if (instanceMetaData.getInstanceStatus() != newStatus) {
             if (updateStatus) {
                 instanceMetaData.setInstanceStatus(newStatus);
-                LOGGER.info(":::Auto sync updater::: The instance status updated from {} to {}", instanceMetaData.getInstanceStatus(), newStatus);
+                LOGGER.info(":::Auto sync::: The instance status updated from {} to {}", instanceMetaData.getInstanceStatus(), newStatus);
             } else {
-                LOGGER.info(":::Auto sync updater::: The instance status would be had to update from {} to {}",
+                LOGGER.info(":::Auto sync::: The instance status would be had to update from {} to {}",
                         instanceMetaData.getInstanceStatus(), newStatus);
             }
         }
@@ -153,9 +145,9 @@ public class ProviderChecker {
         List<CloudInstance> instances = metadataConverter.convert(notTerminatedForStack);
         try {
             return checkedMeasure(() -> instanceStateQuery.getCloudVmInstanceStatuses(cloudCredential, cloudContext, instances), LOGGER,
-                    ":::Auto sync measure::: get instance statuses in {}ms");
+                    ":::Auto sync::: get instance statuses in {}ms");
         } catch (Exception e) {
-            LOGGER.info(":::Auto sync updater::: Could not fetch vm statuses: " + e.getMessage(), e);
+            LOGGER.info(":::Auto sync::: Could not fetch vm statuses: " + e.getMessage(), e);
             throw e;
         }
     }

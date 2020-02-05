@@ -81,7 +81,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Inject
     private ClusterProxyService clusterProxyService;
 
-    @Value("${cb.changednodesreport.disabled:false}")
+    @Value("${cb.changednodesreport.disabled:true}")
     private boolean changedNodedReportDisabled;
 
     @Override

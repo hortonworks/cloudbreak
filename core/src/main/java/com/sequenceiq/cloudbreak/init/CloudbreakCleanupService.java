@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.service.flowlog.RestartFlowService;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
-import com.sequenceiq.cloudbreak.startup.MissingVolumeTemplatesMigrator;
 
 @Component
 public class CloudbreakCleanupService implements ApplicationListener<ContextRefreshedEvent> {
@@ -23,15 +22,11 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     @Inject
     private HeartbeatService heartbeatService;
 
-    @Inject
-    private MissingVolumeTemplatesMigrator missingVolumeTemplatesMigrator;
-
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         heartbeatService.heartbeat();
         try {
             restartFlowService.purgeTerminatedResourceFlowLogs();
-            missingVolumeTemplatesMigrator.run();
         } catch (Exception e) {
             LOGGER.error("Clean up or the migration operations failed. Shutting down the node. ", e);
             ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) event.getApplicationContext();

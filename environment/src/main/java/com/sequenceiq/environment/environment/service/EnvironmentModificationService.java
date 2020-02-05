@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
@@ -51,9 +52,12 @@ public class EnvironmentModificationService {
 
     private final EnvironmentFlowValidatorService environmentFlowValidatorService;
 
+    private final EnvironmentResourceService environmentResourceService;
+
     public EnvironmentModificationService(EnvironmentDtoConverter environmentDtoConverter, EnvironmentService environmentService,
             CredentialService credentialService, NetworkService networkService, AuthenticationDtoConverter authenticationDtoConverter,
-            ParametersService parametersService, EnvironmentFlowValidatorService environmentFlowValidatorService) {
+            ParametersService parametersService, EnvironmentFlowValidatorService environmentFlowValidatorService,
+            EnvironmentResourceService environmentResourceService) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentService = environmentService;
         this.credentialService = credentialService;
@@ -61,6 +65,7 @@ public class EnvironmentModificationService {
         this.authenticationDtoConverter = authenticationDtoConverter;
         this.parametersService = parametersService;
         this.environmentFlowValidatorService = environmentFlowValidatorService;
+        this.environmentResourceService = environmentResourceService;
     }
 
     public EnvironmentDto editByName(String environmentName, EnvironmentEditDto editDto) {
@@ -135,10 +140,28 @@ public class EnvironmentModificationService {
         }
     }
 
-    private void editAuthenticationIfChanged(EnvironmentEditDto editDto, Environment environment) {
+    @VisibleForTesting
+    void editAuthenticationIfChanged(EnvironmentEditDto editDto, Environment environment) {
         AuthenticationDto authenticationDto = editDto.getAuthentication();
         if (authenticationDto != null) {
+            EnvironmentValidatorService validatorService = environmentService.getValidatorService();
+            ValidationResult validationResult = validatorService.validateAuthenticationModification(editDto, environment);
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
+            String oldSshKeyIdForDeletion = null;
+            String oldSshKeyId = environment.getAuthentication().getPublicKeyId();
+            if (environment.getAuthentication().isManagedKey()) {
+                oldSshKeyIdForDeletion = oldSshKeyId;
+            }
             environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(authenticationDto));
+            if (StringUtils.isNotEmpty(authenticationDto.getPublicKey())) {
+                environmentResourceService.createAndUpdateSshKey(environment);
+            }
+            if (oldSshKeyIdForDeletion != null) {
+                environmentResourceService.deletePublicKey(environment, oldSshKeyIdForDeletion);
+            }
+            LOGGER.info("The '{}' of ssh key is replaced with {}", oldSshKeyId, environment.getAuthentication().getPublicKeyId());
         }
     }
 
