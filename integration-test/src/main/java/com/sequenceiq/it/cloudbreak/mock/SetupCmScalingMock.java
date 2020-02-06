@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
+import com.cloudera.api.swagger.model.ApiHealthCheck;
+import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRef;
@@ -155,7 +157,14 @@ public class SetupCmScalingMock {
             if (InstanceStatus.STARTED.equals(vmStatus.getCloudVmInstanceStatus().getStatus())) {
                 String ip = vmStatus.getMetaData().getPrivateIp();
                 String hostname = HostNameUtil.generateHostNameByIp(ip);
-                apiHosts.add(new ApiHost().hostname(hostname).hostId(hostname).ipAddress(ip).lastHeartbeat(Instant.now().plusSeconds(60000L).toString()));
+                apiHosts.add(new ApiHost()
+                        .hostname(hostname)
+                        .hostId(hostname)
+                        .ipAddress(ip)
+                        .healthChecks(List.of(new ApiHealthCheck()
+                                .name("HOST_SCM_HEALTH")
+                                .summary(ApiHealthSummary.GOOD)))
+                        .lastHeartbeat(Instant.now().plusSeconds(60000L).toString()));
             }
         }
         return apiHosts;
