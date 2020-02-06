@@ -33,7 +33,6 @@ dependencies {
     testCompile project(':cloud-reactor')
     testCompile group: 'org.mockito',               name: 'mockito-junit-jupiter',        version: mockitoVersion
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',     version: springBootVersion
-    testCompile group: 'org.apache.httpcomponents', name: 'httpclient',                   version: httpClientVersion, classifier: 'tests'
     testCompile group: 'org.junit.vintage',         name: 'junit-vintage-engine',         version: '5.2.0'
     testCompile group: 'org.junit.jupiter',         name: 'junit-jupiter-api',            version: '5.2.0'
     testRuntime group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',         version: '5.2.0'
