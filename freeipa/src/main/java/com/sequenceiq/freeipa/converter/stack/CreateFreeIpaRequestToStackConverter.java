@@ -26,11 +26,14 @@ import org.springframework.util.CollectionUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.common.cost.CostTagging;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.service.CDPTagGenerationRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
@@ -46,7 +49,7 @@ import com.sequenceiq.freeipa.entity.SecurityGroup;
 import com.sequenceiq.freeipa.entity.SecurityRule;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
-import com.sequenceiq.freeipa.service.FreeIpaCostTaggingService;
+import com.sequenceiq.freeipa.util.CrnService;
 
 @Component
 public class CreateFreeIpaRequestToStackConverter {
@@ -54,9 +57,6 @@ public class CreateFreeIpaRequestToStackConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateFreeIpaRequestToStackConverter.class);
 
     private static final String TCP_PROTOCOL = "tcp";
-
-    @Inject
-    private FreeIpaCostTaggingService freeIpaCostTaggingService;
 
     @Inject
     private StackAuthenticationRequestToStackAuthenticationConverter stackAuthenticationConverter;
@@ -69,6 +69,12 @@ public class CreateFreeIpaRequestToStackConverter {
 
     @Inject
     private TelemetryConverter telemetryConverter;
+
+    @Inject
+    private CrnService crnService;
+
+    @Inject
+    private CostTagging costTagging;
 
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
@@ -88,6 +94,7 @@ public class CreateFreeIpaRequestToStackConverter {
         stack.setAccountId(accountId);
         stack.setName(source.getName());
         stack.setCreated(System.currentTimeMillis());
+        stack.setResourceCrn(crnService.createCrn(accountId, Crn.ResourceType.FREEIPA));
         stack.setGatewayport(source.getGatewayPort() == null ? nginxPort : source.getGatewayPort());
         stack.setStackStatus(new StackStatus(stack, "Stack provision requested.", DetailedStackStatus.PROVISION_REQUESTED));
         stack.setAvailabilityZone(Optional.ofNullable(source.getPlacement()).map(PlacementBase::getAvailabilityZone).orElse(null));
@@ -100,7 +107,7 @@ public class CreateFreeIpaRequestToStackConverter {
         }
         stack.setTelemetry(telemetryConverter.convert(source.getTelemetry()));
         decorateStackWithTunnelAndCcm(stack, source);
-        updateOwnerRelatedFields(accountId, userFuture, cloudPlatform, stack);
+        updateOwnerRelatedFields(accountId, userFuture, stack);
         extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack);
         return stack;
     }
@@ -144,17 +151,17 @@ public class CreateFreeIpaRequestToStackConverter {
         return securityRule;
     }
 
-    private void updateOwnerRelatedFields(String accountId, Future<User> userFuture, String cloudPlatform, Stack stack) {
+    private void updateOwnerRelatedFields(String accountId, Future<User> userFuture, Stack stack) {
         String owner = accountId;
         try {
             User user = userFuture.get(userGetTimeout, TimeUnit.SECONDS);
             owner = user.getEmail();
+            stack.setTags(getTags(user, stack));
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             String errorMessage = "Couldn't fetch user from UMS: ";
             LOGGER.error(errorMessage, e);
             stack.getStackStatus().setStatusReason(errorMessage + e.getMessage());
         }
-        stack.setTags(getTags(owner, cloudPlatform, stack.getEnvironmentCrn()));
         stack.setOwner(owner);
     }
 
@@ -187,18 +194,26 @@ public class CreateFreeIpaRequestToStackConverter {
         return source.getPlacement().getRegion();
     }
 
-    private Json getTags(String owner, String cloudPlatform, String envCrn) {
+    private Json getTags(User user, Stack stack) {
         try {
-            return new Json(new StackTags(new HashMap<>(), new HashMap<>(), getDefaultTags(owner, cloudPlatform, envCrn)));
+            return new Json(new StackTags(new HashMap<>(), new HashMap<>(), getDefaultTags(user, stack)));
         } catch (Exception ignored) {
             throw new BadRequestException("Failed to convert dynamic tags.");
         }
     }
 
-    private Map<String, String> getDefaultTags(String owner, String cloudPlatform, String envCrn) {
+    private Map<String, String> getDefaultTags(User user, Stack stack) {
         Map<String, String> result = new HashMap<>();
         try {
-            result.putAll(freeIpaCostTaggingService.prepareDefaultTags(owner, result, cloudPlatform, envCrn));
+            CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
+                    .withCreatorCrn(user.getCrn())
+                    .withEnvironmentCrn(stack.getEnvironmentCrn())
+                    .withPlatform(stack.getCloudPlatform())
+                    .withResourceCrn(stack.getResourceCrn())
+                    .withUserName(user.getEmail())
+                    .build();
+
+            result.putAll(costTagging.prepareDefaultTags(request));
         } catch (Exception e) {
             LOGGER.debug("Exception during reading default tags.", e);
         }

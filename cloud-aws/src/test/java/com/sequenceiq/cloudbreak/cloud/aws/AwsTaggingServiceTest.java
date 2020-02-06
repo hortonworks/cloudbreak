@@ -22,7 +22,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.amazonaws.services.cloudformation.model.Tag;
 import com.amazonaws.services.ec2.AmazonEC2Client;
@@ -32,7 +31,6 @@ import com.amazonaws.services.ec2.model.EbsInstanceBlockDevice;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceBlockDeviceMapping;
 import com.amazonaws.services.ec2.model.Reservation;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -59,49 +57,10 @@ public class AwsTaggingServiceTest {
     private ArgumentCaptor<CreateTagsRequest> tagRequestCaptor;
 
     @Test
-    public void testWhenCustomTagsDefined() {
-        ReflectionTestUtils.setField(awsTaggingService, "defaultCloudformationTag", "test1");
-        ReflectionTestUtils.setField(awsTaggingService, "customCloudformationTags", Lists.asList("test2:abc", new String[]{"test3:def"}));
-        awsTaggingService.init();
-        Collection<Tag> tags = awsTaggingService.prepareCloudformationTags(authenticatedContext(), Maps.newHashMap());
-        assertEquals(4L, tags.size());
-    }
-
-    @Test
-    public void testWhenCustomTagsDefinedNoAuthenticatedContext() {
-        ReflectionTestUtils.setField(awsTaggingService, "defaultCloudformationTag", "test1");
-        ReflectionTestUtils.setField(awsTaggingService, "customCloudformationTags", Lists.asList("test2:abc", new String[]{"test3:def"}));
-        awsTaggingService.init();
-        Collection<Tag> tags = awsTaggingService.prepareCloudformationTags(null, Maps.newHashMap());
-        assertEquals(3L, tags.size());
-    }
-
-    @Test
-    public void testWhenCustomAndUserTagsDefined() {
-        ReflectionTestUtils.setField(awsTaggingService, "defaultCloudformationTag", "test1");
-        ReflectionTestUtils.setField(awsTaggingService, "customCloudformationTags", Lists.asList("test2:abc", new String[]{"test3:def"}));
-        awsTaggingService.init();
+    public void testWhenUserTagsDefined() {
         Map<String, String> userDefined = Maps.newHashMap();
         userDefined.put("userdefinedkey", "userdefinedvalue");
         Collection<Tag> tags = awsTaggingService.prepareCloudformationTags(authenticatedContext(), userDefined);
-        assertEquals(5L, tags.size());
-    }
-
-    @Test
-    public void testWhenCustomTagsNotDefined() {
-        ReflectionTestUtils.setField(awsTaggingService, "defaultCloudformationTag", "test1");
-        ReflectionTestUtils.setField(awsTaggingService, "customCloudformationTags", new ArrayList<>());
-        awsTaggingService.init();
-        Collection<Tag> tags = awsTaggingService.prepareCloudformationTags(authenticatedContext(), Maps.newHashMap());
-        assertEquals(2L, tags.size());
-    }
-
-    @Test
-    public void testWhenDefaultAndCustomTagsNotDefined() {
-        ReflectionTestUtils.setField(awsTaggingService, "defaultCloudformationTag", "");
-        ReflectionTestUtils.setField(awsTaggingService, "customCloudformationTags", new ArrayList<>());
-        awsTaggingService.init();
-        Collection<Tag> tags = awsTaggingService.prepareCloudformationTags(authenticatedContext(), Maps.newHashMap());
         assertEquals(1L, tags.size());
     }
 
@@ -132,12 +91,10 @@ public class AwsTaggingServiceTest {
         assertEquals(VOLUME_ID, request.getResources().get(0));
         List<com.amazonaws.services.ec2.model.Tag> tags = request.getTags();
         assertThat(tags, containsInAnyOrder(
-                hasProperty("key", Matchers.is("CloudbreakClusterName")),
                 hasProperty("key", Matchers.is("key1")),
                 hasProperty("key", Matchers.is("key2"))
         ));
         assertThat(tags, containsInAnyOrder(
-                hasProperty("value", Matchers.is("testname")),
                 hasProperty("value", Matchers.is("val1")),
                 hasProperty("value", Matchers.is("val2"))
         ));

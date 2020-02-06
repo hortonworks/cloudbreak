@@ -17,6 +17,10 @@ public class NetworkCreationRequest {
 
     private final String variant;
 
+    private final String userName;
+
+    private final String creatorCrn;
+
     private final Region region;
 
     private final String networkCidr;
@@ -41,6 +45,8 @@ public class NetworkCreationRequest {
         noPublicIp = builder.noPublicIp;
         stackName = builder.stackName;
         privateSubnetEnabled = builder.privateSubnetEnabled;
+        userName = builder.userName;
+        creatorCrn = builder.creatorCrn;
     }
 
     public String getEnvName() {
@@ -87,12 +93,22 @@ public class NetworkCreationRequest {
         return privateSubnetEnabled;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getCreatorCrn() {
+        return creatorCrn;
+    }
+
     public static class Builder {
         private Long envId;
 
         private String envName;
 
         private String envCrn;
+
+        private String userName;
 
         private CloudCredential cloudCredential;
 
@@ -109,6 +125,8 @@ public class NetworkCreationRequest {
         private String stackName;
 
         private boolean privateSubnetEnabled;
+
+        private String creatorCrn;
 
         public Builder withEnvId(Long envId) {
             this.envId = envId;
@@ -162,6 +180,16 @@ public class NetworkCreationRequest {
 
         public Builder withPrivateSubnetEnabled(boolean privateSubnetEnabled) {
             this.privateSubnetEnabled = privateSubnetEnabled;
+            return this;
+        }
+
+        public Builder withUserName(String userName) {
+            this.userName = userName;
+            return this;
+        }
+
+        public Builder withCreatorCrn(String creatorCrn) {
+            this.creatorCrn = creatorCrn;
             return this;
         }
 

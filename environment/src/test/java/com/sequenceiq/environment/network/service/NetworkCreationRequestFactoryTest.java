@@ -94,6 +94,7 @@ class NetworkCreationRequestFactoryTest {
     private EnvironmentDto.Builder createEnvironmentDtoWithoutAureParams() {
         return EnvironmentDto.builder()
                 .withName(ENV_NAME)
+                .withCreator("creator")
                 .withCredential(new Credential())
                 .withCloudPlatform(CLOUD_PLATFORM)
                 .withLocationDto(LocationDto.builder().withName(REGION).build())

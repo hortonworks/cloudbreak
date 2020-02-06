@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 
 @Service
 public class AzureStorage {
@@ -48,9 +47,6 @@ public class AzureStorage {
 
     @Inject
     private AzureUtils armUtils;
-
-    @Inject
-    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Inject
     private SkuTypeResolver skuTypeResolver;
@@ -108,8 +104,7 @@ public class AzureStorage {
             Map<String, String> tags)
             throws CloudException {
         if (!storageAccountExist(client, osStorageName)) {
-            client.createStorageAccount(storageGroup, osStorageName, region, skuTypeResolver.resolveFromAzureDiskType(storageType), encrypted, tags,
-                    defaultCostTaggingService.prepareStorageTagging());
+            client.createStorageAccount(storageGroup, osStorageName, region, skuTypeResolver.resolveFromAzureDiskType(storageType), encrypted, tags);
         }
     }
 

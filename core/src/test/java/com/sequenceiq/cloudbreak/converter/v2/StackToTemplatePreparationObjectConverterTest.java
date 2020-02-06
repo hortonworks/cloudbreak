@@ -211,6 +211,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         MockitoAnnotations.initMocks(this);
         User user = new User();
         user.setUserName("applebob@apple.com");
+        user.setUserCrn("user-crn");
         when(stackMock.getCreator()).thenReturn(user);
         when(stackMock.getEnvironmentCrn()).thenReturn("env");
         when(stackMock.getCloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
@@ -228,6 +229,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
         when(stackMock.getEnvironmentCrn()).thenReturn(TestConstants.CRN);
         when(stackMock.getCluster()).thenReturn(sourceCluster);
+        when(stackMock.getResourceCrn()).thenReturn("crn");
         Credential credential = Credential.builder()
                 .crn("aCredentialCRN")
                 .attributes(new Json(""))

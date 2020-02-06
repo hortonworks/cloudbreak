@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,16 +21,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpReservedIpResourceBuilder.class);
-
-    @Inject
-    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -60,7 +54,6 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
 
             Map<String, Object> customTags = new HashMap<>();
             customTags.putAll(cloudStack.getTags());
-            customTags.putAll(defaultCostTaggingService.prepareIpTagging());
             address.setUnknownKeys(customTags);
             Insert networkInsert = context.getCompute().addresses().insert(projectId, region, address);
             try {

@@ -26,14 +26,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
 public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
-
-    @Inject
-    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Inject
     private GcpDiskEncryptionService gcpDiskEncryptionService;
@@ -61,7 +57,6 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
         Map<String, String> customTags = new HashMap<>();
         customTags.putAll(cloudStack.getTags());
-        customTags.putAll(defaultCostTaggingService.prepareDiskTagging());
         disk.setLabels(customTags);
 
         Insert insDisk = context.getCompute().disks().insert(projectId, location.getAvailabilityZone().value(), disk);

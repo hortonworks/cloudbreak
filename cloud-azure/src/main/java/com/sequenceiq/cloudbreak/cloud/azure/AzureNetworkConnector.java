@@ -54,7 +54,7 @@ public class AzureNetworkConnector implements NetworkConnector {
     private AzureUtils azureUtils;
 
     @Override
-    public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest, String creatorUser) {
+    public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest) {
         AzureClient azureClient = azureClientService.getClient(networkRequest.getCloudCredential());
         String template = azureNetworkTemplateBuilder.build(networkRequest);
         String envName = networkRequest.getEnvName();
@@ -62,8 +62,7 @@ public class AzureNetworkConnector implements NetworkConnector {
         ResourceGroup resourceGroup;
         try {
             Map<String, String> tags = Collections.emptyMap();
-            Map<String, String> costFollowerTags = Collections.emptyMap();
-            resourceGroup = azureClient.createResourceGroup(envName, networkRequest.getRegion().value(), tags, costFollowerTags);
+            resourceGroup = azureClient.createResourceGroup(envName, networkRequest.getRegion().value(), tags);
             templateDeployment = azureClient.createTemplateDeployment(resourceGroup.name(), networkRequest.getStackName(), template, "");
         } catch (CloudException e) {
             LOGGER.info("Provisioning error, cloud exception happened: ", e);

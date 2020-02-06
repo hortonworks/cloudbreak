@@ -28,7 +28,9 @@ import com.sequenceiq.cloudbreak.cmtemplate.general.GeneralClusterConfigsProvide
 import com.sequenceiq.cloudbreak.cmtemplate.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.service.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
@@ -151,6 +153,15 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                 gatewaySignKey = gateway.getSignKey();
             }
             VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(source.getEnvironmentCrn(), ldapView.map(LdapView::getAdminGroup).orElse(""));
+
+            CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
+                    .withCreatorCrn(source.getCreator().getUserCrn())
+                    .withEnvironmentCrn(source.getEnvironmentCrn())
+                    .withPlatform(CloudConstants.AWS)
+                    .withResourceCrn(source.getResourceCrn())
+                    .withUserName(source.getCreator().getUserName())
+                    .build();
+
             Builder builder = Builder.builder()
                     .withCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()))
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
@@ -165,11 +176,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withKerberosConfig(kerberosConfigService.get(source.getEnvironmentCrn(), source.getName()).orElse(null))
                     .withProductDetails(cm, products)
                     .withExposedServices(views)
-                    .withDefaultTags(defaultCostTaggingService.prepareDefaultTags(
-                            source.getCreator().getUserName(),
-                            new HashMap<>(),
-                            source.getCloudPlatform(),
-                            environment.getCrn()))
+                    .withDefaultTags(defaultCostTaggingService.prepareDefaultTags(request))
                     .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeResource))
                     .withStackType(source.getType())
                     .withVirtualGroupView(virtualGroupRequest);

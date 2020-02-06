@@ -5,7 +5,6 @@ import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -45,10 +44,9 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
-import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
-import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 import freemarker.template.Configuration;
 
@@ -117,8 +115,6 @@ public class CloudFormationTemplateBuilderDBTest {
         awsCloudFormationTemplate = configuration.getTemplate(templatePath, "UTF-8").toString();
         authenticatedContext = authenticatedContext();
 
-        defaultTags.put(CloudbreakResourceType.DATABASE.templateVariable(), CloudbreakResourceType.DATABASE.key());
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         databaseStack = createDefaultDatabaseStack(getDefaultDatabaseStackTags());
     }
 
@@ -135,10 +131,6 @@ public class CloudFormationTemplateBuilderDBTest {
         // FIXME this is apparently intentional, but it doesn't make sense
         assertThat(templateString, not(containsString("testtagkey")));
         assertThat(templateString, not(containsString("testtagvalue")));
-        JsonNode jsonNode = JsonUtil.readTree(templateString);
-        jsonNode.findValues("Tags").forEach(jsonNode1 -> {
-            assertTrue(jsonNode1.findValues("Key").stream().anyMatch(jsonNode2 -> "cb-resource-type".equals(jsonNode2.textValue())));
-        });
     }
 
     private AuthenticatedContext authenticatedContext() {

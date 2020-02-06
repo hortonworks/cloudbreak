@@ -34,10 +34,6 @@
             "Value": "Public"
           },
           {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
-          },
-          {
             "Key": "owner",
             "Value": {
               "Ref": "stackowner"
@@ -65,10 +61,6 @@
           {
             "Key": "Network",
             "Value": "Public"
-          },
-          {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
           },
           {
             "Key": "owner",
@@ -117,10 +109,6 @@
             "Value": "Public"
           },
           {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
-          },
-          {
             "Key": "kubernetes.io/role/elb",
             "Value": "1"
           },
@@ -158,10 +146,6 @@
           {
             "Key": "Network",
             "Value": "Private"
-          },
-          {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
           },
           {
             "Key": "kubernetes.io/role/elb",
@@ -221,10 +205,6 @@
           {
             "Key": "Network",
             "Value": "Private"
-          },
-          {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
           },
           {
             "Key": "owner",
@@ -332,10 +312,6 @@
             "Value": "Public"
           },
           {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
-          },
-          {
             "Key": "kubernetes.io/role/elb",
             "Value": "1"
           },
@@ -373,10 +349,6 @@
           {
             "Key": "Network",
             "Value": "Private"
-          },
-          {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
           },
           {
             "Key": "kubernetes.io/role/elb",
@@ -436,10 +408,6 @@
           {
             "Key": "Network",
             "Value": "Private"
-          },
-          {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
           },
           {
             "Key": "owner",
@@ -542,10 +510,6 @@
           {
             "Key": "Network",
             "Value": "Public"
-          },
-          {
-            "Key": "cb-resource-type",
-            "Value": "NETWORK"
           },
           {
             "Key": "owner",

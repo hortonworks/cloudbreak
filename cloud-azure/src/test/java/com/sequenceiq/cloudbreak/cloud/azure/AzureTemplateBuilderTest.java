@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetSt
 import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
@@ -37,7 +36,6 @@ import org.mockito.Spy;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -65,9 +63,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
-import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.cloudbreak.util.Version;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -200,13 +196,6 @@ public class AzureTemplateBuilderTest {
 
         azureSubnetStrategy = AzureSubnetStrategy.getAzureSubnetStrategy(FILL, Collections.singletonList("existingSubnet"),
                 ImmutableMap.of("existingSubnet", 100L));
-        defaultTags.put(CloudbreakResourceType.DISK.templateVariable(), CloudbreakResourceType.DISK.key());
-        defaultTags.put(CloudbreakResourceType.INSTANCE.templateVariable(), CloudbreakResourceType.INSTANCE.key());
-        defaultTags.put(CloudbreakResourceType.IP.templateVariable(), CloudbreakResourceType.IP.key());
-        defaultTags.put(CloudbreakResourceType.NETWORK.templateVariable(), CloudbreakResourceType.NETWORK.key());
-        defaultTags.put(CloudbreakResourceType.SECURITY.templateVariable(), CloudbreakResourceType.SECURITY.key());
-        defaultTags.put(CloudbreakResourceType.STORAGE.templateVariable(), CloudbreakResourceType.STORAGE.key());
-        defaultTags.put(CloudbreakResourceType.TEMPLATE.templateVariable(), CloudbreakResourceType.TEMPLATE.key());
         reset(azureUtils);
     }
 
@@ -232,7 +221,6 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
         //WHEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
@@ -241,12 +229,6 @@ public class AzureTemplateBuilderTest {
         assertFalse(templateString.contains("publicIPAddress"));
         assertTrue(templateString.contains("\"testtagkey1\": \"testtagvalue1\""));
         assertTrue(templateString.contains("\"testtagkey2\": \"testtagvalue2\""));
-        // Only 2.x version have cb-resource-type
-        if (!templatePath.contains(V16)) {
-            JsonNode jsonNode = JsonUtil.readTree(templateString);
-            assertNotNull("Missing cb-resource-type from tags",
-                    jsonNode.findPath("resources").iterator().next().findPath("tags").get("cb-resource-type"));
-        }
     }
 
     @Test
@@ -257,7 +239,6 @@ public class AzureTemplateBuilderTest {
         when(azureUtils.getCustomNetworkId(any())).thenReturn("existingNetworkName");
         when(azureUtils.getCustomResourceGroupName(any())).thenReturn("existingResourceGroup");
         when(azureUtils.getCustomSubnetIds(any())).thenReturn(Collections.singletonList("existingSubnet"));
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         Network network = new Network(new Subnet("testSubnet"));
@@ -290,7 +271,6 @@ public class AzureTemplateBuilderTest {
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
         when(azureUtils.isNoSecurityGroups(any())).then(invocation -> false);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         Map<String, String> parameters = new HashMap<>();
@@ -320,7 +300,6 @@ public class AzureTemplateBuilderTest {
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> false);
         when(azureUtils.isNoSecurityGroups(any())).then(invocation -> false);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         Map<String, String> parameters = new HashMap<>();
@@ -342,12 +321,6 @@ public class AzureTemplateBuilderTest {
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("publicIPAddress"));
         assertTrue(templateString.contains("networkSecurityGroups"));
-        // On older version cb-resource-type was added only when there was user defined tag
-        if (templatePath.equalsIgnoreCase(LATEST_TEMPLATE_PATH)) {
-            JsonNode jsonNode = JsonUtil.readTree(templateString);
-            assertNotNull("Missing cb-resource-type from tags",
-                    jsonNode.findPath("resources").iterator().next().findPath("tags").get("cb-resource-type"));
-        }
     }
 
     private String base64EncodedUserData(String data) {
@@ -370,7 +343,6 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
@@ -397,7 +369,6 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
@@ -424,7 +395,6 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
@@ -451,7 +421,6 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
@@ -480,7 +449,6 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
@@ -510,7 +478,6 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
@@ -543,7 +510,6 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
@@ -574,7 +540,6 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
@@ -603,7 +568,6 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
@@ -632,7 +596,6 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
@@ -662,7 +625,6 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(Collections.emptyMap());
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
@@ -692,7 +654,6 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
@@ -722,7 +683,6 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
@@ -763,7 +723,6 @@ public class AzureTemplateBuilderTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");

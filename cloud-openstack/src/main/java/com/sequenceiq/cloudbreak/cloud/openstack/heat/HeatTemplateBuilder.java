@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NovaInstanceView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.OpenStackGroupView;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
@@ -50,9 +49,6 @@ public class HeatTemplateBuilder {
     private Configuration freemarkerConfiguration;
 
     @Inject
-    private DefaultCostTaggingService defaultCostTaggingService;
-
-    @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     public String build(ModelContext modelContext) {
@@ -67,7 +63,6 @@ public class HeatTemplateBuilder {
             model.put("existingNetwork", modelContext.existingNetwork);
             model.put("existingSubnet", modelContext.existingSubnet);
             model.put("network", modelContext.neutronNetworkView);
-            model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
             AvailabilityZone az = modelContext.location.getAvailabilityZone();
             if (az != null && az.value() != null) {
                 model.put("availability_zone", az.value());

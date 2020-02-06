@@ -150,7 +150,6 @@
               ],
               "Tags" : [
                     { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-                    { "Key" : "cb-resource-type", "Value" : "${database_resource}" },
                     { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
                     { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
               ],
@@ -166,7 +165,6 @@
                 "SubnetIds": { "Ref": "DBSubnetGroupSubnetIdsParameter" },
                 "Tags": [
                     { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-                    { "Key" : "cb-resource-type", "Value" : "${database_resource}" },
                     { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
                     { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
                 ]
@@ -192,7 +190,6 @@
                 "StorageType": { "Ref": "StorageTypeParameter" },
                 "Tags": [
                     { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-                    { "Key" : "cb-resource-type", "Value" : "${database_resource}" },
                     { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
                     { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
                 ],

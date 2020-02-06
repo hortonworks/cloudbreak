@@ -181,7 +181,6 @@ public class GcpInstanceResourceBuilderTest {
         when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
-        when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(new HashMap<>());
 
         builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
 
@@ -203,7 +202,6 @@ public class GcpInstanceResourceBuilderTest {
         when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
-        when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(new HashMap<>());
 
         builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
 
@@ -225,7 +223,6 @@ public class GcpInstanceResourceBuilderTest {
         when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
-        when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(new HashMap<>());
 
         builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
 
@@ -247,7 +244,6 @@ public class GcpInstanceResourceBuilderTest {
         when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
-        when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(new HashMap<>());
 
         builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
 
@@ -277,7 +273,6 @@ public class GcpInstanceResourceBuilderTest {
         when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
-        when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(new HashMap<>());
 
         builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
 

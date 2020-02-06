@@ -1,9 +1,5 @@
 package com.sequenceiq.redbeams.converter.stack;
 
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_CB_VERSION;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_CREATION_TIMESTAMP;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_USER_NAME;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.OWNER;
 import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request.RDS_NAME_MAX_LENGTH;
 
 import java.time.Instant;
@@ -27,7 +23,6 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.security.CrnUser;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
-import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
@@ -138,7 +133,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         }
 
         Instant now = clock.getCurrentInstant();
-        dbStack.setTags(getTags(user.getEmail(), cloudPlatform.name(), now.getEpochSecond(), environment.getCrn()));
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.PROVISION_REQUESTED, now.toEpochMilli()));
 
         return dbStack;
@@ -264,23 +258,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         }
 
         return securityGroup;
-    }
-
-    // compare to freeipa CostTaggingService
-
-    private Json getTags(String userEmail, String cloudPlatform, long now, String envCrn) {
-        // freeipa currently uses account ID for username / owner
-//        String user = ownerCrn.getUserId();
-
-        Map<String, String> defaultTags = new HashMap<>();
-        defaultTags.put(defaultCostTaggingService.transform(CDP_USER_NAME.key(), cloudPlatform), defaultCostTaggingService.transform(userEmail, cloudPlatform));
-        defaultTags.put(defaultCostTaggingService.transform(CDP_CB_VERSION.key(), cloudPlatform), defaultCostTaggingService.transform(version, cloudPlatform));
-        defaultTags.put(defaultCostTaggingService.transform(OWNER.key(), cloudPlatform), defaultCostTaggingService.transform(userEmail, cloudPlatform));
-        defaultTags.put(defaultCostTaggingService.transform(CDP_CREATION_TIMESTAMP.key(), cloudPlatform),
-                defaultCostTaggingService.transform(String.valueOf(now), cloudPlatform));
-        defaultCostTaggingService.addEnvironmentCrnIfPresent(defaultTags, envCrn, cloudPlatform);
-
-        return new Json(new StackTags(new HashMap<>(), new HashMap<>(), defaultTags));
     }
 
     // Sorry, MissingResourceNameGenerator seems like overkill. Unlike other

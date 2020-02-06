@@ -9,11 +9,9 @@ import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -149,16 +147,11 @@ public class AzureClient {
         azure.resourceGroups().deleteByName(name);
     }
 
-    public ResourceGroup createResourceGroup(String name, String region, Map<String, String> tags, Map<String, String> costFollowerTags) {
-        Map<String, String> resultTags = new HashMap<>();
-        for (Entry<String, String> entry : costFollowerTags.entrySet()) {
-            resultTags.put(entry.getKey(), entry.getValue());
-        }
-        resultTags.putAll(tags);
+    public ResourceGroup createResourceGroup(String name, String region, Map<String, String> tags) {
         return handleAuthException(() ->
                 azure.resourceGroups().define(name)
                         .withRegion(region)
-                        .withTags(resultTags)
+                        .withTags(tags)
                         .create()
         );
     }
@@ -215,18 +208,13 @@ public class AzureClient {
     }
 
     public StorageAccount createStorageAccount(String resourceGroup, String storageName, String storageLocation, StorageAccountSkuType accType, Boolean encryted,
-            Map<String, String> tags, Map<String, String> costFollowerTags) {
-        Map<String, String> resultTags = new HashMap<>();
-        for (Entry<String, String> entry : costFollowerTags.entrySet()) {
-            resultTags.put(entry.getKey(), entry.getValue());
-        }
-        resultTags.putAll(tags);
+            Map<String, String> tags) {
         return handleAuthException(() -> {
             WithCreate withCreate = azure.storageAccounts()
                     .define(storageName)
                     .withRegion(storageLocation)
                     .withExistingResourceGroup(resourceGroup)
-                    .withTags(resultTags)
+                    .withTags(tags)
                     .withSku(accType);
             if (encryted) {
                 withCreate.withBlobEncryption();

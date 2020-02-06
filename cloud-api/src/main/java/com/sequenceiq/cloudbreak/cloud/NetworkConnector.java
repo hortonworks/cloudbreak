@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
  */
 public interface NetworkConnector extends CloudPlatformAware {
 
-    CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkCreationRequest, String creatorUser);
+    CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkCreationRequest);
 
     void deleteNetworkWithSubnets(NetworkDeletionRequest networkDeletionRequest);
 

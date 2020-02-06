@@ -194,8 +194,7 @@
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" },
           { "Key" : "owner", "Value" : { "Ref" : "stackowner" }},
-          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }},
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" }
+          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }}
         ]
       }
     },
@@ -220,8 +219,7 @@
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" },
           { "Key" : "owner", "Value" : { "Ref" : "stackowner" }},
-          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }},
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" }
+          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }}
         ]
       }
     },
@@ -235,8 +233,7 @@
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" },
           { "Key" : "owner", "Value" : { "Ref" : "stackowner" }},
-          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }},
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" }
+          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }}
         ]
       }
     },
@@ -266,8 +263,7 @@
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" },
           { "Key" : "owner", "Value" : { "Ref" : "stackowner" }},
-          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }},
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" }
+          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }}
         ]
       }
     },
@@ -324,7 +320,6 @@
         "Tags" : [ { "Key" : "Name", "Value" : { "Fn::Join" : ["-", [ { "Ref" : "StackName" }, "${group.groupName}"]] }, "PropagateAtLaunch" : "true" },
         		   { "Key" : "owner", "Value" : { "Ref" : "stackowner" }, "PropagateAtLaunch" : "true" },
         		   { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }, "PropagateAtLaunch" : "true" },
-        		   { "Key" : "cb-resource-type", "Value" : "${instance_resource}", "PropagateAtLaunch" : "true" },
         		   { "Key" : "instanceGroup", "Value" : "${group.groupName}", "PropagateAtLaunch" : "true" }]
       }
     },
@@ -397,7 +392,6 @@
       "Properties" : {
         "GroupDescription" : "Allow access from web and bastion as well as outbound HTTP and HTTPS traffic",
         "Tags" : [
-            { "Key" : "cb-resource-type", "Value" : "${securitygroup_resource}" },
             { "Key" : "owner", "Value" : { "Ref" : "stackowner" }},
             { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }}
         ],

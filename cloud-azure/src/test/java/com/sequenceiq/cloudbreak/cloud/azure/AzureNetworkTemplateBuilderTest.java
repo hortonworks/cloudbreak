@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -69,7 +68,6 @@ public class AzureNetworkTemplateBuilderTest {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode expectedJson = objectMapper.readTree(new File("src/test/resources/json/arm-network.json"));
 
-        when(defaultCostTaggingService.prepareNetworkTagging()).thenReturn(Collections.emptyMap());
         when(freeMarkerTemplateUtils.processTemplateIntoString(any(), any())).thenCallRealMethod();
 
         String actual = underTest.build(networkCreationRequest);
@@ -77,7 +75,6 @@ public class AzureNetworkTemplateBuilderTest {
         JsonNode json = objectMapper.readTree(actual);
         assertEquals(expectedJson, json);
         verify(freeMarkerTemplateUtils).processTemplateIntoString(any(Template.class), anyMap());
-        verify(defaultCostTaggingService).prepareNetworkTagging();
     }
 
     private NetworkCreationRequest createRequest() {

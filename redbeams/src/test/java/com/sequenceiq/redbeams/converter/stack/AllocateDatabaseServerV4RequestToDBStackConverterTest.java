@@ -1,19 +1,13 @@
 package com.sequenceiq.redbeams.converter.stack;
 
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_CB_VERSION;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_CREATION_TIMESTAMP;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CDP_USER_NAME;
-import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.OWNER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -38,14 +32,12 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.security.CrnUser;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
-import com.sequenceiq.cloudbreak.cloud.model.StackTags;
-import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.cost.CostTagging;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
@@ -131,7 +123,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     private CrnUserDetailsService crnUserDetailsService;
 
     @Mock
-    private DefaultCostTaggingService defaultCostTaggingService;
+    private CostTagging costTagging;
 
     @InjectMocks
     private AllocateDatabaseServerV4RequestToDBStackConverter underTest;
@@ -171,8 +163,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     public void testConversionWhenOptionalElementsAreProvided() throws IOException {
         setupAllocateRequest(true);
 
-        String cdpCreationTimestamp = String.valueOf(NOW.getEpochSecond());
-
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
                 .withCloudPlatform(AWS_CLOUD_PLATFORM.name())
                 .withCrn(ENVIRONMENT_CRN)
@@ -181,14 +171,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         when(crnUserDetailsService.loadUserByUsername(OWNER_CRN)).thenReturn(getCrnUser());
-        when(defaultCostTaggingService.transform(CDP_USER_NAME.key(), AWS_CLOUD_PLATFORM.name())).thenReturn(CDP_USER_NAME.key());
-        when(defaultCostTaggingService.transform(USER_EMAIL, AWS_CLOUD_PLATFORM.name())).thenReturn(USER_EMAIL);
-        when(defaultCostTaggingService.transform(OWNER.key(), AWS_CLOUD_PLATFORM.name())).thenReturn(OWNER.key());
-        when(defaultCostTaggingService.transform(CDP_CB_VERSION.key(), AWS_CLOUD_PLATFORM.name())).thenReturn(CDP_CB_VERSION.key());
-        when(defaultCostTaggingService.transform(VERSION, AWS_CLOUD_PLATFORM.name())).thenReturn(VERSION);
-        when(defaultCostTaggingService.transform(CDP_CREATION_TIMESTAMP.key(), AWS_CLOUD_PLATFORM.name())).thenReturn(CDP_CREATION_TIMESTAMP.key());
-        when(defaultCostTaggingService.transform(cdpCreationTimestamp, AWS_CLOUD_PLATFORM.name())).thenReturn(cdpCreationTimestamp);
-        when(defaultCostTaggingService.transform(cdpCreationTimestamp, AWS_CLOUD_PLATFORM.name())).thenReturn(cdpCreationTimestamp);
 
         DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
 
@@ -201,15 +183,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals("value", dbStack.getParameters().get("key"));
         assertEquals(Crn.safeFromString(OWNER_CRN), dbStack.getOwnerCrn());
         assertEquals(USER_EMAIL, dbStack.getUserName());
-
-        Json tags = dbStack.getTags();
-        StackTags stackTags = tags.get(StackTags.class);
-        Map<String, String> defaultTags = stackTags.getDefaultTags();
-        assertEquals(USER_EMAIL, defaultTags.get(CDP_USER_NAME.key()));
-        assertEquals(USER_EMAIL, defaultTags.get(OWNER.key()));
-        assertEquals(cdpCreationTimestamp, defaultTags.get(CDP_CREATION_TIMESTAMP.key()));
-        assertEquals(VERSION, defaultTags.get(CDP_CB_VERSION.key()));
-
         assertEquals(Status.REQUESTED, dbStack.getStatus());
         assertEquals(DetailedDBStackStatus.PROVISION_REQUESTED, dbStack.getDbStackStatus().getDetailedDBStackStatus());
         assertEquals(NOW.toEpochMilli(), dbStack.getDbStackStatus().getCreated().longValue());
@@ -236,8 +209,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         verify(networkParameterAdder, never()).addSubnetIds(any(), any(), any());
         verify(userGeneratorService, never()).generateUserName();
         verify(passwordGeneratorService, never()).generatePassword(any());
-        verify(defaultCostTaggingService, times(1)).addEnvironmentCrnIfPresent(any(),
-                eq(ENVIRONMENT_CRN), eq(AWS_CLOUD_PLATFORM.name()));
     }
 
     private CrnUser getCrnUser() {
@@ -247,16 +218,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     @Test
     public void testConversionWhenOptionalElementsGenerated() {
         setupAllocateRequest(false);
-
-        String cdpCreationTimestamp = String.valueOf(NOW.getEpochSecond());
-
-        when(defaultCostTaggingService.transform(CDP_USER_NAME.key(), AWS_CLOUD_PLATFORM.name())).thenReturn(CDP_USER_NAME.key());
-        when(defaultCostTaggingService.transform(USER_EMAIL, AWS_CLOUD_PLATFORM.name())).thenReturn(USER_EMAIL);
-        when(defaultCostTaggingService.transform(OWNER.key(), AWS_CLOUD_PLATFORM.name())).thenReturn(OWNER.key());
-        when(defaultCostTaggingService.transform(CDP_CB_VERSION.key(), AWS_CLOUD_PLATFORM.name())).thenReturn(CDP_CB_VERSION.key());
-        when(defaultCostTaggingService.transform(VERSION, AWS_CLOUD_PLATFORM.name())).thenReturn(VERSION);
-        when(defaultCostTaggingService.transform(CDP_CREATION_TIMESTAMP.key(), AWS_CLOUD_PLATFORM.name())).thenReturn(CDP_CREATION_TIMESTAMP.key());
-        when(defaultCostTaggingService.transform(cdpCreationTimestamp, AWS_CLOUD_PLATFORM.name())).thenReturn(cdpCreationTimestamp);
 
         List<CloudSubnet> cloudSubnets = List.of(
                 new CloudSubnet("subnet-1", "", "az-a", ""),
@@ -302,8 +263,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         verify(networkParameterAdder).addSubnetIds(any(), any(), any());
         verify(userGeneratorService).generateUserName();
         verify(passwordGeneratorService).generatePassword(any());
-        verify(defaultCostTaggingService, times(1)).addEnvironmentCrnIfPresent(any(),
-                eq(ENVIRONMENT_CRN), eq(AWS_CLOUD_PLATFORM.name()));
     }
 
     @Test

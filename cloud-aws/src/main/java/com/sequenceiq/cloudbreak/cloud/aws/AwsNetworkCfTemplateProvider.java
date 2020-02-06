@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
-import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 import freemarker.template.Configuration;
@@ -48,7 +47,6 @@ public class AwsNetworkCfTemplateProvider {
         model.put("vpcCidr", vpcCidr);
         model.put("subnetDetails", subnets);
         model.put("privateSubnetEnabled", privateSubnetEnabled);
-        model.put("network_resource", CloudbreakResourceType.NETWORK);
         return model;
     }
 }

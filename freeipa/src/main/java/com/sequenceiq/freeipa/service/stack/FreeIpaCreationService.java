@@ -13,7 +13,6 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
@@ -109,7 +108,6 @@ public class FreeIpaCreationService {
         Future<User> userFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn, userCrn, MDCUtils.getRequestId()));
         Credential credential = credentialService.getCredentialByEnvCrn(request.getEnvironmentCrn());
         Stack stack = stackConverter.convert(request, accountId, userFuture, credential.getCloudPlatform());
-        stack.setResourceCrn(crnService.createCrn(accountId, Crn.ResourceType.FREEIPA));
         stack.setAppVersion(appVersion);
         GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack, credential);
 

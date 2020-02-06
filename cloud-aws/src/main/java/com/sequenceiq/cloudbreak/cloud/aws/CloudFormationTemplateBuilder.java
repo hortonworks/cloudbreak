@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
@@ -34,9 +33,6 @@ import freemarker.template.TemplateException;
 public class CloudFormationTemplateBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
-
-    @Inject
-    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
@@ -86,7 +82,6 @@ public class CloudFormationTemplateBuilder {
         model.put("dedicatedInstances", areDedicatedInstancesRequested(context.stack));
         model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone().value() != null);
         model.put("mapPublicIpOnLaunch", context.mapPublicIpOnLaunch);
-        model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
         try {
             String template = freeMarkerTemplateUtils.processTemplateIntoString(new Template("aws-template", context.template, freemarkerConfiguration), model);
             return template.replaceAll("\\t|\\n| [\\s]+", "");
@@ -104,7 +99,6 @@ public class CloudFormationTemplateBuilder {
 
     public String build(RDSModelContext context) {
         Map<String, Object> model = new HashMap<>();
-        model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
         model.put("hasPort", context.hasPort);
         model.put("hasSecurityGroup", context.hasSecurityGroup);
         try {

@@ -3,13 +3,11 @@ package com.sequenceiq.cloudbreak.common.type;
 public enum DefaultApplicationTag {
 
     OWNER("Owner"),
-    CDP_USER_NAME("cdp-user-name"),
-    CDP_CB_VERSION("cdp-cb-version"),
-    CDP_ACOUNT_NAME("cdp-account-name"),
-    CDP_RESOURCE_TYPE("cdp-resource-type"),
-    CDP_CREATION_TIMESTAMP("cdp-creation-timestamp"),
+    owner("owner"),
+    CREATION_TIMESTAMP("creation-timestamp"),
     ENVIRONMENT_CRN("Cloudera-Environment-Resource-Name"),
-    CDP_CREATION_DATETIME_UTC("cdp-creation-datetime-utc");
+    CREATOR_CRN("Cloudera-Creator-Resource-Name"),
+    RESOURCE_CRN("Cloudera-Resource-Name");
 
     private final String key;
 

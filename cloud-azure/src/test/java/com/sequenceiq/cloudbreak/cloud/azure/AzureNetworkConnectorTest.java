@@ -118,11 +118,11 @@ public class AzureNetworkConnectorTest {
         when(azureClientService.getClient(networkCreationRequest.getCloudCredential())).thenReturn(azureClient);
         when(azureNetworkTemplateBuilder.build(networkCreationRequest)).thenReturn(TEMPLATE);
         when(azureClient.createTemplateDeployment(ENV_NAME, STACK_NAME, TEMPLATE, PARAMETER)).thenReturn(templateDeployment);
-        when(azureClient.createResourceGroup(ENV_NAME, REGION.value(), Collections.emptyMap(), Collections.emptyMap())).thenReturn(resourceGroup);
+        when(azureClient.createResourceGroup(ENV_NAME, REGION.value(), Collections.emptyMap())).thenReturn(resourceGroup);
         when(resourceGroup.name()).thenReturn(ENV_NAME);
         when(templateDeployment.outputs()).thenReturn(outputs);
 
-        CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest, "creatorUser");
+        CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest);
 
         assertEquals(ENV_NAME, actual.getNetworkId());
         assertTrue(actual.getSubnets().stream().anyMatch(cloudSubnet -> cloudSubnet.getSubnetId().equals(SUBNET_ID_0)));

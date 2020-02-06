@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -59,7 +58,9 @@ public class EnvironmentNetworkService {
                 .orElseThrow(() -> new BadRequestException("No network connector for cloud platform: " + environment.getCloudPlatform()));
         NetworkCreationRequest networkCreationRequest = networkCreationRequestFactory.create(environment);
         EnvironmentNetworkConverter converter = environmentNetworkConverterMap.get(getCloudPlatform(environment));
-        CreatedCloudNetwork createdCloudNetwork = networkConnector.createNetworkWithSubnets(networkCreationRequest, getUserFromCrn(environment.getCreator()));
+
+
+        CreatedCloudNetwork createdCloudNetwork = networkConnector.createNetworkWithSubnets(networkCreationRequest);
         return converter.setCreatedCloudNetwork(baseNetwork, createdCloudNetwork);
     }
 
@@ -102,9 +103,5 @@ public class EnvironmentNetworkService {
 
     private CloudPlatform getCloudPlatform(EnvironmentDto environment) {
         return CloudPlatform.valueOf(environment.getCloudPlatform());
-    }
-
-    private String getUserFromCrn(String crn) {
-        return Optional.ofNullable(Crn.fromString(crn)).map(Crn::getUserId).orElse(null);
     }
 }

@@ -9,11 +9,24 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.common.cost.CostTagging;
+import com.sequenceiq.cloudbreak.common.service.CDPTagGenerationRequest;
 import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
@@ -24,16 +37,6 @@ import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
 import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
-
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class RedbeamsCreationServiceTest {
@@ -74,6 +77,9 @@ class RedbeamsCreationServiceTest {
     private DBStackService dbStackService;
 
     @Mock
+    private CostTagging costTagging;
+
+    @Mock
     private DatabaseServerConfigService databaseServerConfigService;
 
     @Mock
@@ -94,9 +100,11 @@ class RedbeamsCreationServiceTest {
         dbStack.setName(DB_STACK_NAME);
         dbStack.setDescription(DB_STACK_DESCRIPTION);
         dbStack.setEnvironmentId(ENVIRONMENT_CRN);
-        dbStack.setResourceCrn(null);
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
         dbStack.setPlatformVariant(PLATFORM_VARIANT);
+        dbStack.setUserName("username");
+        dbStack.setOwnerCrn(Crn.fromString("crn:cdp:iam:us-west-1:1234:user:234123"));
+        dbStack.setResourceCrn(Crn.fromString("crn:cdp:iam:us-west-1:1234:database:2312312"));
         DatabaseServer databaseServer = new DatabaseServer();
         dbStack.setDatabaseServer(databaseServer);
         databaseServer.setAccountId(ACCOUNT_ID);
@@ -109,6 +117,7 @@ class RedbeamsCreationServiceTest {
         connector = mock(CloudConnector.class, RETURNS_DEEP_STUBS);
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(connector);
         when(connector.resources().getDBStackTemplate()).thenReturn(TEMPLATE);
+        when(costTagging.prepareDefaultTags(any(CDPTagGenerationRequest.class))).thenReturn(new HashMap<>());
     }
 
     @Test

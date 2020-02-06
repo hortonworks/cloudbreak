@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.event.validation.ParametersValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -431,6 +433,16 @@ public class StackCreatorService {
                 throw new RuntimeException(String.format("Could not determine image from image catalog in %d %s", time, unit), e);
             }
         }).orElse(null);
+    }
+
+    private String createCRN(String accountId) {
+        return Crn.builder()
+                .setService(Crn.Service.DATAHUB)
+                .setAccountId(accountId)
+                .setResourceType(Crn.ResourceType.CLUSTER)
+                .setResource(UUID.randomUUID().toString())
+                .build()
+                .toString();
     }
 
 }

@@ -139,7 +139,6 @@
                       "${key}": "${serverTags[key]}",
                       </#list>
                 </#if>
-                    "cb-resource-type": "database"
             },
             "metadata": {
                 "description": "User defined tags to be attached to the resource."
