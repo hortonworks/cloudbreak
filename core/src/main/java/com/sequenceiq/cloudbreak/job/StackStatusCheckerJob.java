@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.job;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
@@ -9,6 +10,7 @@ import static java.util.stream.Collectors.toSet;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,7 +19,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -53,11 +54,15 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.environment.client.EnvironmentInternalCrnClient;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.statuschecker.service.JobService;
 
 @Component
 public class StackStatusCheckerJob extends StatusCheckerJob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStatusCheckerJob.class);
+
+    @Inject
+    private JobService jobService;
 
     @Inject
     private StackService stackService;
@@ -99,6 +104,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             Stack stack = stackService.getByIdWithListsInTransaction(getStackId());
             if (stack.isStackInDeletionOrFailedPhase()) {
                 LOGGER.debug("StackStatusCheckerJob cannot run, stack is being terminated: {}", getStackId());
+                jobService.unschedule(getLocalId());
                 return;
             }
             ClusterApi connector = clusterApiConnectors.getConnector(stack);
@@ -127,14 +133,16 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         clusterService.reportHealthChange(stack.getResourceCrn(), failedNodeNames, newHealtyHostNames);
         if (failedNodeNames.size() > 0) {
             clusterService.updateClusterStatusByStackId(stack.getId(), Status.AMBIGUOUS);
-        } else if (stack.getCluster().getStatus() == Status.AMBIGUOUS) {
+        } else if (EnumSet.of(Status.AMBIGUOUS, Status.STOPPED).contains(stack.getCluster().getStatus())) {
             clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
         }
-        syncInstances(stack, failedInstances, InstanceSyncState.RUNNING);
+        syncInstances(stack, failedInstances, defaultState);
     }
 
     private boolean isClusterManagerRunning(Stack stack, ClusterApi connector) {
-        return !stack.isStopped() && !queryClusterStatus(connector).getClusterStatus().equals(ClusterStatus.AMBARISERVER_NOT_RUNNING);
+        return !stack.isStopped()
+                && !stack.isStackInDeletionOrFailedPhase()
+                && !queryClusterStatus(connector).getClusterStatus().equals(ClusterStatus.AMBARISERVER_NOT_RUNNING);
     }
 
     private void syncInstances(Stack stack, Collection<InstanceMetaData> instanceMetaData, InstanceSyncState defaultState) {
@@ -146,7 +154,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private ClusterStatusResult queryClusterStatus(ClusterApi connector) {
         Optional<Cluster> cluster = clusterService.retrieveClusterByStackIdWithoutAuth(getStackId());
         String blueprintName = cluster.isPresent() ? cluster.get().getBlueprint().getStackName() : null;
-        return connector.clusterStatusService().getStatus(StringUtils.isNotBlank(blueprintName));
+        return connector.clusterStatusService().getStatus(false);
     }
 
     private Set<String> getNewHealthyHostNames(Stack stack, Map<HostName, ClusterManagerState> hostStatuses) {
@@ -156,7 +164,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 .map(HostName::value)
                 .collect(Collectors.toSet());
         Set<String> unhealthyStoredHosts = getAllRunningInstanceMetadata(stack).stream()
-                .filter(i -> i.getInstanceStatus() == SERVICES_UNHEALTHY)
+                .filter(i -> i.getInstanceStatus() == SERVICES_UNHEALTHY || i.getInstanceStatus() == SERVICES_RUNNING)
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(Collectors.toSet());
         return Sets.intersect(healthyHosts, unhealthyStoredHosts);

@@ -21,6 +21,8 @@ import org.testng.annotations.Test;
 
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
+import com.cloudera.api.swagger.model.ApiHealthCheck;
+import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRef;
@@ -210,7 +212,14 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
             if (InstanceStatus.STARTED.equals(vmStatus.getCloudVmInstanceStatus().getStatus())) {
                 String ip = vmStatus.getMetaData().getPrivateIp();
                 String hostname = HostNameUtil.generateHostNameByIp(ip);
-                apiHosts.add(new ApiHost().hostname(hostname).hostId(hostname).ipAddress(ip).lastHeartbeat(Instant.now().plusSeconds(60000L).toString()));
+                apiHosts.add(new ApiHost()
+                        .hostname(hostname)
+                        .hostId(hostname)
+                        .ipAddress(ip)
+                        .lastHeartbeat(Instant.now().plusSeconds(60000L).toString())
+                        .healthChecks(List.of(new ApiHealthCheck()
+                                .name("HOST_SCM_HEALTH")
+                                .summary(ApiHealthSummary.GOOD))));
             }
         }
         return apiHosts;

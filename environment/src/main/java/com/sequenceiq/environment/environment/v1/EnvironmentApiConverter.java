@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.environment.v1;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
-import static com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest.DEFAULT_USER_NAME;
 import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto.EnvironmentChangeCredentialDtoBuilder.anEnvironmentChangeCredentialDto;
 
 import java.util.Objects;
@@ -208,11 +207,6 @@ public class EnvironmentApiConverter {
                     .withPublicKey(publicKey)
                     .withPublicKeyId(nullIfBlank(authentication.getPublicKeyId()))
                     .withManagedKey(Objects.nonNull(publicKey));
-        } else {
-            builder.withLoginUserName(DEFAULT_USER_NAME)
-                    .withPublicKey(DUMMY_SSH_KEY)
-                    .withManagedKey(true)
-                    .withPublicKeyId(null);
         }
         return builder.build();
     }
@@ -268,6 +262,7 @@ public class EnvironmentApiConverter {
                 .withCloudPlatform(environmentDto.getCloudPlatform())
                 .withCredentialView(credentialViewConverter.convert(environmentDto.getCredentialView()))
                 .withEnvironmentStatus(environmentDto.getStatus().getResponseStatus())
+                .withCreator(environmentDto.getCreator())
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
                 .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
                 .withStatusReason(environmentDto.getStatusReason())

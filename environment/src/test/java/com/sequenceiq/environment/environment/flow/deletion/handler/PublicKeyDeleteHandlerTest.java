@@ -5,8 +5,6 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,15 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
-import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyUnregisterRequest;
-import com.sequenceiq.environment.credential.domain.Credential;
-import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
-import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
@@ -51,14 +40,6 @@ class PublicKeyDeleteHandlerTest {
 
     private static final String ENVIRONMENT_CRN = "environmentCrn";
 
-    private static final String CLOUD_PLATFORM = "platform";
-
-    private static final String LOCATION = "location";
-
-    private static final String DYNAMO_TABLE_NAME = "tableName";
-
-    private static final String PUBLIC_KEY_ID = "publicKeyId";
-
     @Mock
     private EventSender eventSender;
 
@@ -66,22 +47,10 @@ class PublicKeyDeleteHandlerTest {
     private EnvironmentService environmentService;
 
     @Mock
-    private CloudPlatformConnectors cloudPlatformConnectors;
-
-    @Mock
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
-
-    @Mock
     private Event<EnvironmentDto> environmentDtoEvent;
 
     @Mock
     private Headers headers;
-
-    @Mock
-    private CloudConnector<Object> cloudConnector;
-
-    @Mock
-    private PublicKeyConnector publicKeyConnector;
 
     @InjectMocks
     private PublicKeyDeleteHandler underTest;
@@ -110,8 +79,6 @@ class PublicKeyDeleteHandlerTest {
 
         underTest.accept(environmentDtoEvent);
 
-        verify(cloudPlatformConnectors, never()).get(any());
-        verify(cloudPlatformConnectors, never()).get(any(), any());
         verify(eventSender).sendEvent(baseNamedFlowEvent.capture(), headersArgumentCaptor.capture());
         verifyEnvDeleteEvent();
     }
@@ -123,102 +90,13 @@ class PublicKeyDeleteHandlerTest {
 
         underTest.accept(environmentDtoEvent);
         verify(eventSender).sendEvent(baseNamedFlowEvent.capture(), headersArgumentCaptor.capture());
-        verify(cloudPlatformConnectors, never()).get(any());
-        verify(cloudPlatformConnectors, never()).get(any(), any());
         verifyEnvDeleteFailedEvent(error);
-    }
-
-    @Test
-    void acceptTestAwsFailure() {
-        when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
-        when(cloudConnector.publicKey()).thenReturn(publicKeyConnector);
-        CloudCredential cloudCredential = new CloudCredential();
-        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(cloudCredential);
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(createEnvironment(true, true)));
-        IllegalStateException error = new IllegalStateException("error");
-        doThrow(error).when(publicKeyConnector).unregister(any());
-
-        underTest.accept(environmentDtoEvent);
-
-        verify(eventSender).sendEvent(baseNamedFlowEvent.capture(), headersArgumentCaptor.capture());
-        verify(cloudPlatformConnectors).get(any());
-        PublicKeyUnregisterRequest request = getPublicKeyUnregisterRequest(cloudCredential);
-        verify(publicKeyConnector).unregister(request);
-        verifyEnvDeleteFailedEvent(error);
-    }
-
-    @Test
-    void acceptManagedKey() {
-        when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
-        when(cloudConnector.publicKey()).thenReturn(publicKeyConnector);
-        CloudCredential cloudCredential = new CloudCredential();
-        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(cloudCredential);
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(createEnvironment(true, true)));
-
-        underTest.accept(environmentDtoEvent);
-
-        verify(eventSender).sendEvent(baseNamedFlowEvent.capture(), headersArgumentCaptor.capture());
-        verify(cloudPlatformConnectors).get(any());
-        PublicKeyUnregisterRequest request = getPublicKeyUnregisterRequest(cloudCredential);
-        verify(publicKeyConnector).unregister(request);
-        verifyEnvDeleteEvent();
-    }
-
-    @Test
-    void acceptNonManagedKey() {
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(createEnvironment(false, true)));
-
-        underTest.accept(environmentDtoEvent);
-
-        verify(eventSender).sendEvent(baseNamedFlowEvent.capture(), headersArgumentCaptor.capture());
-        verify(cloudPlatformConnectors, never()).get(any());
-        verify(cloudPlatformConnectors, never()).get(any(), any());
-        verify(publicKeyConnector, never()).unregister(any());
-        verifyEnvDeleteEvent();
-    }
-
-    @Test
-    void acceptSimulateFailedEnvCreationMissingPublicKeyId() {
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(createEnvironment(true, false)));
-
-        underTest.accept(environmentDtoEvent);
-
-        verify(eventSender).sendEvent(baseNamedFlowEvent.capture(), headersArgumentCaptor.capture());
-        verify(cloudPlatformConnectors, never()).get(any());
-        verify(cloudPlatformConnectors, never()).get(any(), any());
-        verify(publicKeyConnector, never()).unregister(any());
-        verifyEnvDeleteEvent();
     }
 
     @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
     void selector() {
         assertThat(underTest.selector()).isEqualTo("DELETE_PUBLICKEY_EVENT");
-    }
-
-    private Environment createEnvironment(boolean managedPublicKey, boolean hasPublicKey) {
-        Environment env = new Environment();
-        env.setId(ENVIRONMENT_ID);
-        env.setResourceCrn(ENVIRONMENT_CRN);
-        EnvironmentAuthentication authentication = new EnvironmentAuthentication();
-        authentication.setManagedKey(managedPublicKey);
-        authentication.setPublicKeyId(hasPublicKey ? PUBLIC_KEY_ID : null);
-        env.setAuthentication(authentication);
-        env.setLocation(LOCATION);
-        env.setCloudPlatform(CLOUD_PLATFORM);
-        Credential credential = new Credential();
-        credential.setCloudPlatform(CLOUD_PLATFORM);
-        env.setCredential(credential);
-        return env;
-    }
-
-    private PublicKeyUnregisterRequest getPublicKeyUnregisterRequest(CloudCredential cloudCredential) {
-        return PublicKeyUnregisterRequest.builder()
-                .withCloudPlatform(CLOUD_PLATFORM)
-                .withCredential(cloudCredential)
-                .withRegion(LOCATION)
-                .withPublicKeyId(PUBLIC_KEY_ID)
-                .build();
     }
 
     private void verifyEnvDeleteEvent() {

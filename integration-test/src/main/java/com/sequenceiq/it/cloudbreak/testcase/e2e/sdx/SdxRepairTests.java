@@ -129,14 +129,13 @@ public class SdxRepairTests extends BasicSdxTests {
                 .validate();
     }
 
-    @Ignore("This should be re-enabled once CB-5385 is fixed")
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running Cloudbreak, and an SDX cluster in available state",
             when = "recovery called on the IDBROKER host group, where the EC2 instance had been stopped",
             then = "SDX recovery should be successful, the cluster should be up and running"
     )
-    public void disabledTestSDXRepairIDBRokerWithStoppedEC2Instance(TestContext testContext) {
+    public void testSDXRepairIDBRokerWithStoppedEC2Instance(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
 
         List<String> actualIDBrokerVolumeIds = new ArrayList<>();

@@ -1,7 +1,6 @@
 package com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup;
 
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.COMPUTE;
-import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.GATEWAY;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.WORKER;
 import static com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupTestDto.withHostGroup;
@@ -24,7 +23,7 @@ public class DistroXInstanceGroupsBuilder {
     }
 
     public DistroXInstanceGroupsBuilder defaultHostGroup() {
-        distroXInstanceGroupTestDtoList = withHostGroup(testContext, MASTER, COMPUTE, WORKER, GATEWAY);
+        distroXInstanceGroupTestDtoList = withHostGroup(testContext, MASTER, COMPUTE, WORKER);
         return this;
     }
 
