@@ -157,8 +157,6 @@ class GcpDiskResourceBuilderTest {
         cloudStack = new CloudStack(Collections.emptyList(), null, image, emptyMap(), emptyMap(), null,
                 null, null, null, null);
 
-        when(defaultCostTaggingService.prepareDiskTagging()).thenReturn(Map.of());
-
         Operation operation = new Operation();
         operation.setName("operation");
         operation.setHttpErrorStatusCode(null);

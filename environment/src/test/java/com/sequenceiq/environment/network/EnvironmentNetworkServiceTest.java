@@ -93,7 +93,7 @@ class EnvironmentNetworkServiceTest {
 
         when(cloudConnector.networkConnector()).thenReturn(networkConnector);
         when(networkCreationRequestFactory.create(environmentDto)).thenReturn(networkCreationRequest);
-        when(networkConnector.createNetworkWithSubnets(networkCreationRequest, USER_NAME)).thenReturn(createdCloudNetwork);
+        when(networkConnector.createNetworkWithSubnets(networkCreationRequest)).thenReturn(createdCloudNetwork);
         when(environmentNetworkConverterMap.get(CloudPlatform.valueOf(CLOUD_PLATFORM))).thenReturn(networkConverter);
         when(networkConverter.setCreatedCloudNetwork(baseNetwork, createdCloudNetwork)).thenReturn(baseNetwork);
 
@@ -102,7 +102,7 @@ class EnvironmentNetworkServiceTest {
         verify(cloudConnector).networkConnector();
         verify(cloudPlatformConnectors).get(any(CloudPlatformVariant.class));
         verify(networkCreationRequestFactory).create(environmentDto);
-        verify(networkConnector).createNetworkWithSubnets(networkCreationRequest, USER_NAME);
+        verify(networkConnector).createNetworkWithSubnets(networkCreationRequest);
         verify(environmentNetworkConverterMap).get(CloudPlatform.valueOf(CLOUD_PLATFORM));
         verify(networkConverter).setCreatedCloudNetwork(baseNetwork, createdCloudNetwork);
         assertEquals(baseNetwork, actual);

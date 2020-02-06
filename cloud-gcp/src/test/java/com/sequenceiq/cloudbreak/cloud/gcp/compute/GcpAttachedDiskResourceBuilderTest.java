@@ -173,7 +173,6 @@ class GcpAttachedDiskResourceBuilderTest {
         cloudStack = new CloudStack(Collections.emptyList(), null, image, emptyMap(), emptyMap(), null,
                 null, null, null, null);
 
-        when(defaultCostTaggingService.prepareDiskTagging()).thenReturn(Map.of());
         when(intermediateBuilderExecutor.submit(any(Callable.class))).thenAnswer(invocation -> {
             Callable<Void> callable = invocation.getArgument(0);
             return new MockFuture(callable);

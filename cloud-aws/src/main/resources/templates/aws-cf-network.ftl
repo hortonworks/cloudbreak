@@ -30,7 +30,6 @@
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" },
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" },
           { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
           { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
         ]
@@ -42,7 +41,6 @@
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" },
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" },
           { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
           { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
         ]
@@ -67,7 +65,6 @@
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" },
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" },
           { "Key" : "kubernetes.io/role/elb", "Value" : "1" },
           { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
           { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
@@ -85,7 +82,6 @@
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Private" },
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" },
           { "Key" : "kubernetes.io/role/elb", "Value" : "1" },
           { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
           { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
@@ -113,7 +109,6 @@
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Private" },
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" },
           { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
           { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
         ]
@@ -168,7 +163,6 @@
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" },
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" },
           { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
           { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
         ]

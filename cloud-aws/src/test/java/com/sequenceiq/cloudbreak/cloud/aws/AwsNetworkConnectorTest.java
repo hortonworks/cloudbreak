@@ -59,7 +59,6 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
-import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AwsNetworkConnectorTest {
@@ -167,14 +166,14 @@ public class AwsNetworkConnectorTest {
         when(awsCreatedSubnetProvider.provide(output, networkCreationRequest.getSubnetCidrs().size(), networkCreationRequest.isPrivateSubnetEnabled()))
                 .thenReturn(createdSubnets);
 
-        CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest, "creatorUser");
+        CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest);
 
         verify(awsClient).createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsNetworkCfTemplateProvider).provide(networkCidr, subnetRequestList, true);
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest);
         verify(cfStackUtil).getOutputs(NETWORK_ID, cloudFormationRetryClient);
-        verify(defaultCostTaggingService, never()).prepareDefaultTags(any(), any(), any(), any());
+        verify(defaultCostTaggingService, never()).prepareDefaultTags(any());
         verify(awsTaggingService, never()).prepareCloudformationTags(any(), any());
         verify(cloudFormationRetryClient, never()).createStack(any(CreateStackRequest.class));
         assertEquals(VPC_ID, actual.getNetworkId());
@@ -207,13 +206,13 @@ public class AwsNetworkConnectorTest {
         when(cfStackUtil.getOutputs(NETWORK_ID, cloudFormationRetryClient)).thenReturn(output);
         when(awsCreatedSubnetProvider.provide(output, networkCreationRequest.getSubnetCidrs().size(), networkCreationRequest.isPrivateSubnetEnabled()))
                 .thenReturn(createdSubnets);
-        CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest, "creatorUser");
+        CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest);
 
         verify(awsClient).createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsNetworkCfTemplateProvider).provide(networkCidr, subnetRequestList, true);
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest);
-        verify(defaultCostTaggingService).prepareDefaultTags(eq("creatorUser"), any(), eq(CloudConstants.AWS), any());
+        verify(defaultCostTaggingService).prepareDefaultTags(any());
         verify(awsTaggingService).prepareCloudformationTags(any(), any());
         verify(cloudFormationRetryClient).createStack(any(CreateStackRequest.class));
         verify(cfStackUtil).getOutputs(NETWORK_ID, cloudFormationRetryClient);
@@ -357,6 +356,8 @@ public class AwsNetworkConnectorTest {
                 .withNetworkCidr(networkCidr)
                 .withSubnetCidrs(subnetCidrs)
                 .withPrivateSubnetEnabled(true)
+                .withUserName("user@cloudera.com")
+                .withCreatorCrn("user-crn")
                 .build();
     }
 

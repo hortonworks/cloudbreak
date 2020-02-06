@@ -45,10 +45,9 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.util.DeviceNameGenerator;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.cloudbreak.util.DeviceNameGenerator;
 
 @Component
 public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
@@ -60,9 +59,6 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
     @Inject
     @Qualifier("intermediateBuilderExecutor")
     private AsyncTaskExecutor intermediateBuilderExecutor;
-
-    @Inject
-    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Inject
     private GcpDiskEncryptionService gcpDiskEncryptionService;
@@ -225,7 +221,6 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
         Map<String, String> customTags = new HashMap<>();
         customTags.putAll(tags);
-        customTags.putAll(defaultCostTaggingService.prepareDiskTagging());
         disk.setLabels(customTags);
 
         return disk;

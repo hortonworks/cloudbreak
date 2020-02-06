@@ -27,9 +27,8 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -57,9 +56,6 @@ public class AzureTemplateBuilder {
 
     @Inject
     private AzureStorage azureStorage;
-
-    @Inject
-    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
@@ -105,7 +101,6 @@ public class AzureTemplateBuilder {
             model.put("noFirewallRules", false);
             model.put("userDefinedTags", cloudStack.getTags());
             model.put("acceleratedNetworkEnabled", azureAcceleratedNetworkValidator.validate(armStack));
-            model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(cloudStack), model);
             LOGGER.info("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;
@@ -141,7 +136,6 @@ public class AzureTemplateBuilder {
             model.put("sslEnforcement", false);
             model.put("storageAutoGrow", azureDatabaseServerView.getStorageAutoGrow());
             model.put("subnets", azureNetworkView.getSubnets());
-            model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(databaseStack), model);
             LOGGER.debug("Generated ARM database template: {}", AnonymizerUtil.anonymize(generatedTemplate));
             return generatedTemplate;

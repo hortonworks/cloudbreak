@@ -34,10 +34,6 @@
                         "Value": "Public"
                     },
                     {
-                        "Key": "cb-resource-type",
-                        "Value": "NETWORK"
-                    },
-                    {
                         "Key": "owner",
                         "Value": {
                             "Ref": "stackowner"
@@ -65,10 +61,6 @@
                     {
                         "Key": "Network",
                         "Value": "Public"
-                    },
-                    {
-                        "Key": "cb-resource-type",
-                        "Value": "NETWORK"
                     },
                     {
                         "Key": "owner",
@@ -115,10 +107,6 @@
                     {
                         "Key": "Network",
                         "Value": "Public"
-                    },
-                    {
-                        "Key": "cb-resource-type",
-                        "Value": "NETWORK"
                     },
                     {
                         "Key": "kubernetes.io/role/elb",
@@ -171,10 +159,6 @@
                         "Value": "Public"
                     },
                     {
-                        "Key": "cb-resource-type",
-                        "Value": "NETWORK"
-                    },
-                    {
                         "Key": "kubernetes.io/role/elb",
                         "Value": "1"
                     },
@@ -220,10 +204,6 @@
                     {
                         "Key": "Network",
                         "Value": "Public"
-                    },
-                    {
-                        "Key": "cb-resource-type",
-                        "Value": "NETWORK"
                     },
                     {
                         "Key": "owner",

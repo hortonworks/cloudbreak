@@ -53,7 +53,6 @@ import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.heat.HeatTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
-import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
@@ -130,15 +129,6 @@ public class HeatTemplateBuilderTest {
                 InstanceGroupType.CORE, "CORE",
                 InstanceGroupType.GATEWAY, "GATEWAY"
         );
-        Map<String, String> tags = new HashMap<>();
-        tags.put(CloudbreakResourceType.DISK.templateVariable(), CloudbreakResourceType.DISK.key());
-        tags.put(CloudbreakResourceType.INSTANCE.templateVariable(), CloudbreakResourceType.INSTANCE.key());
-        tags.put(CloudbreakResourceType.IP.templateVariable(), CloudbreakResourceType.IP.key());
-        tags.put(CloudbreakResourceType.NETWORK.templateVariable(), CloudbreakResourceType.NETWORK.key());
-        tags.put(CloudbreakResourceType.SECURITY.templateVariable(), CloudbreakResourceType.SECURITY.key());
-        tags.put(CloudbreakResourceType.STORAGE.templateVariable(), CloudbreakResourceType.STORAGE.key());
-        tags.put(CloudbreakResourceType.TEMPLATE.templateVariable(), CloudbreakResourceType.TEMPLATE.key());
-        when(defaultCostTaggingService.prepareInstanceTagging()).thenReturn(tags);
         image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "url", "default", null, new HashMap<>());
     }
 

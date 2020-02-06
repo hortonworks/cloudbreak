@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
@@ -39,6 +40,8 @@ public class NetworkCreationRequestFactory {
                 .withRegion(Region.region(environment.getLocation().getName()))
                 .withNetworkCidr(networkDto.getNetworkCidr())
                 .withPrivateSubnetEnabled(getPrivateSubnetEnabled(environment))
+                .withUserName(getUserFromCrn(environment.getCreator()))
+                .withCreatorCrn(environment.getCreator())
                 .withSubnetCidrs(getSubNetCidrs(networkDto.getNetworkCidr()));
         getNoPublicIp(networkDto).ifPresent(builder::withNoPublicIp);
         return builder.build();
@@ -62,5 +65,9 @@ public class NetworkCreationRequestFactory {
 
     private Optional<Boolean> getNoPublicIp(NetworkDto networkDto) {
         return Optional.of(networkDto).map(NetworkDto::getAzure).map(AzureParams::isNoPublicIp);
+    }
+
+    private String getUserFromCrn(String crn) {
+        return Optional.ofNullable(Crn.fromString(crn)).map(Crn::getUserId).orElse(null);
     }
 }

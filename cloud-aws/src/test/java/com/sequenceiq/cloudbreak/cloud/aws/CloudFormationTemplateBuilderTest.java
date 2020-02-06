@@ -9,7 +9,6 @@ import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -64,7 +63,6 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
-import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.CloudIdentityType;
@@ -158,15 +156,6 @@ public class CloudFormationTemplateBuilderTest {
         image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
         List<Group> groups = List.of(createDefaultGroup("master", InstanceGroupType.CORE, ROOT_VOLUME_SIZE, security, Optional.empty()),
                 createDefaultGroup("gateway", InstanceGroupType.GATEWAY, ROOT_VOLUME_SIZE, security, Optional.empty()));
-
-        defaultTags.put(CloudbreakResourceType.DISK.templateVariable(), CloudbreakResourceType.DISK.key());
-        defaultTags.put(CloudbreakResourceType.INSTANCE.templateVariable(), CloudbreakResourceType.INSTANCE.key());
-        defaultTags.put(CloudbreakResourceType.IP.templateVariable(), CloudbreakResourceType.IP.key());
-        defaultTags.put(CloudbreakResourceType.NETWORK.templateVariable(), CloudbreakResourceType.NETWORK.key());
-        defaultTags.put(CloudbreakResourceType.SECURITY.templateVariable(), CloudbreakResourceType.SECURITY.key());
-        defaultTags.put(CloudbreakResourceType.STORAGE.templateVariable(), CloudbreakResourceType.STORAGE.key());
-        defaultTags.put(CloudbreakResourceType.TEMPLATE.templateVariable(), CloudbreakResourceType.TEMPLATE.key());
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         cloudStack = createDefaultCloudStack(groups, getDefaultCloudStackParameters(), getDefaultCloudStackTags());
     }
 
@@ -195,12 +184,6 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("testtagkey")));
         assertThat(templateString, not(containsString("testtagvalue")));
         assertThat(templateString, containsString(Integer.toString(ROOT_VOLUME_SIZE)));
-        if (!templatePath.contains(V16)) {
-            JsonNode jsonNode = JsonUtil.readTree(templateString);
-            jsonNode.findValues("Tags").forEach(jsonNode1 -> {
-                assertTrue(jsonNode1.findValues("Key").stream().anyMatch(jsonNode2 -> "cb-resource-type".equals(jsonNode2.textValue())));
-            });
-        }
     }
 
     @Test

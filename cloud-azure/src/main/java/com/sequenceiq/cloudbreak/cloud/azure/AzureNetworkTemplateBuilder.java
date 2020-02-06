@@ -13,8 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
-import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 import freemarker.template.Configuration;
@@ -31,9 +29,6 @@ public class AzureNetworkTemplateBuilder {
 
     @Inject
     private Configuration freemarkerConfiguration;
-
-    @Inject
-    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
@@ -67,8 +62,6 @@ public class AzureNetworkTemplateBuilder {
         model.put("resourceGroupName", networkRequest.getEnvName());
         model.put("noPublicIp", networkRequest.isNoPublicIp());
         model.put("noFirewallRules", false);
-        model.putAll(defaultCostTaggingService.prepareNetworkTagging());
-        model.put("network_resource", CloudbreakResourceType.NETWORK);
         return model;
     }
 }

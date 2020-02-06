@@ -1,6 +1,37 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import com.cedarsoftware.util.io.JsonReader;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_IGNORED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.authorization.resource.ResourceAction;
@@ -20,8 +51,11 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
+import com.sequenceiq.cloudbreak.common.cost.CostTagging;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.service.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -33,7 +67,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
@@ -82,40 +115,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.ResourceIdProvider;
-import com.sequenceiq.flow.domain.FlowLog;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_IGNORED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
-import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 @Service
 public class StackService implements ResourceIdProvider {
@@ -210,7 +210,7 @@ public class StackService implements ResourceIdProvider {
     private StackUpdater stackUpdater;
 
     @Inject
-    private FlowLogService flowLogService;
+    private CostTagging costTagging;
 
     @Inject
     private CloudStorageFolderResolverService cloudStorageFolderResolverService;
@@ -488,6 +488,7 @@ public class StackService implements ResourceIdProvider {
 
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         stack.setResourceCrn(createCRN(accountId));
+        setDefaultTags(stack);
 
         Stack savedStack = measure(() -> stackRepository.save(stack),
                 LOGGER, "Stackrepository save took {} ms for stack {}", stackName);
@@ -522,29 +523,28 @@ public class StackService implements ResourceIdProvider {
         return savedStack;
     }
 
+    private void setDefaultTags(Stack stack) {
+        try {
+            StackTags stackTag = stack.getTags().get(StackTags.class);
+
+            CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
+                    .withCreatorCrn(stack.getCreator().getUserCrn())
+                    .withEnvironmentCrn(stack.getEnvironmentCrn())
+                    .withPlatform(stack.getCloudPlatform())
+                    .withResourceCrn(stack.getResourceCrn())
+                    .withUserName(stack.getCreator().getUserName())
+                    .build();
+
+            Map<String, String> defaultTags = stackTag.getDefaultTags();
+            defaultTags.putAll(costTagging.prepareDefaultTags(request));
+            stack.setTags(new Json(new StackTags(stackTag.getUserDefinedTags(), stackTag.getApplicationTags(), defaultTags)));
+        } catch (Exception e) {
+            LOGGER.debug("Exception during reading default tags.", e);
+        }
+    }
+
     private void setPlatformVariant(Stack stack) {
         stack.setPlatformVariant(connector.checkAndGetPlatformVariant(stack).value());
-    }
-
-    public void deleteByName(Long id, Boolean forced, User user) {
-        stackRepository.findById(id).map(stack -> {
-            deleteByName(stack.getName(), stack.getWorkspace().getId(), forced, user);
-            return stack;
-        }).orElseThrow(notFound("Stack", id));
-    }
-
-    public void deleteByName(String name, Long workspaceId, boolean forced, User user) {
-        stackRepository.findByNameAndWorkspaceId(name, workspaceId).map(stack -> {
-            deleteByName(stack, forced, user);
-            return stack;
-        }).orElseThrow(notFound("Stack", name));
-    }
-
-    public void deleteByCrn(String crn, Long workspaceId, boolean forced, User user) {
-        stackRepository.findByCrnAndWorkspaceId(crn, workspaceId).map(stack -> {
-            deleteByName(stack, forced, user);
-            return stack;
-        }).orElseThrow(notFound("Stack", crn));
     }
 
     public void removeInstance(Stack stack, Long workspaceId, String instanceId, boolean forced, User user) {
@@ -828,20 +828,10 @@ public class StackService implements ResourceIdProvider {
         });
     }
 
-    public void updateMetaDataStatusIfFound(Long id, String hostName, InstanceStatus status) {
-        updateMetaDataStatusIfFound(id, hostName, status, null);
-    }
-
     public List<String> getHostNamesForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
         return getInstanceMetaDataForPrivateIds(instanceMetaDataList, privateIds).stream()
                 .map(InstanceMetaData::getInstanceId)
                 .collect(Collectors.toList());
-    }
-
-    public Optional<InstanceMetaData> getInstanceMetadataByPrivateIp(List<InstanceMetaData> instanceMetaDataList, String privateIp) {
-        return instanceMetaDataList.stream()
-                .filter(instanceMetaData -> privateIp.equals(instanceMetaData.getPrivateIp()))
-                .findFirst();
     }
 
     public List<String> getInstanceIdsForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
@@ -941,53 +931,6 @@ public class StackService implements ResourceIdProvider {
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         if (instanceGroup == null) {
             throw new BadRequestException(String.format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getName(), instanceGroupName));
-        }
-    }
-
-    private void deleteByName(Stack stack, boolean forced, User user) {
-        LOGGER.info("Check permission for stack {} in environment {}.", stack.getName(), stack.getEnvironmentCrn());
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        LOGGER.info("Check stack that no cluster is attached to {} in environment.", stack.getEnvironmentCrn());
-        checkStackHasNoAttachedClusters(stack);
-        MDCBuilder.buildMdcContext(stack);
-        cancelTooOldTerminationFlowForResource(stack);
-        if (stack.isDeleteInProgress() && forced) {
-            LOGGER.info("stack {} in environment {} is already delete in progress.", stack.getName(), stack.getEnvironmentCrn());
-            List<FlowLog> flowLogs = flowLogService.findAllByResourceIdOrderByCreatedDesc(stack.getId());
-            Optional<FlowLog> flowLog = flowLogs.stream()
-                    .filter(fl -> StackTerminationState.PRE_TERMINATION_STATE.name().equalsIgnoreCase(fl.getCurrentState()))
-                    .findFirst();
-            flowLog.ifPresent(fl -> {
-                Map<Object, Object> variables = (Map<Object, Object>) JsonReader.jsonToJava(fl.getVariables());
-                boolean runningFlowForced = variables.get("FORCEDTERMINATION") != null && Boolean.parseBoolean(variables.get("FORCEDTERMINATION").toString());
-                if (!runningFlowForced) {
-                    LOGGER.info("Terminate stack {} in environment {} because the current flow is not force termination.",
-                            stack.getName(), stack.getEnvironmentCrn());
-                    flowManager.triggerTermination(stack.getId(), true);
-                }
-            });
-        } else if (!stack.isDeleteCompleted() && !stack.isDeleteInProgress()) {
-            LOGGER.info("Terminate stack {} in environment {}.", stack.getName(), stack.getEnvironmentCrn());
-            flowManager.triggerTermination(stack.getId(), forced);
-        } else {
-            LOGGER.debug("Stack is already deleted.");
-        }
-    }
-
-    private void cancelTooOldTerminationFlowForResource(Stack stack) {
-        try {
-            flowLogService.cancelTooOldTerminationFlowForResource(stack.getId(), new Date().getTime() - terminationRetryAllowedInMinute * MINUTE_IN_MS);
-        } catch (Exception e) {
-            LOGGER.warn("Can't cancel old termination flows for stack {}", stack.getName(), e);
-        }
-    }
-
-    private void checkStackHasNoAttachedClusters(Stack stack) {
-        Set<StackIdView> attachedOnes = findClustersConnectedToDatalakeByDatalakeStackId(stack.getId());
-        if (!attachedOnes.isEmpty()) {
-            throw new BadRequestException(String.format("Data Lake has attached Data Hub clusters! "
-                            + "Please delete Data Hub cluster %s before deleting this Data Lake",
-                    String.join(", ", attachedOnes.stream().map(StackIdView::getName).collect(Collectors.toSet()))));
         }
     }
 

@@ -36,9 +36,6 @@
             {
                  "apiVersion": "2019-04-01",
                  "type": "Microsoft.Network/virtualNetworks",
-                 "tags": {
-                    "cb-resource-type": "${network_resource}"
-                },
                  "name": "[parameters('virtualNetworkName')]",
                  "location": "[parameters('region')]",
                  "properties": {

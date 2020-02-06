@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
@@ -55,7 +54,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
@@ -70,16 +68,10 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private static final Logger LOGGER = LoggerFactory.getLogger(StackV4RequestToStackConverter.class);
 
     @Inject
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
     private WorkspaceService workspaceService;
 
     @Inject
     private EnvironmentClientService environmentClientService;
-
-    @Inject
-    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
@@ -202,7 +194,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         source.setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
         stack.setRegion(getIfNotNull(source.getPlacement(), s -> getRegion(source, cloudPlatform)));
         stack.setCloudPlatform(cloudPlatform);
-        stack.setTags(getTags(source, cloudPlatform, environment.getCrn()));
+        stack.setTags(getTags(source));
         stack.setPlatformVariant(cloudPlatform);
     }
 
@@ -252,27 +244,16 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         return environmentResponse.getCloudPlatform();
     }
 
-    private Json getTags(StackV4Request source, String cloudPlatform, String envCrn) {
+    private Json getTags(StackV4Request source) {
         try {
             TagsV4Request tags = source.getTags();
             if (tags == null) {
-                return new Json(new StackTags(new HashMap<>(), new HashMap<>(), getDefaultTags(cloudPlatform, envCrn)));
+                return new Json(new StackTags(new HashMap<>(), new HashMap<>(), new HashMap<>()));
             }
-            return new Json(new StackTags(tags.getUserDefined(), tags.getApplication(), getDefaultTags(cloudPlatform, envCrn)));
+            return new Json(new StackTags(tags.getUserDefined(), tags.getApplication(), new HashMap<>()));
         } catch (Exception ignored) {
             throw new BadRequestException("Failed to convert dynamic tags.");
         }
-    }
-
-    private Map<String, String> getDefaultTags(String cloudPlatform, String envCrn) {
-        Map<String, String> result = new HashMap<>();
-        try {
-            result.putAll(defaultCostTaggingService.prepareDefaultTags(restRequestThreadLocalService.getCloudbreakUser().getUsername(),
-                    result, cloudPlatform, envCrn));
-        } catch (Exception e) {
-            LOGGER.debug("Exception during reading default tags.", e);
-        }
-        return result;
     }
 
     private Long getDatalakeResourceId(StackV4Request source, Workspace workspace) {

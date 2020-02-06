@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -44,9 +43,6 @@ public class AzureDatabaseResourceService {
     @Inject
     private AzureUtils azureUtils;
 
-    @Inject
-    private DefaultCostTaggingService defaultCostTaggingService;
-
     public List<CloudResourceStatus> buildDatabaseResourcesForLaunch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier persistenceNotifier) {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
@@ -58,7 +54,7 @@ public class AzureDatabaseResourceService {
 
         try {
             if (!client.resourceGroupExists(resourceGroupName)) {
-                client.createResourceGroup(resourceGroupName, region, stack.getTags(), defaultCostTaggingService.prepareTemplateTagging());
+                client.createResourceGroup(resourceGroupName, region, stack.getTags());
             }
         } catch (Exception ex) {
             throw new CloudConnectorException(ex);

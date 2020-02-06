@@ -48,7 +48,6 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -66,9 +65,6 @@ public class AzureSetup implements Setup {
 
     @Inject
     private AzureStorage armStorage;
-
-    @Inject
-    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Override
     public void prepareImage(AuthenticatedContext ac, CloudStack stack, Image image) {
@@ -92,10 +88,10 @@ public class AzureSetup implements Setup {
         String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), stack);
         String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
         if (!client.resourceGroupExists(resourceGroupName)) {
-            client.createResourceGroup(resourceGroupName, region, stack.getTags(), defaultCostTaggingService.prepareTemplateTagging());
+            client.createResourceGroup(resourceGroupName, region, stack.getTags());
         }
         if (!client.resourceGroupExists(imageResourceGroupName)) {
-            client.createResourceGroup(imageResourceGroupName, region, stack.getTags(), defaultCostTaggingService.prepareTemplateTagging());
+            client.createResourceGroup(imageResourceGroupName, region, stack.getTags());
         }
         armStorage.createStorage(client, imageStorageName, AzureDiskType.LOCALLY_REDUNDANT, imageResourceGroupName, region,
                 armStorage.isEncrytionNeeded(stack.getParameters()), stack.getTags());
@@ -146,7 +142,7 @@ public class AzureSetup implements Setup {
             AzureClient client = ac.getParameter(AzureClient.class);
             persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
             if (!client.resourceGroupExists(resourceGroupName)) {
-                client.createResourceGroup(resourceGroupName, region, stack.getTags(), defaultCostTaggingService.prepareTemplateTagging());
+                client.createResourceGroup(resourceGroupName, region, stack.getTags());
             }
         } catch (Exception ex) {
             throw new CloudConnectorException(ex);

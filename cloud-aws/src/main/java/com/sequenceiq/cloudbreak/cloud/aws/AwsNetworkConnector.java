@@ -53,7 +53,8 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.common.cost.CostTagging;
+import com.sequenceiq.cloudbreak.common.service.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 
 @Service
@@ -90,10 +91,10 @@ public class AwsNetworkConnector implements NetworkConnector {
     private AwsTaggingService awsTaggingService;
 
     @Inject
-    private DefaultCostTaggingService defaultCostTaggingService;
+    private CostTagging costTagging;
 
     @Override
-    public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest, String creatorUser) {
+    public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest) {
         AwsCredentialView credentialView = new AwsCredentialView(networkRequest.getCloudCredential());
         AmazonCloudFormationRetryClient cloudFormationRetryClient = getCloudFormationRetryClient(credentialView, networkRequest.getRegion().value());
         List<SubnetRequest> subnetRequests = getCloudSubNets(networkRequest);
@@ -107,8 +108,7 @@ public class AwsNetworkConnector implements NetworkConnector {
             if (networkDoesNotExist(e)) {
                 LOGGER.warn("{} occurred during describe AWS CloudFormation stack for Network with stack name: '{}'. "
                         + "Assuming the CF Stack does not exist, so creating a new one. Exception message: {}", e.getClass(), cfStackName, e.getMessage());
-                return createNewCfNetworkStack(networkRequest, credentialView, cloudFormationRetryClient, cloudFormationTemplate, creatorUser,
-                        networkRequest.getEnvCrn());
+                return createNewCfNetworkStack(networkRequest, credentialView, cloudFormationRetryClient, cloudFormationTemplate);
             } else {
                 throw new CloudConnectorException("Failed to create network.", e);
             }
@@ -154,10 +154,23 @@ public class AwsNetworkConnector implements NetworkConnector {
         return subnetRequestList.stream().noneMatch(subnetRequest -> subnetRequest.getPrivateSubnetCidr().isEmpty()) && networkRequest.isPrivateSubnetEnabled();
     }
 
-    private CreatedCloudNetwork createNewCfNetworkStack(NetworkCreationRequest networkRequest, AwsCredentialView credentialView,
-            AmazonCloudFormationRetryClient cloudFormationRetryClient, String cloudFormationTemplate, String creatorUser, String envCrn) {
-        Map<String, String> defaultTags = defaultCostTaggingService.prepareDefaultTags(creatorUser, null, CloudConstants.AWS, envCrn);
-        cloudFormationRetryClient.createStack(createStackRequest(networkRequest.getStackName(), cloudFormationTemplate, defaultTags, creatorUser));
+    private CreatedCloudNetwork createNewCfNetworkStack(
+            NetworkCreationRequest networkRequest,
+            AwsCredentialView credentialView,
+            AmazonCloudFormationRetryClient cloudFormationRetryClient,
+            String cloudFormationTemplate) {
+
+        CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
+                .withCreatorCrn(networkRequest.getCreatorCrn())
+                .withEnvironmentCrn(networkRequest.getEnvCrn())
+                .withPlatform(CloudConstants.AZURE)
+                .withResourceCrn(networkRequest.getEnvCrn())
+                .withUserName(networkRequest.getUserName())
+                .build();
+
+        Map<String, String> defaultTags = costTagging.prepareDefaultTags(request);
+        cloudFormationRetryClient.createStack(createStackRequest(networkRequest.getStackName(), cloudFormationTemplate, defaultTags,
+                networkRequest.getCreatorCrn()));
         LOGGER.debug("CloudFormation stack creation request sent with stack name: '{}' ", networkRequest.getStackName());
         return getCreatedNetworkWithPolling(networkRequest, credentialView, cloudFormationRetryClient);
     }

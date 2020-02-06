@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -67,7 +66,6 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -86,9 +84,6 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private static final String PREEMPTIBLE = "preemptible";
 
     private static final int ORDER = 3;
-
-    @Inject
-    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Inject
     private GcpDiskEncryptionService gcpDiskEncryptionService;
@@ -143,11 +138,6 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         Map<String, String> labels = new HashMap<>();
         String groupname = group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
         tagList.add(groupname);
-        Map<String, String> instanceTag = defaultCostTaggingService.prepareInstanceTagging();
-        for (Entry<String, String> entry : instanceTag.entrySet()) {
-            tagList.add(String.format("%s-%s", entry.getKey(), entry.getValue()));
-            labels.put(entry.getKey(), entry.getValue());
-        }
 
         tagList.add(GcpStackUtil.getClusterTag(auth.getCloudContext()));
         tagList.add(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));

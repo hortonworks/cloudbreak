@@ -127,10 +127,9 @@
                  "tags": {
                 <#if userDefinedTags?? && userDefinedTags?has_content>
                     <#list userDefinedTags?keys as key>
-                      "${key}": "${userDefinedTags[key]}",
+                      "${key}": "${userDefinedTags[key]}"<#if key_has_next>,</#if>
                       </#list>
                 </#if>
-                    "cb-resource-type": "${network_resource}"
                 },
                  "name": "[parameters('virtualNetworkNamePrefix')]",
                  "location": "[parameters('region')]",
@@ -163,10 +162,9 @@
 
                  <#if userDefinedTags?? && userDefinedTags?has_content>
                      <#list userDefinedTags?keys as key>
-                    "${key}": "${userDefinedTags[key]}",
+                    "${key}": "${userDefinedTags[key]}"<#if key_has_next>,</#if>
                     </#list>
                  </#if>
-                    "cb-resource-type": "${network_resource}"
                },
                "properties": {
                "securityRules": [
@@ -215,10 +213,9 @@
                    "tags": {
                      <#if userDefinedTags?? && userDefinedTags?has_content>
                          <#list userDefinedTags?keys as key>
-                        "${key}": "${userDefinedTags[key]}",
+                        "${key}": "${userDefinedTags[key]}"<#if key_has_next>,</#if>
                         </#list>
                      </#if>
-                        "cb-resource-type": "${ipaddress_resource}"
                      },
                    "properties": {
                        <#if instanceGroup == "GATEWAY">
@@ -237,10 +234,9 @@
                    "tags": {
                  <#if userDefinedTags?? && userDefinedTags?has_content>
                      <#list userDefinedTags?keys as key>
-                        "${key}": "${userDefinedTags[key]}",
+                        "${key}": "${userDefinedTags[key]}"<#if key_has_next>,</#if>
                         </#list>
                  </#if>
-                        "cb-resource-type": "${network_resource}"
                     },
                    "dependsOn": [
                        <#if !noFirewallRules>
@@ -321,10 +317,9 @@
 
                     <#if userDefinedTags?? && userDefinedTags?has_content>
                         <#list userDefinedTags?keys as key>
-                        "${key}": "${userDefinedTags[key]}",
+                        "${key}": "${userDefinedTags[key]}"<#if key_has_next>,</#if>
                         </#list>
                     </#if>
-                        "cb-resource-type": "${instance_resource}"
                     },
                    "properties": {
                         <#if instance.availabilitySetName?? && instance.availabilitySetName?has_content>
