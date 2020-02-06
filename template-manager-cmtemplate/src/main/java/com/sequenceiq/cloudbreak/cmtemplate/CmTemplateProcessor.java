@@ -197,6 +197,10 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         return Optional.ofNullable(cmTemplate.getCdhVersion());
     }
 
+    public Optional<String> getCmVersion() {
+        return Optional.ofNullable(cmTemplate.getCmVersion());
+    }
+
     @Override
     public Map<String, Set<String>> getComponentsByHostGroup() {
         return getServiceComponentsByHostGroup().entrySet().stream()

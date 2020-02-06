@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
+
 import java.util.Collections;
 
 import javax.inject.Inject;
@@ -52,6 +54,9 @@ public class ClouderaManagerKerberosService {
     @Inject
     private KerberosDetailService kerberosDetailService;
 
+    @Inject
+    private ClouderaManagerConfigService clouderaManagerConfigService;
+
     public void configureKerberosViaApi(ApiClient client, HttpClientConfig clientConfig, Stack stack, KerberosConfig kerberosConfig)
             throws ApiException, CloudbreakException {
         Cluster cluster = stack.getCluster();
@@ -76,7 +81,8 @@ public class ClouderaManagerKerberosService {
         String password = cluster.getCloudbreakAmbariPassword();
         try {
             ApiClient client = clouderaManagerApiClientProvider.getClient(stack.getGatewayPort(), user, password, clientConfig);
-            ClouderaManagerResourceApi apiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
+            clouderaManagerConfigService.disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, client, clientConfig, stack.getName());
+
             ClouderaManagerModificationService modificationService = applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig);
             modificationService.stopCluster();
 
@@ -84,6 +90,7 @@ public class ClouderaManagerKerberosService {
                     stack, clientConfig);
             decomissionService.removeManagementServices();
 
+            ClouderaManagerResourceApi apiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
             ApiCommand command = apiInstance.deleteCredentialsCommand("all");
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, command.getId());
         } catch (ApiException | CloudbreakException | ClouderaManagerClientInitException e) {

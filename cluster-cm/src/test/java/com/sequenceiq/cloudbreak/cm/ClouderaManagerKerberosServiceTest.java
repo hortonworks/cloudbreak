@@ -26,8 +26,8 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
-import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -68,6 +68,9 @@ public class ClouderaManagerKerberosServiceTest {
 
     @Mock
     private ApiClient client;
+
+    @Mock
+    private ClouderaManagerConfigService clouderaManagerConfigService;
 
     @InjectMocks
     private ClouderaManagerKerberosService underTest;
