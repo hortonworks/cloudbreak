@@ -15,6 +15,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.MultivaluedMap;
@@ -53,14 +54,18 @@ public class ApiKeyRequestFilter implements ClientRequestFilter {
         MultivaluedMap<String, Object> headers = requestContext.getHeaders();
         String dateStringForAltus = RFC_1123_DATE_TIME.format(OffsetDateTime.now(ZoneOffset.UTC));
         if (headers.get("Content-Type") == null) {
-            headers.add("Content-Type", ContentType.APPLICATION_JSON);
+            headers.add("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
+        }
+        if (headers.get("Content-Type").size() == 0) {
+            throw new BadRequestException("Content-Type header is empty");
         }
         headers.add(X_ALTUS_DATE, dateStringForAltus);
-        headers.add(X_ALTUS_AUTH, authHeader(accessKey, secretKey, requestContext.getMethod(), requestContext.getUri().getPath(), dateStringForAltus));
+        headers.add(X_ALTUS_AUTH, authHeader(accessKey, secretKey, requestContext.getMethod(), headers.get("Content-Type").get(0).toString(),
+                requestContext.getUri().getPath(), dateStringForAltus));
     }
 
-    private String authHeader(String accessKeyID, String privateKey, String method, String path, String date) {
-        return urlsafeMeta(accessKeyID) + "." + urlsafeSignature(privateKey, method, path, date);
+    private String authHeader(String accessKeyID, String privateKey, String contentType, String method, String path, String date) {
+        return urlsafeMeta(accessKeyID) + "." + urlsafeSignature(privateKey, contentType, method, path, date);
     }
 
     private String urlsafeMeta(String accessKeyID) {
@@ -68,14 +73,14 @@ public class ApiKeyRequestFilter implements ClientRequestFilter {
         return new String(Base64.getUrlEncoder().encode(metadata.getBytes(StandardCharsets.UTF_8)));
     }
 
-    private String urlsafeSignature(String seedBase64, String method, String path, String date) {
+    private String urlsafeSignature(String seedBase64, String method, String contentType, String path, String date) {
         byte[] seed = Base64.getDecoder().decode(seedBase64);
         EdDSAPrivateKeySpec privKeySpec = new EdDSAPrivateKeySpec(seed, ED_25519_CURVE_SPEC);
         PrivateKey privateKey = new EdDSAPrivateKey(privKeySpec);
         try {
             Signature sgr = new EdDSAEngine(MessageDigest.getInstance("SHA-512"));
             sgr.initSign(privateKey);
-            String messageToSign = method + "\n" + "application/json\n" + date + "\n" + path + "\n" + AUTH_METHOD;
+            String messageToSign = method + "\n" + contentType + "\n" + date + "\n" + path + "\n" + AUTH_METHOD;
             LOGGER.info("Message to sign: \n'{}'", messageToSign);
             sgr.update(messageToSign.getBytes(StandardCharsets.UTF_8));
             return new String(Base64.getUrlEncoder().encode(sgr.sign()), StandardCharsets.UTF_8);
