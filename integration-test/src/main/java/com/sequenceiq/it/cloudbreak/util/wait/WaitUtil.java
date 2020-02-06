@@ -353,9 +353,6 @@ public class WaitUtil {
         int retryCount = 0;
         String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
 
-        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
-        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
-
         while (retryCount < maxRetry && !checkSdxInstanceStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
             LOGGER.info("Waiting for instance status {} in Host Group {} at {} SDX", desiredState, hostGroup, sdxName);
             sleep(pollingInterval);
@@ -377,9 +374,6 @@ public class WaitUtil {
         int retryCount = 0;
         String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
 
-        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
-        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
-
         while (retryCount < maxRetry && !checkSdxInstanceStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
             LOGGER.info("Waiting for instance status {} in Host Group {} at {} SDX", desiredState, hostGroup, sdxName);
             sleep(pollingInterval);
@@ -399,9 +393,6 @@ public class WaitUtil {
 
     public SdxInternalTestDto waitForSdxInstancesStatus(SdxInternalTestDto sdxTestDto, SdxClient sdxClient, Map<String, InstanceStatus> hostGroupsAndStates) {
         String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
-
-        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
-        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
 
         hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
             int retryCount = 0;
@@ -428,9 +419,6 @@ public class WaitUtil {
     public SdxTestDto waitForSdxInstancesStatus(SdxTestDto sdxTestDto, SdxClient sdxClient, Map<String, InstanceStatus> hostGroupsAndStates) {
         String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
 
-        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
-        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
-
         hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
             int retryCount = 0;
 
@@ -456,9 +444,6 @@ public class WaitUtil {
     public SdxTestDto waitForSdxInstanceGroupStatus(SdxTestDto sdxTestDto, SdxClient sdxClient, String hostGroup, String desiredState) {
         int retryCount = 0;
         String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
-
-        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
-        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
 
         while (retryCount < maxRetry && !checkSdxInstanceGroupStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
             LOGGER.info("Waiting for status {} in Host Group {} at {} SDX", desiredState, hostGroup, sdxName);
