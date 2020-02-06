@@ -1,22 +1,22 @@
 package com.sequenceiq.redbeams.service.network;
 
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.redbeams.exception.BadRequestException;
 
+@RunWith(MockitoJUnitRunner.class)
 public class SubnetChooserServiceTest {
 
     private static final String AVAILABILITY_ZONE_A = "AZ-a";
@@ -29,84 +29,67 @@ public class SubnetChooserServiceTest {
 
     private static final String SUBNET_3 = "subnet-3";
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    @Mock
+    private AwsSubnetChooser awsSubnetChooser;
 
-    private final SubnetChooserService underTest = new SubnetChooserService();
+    @InjectMocks
+    private  SubnetChooserService underTest;
 
     @Test
-    public void testChooseSubnetsAwsSuccess() {
+    public void testAwsSubnetChooserCalled() {
         List<CloudSubnet> subnets = List.of(
                 new CloudSubnet(SUBNET_1, "", AVAILABILITY_ZONE_A, ""),
                 new CloudSubnet(SUBNET_2, "", AVAILABILITY_ZONE_B, ""),
                 new CloudSubnet(SUBNET_3, "", AVAILABILITY_ZONE_B, "")
         );
 
-        List<CloudSubnet> chosenSubnets = underTest.chooseSubnets(subnets, CloudPlatform.AWS);
-
-        assertThat(chosenSubnets, hasSize(3));
-        assertThat(chosenSubnets, hasItem(hasProperty("availabilityZone", is(AVAILABILITY_ZONE_A))));
-        assertThat(chosenSubnets, hasItem(hasProperty("availabilityZone", is(AVAILABILITY_ZONE_B))));
+        underTest.chooseSubnets(subnets, CloudPlatform.AWS, null);
+        verify(awsSubnetChooser).chooseSubnets(subnets, null);
     }
-
-    @Test
-    public void testChooseSubnetsAwsOnlyOneSubnet() {
-        List<CloudSubnet> subnets = List.of(new CloudSubnet(SUBNET_1, "", AVAILABILITY_ZONE_A, ""));
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Insufficient number of subnets");
-
-        underTest.chooseSubnets(subnets, CloudPlatform.AWS);
-    }
-
-    @Test
-    public void testChooseSubnetsAwsNoSubnets() {
-        List<CloudSubnet> subnets = List.of();
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Insufficient number of subnets");
-
-        underTest.chooseSubnets(subnets, CloudPlatform.AWS);
-    }
-
-    @Test
-    public void testChooseSubnetsAwsWithTwoSubnetsFromSameAz() {
-        List<CloudSubnet> subnets = List.of(
-                new CloudSubnet(SUBNET_1, "", AVAILABILITY_ZONE_A, ""),
-                new CloudSubnet(SUBNET_2, "", AVAILABILITY_ZONE_A, "")
-        );
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("All subnets are in the same availability zone");
-
-        underTest.chooseSubnets(subnets, CloudPlatform.AWS);
-    }
-
-    @Test
-    public void testChooseSubnetsAwsWithSixSubnetsFromSomeDifferentAz() {
-        List<CloudSubnet> subnets = List.of(
-                new CloudSubnet("subnet1", "", "us-west-2c", ""),
-                new CloudSubnet("subnet2", "", "us-west-2c", ""),
-                new CloudSubnet("subnet3", "", "us-west-2b", ""),
-                new CloudSubnet("subnet4", "", "us-west-2a", ""),
-                new CloudSubnet("subnet5", "", "us-west-2a", ""),
-                new CloudSubnet("subnet6", "", "us-west-2b", "")
-        );
-
-        List<CloudSubnet> chosenSubnets = underTest.chooseSubnets(subnets, CloudPlatform.AWS);
-
-        assertThat(chosenSubnets, hasSize(6));
-    }
-
-    // ---
 
     @Test
     public void testChooseSubnetsAzure() {
+        List<CloudSubnet> subnets = List.of(
+                new CloudSubnet(SUBNET_1, "")
+        );
+
+        List<CloudSubnet> chosenSubnets = underTest.chooseSubnets(subnets, CloudPlatform.AZURE, null);
+
+        assertEquals(1, chosenSubnets.size());
+        assertTrue(subnets.contains(chosenSubnets.get(0)));
+    }
+
+    @Test
+    public void testChooseSubnetsAzure2() {
         List<CloudSubnet> subnets = List.of(
                 new CloudSubnet(SUBNET_1, ""),
                 new CloudSubnet(SUBNET_2, "")
         );
 
-        List<CloudSubnet> chosenSubnets = underTest.chooseSubnets(subnets, CloudPlatform.AZURE);
+        List<CloudSubnet> chosenSubnets = underTest.chooseSubnets(subnets, CloudPlatform.AZURE, null);
 
-        assertEquals(subnets, chosenSubnets);
+        assertEquals(1, chosenSubnets.size());
+        assertTrue(subnets.contains(chosenSubnets.get(0)));
+    }
+
+    @Test
+    public void testChooseSubnetsAzure3() {
+        List<CloudSubnet> subnets = List.of(
+                new CloudSubnet(SUBNET_1, ""),
+                new CloudSubnet(SUBNET_2, ""),
+                new CloudSubnet(SUBNET_3, "")
+        );
+
+        List<CloudSubnet> chosenSubnets = underTest.chooseSubnets(subnets, CloudPlatform.AZURE, null);
+
+        assertEquals(1, chosenSubnets.size());
+        assertTrue(subnets.contains(chosenSubnets.get(0)));
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testChooseSubnetsAzureValidation() {
+        List<CloudSubnet> subnets = List.of();
+        underTest.chooseSubnets(subnets, CloudPlatform.AZURE, null);
     }
 
 }
