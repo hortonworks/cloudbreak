@@ -1,6 +1,9 @@
 package com.sequenceiq.redbeams.service.network;
 
 import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
@@ -12,10 +15,13 @@ import com.sequenceiq.redbeams.exception.RedbeamsException;
 @Service
 public class SubnetChooserService {
 
-    public List<CloudSubnet> chooseSubnets(List<CloudSubnet> subnetMetas, CloudPlatform cloudPlatform) {
+    @Inject
+    private AwsSubnetChooser awsSubnetChooser;
+
+    public List<CloudSubnet> chooseSubnets(List<CloudSubnet> subnetMetas, CloudPlatform cloudPlatform, Map<String, String> dbParameters) {
         switch (cloudPlatform) {
             case AWS:
-                return chooseSubnetsAws(subnetMetas);
+                return awsSubnetChooser.chooseSubnets(subnetMetas, dbParameters);
             case AZURE:
                 return chooseSubnetsAzure(subnetMetas);
             case MOCK:
@@ -25,21 +31,11 @@ public class SubnetChooserService {
         }
     }
 
-    private List<CloudSubnet> chooseSubnetsAws(List<CloudSubnet> subnetMetas) {
-        if (subnetMetas.size() < 2) {
-            throw new BadRequestException("Insufficient number of subnets: at least two subnets in two different availability zones needed");
-        }
-
-        long numAZs = subnetMetas.stream().map(CloudSubnet::getAvailabilityZone).distinct().count();
-        if (numAZs < 2L) {
-            throw new BadRequestException("All subnets are in the same availability zone: at least two subnets in two different availability zones needed");
-        } else {
-            return subnetMetas;
-        }
-    }
-
     private List<CloudSubnet> chooseSubnetsAzure(List<CloudSubnet> subnetMetas) {
-        return subnetMetas;
+        if (subnetMetas.isEmpty()) {
+            throw new BadRequestException("Insufficient number of subnets: at least one subnet needed");
+        }
+        return subnetMetas.subList(0, 1);
     }
 
     private List<CloudSubnet> chooseSubnetsMock(List<CloudSubnet> subnetMetas) {

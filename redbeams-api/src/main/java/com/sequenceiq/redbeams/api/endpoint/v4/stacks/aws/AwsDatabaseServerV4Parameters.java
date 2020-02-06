@@ -18,6 +18,8 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class AwsDatabaseServerV4Parameters extends MappableBase {
 
+    public static final String MULTI_AZ = "multiAZ";
+
     @ApiModelProperty(AwsDatabaseServerModelDescriptions.BACKUP_RETENTION_PERIOD)
     private Integer backupRetentionPeriod;
 
@@ -68,7 +70,7 @@ public class AwsDatabaseServerV4Parameters extends MappableBase {
         Map<String, Object> map = super.asMap();
         putIfValueNotNull(map, "backupRetentionPeriod", backupRetentionPeriod);
         putIfValueNotNull(map, "engineVersion", engineVersion);
-        putIfValueNotNull(map, "multiAZ", multiAZ);
+        putIfValueNotNull(map, MULTI_AZ, multiAZ);
         putIfValueNotNull(map, "storageType", storageType);
         return map;
     }
@@ -84,7 +86,7 @@ public class AwsDatabaseServerV4Parameters extends MappableBase {
     public void parse(Map<String, Object> parameters) {
         backupRetentionPeriod = getInt(parameters, "backupRetentionPeriod");
         engineVersion = getParameterOrNull(parameters, "engineVersion");
-        multiAZ = getParameterOrNull(parameters, "multiAZ");
+        multiAZ = getParameterOrNull(parameters, MULTI_AZ);
         storageType = getParameterOrNull(parameters, "storageType");
     }
 }
