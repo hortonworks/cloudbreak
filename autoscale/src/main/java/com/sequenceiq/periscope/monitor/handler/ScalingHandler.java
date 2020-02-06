@@ -13,14 +13,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
+import com.sequenceiq.periscope.monitor.evaluator.cm.ClouderaManagerTotalHostsEvaluator;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
-import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 import com.sequenceiq.periscope.utils.ClusterUtils;
@@ -42,13 +40,10 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
     private ApplicationContext applicationContext;
 
     @Inject
-    private AmbariClientProvider ambariClientProvider;
-
-    @Inject
     private RejectedThreadService rejectedThreadService;
 
     @Inject
-    private RequestLogging ambariRequestLogging;
+    private ClouderaManagerTotalHostsEvaluator totalHostsEvaluatorService;
 
     @Override
     public void onApplicationEvent(ScalingEvent event) {
@@ -61,8 +56,7 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
     private void scale(Cluster cluster, ScalingPolicy policy) {
         long remainingTime = getRemainingCooldownTime(cluster);
         if (remainingTime <= 0) {
-            AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
-            int totalNodes = ambariRequestLogging.logging(ambariClient::getClusterHosts, "clusterHosts").size();
+            int totalNodes = totalHostsEvaluatorService.getTotalHosts(cluster);
             int desiredNodeCount = getDesiredNodeCount(cluster, policy, totalNodes);
             if (totalNodes != desiredNodeCount) {
                 Runnable scalingRequest = (Runnable) applicationContext.getBean("ScalingRequest", cluster, policy, totalNodes, desiredNodeCount);
