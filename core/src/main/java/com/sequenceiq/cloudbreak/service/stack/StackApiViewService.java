@@ -59,7 +59,7 @@ public class StackApiViewService {
     public boolean canChangeCredential(StackApiView stackApiView) {
         if (stackApiView.getStatus() != null) {
             if (stackApiView.getStatus() == Status.AVAILABLE) {
-                return !flowLogService.isOtherFlowRunning(stackApiView.getId());
+                return !flowLogService.isOtherNonTerminationFlowRunning(stackApiView.getId());
             }
         }
         return false;

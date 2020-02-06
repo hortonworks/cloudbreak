@@ -151,7 +151,8 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     private boolean isFlowAcceptable(String key, Payload payload) {
         if (payload instanceof Acceptable && ((Acceptable) payload).accepted() != null) {
             Acceptable acceptable = (Acceptable) payload;
-            if (!applicationFlowInformation.getAllowedParallelFlows().contains(key) && flowLogService.isOtherFlowRunning(payload.getResourceId())) {
+            if (!applicationFlowInformation.getAllowedParallelFlows().contains(key)
+                    && flowLogService.isOtherNonTerminationFlowRunning(payload.getResourceId())) {
                 acceptable.accepted().accept(Boolean.FALSE);
                 return false;
             }

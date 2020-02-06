@@ -150,8 +150,20 @@ public class FlowLogDBService implements FlowLogService {
                 .collect(Collectors.toSet());
     }
 
-    public boolean isOtherFlowRunning(Long resourceId) {
+    public boolean isOtherNonTerminationFlowRunning(Long resourceId) {
         Set<String> flowIds = findAllRunningNonTerminationFlowIdsByResourceId(resourceId);
+        return !flowIds.isEmpty();
+    }
+
+    private Set<String> findAllRunningFlowIdsByResourceId(Long resourceId) {
+        Set<FlowLogIdWithTypeAndTimestamp> allRunningFlowIdsByResourceId = flowLogRepository.findAllRunningFlowLogByResourceId(resourceId);
+        return allRunningFlowIdsByResourceId.stream()
+                .map(FlowLogIdWithTypeAndTimestamp::getFlowId)
+                .collect(Collectors.toSet());
+    }
+
+    public boolean isOtherFlowRunning(Long resourceId) {
+        Set<String> flowIds = findAllRunningFlowIdsByResourceId(resourceId);
         return !flowIds.isEmpty();
     }
 
