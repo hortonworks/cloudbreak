@@ -69,6 +69,15 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.SDX_STOP_FINISHED, "", sdx);
             logStateChange(DatalakeStatusEnum.STOPPED, DatalakeStatusEnum.RUNNING);
         }
+        if (stack.getStatus().equals(Status.DELETE_COMPLETED)) {
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETED, ResourceEvent.SDX_CLUSTER_DELETION_FINISHED, "", sdx);
+            jobService.unschedule(String.valueOf(sdx.getId()));
+            logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.STACK_DELETED);
+        }
+        if (stack.getStatus().equals(Status.DELETE_FAILED)) {
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_FAILED, ResourceEvent.SDX_CLUSTER_DELETION_FAILED, "", sdx);
+            logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.DELETE_FAILED);
+        }
     }
 
     private void handleRunningSdx(StackStatusV4Response stack, SdxCluster sdx) {
