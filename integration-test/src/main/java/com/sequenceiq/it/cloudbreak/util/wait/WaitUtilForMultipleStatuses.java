@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -23,18 +23,14 @@ public class WaitUtilForMultipleStatuses {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WaitUtilForMultipleStatuses.class);
 
-    @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 300 : ${integrationtest.testsuite.maxRetry:1800}}")
-    private int maxRetry;
+    @Inject
+    private PollingConfigProvider pollingConfigProvider;
 
-    @Value("${integrationtest.testsuite.pollingInterval:1000}")
-    private long pollingInterval;
-
-    public Map<String, String> waitAndCheckStatuses(CloudbreakClient cloudbreakClient, String stackName, Map<String, Status> desiredStatuses,
-            long pollingInterval) {
+    public Map<String, String> waitAndCheckStatuses(CloudbreakClient cloudbreakClient, String stackName, Map<String, Status> desiredStatuses) {
         Map<String, String> errors = new HashMap<>();
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
-            waitResult = waitForStatuses(cloudbreakClient, stackName, desiredStatuses, Math.max(this.pollingInterval, pollingInterval));
+            waitResult = waitForStatuses(cloudbreakClient, stackName, desiredStatuses, pollingConfigProvider.getPollingInterval());
             if (waitResult == WaitResult.FAILED || waitResult == WaitResult.TIMEOUT) {
                 break;
             }
@@ -91,7 +87,7 @@ public class WaitUtilForMultipleStatuses {
 
         long startTime = System.currentTimeMillis();
         int retryCount = 0;
-        while (!checkStatuses(currentStatuses, desiredStatuses) && !checkFailedStatuses(currentStatuses) && retryCount < maxRetry) {
+        while (!checkStatuses(currentStatuses, desiredStatuses) && !checkFailedStatuses(currentStatuses) && retryCount < pollingConfigProvider.getMaxRetry()) {
             LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {}, ellapsed {}ms ...", desiredStatuses, stackName, currentStatuses,
                     System.currentTimeMillis() - startTime);
 
@@ -123,7 +119,7 @@ public class WaitUtilForMultipleStatuses {
                 || checkNotExpectedDelete(currentStatuses, desiredStatuses)) {
             waitResult = WaitResult.FAILED;
             LOGGER.info("Desired status(es) are {} for {} but status(es) are {}", desiredStatuses, stackName, currentStatuses);
-        } else if (retryCount == maxRetry) {
+        } else if (retryCount == pollingConfigProvider.getMaxRetry()) {
             waitResult = WaitResult.TIMEOUT;
             LOGGER.info("Timeout: Desired tatus(es) are {} for {} but status(es) are {}", desiredStatuses, stackName, currentStatuses);
         } else {

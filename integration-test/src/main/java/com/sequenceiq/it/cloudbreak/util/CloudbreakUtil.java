@@ -7,14 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.util.wait.PollingConfigProvider;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -23,9 +25,12 @@ public class CloudbreakUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakUtil.class);
 
-    private static final int MAX_RETRY = 360;
+    @Inject
+    private PollingConfigProvider pollingConfigProvider;
 
-    private static long pollingInterval = 10000L;
+    private static int maxRetry;
+
+    private static long pollingInterval;
 
     private CloudbreakUtil() {
     }
@@ -56,13 +61,13 @@ public class CloudbreakUtil {
 
             retryCount++;
         }
-        while (!checkStatuses(currentStatuses, desiredStatuses) && !checkFailedStatuses(currentStatuses) && retryCount < MAX_RETRY);
+        while (!checkStatuses(currentStatuses, desiredStatuses) && !checkFailedStatuses(currentStatuses) && retryCount < maxRetry);
 
         LOGGER.info("Status(es) {} for {} are in desired status(es) {}", desiredStatuses.keySet(), stackName, currentStatuses.values());
         if (currentStatuses.values().stream().anyMatch(cs -> cs.contains("FAILED")) || checkNotExpectedDelete(currentStatuses, desiredStatuses)) {
             waitResult = WaitResult.FAILED;
         }
-        if (retryCount == MAX_RETRY) {
+        if (retryCount == maxRetry) {
             waitResult = WaitResult.TIMEOUT;
         }
         return waitResult;
@@ -111,8 +116,12 @@ public class CloudbreakUtil {
     }
 
     @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
-    @Value("${integrationtest.testsuite.pollingInterval:10000}")
-    public void setPollingInterval(int pollingInterval) {
-        this.pollingInterval = pollingInterval;
+    public void setPollingInterval() {
+        this.pollingInterval = pollingConfigProvider.getPollingInterval();
+    }
+
+    @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
+    public void setMexRetry() {
+        this.maxRetry = pollingConfigProvider.getMaxRetry();
     }
 }

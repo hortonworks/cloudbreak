@@ -3,9 +3,10 @@ package com.sequenceiq.it.util.cleanup;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -15,6 +16,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentB
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.client.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.util.WaitResult;
+import com.sequenceiq.it.cloudbreak.util.wait.PollingConfigProvider;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.client.SdxClient;
@@ -26,11 +28,8 @@ public class CleanupWaitUtil {
 
     private static final int DELETE_SLEEP = 30000;
 
-    @Value("${integrationtest.testsuite.pollingInterval:30000}")
-    private long pollingInterval;
-
-    @Value("${integrationtest.testsuite.maxRetry:3000}")
-    private int maxRetry;
+    @Inject
+    private PollingConfigProvider pollingConfigProvider;
 
     /**
      * Wait till all the distroxes in all the environments is going to be teminated. However not more than the "integrationtest.testsuite.maxRetry"
@@ -49,8 +48,8 @@ public class CleanupWaitUtil {
         Map<String, String> environments = environment.environmentV1Endpoint().list().getResponses().stream()
                 .collect(Collectors.toMap(response -> response.getCrn(), response -> response.getName()));
 
-        while (retryCount < maxRetry && checkDistroxesAreAvailable(cloudbreak, environments) && !checkDistroxesDeleteFailedStatus(cloudbreak, environments)) {
-            sleep(pollingInterval);
+        while (retryCount < pollingConfigProvider.getMaxRetry() && checkDistroxesAreAvailable(cloudbreak, environments) && !checkDistroxesDeleteFailedStatus(cloudbreak, environments)) {
+            sleep(pollingConfigProvider.getPollingInterval());
             retryCount++;
         }
 
@@ -58,7 +57,7 @@ public class CleanupWaitUtil {
             LOG.info("One or more DISTROX cannot be terminated in the associated environment");
             return WaitResult.FAILED;
         } else if (checkDistroxesAreAvailable(cloudbreak, environments)) {
-            LOG.info("Timeout: DISTROXes cannot be terminated in environment during {} retries", maxRetry);
+            LOG.info("Timeout: DISTROXes cannot be terminated in environment during {} retries", pollingConfigProvider.getMaxRetry());
             return WaitResult.TIMEOUT;
         } else {
             sleep(DELETE_SLEEP);
@@ -84,8 +83,8 @@ public class CleanupWaitUtil {
         Map<String, String> environments = environment.environmentV1Endpoint().list().getResponses().stream()
                 .collect(Collectors.toMap(response -> response.getCrn(), response -> response.getName()));
 
-        while (retryCount < maxRetry && checkSdxesAreAvailable(sdx, environments) && !checkSdxesDeleteFailedStatus(sdx, environments)) {
-            sleep(pollingInterval);
+        while (retryCount < pollingConfigProvider.getMaxRetry() && checkSdxesAreAvailable(sdx, environments) && !checkSdxesDeleteFailedStatus(sdx, environments)) {
+            sleep(pollingConfigProvider.getPollingInterval());
             retryCount++;
         }
 
@@ -93,7 +92,7 @@ public class CleanupWaitUtil {
             LOG.info("One or more SDX cannot be terminated in the associated environment");
             return WaitResult.FAILED;
         } else if (checkSdxesAreAvailable(sdx, environments)) {
-            LOG.info("Timeout: SDXes cannot be terminated in environment during {} retries", maxRetry);
+            LOG.info("Timeout: SDXes cannot be terminated in environment during {} retries", pollingConfigProvider.getMaxRetry());
             return WaitResult.TIMEOUT;
         } else {
             sleep(DELETE_SLEEP);
@@ -116,8 +115,8 @@ public class CleanupWaitUtil {
     public WaitResult waitForEnvironmentsCleanup(EnvironmentClient environment) {
         int retryCount = 0;
 
-        while (retryCount < maxRetry && checkEnvironmentsAreAvailable(environment) && !checkEnvironmentsDeleteFailedStatus(environment)) {
-            sleep(pollingInterval);
+        while (retryCount < pollingConfigProvider.getMaxRetry() && checkEnvironmentsAreAvailable(environment) && !checkEnvironmentsDeleteFailedStatus(environment)) {
+            sleep(pollingConfigProvider.getPollingInterval());
             retryCount++;
         }
 
@@ -125,7 +124,7 @@ public class CleanupWaitUtil {
             LOG.info("One or more environment cannot be terminated");
             return WaitResult.FAILED;
         } else if (checkEnvironmentsAreAvailable(environment)) {
-            LOG.info("Timeout: Environments cannot be terminated during {} retries", maxRetry);
+            LOG.info("Timeout: Environments cannot be terminated during {} retries", pollingConfigProvider.getMaxRetry());
             return WaitResult.TIMEOUT;
         } else {
             sleep(DELETE_SLEEP);

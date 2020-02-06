@@ -175,35 +175,35 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
-    public <T extends CloudbreakTestDto> T await(T entity, Map<String, Status> desiredStatuses, RunningParameter runningParameter, long pollingInterval) {
-        return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
+    public <T extends CloudbreakTestDto> T await(T entity, Map<String, Status> desiredStatuses, RunningParameter runningParameter) {
+        return wrappedTestContext.await(entity, desiredStatuses, runningParameter);
     }
 
     @Override
-    public EnvironmentTestDto await(EnvironmentTestDto entity, EnvironmentStatus desiredStatuses, RunningParameter runningParameter, long pollingInterval) {
-        return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
+    public EnvironmentTestDto await(EnvironmentTestDto entity, EnvironmentStatus desiredStatuses, RunningParameter runningParameter) {
+        return wrappedTestContext.await(entity, desiredStatuses, runningParameter);
     }
 
     @Override
-    public SdxTestDto await(SdxTestDto entity, SdxClusterStatusResponse desiredStatuses, RunningParameter runningParameter, long pollingInterval) {
-        return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
+    public SdxTestDto await(SdxTestDto entity, SdxClusterStatusResponse desiredStatuses, RunningParameter runningParameter) {
+        return wrappedTestContext.await(entity, desiredStatuses, runningParameter);
     }
 
     @Override
     public SdxInternalTestDto await(SdxInternalTestDto entity, SdxClusterStatusResponse desiredStatuses,
-            RunningParameter runningParameter, long pollingInterval) {
-        return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
+            RunningParameter runningParameter) {
+        return wrappedTestContext.await(entity, desiredStatuses, runningParameter);
     }
 
     @Override
-    public SdxRepairTestDto await(SdxRepairTestDto entity, SdxClusterStatusResponse desiredStatuses, RunningParameter runningParameter, long pollingInterval) {
-        return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
+    public SdxRepairTestDto await(SdxRepairTestDto entity, SdxClusterStatusResponse desiredStatuses, RunningParameter runningParameter) {
+        return wrappedTestContext.await(entity, desiredStatuses, runningParameter);
     }
 
     @Override
     public FreeIPATestDto await(FreeIPATestDto entity, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status desiredStatuses,
-            RunningParameter runningParameter, long pollingInterval) {
-        return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
+            RunningParameter runningParameter) {
+        return wrappedTestContext.await(entity, desiredStatuses, runningParameter);
     }
 
     @Override

@@ -79,9 +79,9 @@ public class CMDownscaleWithHttp500ResponsesTest extends AbstractIntegrationTest
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
-                .await(StackTestDto.class, STACK_AVAILABLE, 3000)
+                .await(StackTestDto.class, STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredBackscaledWorkerCount()))
-                .await(StackTestDto.class, STACK_AVAILABLE, 3000)
+                .await(StackTestDto.class, STACK_AVAILABLE)
                 .validate();
     }
 

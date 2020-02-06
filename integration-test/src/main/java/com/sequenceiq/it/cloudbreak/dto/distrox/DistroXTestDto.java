@@ -35,6 +35,7 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
+import com.sequenceiq.it.cloudbreak.util.wait.PollingConfigProvider;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 
 @Prototype
@@ -51,6 +52,9 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Inject
     private WaitUtil waitUtil;
+
+    @Inject
+    private PollingConfigProvider pollingConfigProvider;
 
     public DistroXTestDto(TestContext testContext) {
         super(new DistroXV1Request(), testContext);
@@ -130,13 +134,6 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     @Override
-    public DistroXTestDto await(Class<DistroXTestDto> entityClass, Map<String, Status> statuses, long pollingInteval) {
-        super.await(entityClass, statuses, pollingInteval);
-        waitTillFlowInOperation();
-        return this;
-    }
-
-    @Override
     public DistroXTestDto await(Class<DistroXTestDto> entityClass, Map<String, Status> statuses, RunningParameter runningParameter) {
         super.await(entityClass, statuses, runningParameter);
         waitTillFlowInOperation();
@@ -153,7 +150,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     private void waitTillFlowInOperation() {
         while (hasFlow()) {
             try {
-                Thread.sleep(waitUtil.getPollingInterval());
+                Thread.sleep(pollingConfigProvider.getPollingInterval());
             } catch (InterruptedException e) {
                 LOGGER.warn("Exception has been occurred during wait for flow end: ", e);
             }

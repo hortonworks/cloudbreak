@@ -11,11 +11,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -47,19 +47,8 @@ public class WaitUtil {
     private static final com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status FREE_IPA_DELETE_COMPLETED =
             com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
 
-    @Value("${integrationtest.testsuite.pollingInterval:1000}")
-    private long pollingInterval;
-
-    @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 300 : ${integrationtest.testsuite.maxRetry:1800}}")
-    private int maxRetry;
-
-    public long getPollingInterval() {
-        return pollingInterval;
-    }
-
-    public int getMaxRetry() {
-        return maxRetry;
-    }
+    @Inject
+    private PollingConfigProvider pollingConfigProvider;
 
     private WaitResult waitForStatuses(FreeIPAClient freeIPAClient, String environmentCrn,
             com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status desiredStatus) {
@@ -69,11 +58,11 @@ public class WaitUtil {
 
         long startTime = System.currentTimeMillis();
         int retryCount = 0;
-        while (currentStatus != desiredStatus && !checkFailedStatuses(currentStatus) && retryCount < maxRetry) {
+        while (currentStatus != desiredStatus && !checkFailedStatuses(currentStatus) && retryCount < pollingConfigProvider.getMaxRetry()) {
             LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {}, ellapsed {}ms ...", desiredStatus, environmentCrn, currentStatus,
                     System.currentTimeMillis() - startTime);
 
-            sleep(pollingInterval);
+            sleep(pollingConfigProvider.getPollingInterval());
             FreeIpaV1Endpoint freeIpaV1Endpoint = freeIPAClient.getFreeIpaClient().getFreeIpaV1Endpoint();
             try {
                 Optional<com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status> statusResult =
@@ -94,7 +83,7 @@ public class WaitUtil {
         if (currentStatus.name().contains("FAILED") && FREE_IPA_DELETE_COMPLETED != desiredStatus && FREE_IPA_DELETE_COMPLETED == currentStatus) {
             waitResult = WaitResult.FAILED;
             LOGGER.info("Desired status(es) are {} for {} but status(es) are {}", desiredStatus, environmentCrn, currentStatus);
-        } else if (retryCount == maxRetry) {
+        } else if (retryCount == pollingConfigProvider.getMaxRetry()) {
             waitResult = WaitResult.TIMEOUT;
             LOGGER.info("Timeout: Desired tatus(es) are {} for {} but status(es) are {}", desiredStatus, environmentCrn, currentStatus);
         } else {
@@ -110,11 +99,11 @@ public class WaitUtil {
 
         long startTime = System.currentTimeMillis();
         int retryCount = 0;
-        while (currentStatus != desiredStatus && !checkFailedStatuses(currentStatus) && retryCount < maxRetry) {
+        while (currentStatus != desiredStatus && !checkFailedStatuses(currentStatus) && retryCount < pollingConfigProvider.getMaxRetry()) {
             LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {}, ellapsed {}ms ...", desiredStatus, name, currentStatus,
                     System.currentTimeMillis() - startTime);
 
-            sleep(pollingInterval);
+            sleep(pollingConfigProvider.getPollingInterval());
             EnvironmentEndpoint environmentEndpoint = environmentClient.getEnvironmentClient().environmentV1Endpoint();
             try {
                 Optional<EnvironmentStatus> statusResult = Optional.ofNullable(environmentEndpoint.getByName(name).getEnvironmentStatus());
@@ -134,7 +123,7 @@ public class WaitUtil {
         if (currentStatus.name().contains("FAILED") && EnvironmentStatus.ARCHIVED != desiredStatus && EnvironmentStatus.ARCHIVED == currentStatus) {
             waitResult = WaitResult.FAILED;
             LOGGER.info("Desired status(es) are {} for {} but status(es) are {}", desiredStatus, name, currentStatus);
-        } else if (retryCount == maxRetry) {
+        } else if (retryCount == pollingConfigProvider.getMaxRetry()) {
             waitResult = WaitResult.TIMEOUT;
             LOGGER.info("Timeout: Desired tatus(es) are {} for {} but status(es) are {}", desiredStatus, name, currentStatus);
         } else {
@@ -150,11 +139,11 @@ public class WaitUtil {
 
         long startTime = System.currentTimeMillis();
         int retryCount = 0;
-        while (currentStatus != desiredStatus && !checkFailedStatuses(currentStatus) && retryCount < maxRetry) {
+        while (currentStatus != desiredStatus && !checkFailedStatuses(currentStatus) && retryCount < pollingConfigProvider.getMaxRetry()) {
             LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {}, ellapsed {}ms ...", desiredStatus, name, currentStatus,
                     System.currentTimeMillis() - startTime);
 
-            sleep(pollingInterval);
+            sleep(pollingConfigProvider.getPollingInterval());
             SdxEndpoint sdxEndpoint = sdxClient.getSdxClient().sdxEndpoint();
             try {
                 Optional<SdxClusterStatusResponse> statusResult = Optional.ofNullable(sdxEndpoint.get(name).getStatus());
@@ -174,7 +163,7 @@ public class WaitUtil {
         if (currentStatus.name().contains("FAILED") || (DELETED != desiredStatus && DELETED == currentStatus)) {
             waitResult = WaitResult.FAILED;
             LOGGER.info("Desired status(es) are {} for {} but status(es) are {}", desiredStatus, name, currentStatus);
-        } else if (retryCount == maxRetry) {
+        } else if (retryCount == pollingConfigProvider.getMaxRetry()) {
             waitResult = WaitResult.TIMEOUT;
             LOGGER.info("Timeout: Desired tatus(es) are {} for {} but status(es) are {}", desiredStatus, name, currentStatus);
         } else {
@@ -196,7 +185,7 @@ public class WaitUtil {
     }
 
     public Map<String, String> waitAndCheckStatuses(FreeIPAClient freeIPAClient, String name,
-            com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status desiredStatus, long pollingInterval) {
+            com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status desiredStatus) {
         Map<String, String> errors = new HashMap<>();
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
@@ -223,7 +212,7 @@ public class WaitUtil {
     }
 
     public Map<String, String> waitAndCheckStatuses(EnvironmentClient environmentClient, String name,
-            EnvironmentStatus desiredStatus, long pollingInterval) {
+            EnvironmentStatus desiredStatus) {
         Map<String, String> errors = new HashMap<>();
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
@@ -244,7 +233,7 @@ public class WaitUtil {
     }
 
     public Map<String, String> waitAndCheckStatuses(SdxClient sdxClient, String name,
-            SdxClusterStatusResponse desiredStatus, long pollingInterval) {
+            SdxClusterStatusResponse desiredStatus) {
         Map<String, String> errors = new HashMap<>();
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
@@ -268,14 +257,11 @@ public class WaitUtil {
         int retryCount = 0;
         String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
 
-        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
-        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
-
         long startTime = System.currentTimeMillis();
-        while (retryCount < maxRetry && !checkSdxInstanceStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
+        while (retryCount < pollingConfigProvider.getMaxRetry() && !checkSdxInstanceStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
             LOGGER.info("Waiting for instance status {} in Host Group {} at {} SDX, ellapsed {}ms", desiredState, hostGroup, sdxName,
                     System.currentTimeMillis() - startTime);
-            sleep(pollingInterval);
+            sleep(pollingConfigProvider.getPollingInterval());
             retryCount++;
         }
 
@@ -283,9 +269,9 @@ public class WaitUtil {
             Log.log(LOGGER, format(" [%s] host group instance state is [%s] at [%s] SDX.", hostGroup, desiredState, sdxName));
         } else {
             LOGGER.error("Timeout: Host Group: {} desired instance state: {} is NOT available at {} SDX during {} retries", hostGroup, desiredState, sdxName,
-                    maxRetry);
+                    pollingConfigProvider.getMaxRetry());
             throw new TestFailException(" Timeout: Host Group: " + hostGroup + " desired instance state: " + desiredState
-                    + " is NOT available at " + sdxName + " SDX during " + maxRetry + " retries");
+                    + " is NOT available at " + sdxName + " SDX during " + pollingConfigProvider.getMaxRetry() + " retries");
         }
         return sdxTestDto;
     }
@@ -293,16 +279,13 @@ public class WaitUtil {
     public SdxInternalTestDto waitForSdxInstancesStatus(SdxInternalTestDto sdxTestDto, SdxClient sdxClient, Map<String, InstanceStatus> hostGroupsAndStates) {
         String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
 
-        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
-        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
-
         hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
             int retryCount = 0;
             long startTime = System.currentTimeMillis();
-            while (retryCount < maxRetry && !checkSdxInstanceStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
+            while (retryCount < pollingConfigProvider.getMaxRetry() && !checkSdxInstanceStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
                 LOGGER.info("Waiting for instance status {} in Host Group {} at {} SDX, ellapsed {}ms", desiredState, hostGroup, sdxName,
                         System.currentTimeMillis() - startTime);
-                sleep(pollingInterval);
+                sleep(pollingConfigProvider.getPollingInterval());
                 retryCount++;
             }
 
@@ -310,9 +293,9 @@ public class WaitUtil {
                 Log.log(LOGGER, format(" [%s] host group instance state is [%s] at [%s] SDX.", hostGroup, desiredState, sdxName));
             } else {
                 LOGGER.error("Timeout: Host Group: {} desired instance state: {} is NOT available at {} SDX during {} retries", hostGroup, desiredState, sdxName,
-                        maxRetry);
+                        pollingConfigProvider.getMaxRetry());
                 throw new TestFailException(" Timeout: Host Group: " + hostGroup + " desired instance state: " + desiredState
-                        + " is NOT available at " + sdxName + " SDX during " + maxRetry + " retries");
+                        + " is NOT available at " + sdxName + " SDX during " + pollingConfigProvider.getMaxRetry() + " retries");
             }
         });
 
@@ -322,16 +305,13 @@ public class WaitUtil {
     public SdxTestDto waitForSdxInstancesStatus(SdxTestDto sdxTestDto, SdxClient sdxClient, Map<String, InstanceStatus> hostGroupsAndStates) {
         String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
 
-        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
-        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
-
         hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
             int retryCount = 0;
             long startTime = System.currentTimeMillis();
-            while (retryCount < maxRetry && !checkSdxInstanceStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
+            while (retryCount < pollingConfigProvider.getMaxRetry() && !checkSdxInstanceStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
                 LOGGER.info("Waiting for instance status {} in Host Group {} at {} SDX, ellapsed {}ms", desiredState, hostGroup, sdxName,
                         System.currentTimeMillis() - startTime);
-                sleep(pollingInterval);
+                sleep(pollingConfigProvider.getPollingInterval());
                 retryCount++;
             }
 
@@ -339,9 +319,9 @@ public class WaitUtil {
                 Log.log(LOGGER, format(" [%s] host group instance state is [%s] at [%s] SDX.", hostGroup, desiredState, sdxName));
             } else {
                 LOGGER.error("Timeout: Host Group: {} desired instance state: {} is NOT available at {} SDX during {} retries", hostGroup, desiredState,
-                        sdxName, maxRetry);
+                        sdxName, pollingConfigProvider.getMaxRetry());
                 throw new TestFailException(" Timeout: Host Group: " + hostGroup + " desired instance state: " + desiredState
-                        + " is NOT available at " + sdxName + " SDX during " + maxRetry + " retries");
+                        + " is NOT available at " + sdxName + " SDX during " + pollingConfigProvider.getMaxRetry() + " retries");
             }
         });
 
@@ -352,16 +332,13 @@ public class WaitUtil {
             InstanceStatus> hostGroupsAndStates) {
         String distroxName = distroXTestDto.getRequest().getName();
 
-        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
-        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
-
         hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
             int retryCount = 0;
             long startTime = System.currentTimeMillis();
-            while (retryCount < maxRetry && !checkDistroxInstanceStateIsAvailable(cloudbreakClient, distroxName, hostGroup, desiredState)) {
+            while (retryCount < pollingConfigProvider.getMaxRetry() && !checkDistroxInstanceStateIsAvailable(cloudbreakClient, distroxName, hostGroup, desiredState)) {
                 LOGGER.info("Waiting for instance status {} in Host Group {} at {} DistroX, ellapsed {}ms", desiredState, hostGroup, distroxName,
                         System.currentTimeMillis() - startTime);
-                sleep(pollingInterval);
+                sleep(pollingConfigProvider.getPollingInterval());
                 retryCount++;
             }
 
@@ -369,9 +346,9 @@ public class WaitUtil {
                 Log.log(LOGGER, format(" [%s] host group instance state is [%s] at [%s] DostroX.", hostGroup, desiredState, distroxName));
             } else {
                 LOGGER.error("Timeout: Host Group: {} desired instance state: {} is NOT available at {} DostroX during {} retries", hostGroup, desiredState,
-                        distroxName, maxRetry);
+                        distroxName, pollingConfigProvider.getMaxRetry());
                 throw new TestFailException(" Timeout: Host Group: " + hostGroup + " desired instance state: " + desiredState
-                        + " is NOT available at " + distroxName + " DostroX during " + maxRetry + " retries");
+                        + " is NOT available at " + distroxName + " DostroX during " + pollingConfigProvider.getMaxRetry() + " retries");
             }
         });
 
