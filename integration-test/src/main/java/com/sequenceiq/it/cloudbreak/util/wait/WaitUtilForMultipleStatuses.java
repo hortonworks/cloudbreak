@@ -29,12 +29,11 @@ public class WaitUtilForMultipleStatuses {
     @Value("${integrationtest.testsuite.pollingInterval:1000}")
     private long pollingInterval;
 
-    public Map<String, String> waitAndCheckStatuses(CloudbreakClient cloudbreakClient, String stackName, Map<String, Status> desiredStatuses,
-            long pollingInterval) {
+    public Map<String, String> waitAndCheckStatuses(CloudbreakClient cloudbreakClient, String stackName, Map<String, Status> desiredStatuses) {
         Map<String, String> errors = new HashMap<>();
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
-            waitResult = waitForStatuses(cloudbreakClient, stackName, desiredStatuses, Math.max(this.pollingInterval, pollingInterval));
+            waitResult = waitForStatuses(cloudbreakClient, stackName, desiredStatuses, pollingInterval);
             if (waitResult == WaitResult.FAILED || waitResult == WaitResult.TIMEOUT) {
                 break;
             }

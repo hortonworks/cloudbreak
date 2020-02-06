@@ -130,13 +130,6 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     @Override
-    public DistroXTestDto await(Class<DistroXTestDto> entityClass, Map<String, Status> statuses, long pollingInteval) {
-        super.await(entityClass, statuses, pollingInteval);
-        waitTillFlowInOperation();
-        return this;
-    }
-
-    @Override
     public DistroXTestDto await(Class<DistroXTestDto> entityClass, Map<String, Status> statuses, RunningParameter runningParameter) {
         super.await(entityClass, statuses, runningParameter);
         waitTillFlowInOperation();

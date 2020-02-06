@@ -196,7 +196,7 @@ public class WaitUtil {
     }
 
     public Map<String, String> waitAndCheckStatuses(FreeIPAClient freeIPAClient, String name,
-            com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status desiredStatus, long pollingInterval) {
+            com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status desiredStatus) {
         Map<String, String> errors = new HashMap<>();
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
@@ -223,7 +223,7 @@ public class WaitUtil {
     }
 
     public Map<String, String> waitAndCheckStatuses(EnvironmentClient environmentClient, String name,
-            EnvironmentStatus desiredStatus, long pollingInterval) {
+            EnvironmentStatus desiredStatus) {
         Map<String, String> errors = new HashMap<>();
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
@@ -244,7 +244,7 @@ public class WaitUtil {
     }
 
     public Map<String, String> waitAndCheckStatuses(SdxClient sdxClient, String name,
-            SdxClusterStatusResponse desiredStatus, long pollingInterval) {
+            SdxClusterStatusResponse desiredStatus) {
         Map<String, String> errors = new HashMap<>();
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
@@ -293,9 +293,6 @@ public class WaitUtil {
     public SdxInternalTestDto waitForSdxInstancesStatus(SdxInternalTestDto sdxTestDto, SdxClient sdxClient, Map<String, InstanceStatus> hostGroupsAndStates) {
         String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
 
-        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
-        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
-
         hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
             int retryCount = 0;
             long startTime = System.currentTimeMillis();
@@ -321,9 +318,6 @@ public class WaitUtil {
 
     public SdxTestDto waitForSdxInstancesStatus(SdxTestDto sdxTestDto, SdxClient sdxClient, Map<String, InstanceStatus> hostGroupsAndStates) {
         String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
-
-        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
-        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
 
         hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
             int retryCount = 0;
@@ -351,9 +345,6 @@ public class WaitUtil {
     public DistroXTestDto waitForDistroxInstancesStatus(DistroXTestDto distroXTestDto, CloudbreakClient cloudbreakClient, Map<String,
             InstanceStatus> hostGroupsAndStates) {
         String distroxName = distroXTestDto.getRequest().getName();
-
-        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
-        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
 
         hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
             int retryCount = 0;
