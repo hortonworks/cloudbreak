@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.validation.environment;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static java.util.Optional.ofNullable;
 
 import java.util.Optional;
@@ -18,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -47,13 +47,8 @@ public class ClusterCreationEnvironmentValidator {
 
     public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack, DetailedEnvironmentResponse environment) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        String regionName = cloudPlatformConnectors.getDefault(platform(stack.cloudPlatform()))
-                .displayNameToRegion(stack.getRegion());
         if (environment != null && !CollectionUtils.isEmpty(environment.getRegions().getNames())
-                && environment.getRegions()
-                .getNames()
-                .stream()
-                .noneMatch(region -> region.equals(regionName))) {
+                && environment.getRegions().getNames().stream().noneMatch(region -> region.equals(stack.getRegion()))) {
             resultBuilder.error(String.format("[%s] region is not enabled in [%s] environment. Enabled regions: [%s]", stack.getRegion(),
                     environment.getName(), environment.getRegions().getNames().stream().sorted().collect(Collectors.joining(","))));
         }
@@ -109,7 +104,7 @@ public class ClusterCreationEnvironmentValidator {
     }
 
     private boolean isAutoTlsSupportedByCloudPlatform(Stack stack) {
-        CloudConnector<Object> connector = cloudPlatformConnectors.get(platform(stack.cloudPlatform()), Variant.variant(stack.getPlatformVariant()));
+        CloudConnector<Object> connector = cloudPlatformConnectors.get(Platform.platform(stack.cloudPlatform()), Variant.variant(stack.getPlatformVariant()));
         PlatformParameters platformParameters = connector.parameters();
         return platformParameters.isAutoTlsSupported();
     }
