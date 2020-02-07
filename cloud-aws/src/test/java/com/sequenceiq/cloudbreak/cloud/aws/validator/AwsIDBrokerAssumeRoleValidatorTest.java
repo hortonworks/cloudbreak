@@ -38,45 +38,16 @@ public class AwsIDBrokerAssumeRoleValidatorTest {
     private AwsIDBrokerAssumeRoleValidator awsIDBrokerAssumeRoleValidator;
 
     @Test
-    public void checkCannotAssumeRole() {
-        Role instanceProfileRole = new Role();
-        InstanceProfile instanceProfile = new InstanceProfile().withRoles(instanceProfileRole);
-
-        Role role = new Role();
-
-        EvaluationResult evalResult = new EvaluationResult()
-                .withEvalDecision(PolicyEvaluationDecisionType.ImplicitDeny);
-        when(iam.simulatePrincipalPolicy(any(SimulatePrincipalPolicyRequest.class)))
-                .thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(evalResult));
-
-        assertThat(awsIDBrokerAssumeRoleValidator.canAssumeRole(iam, instanceProfile, role)).isFalse();
-    }
-
-    @Test
-    public void checkCanAssumeRole() {
-        Role instanceProfileRole = new Role();
-        InstanceProfile instanceProfile = new InstanceProfile().withRoles(instanceProfileRole);
-
-        Role role = new Role();
-
-        EvaluationResult evalResult = new EvaluationResult()
-                .withEvalDecision(PolicyEvaluationDecisionType.Allowed);
-        when(iam.simulatePrincipalPolicy(any(SimulatePrincipalPolicyRequest.class)))
-                .thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(evalResult));
-
-        assertThat(awsIDBrokerAssumeRoleValidator.canAssumeRole(iam, instanceProfile, role)).isTrue();
-    }
-
-    @Test
     public void checkCanAssumeRoles() {
         Role instanceProfileRole = new Role();
         InstanceProfile instanceProfile = new InstanceProfile().withRoles(instanceProfileRole);
 
-        Role role = new Role();
+        Role role = new Role().withArn("roleArn");
         Collection<Role> roles = Collections.singletonList(role);
 
         EvaluationResult evalResult = new EvaluationResult()
-                .withEvalDecision(PolicyEvaluationDecisionType.Allowed);
+                .withEvalDecision(PolicyEvaluationDecisionType.Allowed)
+                .withEvalResourceName(role.getArn());
         when(iam.simulatePrincipalPolicy(any(SimulatePrincipalPolicyRequest.class)))
                 .thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(evalResult));
 
@@ -121,9 +92,11 @@ public class AwsIDBrokerAssumeRoleValidatorTest {
         Collection<Role> roles = Arrays.asList(role1, role2);
 
         EvaluationResult evalResult1 = new EvaluationResult()
-                .withEvalDecision(PolicyEvaluationDecisionType.Allowed);
+                .withEvalDecision(PolicyEvaluationDecisionType.Allowed)
+                .withEvalResourceName(role1.getArn());
         EvaluationResult evalResult2 = new EvaluationResult()
-                .withEvalDecision(PolicyEvaluationDecisionType.ImplicitDeny);
+                .withEvalDecision(PolicyEvaluationDecisionType.ImplicitDeny)
+                .withEvalResourceName(role2.getArn());
         when(iam.simulatePrincipalPolicy(any(SimulatePrincipalPolicyRequest.class)))
                 .thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(evalResult1))
                 .thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(evalResult2));
