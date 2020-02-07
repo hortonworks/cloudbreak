@@ -1,17 +1,21 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.amazonaws.util.StringUtils.isNullOrEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.service.CloudParameterService.ACCESS_CONFIG_TYPE;
 import static java.util.Collections.singletonList;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -75,7 +79,6 @@ import com.amazonaws.services.kms.model.ListAliasesRequest;
 import com.amazonaws.services.kms.model.ListAliasesResult;
 import com.amazonaws.services.kms.model.ListKeysRequest;
 import com.amazonaws.services.kms.model.ListKeysResult;
-import com.amazonaws.util.StringUtils;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -128,13 +131,12 @@ import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
 
 @Service
 public class AwsPlatformResources implements PlatformResources {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsPlatformResources.class);
 
     private static final int UNAUTHORIZED = 403;
 
     private static final String OPEN_CIDR_BLOCK = "0.0.0.0/0";
-
-    private static final int MAX_ITEMS = 500;
 
     @Inject
     private AwsClient awsClient;
@@ -156,6 +158,9 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Value("#{'${cb.aws.distrox.enabled.instance.types:}'.split(',')}")
     private List<String> enabledDistroxInstanceTypes;
+
+    @Value("${cb.aws.fetch.max.items:500}")
+    private Integer fetchMaxItems;
 
     @Value("${distrox.restrict.instance.types:true}")
     private boolean restrictInstanceTypes;
@@ -321,7 +326,7 @@ public class AwsPlatformResources implements PlatformResources {
 
             DescribeVpcsResult describeVpcsResult = null;
             boolean first = true;
-            while (first || !StringUtils.isNullOrEmpty(describeVpcsResult.getNextToken())) {
+            while (first || !isNullOrEmpty(describeVpcsResult.getNextToken())) {
                 LOGGER.debug("Getting VPC list in region {}{}", region.getRegionName(), first ? "" : " (continuation)");
                 first = false;
                 describeVpcsRequest.setNextToken(describeVpcsResult == null ? null : describeVpcsResult.getNextToken());
@@ -373,7 +378,7 @@ public class AwsPlatformResources implements PlatformResources {
         List<Subnet> awsSubnets = new ArrayList<>();
         DescribeSubnetsResult describeSubnetsResult = null;
         boolean first = true;
-        while (first || !StringUtils.isNullOrEmpty(describeSubnetsResult.getNextToken())) {
+        while (first || !isNullOrEmpty(describeSubnetsResult.getNextToken())) {
             LOGGER.debug("Describing subnets for VPC {}{}", vpc.getVpcId(), first ? "" : " (continuation)");
             first = false;
             DescribeSubnetsRequest describeSubnetsRequest = createSubnetsDescribeRequest(vpc, describeSubnetsResult == null
@@ -767,7 +772,7 @@ public class AwsPlatformResources implements PlatformResources {
         ListTablesRequest listTablesRequest = new ListTablesRequest();
         ListTablesResult listTablesResult = null;
         boolean first = true;
-        while (first || !StringUtils.isNullOrEmpty(listTablesResult.getLastEvaluatedTableName())) {
+        while (first || !isNullOrEmpty(listTablesResult.getLastEvaluatedTableName())) {
             first = false;
             listTablesRequest.setExclusiveStartTableName(listTablesResult == null ? null : listTablesResult.getLastEvaluatedTableName());
             listTablesResult = dynamoDbClient.listTables(listTablesRequest);
@@ -787,10 +792,27 @@ public class AwsPlatformResources implements PlatformResources {
         LOGGER.info("Get all Instance profiles from Amazon");
         String queryFailedMessage = "Could not get instance profiles from Amazon: ";
         try {
-            ListInstanceProfilesRequest listInstanceProfilesRequest = new ListInstanceProfilesRequest();
-            listInstanceProfilesRequest.setMaxItems(MAX_ITEMS);
-            ListInstanceProfilesResult listInstanceProfilesResult = client.listInstanceProfiles(listInstanceProfilesRequest);
-            return listInstanceProfilesResult.getInstanceProfiles().stream().map(this::instanceProfileToCloudAccessConfig).collect(Collectors.toSet());
+            boolean finished = false;
+            String marker = null;
+            Set<InstanceProfile> instanceProfiles = new LinkedHashSet<>();
+            while (!finished) {
+                ListInstanceProfilesRequest listInstanceProfilesRequest = new ListInstanceProfilesRequest();
+                listInstanceProfilesRequest.setMaxItems(fetchMaxItems);
+                if (isNotEmpty(marker)) {
+                    listInstanceProfilesRequest.setMarker(marker);
+                }
+                LOGGER.debug("About to fetch instance profiles...");
+                ListInstanceProfilesResult listInstanceProfilesResult = client.listInstanceProfiles(listInstanceProfilesRequest);
+                List<InstanceProfile> fetchedInstanceProfiles = listInstanceProfilesResult.getInstanceProfiles();
+                instanceProfiles.addAll(fetchedInstanceProfiles);
+                if (listInstanceProfilesResult.isTruncated()) {
+                    marker = listInstanceProfilesResult.getMarker();
+                } else {
+                    finished = true;
+                }
+            }
+            LOGGER.debug("The total of {} instance profile(s) has fetched.", instanceProfiles.size());
+            return instanceProfiles.stream().map(this::instanceProfileToCloudAccessConfig).collect(Collectors.toSet());
         } catch (AmazonServiceException ase) {
             if (ase.getStatusCode() == UNAUTHORIZED) {
                 LOGGER.error("Could not get instance profiles because the user does not have enough permission.", ase);
@@ -809,10 +831,25 @@ public class AwsPlatformResources implements PlatformResources {
         LOGGER.info("Get all Roles from Amazon");
         String queryFailedMessage = "Could not get roles from Amazon: ";
         try {
-            ListRolesRequest listRolesRequest = new ListRolesRequest();
-            listRolesRequest.setMaxItems(MAX_ITEMS);
-            ListRolesResult listRolesResult = client.listRoles(listRolesRequest);
-            return listRolesResult.getRoles().stream().map(this::roleToCloudAccessConfig).collect(Collectors.toSet());
+            boolean finished = false;
+            String marker = null;
+            List<Role> roles = new LinkedList<>();
+            while (!finished) {
+                ListRolesRequest listRolesRequest = new ListRolesRequest();
+                listRolesRequest.setMaxItems(fetchMaxItems);
+                if (isNotEmpty(marker)) {
+                    listRolesRequest.setMarker(marker);
+                }
+                LOGGER.debug("About to fetch roles...");
+                ListRolesResult listRolesResult = client.listRoles(listRolesRequest);
+                roles.addAll(listRolesResult.getRoles());
+                if (listRolesResult.isTruncated()) {
+                    marker = listRolesResult.getMarker();
+                } else {
+                    finished = true;
+                }
+            }
+            return roles.stream().map(this::roleToCloudAccessConfig).collect(Collectors.toSet());
         } catch (AmazonServiceException ase) {
             if (ase.getStatusCode() == UNAUTHORIZED) {
                 String policyMessage = "Could not get roles because the user does not have enough permission. ";
@@ -849,4 +886,5 @@ public class AwsPlatformResources implements PlatformResources {
         properties.put("roleArn", roleArn);
         return properties;
     }
+
 }
