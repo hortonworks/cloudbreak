@@ -123,6 +123,7 @@ public class AwsPlatformResourcesTest {
 
         ReflectionTestUtils.setField(underTest, "vmTypes",
                 Collections.singletonMap(region("eu-central-1"), Collections.singleton(VmType.vmType("m5.2xlarge"))));
+        ReflectionTestUtils.setField(underTest, "fetchMaxItems", 500);
     }
 
     @Test
@@ -187,6 +188,7 @@ public class AwsPlatformResourcesTest {
         instanceProfileSet.add(instanceProfile(4));
 
         listInstanceProfilesResult.setInstanceProfiles(instanceProfileSet);
+        listInstanceProfilesResult.setIsTruncated(false);
 
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonCFClient);
         when(amazonCFClient.listInstanceProfiles(any(ListInstanceProfilesRequest.class))).thenReturn(listInstanceProfilesResult);

@@ -45,11 +45,18 @@ public class GetPlatformAccessConfigsHandler implements CloudPlatformEventHandle
             GetPlatformCloudAccessConfigsResult getPlatformCloudAccessConfigsResult =
                     new GetPlatformCloudAccessConfigsResult(request.getResourceId(), cloudAccessConfigs);
             request.getResult().onNext(getPlatformCloudAccessConfigsResult);
-            LOGGER.debug("Query platform access configs finished.");
+            LOGGER.debug("Query platform access configs finished. {} access config(s) has returned.",
+                    getResultAccessConfigQuantityIfAvailable(getPlatformCloudAccessConfigsResult));
         } catch (CloudUnauthorizedException e) {
             request.getResult().onNext(new GetPlatformCloudAccessConfigsResult(EventStatus.PERMANENTLY_FAILED, e.getMessage(), e, request.getResourceId()));
         } catch (Exception e) {
             request.getResult().onNext(new GetPlatformCloudAccessConfigsResult(e.getMessage(), e, request.getResourceId()));
         }
     }
+
+    private int getResultAccessConfigQuantityIfAvailable(GetPlatformCloudAccessConfigsResult result) {
+        CloudAccessConfigs cloudAccessConfigs = result.getCloudAccessConfigs();
+        return cloudAccessConfigs != null && cloudAccessConfigs.getCloudAccessConfigs() != null ? cloudAccessConfigs.getCloudAccessConfigs().size() : 0;
+    }
+
 }
