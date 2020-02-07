@@ -1,11 +1,5 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static java.lang.Thread.sleep;
-
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -16,7 +10,6 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
-import com.sequenceiq.flow.api.model.StateStatus;
 
 @Service
 public class CloudbreakFlowService {
@@ -49,37 +42,12 @@ public class CloudbreakFlowService {
         try {
             String actualCbFlowChainId = sdxCluster.getLastCbFlowChainId();
             if (actualCbFlowChainId != null) {
-                boolean hasPendingFlowSteps = getFlowLogsByNameAndFlowChainId(sdxCluster.getClusterName(), actualCbFlowChainId)
-                        .stream().anyMatch(pendingFlowLogPredicate());
-                if (!hasPendingFlowSteps) {
-                    hasPendingFlowSteps = !doubleCheckIfHasNotActiveFlow(sdxCluster.getClusterName(), actualCbFlowChainId);
-                }
-                return hasPendingFlowSteps;
+                return flowEndpoint.hasFlowRunning(sdxCluster.getClusterName(), sdxCluster.getLastCbFlowChainId()).getHasActiveFlow();
             }
         } catch (Exception e) {
-            LOGGER.error("Exception occured during getting flow logs from CB: {}", e.getMessage());
+            LOGGER.error("Exception occured during checking if there is a flow for cluster {} in CB: {}", sdxCluster.getClusterName(), e.getMessage());
+            return true;
         }
         return false;
-    }
-
-    private boolean doubleCheckIfHasNotActiveFlow(String resourceName, String flowChainId) throws InterruptedException {
-        AtomicInteger retryCount = new AtomicInteger(DOUBLE_CHECK_RETRY_COUNT);
-        while (retryCount.decrementAndGet() > 0) {
-            sleep(DOUBLE_CHECK_SLEEP_SEC);
-            if (getFlowLogsByNameAndFlowChainId(resourceName, flowChainId).stream().anyMatch(pendingFlowLogPredicate())) {
-                LOGGER.info("It seems there is still a running flow for SDX {} based on double check of active flow!", resourceName);
-                return false;
-            }
-        }
-        LOGGER.info("Double check finished, there is still no running flow for SDX {}!", resourceName);
-        return true;
-    }
-
-    private List<FlowLogResponse> getFlowLogsByNameAndFlowChainId(String resourceName, String flowChainId) {
-        return flowEndpoint.getFlowLogsByResourceNameAndChainId(resourceName, flowChainId);
-    }
-
-    private Predicate<FlowLogResponse> pendingFlowLogPredicate() {
-        return flowLog -> flowLog.getStateStatus().equals(StateStatus.PENDING) || !flowLog.getFinalized();
     }
 }
