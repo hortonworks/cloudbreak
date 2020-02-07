@@ -268,9 +268,6 @@ public class WaitUtil {
         int retryCount = 0;
         String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
 
-        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
-        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
-
         long startTime = System.currentTimeMillis();
         while (retryCount < maxRetry && !checkSdxInstanceStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
             LOGGER.info("Waiting for instance status {} in Host Group {} at {} SDX, ellapsed {}ms", desiredState, hostGroup, sdxName,
@@ -292,9 +289,6 @@ public class WaitUtil {
 
     public SdxInternalTestDto waitForSdxInstancesStatus(SdxInternalTestDto sdxTestDto, SdxClient sdxClient, Map<String, InstanceStatus> hostGroupsAndStates) {
         String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
-
-        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
-        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
 
         hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
             int retryCount = 0;
@@ -322,9 +316,6 @@ public class WaitUtil {
     public SdxTestDto waitForSdxInstancesStatus(SdxTestDto sdxTestDto, SdxClient sdxClient, Map<String, InstanceStatus> hostGroupsAndStates) {
         String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
 
-        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
-        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
-
         hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
             int retryCount = 0;
             long startTime = System.currentTimeMillis();
@@ -351,9 +342,6 @@ public class WaitUtil {
     public DistroXTestDto waitForDistroxInstancesStatus(DistroXTestDto distroXTestDto, CloudbreakClient cloudbreakClient, Map<String,
             InstanceStatus> hostGroupsAndStates) {
         String distroxName = distroXTestDto.getRequest().getName();
-
-        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
-        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
 
         hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
             int retryCount = 0;
