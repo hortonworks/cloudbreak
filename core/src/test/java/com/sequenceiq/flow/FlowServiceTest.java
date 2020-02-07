@@ -14,7 +14,6 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -28,6 +27,7 @@ import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
