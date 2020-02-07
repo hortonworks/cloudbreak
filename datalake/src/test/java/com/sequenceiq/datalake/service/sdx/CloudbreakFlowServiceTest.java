@@ -102,7 +102,7 @@ public class CloudbreakFlowServiceTest {
         when(flowEndpoint.hasFlowRunning(anyString(), eq(FLOW_CHAIN_ID))).thenThrow(new NotFoundException("something"));
 
         assertFalse(underTest.isLastKnownFlowRunning(cluster));
-    }    
+    }
 
     @Test
     public void testSaveFlowChainId() {
