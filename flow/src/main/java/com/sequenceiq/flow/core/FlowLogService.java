@@ -28,6 +28,8 @@ public interface FlowLogService {
 
     void updateLastFlowLogStatus(FlowLog lastFlowLog, boolean failureEvent);
 
+    boolean isOtherNonTerminationFlowRunning(Long stackId);
+
     boolean isOtherFlowRunning(Long stackId);
 
     boolean repeatedFlowState(FlowLog lastFlowLog, String event);

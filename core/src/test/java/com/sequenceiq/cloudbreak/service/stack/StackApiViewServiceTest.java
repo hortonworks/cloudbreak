@@ -56,7 +56,7 @@ public class StackApiViewServiceTest {
         StackStatusView stackStatusView = Mockito.mock(StackStatusView.class);
         when(stackStatusView.getStatus()).thenReturn(Status.AVAILABLE);
         stackApiView.setStackStatus(stackStatusView);
-        when(flowLogService.isOtherFlowRunning(stackId)).thenReturn(true);
+        when(flowLogService.isOtherNonTerminationFlowRunning(stackId)).thenReturn(true);
 
         boolean result = stackApiViewService.canChangeCredential(stackApiView);
 
@@ -71,7 +71,7 @@ public class StackApiViewServiceTest {
         StackStatusView stackStatusView = Mockito.mock(StackStatusView.class);
         when(stackStatusView.getStatus()).thenReturn(Status.AVAILABLE);
         stackApiView.setStackStatus(stackStatusView);
-        when(flowLogService.isOtherFlowRunning(stackId)).thenReturn(false);
+        when(flowLogService.isOtherNonTerminationFlowRunning(stackId)).thenReturn(false);
 
         boolean result = stackApiViewService.canChangeCredential(stackApiView);
 

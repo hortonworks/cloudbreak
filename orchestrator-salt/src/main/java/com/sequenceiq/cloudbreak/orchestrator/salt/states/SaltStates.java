@@ -48,10 +48,6 @@ public class SaltStates {
     private SaltStates() {
     }
 
-    public static String mountDisks(SaltConnector sc) {
-        return applyStateAll(sc, "disks.format-and-mount").getJid();
-    }
-
     public static Map<String, String> getUuidList(SaltConnector sc) {
         ApplyResponse applyResponse = applyStateAllSync(sc, "disks.get-uuid-list");
         List<Map<String, JsonNode>> result = (List<Map<String, JsonNode>>) applyResponse.getResult();
@@ -237,7 +233,7 @@ public class SaltStates {
         return sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service);
     }
 
-    private static ApplyResponse applyStateAll(SaltConnector sc, String service) {
+    public static ApplyResponse applyStateAll(SaltConnector sc, String service) {
         return applyState(sc, service, Glob.ALL);
     }
 
