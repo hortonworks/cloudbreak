@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -81,8 +80,9 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             Optional<KerberosConfig> kerberosConfigOptional = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
-            // TODO remove Cloudplatform check when FreeIPA registration is ready
-            if (keytabsShouldBeUploaded(stack, kerberosConfigOptional)) {
+            boolean childEnvironment = environmentConfigProvider.isChildEnvironment(stack.getEnvironmentCrn());
+
+            if (kerberosDetailService.keytabsShouldBeUpdated(stack.cloudPlatform(), childEnvironment, kerberosConfigOptional)) {
                 GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
                 ServiceKeytabResponse serviceKeytabResponse = keytabProvider.getServiceKeytabResponse(stack, primaryGatewayConfig);
                 KeytabModel keytabModel = buildKeytabModel(serviceKeytabResponse);
@@ -96,19 +96,6 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
             response = new KeytabConfigurationFailed(stackId, configurationException);
         }
         eventBus.notify(response.selector(), new Event<>(keytabConfigurationRequestEvent.getHeaders(), response));
-    }
-
-    private boolean keytabsShouldBeUploaded(Stack stack, Optional<KerberosConfig> kerberosConfigOptional) {
-        boolean yarnChildEnvironment = CloudPlatform.YARN.name().equals(stack.cloudPlatform())
-                && environmentConfigProvider.isChildEnvironment(stack.getEnvironmentCrn());
-
-        boolean supportedOnCloudPlatform = CloudPlatform.AWS.name().equals(stack.cloudPlatform())
-                || CloudPlatform.AZURE.name().equals(stack.cloudPlatform())
-                || yarnChildEnvironment;
-
-        return supportedOnCloudPlatform
-                && kerberosConfigOptional.isPresent()
-                && kerberosDetailService.isIpaJoinable(kerberosConfigOptional.get());
     }
 
     private KeytabModel buildKeytabModel(ServiceKeytabResponse serviceKeytabResponse) {
