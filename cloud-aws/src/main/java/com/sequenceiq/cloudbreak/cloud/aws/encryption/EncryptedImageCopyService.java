@@ -28,6 +28,7 @@ import com.amazonaws.services.ec2.model.DeregisterImageRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.Image;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
@@ -39,7 +40,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -63,7 +63,7 @@ public class EncryptedImageCopyService {
     private AwsPollTaskFactory awsPollTaskFactory;
 
     @Inject
-    private SyncPollingScheduler<Boolean> syncPollingScheduler;
+    private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
 
     public Map<String, String> createEncryptedImages(AuthenticatedContext ac, CloudStack cloudStack, PersistenceNotifier resourceNotifier) {
         String selectedAMIName = cloudStack.getImage().getImageName();
@@ -151,7 +151,7 @@ public class EncryptedImageCopyService {
         try {
             Boolean statePollerResult = booleanPollTask.call();
             if (!booleanPollTask.completed(statePollerResult)) {
-                syncPollingScheduler.schedule(booleanPollTask);
+                awsBackoffSyncPollingScheduler.schedule(booleanPollTask);
             }
         } catch (Exception e) {
             throw new CloudConnectorException(e.getMessage(), e);
