@@ -34,6 +34,7 @@ import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.EbsBlockDevice;
 import com.amazonaws.services.ec2.model.Image;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AMICopyStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -51,7 +52,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -76,7 +76,7 @@ public class EncryptedImageCopyServiceTest {
     private AwsPollTaskFactory awsPollTaskFactory;
 
     @Mock
-    private SyncPollingScheduler<Boolean> syncPollingScheduler;
+    private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private CloudStack cloudStack;
@@ -135,7 +135,7 @@ public class EncryptedImageCopyServiceTest {
 
         verify(ec2Client, times(1)).copyImage(any());
         verify(resourceNotifier, times(1)).notifyAllocation(any(), any());
-        verify(syncPollingScheduler, times(1)).schedule(amiCopyStatusCheckerTask);
+        verify(awsBackoffSyncPollingScheduler, times(1)).schedule(amiCopyStatusCheckerTask);
         Assert.assertEquals(encryptedImages.size(), 2);
         Assert.assertTrue(encryptedImages.values().stream().allMatch(el -> el.equals(encryptedImageId)));
     }
@@ -161,7 +161,7 @@ public class EncryptedImageCopyServiceTest {
 
         verify(ec2Client, times(1)).copyImage(any());
         verify(resourceNotifier, times(1)).notifyAllocation(any(), any());
-        verify(syncPollingScheduler, times(1)).schedule(amiCopyStatusCheckerTask);
+        verify(awsBackoffSyncPollingScheduler, times(1)).schedule(amiCopyStatusCheckerTask);
         Assert.assertEquals(encryptedImages.size(), 2);
         Assert.assertTrue(encryptedImages.values().stream().allMatch(el -> el.equals(encryptedImageId)));
     }
@@ -196,7 +196,7 @@ public class EncryptedImageCopyServiceTest {
 
         verify(ec2Client, times(2)).copyImage(any());
         verify(resourceNotifier, times(2)).notifyAllocation(any(), any());
-        verify(syncPollingScheduler, times(1)).schedule(amiCopyStatusCheckerTask);
+        verify(awsBackoffSyncPollingScheduler, times(1)).schedule(amiCopyStatusCheckerTask);
         Assert.assertEquals(encryptedImages.size(), 2);
         Assert.assertTrue(encryptedImages.containsValue(encryptedImageId));
         Assert.assertTrue(encryptedImages.containsValue(secondEncryptedImageId));
@@ -237,7 +237,7 @@ public class EncryptedImageCopyServiceTest {
 
         verify(ec2Client, times(2)).copyImage(any());
         verify(resourceNotifier, times(2)).notifyAllocation(any(), any());
-        verify(syncPollingScheduler, times(1)).schedule(amiCopyStatusCheckerTask);
+        verify(awsBackoffSyncPollingScheduler, times(1)).schedule(amiCopyStatusCheckerTask);
         Assert.assertEquals(encryptedImages.size(), 2);
         Assert.assertTrue(encryptedImages.containsValue(encryptedImageId));
         Assert.assertTrue(encryptedImages.containsValue(secondEncryptedImageId));
