@@ -27,6 +27,20 @@
    message message
    multiline_flush_interval 0.1
 </match>
+{% if fluent.anonymizationRules %}
+<filter processed.{{providerPrefix}}**>
+   @type redaction
+   {% for rule in fluent.anonymizationRules %}
+     {% set regex_value = rule["value"] %}
+     {% set replacement = rule["replacement"] if rule["replacement"] else "[REDACTED]" %}
+   <rule>
+     key message
+     pattern {{ regex_value }}
+     replace "{{ replacement }}"
+   </rule>
+   {% endfor %}
+</filter>
+{% endif %}
 <filter processed.{{providerPrefix}}.**>
   @type record_transformer
   enable_ruby true

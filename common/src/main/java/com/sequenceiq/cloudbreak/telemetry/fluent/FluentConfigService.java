@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.telemetry.fluent;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +14,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchStreamKey;
 import com.sequenceiq.common.api.telemetry.model.Logging;
@@ -42,6 +44,12 @@ public class FluentConfigService {
 
     public FluentConfigView createFluentConfigs(FluentClusterDetails clusterDetails,
             boolean databusEnabled, boolean meteringEnabled, Telemetry telemetry) {
+        return createFluentConfigs(clusterDetails, databusEnabled, meteringEnabled, telemetry, null);
+    }
+
+    public FluentConfigView createFluentConfigs(FluentClusterDetails clusterDetails,
+            boolean databusEnabled, boolean meteringEnabled, Telemetry telemetry,
+            List<AnonymizationRule> anonymizationRules) {
         final FluentConfigView.Builder builder = new FluentConfigView.Builder();
         boolean enabled = false;
         if (telemetry != null) {
@@ -59,6 +67,7 @@ public class FluentConfigService {
         return builder
                 .withEnabled(enabled)
                 .withClusterDetails(clusterDetails)
+                .withAnonymizationRules(anonymizationRules)
                 .build();
     }
 
