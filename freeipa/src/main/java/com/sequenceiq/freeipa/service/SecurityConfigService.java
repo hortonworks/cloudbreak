@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.repository.SaltSecurityConfigRepository;
+import com.sequenceiq.freeipa.repository.DisabledSaltSecurityConfigRepository;
 import com.sequenceiq.freeipa.repository.SecurityConfigRepository;
 
 @Service
@@ -22,7 +22,7 @@ public class SecurityConfigService {
     private SecurityConfigRepository securityConfigRepository;
 
     @Inject
-    private SaltSecurityConfigRepository saltSecurityConfigRepository;
+    private DisabledSaltSecurityConfigRepository disabledSaltSecurityConfigRepository;
 
     public SecurityConfig save(SecurityConfig securityConfig) {
         return securityConfigRepository.save(securityConfig);
@@ -47,7 +47,7 @@ public class SecurityConfigService {
                 if (!saltSecurityConfig.getSaltSignPrivateKey().equals(saltSecurityConfig.getSaltSignPrivateKeyVault())) {
                     saltSecurityConfig.setSaltSignPrivateKeyVault(saltSecurityConfig.getSaltSignPrivateKey());
                 }
-                saltSecurityConfig = saltSecurityConfigRepository.save(saltSecurityConfig);
+                saltSecurityConfig = disabledSaltSecurityConfigRepository.save(saltSecurityConfig);
                 securityConfig.setSaltSecurityConfig(saltSecurityConfig);
             }
         }

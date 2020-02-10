@@ -93,6 +93,18 @@ public class CloudbreakFlowServiceTest {
     }
 
     @Test
+    public void testFlowCheckIfNotFoundExceptionOccured() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
+        cluster.setInitiatorUserCrn(USER_CRN);
+        cluster.setClusterName(CLUSTER_NAME);
+
+        when(flowEndpoint.hasFlowRunning(anyString(), eq(FLOW_CHAIN_ID))).thenThrow(new NotFoundException("something"));
+
+        assertFalse(underTest.isLastKnownFlowRunning(cluster));
+    }
+
+    @Test
     public void testSaveFlowChainId() {
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
