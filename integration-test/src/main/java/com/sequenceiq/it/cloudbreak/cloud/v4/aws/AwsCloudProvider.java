@@ -292,8 +292,8 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
         return imageSettings
-                .withImageId(getImageId())
-                .withImageCatalog(getImageCatalogName());
+                .withImageId(awsProperties.getBaseimage().getImageId())
+                .withImageCatalog(commonCloudProperties().getImageCatalogName());
     }
 
     @Override
@@ -356,14 +356,13 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         }
     }
 
-    @Override
-    public void setImageId(String id) {
-        awsProperties.getBaseimage().setImageId(id);
+    public String getImageCatalogUrl() {
+        return commonCloudProperties().getImageCatalogUrl();
     }
 
     @Override
-    public String getImageId() {
-        return awsProperties.getBaseimage().getImageId();
+    public void setImageId(String id) {
+        awsProperties.getBaseimage().setImageId(id);
     }
 
     @Override

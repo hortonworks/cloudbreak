@@ -177,14 +177,19 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
         return this;
     }
 
-    public StackTestDtoBase<T> withImageSettings(ImageSettingsTestDto imageSettings) {
-        getRequest().setImage(imageSettings.getRequest());
+    public StackTestDtoBase<T> withImageSettings(String key) {
+        ImageSettingsTestDto imageSettingsEntity = getTestContext().get(key);
+        getRequest().setImage(imageSettingsEntity.getRequest());
         return this;
     }
 
-    public StackTestDtoBase<T> withImageSettings(String key) {
-        ImageSettingsTestDto imageSettingsEntity = getTestContext().get(key);
-        return withImageSettings(imageSettingsEntity);
+    public StackTestDtoBase<T> withImageSettings(ImageSettingsTestDto imageSettings) {
+        getRequest().setImage(imageSettings.getRequest());
+        ImageCatalogTestDto imageCatalogTestDto = getTestContext().get(ImageCatalogTestDto.class);
+        if (imageCatalogTestDto != null) {
+            getRequest().getImage().setCatalog(imageCatalogTestDto.getName());
+        }
+        return this;
     }
 
     public StackTestDtoBase<T> withInputs(Map<String, Object> inputs) {
