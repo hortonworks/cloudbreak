@@ -44,7 +44,7 @@ public class DefaultModel extends MockModel {
     @Override
     public void startModel(Service sparkService, String mockServerAddress, Set<String> activeProfiles) {
         setMockServerAddress(mockServerAddress);
-        initInstanceMap(2200);
+        initInstanceMap(1000);
 
         ambariMock = new AmbariMock(sparkService, this);
         spiMock = new SPIMock(sparkService, this);
