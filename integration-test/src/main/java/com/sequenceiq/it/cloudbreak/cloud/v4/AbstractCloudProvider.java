@@ -49,12 +49,14 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return imageSettings.withImageCatalog(commonCloudProperties.getImageCatalogName());
+        imageSettings.withImageCatalog(commonCloudProperties.getImageCatalogName());
+        return imageSettings;
     }
 
     @Override
     public DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings) {
-        return imageSettings.withImageCatalog(commonCloudProperties.getImageCatalogName());
+        imageSettings.withImageCatalog(commonCloudProperties.getImageCatalogName());
+        return imageSettings;
     }
 
     @Override
@@ -112,18 +114,13 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
-    public String getImageCatalogName() {
-        return commonCloudProperties().getImageCatalogName();
-    }
-
-    @Override
     public void setImageCatalogUrl(String url) {
         commonCloudProperties().setImageCatalogUrl(url);
     }
 
     @Override
-    public String getImageCatalogUrl() {
-        return commonCloudProperties().getImageCatalogUrl();
+    public String getImageCatalogName() {
+        return commonCloudProperties().getImageCatalogName();
     }
 
     @Override

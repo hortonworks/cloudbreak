@@ -3,8 +3,6 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.gcp;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
@@ -40,8 +38,6 @@ import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 
 @Component
 public class GcpCloudProvider extends AbstractCloudProvider {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(GcpCloudProvider.class);
 
     private static final String JSON_CREDENTIAL_TYPE = "json";
 
@@ -221,9 +217,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return imageSettings
-                .withImageId(getImageId())
-                .withImageCatalog(getImageCatalogName());
+        return imageSettings.withImageCatalog(commonCloudProperties().getImageCatalogName());
     }
 
     @Override
@@ -234,11 +228,6 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         return notImplementedException();
-    }
-
-    @Override
-    public String getImageId() {
-        return gcpProperties.getBaseimage().getImageId();
     }
 
     private <T> T notImplementedException() {

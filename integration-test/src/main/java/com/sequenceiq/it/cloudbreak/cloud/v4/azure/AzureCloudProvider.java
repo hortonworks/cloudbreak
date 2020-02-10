@@ -306,9 +306,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return imageSettings
-                .withImageId(getImageId())
-                .withImageCatalog(getImageCatalogName());
+        return imageSettings.withImageCatalog(commonCloudProperties().getImageCatalogName());
     }
 
     @Override
@@ -319,11 +317,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         return notImplementedException();
-    }
-
-    @Override
-    public String getImageId() {
-        return azureProperties.getBaseimage().getImageId();
     }
 
     private String notImplementedException() {

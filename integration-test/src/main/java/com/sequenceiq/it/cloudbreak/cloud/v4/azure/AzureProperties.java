@@ -23,8 +23,6 @@ public class AzureProperties {
 
     private final Instance instance = new Instance();
 
-    private final Baseimage baseimage = new Baseimage();
-
     private final Cloudstorage cloudstorage = new Cloudstorage();
 
     private final Network network = new Network();
@@ -67,10 +65,6 @@ public class AzureProperties {
 
     public Instance getInstance() {
         return instance;
-    }
-
-    public Baseimage getBaseimage() {
-        return baseimage;
     }
 
     public Cloudstorage getCloudstorage() {
@@ -170,18 +164,6 @@ public class AzureProperties {
 
         public void setVolumeType(String volumeType) {
             this.volumeType = volumeType;
-        }
-    }
-
-    public static class Baseimage {
-        private String imageId;
-
-        public String getImageId() {
-            return imageId;
-        }
-
-        public void setImageId(String imageId) {
-            this.imageId = imageId;
         }
     }
 
