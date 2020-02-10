@@ -42,7 +42,7 @@ class FreeIpaCreationRetrievalTaskTest {
     @Test
     void testExitPollingWhenFreeIpaClusterIsInCreateInProgressState() {
         EnvironmentInMemoryStateStore.put(ENV_ID, PollGroup.CANCELLED);
-        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN);
+        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN, true);
 
         boolean result = underTest.exitPolling(freeIpaPollerObject);
 
@@ -51,7 +51,7 @@ class FreeIpaCreationRetrievalTaskTest {
 
     @Test
     void testExitPollingWhenFreeIpaClusterIsInDeleteRelatedState() {
-        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN);
+        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN, true);
 
         boolean result = underTest.exitPolling(freeIpaPollerObject);
 
@@ -60,7 +60,7 @@ class FreeIpaCreationRetrievalTaskTest {
 
     @Test
     void testCheckStatusWithMissingFreeIpa() {
-        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN);
+        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN, true);
         when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.empty());
 
         assertThrows(FreeIpaOperationFailedException.class, () -> underTest.checkStatus(freeIpaPollerObject));
@@ -68,7 +68,7 @@ class FreeIpaCreationRetrievalTaskTest {
 
     @Test
     void testCheckStatusWithDeleteInProgressState() {
-        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN);
+        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN, true);
         DescribeFreeIpaResponse freeIpa = new DescribeFreeIpaResponse();
         freeIpa.setStatus(DELETE_IN_PROGRESS);
         freeIpa.setName(FREE_IPA_NAME);
@@ -80,7 +80,7 @@ class FreeIpaCreationRetrievalTaskTest {
 
     @Test
     void testCheckStatusWithFailedState() {
-        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN);
+        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN, true);
         DescribeFreeIpaResponse freeIpa = new DescribeFreeIpaResponse();
         freeIpa.setStatus(DELETE_IN_PROGRESS);
         freeIpa.setName(FREE_IPA_NAME);

@@ -6,9 +6,12 @@ public class FreeIpaPollerObject {
 
     private final String environmentCrn;
 
-    public FreeIpaPollerObject(Long environmentId, String environmentCrn) {
+    private final boolean createFreeipa;
+
+    public FreeIpaPollerObject(Long environmentId, String environmentCrn, boolean createFreeipa) {
         this.environmentId = environmentId;
         this.environmentCrn = environmentCrn;
+        this.createFreeipa = createFreeipa;
     }
 
     public String getEnvironmentCrn() {
@@ -17,5 +20,9 @@ public class FreeIpaPollerObject {
 
     public Long getEnvironmentId() {
         return environmentId;
+    }
+
+    public boolean isCreateFreeipa() {
+        return createFreeipa;
     }
 }

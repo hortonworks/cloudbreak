@@ -58,7 +58,7 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
                 freeIpaService.delete(env.get().getResourceCrn());
                 Pair<PollingResult, Exception> result = freeIpaPollingService.pollWithTimeout(
                         new FreeIpaDeletionRetrievalTask(freeIpaService),
-                        new FreeIpaPollerObject(env.get().getId(), env.get().getResourceCrn()),
+                        new FreeIpaPollerObject(env.get().getId(), env.get().getResourceCrn(), env.get().isCreateFreeIpa()),
                         FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_INTERVAL,
                         FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_COUNT,
                         SINGLE_FAILURE);

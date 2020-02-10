@@ -32,17 +32,22 @@ public class FreeIpaDeletionRetrievalTask extends SimpleStatusCheckerTask<FreeIp
     public boolean checkStatus(FreeIpaPollerObject freeIpaPollerObject) {
         String environmentCrn = freeIpaPollerObject.getEnvironmentCrn();
         try {
-            LOGGER.info("Checking the state of FreeIpa termination progress for environment: '{}'", environmentCrn);
-            Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(environmentCrn);
-            if (freeIpaResponse.isPresent()) {
-                if (freeIpaResponse.get().getStatus() == Status.DELETE_FAILED) {
-                    throw new FreeIpaOperationFailedException("FreeIpa deletion operation failed: " + freeIpaResponse.get().getStatusReason());
-                }
-                if (!freeIpaResponse.get().getStatus().isSuccessfullyDeleted()) {
-                    return false;
+            if (freeIpaPollerObject.isCreateFreeipa()) {
+                LOGGER.info("Checking the state of FreeIpa termination progress for environment: '{}'", environmentCrn);
+                Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(environmentCrn);
+                if (freeIpaResponse.isPresent()) {
+                    if (freeIpaResponse.get().getStatus() == Status.DELETE_FAILED) {
+                        throw new FreeIpaOperationFailedException("FreeIpa deletion operation failed: " + freeIpaResponse.get().getStatusReason());
+                    }
+                    if (!freeIpaResponse.get().getStatus().isSuccessfullyDeleted()) {
+                        return false;
+                    }
+                } else {
+                    LOGGER.info("FreeIpa was not found.");
+                    return true;
                 }
             } else {
-                LOGGER.info("FreeIpa was not found.");
+                LOGGER.info("FreeIpa create is false so no need to get response from IPA.");
                 return true;
             }
         } catch (Exception e) {
