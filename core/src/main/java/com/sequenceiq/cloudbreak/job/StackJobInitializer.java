@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.statuschecker.model.JobInitializer;
@@ -24,12 +25,18 @@ public class StackJobInitializer implements JobInitializer {
 
     @Override
     public void initJobs() {
-        Iterable<Stack> clusters = stackService.getAllAliveWithInstanceGroups();
         jobService.deleteAll();
-        for (Stack cluster : clusters) {
-            if (!cluster.isStackInDeletionOrFailedPhase()) {
-                jobService.schedule(new StackJobAdapter(cluster));
-            }
-        }
+        stackService.getAllAlive().stream()
+                .map(this::convertToStack)
+                .filter(s -> !s.isStackInDeletionOrFailedPhase())
+                .forEach(s -> jobService.schedule(new StackJobAdapter(s)));
+    }
+
+    private Stack convertToStack(StackTtlView view) {
+        Stack result = new Stack();
+        result.setId(view.getId());
+        result.setResourceCrn(view.getCrn());
+        result.setStackStatus(view.getStatus());
+        return result;
     }
 }
