@@ -1,12 +1,12 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.flow.api.FlowEndpoint;
@@ -14,10 +14,6 @@ import com.sequenceiq.flow.api.model.FlowLogResponse;
 
 @Service
 public class CloudbreakFlowService {
-
-    private static final Integer DOUBLE_CHECK_RETRY_COUNT = 3;
-
-    private static final Integer DOUBLE_CHECK_SLEEP_SEC = 1000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakFlowService.class);
 
