@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.environment.service;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,6 +53,8 @@ public class EnvironmentDeletionServiceTest {
     public void setup() {
         environment = new Environment();
         environmentDto = new EnvironmentDto();
+
+        when(environmentService.findCrnWithAccountIdAndParentEnvIdAndArchivedIsFalse(any(), any())).thenReturn(emptyList());
     }
 
     @ParameterizedTest
@@ -203,7 +207,8 @@ public class EnvironmentDeletionServiceTest {
 
     @Test
     public void canNotDeleteParentEnvironment() {
-        when(environmentService.existsWithAccountIdAndParentEnvIdAndArchivedIsFalse(environment.getAccountId(), environment.getId())).thenReturn(true);
+        when(environmentService.findCrnWithAccountIdAndParentEnvIdAndArchivedIsFalse(environment.getAccountId(), environment.getId()))
+                .thenReturn(singletonList("child crn"));
 
         assertThrows(BadRequestException.class, () -> environmentDeletionService.delete(environment, TestConstants.USER, false));
     }

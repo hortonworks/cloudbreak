@@ -258,7 +258,7 @@ public class EnvironmentService implements ResourceIdProvider {
                         String.format("Environment with name '%s' was not found for account '%s'.", environmentName, accountId)));
     }
 
-    public boolean existsWithAccountIdAndParentEnvIdAndArchivedIsFalse(String accountId, Long parentEnvironmentId) {
-        return environmentRepository.existsWithAccountIdAndParentEnvIdAndArchivedIsFalse(accountId, parentEnvironmentId);
+    public List<String> findCrnWithAccountIdAndParentEnvIdAndArchivedIsFalse(String accountId, Long parentEnvironmentId) {
+        return environmentRepository.findCrnWithAccountIdAndParentEnvIdAndArchivedIsFalse(accountId, parentEnvironmentId);
     }
 }
