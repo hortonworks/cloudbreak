@@ -25,19 +25,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerBase;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
-import com.sequenceiq.freeipa.controller.validation.CreateFreeIpaRequestValidator;
 import com.sequenceiq.freeipa.controller.validation.AttachChildEnvironmentRequestValidator;
+import com.sequenceiq.freeipa.controller.validation.CreateFreeIpaRequestValidator;
 import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaRootCertificateService;
+import com.sequenceiq.freeipa.service.stack.RebootInstancesService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,6 +64,9 @@ class FreeIpaV1ControllerTest {
 
     @Mock
     private FreeIpaDescribeService describeService;
+
+    @Mock
+    private RebootInstancesService rebootInstancesService;
 
     @Mock
     private FreeIpaListService freeIpaListService;
@@ -184,5 +190,14 @@ class FreeIpaV1ControllerTest {
         underTest.detachChildEnvironment(request);
 
         verify(childEnvironmentService).detachChildEnvironment(request, ACCOUNT_ID);
+    }
+
+    @Test
+    void reboot() throws FreeIpaClientException {
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        RebootInstancesRequest rebootInstancesRequest = new RebootInstancesRequest();
+
+        underTest.rebootInstances(rebootInstancesRequest);
+        verify(rebootInstancesService, times(1)).rebootInstances(crnService.getCurrentAccountId(), rebootInstancesRequest);
     }
 }

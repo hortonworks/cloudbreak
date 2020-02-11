@@ -33,6 +33,11 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
     private boolean verifyHostKey;
 
     @Override
+    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext authenticatedContext, List<CloudInstance> vms) {
+        throw new CloudOperationNotSupportedException("Reboot instances operation is not supported on GCP");
+    }
+
+    @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         CloudCredential credential = ac.getCloudCredential();

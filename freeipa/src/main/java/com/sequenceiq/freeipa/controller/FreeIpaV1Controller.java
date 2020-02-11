@@ -20,6 +20,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIp
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
@@ -36,6 +37,7 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaRootCertificateService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStartService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStopService;
+import com.sequenceiq.freeipa.service.stack.RebootInstancesService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
@@ -66,6 +68,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private CleanupService cleanupService;
+
+    @Inject
+    private RebootInstancesService rebootInstancesService;
 
     @Inject
     private CrnService crnService;
@@ -151,6 +156,12 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public OperationStatus cleanup(@Valid CleanupRequest request) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
         return cleanupService.cleanup(accountId, request);
+    }
+
+    @Override
+    public void rebootInstances(@Valid RebootInstancesRequest request) throws FreeIpaClientException {
+        String accountId = crnService.getCurrentAccountId();
+        rebootInstancesService.rebootInstances(accountId, request);
     }
 
     @Override

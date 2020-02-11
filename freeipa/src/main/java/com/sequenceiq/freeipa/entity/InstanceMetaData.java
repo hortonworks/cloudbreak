@@ -138,6 +138,10 @@ public class InstanceMetaData {
         return InstanceStatus.CREATED.equals(instanceStatus);
     }
 
+    public boolean isAvailable() {
+        return instanceStatus.isAvailable();
+    }
+
     public boolean isFailed() {
         return InstanceStatus.FAILED.equals(instanceStatus);
     }
