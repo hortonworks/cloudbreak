@@ -65,6 +65,26 @@ public class AzureInstanceConnector implements InstanceConnector {
     }
 
     @Override
+    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext ac, List<CloudInstance> vms) {
+        LOGGER.info("Rebooting vms on Azure: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
+        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
+        List<Completable> rebootCompletables = new ArrayList<>();
+        for (CloudInstance vm : vms) {
+            String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), vm);
+            AzureClient azureClient = ac.getParameter(AzureClient.class);
+            rebootCompletables.add(azureClient.rebootVirtualMachineAsync(resourceGroupName, vm.getInstanceId())
+                    .doOnError(throwable -> {
+                        LOGGER.error("Error happend on azure instance reboot: {}", vm, throwable);
+                        statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
+                    })
+                    .doOnCompleted(() -> statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.STARTED)))
+                    .subscribeOn(Schedulers.io()));
+        }
+        Completable.merge(rebootCompletables).await();
+        return statuses;
+    }
+
+    @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> cloudInstances) {
         LOGGER.info("Check instances on Azure: {}", cloudInstances.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();

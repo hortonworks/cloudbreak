@@ -33,8 +33,7 @@ public interface InstanceMetaDataRepository extends BaseCrudRepository<InstanceM
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId")
     Set<InstanceMetaData> findAllInStack(@Param("stackId") Long stackId);
 
-    @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceId= :instanceId AND i.instanceGroup.stack.id= :stackId")
+    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceId = :instanceId AND i.instanceGroup.stack.id= :stackId")
     InstanceMetaData findByInstanceId(@Param("stackId") Long stackId, @Param("instanceId") String instanceId);
 
     @CheckPermission(action = ResourceAction.READ)

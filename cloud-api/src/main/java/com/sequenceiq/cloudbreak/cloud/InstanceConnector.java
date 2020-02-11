@@ -26,7 +26,7 @@ public interface InstanceConnector {
     List<CloudVmInstanceStatus> start(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms);
 
     /**
-     * Stop instances. You can start instances trough this method. It does not need to wait/block until the VM instances are stopped, but it can return
+     * Stop instances. You can stop instances trough this method. It does not need to wait/block until the VM instances are stopped, but it can return
      * immediately and the {@link #check(AuthenticatedContext, List)} method is invoked to check regularly whether the VM instances have already been stopped
      * or not.
      *
@@ -37,6 +37,17 @@ public interface InstanceConnector {
      * @return status of instances
      */
     List<CloudVmInstanceStatus> stop(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms);
+
+    /**
+     * Reboot instances. You can reboot instances through this method. It does not need to wait/block until the VM instances are rebooted, but it can return
+     * immediately and the {@link #check(AuthenticatedContext, List)} method is invoked to check regularly whether the VM instances have already been started
+     * after a reboot or not.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param instanceIds          a VM instances that need to be rebooted.
+     * @return status of instances
+     */
+    List<CloudVmInstanceStatus> reboot(AuthenticatedContext authenticatedContext, List<CloudInstance> instanceIds);
 
     /**
      * Invoked to check whether the instances have already reached a StatusGroup.PERMANENT state.

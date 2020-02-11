@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.google.common.collect.Sets;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
@@ -159,7 +160,7 @@ public class FreeIpaHealthServiceTest {
         Assert.assertFalse(response.getNodeHealthDetails().isEmpty());
         for (NodeHealthDetails nodeHealth:response.getNodeHealthDetails()) {
             Assert.assertTrue(nodeHealth.getIssues().isEmpty());
-            Assert.assertEquals(Status.AVAILABLE, nodeHealth.getStatus());
+            Assert.assertEquals(InstanceStatus.CREATED, nodeHealth.getStatus());
         }
     }
 
@@ -174,7 +175,7 @@ public class FreeIpaHealthServiceTest {
         Assert.assertFalse(response.getNodeHealthDetails().isEmpty());
         for (NodeHealthDetails nodeHealth:response.getNodeHealthDetails()) {
             Assert.assertFalse(nodeHealth.getIssues().isEmpty());
-            Assert.assertEquals(Status.UNHEALTHY, nodeHealth.getStatus());
+            Assert.assertEquals(InstanceStatus.FAILED, nodeHealth.getStatus());
         }
     }
 
@@ -189,7 +190,7 @@ public class FreeIpaHealthServiceTest {
         Assert.assertFalse(response.getNodeHealthDetails().isEmpty());
         for (NodeHealthDetails nodeHealth:response.getNodeHealthDetails()) {
             Assert.assertTrue(nodeHealth.getIssues().isEmpty());
-            Assert.assertEquals(Status.UNREACHABLE, nodeHealth.getStatus());
+            Assert.assertEquals(InstanceStatus.UNREACHABLE, nodeHealth.getStatus());
         }
     }
 

@@ -27,6 +27,8 @@ public class SPIMock extends AbstractModelMock {
 
     public static final String START_INSTANCE = "/:instanceid/start";
 
+    public static final String REBOOT_INSTANCE = "/:instanceid/reboot";
+
     public static final String CLOUD_INSTANCE_STATUSES = "/cloud_instance_statuses";
 
     public static final String CLOUD_METADATA_STATUSES = "/cloud_metadata_statuses";
@@ -34,6 +36,8 @@ public class SPIMock extends AbstractModelMock {
     public static final String START_INSTANCES = "/start_instances";
 
     public static final String STOP_INSTANCES = "/stop_instances";
+
+    public static final String REBOOT_INSTANCES = "/reboot_instances";
 
     private DynamicRouteStack dynamicRouteStack;
 
@@ -73,6 +77,14 @@ public class SPIMock extends AbstractModelMock {
         });
     }
 
+    private void getMockProviderRebootStatus() {
+        dynamicRouteStack.get(MOCK_ROOT + REBOOT_INSTANCE, (request, response) -> {
+            String instanceid = request.params("instanceid");
+            CloudInstance instance = new CloudInstance(instanceid, null, null);
+            return new CloudVmInstanceStatus(instance, InstanceStatus.STARTED);
+        });
+    }
+
     private void postMockProviderTerminateInstance(Map<String, CloudVmMetaDataStatus> instanceMap) {
         dynamicRouteStack.post(MOCK_ROOT + TERMINATE_INSTANCES, (request, response) -> {
             List<CloudInstance> cloudInstances = new Gson().fromJson(request.body(), new TypeToken<List<CloudInstance>>() {
@@ -92,6 +104,13 @@ public class SPIMock extends AbstractModelMock {
 
     private void postMockProviderStartInstance(DefaultModel model) {
         dynamicRouteStack.post(MOCK_ROOT + START_INSTANCES, (request, response) -> {
+            model.startAllInstances();
+            return null;
+        });
+    }
+
+    private void postMockProviderRebootInstance(DefaultModel model) {
+        dynamicRouteStack.post(MOCK_ROOT + REBOOT_INSTANCES, (request, response) -> {
             model.startAllInstances();
             return null;
         });
