@@ -61,9 +61,9 @@ public interface EnvironmentRepository extends BaseJpaRepository<Environment, Lo
     Optional<String> findResourceCrnByNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT e.resourceCrn FROM Environment e "
+    @Query("SELECT e.name FROM Environment e "
             + "JOIN e.parentEnvironment pe "
             + "WHERE pe.id = :parentEnvironmentId AND e.accountId = :accountId AND e.archived = false")
-    List<String> findCrnWithAccountIdAndParentEnvIdAndArchivedIsFalse(@Param("accountId") String accountId,
+    List<String> findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(@Param("accountId") String accountId,
         @Param("parentEnvironmentId") Long parentEnvironmentId);
 }

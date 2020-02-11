@@ -54,7 +54,7 @@ public class EnvironmentDeletionServiceTest {
         environment = new Environment();
         environmentDto = new EnvironmentDto();
 
-        when(environmentService.findCrnWithAccountIdAndParentEnvIdAndArchivedIsFalse(any(), any())).thenReturn(emptyList());
+        when(environmentService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(any(), any())).thenReturn(emptyList());
     }
 
     @ParameterizedTest
@@ -207,8 +207,8 @@ public class EnvironmentDeletionServiceTest {
 
     @Test
     public void canNotDeleteParentEnvironment() {
-        when(environmentService.findCrnWithAccountIdAndParentEnvIdAndArchivedIsFalse(environment.getAccountId(), environment.getId()))
-                .thenReturn(singletonList("child crn"));
+        when(environmentService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(environment.getAccountId(), environment.getId()))
+                .thenReturn(singletonList("child name"));
 
         assertThrows(BadRequestException.class, () -> environmentDeletionService.delete(environment, TestConstants.USER, false));
     }

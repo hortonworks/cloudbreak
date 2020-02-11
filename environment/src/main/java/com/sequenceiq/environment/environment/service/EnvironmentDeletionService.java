@@ -118,10 +118,10 @@ public class EnvironmentDeletionService {
     }
 
     void validateDeletion(Environment environment) {
-        List<String> childEnvCrns = environmentService.findCrnWithAccountIdAndParentEnvIdAndArchivedIsFalse(environment.getAccountId(), environment.getId());
-        if (!childEnvCrns.isEmpty()) {
+        List<String> childEnvNames = environmentService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(environment.getAccountId(), environment.getId());
+        if (!childEnvNames.isEmpty()) {
             throw new BadRequestException(String.format("The following Envrionment(s) must be deleted before Environment deletion [%s]",
-                    String.join(", ", childEnvCrns)));
+                    String.join(", ", childEnvNames)));
         }
     }
 }
