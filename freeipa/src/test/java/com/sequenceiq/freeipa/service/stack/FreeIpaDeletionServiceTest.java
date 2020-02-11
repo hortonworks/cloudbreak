@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.termination.event.TerminationEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaDeletionServiceTest {
@@ -42,6 +43,9 @@ class FreeIpaDeletionServiceTest {
 
     @Mock
     private FreeIpaFlowManager flowManager;
+
+    @Mock
+    private FreeipaJobService freeipaJobService;
 
     private Stack stack;
 

@@ -26,11 +26,16 @@ public class StackService {
     }
 
     public List<Stack> findAllForAutoSync() {
-        return stackRepository.findAllRunningAndStatusNotIn(List.of(
-                Status.CREATE_IN_PROGRESS,
-                Status.CREATE_FAILED,
-                Status.REQUESTED,
-                Status.UPDATE_IN_PROGRESS));
+        return stackRepository.findAllRunningAndStatusIn(List.of(
+                Status.AVAILABLE,
+                Status.STACK_AVAILABLE,
+                Status.UPDATE_FAILED,
+                Status.START_FAILED,
+                Status.STOP_FAILED,
+                Status.UNREACHABLE,
+                Status.UNHEALTHY,
+                Status.UNKNOWN,
+                Status.STOPPED));
     }
 
     public Stack getByIdWithListsInTransaction(Long id) {
