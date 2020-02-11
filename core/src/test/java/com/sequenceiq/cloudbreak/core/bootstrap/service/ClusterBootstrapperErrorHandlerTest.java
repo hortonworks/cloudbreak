@@ -95,18 +95,19 @@ public class ClusterBootstrapperErrorHandlerTest {
             }
             return Optional.empty();
         });
-        when(instanceGroupService.findOneByGroupNameInStack(anyLong(), anyString())).thenAnswer((Answer<Optional<InstanceGroup>>) invocation -> {
-            Object[] args = invocation.getArguments();
-            String name = (String) args[1];
-            for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
-                if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
-                    InstanceGroup instanceGroup = instanceMetaData.getInstanceGroup();
-                    instanceGroup.getInstanceMetaDataSet().forEach(im -> im.setInstanceStatus(InstanceStatus.TERMINATED));
-                    return Optional.of(instanceGroup);
-                }
-            }
-            return Optional.empty();
-        });
+        when(instanceGroupService.findOneWithInstanceMetadataByGroupNameInStack(anyLong(), anyString()))
+                .thenAnswer((Answer<Optional<InstanceGroup>>) invocation -> {
+                    Object[] args = invocation.getArguments();
+                    String name = (String) args[1];
+                    for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
+                        if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
+                            InstanceGroup instanceGroup = instanceMetaData.getInstanceGroup();
+                            instanceGroup.getInstanceMetaDataSet().forEach(im -> im.setInstanceStatus(InstanceStatus.TERMINATED));
+                            return Optional.of(instanceGroup);
+                        }
+                    }
+                    return Optional.empty();
+                });
         when(cloudbreakMessagesService.getMessage(eq(CLUSTER_BOOTSTRAPPER_ERROR_INVALID_NODECOUNT.getMessage()), any())).thenReturn("invalide.nodecount");
         thrown.expect(CloudbreakOrchestratorFailedException.class);
         thrown.expectMessage("invalide.nodecount");
@@ -136,16 +137,17 @@ public class ClusterBootstrapperErrorHandlerTest {
             }
             return Optional.empty();
         });
-        when(instanceGroupService.findOneByGroupNameInStack(anyLong(), anyString())).thenAnswer((Answer<Optional<InstanceGroup>>) invocation -> {
-            Object[] args = invocation.getArguments();
-            String name = (String) args[1];
-            for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
-                if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
-                    return Optional.ofNullable(instanceMetaData.getInstanceGroup());
-                }
-            }
-            return Optional.empty();
-        });
+        when(instanceGroupService.findOneWithInstanceMetadataByGroupNameInStack(anyLong(), anyString()))
+                .thenAnswer((Answer<Optional<InstanceGroup>>) invocation -> {
+                    Object[] args = invocation.getArguments();
+                    String name = (String) args[1];
+                    for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
+                        if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
+                            return Optional.ofNullable(instanceMetaData.getInstanceGroup());
+                        }
+                    }
+                    return Optional.empty();
+                });
         underTest.terminateFailedNodes(null, orchestrator, TestUtil.stack(),
                 new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 443, "instanceId", false), prepareNodes(stack));
 
@@ -155,7 +157,7 @@ public class ClusterBootstrapperErrorHandlerTest {
         verify(connector, times(3)).removeInstances(any(Stack.class), anySet(), anyString());
         verify(resourceService, times(3)).findByStackIdAndNameAndType(anyLong(), anyString(), nullable(ResourceType.class));
         verify(resourceService, times(3)).delete(nullable(Resource.class));
-        verify(instanceGroupService, times(3)).findOneByGroupNameInStack(anyLong(), anyString());
+        verify(instanceGroupService, times(3)).findOneWithInstanceMetadataByGroupNameInStack(anyLong(), anyString());
 
     }
 

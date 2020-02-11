@@ -207,7 +207,7 @@ public class StackUpscaleActions {
                     throws TransactionExecutionException {
                 Set<String> upscaleCandidateAddresses = stackUpscaleService.finishExtendMetadata(context.getStack(), context.getAdjustment(), payload);
                 variables.put(UPSCALE_CANDIDATE_ADDRESSES, upscaleCandidateAddresses);
-                InstanceGroup ig = instanceGroupService.findOneByGroupNameInStack(payload.getResourceId(), context.getInstanceGroupName())
+                InstanceGroup ig = instanceGroupService.findOneWithInstanceMetadataByGroupNameInStack(payload.getResourceId(), context.getInstanceGroupName())
                         .orElseThrow(NotFoundException.notFound("instanceGroup", context.getInstanceGroupName()));
                 if (InstanceGroupType.GATEWAY == ig.getInstanceGroupType()) {
                     Stack stack = stackService.getByIdWithListsInTransaction(context.getStack().getId());
