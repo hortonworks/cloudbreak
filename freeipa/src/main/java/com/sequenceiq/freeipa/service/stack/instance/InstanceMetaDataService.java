@@ -1,10 +1,13 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -18,6 +21,7 @@ import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 
 @Service
 public class InstanceMetaDataService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMetaDataService.class);
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
@@ -42,6 +46,16 @@ public class InstanceMetaDataService {
         }
     }
 
+    public void updateStatus(Stack stack, List<String> instanceIds, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus status) {
+        Set<InstanceMetaData> allInstances = instanceMetaDataRepository.findAllInStack(stack.getId());
+        allInstances.stream().filter(im -> instanceIds.contains(im.getInstanceId()))
+                .forEach(im -> {
+                    im.setInstanceStatus(status);
+                    instanceMetaDataRepository.save(im);
+                    LOGGER.info("Updated instanceId {} status to {}.", im.getInstanceId(), status);
+                });
+    }
+
     public void deleteInstanceRequest(Long stackId, Long privateId) {
         Set<InstanceMetaData> instanceMetaData = instanceMetaDataRepository.findAllInStack(stackId);
         for (InstanceMetaData metaData : instanceMetaData) {
@@ -58,6 +72,14 @@ public class InstanceMetaDataService {
 
     public InstanceMetaData save(InstanceMetaData instanceMetaData) {
         return instanceMetaDataRepository.save(instanceMetaData);
+    }
+
+    public Set<InstanceMetaData> getByInstanceId(String instanceId) {
+        return instanceMetaDataRepository.findAllByInstanceIdIn(Set.of(instanceId));
+    }
+
+    public Optional<InstanceMetaData> getById(Long id) {
+        return instanceMetaDataRepository.findById(id);
     }
 
     private InstanceGroup getInstanceGroup(Iterable<InstanceGroup> instanceGroups, String groupName) {

@@ -70,6 +70,24 @@ public class MockInstanceConnector implements InstanceConnector {
     }
 
     @Override
+    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext authenticatedContext, List<CloudInstance> vms) {
+        List<CloudVmInstanceStatus> cloudVmInstanceStatuses = new ArrayList<>();
+        for (CloudInstance instance : vms) {
+            CloudVmInstanceStatus instanceStatus = getVmInstanceStatus(authenticatedContext, instance, "start");
+            cloudVmInstanceStatuses.add(instanceStatus);
+        }
+
+        MockCredentialView mockCredentialView = mockCredentialViewFactory.createCredetialView(authenticatedContext.getCloudCredential());
+        LOGGER.info("start instance statuses to mock spi, server address: " + mockCredentialView.getMockEndpoint());
+        try {
+            Unirest.post(mockCredentialView.getMockEndpoint() + "/spi/reboot_instances").asString();
+        } catch (UnirestException e) {
+            LOGGER.error("Error when instances got started", e);
+        }
+        return cloudVmInstanceStatuses;
+    }
+
+    @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext authenticatedContext, List<CloudInstance> vms) {
 
         try {

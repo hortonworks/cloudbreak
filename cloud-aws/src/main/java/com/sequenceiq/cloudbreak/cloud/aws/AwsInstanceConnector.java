@@ -30,6 +30,7 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.GetConsoleOutputRequest;
 import com.amazonaws.services.ec2.model.GetConsoleOutputResult;
 import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.RebootInstancesRequest;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.poller.PollerUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsInstanceStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -54,6 +56,9 @@ public class AwsInstanceConnector implements InstanceConnector {
 
     @Inject
     private PollerUtil pollerUtil;
+
+    @Inject
+    private AwsClient awsClient;
 
     @Value("${cb.aws.hostkey.verify:}")
     private boolean verifyHostKey;
@@ -117,6 +122,29 @@ public class AwsInstanceConnector implements InstanceConnector {
             throw e;
         }
         return pollerUtil.waitFor(ac, vms, Sets.newHashSet(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(status), InstanceStatus.FAILED));
+    }
+
+    @Retryable(
+            value = SdkClientException.class,
+            maxAttempts = 15,
+            backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
+    )
+    @Override
+    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext ac, List<CloudInstance> vms) {
+        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
+        try {
+            Collection<String> instances = vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toSet());
+            if (!instances.isEmpty()) {
+                amazonEC2Client.rebootInstances(new RebootInstancesRequest().withInstanceIds(instances));
+            }
+        } catch (AmazonEC2Exception e) {
+            handleEC2Exception(vms, e);
+        } catch (SdkClientException e) {
+            LOGGER.warn("Failed to send reboot request to AWS: ", e);
+            throw e;
+        }
+        return pollerUtil.waitFor(ac, vms, Sets.newHashSet(InstanceStatus.STARTED, InstanceStatus.FAILED));
     }
 
     private void handleEC2Exception(List<CloudInstance> vms, AmazonEC2Exception e) throws AmazonEC2Exception {

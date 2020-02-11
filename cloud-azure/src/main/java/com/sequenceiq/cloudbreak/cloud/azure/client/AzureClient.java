@@ -462,6 +462,10 @@ public class AzureClient {
         return handleAuthException(() -> azure.virtualMachines().startAsync(resourceGroup, vmName));
     }
 
+    public Completable rebootVirtualMachineAsync(String resourceGroup, String vmName) {
+        return handleAuthException(() -> azure.virtualMachines().restartAsync(resourceGroup, vmName));
+    }
+
     public void stopVirtualMachine(String resourceGroup, String vmName) {
         handleAuthException(() -> azure.virtualMachines().powerOff(resourceGroup, vmName));
     }
