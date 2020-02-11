@@ -160,8 +160,9 @@ public class FreeIpaCleanupActions {
             @Override
             protected void doExecute(FreeIpaContext context, RemoveRolesResponse payload, Map<Object, Object> variables) {
                 CleanupEvent cleanupEvent = new CleanupEvent(FreeIpaCleanupEvent.CLEANUP_FINISHED_EVENT.event(), payload.getResourceId(), payload.getUsers(),
-                        payload.getHosts(), payload.getRoles(), payload.getAccountId(), payload.getOperationId(), payload.getClusterName());
-                SuccessDetails successDetails = new SuccessDetails(context.getStack().getEnvironmentCrn());
+                        payload.getHosts(), payload.getRoles(), payload.getAccountId(), payload.getOperationId(), payload.getClusterName(),
+                        payload.getEnvironmentCrn());
+                SuccessDetails successDetails = new SuccessDetails(payload.getEnvironmentCrn());
                 successDetails.getAdditionalDetails().put("Hosts", payload.getHosts() == null ? List.of() : new ArrayList<>(payload.getHosts()));
                 successDetails.getAdditionalDetails().put("Users", payload.getUsers() == null ? List.of() : new ArrayList<>(payload.getUsers()));
                 successDetails.getAdditionalDetails().put("Roles", payload.getRoles() == null ? List.of() : new ArrayList<>(payload.getRoles()));
@@ -182,11 +183,12 @@ public class FreeIpaCleanupActions {
             @Override
             protected void doExecute(FreeIpaContext context, CleanupFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Cleanup failed with payload: " + payload);
-                SuccessDetails successDetails = new SuccessDetails(context.getStack().getEnvironmentCrn());
+                String environmentCrn = payload.getEnvironmentCrn();
+                SuccessDetails successDetails = new SuccessDetails(environmentCrn);
                 successDetails.getAdditionalDetails()
                         .put(payload.getFailedPhase(), payload.getSuccess() == null ? List.of() : new ArrayList<>(payload.getSuccess()));
                 String message = "Cleanup failed during " + payload.getFailedPhase();
-                FailureDetails failureDetails = new FailureDetails(context.getStack().getEnvironmentCrn(), message);
+                FailureDetails failureDetails = new FailureDetails(environmentCrn, message);
                 if (payload.getFailureDetails() != null) {
                     failureDetails.getAdditionalDetails().putAll(payload.getFailureDetails());
                 }

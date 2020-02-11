@@ -18,8 +18,11 @@ public class CleanupEvent extends StackEvent {
 
     private final String clusterName;
 
+    private final String environmentCrn;
+
     @SuppressWarnings("ExecutableStatementCount")
-    public CleanupEvent(Long stackId, Set<String> users, Set<String> hosts, Set<String> roles, String accountId, String operationId, String clusterName) {
+    public CleanupEvent(Long stackId, Set<String> users, Set<String> hosts, Set<String> roles, String accountId, String operationId, String clusterName,
+            String environmentCrn) {
         super(stackId);
         this.users = users;
         this.hosts = hosts;
@@ -27,11 +30,12 @@ public class CleanupEvent extends StackEvent {
         this.accountId = accountId;
         this.operationId = operationId;
         this.clusterName = clusterName;
+        this.environmentCrn = environmentCrn;
     }
 
     @SuppressWarnings("ExecutableStatementCount")
     public CleanupEvent(String selector, Long stackId, Set<String> users, Set<String> hosts, Set<String> roles,
-            String accountId, String operationId, String clusterName) {
+            String accountId, String operationId, String clusterName, String environmentCrn) {
         super(selector, stackId);
         this.users = users;
         this.hosts = hosts;
@@ -39,6 +43,7 @@ public class CleanupEvent extends StackEvent {
         this.accountId = accountId;
         this.operationId = operationId;
         this.clusterName = clusterName;
+        this.environmentCrn = environmentCrn;
     }
 
     public Set<String> getUsers() {
@@ -65,6 +70,10 @@ public class CleanupEvent extends StackEvent {
         return clusterName;
     }
 
+    public String getEnvironmentCrn() {
+        return environmentCrn;
+    }
+
     @Override
     public String toString() {
         return "CleanupEvent{" +
@@ -74,6 +83,7 @@ public class CleanupEvent extends StackEvent {
                 ", accountId='" + accountId + '\'' +
                 ", operationId='" + operationId + '\'' +
                 ", clusterName='" + clusterName + '\'' +
+                ", environmentCrn='" + environmentCrn + '\'' +
                 '}';
     }
 }
