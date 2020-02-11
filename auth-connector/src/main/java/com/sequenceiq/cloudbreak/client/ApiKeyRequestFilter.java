@@ -56,9 +56,18 @@ public class ApiKeyRequestFilter implements ClientRequestFilter {
             headers.add("Content-Type", ContentType.APPLICATION_JSON);
         }
         headers.add(X_ALTUS_DATE, dateStringForAltus);
-        headers.add(X_ALTUS_AUTH, authHeader(accessKey, secretKey, requestContext.getMethod(), requestContext.getUri().getPath(), dateStringForAltus));
+        headers.add(X_ALTUS_AUTH, authHeader(accessKey, secretKey, requestContext.getMethod(), getPathAndQuery(requestContext), dateStringForAltus));
     }
 
+    private String getPathAndQuery(ClientRequestContext requestContext) {
+        StringBuilder sb=new StringBuilder(requestContext.getUri().getPath());
+        if(requestContext.getUri().getQuery() != null) {
+            sb.append("?").append(requestContext.getUri().getQuery());
+        }
+        return sb.toString();
+       
+   }
+    
     private String authHeader(String accessKeyID, String privateKey, String method, String path, String date) {
         return urlsafeMeta(accessKeyID) + "." + urlsafeSignature(privateKey, method, path, date);
     }
