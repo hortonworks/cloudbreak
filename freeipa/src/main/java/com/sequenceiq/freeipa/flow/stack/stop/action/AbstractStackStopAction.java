@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.flow.stack.stop.action;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
@@ -56,7 +55,7 @@ public abstract class AbstractStackStopAction<P extends Payload>
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         MDCBuilder.buildMdcContext(stack);
         List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataService.findNotTerminatedForStack(stackId));
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
+        Location location = location(region(stack.getRegion()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getCloudPlatform(), stack.getCloudPlatform(),
                 location, stack.getOwner(), stack.getAccountId());
         Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());

@@ -128,7 +128,8 @@ public class AwsSetup implements Setup {
     private void validateRegionAndZone(CloudCredential cloudCredential, Location location) {
         CloudRegions regions = awsPlatformResources.regions(cloudCredential, location.getRegion(), Collections.emptyMap());
         List<AvailabilityZone> availabilityZones = regions.getCloudRegions().get(location.getRegion());
-        if (!availabilityZones.contains(location.getAvailabilityZone())) {
+        if (location.getAvailabilityZone() != null
+                && !availabilityZones.contains(location.getAvailabilityZone())) {
             throw new CloudConnectorException(String.format("Region [%s] doesn't contain availability zone [%s]",
                     location.getRegion().getRegionName(), location.getAvailabilityZone().value()));
         }

@@ -239,7 +239,6 @@ public class CreateFreeIpaRequestToStackConverter {
             throw new BadRequestException(String.format("No instancegroups are specified. Instancegroups field cannot be empty."));
         }
         Set<InstanceGroup> convertedSet = new HashSet<>();
-        validateNullInstanceTemplateCount(source);
         source.getInstanceGroups().stream()
                 .map(ig -> instanceGroupConverter.convert(ig, accountId, stack.getCloudPlatform()))
                 .forEach(ig -> {
@@ -247,12 +246,6 @@ public class CreateFreeIpaRequestToStackConverter {
                     convertedSet.add(ig);
                 });
         return convertedSet;
-    }
-
-    private void validateNullInstanceTemplateCount(CreateFreeIpaRequest source) {
-        if (source.getInstanceGroups().stream().filter(ig -> ig.getInstanceTemplate() == null).count() > 1) {
-            throw new BadRequestException("More than one instance group is missing the instance template. Defaults cannot be applied.");
-        }
     }
 
 }

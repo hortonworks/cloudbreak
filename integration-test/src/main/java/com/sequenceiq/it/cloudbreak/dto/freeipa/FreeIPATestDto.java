@@ -4,6 +4,8 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.OptionalInt;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -61,12 +63,19 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
         return withName(getResourcePropertyProvider().getName())
                 .withEnvironment(getTestContext().given(EnvironmentTestDto.class))
                 .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
-                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()))
+                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()), OptionalInt.empty(), OptionalInt.empty())
                 .withNetwork(getTestContext().given(NetworkV4TestDto.class))
                 .withGatewayPort(getCloudProvider().gatewayPort(this))
 
                 .withAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
                 .withFreeIPA("ipatest.local", "ipaserver", "admin1234", "admins");
+    }
+
+    public FreeIPATestDto withFreeIpaHa(int instanceGroupCount, int instanceCountByGroup) {
+        withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()),
+                OptionalInt.of(instanceGroupCount),
+                OptionalInt.of(instanceCountByGroup));
+        return this;
     }
 
     private FreeIPATestDto withFreeIPA(String domain, String hostname, String adminPassword, String adminGroupName) {
@@ -93,20 +102,35 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
         return this;
     }
 
-    private FreeIPATestDto withInstanceGroupsEntity(Collection<InstanceGroupTestDto> instanceGroups) {
-        getRequest().setInstanceGroups(instanceGroups.stream()
+    private FreeIPATestDto withInstanceGroupsEntity(Collection<InstanceGroupTestDto> instanceGroups,
+            OptionalInt instanceGroupCount, OptionalInt instanceCountByGroup) {
+        List<InstanceGroupRequest> instanceGroupRequests = instanceGroups.stream()
                 .filter(instanceGroupTestDto -> "master".equals(instanceGroupTestDto.getRequest().getName()))
                 .limit(1)
                 .map(InstanceGroupTestDto::getRequest)
-                .map(mapInstanceGroupRequest())
-                .collect(Collectors.toList()));
+                .map(mapInstanceGroupRequest(instanceCountByGroup))
+                .collect(Collectors.toList());
+        if (instanceGroupCount.isPresent() && instanceGroupRequests.size() == 1) {
+            InstanceGroupRequest reqToCopyDataFrom = instanceGroupRequests.get(0);
+            instanceGroupRequests.clear();
+            for (int i = 0; i < instanceGroupCount.getAsInt(); ++i) {
+                InstanceGroupRequest req = new InstanceGroupRequest();
+                req.setNodeCount(reqToCopyDataFrom.getNodeCount());
+                req.setName(reqToCopyDataFrom.getName() + i);
+                req.setType(reqToCopyDataFrom.getType());
+                req.setInstanceTemplateRequest(reqToCopyDataFrom.getInstanceTemplate());
+                req.setSecurityGroup(reqToCopyDataFrom.getSecurityGroup());
+                instanceGroupRequests.add(req);
+            }
+        }
+        getRequest().setInstanceGroups(instanceGroupRequests);
         return this;
     }
 
-    private Function<InstanceGroupV4Request, InstanceGroupRequest> mapInstanceGroupRequest() {
+    private Function<InstanceGroupV4Request, InstanceGroupRequest> mapInstanceGroupRequest(OptionalInt instanceCountByGroup) {
         return request -> {
             InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
-            instanceGroupRequest.setNodeCount(request.getNodeCount());
+            instanceGroupRequest.setNodeCount(instanceCountByGroup.orElse(request.getNodeCount()));
             instanceGroupRequest.setName("master");
             instanceGroupRequest.setType(InstanceGroupType.MASTER);
             instanceGroupRequest.setInstanceTemplateRequest(mapInstanceTemplateRequest(request));
