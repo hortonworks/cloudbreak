@@ -81,12 +81,13 @@ public class CleanupService {
     private HostDeletionService hostDeletionService;
 
     public OperationStatus cleanup(String accountId, CleanupRequest request) {
-        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);
+        String environmentCrn = request.getEnvironmentCrn();
+        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         Operation operation =
-                operationService.startOperation(accountId, OperationType.CLEANUP, Set.of(stack.getEnvironmentCrn()), Collections.emptySet());
+                operationService.startOperation(accountId, OperationType.CLEANUP, Set.of(environmentCrn), Collections.emptySet());
         CleanupEvent cleanupEvent = new CleanupEvent(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), stack.getId(), request.getUsers(),
-                request.getHosts(), request.getRoles(), accountId, operation.getOperationId(), request.getClusterName());
+                request.getHosts(), request.getRoles(), accountId, operation.getOperationId(), request.getClusterName(), environmentCrn);
         flowManager.notify(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), cleanupEvent);
         return operationToOperationStatusConverter.convert(operation);
     }
@@ -177,7 +178,8 @@ public class CleanupService {
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
-    public Pair<Set<String>, Map<String, String>> removeUsers(Long stackId, Set<String> users, String clusterName) throws FreeIpaClientException {
+    public Pair<Set<String>, Map<String, String>> removeUsers(Long stackId, Set<String> users, String clusterName, String environmentCrn)
+            throws FreeIpaClientException {
         FreeIpaClient client = getFreeIpaClient(stackId);
         Set<String> userCleanupSuccess = new HashSet<>();
         Map<String, String> userCleanupFailed = new HashMap<>();
@@ -198,7 +200,9 @@ public class CleanupService {
         });
         if (StringUtils.isNotBlank(clusterName)) {
             Stack stack = stackService.getStackById(stackId);
-            String environmentCrn = stack.getEnvironmentCrn();
+            if (StringUtils.isEmpty(environmentCrn)) {
+                environmentCrn = stack.getEnvironmentCrn();
+            }
             String accountId = stack.getAccountId();
             try {
                 kerberosConfigService.delete(environmentCrn, accountId, clusterName);

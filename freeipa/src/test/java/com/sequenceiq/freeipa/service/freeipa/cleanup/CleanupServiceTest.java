@@ -36,6 +36,8 @@ public class CleanupServiceTest {
 
     private static final long STACK_ID = 1L;
 
+    private static final String ENV_CRN = "envCrn";
+
     @InjectMocks
     private CleanupService cleanupService;
 
@@ -319,7 +321,7 @@ public class CleanupServiceTest {
         when(freeIpaClient.userFindAll()).thenReturn(ipaUsers);
         when(stackService.getStackById(anyLong())).thenReturn(createStack());
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "test-wl-1");
+        Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "test-wl-1", ENV_CRN);
 
         verify(freeIpaClient, times(1)).deleteUser("ldapbind-test-wl-1");
         verify(freeIpaClient, times(1)).deleteUser("kerberosbind-test-wl-1");
@@ -348,7 +350,7 @@ public class CleanupServiceTest {
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
         when(freeIpaClient.userFindAll()).thenReturn(ipaUsers);
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "");
+        Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "", ENV_CRN);
 
         verify(freeIpaClient, times(1)).deleteUser("ldapbind-test-wl-1");
         verify(freeIpaClient, times(1)).deleteUser("kerberosbind-test-wl-1");
@@ -378,7 +380,7 @@ public class CleanupServiceTest {
         when(freeIpaClient.userFindAll()).thenReturn(ipaUsers);
         doThrow(new FreeIpaClientException("Connection failed")).when(freeIpaClient).deleteUser(anyString());
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "");
+        Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "", ENV_CRN);
 
         verify(freeIpaClient, times(1)).deleteUser("ldapbind-test-wl-1");
         verify(freeIpaClient, times(1)).deleteUser("kerberosbind-test-wl-1");
@@ -410,7 +412,7 @@ public class CleanupServiceTest {
         when(stackService.getStackById(anyLong())).thenReturn(createStack());
         doThrow(new NotFoundException("Kerberos config not found")).when(kerberosConfigService).delete("envCrn", "accountId", "test-wl-1");
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "test-wl-1");
+        Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "test-wl-1", ENV_CRN);
 
         verify(freeIpaClient, times(1)).deleteUser("ldapbind-test-wl-1");
         verify(freeIpaClient, times(1)).deleteUser("kerberosbind-test-wl-1");
@@ -441,7 +443,7 @@ public class CleanupServiceTest {
         when(stackService.getStackById(anyLong())).thenReturn(createStack());
         doThrow(new NotFoundException("Ldap config not found")).when(ldapConfigService).delete("envCrn", "accountId", "test-wl-1");
 
-        Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "test-wl-1");
+        Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "test-wl-1", ENV_CRN);
 
         verify(freeIpaClient, times(1)).deleteUser("ldapbind-test-wl-1");
         verify(freeIpaClient, times(1)).deleteUser("kerberosbind-test-wl-1");
@@ -481,7 +483,7 @@ public class CleanupServiceTest {
 
     private Stack createStack() {
         Stack stack = new Stack();
-        stack.setEnvironmentCrn("envCrn");
+        stack.setEnvironmentCrn(ENV_CRN);
         stack.setAccountId("accountId");
         return stack;
     }

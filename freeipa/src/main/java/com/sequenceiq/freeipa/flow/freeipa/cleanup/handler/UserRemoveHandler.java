@@ -42,7 +42,7 @@ public class UserRemoveHandler implements EventHandler<RemoveUsersRequest> {
         RemoveUsersRequest request = event.getData();
         try {
             Pair<Set<String>, Map<String, String>> removeUsersResult =
-                    cleanupService.removeUsers(request.getResourceId(), request.getUsers(), request.getClusterName());
+                    cleanupService.removeUsers(request.getResourceId(), request.getUsers(), request.getClusterName(), request.getEnvironmentCrn());
             RemoveUsersResponse response = new RemoveUsersResponse(request, removeUsersResult.getFirst(), removeUsersResult.getSecond());
             eventBus.notify(response.getUserCleanupFailed().isEmpty()
                             ? EventSelectorUtil.selector(RemoveUsersResponse.class) : EventSelectorUtil.failureSelector(RemoveUsersResponse.class),
