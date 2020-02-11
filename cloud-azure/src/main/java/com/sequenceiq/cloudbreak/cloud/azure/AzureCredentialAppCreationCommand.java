@@ -44,10 +44,10 @@ public class AzureCredentialAppCreationCommand {
     @Value("${cb.arm.app.creation.template.json.path:}")
     private String appCreationJSONTemplatePath;
 
-    @Value("${cb.arm.app.creation.template.resource.app.id}")
+    @Value("${cb.arm.app.creation.template.resource.app.id:}")
     private String resourceAppId;
 
-    @Value("${cb.arm.app.creation.template.resource.access.scope.id}")
+    @Value("${cb.arm.app.creation.template.resource.access.scope.id:}")
     private String resourceAccessScopeId;
 
     @Inject

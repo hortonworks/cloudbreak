@@ -2,7 +2,6 @@ package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.SUCCESS;
-import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_IN_PROGRESS;
@@ -11,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -37,6 +37,7 @@ import com.sequenceiq.environment.configuration.SupportedPlatforms;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
@@ -68,9 +69,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaCreationHandler.class);
 
-    private static final String MASTER_GROUP_NAME = "master";
-
-    private static final int MASTER_NODE_COUNT = 1;
+    private static final String MASTER_GROUP_NAME = "master0";
 
     private static final String TCP = "tcp";
 
@@ -211,7 +210,12 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         setAuthentication(environment.getAuthentication(), createFreeIpaRequest);
         setTelemetry(environment, createFreeIpaRequest);
         setTags(environment, createFreeIpaRequest);
-        doIfNotNull(environment.getSecurityAccess(), securityAccess -> setSecurityAccess(securityAccess, createFreeIpaRequest));
+        SecurityGroupRequest securityGroupRequest = null;
+        if (environment.getSecurityAccess() != null) {
+            securityGroupRequest = createSecurityGroupRequest(environment.getSecurityAccess());
+        }
+        createFreeIpaRequest.setInstanceGroups(createInstanceGroupRequests(securityGroupRequest, environment.getFreeIpaCreation()));
+
         setUseCcm(environment.getExperimentalFeatures().getTunnel(), createFreeIpaRequest);
         return createFreeIpaRequest;
     }
@@ -255,7 +259,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         createFreeIpaRequest.setAuthentication(stackAuthenticationRequest);
     }
 
-    private void setSecurityAccess(SecurityAccessDto securityAccess, CreateFreeIpaRequest createFreeIpaRequest) {
+    private SecurityGroupRequest createSecurityGroupRequest(SecurityAccessDto securityAccess) {
         SecurityGroupRequest securityGroupRequest = new SecurityGroupRequest();
         if (!Strings.isNullOrEmpty(securityAccess.getCidr())) {
             securityGroupRequest.setSecurityRules(new ArrayList<>());
@@ -271,8 +275,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             securityGroupRequest.setSecurityRules(new ArrayList<>());
             securityGroupRequest.setSecurityGroupIds(new HashSet<>());
         }
-        InstanceGroupRequest instanceGroupRequest = createInstanceGroupRequest(securityGroupRequest);
-        createFreeIpaRequest.setInstanceGroups(List.of(instanceGroupRequest));
+        return securityGroupRequest;
     }
 
     private void setUseCcm(Tunnel tunnel, CreateFreeIpaRequest createFreeIpaRequest) {
@@ -280,13 +283,15 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         createFreeIpaRequest.setTunnel(tunnel);
     }
 
-    private InstanceGroupRequest createInstanceGroupRequest(SecurityGroupRequest securityGroupRequest) {
+    private List<InstanceGroupRequest> createInstanceGroupRequests(SecurityGroupRequest securityGroupRequest, FreeIpaCreationDto freeIpaCreation) {
+        List<InstanceGroupRequest> instanceGroupRequests = new LinkedList<>();
         InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
         instanceGroupRequest.setName(MASTER_GROUP_NAME);
-        instanceGroupRequest.setNodeCount(MASTER_NODE_COUNT);
+        instanceGroupRequest.setNodeCount(freeIpaCreation.getInstanceCountByGroup());
         instanceGroupRequest.setType(InstanceGroupType.MASTER);
         instanceGroupRequest.setSecurityGroup(securityGroupRequest);
-        return instanceGroupRequest;
+        instanceGroupRequests.add(instanceGroupRequest);
+        return instanceGroupRequests;
     }
 
     private SecurityRuleRequest createSecurityRuleRequest(String cidr) {
