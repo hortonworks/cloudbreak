@@ -37,7 +37,7 @@ public class SdxClient extends MicroserviceClient {
         clientEntity.setActing(cloudbreakUser);
         clientEntity.sdxClient = new SdxServiceApiKeyClient(
                 testParameter.get(SdxTest.SDX_SERVER_ROOT),
-                new ConfigKey(false, true, true))
+                new ConfigKey(false, true, true, TIMEOUT))
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
         return clientEntity;
     }

@@ -42,7 +42,7 @@ public class EnvironmentClient extends MicroserviceClient {
         clientEntity.setActing(cloudbreakUser);
         clientEntity.environmentClient = new EnvironmentServiceApiKeyClient(
                 testParameter.get(EnvironmentTest.ENVIRONMENT_SERVER_ROOT),
-                new ConfigKey(false, true, true))
+                new ConfigKey(false, true, true, TIMEOUT))
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
         clientEntity.environmentInternalCrnClient = createInternalEnvironmentClient(
                 testParameter.get(EnvironmentTest.ENVIRONMENT_INTERNAL_SERVER_ROOT));

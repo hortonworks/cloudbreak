@@ -59,7 +59,7 @@ public class CloudbreakClient extends MicroserviceClient {
         if (singletonCloudbreakClient == null) {
             singletonCloudbreakClient = new CloudbreakApiKeyClient(
                     integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
-                    new ConfigKey(false, true, true))
+                    new ConfigKey(false, true, true, TIMEOUT))
                     .withKeys(integrationTestContext.getContextParam(CloudbreakTest.ACCESS_KEY),
                             integrationTestContext.getContextParam(CloudbreakTest.SECRET_KEY));
         }

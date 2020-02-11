@@ -21,7 +21,7 @@ public class RedbeamsClient extends MicroserviceClient {
         clientEntity.setActing(cloudbreakUser);
         clientEntity.endpoints = new RedbeamsApiKeyClient(
                 testParameter.get(RedBeamsTest.REDBEAMS_SERVER_ROOT),
-                new ConfigKey(false, true, true))
+                new ConfigKey(false, true, true, TIMEOUT))
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
         return clientEntity;
     }
