@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -35,13 +37,13 @@ public class LdapConfigRequestToLdapConfigConverter extends AbstractConversionSe
         config.setUserSearchBase(json.getUserSearchBase());
         config.setUserDnPattern(json.getUserDnPattern());
         config.setUserNameAttribute(json.getUserNameAttribute());
-        config.setDomain(json.getDomain());
+        config.setDomain(Optional.ofNullable(json.getDomain()).orElse(""));
         config.setDirectoryType(json.getDirectoryType() != null ? json.getDirectoryType() : DirectoryType.LDAP);
         config.setUserObjectClass(json.getUserObjectClass() != null ? json.getUserObjectClass() : "person");
         config.setGroupObjectClass(json.getGroupObjectClass() != null ? json.getGroupObjectClass() : "groupOfNames");
         config.setGroupNameAttribute(json.getGroupNameAttribute() != null ? json.getGroupNameAttribute() : "cn");
         config.setGroupMemberAttribute(json.getGroupMemberAttribute() != null ? json.getGroupMemberAttribute() : "member");
-        config.setAdminGroup(json.getAdminGroup());
+        config.setAdminGroup(Optional.ofNullable(json.getAdminGroup()).orElse(""));
         return config;
     }
 }
