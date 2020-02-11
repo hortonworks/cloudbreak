@@ -34,6 +34,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListM
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
@@ -486,6 +488,21 @@ public class UmsClient {
                 GetRightsRequest.newBuilder()
                         .setActorCrn(actorCrn)
                         .setResourceCrn(resourceCrn)
+                        .build()
+        );
+    }
+
+    /**
+     * Wraps a call to listWorkloadAdministrationGroupsForMember.
+     *
+     * @param requestId   the request ID for the request
+     * @param memberCrn   the member CRN
+     * @return the workload administration groups for the member
+     */
+    public ListWorkloadAdministrationGroupsForMemberResponse listWorkloadAdministrationGroupsForMember(String requestId, String memberCrn) {
+        return newStub(requestId).listWorkloadAdministrationGroupsForMember(
+                ListWorkloadAdministrationGroupsForMemberRequest.newBuilder()
+                        .setMemberCrn(memberCrn)
                         .build()
         );
     }

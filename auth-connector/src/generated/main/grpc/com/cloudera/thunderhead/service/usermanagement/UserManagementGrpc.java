@@ -69,43 +69,6 @@ public final class UserManagementGrpc {
      return getInteractiveLoginMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getInteractiveLoginTrialMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialResponse> METHOD_INTERACTIVE_LOGIN_TRIAL = getInteractiveLoginTrialMethodHelper();
-
-  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialResponse> getInteractiveLoginTrialMethod;
-
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialResponse> getInteractiveLoginTrialMethod() {
-    return getInteractiveLoginTrialMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialResponse> getInteractiveLoginTrialMethodHelper() {
-    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialResponse> getInteractiveLoginTrialMethod;
-    if ((getInteractiveLoginTrialMethod = UserManagementGrpc.getInteractiveLoginTrialMethod) == null) {
-      synchronized (UserManagementGrpc.class) {
-        if ((getInteractiveLoginTrialMethod = UserManagementGrpc.getInteractiveLoginTrialMethod) == null) {
-          UserManagementGrpc.getInteractiveLoginTrialMethod = getInteractiveLoginTrialMethod = 
-              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialResponse>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "InteractiveLoginTrial"))
-              .setSampledToLocalTracing(true)
-              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialRequest.getDefaultInstance()))
-              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("InteractiveLoginTrial"))
-                  .build();
-          }
-        }
-     }
-     return getInteractiveLoginTrialMethod;
-  }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getInteractiveLogin3rdPartyMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse> METHOD_INTERACTIVE_LOGIN3RD_PARTY = getInteractiveLogin3rdPartyMethodHelper();
@@ -2289,6 +2252,43 @@ public final class UserManagementGrpc {
      return getListGroupsForMemberMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getListWorkloadAdministrationGroupsForMemberMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> METHOD_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER = getListWorkloadAdministrationGroupsForMemberMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> getListWorkloadAdministrationGroupsForMemberMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> getListWorkloadAdministrationGroupsForMemberMethod() {
+    return getListWorkloadAdministrationGroupsForMemberMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> getListWorkloadAdministrationGroupsForMemberMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> getListWorkloadAdministrationGroupsForMemberMethod;
+    if ((getListWorkloadAdministrationGroupsForMemberMethod = UserManagementGrpc.getListWorkloadAdministrationGroupsForMemberMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getListWorkloadAdministrationGroupsForMemberMethod = UserManagementGrpc.getListWorkloadAdministrationGroupsForMemberMethod) == null) {
+          UserManagementGrpc.getListWorkloadAdministrationGroupsForMemberMethod = getListWorkloadAdministrationGroupsForMemberMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "ListWorkloadAdministrationGroupsForMember"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListWorkloadAdministrationGroupsForMember"))
+                  .build();
+          }
+        }
+     }
+     return getListWorkloadAdministrationGroupsForMemberMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getCreateClusterSshPrivateKeyMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse> METHOD_CREATE_CLUSTER_SSH_PRIVATE_KEY = getCreateClusterSshPrivateKeyMethodHelper();
@@ -3284,25 +3284,14 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Handles an interactive login for a user in a regular account.
-     * A user record will be created if necessary.
-     * The account record must alreeady exist.
+     * Handles an interactive login for a user from a Cloudera identity provider.
+     * The user record will be created if necessary.
+     * The account record must already exist.
      * </pre>
      */
     public void interactiveLogin(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getInteractiveLoginMethodHelper(), responseObserver);
-    }
-
-    /**
-     * <pre>
-     * Handles an interactive login for a user in a trial account.
-     * User and account records will be created if necessary.
-     * </pre>
-     */
-    public void interactiveLoginTrial(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialRequest request,
-        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getInteractiveLoginTrialMethodHelper(), responseObserver);
     }
 
     /**
@@ -3904,6 +3893,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * List workload administration group names corresponding to the member
+     * </pre>
+     */
+    public void listWorkloadAdministrationGroupsForMember(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getListWorkloadAdministrationGroupsForMemberMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
      * Creates a new cluster ssh private key.
      * </pre>
      */
@@ -4128,7 +4127,7 @@ public final class UserManagementGrpc {
      * * Resource role assignment events.
      * * Group membership changes events.
      * * Actor deletion events.
-     * * Actore workload credentials change events.
+     * * Actor workload credentials change events.
      * The IDs are guaranteed to be unique and can be used to track the above
      * changes in a specific account. If no such event has happened in the account
      * since tracking started an empty string will be returned instead of an ID.
@@ -4198,13 +4197,6 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse>(
                   this, METHODID_INTERACTIVE_LOGIN)))
-          .addMethod(
-            getInteractiveLoginTrialMethodHelper(),
-            asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialResponse>(
-                  this, METHODID_INTERACTIVE_LOGIN_TRIAL)))
           .addMethod(
             getInteractiveLogin3rdPartyMethodHelper(),
             asyncUnaryCall(
@@ -4619,6 +4611,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse>(
                   this, METHODID_LIST_GROUPS_FOR_MEMBER)))
           .addMethod(
+            getListWorkloadAdministrationGroupsForMemberMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse>(
+                  this, METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER)))
+          .addMethod(
             getCreateClusterSshPrivateKeyMethodHelper(),
             asyncUnaryCall(
               new MethodHandlers<
@@ -4828,27 +4827,15 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Handles an interactive login for a user in a regular account.
-     * A user record will be created if necessary.
-     * The account record must alreeady exist.
+     * Handles an interactive login for a user from a Cloudera identity provider.
+     * The user record will be created if necessary.
+     * The account record must already exist.
      * </pre>
      */
     public void interactiveLogin(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getInteractiveLoginMethodHelper(), getCallOptions()), request, responseObserver);
-    }
-
-    /**
-     * <pre>
-     * Handles an interactive login for a user in a trial account.
-     * User and account records will be created if necessary.
-     * </pre>
-     */
-    public void interactiveLoginTrial(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialRequest request,
-        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getInteractiveLoginTrialMethodHelper(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -5509,6 +5496,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * List workload administration group names corresponding to the member
+     * </pre>
+     */
+    public void listWorkloadAdministrationGroupsForMember(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getListWorkloadAdministrationGroupsForMemberMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
      * Creates a new cluster ssh private key.
      * </pre>
      */
@@ -5753,7 +5751,7 @@ public final class UserManagementGrpc {
      * * Resource role assignment events.
      * * Group membership changes events.
      * * Actor deletion events.
-     * * Actore workload credentials change events.
+     * * Actor workload credentials change events.
      * The IDs are guaranteed to be unique and can be used to track the above
      * changes in a specific account. If no such event has happened in the account
      * since tracking started an empty string will be returned instead of an ID.
@@ -5845,25 +5843,14 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Handles an interactive login for a user in a regular account.
-     * A user record will be created if necessary.
-     * The account record must alreeady exist.
+     * Handles an interactive login for a user from a Cloudera identity provider.
+     * The user record will be created if necessary.
+     * The account record must already exist.
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse interactiveLogin(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest request) {
       return blockingUnaryCall(
           getChannel(), getInteractiveLoginMethodHelper(), getCallOptions(), request);
-    }
-
-    /**
-     * <pre>
-     * Handles an interactive login for a user in a trial account.
-     * User and account records will be created if necessary.
-     * </pre>
-     */
-    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialResponse interactiveLoginTrial(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getInteractiveLoginTrialMethodHelper(), getCallOptions(), request);
     }
 
     /**
@@ -6465,6 +6452,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * List workload administration group names corresponding to the member
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse listWorkloadAdministrationGroupsForMember(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getListWorkloadAdministrationGroupsForMemberMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
      * Creates a new cluster ssh private key.
      * </pre>
      */
@@ -6689,7 +6686,7 @@ public final class UserManagementGrpc {
      * * Resource role assignment events.
      * * Group membership changes events.
      * * Actor deletion events.
-     * * Actore workload credentials change events.
+     * * Actor workload credentials change events.
      * The IDs are guaranteed to be unique and can be used to track the above
      * changes in a specific account. If no such event has happened in the account
      * since tracking started an empty string will be returned instead of an ID.
@@ -6775,27 +6772,15 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Handles an interactive login for a user in a regular account.
-     * A user record will be created if necessary.
-     * The account record must alreeady exist.
+     * Handles an interactive login for a user from a Cloudera identity provider.
+     * The user record will be created if necessary.
+     * The account record must already exist.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse> interactiveLogin(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest request) {
       return futureUnaryCall(
           getChannel().newCall(getInteractiveLoginMethodHelper(), getCallOptions()), request);
-    }
-
-    /**
-     * <pre>
-     * Handles an interactive login for a user in a trial account.
-     * User and account records will be created if necessary.
-     * </pre>
-     */
-    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialResponse> interactiveLoginTrial(
-        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getInteractiveLoginTrialMethodHelper(), getCallOptions()), request);
     }
 
     /**
@@ -7456,6 +7441,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * List workload administration group names corresponding to the member
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> listWorkloadAdministrationGroupsForMember(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getListWorkloadAdministrationGroupsForMemberMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
      * Creates a new cluster ssh private key.
      * </pre>
      */
@@ -7700,7 +7696,7 @@ public final class UserManagementGrpc {
      * * Resource role assignment events.
      * * Group membership changes events.
      * * Actor deletion events.
-     * * Actore workload credentials change events.
+     * * Actor workload credentials change events.
      * The IDs are guaranteed to be unique and can be used to track the above
      * changes in a specific account. If no such event has happened in the account
      * since tracking started an empty string will be returned instead of an ID.
@@ -7769,66 +7765,66 @@ public final class UserManagementGrpc {
   }
 
   private static final int METHODID_INTERACTIVE_LOGIN = 0;
-  private static final int METHODID_INTERACTIVE_LOGIN_TRIAL = 1;
-  private static final int METHODID_INTERACTIVE_LOGIN3RD_PARTY = 2;
-  private static final int METHODID_DELETE_ACCOUNT = 3;
-  private static final int METHODID_DELETE_ACTOR = 4;
-  private static final int METHODID_DELETE_TRIAL_USER = 5;
-  private static final int METHODID_GET_ACCESS_KEY_VERIFICATION_DATA = 6;
-  private static final int METHODID_VERIFY_INTERACTIVE_USER_SESSION_TOKEN = 7;
-  private static final int METHODID_AUTHENTICATE = 8;
-  private static final int METHODID_ACCESS_KEY_USAGE = 9;
-  private static final int METHODID_CREATE_USER = 10;
-  private static final int METHODID_GET_USER = 11;
-  private static final int METHODID_LIST_USERS = 12;
-  private static final int METHODID_FIND_USERS_BY_EMAIL = 13;
-  private static final int METHODID_CREATE_ACCESS_KEY = 14;
-  private static final int METHODID_UPDATE_ACCESS_KEY = 15;
-  private static final int METHODID_DELETE_ACCESS_KEY = 16;
-  private static final int METHODID_GET_ACCESS_KEY = 17;
-  private static final int METHODID_LIST_ACCESS_KEYS = 18;
-  private static final int METHODID_GET_VERSION = 19;
-  private static final int METHODID_GET_ACCOUNT = 20;
-  private static final int METHODID_LIST_ACCOUNTS = 21;
-  private static final int METHODID_GET_RIGHTS = 22;
-  private static final int METHODID_CHECK_RIGHTS = 23;
-  private static final int METHODID_CREATE_ACCOUNT = 24;
-  private static final int METHODID_CREATE_TRIAL_ACCOUNT = 25;
-  private static final int METHODID_GRANT_ENTITLEMENT = 26;
-  private static final int METHODID_REVOKE_ENTITLEMENT = 27;
-  private static final int METHODID_ASSIGN_ROLE = 28;
-  private static final int METHODID_UNASSIGN_ROLE = 29;
-  private static final int METHODID_LIST_ASSIGNED_ROLES = 30;
-  private static final int METHODID_ASSIGN_RESOURCE_ROLE = 31;
-  private static final int METHODID_UNASSIGN_RESOURCE_ROLE = 32;
-  private static final int METHODID_LIST_ASSIGNED_RESOURCE_ROLES = 33;
-  private static final int METHODID_LIST_ROLES = 34;
-  private static final int METHODID_LIST_RESOURCE_ROLES = 35;
-  private static final int METHODID_LIST_RESOURCE_ASSIGNEES = 36;
-  private static final int METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = 37;
-  private static final int METHODID_INITIATE_SUPPORT_CASE = 38;
-  private static final int METHODID_NOTIFY_RESOURCE_DELETED = 39;
-  private static final int METHODID_CREATE_MACHINE_USER = 40;
-  private static final int METHODID_LIST_MACHINE_USERS = 41;
-  private static final int METHODID_DELETE_MACHINE_USER = 42;
-  private static final int METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS = 43;
-  private static final int METHODID_SET_ACCOUNT_MESSAGES = 44;
-  private static final int METHODID_ACCEPT_TERMS = 45;
-  private static final int METHODID_CLEAR_ACCEPTED_TERMS = 46;
-  private static final int METHODID_DESCRIBE_TERMS = 47;
-  private static final int METHODID_LIST_TERMS = 48;
-  private static final int METHODID_LIST_ENTITLEMENTS = 49;
-  private static final int METHODID_SET_TERMS_ACCEPTANCE_EXPIRY = 50;
-  private static final int METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = 51;
-  private static final int METHODID_INSERT_AZURE_SUBSCRIPTION = 52;
-  private static final int METHODID_CREATE_GROUP = 53;
-  private static final int METHODID_DELETE_GROUP = 54;
-  private static final int METHODID_LIST_GROUPS = 55;
-  private static final int METHODID_UPDATE_GROUP = 56;
-  private static final int METHODID_ADD_MEMBER_TO_GROUP = 57;
-  private static final int METHODID_REMOVE_MEMBER_FROM_GROUP = 58;
-  private static final int METHODID_LIST_GROUP_MEMBERS = 59;
-  private static final int METHODID_LIST_GROUPS_FOR_MEMBER = 60;
+  private static final int METHODID_INTERACTIVE_LOGIN3RD_PARTY = 1;
+  private static final int METHODID_DELETE_ACCOUNT = 2;
+  private static final int METHODID_DELETE_ACTOR = 3;
+  private static final int METHODID_DELETE_TRIAL_USER = 4;
+  private static final int METHODID_GET_ACCESS_KEY_VERIFICATION_DATA = 5;
+  private static final int METHODID_VERIFY_INTERACTIVE_USER_SESSION_TOKEN = 6;
+  private static final int METHODID_AUTHENTICATE = 7;
+  private static final int METHODID_ACCESS_KEY_USAGE = 8;
+  private static final int METHODID_CREATE_USER = 9;
+  private static final int METHODID_GET_USER = 10;
+  private static final int METHODID_LIST_USERS = 11;
+  private static final int METHODID_FIND_USERS_BY_EMAIL = 12;
+  private static final int METHODID_CREATE_ACCESS_KEY = 13;
+  private static final int METHODID_UPDATE_ACCESS_KEY = 14;
+  private static final int METHODID_DELETE_ACCESS_KEY = 15;
+  private static final int METHODID_GET_ACCESS_KEY = 16;
+  private static final int METHODID_LIST_ACCESS_KEYS = 17;
+  private static final int METHODID_GET_VERSION = 18;
+  private static final int METHODID_GET_ACCOUNT = 19;
+  private static final int METHODID_LIST_ACCOUNTS = 20;
+  private static final int METHODID_GET_RIGHTS = 21;
+  private static final int METHODID_CHECK_RIGHTS = 22;
+  private static final int METHODID_CREATE_ACCOUNT = 23;
+  private static final int METHODID_CREATE_TRIAL_ACCOUNT = 24;
+  private static final int METHODID_GRANT_ENTITLEMENT = 25;
+  private static final int METHODID_REVOKE_ENTITLEMENT = 26;
+  private static final int METHODID_ASSIGN_ROLE = 27;
+  private static final int METHODID_UNASSIGN_ROLE = 28;
+  private static final int METHODID_LIST_ASSIGNED_ROLES = 29;
+  private static final int METHODID_ASSIGN_RESOURCE_ROLE = 30;
+  private static final int METHODID_UNASSIGN_RESOURCE_ROLE = 31;
+  private static final int METHODID_LIST_ASSIGNED_RESOURCE_ROLES = 32;
+  private static final int METHODID_LIST_ROLES = 33;
+  private static final int METHODID_LIST_RESOURCE_ROLES = 34;
+  private static final int METHODID_LIST_RESOURCE_ASSIGNEES = 35;
+  private static final int METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = 36;
+  private static final int METHODID_INITIATE_SUPPORT_CASE = 37;
+  private static final int METHODID_NOTIFY_RESOURCE_DELETED = 38;
+  private static final int METHODID_CREATE_MACHINE_USER = 39;
+  private static final int METHODID_LIST_MACHINE_USERS = 40;
+  private static final int METHODID_DELETE_MACHINE_USER = 41;
+  private static final int METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS = 42;
+  private static final int METHODID_SET_ACCOUNT_MESSAGES = 43;
+  private static final int METHODID_ACCEPT_TERMS = 44;
+  private static final int METHODID_CLEAR_ACCEPTED_TERMS = 45;
+  private static final int METHODID_DESCRIBE_TERMS = 46;
+  private static final int METHODID_LIST_TERMS = 47;
+  private static final int METHODID_LIST_ENTITLEMENTS = 48;
+  private static final int METHODID_SET_TERMS_ACCEPTANCE_EXPIRY = 49;
+  private static final int METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = 50;
+  private static final int METHODID_INSERT_AZURE_SUBSCRIPTION = 51;
+  private static final int METHODID_CREATE_GROUP = 52;
+  private static final int METHODID_DELETE_GROUP = 53;
+  private static final int METHODID_LIST_GROUPS = 54;
+  private static final int METHODID_UPDATE_GROUP = 55;
+  private static final int METHODID_ADD_MEMBER_TO_GROUP = 56;
+  private static final int METHODID_REMOVE_MEMBER_FROM_GROUP = 57;
+  private static final int METHODID_LIST_GROUP_MEMBERS = 58;
+  private static final int METHODID_LIST_GROUPS_FOR_MEMBER = 59;
+  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER = 60;
   private static final int METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY = 61;
   private static final int METHODID_GET_CLUSTER_SSH_PRIVATE_KEY = 62;
   private static final int METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION = 63;
@@ -7876,10 +7872,6 @@ public final class UserManagementGrpc {
         case METHODID_INTERACTIVE_LOGIN:
           serviceImpl.interactiveLogin((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse>) responseObserver);
-          break;
-        case METHODID_INTERACTIVE_LOGIN_TRIAL:
-          serviceImpl.interactiveLoginTrial((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialRequest) request,
-              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginTrialResponse>) responseObserver);
           break;
         case METHODID_INTERACTIVE_LOGIN3RD_PARTY:
           serviceImpl.interactiveLogin3rdParty((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest) request,
@@ -8117,6 +8109,10 @@ public final class UserManagementGrpc {
           serviceImpl.listGroupsForMember((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse>) responseObserver);
           break;
+        case METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER:
+          serviceImpl.listWorkloadAdministrationGroupsForMember((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse>) responseObserver);
+          break;
         case METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY:
           serviceImpl.createClusterSshPrivateKey((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse>) responseObserver);
@@ -8283,7 +8279,6 @@ public final class UserManagementGrpc {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new UserManagementFileDescriptorSupplier())
               .addMethod(getInteractiveLoginMethodHelper())
-              .addMethod(getInteractiveLoginTrialMethodHelper())
               .addMethod(getInteractiveLogin3rdPartyMethodHelper())
               .addMethod(getDeleteAccountMethodHelper())
               .addMethod(getDeleteActorMethodHelper())
@@ -8343,6 +8338,7 @@ public final class UserManagementGrpc {
               .addMethod(getRemoveMemberFromGroupMethodHelper())
               .addMethod(getListGroupMembersMethodHelper())
               .addMethod(getListGroupsForMemberMethodHelper())
+              .addMethod(getListWorkloadAdministrationGroupsForMemberMethodHelper())
               .addMethod(getCreateClusterSshPrivateKeyMethodHelper())
               .addMethod(getGetClusterSshPrivateKeyMethodHelper())
               .addMethod(getGetAssigneeAuthorizationInformationMethodHelper())

@@ -24,6 +24,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAc
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
@@ -274,6 +275,23 @@ public class GrpcUmsClient {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.debug("Getting rights for user {} in environment {}", userCrn, environmentCrn);
             return client.getRightsForUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, environmentCrn);
+        }
+    }
+
+    /**
+     * Lists the workload administration groups a member belongs to.
+     *
+     * @param actorCrn       the CRN of the actor
+     * @param memberCrn      the CRN of the user or machine user
+     * @param requestId      request id for getting rights
+     * @return the workload administration groups associated with this user or machine user
+     */
+    public ListWorkloadAdministrationGroupsForMemberResponse listWorkloadAdministrationGroupsForMember(
+            String actorCrn, String memberCrn, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.debug("Getting workload administration groups for member {}", memberCrn);
+            return client.listWorkloadAdministrationGroupsForMember(requestId.orElse(UUID.randomUUID().toString()), memberCrn);
         }
     }
 

@@ -50,6 +50,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListM
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse.Builder;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Policy;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.PolicyDefinition;
@@ -256,10 +258,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         responseObserver.onCompleted();
     }
 
-    @Override
-    public void getRights(GetRightsRequest request, StreamObserver<GetRightsResponse> responseObserver) {
-        String actorCrn = request.getActorCrn();
-        String accountId = Crn.fromString(actorCrn).getAccountId();
+    private GetRightsResponse buildGetRightsResponse(String accountId) {
         List<Group> groups = List.copyOf(mockGroupManagementService.getOrCreateGroups(accountId));
         PolicyStatement policyStatement = PolicyStatement.newBuilder()
                 .addRight(ALL_RIGHTS_AND_RESOURCES)
@@ -277,10 +276,30 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                 .addPolicy(powerUserPolicy)
                 .build();
         RoleAssignment roleAssignment = RoleAssignment.newBuilder().setRole(powerUserRole).build();
-        GetRightsResponse.Builder responseBuilder = GetRightsResponse.newBuilder()
+        GetRightsResponse.Builder rightsBuilder = GetRightsResponse.newBuilder()
                 .addRoleAssignment(roleAssignment)
                 .addWorkloadAdministrationGroupName(mockGroupManagementService.generateVirtualGroupName(ENV_ACCESS_RIGHT));
-        groups.stream().forEach(group -> responseBuilder.addGroupCrn(group.getCrn()));
+        groups.stream().forEach(group -> rightsBuilder.addGroupCrn(group.getCrn()));
+        return rightsBuilder.build();
+    }
+
+    @Override
+    public void getRights(GetRightsRequest request, StreamObserver<GetRightsResponse> responseObserver) {
+        String actorCrn = request.getActorCrn();
+        String accountId = Crn.fromString(actorCrn).getAccountId();
+        responseObserver.onNext(buildGetRightsResponse(accountId));
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void listWorkloadAdministrationGroupsForMember(ListWorkloadAdministrationGroupsForMemberRequest request,
+            StreamObserver<ListWorkloadAdministrationGroupsForMemberResponse> responseObserver) {
+        String memberCrn = request.getMemberCrn();
+        String accountId = Crn.fromString(memberCrn).getAccountId();
+        GetRightsResponse getRightsResponse = buildGetRightsResponse(accountId);
+        ListWorkloadAdministrationGroupsForMemberResponse.Builder responseBuilder =
+                ListWorkloadAdministrationGroupsForMemberResponse.newBuilder();
+        responseBuilder.addAllWorkloadAdministrationGroupName(getRightsResponse.getWorkloadAdministrationGroupNameList());
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
     }
