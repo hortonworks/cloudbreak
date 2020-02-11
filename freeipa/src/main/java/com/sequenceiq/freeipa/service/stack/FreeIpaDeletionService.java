@@ -12,6 +12,7 @@ import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.termination.event.TerminationEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
 @Service
 public class FreeIpaDeletionService {
@@ -22,11 +23,19 @@ public class FreeIpaDeletionService {
     @Inject
     private FreeIpaFlowManager flowManager;
 
+    @Inject
+    private FreeipaJobService freeipaJobService;
+
     public void delete(String environmentCrn, String accountId) {
         List<Stack> stacks = stackService.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         if (stacks.isEmpty()) {
             throw new NotFoundException("No FreeIpa found in environment");
         }
-        stacks.forEach(stack -> flowManager.notify(TERMINATION_EVENT.event(), new TerminationEvent(TERMINATION_EVENT.event(), stack.getId(), false)));
+        stacks.forEach(this::unscheduleAndTriggerTerminate);
+    }
+
+    private void unscheduleAndTriggerTerminate(Stack stack) {
+        freeipaJobService.unschedule(stack);
+        flowManager.notify(TERMINATION_EVENT.event(), new TerminationEvent(TERMINATION_EVENT.event(), stack.getId(), false));
     }
 }

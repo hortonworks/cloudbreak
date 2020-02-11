@@ -2,20 +2,16 @@ package com.sequenceiq.freeipa.sync;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -23,19 +19,23 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
+import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
+import com.sequenceiq.statuschecker.job.StatusCheckerJob;
 
 @Component
-public class FreeipaSyncService {
+public class StackStatusCheckerJob extends StatusCheckerJob {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeipaSyncService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackStatusCheckerJob.class);
+
+    @Inject
+    private FlowLogService flowLogService;
 
     @Inject
     private FreeipaChecker freeipaChecker;
@@ -47,46 +47,29 @@ public class FreeipaSyncService {
     private StackService stackService;
 
     @Inject
-    private FreeIpaService freeIpaService;
-
-    @Inject
     private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
-    private ThreadPoolExecutor executorService;
 
     @Inject
     private StackUpdater stackUpdater;
 
-    @Value("${freeipa.autosync.enabled:true}")
-    private boolean enabled;
+    @Inject
+    private AutoSyncConfig autoSyncConfig;
 
-    @Value("${freeipa.autosync.update.status:true}")
-    private boolean updateStatus;
-
-    @PostConstruct
-    void logEnablement() {
-        LOGGER.info("Auto sync is {}", enabled ? "enabled" : "disabled");
-        LOGGER.info("Status update is {} by auto sync ", updateStatus ? "enabled" : "disabled");
-    }
-
-    public void sync() {
-        if (!enabled) {
+    @Override
+    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+        Long stackId = getStackId();
+        Stack stack = stackService.getStackById(stackId);
+        prepareMdcContextWithStack(stack);
+        if (flowLogService.isOtherFlowRunning(stackId)) {
+            LOGGER.debug("StackStatusCheckerJob cannot run, because flow is running for stack: {}", stackId);
             return;
         }
-        checkedMeasure(() -> {
-            var list = new ArrayList<Future>();
-            List<Stack> allRunning = checkedMeasure(() -> stackService.findAllForAutoSync(), LOGGER, ":::Auto sync::: stacks are fetched from db in {}ms");
-            for (Stack stack : allRunning) {
-                list.add(executorService.submit(() -> {
-                    prepareMdcContextWithStack(stack);
-                    syncAStack(stack);
-                    MDCBuilder.cleanupMdc();
-                }));
-            }
-            waitForFinish(list);
-            return null;
-        }, LOGGER, ":::Auto sync measure::: full sync in {}ms");
+        syncAStack(stack);
+        MDCBuilder.cleanupMdc();
+    }
+
+    private Long getStackId() {
+        return Long.valueOf(getLocalId());
     }
 
     private void prepareMdcContextWithStack(Stack stack) {
@@ -96,17 +79,6 @@ public class FreeipaSyncService {
                 .resourceType("STACK")
                 .environmentCrn(stack.getEnvironmentCrn())
                 .buildMdc();
-    }
-
-    private void waitForFinish(ArrayList<Future> list) {
-        LOGGER.info(":::Auto sync::: wait for finish: {}", list.size());
-        list.forEach(l -> {
-            try {
-                l.get();
-            } catch (InterruptedException | ExecutionException e) {
-                LOGGER.error(":::Auto sync::: " + e.getMessage(), e);
-            }
-        });
     }
 
     private void syncAStack(Stack stack) {
@@ -138,7 +110,7 @@ public class FreeipaSyncService {
     private void updateStackStatus(Stack stack, SyncResult result, List<ProviderSyncResult> providerSyncResults) {
         DetailedStackStatus status = getStackStatus(providerSyncResults, result);
         if (status != stack.getStackStatus().getDetailedStackStatus()) {
-            if (updateStatus) {
+            if (autoSyncConfig.isUpdateStatus()) {
                 stackUpdater.updateStackStatus(stack, status, result.getMessage());
             } else {
                 LOGGER.info(":::Auto sync::: The stack status would be had to update from {} to {}",
@@ -165,4 +137,5 @@ public class FreeipaSyncService {
         }
         return result.getStatus();
     }
+
 }
