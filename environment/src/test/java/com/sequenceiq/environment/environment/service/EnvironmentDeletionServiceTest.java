@@ -200,4 +200,11 @@ public class EnvironmentDeletionServiceTest {
         BadRequestException actual = assertThrows(BadRequestException.class, () -> environmentDeletionService.checkIsEnvironmentDeletable(environment));
         assertEquals("The following Data Lake cluster(s) must be terminated before Environment deletion [name]", actual.getMessage());
     }
+
+    @Test
+    public void canNotDeleteParentEnvironment() {
+        when(environmentService.existsWithAccountIdAndParentEnvIdAndArchivedIsFalse(environment.getAccountId(), environment.getId())).thenReturn(true);
+
+        assertThrows(BadRequestException.class, () -> environmentDeletionService.delete(environment, TestConstants.USER, false));
+    }
 }

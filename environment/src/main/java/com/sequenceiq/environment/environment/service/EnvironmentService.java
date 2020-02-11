@@ -257,4 +257,8 @@ public class EnvironmentService implements ResourceIdProvider {
                 .orElseThrow(() -> new BadRequestException(
                         String.format("Environment with name '%s' was not found for account '%s'.", environmentName, accountId)));
     }
+
+    public boolean existsWithAccountIdAndParentEnvIdAndArchivedIsFalse(String accountId, Long parentEnvironmentId) {
+        return environmentRepository.existsWithAccountIdAndParentEnvIdAndArchivedIsFalse(accountId, parentEnvironmentId);
+    }
 }
