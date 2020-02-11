@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.client;
 
 
 import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -15,10 +16,20 @@ public class ConfigKey {
 
     private final boolean ignorePreValidation;
 
+    private final Optional<Integer> timeout;
+
     public ConfigKey(boolean secure, boolean debug, boolean ignorePreValidation) {
         this.secure = secure;
         this.debug = debug;
         this.ignorePreValidation = ignorePreValidation;
+        timeout = Optional.empty();
+    }
+
+    public ConfigKey(boolean secure, boolean debug, boolean ignorePreValidation, int timeout) {
+        this.secure = secure;
+        this.debug = debug;
+        this.ignorePreValidation = ignorePreValidation;
+        this.timeout = Optional.of(timeout);
     }
 
     public boolean isSecure() {
@@ -31,6 +42,10 @@ public class ConfigKey {
 
     public boolean isIgnorePreValidation() {
         return ignorePreValidation;
+    }
+
+    public Optional<Integer> getTimeout() {
+        return timeout;
     }
 
     @Override
@@ -47,6 +62,7 @@ public class ConfigKey {
                 .append(secure, configKey.secure)
                 .append(debug, configKey.debug)
                 .append(ignorePreValidation, configKey.ignorePreValidation)
+                .append(timeout, configKey.timeout)
                 .isEquals();
     }
 
@@ -56,6 +72,7 @@ public class ConfigKey {
                 .append(secure)
                 .append(debug)
                 .append(ignorePreValidation)
+                .append(timeout.orElse(null))
                 .toHashCode();
     }
 
@@ -65,6 +82,7 @@ public class ConfigKey {
                 .append("secure", secure)
                 .append("debug", debug)
                 .append("ignorePreValidation", ignorePreValidation)
+                .append("timeout", timeout)
                 .build();
     }
 }

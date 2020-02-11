@@ -4,6 +4,8 @@ import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 
 public class MicroserviceClient extends Entity {
 
+    protected static final int TIMEOUT = 60 * 1000;
+
     private CloudbreakUser acting;
 
     protected  MicroserviceClient(String newId) {

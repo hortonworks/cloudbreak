@@ -72,7 +72,8 @@ public class RestClientUtil {
         LOGGER.debug("Constructing jax rs client: {}", configKey);
         ClientConfig config = new ClientConfig();
         config.property(ClientProperties.FOLLOW_REDIRECTS, "false");
-        config.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT_MS);
+        config.property(ClientProperties.CONNECT_TIMEOUT, configKey.getTimeout().orElse(CONNECT_TIMEOUT_MS));
+        configKey.getTimeout().ifPresent(rt -> config.property(ClientProperties.READ_TIMEOUT, rt));
         config.register(MultiPartFeature.class);
 
         ClientBuilder builder = ClientBuilder.newBuilder().withConfig(config);

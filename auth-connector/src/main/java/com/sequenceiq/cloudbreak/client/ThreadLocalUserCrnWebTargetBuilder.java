@@ -4,7 +4,6 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.WebTarget;
 
-import org.glassfish.jersey.client.ClientProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,14 +63,12 @@ public class ThreadLocalUserCrnWebTargetBuilder {
     }
 
     public WebTarget build() {
-        ConfigKey configKey = new ConfigKey(secure, debug, ignorePreValidation);
+        ConfigKey configKey = new ConfigKey(secure, debug, ignorePreValidation, TWO_MINUTES_IN_MILLIS);
         Client client = RestClientUtil.get(configKey);
         client.register(clientRequestFilter);
         if (tracer != null) {
             client.register(tracer);
         }
-        client.property(ClientProperties.CONNECT_TIMEOUT, TWO_MINUTES_IN_MILLIS);
-        client.property(ClientProperties.READ_TIMEOUT, TWO_MINUTES_IN_MILLIS);
         WebTarget webTarget = client.target(serviceAddress).path(apiRoot);
         LOGGER.info("WebTarget has been created with token: service address: {}, configKey: {}", serviceAddress, configKey);
         return webTarget;

@@ -36,7 +36,7 @@ public class FreeIPAClient extends MicroserviceClient {
         clientEntity.setActing(cloudbreakUser);
         clientEntity.freeIpaClient = new FreeIpaApiKeyClient(
                 testParameter.get(FreeIPATest.FREEIPA_SERVER_ROOT),
-                new ConfigKey(false, true, true))
+                new ConfigKey(false, true, true, TIMEOUT))
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
         return clientEntity;
     }
