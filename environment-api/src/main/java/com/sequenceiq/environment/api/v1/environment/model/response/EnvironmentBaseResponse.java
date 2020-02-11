@@ -32,6 +32,9 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.CREATE_FREEIPA)
     private Boolean createFreeIpa = Boolean.TRUE;
 
+    @ApiModelProperty(EnvironmentModelDescription.FREEIPA)
+    private FreeIpaResponse freeIpa;
+
     @ApiModelProperty(EnvironmentModelDescription.REGIONS)
     private CompactRegionResponse regions;
 
@@ -164,6 +167,14 @@ public abstract class EnvironmentBaseResponse {
 
     public void setCreateFreeIpa(Boolean createFreeIpa) {
         this.createFreeIpa = createFreeIpa;
+    }
+
+    public FreeIpaResponse getFreeIpa() {
+        return freeIpa;
+    }
+
+    public void setFreeIpa(FreeIpaResponse freeIpa) {
+        this.freeIpa = freeIpa;
     }
 
     public EnvironmentAuthenticationResponse getAuthentication() {

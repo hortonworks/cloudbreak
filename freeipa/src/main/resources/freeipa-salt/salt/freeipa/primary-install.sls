@@ -5,6 +5,7 @@ install-freeipa:
         - FPW: {{salt['pillar.get']('freeipa:password')}}
         - DOMAIN: {{salt['pillar.get']('freeipa:domain')}}
         - REALM: {{salt['pillar.get']('freeipa:realm')}}
+    - failhard: True
     - unless: test -f /var/log/freeipa_install-executed
     - require:
         - file: /opt/salt/scripts/freeipa_install.sh

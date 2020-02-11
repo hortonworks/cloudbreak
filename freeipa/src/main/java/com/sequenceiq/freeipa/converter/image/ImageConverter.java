@@ -16,8 +16,7 @@ public class ImageConverter implements Converter<Image, com.sequenceiq.cloudbrea
     public com.sequenceiq.cloudbreak.cloud.model.Image convert(Image source) {
         com.sequenceiq.cloudbreak.cloud.model.Image image =
                 new com.sequenceiq.cloudbreak.cloud.model.Image(source.getImageName(),
-                        Map.of(InstanceGroupType.GATEWAY, Optional.ofNullable(source.getUserdata()).orElse(""),
-                                InstanceGroupType.CORE, Optional.ofNullable(source.getUserdata()).orElse("")),
+                        Map.of(InstanceGroupType.GATEWAY, Optional.ofNullable(source.getUserdata()).orElse("")),
                         source.getOs(),
                         source.getOsType(),
                         source.getImageCatalogUrl(),

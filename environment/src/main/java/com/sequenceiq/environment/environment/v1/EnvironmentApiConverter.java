@@ -28,6 +28,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzu
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
+import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
@@ -57,6 +58,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -95,13 +97,16 @@ public class EnvironmentApiConverter {
 
     private final SubnetIdProvider subnetIdProvider;
 
+    private final FreeIpaConverter freeIpaConverter;
+
     public EnvironmentApiConverter(RegionConverter regionConverter,
             CredentialToCredentialV1ResponseConverter credentialConverter,
             CredentialViewConverter credentialViewConverter,
             TelemetryApiConverter telemetryApiConverter,
             TunnelConverter tunnelConverter,
             CredentialService credentialService,
-            SubnetIdProvider subnetIdProvider) {
+            SubnetIdProvider subnetIdProvider,
+            FreeIpaConverter freeIpaConverter) {
         this.regionConverter = regionConverter;
         this.credentialConverter = credentialConverter;
         this.credentialViewConverter = credentialViewConverter;
@@ -109,6 +114,7 @@ public class EnvironmentApiConverter {
         this.tunnelConverter = tunnelConverter;
         this.credentialService = credentialService;
         this.subnetIdProvider = subnetIdProvider;
+        this.freeIpaConverter = freeIpaConverter;
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
@@ -121,7 +127,7 @@ public class EnvironmentApiConverter {
                 .withCloudPlatform(getCloudPlatform(request, accountId))
                 .withCredential(request)
                 .withCreated(System.currentTimeMillis())
-                .withCreateFreeIpa(request.getFreeIpa() == null ? true : request.getFreeIpa().getCreate())
+                .withFreeIpaCreation(attachedFreeIpaRequestToDto(request.getFreeIpa()))
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry()))
                 .withRegions(request.getRegions())
@@ -171,6 +177,15 @@ public class EnvironmentApiConverter {
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();
+    }
+
+    private FreeIpaCreationDto attachedFreeIpaRequestToDto(AttachedFreeIpaRequest request) {
+        FreeIpaCreationDto.Builder builder = FreeIpaCreationDto.builder();
+        if (request != null) {
+            builder.withCreate(request.getCreate());
+            NullUtil.doIfNotNull(request.getInstanceCountByGroup(), instanceCountByGroup -> builder.withInstanceCountByGroup(instanceCountByGroup));
+        }
+        return builder.build();
     }
 
     private ParametersDto awsParamsToParametersDto(AwsEnvironmentParameters aws) {
@@ -277,7 +292,7 @@ public class EnvironmentApiConverter {
                 .withCredential(credentialConverter.convert(environmentDto.getCredential()))
                 .withEnvironmentStatus(environmentDto.getStatus().getResponseStatus())
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
-                .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
+                .withCreateFreeIpa(environmentDto.getFreeIpaCreation().getCreate())
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
                 .withCreator(environmentDto.getCreator())
                 .withAuthentication(authenticationDtoToResponse(environmentDto.getAuthentication()))
@@ -309,7 +324,8 @@ public class EnvironmentApiConverter {
                 .withEnvironmentStatus(environmentDto.getStatus().getResponseStatus())
                 .withCreator(environmentDto.getCreator())
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
-                .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
+                .withCreateFreeIpa(environmentDto.getFreeIpaCreation().getCreate())
+                .withFreeIpa(freeIpaConverter.convert(environmentDto.getFreeIpaCreation()))
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
                 .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())

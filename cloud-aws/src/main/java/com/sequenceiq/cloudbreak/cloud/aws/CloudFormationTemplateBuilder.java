@@ -80,7 +80,8 @@ public class CloudFormationTemplateBuilder {
                 : context.existingSubnetCidr);
         model.put("vpcSubnet", context.existingVpcCidr == null ? Collections.emptyList() : context.existingVpcCidr);
         model.put("dedicatedInstances", areDedicatedInstancesRequested(context.stack));
-        model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone().value() != null);
+        model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone() != null
+                && context.ac.getCloudContext().getLocation().getAvailabilityZone().value() != null);
         model.put("mapPublicIpOnLaunch", context.mapPublicIpOnLaunch);
         try {
             String template = freeMarkerTemplateUtils.processTemplateIntoString(new Template("aws-template", context.template, freemarkerConfiguration), model);
