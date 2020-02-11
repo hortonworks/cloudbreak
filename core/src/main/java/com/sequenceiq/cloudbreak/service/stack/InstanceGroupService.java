@@ -49,8 +49,8 @@ public class InstanceGroupService {
                 }).collect(Collectors.toSet());
     }
 
-    public Optional<InstanceGroup> findOneByGroupNameInStack(Long stackId, String groupName) {
-        return repository.findOneByGroupNameInStack(stackId, groupName);
+    public Optional<InstanceGroup> findOneWithInstanceMetadataByGroupNameInStack(Long stackId, String groupName) {
+        return repository.findOneWithInstanceMetadataByGroupNameInStack(stackId, groupName);
     }
 
     public InstanceGroup save(InstanceGroup instanceGroup) {

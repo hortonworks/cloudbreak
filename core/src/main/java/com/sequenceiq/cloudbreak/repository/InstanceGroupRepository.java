@@ -24,11 +24,10 @@ public interface InstanceGroupRepository extends DisabledBaseRepository<Instance
 
     @EntityGraph(value = "InstanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
     @Query("SELECT i from InstanceGroup i WHERE i.stack.id = :stackId AND i.groupName = :groupName")
-    Optional<InstanceGroup> findOneByGroupNameInStack(@Param("stackId") Long stackId, @Param("groupName") String groupName);
+    Optional<InstanceGroup> findOneWithInstanceMetadataByGroupNameInStack(@Param("stackId") Long stackId, @Param("groupName") String groupName);
 
     Set<InstanceGroup> findBySecurityGroup(SecurityGroup securityGroup);
 
-    @EntityGraph(value = "InstanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
     Set<InstanceGroup> findByStackId(@Param("stackId") Long stackId);
 
 }

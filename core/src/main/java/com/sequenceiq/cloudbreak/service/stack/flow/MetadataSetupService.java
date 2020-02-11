@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -18,17 +19,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Service
 public class MetadataSetupService {
@@ -58,7 +59,7 @@ public class MetadataSetupService {
     }
 
     public void cleanupRequestedInstances(Stack stack, String instanceGroupName) {
-        Optional<InstanceGroup> ig = instanceGroupService.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
+        Optional<InstanceGroup> ig = instanceGroupService.findOneWithInstanceMetadataByGroupNameInStack(stack.getId(), instanceGroupName);
         if (ig.isPresent()) {
             List<InstanceMetaData> requestedInstances = instanceMetaDataService.findAllByInstanceGroupAndInstanceStatus(ig.get(), InstanceStatus.REQUESTED);
             for (InstanceMetaData inst : requestedInstances) {
@@ -75,6 +76,11 @@ public class MetadataSetupService {
             Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
             boolean primaryIgSelected = allInstanceMetadata.stream().anyMatch(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY);
             Json imageJson = new Json(imageService.getImage(stack.getId()));
+
+            Map<String, InstanceGroup> instanceGroups = instanceGroupService.findByStackId(stack.getId())
+                    .stream()
+                    .collect(Collectors.toMap(InstanceGroup::getGroupName, instanceGroup -> instanceGroup));
+
             for (CloudVmMetaDataStatus cloudVmMetaDataStatus : cloudVmMetaDataStatusList) {
                 CloudInstance cloudInstance = cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance();
                 CloudInstanceMetaData md = cloudVmMetaDataStatus.getMetaData();
@@ -87,7 +93,7 @@ public class MetadataSetupService {
                 // CB 1.0.x clusters do not have private id thus we cannot correlate them with instance groups thus keep the original one
                 InstanceGroup ig = instanceMetaDataEntry.getInstanceGroup();
                 String group = ig == null ? cloudInstance.getTemplate().getGroupName() : ig.getGroupName();
-                InstanceGroup instanceGroup = instanceGroupService.findOneByGroupNameInStack(stack.getId(), group).orElse(null);
+                InstanceGroup instanceGroup = instanceGroups.get(group);
                 instanceMetaDataEntry.setPrivateIp(md.getPrivateIp());
                 instanceMetaDataEntry.setPublicIp(md.getPublicIp());
                 instanceMetaDataEntry.setSshPort(md.getSshPort());

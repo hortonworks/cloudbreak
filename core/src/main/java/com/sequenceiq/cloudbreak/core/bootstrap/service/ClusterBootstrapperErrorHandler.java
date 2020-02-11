@@ -76,8 +76,9 @@ public class ClusterBootstrapperErrorHandler {
             for (Node missingNode : missingNodes) {
                 InstanceMetaData instanceMetaData =
                         instanceMetaDataService.findNotTerminatedByPrivateAddress(stack.getId(), missingNode.getPrivateIp())
-                        .orElseThrow(NotFoundException.notFound("instanceMetaData", missingNode.getPrivateIp()));
-                InstanceGroup ig = instanceGroupService.findOneByGroupNameInStack(stack.getId(), instanceMetaData.getInstanceGroup().getGroupName())
+                                .orElseThrow(NotFoundException.notFound("instanceMetaData", missingNode.getPrivateIp()));
+                InstanceGroup ig = instanceGroupService.findOneWithInstanceMetadataByGroupNameInStack(stack.getId(),
+                        instanceMetaData.getInstanceGroup().getGroupName())
                         .orElseThrow(NotFoundException.notFound("instanceGroup", instanceMetaData.getInstanceGroup().getGroupName()));
                 if (ig.getNodeCount() < 1) {
                     throw new CloudbreakOrchestratorFailedException(cloudbreakMessagesService.getMessage(
