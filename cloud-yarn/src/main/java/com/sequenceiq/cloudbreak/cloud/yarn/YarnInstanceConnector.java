@@ -28,6 +28,11 @@ public class YarnInstanceConnector implements InstanceConnector {
     }
 
     @Override
+    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext authenticatedContext, List<CloudInstance> vms) {
+        throw new CloudOperationNotSupportedException("Reboot instances operation is not supported on YARN");
+    }
+
+    @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext authenticatedContext, List<CloudInstance> vms) {
         throw new CloudOperationNotSupportedException("Instances' states check operation is not supported on YARN");
     }

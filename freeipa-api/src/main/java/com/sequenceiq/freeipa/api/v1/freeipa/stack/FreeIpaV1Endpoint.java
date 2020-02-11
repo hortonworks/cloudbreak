@@ -24,6 +24,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIp
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 
 import io.swagger.annotations.Api;
@@ -75,6 +76,13 @@ public interface FreeIpaV1Endpoint {
     @ApiOperation(value = FreeIpaOperationDescriptions.HEALTH, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "healthV1")
     HealthDetailsFreeIpaResponse healthDetails(@QueryParam("environment") @NotEmpty String environmentCrn);
+
+    @POST
+    @Path("reboot")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.REBOOT, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "rebootV1")
+    void rebootInstances(@Valid RebootInstancesRequest request) throws Exception;
 
     @GET
     @Path("ca.crt")

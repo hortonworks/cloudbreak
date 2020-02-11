@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -27,6 +28,11 @@ public class OpenStackNativeInstanceConnector extends AbstractInstanceConnector 
 
     @Inject
     private OpenStackClient openStackClient;
+
+    @Override
+    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext authenticatedContext, List<CloudInstance> vms) {
+        throw new CloudOperationNotSupportedException("Reboot instances operation is not supported on OpenStack");
+    }
 
     @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {

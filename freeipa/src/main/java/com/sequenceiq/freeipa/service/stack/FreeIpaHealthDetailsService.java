@@ -12,10 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
@@ -81,7 +80,7 @@ public class FreeIpaHealthDetailsService {
             NodeHealthDetails nodeResponse = new NodeHealthDetails();
             response.addNodeHealthDetailsFreeIpaResponses(nodeResponse);
             nodeResponse.setName(master.getDiscoveryFQDN());
-            nodeResponse.setStatus(Status.UNREACHABLE);
+            nodeResponse.setStatus(InstanceStatus.UNREACHABLE);
         }
         updateResponseWithInstanceIds(response, stack);
         return response;
@@ -112,7 +111,7 @@ public class FreeIpaHealthDetailsService {
 
     private boolean isOverallHealthy(HealthDetailsFreeIpaResponse response) {
         for (NodeHealthDetails node: response.getNodeHealthDetails()) {
-            if (node.getStatus().equals(Status.AVAILABLE)) {
+            if (node.getStatus().equals(InstanceStatus.CREATED)) {
                 return true;
             }
         }
@@ -127,7 +126,7 @@ public class FreeIpaHealthDetailsService {
             if (nodeMatcher.find()) {
                 nodeResponse = new NodeHealthDetails();
                 response.addNodeHealthDetailsFreeIpaResponses(nodeResponse);
-                nodeResponse.setStatus(Status.AVAILABLE);
+                nodeResponse.setStatus(InstanceStatus.CREATED);
                 nodeResponse.setName(nodeMatcher.group(NODE_GROUP));
             }
             if (nodeResponse == null) {
@@ -139,7 +138,7 @@ public class FreeIpaHealthDetailsService {
                     Matcher matcher = RESULT_PATTERN.matcher(message.getMessage());
                     if (matcher.find()) {
                         if (!STATUS_OK.equals(matcher.group(STATUS_GROUP))) {
-                            nodeResponse.setStatus(Status.UNHEALTHY);
+                            nodeResponse.setStatus(InstanceStatus.FAILED);
                             nodeResponse.addIssue(precedingMessage);
                         }
                     }

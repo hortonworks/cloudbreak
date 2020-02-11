@@ -58,6 +58,11 @@ public class OpenStackInstanceConnector implements InstanceConnector {
     }
 
     @Override
+    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext authenticatedContext, List<CloudInstance> vms) {
+        throw new CloudOperationNotSupportedException("Reboot instances operation is not supported on OpenStack");
+    }
+
+    @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         OSClient<?> osClient = openStackClient.createOSClient(ac);

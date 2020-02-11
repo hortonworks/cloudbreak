@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 
 import io.swagger.annotations.ApiModel;
 
@@ -20,7 +20,7 @@ public class NodeHealthDetails {
     private List<String> issues;
 
     @NotNull
-    private Status status;
+    private InstanceStatus status;
 
     @NotNull
     private String name;
@@ -28,11 +28,11 @@ public class NodeHealthDetails {
     @NotNull
     private String instanceId;
 
-    public Status getStatus() {
+    public InstanceStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(InstanceStatus status) {
         this.status = status;
     }
 
