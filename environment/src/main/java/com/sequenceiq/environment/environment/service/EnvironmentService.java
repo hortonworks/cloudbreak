@@ -268,4 +268,8 @@ public class EnvironmentService implements ResourceIdProvider {
     public Long getResourceIdByResourceName(String resourceName) {
         return getByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()).getId();
     }
+
+    public List<String> findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(String accountId, Long parentEnvironmentId) {
+        return environmentRepository.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(accountId, parentEnvironmentId);
+    }
 }

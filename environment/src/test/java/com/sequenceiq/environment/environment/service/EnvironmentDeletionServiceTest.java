@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.environment.service;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,6 +53,8 @@ public class EnvironmentDeletionServiceTest {
     public void setup() {
         environment = new Environment();
         environmentDto = new EnvironmentDto();
+
+        when(environmentService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(any(), any())).thenReturn(emptyList());
     }
 
     @ParameterizedTest
@@ -199,5 +203,13 @@ public class EnvironmentDeletionServiceTest {
 
         BadRequestException actual = assertThrows(BadRequestException.class, () -> environmentDeletionService.checkIsEnvironmentDeletable(environment));
         assertEquals("The following Data Lake cluster(s) must be terminated before Environment deletion [name]", actual.getMessage());
+    }
+
+    @Test
+    public void canNotDeleteParentEnvironment() {
+        when(environmentService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(environment.getAccountId(), environment.getId()))
+                .thenReturn(singletonList("child name"));
+
+        assertThrows(BadRequestException.class, () -> environmentDeletionService.delete(environment, TestConstants.USER, false));
     }
 }

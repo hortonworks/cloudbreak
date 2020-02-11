@@ -62,6 +62,7 @@ public class EnvironmentDeletionService {
 
     public Environment delete(Environment environment, String userCrn, boolean forced) {
         MDCBuilder.buildMdcContext(environment);
+        validateDeletion(environment);
         LOGGER.debug("Deleting environment with name: {}", environment.getName());
         if (forced) {
             reactorFlowManager.triggerForcedDeleteFlow(environment, userCrn);
@@ -113,6 +114,14 @@ public class EnvironmentDeletionService {
         if (!distroXClusterNames.isEmpty()) {
             throw new BadRequestException(String.format("The following Data Hub cluster(s) must be terminated before Environment deletion [%s]",
                     String.join(", ", distroXClusterNames)));
+        }
+    }
+
+    void validateDeletion(Environment environment) {
+        List<String> childEnvNames = environmentService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(environment.getAccountId(), environment.getId());
+        if (!childEnvNames.isEmpty()) {
+            throw new BadRequestException(String.format("The following Envrionment(s) must be deleted before Environment deletion [%s]",
+                    String.join(", ", childEnvNames)));
         }
     }
 }
