@@ -177,6 +177,7 @@ public class UserSyncService {
                             break;
                     }
                 } catch (InterruptedException | ExecutionException e) {
+                    LOGGER.error("Sync is interrupted for env: {}", envCrn, e);
                     failure.add(new FailureDetails(envCrn, e.getLocalizedMessage()));
                 }
             });

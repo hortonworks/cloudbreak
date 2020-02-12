@@ -187,4 +187,23 @@ public class Operation {
         }
         return list;
     }
+
+    @Override
+    public String toString() {
+        return "Operation{" +
+                "id=" + id +
+                ", operationId='" + operationId + '\'' +
+                ", accountId='" + accountId + '\'' +
+                ", operationType=" + operationType +
+                ", status=" + status +
+                ", environmentList=" + environmentList +
+                ", userList=" + userList +
+                ", successList=" + successList +
+                ", failureList=" + failureList +
+                ", error='" + error + '\'' +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", version=" + version +
+                '}';
+    }
 }
