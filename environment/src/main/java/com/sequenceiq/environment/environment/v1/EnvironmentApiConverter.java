@@ -296,7 +296,7 @@ public class EnvironmentApiConverter {
                 .withSubnetIds(network.getSubnetIds())
                 .withNetworkCidr(network.getNetworkCidr())
                 .withSubnetMetas(network.getSubnetMetas())
-                .withPreferedSubnetId(subnetIdProvider.provide(network, tunnel))
+                .withPreferedSubnetId(subnetIdProvider.provide(network, tunnel, network.getCloudPlatform()))
                 .withPrivateSubnetCreation(network.getPrivateSubnetCreation())
                 .withExistingNetwork(RegistrationType.EXISTING == network.getRegistrationType())
                 .withAws(getIfNotNull(network.getAws(), p -> EnvironmentNetworkAwsParams.EnvironmentNetworkAwsParamsBuilder
