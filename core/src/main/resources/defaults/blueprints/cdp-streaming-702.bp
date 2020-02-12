@@ -1,5 +1,5 @@
 {
-  "description": "CDP 1.2 Streams Messaging Heavy Duty with Apache Kafka, Schema Registry, Streams Messaging Manager",
+  "description": "7.0.2 - Streams Messaging Heavy Duty with Apache Kafka, Schema Registry, Streams Messaging Manager",
   "blueprint": {
     "cdhVersion": "7.0.2",
     "displayName": "streams-messaging",

@@ -21,9 +21,9 @@ public class SdxConverter {
             return null;
         }
         if (sdx.getStatus() != SdxClusterStatusResponse.RUNNING) {
-            throw new BadRequestException(String.format("Datalake should be running state. Current state is '%s' instead of Running", sdx.getStatusReason()));
+            throw new BadRequestException(String.format("Datalake should be running state. Current state is '%s' instead of Running", sdx.getStatus()));
         }
-        return getSharedServiceV4Request(sdx.getName());
+        return getSharedServiceV4Request(sdx);
     }
 
     public SdxV1Request getSdx(SharedServiceV4Request sharedServiceV4Request) {
@@ -32,9 +32,10 @@ public class SdxConverter {
         return sdx;
     }
 
-    public SharedServiceV4Request getSharedServiceV4Request(String name) {
+    public SharedServiceV4Request getSharedServiceV4Request(SdxClusterResponse sdx) {
         SharedServiceV4Request sharedServiceV4Request = new SharedServiceV4Request();
-        sharedServiceV4Request.setDatalakeName(name);
+        sharedServiceV4Request.setDatalakeName(sdx.getName());
+        sharedServiceV4Request.setRuntimeVersion(sdx.getRuntime());
         return sharedServiceV4Request;
     }
 }

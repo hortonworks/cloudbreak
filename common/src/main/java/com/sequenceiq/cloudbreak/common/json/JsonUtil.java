@@ -34,6 +34,7 @@ public class JsonUtil {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     static {
+        MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         MAPPER.enable(Feature.ALLOW_UNQUOTED_CONTROL_CHARS);
         MAPPER.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
         MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false);

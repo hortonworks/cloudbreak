@@ -33,14 +33,23 @@ public class ClusterTemplateV4Response extends ClusterTemplateV4Base {
 
     private Long created;
 
-    private FeatureState featurseState;
+    private FeatureState featureState;
+
+    @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.NODE_COUNT)
+    private Integer nodeCount;
+
+    @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.STACK_TYPE)
+    private String stackType;
+
+    @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.STACK_VERSION)
+    private String stackVersion;
 
     public FeatureState getFeatureState() {
-        return featurseState;
+        return featureState;
     }
 
     public void setFeatureState(FeatureState featurseState) {
-        this.featurseState = featurseState;
+        this.featureState = featurseState;
     }
 
     public ResourceStatus getStatus() {
@@ -89,5 +98,29 @@ public class ClusterTemplateV4Response extends ClusterTemplateV4Base {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public Integer getNodeCount() {
+        return nodeCount;
+    }
+
+    public void setNodeCount(Integer nodeCount) {
+        this.nodeCount = nodeCount;
+    }
+
+    public String getStackType() {
+        return stackType;
+    }
+
+    public void setStackType(String stackType) {
+        this.stackType = stackType;
+    }
+
+    public String getStackVersion() {
+        return stackVersion;
+    }
+
+    public void setStackVersion(String stackVersion) {
+        this.stackVersion = stackVersion;
     }
 }

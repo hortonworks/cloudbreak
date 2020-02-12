@@ -30,6 +30,7 @@ public class SdxClusterConverter {
             sdxClusterResponse.setStatus(SdxClusterStatusResponse.valueOf(actualStatusForSdx.getStatus().name()));
             sdxClusterResponse.setStatusReason(actualStatusForSdx.getStatusReason());
         }
+        sdxClusterResponse.setRuntime(sdxCluster.getRuntime());
         sdxClusterResponse.setName(sdxCluster.getClusterName());
         sdxClusterResponse.setCrn(sdxCluster.getCrn());
         sdxClusterResponse.setClusterShape(sdxCluster.getClusterShape());

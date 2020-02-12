@@ -91,7 +91,7 @@ public class PlatformConfig {
 
     private Optional<DatabaseConfig> readDbConfig(CloudPlatform cloudPlatform, SdxClusterShape sdxClusterShape)
             throws IOException {
-        String resourcePath = String.format("sdx/%s/database-%s-template.json",
+        String resourcePath = String.format("rds/%s/database-%s-template.json",
                 cloudPlatform.toString().toLowerCase(Locale.US),
                 sdxClusterShape.toString().toLowerCase(Locale.US).replaceAll("_", "-"));
         String databaseTemplateJson = FileReaderUtils.readFileFromClasspathQuietly(resourcePath);

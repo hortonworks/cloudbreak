@@ -1,12 +1,12 @@
 {
-  "name": "Operational Database with Phoenix for AWS",
+  "name": "7.1.0 - Operational Database with Phoenix for AWS",
   "description": "",
   "type": "OPERATIONALDATABASE",
   "featureState": "PREVIEW",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "CDP 1.2 - Operational Database: Apache HBase, Phoenix"
+      "blueprintName": "7.1.0 - Operational Database: Apache HBase, Phoenix"
     },
     "instanceGroups": [
       {

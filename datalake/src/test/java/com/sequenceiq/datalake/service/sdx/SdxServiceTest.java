@@ -2,7 +2,6 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.SDX_CLUSTER_DELETION_STARTED;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -11,6 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,10 +36,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
@@ -109,6 +110,9 @@ class SdxServiceTest {
     @Mock
     private DistroxService distroxService;
 
+    @Mock
+    private Map<CDPConfigKey, StackV4Request> cdpStackRequests;
+
     @InjectMocks
     private SdxService underTest;
 
@@ -160,7 +164,9 @@ class SdxServiceTest {
     }
 
     @Test
-    void createSdx() {
+    void createSdx() throws IOException {
+        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
+        when(cdpStackRequests.get(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         Map<String, String> tags = new HashMap<>();
@@ -197,7 +203,9 @@ class SdxServiceTest {
     }
 
     @Test
-    void createSdxWhenBaseLocationEndsWithSlash() {
+    void createSdxWhenBaseLocationEndsWithSlash() throws IOException {
+        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
+        when(cdpStackRequests.get(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         sdxClusterRequest.setEnvironment("envir");
@@ -218,7 +226,9 @@ class SdxServiceTest {
     }
 
     @Test
-    void createSdxWhenBaseLocation() {
+    void createSdxWhenBaseLocation() throws IOException {
+        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
+        when(cdpStackRequests.get(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         sdxClusterRequest.setEnvironment("envir");
@@ -279,35 +289,6 @@ class SdxServiceTest {
                 () -> underTest.deleteSdx(USER_CRN, CLUSTER_NAME, false));
         verify(sdxClusterRepository, times(1))
                 .findByAccountIdAndClusterNameAndDeletedIsNull(eq("hortonworks"), eq(CLUSTER_NAME));
-    }
-
-    @Test
-    void validateAllAwsStackRequests() {
-        CloudPlatform cp = CloudPlatform.AWS;
-        Stream.of(SdxClusterShape.values())
-                .filter(a -> !a.equals(SdxClusterShape.CUSTOM))
-                .forEach(a -> assertStackV4Request(cp, a));
-    }
-
-    @Test
-    void validateAllAzureStackRequests() {
-        CloudPlatform cp = CloudPlatform.AZURE;
-        Stream.of(SdxClusterShape.values())
-                .filter(a -> !a.equals(SdxClusterShape.CUSTOM))
-                .forEach(a -> assertStackV4Request(cp, a));
-    }
-
-    @Test
-    void validateAllYarnStackRequests() {
-        CloudPlatform cp = CloudPlatform.YARN;
-        Stream.of(SdxClusterShape.values())
-                .filter(a -> !a.equals(SdxClusterShape.CUSTOM))
-                .forEach(a -> assertStackV4Request(cp, a));
-    }
-
-    private void assertStackV4Request(CloudPlatform type, SdxClusterShape shape) {
-        StackV4Request lightDutyStackrequest = underTest.getStackRequestFromFile(underTest.generateClusterTemplatePath(type.toString(), shape));
-        assertNotNull(lightDutyStackrequest.getCluster().getBlueprintName(), "Bp name should be defined in all templates");
     }
 
     @Test

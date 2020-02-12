@@ -223,4 +223,9 @@ public class SdxController implements SdxEndpoint {
         sdxStopService.triggerStopIfClusterNotStopped(sdxCluster);
     }
 
+    @Override
+    public List<String> versions() {
+        return sdxService.getDatalakeVersions();
+    }
+
 }
