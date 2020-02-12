@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.validator;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -34,42 +34,36 @@ public class AwsIDBrokerAssumeRoleValidator {
 
     public boolean canAssumeRoles(AmazonIdentityManagement iam, InstanceProfile instanceProfile,
             Collection<Role> roles, ValidationResultBuilder resultBuilder) {
-        SortedSet<String> failedRoles = new TreeSet<>();
-        for (Role role : roles) {
-            if (!canAssumeRole(iam, instanceProfile, role)) {
-                failedRoles.add(role.getArn());
-            }
-        }
-        if (failedRoles.isEmpty()) {
-            return true;
-        } else {
-            resultBuilder.error(
-                    String.format("IDBroker instance profile (%s) doesn't have permissions to assume " +
-                            "the role(s): %s", instanceProfile.getArn(), failedRoles));
-            return false;
-        }
-    }
+        Collection<String> roleArns = roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new));
 
-    boolean canAssumeRole(AmazonIdentityManagement iam, InstanceProfile instanceProfile, Role role) {
         for (Role instanceProfileRole : instanceProfile.getRoles()) {
-            Collection<String> resources = Collections.singletonList(role.getArn());
             try {
                 List<EvaluationResult> evaluationResults = awsIamService.simulatePrincipalPolicy(iam,
-                        instanceProfileRole.getArn(), ASSUME_ROLE_ACTION, resources);
+                        instanceProfileRole.getArn(), ASSUME_ROLE_ACTION, roleArns);
                 for (EvaluationResult evaluationResult : evaluationResults) {
-                    if (PolicyEvaluationDecisionType.Allowed.toString()
-                            .equals(evaluationResult.getEvalDecision())) {
-                        return true;
+                    if (PolicyEvaluationDecisionType.Allowed.toString().equals(evaluationResult.getEvalDecision())) {
+                        roleArns.remove(evaluationResult.getEvalResourceName());
                     }
                 }
             } catch (AmazonIdentityManagementException e) {
                 // Log the error and return true. We don't want to block if there is an IAM failure.
                 // This can happen due to throttling or other issues.
-                LOGGER.error("Unable to check assume role from instance profile {} for role {} due to {}",
-                        instanceProfile.getArn(), role.getArn(), e.getMessage(), e);
+                LOGGER.error("Unable to check assume role from instance profile {} for roles {} due to {}",
+                        instanceProfile.getArn(), roleArns, e.getMessage(), e);
+                return true;
+            }
+            if (roleArns.isEmpty()) {
                 return true;
             }
         }
-        return false;
+
+        if (roleArns.isEmpty()) {
+            return true;
+        } else {
+            resultBuilder.error(
+                    String.format("IDBroker instance profile (%s) doesn't have permissions to assume " +
+                            "the role(s): %s", instanceProfile.getArn(), roleArns));
+            return false;
+        }
     }
 }
