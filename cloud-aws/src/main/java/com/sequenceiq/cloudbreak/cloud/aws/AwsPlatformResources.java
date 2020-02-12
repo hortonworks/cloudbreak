@@ -389,7 +389,7 @@ public class AwsPlatformResources implements PlatformResources {
                             subnetName.orElse(subnet.getSubnetId()),
                             subnet.getAvailabilityZone(),
                             subnet.getCidrBlock(),
-                            !subnet.isMapPublicIpOnLaunch(),
+                            !hasInternetGateway,
                             subnet.getMapPublicIpOnLaunch(),
                             hasInternetGateway)
             );
