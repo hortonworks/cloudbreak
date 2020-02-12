@@ -451,7 +451,7 @@ public class ServiceEndpointCollector {
     private String getImpalaJdbcUrlFromGatewayTopology(String managerIp, GatewayTopology gt) {
         Gateway gateway = gt.getGateway();
         if (gatewayListeningOnHttpsPort(gateway)) {
-            return String.format("jdbc:impala://%s/;ssl=1;transportMode=http;httpPath=%s/%s%s/impala;AuthMech=3;",
+            return String.format("jdbc:impala://%s:443/;ssl=1;transportMode=http;httpPath=%s/%s%s/impala;AuthMech=3;",
                     managerIp, gateway.getPath(), gt.getTopologyName(), API_TOPOLOGY_POSTFIX);
         } else {
             return String.format("jdbc:impala://%s:%s/;ssl=1;transportMode=http;httpPath=%s/%s%s/impala;AuthMech=3;",

@@ -41,7 +41,7 @@ public class JobService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobService.class);
 
-    private static final int RANDOM_DELAY = 100;
+    private static final int RANDOM_DELAY = 120;
 
     private static final Random RANDOM = new SecureRandom();
 

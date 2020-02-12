@@ -39,6 +39,7 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',           version: springBootVersion
   implementation     group: 'io.projectreactor',         name: 'reactor-core',                         version: eventBusVersion
   implementation     group: 'io.projectreactor',         name: 'reactor-bus',                          version: eventBusVersion
   implementation     group: 'io.projectreactor',         name: 'reactor-stream',                       version: eventBusVersion
@@ -97,6 +98,8 @@ dependencies {
   implementation project(':notification-sender')
   implementation project(':environment-api')
   implementation project(':cluster-proxy')
+  implementation project(':status-checker')
+
   testCompile project(path: ':secret-engine', configuration: 'tests')
   runtime project(':orchestrator-salt')
   runtime project(':cloud-openstack')

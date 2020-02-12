@@ -28,7 +28,7 @@ join_ipa:
           {%- endif %}
           --password "{{salt['pillar.get']('sssd-ipa:password')}}" --unattended --force-join --ssh-trust-dns --no-ntp --unattended'
 {% endif %}
-    - unless: ipa env
+    - unless: echo $PW | kinit {{salt['pillar.get']('sssd-ipa:principal')}} && ipa env
     - runas: root
     - failhard: True
     - env:
