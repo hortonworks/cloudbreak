@@ -135,8 +135,8 @@ public class StackSyncService {
         instanceMetaDataService.save(instanceMetaData);
     }
 
-    public void autoSync(Stack stack, List<CloudVmInstanceStatus> instanceStatuses, boolean stackStatusUpdateEnabled, InstanceSyncState defaultState) {
-        Set<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
+    public void autoSync(Stack stack, Collection<InstanceMetaData> instances, List<CloudVmInstanceStatus> instanceStatuses,
+            boolean stackStatusUpdateEnabled, InstanceSyncState defaultState) {
         Map<String, InstanceSyncState> instaceSyncStates = instanceStatuses.stream()
                 .collect(Collectors.toMap(i -> i.getCloudInstance().getInstanceId(), i -> InstanceSyncState.getInstanceSyncState(i.getStatus())));
         Map<InstanceSyncState, Integer> instanceStateCounts = initInstanceStateCounts();

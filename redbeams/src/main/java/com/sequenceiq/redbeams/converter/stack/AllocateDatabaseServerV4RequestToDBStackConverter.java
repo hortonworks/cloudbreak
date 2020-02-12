@@ -118,7 +118,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         dbStack.setName(source.getName() != null ? source.getName() : generateDatabaseServerStackName(environment.getName()));
         dbStack.setEnvironmentId(source.getEnvironmentCrn());
         setRegion(dbStack, environment);
-        dbStack.setNetwork(buildNetwork(source.getNetwork(), environment, cloudPlatform));
 
         if (source.getDatabaseServer() != null) {
             dbStack.setDatabaseServer(buildDatabaseServer(source.getDatabaseServer(), cloudPlatform, source.getName(), ownerCrn,
@@ -131,6 +130,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
             asMap.forEach((key, value) -> parameter.put(key, value.toString()));
             dbStack.setParameters(parameter);
         }
+        dbStack.setNetwork(buildNetwork(source.getNetwork(), environment, cloudPlatform, dbStack.getParameters()));
 
         Instant now = clock.getCurrentInstant();
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.PROVISION_REQUESTED, now.toEpochMilli()));
@@ -184,22 +184,24 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         }
     }
 
-    private Map<String, Object> getSubnetsFromEnvironment(DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform) {
+    private Map<String, Object> getSubnetsFromEnvironment(DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,
+            Map<String, String> dbParameters) {
         List<CloudSubnet> subnets = subnetListerService.listSubnets(environmentResponse, cloudPlatform);
-        List<String> chosenSubnetIds = subnetChooserService.chooseSubnets(subnets, cloudPlatform).stream()
+        List<String> chosenSubnetIds = subnetChooserService.chooseSubnets(subnets, cloudPlatform, dbParameters).stream()
                 .map(CloudSubnet::getId)
                 .collect(Collectors.toList());
 
         return networkParameterAdder.addSubnetIds(new HashMap<>(), chosenSubnetIds, cloudPlatform);
     }
 
-    private Network buildNetwork(NetworkV4StackRequest source, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform) {
+    private Network buildNetwork(NetworkV4StackRequest source, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,
+            Map<String, String> dbParameters) {
         Network network = new Network();
         network.setName(generateNetworkName());
 
         Map<String, Object> parameters = source != null
                 ? providerParameterCalculator.get(source).asMap()
-                : getSubnetsFromEnvironment(environmentResponse, cloudPlatform);
+                : getSubnetsFromEnvironment(environmentResponse, cloudPlatform, dbParameters);
 
         networkParameterAdder.addParameters(parameters, environmentResponse, cloudPlatform);
 

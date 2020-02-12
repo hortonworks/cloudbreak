@@ -112,6 +112,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${cb.max.salt.recipe.execution.retry.forced:2}")
     private int maxRetryRecipeForced;
 
+    @Value("${cb.max.salt.new.service.telemetry.stop.retry:5}")
+    private int maxTelemetryStopRetry;
+
     @Value("${rest.debug}")
     private boolean restDebug;
 
@@ -210,7 +213,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = createSaltConnector(primaryGateway)) {
             StateAllRunner stateAllJobRunner = new StateAllRunner(gatewayTargets, nodes, "fluent.agent-stop");
             OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateAllJobRunner);
-            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel, maxTelemetryStopRetry, false);
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during telemetry agent stop", e);

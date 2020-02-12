@@ -30,4 +30,9 @@ public class ClusterManagerState {
     public void setClusterManagerStatus(ClusterManagerStatus clusterManagerStatus) {
         this.clusterManagerStatus = clusterManagerStatus;
     }
+
+    @Override
+    public String toString() {
+        return String.format("ClusterManagerState{status='%s', reason='%s'}", clusterManagerStatus.name(), statusReason);
+    }
 }

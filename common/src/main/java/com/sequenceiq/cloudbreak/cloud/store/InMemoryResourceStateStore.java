@@ -5,9 +5,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 
 public class InMemoryResourceStateStore {
+    private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryResourceStateStore.class);
+
     private static final Map<String, Map<Long, PollGroup>> RESOURCE_STATE_STORE = new ConcurrentHashMap<>();
 
     private InMemoryResourceStateStore() {
@@ -31,6 +36,7 @@ public class InMemoryResourceStateStore {
             resourceMap = RESOURCE_STATE_STORE.get(resourceType);
         }
         resourceMap.put(resourceId, value);
+        LOGGER.debug("The polling inited in the in-memory-store for {} with {}: {}", resourceType, resourceId, value);
     }
 
     public static void deleteResource(String resourceType, Long resourceId) {
