@@ -90,6 +90,7 @@ public class MockedTestContext extends TestContext implements MockTestContext {
 
     @Override
     public void cleanupTestContext() {
+        super.cleanupTestContext();
         if (sparkServer != null) {
             LOGGER.info("Cleaning up MockedTestContext. {}", sparkServer.getEndpoint());
             sparkServerPool.putSecure(sparkServer);
@@ -98,7 +99,6 @@ public class MockedTestContext extends TestContext implements MockTestContext {
             sparkServer = null;
             model = null;
         }
-        super.cleanupTestContext();
     }
 
     @PreDestroy
