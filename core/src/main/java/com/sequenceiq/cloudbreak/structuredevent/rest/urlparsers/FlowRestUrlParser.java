@@ -16,14 +16,15 @@ public class FlowRestUrlParser extends RestUrlParser {
 
     public static final int RESOURCE_NAME_GROUP_NUMBER = 4;
 
-    public static final int FLOW_ID_GROUP_NUMBER = 8;
+    public static final int FLOW_ID_GROUP_NUMBER = 6;
 
-    public static final int CHECK_FLOW_ID_GROUP_NUMBER = 6;
+    public static final int CHECK_FLOW_ID_GROUP_NUMBER = 11;
 
-    public static final int CHECK_CHAIN_ID_GROUP_NUMBER = 7;
+    public static final int CHECK_CHAIN_ID_GROUP_NUMBER = 13;
 
-    private static final Pattern PATTERN = Pattern.compile("flow_logs/((resource/|check/)(name/([^/]+)|" +
-            "crn/([^/]+)|flowId/([^/]+)|chainId/([^/]+))|([^/]+))(/last)?");
+    private static final Pattern PATTERN = Pattern.compile("flow/" +
+            "((logs/(resource/name/([^/]+)|resource/crn/([^/]+)|([^/]+))(/last)?)|" +
+            "(check/((flowId/([^/]+))|(chainId/([^/]+)))))");
 
     @Override
     public Pattern getPattern() {
@@ -53,7 +54,7 @@ public class FlowRestUrlParser extends RestUrlParser {
 
     @Override
     protected String getResourceType(Matcher matcher) {
-        return "flow_logs";
+        return "flow";
     }
 
     @Override
