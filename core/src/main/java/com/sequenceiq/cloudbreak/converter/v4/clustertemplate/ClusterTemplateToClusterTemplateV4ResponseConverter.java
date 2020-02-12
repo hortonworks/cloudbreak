@@ -47,6 +47,13 @@ public class ClusterTemplateToClusterTemplateV4ResponseConverter extends Abstrac
             if (stackTemplate.getEnvironmentCrn() != null) {
                 clusterTemplateV4Response.setEnvironmentCrn(stackTemplate.getEnvironmentCrn());
             }
+            if (source.getStackTemplate().getCluster() != null && source.getStackTemplate().getCluster().getBlueprint() != null) {
+                clusterTemplateV4Response.setStackType(source.getStackTemplate().getCluster().getBlueprint().getStackType());
+                clusterTemplateV4Response.setStackVersion(source.getStackTemplate().getCluster().getBlueprint().getStackVersion());
+            }
+        }
+        if (stack != null) {
+            clusterTemplateV4Response.setNodeCount(stack.getFullNodeCount());
         }
         clusterTemplateV4Response.setCreated(source.getCreated());
         return clusterTemplateV4Response;

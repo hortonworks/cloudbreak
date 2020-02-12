@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.caas.exception.JsonOperationException;
 
@@ -13,6 +14,10 @@ import com.sequenceiq.caas.exception.JsonOperationException;
 public class JsonUtil {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    static {
+        MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    }
 
     public String toJsonString(Object o) {
         return jsonOperationWithExceptionChange(() -> MAPPER.writeValueAsString(o));

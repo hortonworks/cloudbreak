@@ -359,9 +359,10 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
         return this;
     }
 
-    public StackTestDtoBase<T> withSharedService(String datalakeClusterName) {
+    public StackTestDtoBase<T> withSharedService(String datalakeClusterName, String runtime) {
         SharedServiceV4Request sharedServiceRequest = new SharedServiceV4Request();
         sharedServiceRequest.setDatalakeName(datalakeClusterName);
+        sharedServiceRequest.setRuntimeVersion(runtime);
         getRequest().setSharedService(sharedServiceRequest);
         return this;
     }

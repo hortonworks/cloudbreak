@@ -1,7 +1,7 @@
 {
-  "description": "CDP 1.0 Data Engineering with Apache Hive LLAP",
+  "description": "7.1.0 - Data Engineering with Apache Hive LLAP",
   "blueprint": {
-    "cdhVersion": "7.0.0",
+    "cdhVersion": "7.1.0",
     "displayName": "de-llap",
     "services": [
       {

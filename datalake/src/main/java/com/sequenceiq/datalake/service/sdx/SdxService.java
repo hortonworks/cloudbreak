@@ -4,31 +4,28 @@ import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
@@ -38,11 +35,9 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -83,9 +78,6 @@ public class SdxService implements ResourceIdProvider {
     private EnvironmentClientService environmentClientService;
 
     @Inject
-    private StackRequestManifester stackRequestManifester;
-
-    @Inject
     private SdxStatusService sdxStatusService;
 
     @Inject
@@ -96,6 +88,12 @@ public class SdxService implements ResourceIdProvider {
 
     @Inject
     private CloudStorageManifester cloudStorageManifester;
+
+    @Inject
+    private Map<CDPConfigKey, StackV4Request> cdpStackRequests;
+
+    @Value("${sdx.default.runtime:7.0.2}")
+    private String defaultRuntime;
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
         LOGGER.info("Searching for SDX cluster by ids and statuses.");
@@ -169,9 +167,12 @@ public class SdxService implements ResourceIdProvider {
             sdxCluster.setCloudStorageFileSystemType(sdxClusterRequest.getCloudStorage().getFileSystemType());
             sdxClusterRequest.getCloudStorage().setBaseLocation(trimmedBaseLocation);
         }
-        externalDatabaseConfigurer.configure(CloudPlatform.valueOf(environment.getCloudPlatform()), sdxClusterRequest.getExternalDatabase(), sdxCluster);
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
+        externalDatabaseConfigurer.configure(cloudPlatform, sdxClusterRequest.getExternalDatabase(), sdxCluster);
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(stackV4Request, environment.getCrn());
-        StackV4Request stackRequest = getStackRequest(stackV4Request, sdxClusterRequest.getClusterShape(), environment.getCloudPlatform());
+        String runtimeVersion = getRuntime(sdxClusterRequest);
+        sdxCluster.setRuntime(runtimeVersion);
+        StackV4Request stackRequest = getStackRequest(sdxClusterRequest, stackV4Request, cloudPlatform, runtimeVersion);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
         try {
             sdxCluster.setStackRequest(JsonUtil.writeValueAsString(stackRequest));
@@ -190,6 +191,34 @@ public class SdxService implements ResourceIdProvider {
         sdxReactorFlowManager.triggerSdxCreation(sdxCluster.getId());
 
         return sdxCluster;
+    }
+
+    private StackV4Request getStackRequest(SdxClusterRequest sdxClusterRequest, StackV4Request internalStackV4Request, CloudPlatform cloudPlatform,
+            String runtimeVersion) {
+        if (internalStackV4Request == null) {
+            StackV4Request stackRequest = cdpStackRequests.get(new CDPConfigKey(cloudPlatform, sdxClusterRequest.getClusterShape(), runtimeVersion));
+            if (stackRequest == null) {
+                LOGGER.error("Can't find template for cloudplatform: {}, shape {}, cdp version: {}", cloudPlatform, sdxClusterRequest.getClusterShape(),
+                        runtimeVersion);
+                throw new BadRequestException("Can't find template for cloudplatform: " + cloudPlatform + ", shape: " + sdxClusterRequest.getClusterShape() +
+                        ", runtime version: " + runtimeVersion);
+            }
+            return stackRequest;
+        } else {
+            return internalStackV4Request;
+        }
+    }
+
+    public List<String> getDatalakeVersions() {
+        return cdpStackRequests.keySet().stream().map(CDPConfigKey::getCdpVersion).distinct().collect(Collectors.toList());
+    }
+
+    private String getRuntime(SdxClusterRequest sdxClusterRequest) {
+        if (sdxClusterRequest.getRuntime() != null) {
+            return sdxClusterRequest.getRuntime();
+        } else {
+            return defaultRuntime;
+        }
     }
 
     private void updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(StackV4Request request, String environmentCrn) {
@@ -274,55 +303,6 @@ public class SdxService implements ResourceIdProvider {
     private boolean isCloudStorageConfigured(SdxClusterRequest clusterRequest) {
         return clusterRequest.getCloudStorage() != null
                 && StringUtils.isNotEmpty(clusterRequest.getCloudStorage().getBaseLocation());
-    }
-
-    private StackV4Request getStackRequest(@Nullable StackV4Request internalStackRequest, SdxClusterShape shape, String cloudPlatform) {
-        if (internalStackRequest == null) {
-            String clusterTemplatePath = generateClusterTemplatePath(cloudPlatform, shape);
-            LOGGER.info("Using path of {} based on Cloudplatform {} and Shape {}", clusterTemplatePath, cloudPlatform, shape);
-            return getStackRequestFromFile(clusterTemplatePath);
-        } else {
-            return internalStackRequest;
-        }
-    }
-
-    protected StackV4Request getStackRequestFromFile(String templatePath) {
-        try {
-            String clusterTemplateJson = FileReaderUtils.readFileFromClasspath(templatePath);
-            StackV4Request stackV4Request = JsonUtil.readValue(clusterTemplateJson, StackV4Request.class);
-            stackV4Request.getInstanceGroups().forEach(instance -> {
-                SecurityGroupV4Request groupRequest = new SecurityGroupV4Request();
-                if (InstanceGroupType.CORE.equals(instance.getType())) {
-                    groupRequest.setSecurityRules(rulesWithPorts("22"));
-                } else if (InstanceGroupType.GATEWAY.equals(instance.getType())) {
-                    groupRequest.setSecurityRules(rulesWithPorts("443", "22"));
-                } else {
-                    throw new IllegalStateException("Unknown instance group type " + instance.getType());
-                }
-                instance.setSecurityGroup(groupRequest);
-            });
-            return stackV4Request;
-        } catch (IOException e) {
-            LOGGER.info("Can not read template from path: " + templatePath, e);
-            throw new BadRequestException("Can not read template from path: " + templatePath);
-        }
-    }
-
-    private List<SecurityRuleV4Request> rulesWithPorts(String... ports) {
-        return Stream.of(ports)
-                .map(port -> {
-                    SecurityRuleV4Request ruleRequest = new SecurityRuleV4Request();
-                    ruleRequest.setSubnet("0.0.0.0/0");
-                    ruleRequest.setPorts(List.of(port));
-                    ruleRequest.setProtocol("tcp");
-                    return ruleRequest;
-                })
-                .collect(Collectors.toList());
-    }
-
-    protected String generateClusterTemplatePath(String cloudPlatform, SdxClusterShape shape) {
-        String convertedShape = shape.toString().toLowerCase().replaceAll("_", "-");
-        return "sdx/" + cloudPlatform.toLowerCase() + "/cluster-" + convertedShape + "-template.json";
     }
 
     private void validateSdxRequest(String name, String envName, String accountId) {

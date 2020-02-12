@@ -1,5 +1,5 @@
 {
-  "description": "CDP 1.2 Operational Database: Apache HBase, Phoenix",
+  "description": "7.0.2 - Operational Database: Apache HBase, Phoenix",
   "blueprint": {
     "cdhVersion": "7.1.0",
     "displayName": "opdb",

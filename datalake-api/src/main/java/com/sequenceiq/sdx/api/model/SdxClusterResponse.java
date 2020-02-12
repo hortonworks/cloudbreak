@@ -28,13 +28,15 @@ public class SdxClusterResponse {
 
     private FileSystemType cloudStorageFileSystemType;
 
+    private String runtime;
+
     public SdxClusterResponse() {
     }
 
     public SdxClusterResponse(String crn, String name, SdxClusterStatusResponse status,
             String statusReason, String environmentName, String environmentCrn, String stackCrn,
-            SdxClusterShape clusterShape,
-            String cloudStorageBaseLocation, FileSystemType cloudStorageFileSystemType) {
+            SdxClusterShape clusterShape, String cloudStorageBaseLocation,
+            FileSystemType cloudStorageFileSystemType, String runtime) {
         this.crn = crn;
         this.name = name;
         this.status = status;
@@ -45,6 +47,7 @@ public class SdxClusterResponse {
         this.clusterShape = clusterShape;
         this.cloudStorageBaseLocation = cloudStorageBaseLocation;
         this.cloudStorageFileSystemType = cloudStorageFileSystemType;
+        this.runtime = runtime;
     }
 
     public String getCrn() {
@@ -141,5 +144,13 @@ public class SdxClusterResponse {
 
     public void setCloudStorageFileSystemType(FileSystemType cloudStorageFileSystemType) {
         this.cloudStorageFileSystemType = cloudStorageFileSystemType;
+    }
+
+    public String getRuntime() {
+        return runtime;
+    }
+
+    public void setRuntime(String runtime) {
+        this.runtime = runtime;
     }
 }

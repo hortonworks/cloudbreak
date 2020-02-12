@@ -153,12 +153,12 @@ public class BlueprintLoaderServiceTest {
     @Test
     public void testForTheSpecifiedUserWhenOneNewDefaultExistThenRepositoryShouldUpdateOnlyOneBlueprint() {
         Set<Blueprint> blueprints = generateBlueprintData(3);
-        Map<String, Blueprint> defaultBlueprints = generateCacheData(3, 1);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(3, 2);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
-        Assert.assertEquals(4L, resultSet.size());
+        Assert.assertEquals(3L, resultSet.size());
     }
 
     @Test

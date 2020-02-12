@@ -13,6 +13,8 @@ public class SdxClusterRequest {
     @NotNull
     private SdxClusterShape clusterShape;
 
+    private String runtime;
+
     private SdxCloudStorageRequest cloudStorage;
 
     private SdxDatabaseRequest externalDatabase;
@@ -33,6 +35,18 @@ public class SdxClusterRequest {
 
     public void setClusterShape(SdxClusterShape clusterShape) {
         this.clusterShape = clusterShape;
+    }
+
+    public String getRuntime() {
+        return runtime;
+    }
+
+    public void setRuntime(String runtime) {
+        this.runtime = runtime;
+    }
+
+    public void setTags(Map<String, String> tags) {
+        this.tags = tags;
     }
 
     public Map<String, String> getTags() {

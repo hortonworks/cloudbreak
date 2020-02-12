@@ -188,4 +188,10 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "stop sdx by crn", produces = MediaType.APPLICATION_JSON, nickname = "stopSdxByCrn")
     void stopByCrn(@PathParam("crn") String crn);
+
+    @GET
+    @Path("/versions")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "list datalake versions", produces = MediaType.APPLICATION_JSON, nickname = "versions")
+    List<String> versions();
 }

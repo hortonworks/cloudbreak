@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.init.blueprint;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT_DELETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -54,6 +56,7 @@ public class BlueprintLoaderService {
         Set<Blueprint> blueprintsWhichAreMissing = addMissingBlueprints(blueprintsInDatabase, workspace);
         try {
             blueprintsWhichAreMissing.addAll(blueprintsWhichShouldBeUpdated);
+            deleteOldDefaults(blueprintsInDatabase);
             if (!blueprintsWhichAreMissing.isEmpty()) {
                 return Sets.newHashSet(getResultSetFromUpdateAndOriginalBlueprints(blueprintsInDatabase, blueprintsWhichAreMissing, workspace,
                         saveMethod));
@@ -62,6 +65,21 @@ public class BlueprintLoaderService {
             LOGGER.info("Cluster definitions {} is not available for {} workspace.", collectNames(blueprintsWhichAreMissing), workspace.getId());
         }
         return blueprintsInDatabase;
+    }
+
+    private void deleteOldDefaults(Set<Blueprint> blueprintsInDatabase) {
+        List<Blueprint> deletableDefaults = blueprintsInDatabase.stream()
+                .filter(blueprint -> blueprint.getStatus().equals(DEFAULT))
+                .filter(blueprint -> !defaultBlueprintCache.defaultBlueprints().containsKey(blueprint.getName()))
+                .collect(Collectors.toList());
+
+        LOGGER.info("Put old default blueprints to DEFAULT_DELETED: " + deletableDefaults);
+
+        for (Blueprint blueprint : deletableDefaults) {
+            blueprint.setStatus(DEFAULT_DELETED);
+        }
+
+        blueprintService.pureSaveAll(deletableDefaults);
     }
 
     private Iterable<Blueprint> getResultSetFromUpdateAndOriginalBlueprints(Collection<Blueprint> blueprints,
@@ -96,6 +114,7 @@ public class BlueprintLoaderService {
             blueprintService.decorateWithCrn(bp, accountId, creator);
             resultList.add(bp);
         }
+
         LOGGER.debug("Finished to add default blueprints which are missing for the user.");
         return resultList;
     }

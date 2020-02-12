@@ -52,6 +52,8 @@ public class SdxCluster implements AccountIdAwareResource {
 
     private String stackCrn;
 
+    private String runtime;
+
     @NotNull
     @Enumerated(EnumType.STRING)
     private SdxClusterShape clusterShape;
@@ -204,6 +206,14 @@ public class SdxCluster implements AccountIdAwareResource {
 
     public void setStackCrn(String stackCrn) {
         this.stackCrn = stackCrn;
+    }
+
+    public String getRuntime() {
+        return runtime;
+    }
+
+    public void setRuntime(String runtime) {
+        this.runtime = runtime;
     }
 
     public Long getCreated() {

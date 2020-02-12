@@ -1,5 +1,5 @@
 {
-  "description": "CDP 1.2 Data Engineering Hue HA",
+  "description": "7.0.2 - Data Engineering Hue HA",
   "blueprint": {
     "cdhVersion": "7.0.2",
     "displayName": "dataengineering",

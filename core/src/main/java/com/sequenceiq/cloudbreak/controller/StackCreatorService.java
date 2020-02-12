@@ -184,6 +184,7 @@ public class StackCreatorService {
         String platformString = stackStub.getCloudPlatform().toLowerCase();
         LOGGER.info("Determine blueprint for stack with {} name ", stackName);
         Blueprint blueprint = determineBlueprint(stackRequest, workspace);
+        checkSharedServiceVersion(stackRequest, blueprint);
         LOGGER.info("Determine image for stack with {} name ", stackName);
         Future<StatedImage> imgFromCatalogFuture = determineImageCatalog(stackName, platformString, stackRequest, blueprint, user, workspace);
 
@@ -281,6 +282,18 @@ public class StackCreatorService {
         metricService.submit(STACK_PREPARATION, System.currentTimeMillis() - start);
 
         return response;
+    }
+
+    private void checkSharedServiceVersion(StackV4Request stackRequest, Blueprint blueprint) {
+        if (blueprint != null && stackRequest.getSharedService() != null && stackRequest.getSharedService().getRuntimeVersion() != null) {
+            String sharedServiceRuntimeVersion = stackRequest.getSharedService().getRuntimeVersion();
+            if (!sharedServiceRuntimeVersion.equals(blueprint.getStackVersion())) {
+                String errorMessage = String.format("Given stack version (%s) does not match with shared context's runtime version (%s)",
+                        blueprint.getStackVersion(), sharedServiceRuntimeVersion);
+                LOGGER.error(errorMessage);
+                throw new BadRequestException(errorMessage);
+            }
+        }
     }
 
     private void validateRecipeExistenceOnInstanceGroups(final List<InstanceGroupV4Request> instanceGroupV4Requests, long workspaceId) {

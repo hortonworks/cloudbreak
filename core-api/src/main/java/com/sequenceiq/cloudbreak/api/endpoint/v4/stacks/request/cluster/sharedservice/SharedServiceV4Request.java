@@ -19,11 +19,23 @@ public class SharedServiceV4Request implements JsonEntity {
     @NotEmpty
     private String datalakeName;
 
+    @ApiModelProperty
+    @NotEmpty
+    private String runtimeVersion;
+
     public String getDatalakeName() {
         return datalakeName;
     }
 
     public void setDatalakeName(String datalakeName) {
         this.datalakeName = datalakeName;
+    }
+
+    public String getRuntimeVersion() {
+        return runtimeVersion;
+    }
+
+    public void setRuntimeVersion(String runtimeVersion) {
+        this.runtimeVersion = runtimeVersion;
     }
 }

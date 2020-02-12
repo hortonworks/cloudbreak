@@ -8,14 +8,11 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 public class StructuredEventDeserializer extends StdDeserializer<StructuredEvent> {
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final Map<String, Class<? extends StructuredEvent>> classes = new HashMap<>();
 
