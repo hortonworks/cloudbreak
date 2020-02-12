@@ -59,7 +59,7 @@ public class SecurityConfig {
 
         private static final String AUTOSCALE_API = API_ROOT_CONTEXT + "/autoscale/**";
 
-        private static final String FLOW_API = API_ROOT_CONTEXT + "/flow_logs/**";
+        private static final String FLOW_API = API_ROOT_CONTEXT + "/flow/**";
 
         @Inject
         private GrpcUmsClient umsClient;
