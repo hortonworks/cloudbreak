@@ -337,7 +337,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     public ImageCatalog get(Long workspaceId, String name) {
-        return isEnvDefault(name) ? getCloudbreakDefaultImageCatalog() : getByNameForWorkspaceId(name, workspaceId);
+        return isEnvDefault(name) ? getDefaultCatalog(name) : getByNameForWorkspaceId(name, workspaceId);
     }
 
     public ImageCatalog setAsDefault(Long workspaceId, String name) {
@@ -379,6 +379,14 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     private void checkImageCatalog(ImageCatalog imageCatalog, Object filter) {
         if (imageCatalog == null) {
             throw new NotFoundException(String.format("Resource not found with filter [%s]", filter));
+        }
+    }
+
+    private ImageCatalog getDefaultCatalog(String name) {
+        if (CDP_DEFAULT_CATALOG_NAME.equalsIgnoreCase(name)) {
+            return getCloudbreakDefaultImageCatalog();
+        } else {
+            return getCloudbreakLegacyDefaultImageCatalog();
         }
     }
 
