@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static java.util.Objects.requireNonNull;
+
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -14,18 +16,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ResourceRoleAssignment;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RoleAssignment;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
+import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
@@ -40,6 +41,8 @@ public class UmsUsersStateProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(UmsUsersStateProvider.class);
 
     private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
+
+    private static final String ADMIN_FREEIPA_GROUP = "admins";
 
     @Inject
     private GrpcUmsClient grpcUmsClient;
@@ -71,12 +74,15 @@ public class UmsUsersStateProvider {
                 internalUserSyncGroup.setName(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP);
                 usersStateBuilder.addGroup(internalUserSyncGroup);
 
+                EnvironmentAccessChecker environmentAccessChecker = createEnvironmentAccessChecker(environmentCrn);
+
                 users.stream().forEach(u -> {
                     FmsUser fmsUser = umsUserToUser(u);
                     // add workload username for each user. This will be helpful in getting users from IPA.
                     umsUsersStateBuilder.addRequestedWorkloadUsers(fmsUser);
 
-                    handleUser(umsUsersStateBuilder, usersStateBuilder, crnToFmsGroup, actorCrn, u.getCrn(), fmsUser, environmentCrn, requestIdOptional);
+                    handleUser(umsUsersStateBuilder, usersStateBuilder, crnToFmsGroup, u.getCrn(), fmsUser,
+                            environmentAccessChecker.hasAccess(u.getCrn(), requestIdOptional), requestIdOptional);
 
                 });
 
@@ -85,7 +91,8 @@ public class UmsUsersStateProvider {
                     umsUsersStateBuilder.addRequestedWorkloadUsers(fmsUser);
                     // add workload username for each user. This will be helpful in getting users from IPA.
 
-                    handleUser(umsUsersStateBuilder, usersStateBuilder, crnToFmsGroup, actorCrn, mu.getCrn(), fmsUser, environmentCrn, requestIdOptional);
+                    handleUser(umsUsersStateBuilder, usersStateBuilder, crnToFmsGroup, mu.getCrn(), fmsUser,
+                            environmentAccessChecker.hasAccess(mu.getCrn(), requestIdOptional), requestIdOptional);
                 });
 
                 umsUsersStateBuilder.setUsersState(usersStateBuilder.build());
@@ -129,96 +136,64 @@ public class UmsUsersStateProvider {
         return new WorkloadCredential(hashedPassword, keys, expirationInstant);
     }
 
-    private boolean isEnvironmentUser(String enviromentCrn, GetRightsResponse rightsResponse) {
-
-        List<RoleAssignment> rolesAssignedList = rightsResponse.getRoleAssignmentList();
-        for (RoleAssignment roleAssigned : rolesAssignedList) {
-            // TODO: should come from IAM Roles and check against Role Object
-            if (roleAssigned.getRole().getCrn().contains("PowerUser") ||
-                roleAssigned.getRole().getCrn().contains("EnvironmentAdmin")) {
-                return true;
-                // admins are also users
-            }
-        }
-
-        List<ResourceRoleAssignment> resourceRoleAssignedList = rightsResponse.getResourceRolesAssignmentList();
-        for (ResourceRoleAssignment resourceRoleAssigned : resourceRoleAssignedList) {
-            // TODO: should come from IAM Roles and check against Role Object
-            if (resourceRoleAssigned.getResourceRole().getCrn().contains("EnvironmentAdmin") ||
-                (resourceRoleAssigned.getResourceRole().getCrn().contains("EnvironmentUser"))) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private boolean isEnvironmentAdmin(String enviromentCrn, GetRightsResponse rightsResponse) {
-        List<RoleAssignment> rolesAssignedList = rightsResponse.getRoleAssignmentList();
-        for (RoleAssignment roleAssigned : rolesAssignedList) {
-            // TODO: should come from IAM Roles and check against Role Object
-            if (roleAssigned.getRole().getCrn().contains("PowerUser") ||
-                roleAssigned.getRole().getCrn().contains("EnvironmentAdmin")) {
-                return true;
-            }
-        }
-
-        List<ResourceRoleAssignment> resourceRoleAssignedList = rightsResponse.getResourceRolesAssignmentList();
-        for (ResourceRoleAssignment resourceRoleAssigned : resourceRoleAssignedList) {
-            // TODO: should come from IAM Roles and check against Role Object
-            if (resourceRoleAssigned.getResourceRole().getCrn().contains("EnvironmentAdmin")) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     @SuppressWarnings("ParameterNumber")
     private void handleUser(UmsUsersState.Builder umsUsersStateBuilder, UsersState.Builder usersStateBuilder, Map<String, FmsGroup> crnToFmsGroup,
-                            String actorCrn, String memberCrn, FmsUser fmsUser, String environmentCrn, Optional<String> requestId) {
+                            String memberCrn, FmsUser fmsUser, EnvironmentAccessRights environmentAccessRights, Optional<String> requestId) {
         try {
-            GetRightsResponse rightsResponse = grpcUmsClient.getRightsForUser(actorCrn, memberCrn, environmentCrn, requestId);
-            if (isEnvironmentUser(environmentCrn, rightsResponse)) {
-                usersStateBuilder.addUser(fmsUser);
-                rightsResponse.getGroupCrnList().stream().forEach(gcrn -> {
+            if (environmentAccessRights.hasEnvironmentAccessRight()) {
+                String username = fmsUser.getName();
+                String accountId = Crn.safeFromString(memberCrn).getAccountId();
+
+                // Retrieve all information from UMS before modifying to the UmsUsersState or UsersState. This is so that
+                // we don't partially modify the state if the member has been deleted after we started the sync
+                List<String> groupCrnsForMember = grpcUmsClient.listGroupsForMember(IAM_INTERNAL_ACTOR_CRN, accountId, memberCrn, requestId);
+                UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse workloadAdministrationGroups =
+                        grpcUmsClient.listWorkloadAdministrationGroupsForMember(IAM_INTERNAL_ACTOR_CRN, memberCrn, requestId);
+                WorkloadCredential workloadCredential = getCredentials(memberCrn, requestId);
+
+                groupCrnsForMember.forEach(gcrn -> {
                     FmsGroup group = crnToFmsGroup.get(gcrn);
                     // If the group is null, then there has been a group membership change after we started the sync
                     // the group and group membership will be updated on the next sync
                     if (group != null) {
-                        usersStateBuilder.addMemberToGroup(group.getName(), fmsUser.getName());
+                        usersStateBuilder.addMemberToGroup(group.getName(), username);
+                    } else {
+                        LOGGER.warn("{} is a member of unexpected group {}. Group must have been added after UMS state calculation started",
+                                memberCrn, gcrn);
                     }
                 });
 
-                // Since this user is eligible, add this user to internal group
-                usersStateBuilder.addMemberToGroup(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP, fmsUser.getName());
-
-                List<String> workloadAdministrationGroupNames = rightsResponse.getWorkloadAdministrationGroupNameList();
-                LOGGER.debug("workloadAdministrationGroupNameList = {}", workloadAdministrationGroupNames);
-                workloadAdministrationGroupNames.forEach(groupName -> {
+                workloadAdministrationGroups.getWorkloadAdministrationGroupNameList().forEach(groupName -> {
                     usersStateBuilder.addGroup(nameToGroup(groupName));
-                    usersStateBuilder.addMemberToGroup(groupName, fmsUser.getName());
+                    usersStateBuilder.addMemberToGroup(groupName, username);
                 });
 
-                if (isEnvironmentAdmin(environmentCrn, rightsResponse)) {
-                    // TODO: introduce a flag for adding admin
-                    usersStateBuilder.addMemberToGroup("admins", fmsUser.getName());
+                if (environmentAccessRights.hasAdminFreeIPARight()) {
+                    usersStateBuilder.addMemberToGroup(ADMIN_FREEIPA_GROUP, username);
                 }
 
-                // get credentials
-                umsUsersStateBuilder.addWorkloadCredentials(fmsUser.getName(), getCredentials(memberCrn, requestId));
+                addMemberToInternalTrackingGroup(usersStateBuilder, username);
+
+                umsUsersStateBuilder.addWorkloadCredentials(fmsUser.getName(), workloadCredential);
+
+                usersStateBuilder.addUser(fmsUser);
             }
         } catch (StatusRuntimeException e) {
             // NOT_FOUND errors indicate that a user/machineUser has been deleted after we have
-            // retrieved the list of users/machineUsers from the UMS. Treat these users as if
-            // they do not have the right to access this environment and belong to no groups.
+            // retrieved the list of users/machineUsers from the UMS. Interrupt calculation of group
+            // membership.
             if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
-                LOGGER.warn("CRN {} not found in UMS. Treating as if CRN has no rights to environment {}: {}",
-                        memberCrn, environmentCrn, e.getLocalizedMessage());
+                LOGGER.warn("Member CRN {} not found in UMS. Member will not be added to the UMS Users State. {}",
+                        memberCrn, e.getLocalizedMessage());
             } else {
                 throw e;
             }
         }
+
+    }
+
+    private void addMemberToInternalTrackingGroup(UsersState.Builder usersStateBuilder, String username) {
+        usersStateBuilder.addMemberToGroup(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP, username);
     }
 
     private FmsUser umsUserToUser(User umsUser) {
@@ -254,4 +229,8 @@ public class UmsUsersStateProvider {
         return fmsGroup;
     }
 
+    private EnvironmentAccessChecker createEnvironmentAccessChecker(String environmentCrn) {
+        requireNonNull(environmentCrn, "environmentCrn is null");
+        return new EnvironmentAccessChecker(grpcUmsClient, environmentCrn);
+    }
 }

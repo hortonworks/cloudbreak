@@ -182,6 +182,7 @@ public class UserSyncService {
                 }
             });
             operationService.completeOperation(accountId, operationId, success, failure);
+            LOGGER.error("User sync operation {} completed.", operationId);
         } catch (RuntimeException e) {
             LOGGER.error("User sync operation {} failed with error:", operationId, e);
             operationService.failOperation(accountId, operationId, e.getLocalizedMessage());

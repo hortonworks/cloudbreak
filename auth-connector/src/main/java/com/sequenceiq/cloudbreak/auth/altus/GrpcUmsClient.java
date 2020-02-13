@@ -3,9 +3,11 @@ package com.sequenceiq.cloudbreak.auth.altus;
 import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -17,6 +19,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
@@ -345,6 +348,33 @@ public class GrpcUmsClient {
     @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right, #resource }")
     public boolean checkRight(String actorCrn, String userCrn, String right, Optional<String> requestId) {
         return checkRight(actorCrn, userCrn, right, null, requestId);
+    }
+
+    /**
+     * Retrieves whether the member has the specified rights.
+     *
+     * @param actorCrn the CRN of the actor
+     * @param memberCrn the CRN of the member
+     * @param rightChecks the rights to check
+     * @param requestId an optional request id
+     * @return a list of booleans indicating whether the member has the specified rights
+     */
+    public List<Boolean> hasRights(String actorCrn, String memberCrn, List<AuthorizationProto.RightCheck> rightChecks, Optional<String> requestId) {
+        LOGGER.info("Checking whether member [] has rights [{}]",
+                memberCrn,
+                rightChecks.stream().map(AuthorizationProto.RightCheck::getRight).collect(Collectors.toList()));
+        if (InternalCrnBuilder.isInternalCrn(memberCrn)) {
+            LOGGER.info("InternalCrn has all rights");
+            Boolean[] values = new Boolean[rightChecks.size()];
+            Arrays.fill(values, Boolean.TRUE);
+            return Arrays.asList(values);
+        }
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn);
+            List<Boolean> retVal = client.hasRights(requestId.orElse(UUID.randomUUID().toString()), memberCrn, rightChecks);
+            LOGGER.info("member {} has rights {}", memberCrn, retVal);
+            return retVal;
+        }
     }
 
     @Cacheable(cacheNames = "umsResourceAssigneesCache", key = "{ #actorCrn, #userCrn, #resourceCrn }")

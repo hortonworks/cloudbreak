@@ -22,7 +22,7 @@ class CooldownChecker {
                 Instant.ofEpochMilli(userSyncStatus.getLastFullSyncStartTime()).isBefore(cooldownThresholdTime);
         if (LOGGER.isDebugEnabled()) {
             Stack stack = userSyncStatus.getStack();
-            LOGGER.debug("Synchronization fo Environment {} in Account {} {} been run since {}", stack.getEnvironmentCrn(),
+            LOGGER.debug("Synchronization to Environment {} in Account {} {} been run since {}", stack.getEnvironmentCrn(),
                     stack.getAccountId(), cool ? "has not" : "has", DATE_TIME_FORMATTER.format(cooldownThresholdTime));
         }
         return cool;
