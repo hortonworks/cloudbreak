@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -45,7 +47,10 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -326,5 +331,57 @@ public class StackServiceTest {
         Set<AutoscaleStack> stackSet = aliveStackCaptor.getValue();
         assertNotNull(stackSet);
         assertEquals(availableStack.getStackStatus(), stackSet.iterator().next().getStackStatus());
+    }
+
+    @Test
+    public void testStartWhenStackAvailable() {
+        Stack stack = new Stack();
+        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+
+        underTest.start(stack, null, false, new User());
+
+        verify(eventService, times(1)).fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_START_IGNORED);
+    }
+
+    @Test
+    public void testStartWhenStackStopped() {
+        Stack stack = new Stack();
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.STOPPED));
+
+        underTest.start(stack, null, false, new User());
+
+        verify(flowManager, times(1)).triggerStackStart(stack.getId());
+    }
+
+    @Test
+    public void testStartWhenStackStartFailed() {
+        Stack stack = new Stack();
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.START_FAILED));
+
+        underTest.start(stack, null, false, new User());
+
+        verify(flowManager, times(1)).triggerStackStart(stack.getId());
+    }
+
+    @Test
+    public void testStartWhenStackStopFailed() {
+        Stack stack = new Stack();
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.STOP_FAILED));
+
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage("");
+        underTest.start(stack, null, false, new User());
+    }
+
+    @Test
+    public void testStartWhenClusterStopFailed() {
+        Stack stack = new Stack();
+        stack.setId(9876L);
+        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        Cluster cluster = new Cluster();
+        cluster.setStatus(Status.STOPPED);
+        stack.setCluster(cluster);
+        underTest.start(stack, cluster, false, new User());
+        verify(flowManager, times(1)).triggerStackStart(stack.getId());
     }
 }
