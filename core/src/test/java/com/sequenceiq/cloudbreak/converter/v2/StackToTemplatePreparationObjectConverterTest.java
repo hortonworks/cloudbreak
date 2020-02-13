@@ -33,6 +33,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
@@ -81,6 +82,7 @@ import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.util.TestConstants;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
@@ -206,12 +208,19 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Mock
     private ExposedServiceCollector exposedServiceCollector;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
         User user = new User();
         user.setUserName("applebob@apple.com");
         user.setUserCrn("user-crn");
+        Tenant tenant = new Tenant();
+        tenant.setId(1L);
+        tenant.setName("account");
+        user.setTenant(tenant);
         when(stackMock.getCreator()).thenReturn(user);
         when(stackMock.getEnvironmentCrn()).thenReturn("env");
         when(stackMock.getCloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
@@ -230,6 +239,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.getEnvironmentCrn()).thenReturn(TestConstants.CRN);
         when(stackMock.getCluster()).thenReturn(sourceCluster);
         when(stackMock.getResourceCrn()).thenReturn("crn");
+        when(entitlementService.internalTenant(anyString(), anyString())).thenReturn(true);
         Credential credential = Credential.builder()
                 .crn("aCredentialCRN")
                 .attributes(new Json(""))

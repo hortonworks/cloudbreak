@@ -20,14 +20,17 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.CrnUser;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.common.cost.CostTagging;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
+import com.sequenceiq.cloudbreak.common.service.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
@@ -46,6 +49,7 @@ import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.PasswordGeneratorService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.UuidGeneratorService;
+import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.network.NetworkParameterAdder;
 import com.sequenceiq.redbeams.service.network.SubnetChooserService;
 import com.sequenceiq.redbeams.service.network.SubnetListerService;
@@ -96,7 +100,13 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     private CrnUserDetailsService crnUserDetailsService;
 
     @Inject
-    private DefaultCostTaggingService defaultCostTaggingService;
+    private EntitlementService entitlementService;
+
+    @Inject
+    private CrnService crnService;
+
+    @Inject
+    private CostTagging costTagging;
 
     @PostConstruct
     public void initSupportedPlatforms() {
@@ -134,8 +144,28 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
         Instant now = clock.getCurrentInstant();
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.PROVISION_REQUESTED, now.toEpochMilli()));
-
+        dbStack.setResourceCrn(crnService.createCrn(dbStack));
+        dbStack.setTags(getTags(dbStack, environment));
         return dbStack;
+    }
+
+    private Json getTags(DBStack dbStack, DetailedEnvironmentResponse environment) {
+        boolean internalTenant = entitlementService.internalTenant(dbStack.getOwnerCrn().toString(), dbStack.getAccountId());
+
+        CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder
+                .builder()
+                .withCreatorCrn(dbStack.getOwnerCrn().toString())
+                .withEnvironmentCrn(dbStack.getEnvironmentId())
+                .withPlatform(dbStack.getCloudPlatform())
+                .withAccountId(dbStack.getAccountId())
+                .withResourceCrn(dbStack.getResourceCrn().toString())
+                .withIsInternalTenant(internalTenant)
+                .withUserName(dbStack.getUserName())
+                .build();
+
+        Map<String, String> defaultTags = costTagging.prepareDefaultTags(request);
+
+        return new Json(new StackTags(environment.getTags().getUserDefined(), new HashMap<>(), defaultTags));
     }
 
     private void setRegion(DBStack dbStack, DetailedEnvironmentResponse environment) {

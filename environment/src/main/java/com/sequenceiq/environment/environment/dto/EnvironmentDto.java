@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.domain.CredentialView;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
+import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
@@ -67,6 +68,8 @@ public class EnvironmentDto implements Payload {
     private ParametersDto parameters;
 
     private ExperimentalFeatures experimentalFeatures = new ExperimentalFeatures();
+
+    private EnvironmentTags tags;
 
     @Override
     public Long getResourceId() {
@@ -277,6 +280,14 @@ public class EnvironmentDto implements Payload {
         this.experimentalFeatures = experimentalFeatures;
     }
 
+    public EnvironmentTags getTags() {
+        return tags;
+    }
+
+    public void setTags(EnvironmentTags tags) {
+        this.tags = tags;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentDto{"
@@ -341,6 +352,8 @@ public class EnvironmentDto implements Payload {
         private ParametersDto parameters;
 
         private ExperimentalFeatures experimentalFeatures;
+
+        private EnvironmentTags tags;
 
         private Builder() {
         }
@@ -470,6 +483,11 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
+        public Builder withTags(EnvironmentTags tags) {
+            this.tags = tags;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setId(id);
@@ -497,6 +515,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setAdminGroupName(adminGroupName);
             environmentDto.setParameters(parameters);
             environmentDto.setExperimentalFeatures(experimentalFeatures);
+            environmentDto.setTags(tags);
             return environmentDto;
         }
     }

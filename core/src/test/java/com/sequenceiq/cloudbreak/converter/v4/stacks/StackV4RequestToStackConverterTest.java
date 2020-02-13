@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -34,10 +35,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.common.cost.CostTagging;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
+import com.sequenceiq.cloudbreak.common.service.CDPTagMergeRequest;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
@@ -67,6 +71,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
 
 public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<StackV4Request> {
 
@@ -136,6 +141,12 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
     @Mock
     private CredentialResponse credentialResponse;
 
+    @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
+    private CostTagging costTagging;
+
     private Credential credential;
 
     @Before
@@ -150,9 +161,12 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         environmentResponse.setCredential(credentialResponse);
         environmentResponse.setCloudPlatform("AWS");
         environmentResponse.setTunnel(Tunnel.DIRECT);
+        environmentResponse.setTags(new TagResponse());
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
+        when(entitlementService.internalTenant(anyString(), anyString())).thenReturn(true);
+        when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
         credential = Credential.builder()
                 .cloudPlatform("AWS")
                 .build();

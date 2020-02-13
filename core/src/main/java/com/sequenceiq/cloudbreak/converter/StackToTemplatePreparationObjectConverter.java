@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
@@ -127,6 +128,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     private VirtualGroupService virtualGroupService;
 
     @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
     private ExposedServiceCollector exposedServiceCollector;
 
     @Override
@@ -154,10 +158,13 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             }
             VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(source.getEnvironmentCrn(), ldapView.map(LdapView::getAdminGroup).orElse(""));
 
+            boolean internalTenant = entitlementService.internalTenant(source.getCreator().getUserCrn(), source.getCreator().getTenant().getName());
             CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
                     .withCreatorCrn(source.getCreator().getUserCrn())
                     .withEnvironmentCrn(source.getEnvironmentCrn())
                     .withPlatform(CloudConstants.AWS)
+                    .withAccountId(source.getCreator().getTenant().getName())
+                    .withIsInternalTenant(internalTenant)
                     .withResourceCrn(source.getResourceCrn())
                     .withUserName(source.getCreator().getUserName())
                     .build();

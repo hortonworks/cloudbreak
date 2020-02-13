@@ -2,16 +2,25 @@ package com.sequenceiq.environment.environment.dto;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.cost.CostTagging;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.service.CDPTagGenerationRequest;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverter;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
 
@@ -28,13 +37,23 @@ public class EnvironmentDtoConverter {
 
     private final CredentialViewConverter credentialViewConverter;
 
-    public EnvironmentDtoConverter(Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap,
+    private final EntitlementService entitlementService;
+
+    private final CostTagging costTagging;
+
+    public EnvironmentDtoConverter(Map<CloudPlatform,
+            EnvironmentNetworkConverter> environmentNetworkConverterMap,
             Map<CloudPlatform, EnvironmentParametersConverter> environmentParamsConverterMap,
-            AuthenticationDtoConverter authenticationDtoConverter, CredentialViewConverter credentialViewConverter) {
+            AuthenticationDtoConverter authenticationDtoConverter,
+            CredentialViewConverter credentialViewConverter,
+            CostTagging costTagging,
+            EntitlementService entitlementService) {
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
         this.environmentParamsConverterMap = environmentParamsConverterMap;
         this.authenticationDtoConverter = authenticationDtoConverter;
         this.credentialViewConverter = credentialViewConverter;
+        this.costTagging = costTagging;
+        this.entitlementService = entitlementService;
     }
 
     public EnvironmentDto environmentToDto(Environment environment) {
@@ -59,6 +78,7 @@ public class EnvironmentDtoConverter {
                 .withCreated(environment.getCreated())
                 .withStatusReason(environment.getStatusReason())
                 .withExperimentalFeatures(environment.getExperimentalFeaturesJson())
+                .withTags(environment.getEnvironmentTags())
                 .withSecurityAccess(environmentToSecurityAccessDto(environment))
                 .withAdminGroupName(environment.getAdminGroupName());
 
@@ -86,6 +106,7 @@ public class EnvironmentDtoConverter {
         environment.setCreateFreeIpa(creationDto.isCreateFreeIpa());
         environment.setAdminGroupName(creationDto.getAdminGroupName());
         environment.setCreated(System.currentTimeMillis());
+        environment.setTags(getTags(creationDto));
         environment.setExperimentalFeaturesJson(creationDto.getExperimentalFeatures());
         return environment;
     }
@@ -99,11 +120,39 @@ public class EnvironmentDtoConverter {
                 .build();
     }
 
+    private String getUserFromCrn(String crn) {
+        return Optional.ofNullable(Crn.fromString(crn)).map(Crn::getUserId).orElse(null);
+    }
+
     private SecurityAccessDto environmentToSecurityAccessDto(Environment environment) {
         return SecurityAccessDto.builder()
                 .withCidr(environment.getCidr())
                 .withSecurityGroupIdForKnox(environment.getSecurityGroupIdForKnox())
                 .withDefaultSecurityGroupId(environment.getDefaultSecurityGroupId())
                 .build();
+    }
+
+    private Json getTags(EnvironmentCreationDto creationDto) {
+        boolean internalTenant = entitlementService.internalTenant(creationDto.getCreator(), creationDto.getAccountId());
+        CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
+                .withCreatorCrn(creationDto.getCreator())
+                .withEnvironmentCrn(creationDto.getCrn())
+                .withAccountId(creationDto.getAccountId())
+                .withPlatform(creationDto.getCloudPlatform())
+                .withResourceCrn(creationDto.getCrn())
+                .withIsInternalTenant(internalTenant)
+                .withUserName(getUserFromCrn(creationDto.getCreator()))
+                .build();
+
+        Map<String, String> defaultTags = costTagging.prepareDefaultTags(request);
+        try {
+            Map<String, String> requestTags = creationDto.getTags();
+            if (requestTags == null) {
+                return new Json(new EnvironmentTags(new HashMap<>(), defaultTags));
+            }
+            return new Json(new EnvironmentTags(requestTags, defaultTags));
+        } catch (Exception ignored) {
+            throw new BadRequestException("Failed to convert dynamic tags.");
+        }
     }
 }

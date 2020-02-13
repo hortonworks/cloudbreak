@@ -8,6 +8,7 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_IN_PROGRESS;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -175,9 +176,18 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         setPlacementAndNetwork(environment, createFreeIpaRequest);
         setAuthentication(environment.getAuthentication(), createFreeIpaRequest);
         setTelemetry(environment, createFreeIpaRequest);
+        setTags(environment, createFreeIpaRequest);
         doIfNotNull(environment.getSecurityAccess(), securityAccess -> setSecurityAccess(securityAccess, createFreeIpaRequest));
         setUseCcm(environment.getExperimentalFeatures().getTunnel(), createFreeIpaRequest);
         return createFreeIpaRequest;
+    }
+
+    private void setTags(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest) {
+        Map<String, String> userDefinedTags = environment.getTags().getUserDefinedTags();
+        if (userDefinedTags == null) {
+            userDefinedTags = new HashMap<>();
+        }
+        createFreeIpaRequest.setTags(userDefinedTags);
     }
 
     private CreateFreeIpaRequest initFreeIpaRequest(EnvironmentDto environment) {

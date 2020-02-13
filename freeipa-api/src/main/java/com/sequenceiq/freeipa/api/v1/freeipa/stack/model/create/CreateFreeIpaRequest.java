@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
@@ -66,6 +68,9 @@ public class CreateFreeIpaRequest {
 
     @ApiModelProperty(FreeIpaModelDescriptions.TELEMETRY)
     private TelemetryRequest telemetry;
+
+    @ApiModelProperty(FreeIpaModelDescriptions.TAGS)
+    private Map<String, String> tags = new HashMap<>();
 
     /**
      * @deprecated use {@link #tunnel} instead
@@ -171,6 +176,14 @@ public class CreateFreeIpaRequest {
 
     public void setTunnel(Tunnel tunnel) {
         this.tunnel = tunnel;
+    }
+
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Map<String, String> tags) {
+        this.tags = tags;
     }
 
     @Override
