@@ -75,7 +75,6 @@ import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -121,9 +120,6 @@ public class GcpInstanceResourceBuilderTest {
 
     @Mock
     private Insert insert;
-
-    @Mock
-    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Mock
     private GcpDiskEncryptionService gcpDiskEncryptionService;

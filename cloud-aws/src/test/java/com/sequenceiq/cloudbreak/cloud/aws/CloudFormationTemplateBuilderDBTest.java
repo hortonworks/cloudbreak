@@ -45,7 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 import freemarker.template.Configuration;
@@ -64,7 +64,7 @@ public class CloudFormationTemplateBuilderDBTest {
     private static final int ROOT_VOLUME_SIZE = 17;
 
     @Mock
-    private DefaultCostTaggingService defaultCostTaggingService;
+    private CostTagging defaultCostTaggingService;
 
     @Mock
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;

@@ -57,9 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
-import com.sequenceiq.cloudbreak.common.cost.CostTagging;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.service.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -104,6 +102,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
+import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
@@ -112,6 +111,8 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.tag.CostTagging;
+import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
 import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
@@ -222,6 +223,9 @@ public class StackService implements ResourceIdProvider {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private AccountTagClientService accountTagClientService;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -537,6 +541,7 @@ public class StackService implements ResourceIdProvider {
                     .withResourceCrn(stack.getResourceCrn())
                     .withIsInternalTenant(internalTenant)
                     .withUserName(stack.getCreator().getUserName())
+                    .withAccountTags(accountTagClientService.list())
                     .build();
 
             Map<String, String> defaultTags = stackTag.getDefaultTags();

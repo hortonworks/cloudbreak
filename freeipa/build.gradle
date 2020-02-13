@@ -95,6 +95,7 @@ dependencies {
   implementation project(':environment-api')
   implementation project(':cluster-proxy')
   implementation project(':status-checker')
+  implementation project(':template-manager-tag')
 
   testCompile project(path: ':secret-engine', configuration: 'tests')
   runtime project(':orchestrator-salt')

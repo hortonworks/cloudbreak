@@ -52,7 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.heat.HeatTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
@@ -69,7 +69,7 @@ public class HeatTemplateBuilderTest {
     private OpenStackUtils openStackUtil;
 
     @Mock
-    private DefaultCostTaggingService defaultCostTaggingService;
+    private CostTagging costTagging;
 
     @Spy
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;

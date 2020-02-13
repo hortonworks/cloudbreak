@@ -49,6 +49,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         "com.sequenceiq.cloudbreak.service",
         "com.sequenceiq.cloudbreak.ha.service",
         "com.sequenceiq.cloudbreak.tracing",
+        "com.sequenceiq.cloudbreak.tag",
         "com.sequenceiq.cloudbreak.filter"},
         exclude = WebMvcMetricsAutoConfiguration.class)
 public class RedbeamsApplication {
