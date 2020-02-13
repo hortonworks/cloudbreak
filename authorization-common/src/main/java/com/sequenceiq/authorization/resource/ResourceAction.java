@@ -11,7 +11,9 @@ public enum ResourceAction {
     READ(RightsConstants.READ_ACTION),
     WRITE(RightsConstants.WRITE_ACTION),
     // manage action is obsolete, used only in workspace authz
-    MANAGE("manage");
+    MANAGE("manage"),
+    ACCESS_ENVIRONMENT(RightsConstants.ACCESS_ENVIRONMENT_ACTION),
+    ADMIN_FREEIPA(RightsConstants.ADMIN_FREEIPA_ACTION);
 
     private String authorizationName;
 

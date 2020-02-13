@@ -117,7 +117,18 @@ public class UmsClient {
         checkNotNull(accountId);
         checkNotNull(memberCrn);
 
-        Actor.Builder actor = Actor.newBuilder().setAccountId(accountId).setUserIdOrCrn(memberCrn);
+        Crn crn = Crn.safeFromString(memberCrn);
+        Actor.Builder actor = Actor.newBuilder().setAccountId(accountId);
+        switch (crn.getResourceType()) {
+            case USER:
+                actor.setUserIdOrCrn(memberCrn);
+                break;
+            case MACHINE_USER:
+                actor.setMachineUserNameOrCrn(memberCrn);
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("memberCrn %s is not a USER or MACHINE_USER", memberCrn));
+        }
         ListGroupsForMemberRequest.Builder request = ListGroupsForMemberRequest.newBuilder()
                 .setMember(actor.build());
 
@@ -129,6 +140,7 @@ public class UmsClient {
                 String grpCRN = response.getGroupCrn(i);
                 groups.add(grpCRN);
             }
+            request.setPageToken(response.getNextPageToken());
         } while (response.hasNextPageToken());
 
         return groups;

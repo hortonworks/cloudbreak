@@ -44,6 +44,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRi
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse;
@@ -288,6 +290,18 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         String actorCrn = request.getActorCrn();
         String accountId = Crn.fromString(actorCrn).getAccountId();
         responseObserver.onNext(buildGetRightsResponse(accountId));
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void listGroupsForMember(ListGroupsForMemberRequest request,
+            StreamObserver<ListGroupsForMemberResponse> responseObserver) {
+        String accountId = request.getMember().getAccountId();
+        List<Group> groups = List.copyOf(mockGroupManagementService.getOrCreateGroups(accountId));
+        ListGroupsForMemberResponse.Builder responseBuilder =
+                ListGroupsForMemberResponse.newBuilder();
+        groups.forEach(g -> responseBuilder.addGroupCrn(g.getCrn()));
+        responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
     }
 

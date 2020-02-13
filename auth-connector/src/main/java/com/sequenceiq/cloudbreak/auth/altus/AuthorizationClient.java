@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.List;
+
 import org.springframework.util.StringUtils;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationGrpc;
@@ -46,6 +48,19 @@ public class AuthorizationClient {
                         .setCheck(rightCheckBuilder.build())
                         .build()
         );
+    }
+
+    public List<Boolean> hasRights(String requestId, String actorCrn, Iterable<AuthorizationProto.RightCheck> rightChecks) {
+        checkNotNull(requestId);
+        checkNotNull(actorCrn);
+        checkNotNull(rightChecks);
+        AuthorizationProto.HasRightsResponse response = newStub(requestId).hasRights(
+                AuthorizationProto.HasRightsRequest.newBuilder()
+                        .setActorCrn(actorCrn)
+                        .addAllCheck(rightChecks)
+                        .build()
+        );
+        return response.getResultList();
     }
 
     /**
