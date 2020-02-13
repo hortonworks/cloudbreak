@@ -15,6 +15,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,12 +35,12 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.CrnUser;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
-import com.sequenceiq.cloudbreak.common.cost.CostTagging;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
@@ -54,6 +55,7 @@ import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.BadRequestException;
+import com.sequenceiq.redbeams.service.AccountTagService;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.PasswordGeneratorService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
@@ -135,6 +137,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private AccountTagService accountTagService;
+
     @InjectMocks
     private AllocateDatabaseServerV4RequestToDBStackConverter underTest;
 
@@ -164,6 +169,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         databaseServerRequest.setSecurityGroup(securityGroupRequest);
 
         when(uuidGeneratorService.randomUuid()).thenReturn("uuid");
+        when(accountTagService.list()).thenReturn(new HashMap<>());
         when(uuidGeneratorService.uuidVariableParts(anyInt())).thenReturn("parts");
         when(entitlementService.internalTenant(anyString(), anyString())).thenReturn(true);
 

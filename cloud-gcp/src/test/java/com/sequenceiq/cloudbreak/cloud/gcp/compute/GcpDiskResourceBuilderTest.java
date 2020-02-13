@@ -56,7 +56,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -73,9 +72,6 @@ class GcpDiskResourceBuilderTest {
 
     @Mock
     private Compute compute;
-
-    @Mock
-    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Mock
     private GcpDiskEncryptionService gcpDiskEncryptionService;

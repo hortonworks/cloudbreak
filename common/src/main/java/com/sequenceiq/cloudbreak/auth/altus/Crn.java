@@ -159,8 +159,9 @@ public class Crn {
         FREEIPA("freeipa", NON_ADMIN_SERVICE),
         DATAHUB("datahub", NON_ADMIN_SERVICE),
         DATALAKE("datalake", NON_ADMIN_SERVICE),
-        ML("ml", NON_ADMIN_SERVICE),
-        DEX("dex", NON_ADMIN_SERVICE);
+        DEX("dex", NON_ADMIN_SERVICE),
+        ACCOUNTTAG("accounttag", NON_ADMIN_SERVICE),
+        ML("ml", NON_ADMIN_SERVICE);
 
         private static final ImmutableMap<String, Service> FROM_STRING;
 
@@ -315,7 +316,8 @@ public class Crn {
         KERBEROS("kerberos"),
         RECIPE("recipe"),
         FREEIPA("freeipa"),
-        DATALAKE("datalake");
+        DATALAKE("datalake"),
+        ACCOUNT_TAG("accountTag");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
 

@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 import freemarker.template.Template;
@@ -45,9 +44,6 @@ public class AzureNetworkTemplateBuilderTest {
 
     @InjectMocks
     private AzureNetworkTemplateBuilder underTest;
-
-    @Mock
-    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Mock
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;

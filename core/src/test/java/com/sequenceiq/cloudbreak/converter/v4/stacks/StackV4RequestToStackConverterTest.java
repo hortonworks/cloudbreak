@@ -37,11 +37,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.common.cost.CostTagging;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
-import com.sequenceiq.cloudbreak.common.service.CDPTagMergeRequest;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
@@ -64,6 +62,8 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClient
 import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.tag.CostTagging;
+import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;

@@ -63,7 +63,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.cloudbreak.util.Version;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -99,9 +98,6 @@ public class AzureTemplateBuilderTest {
 
     @Mock
     private Configuration freemarkerConfiguration;
-
-    @Mock
-    private DefaultCostTaggingService defaultCostTaggingService;
 
     @Mock
     private AzureAcceleratedNetworkValidator azureAcceleratedNetworkValidator;

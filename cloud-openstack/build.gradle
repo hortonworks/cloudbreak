@@ -19,6 +19,7 @@ dependencies {
 
     compile project(':cloud-common')
     compile project(':cloud-template')
+    compile project(':template-manager-tag')
 
     compile group: 'org.slf4j',                          name: 'slf4j-api',                      version: slf4jApiVersion
     compile group: 'org.apache.commons',                 name: 'commons-lang3',                  version: apacheCommonsLangVersion

@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.sharedservice.SharedServiceConfigsVi
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
@@ -71,8 +71,10 @@ import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
+import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
+import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
@@ -191,7 +193,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
     @Mock
-    private DefaultCostTaggingService defaultCostTaggingService;
+    private CostTagging defaultCostTaggingService;
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -210,6 +212,9 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private AccountTagClientService accountTagClientService;
 
     @Before
     public void setUp() throws IOException {
@@ -239,6 +244,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.getEnvironmentCrn()).thenReturn(TestConstants.CRN);
         when(stackMock.getCluster()).thenReturn(sourceCluster);
         when(stackMock.getResourceCrn()).thenReturn("crn");
+        when(accountTagClientService.list()).thenReturn(new HashMap<>());
         when(entitlementService.internalTenant(anyString(), anyString())).thenReturn(true);
         Credential credential = Credential.builder()
                 .crn("aCredentialCRN")

@@ -29,9 +29,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.general.GeneralClusterConfigsProvide
 import com.sequenceiq.cloudbreak.cmtemplate.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.service.CDPTagGenerationRequest;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
-import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
@@ -49,9 +46,12 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
+import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
+import com.sequenceiq.cloudbreak.tag.CostTagging;
+import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
@@ -116,7 +116,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
     @Inject
-    private DefaultCostTaggingService defaultCostTaggingService;
+    private CostTagging defaultCostTaggingService;
 
     @Inject
     private ServiceEndpointCollector serviceEndpointCollector;
@@ -132,6 +132,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
+
+    @Inject
+    private AccountTagClientService accountTagClientService;
 
     @Override
     public TemplatePreparationObject convert(Stack source) {
@@ -162,11 +165,12 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
                     .withCreatorCrn(source.getCreator().getUserCrn())
                     .withEnvironmentCrn(source.getEnvironmentCrn())
-                    .withPlatform(CloudConstants.AWS)
+                    .withPlatform(source.getCloudPlatform())
                     .withAccountId(source.getCreator().getTenant().getName())
                     .withIsInternalTenant(internalTenant)
                     .withResourceCrn(source.getResourceCrn())
                     .withUserName(source.getCreator().getUserName())
+                    .withAccountTags(accountTagClientService.list())
                     .build();
 
             Builder builder = Builder.builder()
