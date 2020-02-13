@@ -216,6 +216,7 @@ public class OperationDescriptions {
         public static final String GET_BY_IMAGE_CATALOG_NAME = "retrieve imagecatalog request by imagecatalog name";
         public static final String GET_IMAGES_BY_NAME = "determines available images for the given stack or platform"
                 + "from the given imagecatalog name";
+        public static final String GET_IMAGES_FOR_UPGRADE = "determines available images for platform upgrade";
         public static final String GET_IMAGES = "determines available images for the given stack or platform"
                 + "from the default image catalog";
         public static final String LIST_BY_WORKSPACE = "list image catalogs for the given workspace";
