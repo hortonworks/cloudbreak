@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -451,6 +453,18 @@ public class GrpcUmsClient {
             LOGGER.info("Deleting access keys for {}", machineUserCrn);
             client.deleteAccessKeys(UUID.randomUUID().toString(), accessKeys, actorCrn);
         }
+    }
+
+    /**
+     * Gather anonymization rules for a specific account
+     * NOTE: not supported yet on UMS side
+     * @param accountId account that owns the anonymization rules
+     * @param actorCrn actor that requests to gather the anonymization rules
+     * @return a list of anonymization rules for an UMS account
+     */
+    public List<AnonymizationRule> getAnonymizationRules(String accountId, String actorCrn) {
+        LOGGER.debug("Try getting anonymization rules for {} by {}", accountId, actorCrn);
+        return new ArrayList<>();
     }
 
     private ManagedChannelWrapper makeWrapper() {

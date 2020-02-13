@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 
 import static java.util.Collections.singletonMap;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -12,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.service.altus.AltusAnonymizationRulesService;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
@@ -21,6 +23,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfigService;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfigView;
+import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 /**
@@ -60,15 +63,19 @@ public class TelemetryDecorator {
 
     private final AltusMachineUserService altusMachineUserService;
 
+    private final AltusAnonymizationRulesService altusAnonymizationRulesService;
+
     public TelemetryDecorator(DatabusConfigService databusConfigService,
             FluentConfigService fluentConfigService,
             MeteringConfigService meteringConfigService,
             AltusMachineUserService altusMachineUserService,
+            AltusAnonymizationRulesService altusAnonymizationRulesService,
             @Value("${info.app.version:}") String version) {
         this.databusConfigService = databusConfigService;
         this.fluentConfigService = fluentConfigService;
         this.meteringConfigService = meteringConfigService;
         this.altusMachineUserService = altusMachineUserService;
+        this.altusAnonymizationRulesService = altusAnonymizationRulesService;
         this.version = version;
     }
 
@@ -100,8 +107,9 @@ public class TelemetryDecorator {
                 .withPlatform(stack.getCloudPlatform())
                 .withVersion(version)
                 .build();
+        List<AnonymizationRule> rules = altusAnonymizationRulesService.getAnonymizationRules(stack);
         FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterDetails,
-                databusConfigView.isEnabled(), meteringEnabled, telemetry);
+                databusConfigView.isEnabled(), meteringEnabled, telemetry, rules);
         if (fluentConfigView.isEnabled()) {
             Map<String, Object> fluentConfig = fluentConfigView.toMap();
             servicePillar.put("fluent",

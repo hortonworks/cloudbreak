@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.auth.altus.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +12,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
 @Service
 public class AltusIAMService {
@@ -72,6 +74,10 @@ public class AltusIAMService {
             LOGGER.warn("Cluster Databus resource cleanup failed (fluent - databus user). It is not a fatal issue, "
                     + "but note that you could have remaining UMS resources for your account", e);
         }
+    }
+
+    public List<AnonymizationRule> getAnonymizationRules(String accountId, String actorCrn) {
+        return umsClient.getAnonymizationRules(accountId, actorCrn);
     }
 
     public void clearMachineUser(String machineUserName, String actorCrn) {

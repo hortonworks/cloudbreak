@@ -11,8 +11,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -28,11 +28,13 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
+import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
+import com.sequenceiq.freeipa.service.AltusAnonymizationRulesService;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
@@ -70,6 +72,9 @@ public class FreeIpaInstallService {
 
     @Inject
     private DatabusConfigService databusConfigService;
+
+    @Inject
+    private AltusAnonymizationRulesService altusAnonymizationRulesService;
 
     @Inject
     private AltusMachineUserService altusMachineUserService;
@@ -133,9 +138,9 @@ public class FreeIpaInstallService {
                     .withPlatform(stack.getCloudPlatform())
                     .withVersion(version)
                     .build();
-
+            List<AnonymizationRule> rules = altusAnonymizationRulesService.getAnonymizationRules();
             FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterDetails,
-                    databusEnabled, false, telemetry);
+                    databusEnabled, false, telemetry, rules);
             servicePillarConfig.put("fluent", new SaltPillarProperties("/fluent/init.sls", Collections.singletonMap("fluent", fluentConfigView.toMap())));
             if (databusEnabled) {
                 Optional<AltusCredential> credential = altusMachineUserService.createMachineUserWithAccessKeys(stack, telemetry);

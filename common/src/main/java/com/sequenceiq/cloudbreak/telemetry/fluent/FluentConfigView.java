@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.telemetry.fluent;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfigView;
+import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
 public class FluentConfigView implements TelemetryConfigView {
 
@@ -65,6 +68,8 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private final String logFolderName;
 
+    private final List<AnonymizationRule> anonymizationRules;
+
     private final Map<String, Object> overrideAttributes;
 
     private FluentConfigView(Builder builder) {
@@ -89,6 +94,7 @@ public class FluentConfigView implements TelemetryConfigView {
         this.azureStorageAccount = builder.azureStorageAccount;
         this.azureInstanceMsi = builder.azureInstanceMsi;
         this.azureStorageAccessKey = builder.azureStorageAccessKey;
+        this.anonymizationRules = builder.anonymizationRules;
         this.overrideAttributes = builder.overrideAttributes;
     }
 
@@ -207,6 +213,9 @@ public class FluentConfigView implements TelemetryConfigView {
         if (this.clusterDetails != null) {
             map.putAll(clusterDetails.toMap());
         }
+        if (CollectionUtils.isNotEmpty(this.anonymizationRules)) {
+            map.put("anonymizationRules", this.anonymizationRules);
+        }
         if (this.overrideAttributes != null) {
             for (Map.Entry<String, Object> entry : this.overrideAttributes.entrySet()) {
                 if (!"enabled".equalsIgnoreCase(entry.getKey())
@@ -262,6 +271,8 @@ public class FluentConfigView implements TelemetryConfigView {
         private String azureInstanceMsi;
 
         private String azureStorageAccessKey;
+
+        private List<AnonymizationRule> anonymizationRules;
 
         private Map<String, Object> overrideAttributes;
 
@@ -376,6 +387,11 @@ public class FluentConfigView implements TelemetryConfigView {
 
         public Builder withClusterDetails(FluentClusterDetails clusterDetails) {
             this.clusterDetails = clusterDetails;
+            return this;
+        }
+
+        public Builder withAnonymizationRules(List<AnonymizationRule> anonymizationRules) {
+            this.anonymizationRules = anonymizationRules;
             return this;
         }
     }

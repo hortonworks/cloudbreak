@@ -68,7 +68,7 @@
 {% set cloudera_azure_plugin_version = '1.0.1' %}
 {% set cloudera_azure_gen2_plugin_version = '0.2.4' %}
 {% set cloudera_databus_plugin_version = '1.0.3' %}
-{% set redaction_plugin_version = '0.1.1' %}
+{% set redaction_plugin_version = '0.1.2' %}
 {% set platform = salt['pillar.get']('fluent:platform') %}
 
 {% set service_path_log_suffix = '%Y-%m-%d/%H/\${tag[1]}-#{Socket.gethostname}-%M' %}
@@ -89,6 +89,11 @@
 {% if dbus_cluster_logs_collection_enabled %}
 {%   set cluster_logs_collection_worker_index=number_of_workers %}
 {%   set number_of_workers=number_of_workers+1 %}
+{% endif %}
+
+{% set anonymization_rules=[] %}
+{% if salt['pillar.get']('fluent:anonymizationRules') %}
+{%   set anonymization_rules = salt['pillar.get']('fluent:anonymizationRules') %}
 {% endif %}
 
 {% do fluent.update({
@@ -129,6 +134,7 @@
     "cloudStorageWorkerIndex": cloud_storage_worker_index,
     "meteringWorkerIndex": metering_worker_index,
     "clusterLogsCollectionWorkerIndex": cluster_logs_collection_worker_index,
+    "anonymizationRules": anonymization_rules,
     "region": region,
     "platform": platform
 }) %}
