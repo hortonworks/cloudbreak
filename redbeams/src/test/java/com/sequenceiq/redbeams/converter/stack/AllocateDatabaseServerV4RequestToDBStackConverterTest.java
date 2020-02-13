@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -29,6 +30,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.CrnUser;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -42,6 +44,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
@@ -55,6 +58,7 @@ import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.PasswordGeneratorService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.UuidGeneratorService;
+import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.network.NetworkParameterAdder;
 import com.sequenceiq.redbeams.service.network.SubnetChooserService;
 import com.sequenceiq.redbeams.service.network.SubnetListerService;
@@ -125,6 +129,12 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     @Mock
     private CostTagging costTagging;
 
+    @Mock
+    private CrnService crnService;
+
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private AllocateDatabaseServerV4RequestToDBStackConverter underTest;
 
@@ -155,8 +165,15 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
         when(uuidGeneratorService.randomUuid()).thenReturn("uuid");
         when(uuidGeneratorService.uuidVariableParts(anyInt())).thenReturn("parts");
+        when(entitlementService.internalTenant(anyString(), anyString())).thenReturn(true);
 
         when(clock.getCurrentInstant()).thenReturn(NOW);
+        when(crnService.createCrn(any(DBStack.class))).thenReturn(Crn.builder()
+                .setService(Crn.Service.REDBEAMS)
+                .setAccountId("accountid")
+                .setResourceType(Crn.ResourceType.DATABASE_SERVER)
+                .setResource("1")
+                .build());
     }
 
     @Test
@@ -168,6 +185,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 .withCrn(ENVIRONMENT_CRN)
                 .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName("myRegion").build())
                 .withName(ENVIRONMENT_NAME)
+                .withTag(new TagResponse())
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         when(crnUserDetailsService.loadUserByUsername(OWNER_CRN)).thenReturn(getCrnUser());
@@ -227,6 +245,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 .withCloudPlatform(AWS_CLOUD_PLATFORM.name())
                 .withName(ENVIRONMENT_NAME)
                 .withCrn(ENVIRONMENT_CRN)
+                .withTag(new TagResponse())
                 .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName("myRegion").build())
                 .withSecurityAccess(SecurityAccessResponse.builder().withDefaultSecurityGroupId(DEFAULT_SECURITY_GROUP_ID).build())
                 .withNetwork(EnvironmentNetworkResponse.EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()

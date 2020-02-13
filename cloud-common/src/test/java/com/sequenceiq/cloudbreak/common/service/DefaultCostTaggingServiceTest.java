@@ -92,6 +92,8 @@ public class DefaultCostTaggingServiceTest {
                 .withResourceCrn("resource-crn")
                 .withUserName("apache1@apache.com")
                 .withPlatform(platform)
+                .withAccountId("pepsi")
+                .withIsInternalTenant(true)
                 .withSourceMap(sourceMap)
                 .build();
     }

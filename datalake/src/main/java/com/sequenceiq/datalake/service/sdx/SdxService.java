@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -327,7 +328,11 @@ public class SdxService implements ResourceIdProvider {
 
     private void setTagsSafe(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster) {
         try {
-            sdxCluster.setTags(new Json(sdxClusterRequest.getTags()));
+            if (sdxClusterRequest.getTags() == null) {
+                sdxCluster.setTags(new Json(new HashMap<>()));
+            } else {
+                sdxCluster.setTags(new Json(sdxClusterRequest.getTags()));
+            }
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Can not convert tags", e);
         }

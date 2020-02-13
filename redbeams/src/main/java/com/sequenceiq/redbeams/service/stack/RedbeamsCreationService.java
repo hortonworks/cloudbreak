@@ -1,8 +1,5 @@
 package com.sequenceiq.redbeams.service.stack;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -14,10 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
-import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.cost.CostTagging;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.service.CDPTagGenerationRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
@@ -27,7 +21,6 @@ import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
-import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 
 @Service
@@ -38,9 +31,6 @@ public class RedbeamsCreationService {
     static final long DEFAULT_WORKSPACE = 0L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsCreationService.class);
-
-    @Inject
-    private CrnService crnService;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -65,9 +55,6 @@ public class RedbeamsCreationService {
         if (dbStackService.findByNameAndEnvironmentCrn(dbStack.getName(), dbStack.getEnvironmentId()).isPresent()) {
             throw new BadRequestException("A stack for this database server already exists in the environment");
         }
-
-        dbStack.setResourceCrn(crnService.createCrn(dbStack));
-        dbStack.setTags(getTags(dbStack));
 
         // possible future change is to use a flow here (GetPlatformTemplateRequest, modified for database server)
         // for now, just get it synchronously / within this thread, it ought to be quick
@@ -99,20 +86,6 @@ public class RedbeamsCreationService {
         flowManager.notify(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(),
                 new RedbeamsEvent(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(), dbStack.getId()));
         return savedStack;
-    }
-
-    private Json getTags(DBStack dbStack) {
-        CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
-                .withCreatorCrn(dbStack.getOwnerCrn().toString())
-                .withEnvironmentCrn(dbStack.getEnvironmentId())
-                .withPlatform(dbStack.getCloudPlatform())
-                .withResourceCrn(dbStack.getResourceCrn().toString())
-                .withUserName(dbStack.getUserName())
-                .build();
-
-        Map<String, String> defaultTags = costTagging.prepareDefaultTags(request);
-
-        return new Json(new StackTags(new HashMap<>(), new HashMap<>(), defaultTags));
     }
 
     private void registerDatabaseServerConfig(DBStack dbStack) {

@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
@@ -219,6 +220,9 @@ public class StackService implements ResourceIdProvider {
 
     @Inject
     private StackIdViewToStackResponseConverter stackIdViewToStackResponseConverter;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -529,11 +533,14 @@ public class StackService implements ResourceIdProvider {
         try {
             StackTags stackTag = stack.getTags().get(StackTags.class);
 
+            boolean internalTenant = entitlementService.internalTenant(stack.getCreator().getUserCrn(), stack.getCreator().getTenant().getName());
             CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
                     .withCreatorCrn(stack.getCreator().getUserCrn())
                     .withEnvironmentCrn(stack.getEnvironmentCrn())
                     .withPlatform(stack.getCloudPlatform())
+                    .withAccountId(stack.getCreator().getTenant().getName())
                     .withResourceCrn(stack.getResourceCrn())
+                    .withIsInternalTenant(internalTenant)
                     .withUserName(stack.getCreator().getUserName())
                     .build();
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.domain;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -120,8 +121,13 @@ public class Environment implements AuthResource {
     @Column(name = "experimentalfeatures", columnDefinition = "TEXT")
     private Json experimentalFeaturesJson;
 
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json tags;
+
     public Environment() {
         regions = new Json(new HashSet<Region>());
+        tags = new Json(new EnvironmentTags(new HashMap<>(), new HashMap<>()));
         experimentalFeaturesJson = new Json(new ExperimentalFeatures());
     }
 
@@ -394,5 +400,21 @@ public class Environment implements AuthResource {
 
     public void setParameters(BaseParameters parameters) {
         this.parameters = parameters;
+    }
+
+    public Json getTags() {
+        return tags;
+    }
+
+    public void setTags(Json tags) {
+        this.tags = tags;
+    }
+
+    public EnvironmentTags getEnvironmentTags() {
+        if (tags != null && tags.getValue() != null) {
+            return JsonUtil.readValueOpt(tags.getValue(), EnvironmentTags.class)
+                    .orElse(new EnvironmentTags(new HashMap<>(), new HashMap<>()));
+        }
+        return new EnvironmentTags(new HashMap<>(), new HashMap<>());
     }
 }

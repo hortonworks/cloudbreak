@@ -40,16 +40,36 @@ public class DefaultCostTaggingService implements CostTagging {
         addCDPCrnIfPresent(result, RESOURCE_CRN, request.getResourceCrn(), platform);
 
         // Internal tags should be based on entitlement
-        addTagIfNotPresented(result, request, OWNER, request.getUserName());
-        addTagIfNotPresented(result, request, owner, request.getUserName());
-        addTagIfNotPresented(result, request, CREATION_TIMESTAMP, String.valueOf(clock.getCurrentInstant().getEpochSecond()));
+        if (request.isInternalTenant()) {
+            addTagIfNotPresented(result, request, OWNER, request.getUserName());
+            addTagIfNotPresented(result, request, owner, request.getUserName());
+            addTagIfNotPresented(result, request, CREATION_TIMESTAMP, String.valueOf(clock.getCurrentInstant().getEpochSecond()));
+        }
         LOGGER.debug("The following default tag(s) has prepared: {}", result);
+        return result;
+    }
+
+    @Override
+    public Map<String, String> mergeTags(CDPTagMergeRequest request) {
+        LOGGER.debug("About to merge tag(s)...");
+        Map<String, String> result = new HashMap<>();
+        result.putAll(request.getRequestTags());
+        for (String key : request.getEnvironmentTags().keySet()) {
+            addTagIfNotPresented(result, request, key);
+        }
+        LOGGER.debug("The following requested tag(s) will be applied prepared: {}", result);
         return result;
     }
 
     private void addTagIfNotPresented(Map<String, String> result, CDPTagGenerationRequest request, DefaultApplicationTag key, String value) {
         if (request.isKeyNotPresented(key)) {
             result.put(transform(key.key(), request.getPlatform()), transform(value, request.getPlatform()));
+        }
+    }
+
+    private void addTagIfNotPresented(Map<String, String> result, CDPTagMergeRequest request, String key) {
+        if (request.isKeyNotPresented(key)) {
+            result.put(transform(key, request.getPlatform()), transform(request.getEnvironmentTags().get(key), request.getPlatform()));
         }
     }
 

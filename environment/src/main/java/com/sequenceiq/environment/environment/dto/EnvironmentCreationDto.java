@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.environment.dto;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -47,14 +49,18 @@ public class EnvironmentCreationDto {
 
     private final ParametersDto parameters;
 
+    private final String crn;
+
     private final ExperimentalFeatures experimentalFeatures;
+
+    private final Map<String, String> tags;
 
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             String creator, LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
             Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, AuthenticationDto authentication,
             Long created, EnvironmentTelemetry telemetry, SecurityAccessDto securityAccess, String adminGroupName,
-            ParametersDto parameters, ExperimentalFeatures experimentalFeatures) {
+            ParametersDto parameters, ExperimentalFeatures experimentalFeatures, Map<String, String> tags, String crn) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -82,6 +88,12 @@ public class EnvironmentCreationDto {
         this.adminGroupName = adminGroupName;
         this.parameters = parameters;
         this.experimentalFeatures = experimentalFeatures != null ? experimentalFeatures : new ExperimentalFeatures();
+        if (tags == null) {
+            this.tags = new HashMap<>();
+        } else {
+            this.tags = tags;
+        }
+        this.crn = crn;
     }
 
     public static Builder builder() {
@@ -160,6 +172,14 @@ public class EnvironmentCreationDto {
         return experimentalFeatures;
     }
 
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    public String getCrn() {
+        return crn;
+    }
+
     public static final class Builder {
         private String name;
 
@@ -196,6 +216,10 @@ public class EnvironmentCreationDto {
         private ParametersDto parameters;
 
         private ExperimentalFeatures experimentalFeatures;
+
+        private Map<String, String> tags = new HashMap<>();
+
+        private String crn;
 
         private Builder() {
         }
@@ -290,10 +314,20 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        public Builder withTags(Map<String, String> tags) {
+            this.tags = tags;
+            return this;
+        }
+
+        public Builder withCrn(String crn) {
+            this.crn = crn;
+            return this;
+        }
+
         public EnvironmentCreationDto build() {
             return new EnvironmentCreationDto(name, description, cloudPlatform, accountId, creator,
                     location, network, credential, regions, proxyNames, createFreeIpa, authentication,
-                    created, telemetry, securityAccess, adminGroupName, parameters, experimentalFeatures);
+                    created, telemetry, securityAccess, adminGroupName, parameters, experimentalFeatures, tags, crn);
         }
     }
 }

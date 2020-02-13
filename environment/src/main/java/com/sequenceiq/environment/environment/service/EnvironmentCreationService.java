@@ -3,9 +3,7 @@ package com.sequenceiq.environment.environment.service;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 
 import java.util.Map;
-import java.util.UUID;
 
-import javax.annotation.Nonnull;
 import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -118,7 +116,7 @@ public class EnvironmentCreationService {
 
     private Environment initializeEnvironment(EnvironmentCreationDto creationDto) {
         Environment environment = environmentDtoConverter.creationDtoToEnvironment(creationDto);
-        environment.setResourceCrn(createCrn(creationDto.getAccountId()));
+        environment.setResourceCrn(creationDto.getCrn());
         Credential credential = environmentResourceService
                 .getCredentialFromRequest(creationDto.getCredential(), creationDto.getAccountId(), creationDto.getCreator());
         environment.setCredential(credential);
@@ -148,16 +146,6 @@ public class EnvironmentCreationService {
 
     private void createAndSetParameters(Environment environment, ParametersDto parameters) {
         environment.setParameters(parametersService.saveParameters(environment, parameters));
-    }
-
-    private String createCrn(@Nonnull String accountId) {
-        return Crn.builder()
-                .setService(Crn.Service.ENVIRONMENTS)
-                .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.ENVIRONMENT)
-                .setResource(UUID.randomUUID().toString())
-                .build()
-                .toString();
     }
 
     private void validateCreation(EnvironmentCreationDto creationDto, Environment environment, CloudRegions cloudRegions,

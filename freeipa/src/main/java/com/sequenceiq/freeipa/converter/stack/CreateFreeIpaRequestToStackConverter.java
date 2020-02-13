@@ -27,6 +27,7 @@ import org.springframework.util.CollectionUtils;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
@@ -76,6 +77,9 @@ public class CreateFreeIpaRequestToStackConverter {
     @Inject
     private CostTagging costTagging;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
 
@@ -107,7 +111,7 @@ public class CreateFreeIpaRequestToStackConverter {
         }
         stack.setTelemetry(telemetryConverter.convert(source.getTelemetry()));
         decorateStackWithTunnelAndCcm(stack, source);
-        updateOwnerRelatedFields(accountId, userFuture, stack);
+        updateOwnerRelatedFields(source, accountId, userFuture, stack);
         extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack);
         return stack;
     }
@@ -151,12 +155,12 @@ public class CreateFreeIpaRequestToStackConverter {
         return securityRule;
     }
 
-    private void updateOwnerRelatedFields(String accountId, Future<User> userFuture, Stack stack) {
+    private void updateOwnerRelatedFields(CreateFreeIpaRequest source, String accountId, Future<User> userFuture, Stack stack) {
         String owner = accountId;
         try {
             User user = userFuture.get(userGetTimeout, TimeUnit.SECONDS);
             owner = user.getEmail();
-            stack.setTags(getTags(user, stack));
+            stack.setTags(getTags(source, user, stack));
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             String errorMessage = "Couldn't fetch user from UMS: ";
             LOGGER.error(errorMessage, e);
@@ -194,9 +198,14 @@ public class CreateFreeIpaRequestToStackConverter {
         return source.getPlacement().getRegion();
     }
 
-    private Json getTags(User user, Stack stack) {
+    private Json getTags(CreateFreeIpaRequest source, User user, Stack stack) {
         try {
-            return new Json(new StackTags(new HashMap<>(), new HashMap<>(), getDefaultTags(user, stack)));
+            Map<String, String> userDefined = source.getTags();
+            if (userDefined == null) {
+                userDefined =  new HashMap<>();
+            }
+            // userdefined tags comming from environment service
+            return new Json(new StackTags(userDefined, new HashMap<>(), getDefaultTags(user, stack)));
         } catch (Exception ignored) {
             throw new BadRequestException("Failed to convert dynamic tags.");
         }
@@ -205,11 +214,14 @@ public class CreateFreeIpaRequestToStackConverter {
     private Map<String, String> getDefaultTags(User user, Stack stack) {
         Map<String, String> result = new HashMap<>();
         try {
+            boolean internalTenant = entitlementService.internalTenant(user.getCrn(), stack.getAccountId());
             CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
                     .withCreatorCrn(user.getCrn())
                     .withEnvironmentCrn(stack.getEnvironmentCrn())
                     .withPlatform(stack.getCloudPlatform())
+                    .withAccountId(stack.getAccountId())
                     .withResourceCrn(stack.getResourceCrn())
+                    .withIsInternalTenant(internalTenant)
                     .withUserName(user.getEmail())
                     .build();
 
