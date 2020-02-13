@@ -32,6 +32,10 @@ public class EntitlementService {
         return isEntitlementRegistered(actorCrn, accountId, "CDP_AUTOMATIC_USERSYNC_POLLER");
     }
 
+    public boolean internalTenant(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, "CLOUDERA_INTERNAL_ACCOUNT");
+    }
+
     public boolean fmsClusterProxyEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, "CDP_FMS_CLUSTER_PROXY");
     }

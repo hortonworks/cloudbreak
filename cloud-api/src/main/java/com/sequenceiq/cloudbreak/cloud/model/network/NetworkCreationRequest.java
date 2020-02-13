@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model.network;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -33,6 +35,8 @@ public class NetworkCreationRequest {
 
     private final boolean privateSubnetEnabled;
 
+    private final Map<String, String> tags;
+
     private NetworkCreationRequest(Builder builder) {
         envId = builder.envId;
         envName = builder.envName;
@@ -47,6 +51,7 @@ public class NetworkCreationRequest {
         privateSubnetEnabled = builder.privateSubnetEnabled;
         userName = builder.userName;
         creatorCrn = builder.creatorCrn;
+        tags = builder.tags;
     }
 
     public String getEnvName() {
@@ -101,6 +106,10 @@ public class NetworkCreationRequest {
         return creatorCrn;
     }
 
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
     public static class Builder {
         private Long envId;
 
@@ -127,6 +136,8 @@ public class NetworkCreationRequest {
         private boolean privateSubnetEnabled;
 
         private String creatorCrn;
+
+        private Map<String, String> tags = new HashMap<>();
 
         public Builder withEnvId(Long envId) {
             this.envId = envId;
@@ -190,6 +201,11 @@ public class NetworkCreationRequest {
 
         public Builder withCreatorCrn(String creatorCrn) {
             this.creatorCrn = creatorCrn;
+            return this;
+        }
+
+        public Builder withTags(Map<String, String> tags) {
+            this.tags = tags;
             return this;
         }
 

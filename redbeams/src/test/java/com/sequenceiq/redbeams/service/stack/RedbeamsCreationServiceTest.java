@@ -9,7 +9,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -26,8 +25,6 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.common.cost.CostTagging;
-import com.sequenceiq.cloudbreak.common.service.CDPTagGenerationRequest;
-import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
@@ -52,8 +49,6 @@ class RedbeamsCreationServiceTest {
     private static final String CLOUD_PLATFORM = "cloudPlatform";
 
     private static final String PLATFORM_VARIANT = "platformVariant";
-
-    private static final Crn CRN = TestData.getTestCrn("database", "name");
 
     private static final String ACCOUNT_ID = "accountId";
 
@@ -117,20 +112,19 @@ class RedbeamsCreationServiceTest {
         connector = mock(CloudConnector.class, RETURNS_DEEP_STUBS);
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(connector);
         when(connector.resources().getDBStackTemplate()).thenReturn(TEMPLATE);
-        when(costTagging.prepareDefaultTags(any(CDPTagGenerationRequest.class))).thenReturn(new HashMap<>());
     }
 
     @Test
     public void testLaunchDatabaseServer() {
+        Crn crn = Crn.fromString("crn:cdp:iam:us-west-1:1234:database:2312312");
         when(dbStackService.findByNameAndEnvironmentCrn(DB_STACK_NAME, ENVIRONMENT_CRN)).thenReturn(Optional.empty());
-        when(crnService.createCrn(dbStack)).thenReturn(CRN);
         when(dbStackService.save(dbStack)).thenReturn(dbStack);
 
         DBStack launchedStack = underTest.launchDatabaseServer(dbStack);
         assertEquals(dbStack, launchedStack);
         verify(dbStackService).save(dbStack);
 
-        assertEquals(CRN, dbStack.getResourceCrn());
+        assertEquals(crn, dbStack.getResourceCrn());
         assertEquals(TEMPLATE, dbStack.getTemplate());
 
         ArgumentCaptor<DatabaseServerConfig> databaseServerConfigCaptor = ArgumentCaptor.forClass(DatabaseServerConfig.class);
@@ -147,7 +141,7 @@ class RedbeamsCreationServiceTest {
         assertEquals(DatabaseVendor.POSTGRES, databaseServerConfig.getDatabaseVendor());
         assertNull(databaseServerConfig.getHost());
         assertNull(databaseServerConfig.getPort());
-        assertEquals(CRN, databaseServerConfig.getResourceCrn());
+        assertEquals(crn, databaseServerConfig.getResourceCrn());
         assertEquals(dbStack, databaseServerConfig.getDbStack().get());
 
         ArgumentCaptor<RedbeamsEvent> eventCaptor = ArgumentCaptor.forClass(RedbeamsEvent.class);

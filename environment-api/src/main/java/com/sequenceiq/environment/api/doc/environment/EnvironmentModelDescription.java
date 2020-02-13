@@ -56,6 +56,7 @@ public class EnvironmentModelDescription {
     public static final String ADMIN_GROUP_NAME = "Name of the admin group to be used for all the services.";
 
     public static final String AWS_PARAMETERS = "AWS Specific parameters.";
+    public static final String TAGS = "Tags for environments.";
     public static final String S3_GUARD = "S3Guard parameters.";
     public static final String S3_GUARD_DYNAMO_TABLE_NAME = "S3Guard Dynamo table name.";
 

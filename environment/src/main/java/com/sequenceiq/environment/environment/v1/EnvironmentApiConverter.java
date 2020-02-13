@@ -5,8 +5,10 @@ import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCreden
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -39,9 +42,11 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentN
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverter;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
+import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
@@ -112,6 +117,8 @@ public class EnvironmentApiConverter {
                 .withRegions(request.getRegions())
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()))
                 .withAdminGroupName(request.getAdminGroupName())
+                .withTags(request.getTags())
+                .withCrn(createCrn(ThreadBasedUserCrnProvider.getAccountId()))
                 .withExperimentalFeatures(ExperimentalFeatures.builder()
                         .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
                         .withTunnel(tunnelConverter.convert(request.getTunnel()))
@@ -129,6 +136,16 @@ public class EnvironmentApiConverter {
             builder.withSecurityAccess(securityAccess);
         }
         return builder.build();
+    }
+
+    private String createCrn(@Nonnull String accountId) {
+        return Crn.builder()
+                .setService(Crn.Service.ENVIRONMENTS)
+                .setAccountId(accountId)
+                .setResourceType(Crn.ResourceType.ENVIRONMENT)
+                .setResource(UUID.randomUUID().toString())
+                .build()
+                .toString();
     }
 
     private ParametersDto awsParamsToParametersDto(AwsEnvironmentParameters aws) {
@@ -241,6 +258,7 @@ public class EnvironmentApiConverter {
                 .withAuthentication(authenticationDtoToResponse(environmentDto.getAuthentication()))
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
+                .withTag(getIfNotNull(environmentDto.getTags(), this::environtmentTagsToTagResponse))
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
                 .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())
@@ -269,6 +287,7 @@ public class EnvironmentApiConverter {
                 .withCreated(environmentDto.getCreated())
                 .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())
                 .withAdminGroupName(environmentDto.getAdminGroupName())
+                .withTag(getIfNotNull(environmentDto.getTags(), this::environtmentTagsToTagResponse))
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams));
@@ -288,6 +307,13 @@ public class EnvironmentApiConverter {
         return S3GuardRequestParameters.builder()
                 .withDynamoDbTableName(awsParametersDto.getS3GuardTableName())
                 .build();
+    }
+
+    private TagResponse environtmentTagsToTagResponse(EnvironmentTags tags) {
+        TagResponse tagResponse = new TagResponse();
+        tagResponse.setDefaults(tags.getDefaultTags());
+        tagResponse.setUserDefined(tags.getUserDefinedTags());
+        return tagResponse;
     }
 
     public EnvironmentNetworkResponse networkDtoToResponse(NetworkDto network, Tunnel tunnel) {

@@ -115,6 +115,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final String CDP_AUTOMATIC_USERSYNC_POLLER = "CDP_AUTOMATIC_USERSYNC_POLLER";
 
+    private static final String CLOUDERA_INTERNAL_ACCOUNT = "CLOUDERA_INTERNAL_ACCOUNT";
+
     private static final String CDP_BASE_IMAGE = "CDP_BASE_IMAGE";
 
     @Inject
@@ -348,6 +350,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                                 .setWorkloadSubdomain(ACCOUNT_SUBDOMAIN)
                                 .addEntitlements(createEntitlement(CDP_AZURE))
                                 .addEntitlements(createEntitlement(CDP_AUTOMATIC_USERSYNC_POLLER))
+                                .addEntitlements(createEntitlement(CLOUDERA_INTERNAL_ACCOUNT))
                                 .setPasswordPolicy(workloadPasswordPolicy)
                                 .build())
                         .build());

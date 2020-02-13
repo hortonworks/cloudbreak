@@ -2,10 +2,10 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
-import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 
 import io.swagger.annotations.ApiModel;
@@ -68,6 +68,9 @@ public abstract class EnvironmentBaseResponse {
 
     @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
+
+    @ApiModelProperty(EnvironmentModelDescription.TAGS)
+    private TagResponse tags;
 
     public String getCrn() {
         return crn;
@@ -219,5 +222,13 @@ public abstract class EnvironmentBaseResponse {
 
     public void setAws(AwsEnvironmentParameters aws) {
         this.aws = aws;
+    }
+
+    public TagResponse getTags() {
+        return tags;
+    }
+
+    public void setTags(TagResponse tags) {
+        this.tags = tags;
     }
 }

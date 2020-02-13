@@ -17,6 +17,7 @@ public class FreeIpaModelDescriptions {
     public static final String CLOUD_PLATFORM = "Cloud Platform for FreeIPA";
     public static final String USE_CCM = "whether to use CCM for communicating with the freeipa instance";
     public static final String TUNNEL = "Configuration that the connection going directly or with cluster proxy or with ccm and cluster proxy.";
+    public static final String TAGS = "Tags for freeipa server.";
 
     private FreeIpaModelDescriptions() {
     }
@@ -87,5 +88,6 @@ public class FreeIpaModelDescriptions {
         public static final String DOMAIN = "Domain name associated to the FreeIPA";
         public static final String HOSTNAME = "Base hostname for FreeIPA servers";
         public static final String ADMIN_GROUP_NAME = "Name of the admin group to be used for all the services.";
+        public static final String TAGS = "Tags on freeipa.";
     }
 }

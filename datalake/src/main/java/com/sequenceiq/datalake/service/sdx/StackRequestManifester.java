@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -86,9 +87,18 @@ public class StackRequestManifester {
             stackRequest.setName(sdxCluster.getClusterName());
             stackRequest.setType(StackType.DATALAKE);
             if (stackRequest.getTags() == null) {
+                Map<String, String> userDefined = environment.getTags().getUserDefined();
                 TagsV4Request tags = new TagsV4Request();
                 try {
-                    tags.setUserDefined(sdxCluster.getTags().get(HashMap.class));
+                    Map<String, String> sdxUserDefined = new HashMap<>();
+                    // TODO currently the sdx app is putting 'null' if the user send us a null this is now fixed but we need to support old DL's
+                    if (sdxCluster.getTags() != null
+                            && !Strings.isNullOrEmpty(sdxCluster.getTags().getValue())
+                            && !"null".equals(sdxCluster.getTags().getValue())) {
+                        sdxUserDefined = sdxCluster.getTags().get(HashMap.class);
+                    }
+                    userDefined.putAll(sdxUserDefined);
+                    tags.setUserDefined(userDefined);
                 } catch (IOException e) {
                     LOGGER.error("Can not parse JSON to tags");
                     throw new BadRequestException("Can not parse JSON to tags", e);
