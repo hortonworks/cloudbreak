@@ -123,7 +123,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             String clusterName = stack.getName();
             List<String> upscaleHostNames = getUpscaleHosts(clustersResourceApi, clusterName, instanceMetaDatas);
             if (!upscaleHostNames.isEmpty()) {
-                List<ApiHost> hosts = clouderaManagerApiFactory.getHostsResourceApi(apiClient).readHosts(SUMMARY).getItems();
+                List<ApiHost> hosts = clouderaManagerApiFactory.getHostsResourceApi(apiClient).readHosts(null, null, SUMMARY).getItems();
                 ApiHostRefList body = createUpscaledHostRefList(upscaleHostNames, hosts);
                 clustersResourceApi.addHosts(clusterName, body);
                 activateParcel(clustersResourceApi);
@@ -154,7 +154,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private List<String> getHostNamesFromCM(ClustersResourceApi clustersResourceApi, String clusterName) throws ApiException {
-        List<ApiHostRef> hostRefs = clustersResourceApi.listHosts(clusterName).getItems();
+        List<ApiHostRef> hostRefs = clustersResourceApi.listHosts(clusterName, null, null).getItems();
         return hostRefs.stream().map(ApiHostRef::getHostname).collect(Collectors.toList());
     }
 

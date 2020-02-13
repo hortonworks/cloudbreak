@@ -120,7 +120,7 @@ public class ClouderaManagerDecomissioner {
             int replication = hostGroupNodesAreDataNodes(hostTemplates, hostGroup.getName()) ? getReplicationFactor(client, stack.getName()) : 0;
             verifyNodeCount(replication, scalingAdjustment, instancesForHostGroup.size(), 0, stack);
 
-            ApiHostRefList hostRefList = clustersResourceApi.listHosts(stack.getName());
+            ApiHostRefList hostRefList = clustersResourceApi.listHosts(stack.getName(), null, null);
 
             Set<InstanceMetaData> instancesToRemove = instancesForHostGroup.stream()
                     .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() == null)
@@ -165,7 +165,7 @@ public class ClouderaManagerDecomissioner {
         }
         ClustersResourceApi clustersResourceApi = new ClustersResourceApi(client);
         try {
-            ApiHostRefList hostRefList = clustersResourceApi.listHosts(stack.getName());
+            ApiHostRefList hostRefList = clustersResourceApi.listHosts(stack.getName(), null, null);
             List<String> runningHosts = hostRefList.getItems().stream()
                     .map(ApiHostRef::getHostname)
                     .collect(Collectors.toList());
@@ -184,7 +184,7 @@ public class ClouderaManagerDecomissioner {
     public Set<String> decommissionNodes(Stack stack, Map<String, InstanceMetaData> hostsToRemove, ApiClient client) {
         ClustersResourceApi clustersResourceApi = new ClustersResourceApi(client);
         try {
-            ApiHostRefList hostRefList = clustersResourceApi.listHosts(stack.getName());
+            ApiHostRefList hostRefList = clustersResourceApi.listHosts(stack.getName(), null, null);
             List<String> stillAvailableRemovableHosts = hostRefList.getItems().stream()
                     .filter(apiHostRef -> hostsToRemove.containsKey(apiHostRef.getHostname()))
                     .parallel()
@@ -276,7 +276,7 @@ public class ClouderaManagerDecomissioner {
     private void deleteHostFromClouderaManager(Stack stack, InstanceMetaData data, ApiClient client) {
         ClustersResourceApi clustersResourceApi = new ClustersResourceApi(client);
         try {
-            ApiHostRefList hostRefList = clustersResourceApi.listHosts(stack.getName());
+            ApiHostRefList hostRefList = clustersResourceApi.listHosts(stack.getName(), null, null);
             Optional<ApiHostRef> hostRefOptional = hostRefList.getItems().stream()
                     .filter(host -> data.getDiscoveryFQDN().equals(host.getHostname()))
                     .findFirst();

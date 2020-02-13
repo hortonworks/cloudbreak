@@ -316,7 +316,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     private Map<HostName, ApiHealthSummary> getHostHealthSummary() {
         HostsResourceApi api = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
-            return api.readHosts(FULL_VIEW).getItems().stream()
+            return api.readHosts(null, null, FULL_VIEW).getItems().stream()
                     .filter(host -> host.getHealthChecks() != null)
                     .flatMap(host -> host.getHealthChecks().stream()
                             .filter(check -> HOST_SCM_HEALTH.equals(check.getName()))
@@ -334,7 +334,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     private Map<HostName, ApiHealthCheck> getHostHealth() {
         HostsResourceApi api = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
-            return api.readHosts(FULL_WITH_EXPLANATION_VIEW).getItems().stream()
+            return api.readHosts(null, null, FULL_WITH_EXPLANATION_VIEW).getItems().stream()
                     .filter(host -> host.getHealthChecks() != null)
                     .flatMap(host -> host.getHealthChecks().stream()
                             .filter(check -> HOST_SCM_HEALTH.equals(check.getName()))
