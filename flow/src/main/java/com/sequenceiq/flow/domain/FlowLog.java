@@ -220,4 +220,14 @@ public class FlowLog {
     public void setFlowTriggerUserCrn(String flowTriggerUserCrn) {
         this.flowTriggerUserCrn = flowTriggerUserCrn;
     }
+
+    public String minimizedString() {
+        return "FlowLog{" +
+                "resourceId=" + resourceId +
+                ", created=" + created +
+                ", flowId='" + flowId + '\'' +
+                ", currentState='" + currentState + '\'' +
+                ", stateStatus=" + stateStatus +
+                '}';
+    }
 }
