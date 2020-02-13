@@ -19,6 +19,10 @@ public class CDPTagGenerationRequest {
 
     private final String userName;
 
+    private final String accountId;
+
+    private final boolean internalTenant;
+
     private final Map<String, String> sourceMap;
 
     private CDPTagGenerationRequest(CDPTagGenerationRequest.Builder builder) {
@@ -28,6 +32,8 @@ public class CDPTagGenerationRequest {
         this.creatorCrn = builder.creatorCrn;
         this.userName = builder.userName;
         this.sourceMap = builder.sourceMap;
+        this.accountId = builder.accountId;
+        this.internalTenant = builder.internalTenant;
     }
 
     public String getPlatform() {
@@ -50,8 +56,16 @@ public class CDPTagGenerationRequest {
         return userName;
     }
 
+    public String getAccountId() {
+        return accountId;
+    }
+
     public Map<String, String> getSourceMap() {
         return sourceMap;
+    }
+
+    public boolean isInternalTenant() {
+        return internalTenant;
     }
 
     public boolean isKeyNotPresented(DefaultApplicationTag tag) {
@@ -69,6 +83,10 @@ public class CDPTagGenerationRequest {
         private String creatorCrn;
 
         private String userName;
+
+        private String accountId;
+
+        private boolean internalTenant;
 
         private Map<String, String> sourceMap = new HashMap<>();
 
@@ -101,6 +119,16 @@ public class CDPTagGenerationRequest {
             return this;
         }
 
+        public Builder withAccountId(String accountId) {
+            this.accountId = accountId;
+            return this;
+        }
+
+        public Builder withIsInternalTenant(boolean internalTenant) {
+            this.internalTenant = internalTenant;
+            return this;
+        }
+
         public Builder withSourceMap(Map<String, String> sourceMap) {
             this.sourceMap = sourceMap;
             return this;
@@ -112,6 +140,7 @@ public class CDPTagGenerationRequest {
             Objects.requireNonNull(resourceCrn);
             Objects.requireNonNull(creatorCrn);
             Objects.requireNonNull(userName);
+            Objects.requireNonNull(accountId);
             return new CDPTagGenerationRequest(this);
         }
     }

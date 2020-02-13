@@ -155,6 +155,7 @@ class EnvironmentCreationServiceTest {
                 .withName(ENVIRONMENT_NAME)
                 .withCreator(CRN)
                 .withAccountId(ACCOUNT_ID)
+                .withCrn("crn")
                 .withAuthentication(AuthenticationDto.builder().build())
                 .withParameters(parametersDto)
                 .withLocation(LocationDto.builder()
@@ -185,7 +186,7 @@ class EnvironmentCreationServiceTest {
         verify(environmentService, times(2)).save(any());
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any());
-        verify(reactorFlowManager).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
+        verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
     }
 
     @Test

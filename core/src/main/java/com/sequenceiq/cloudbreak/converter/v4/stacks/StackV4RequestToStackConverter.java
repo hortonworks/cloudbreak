@@ -37,9 +37,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.common.cost.CostTagging;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
+import com.sequenceiq.cloudbreak.common.service.CDPTagMergeRequest;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -90,6 +92,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
 
     @Inject
     private GatewaySecurityGroupDecorator gatewaySecurityGroupDecorator;
+
+    @Inject
+    private CostTagging costTagging;
 
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
@@ -194,7 +199,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         source.setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
         stack.setRegion(getIfNotNull(source.getPlacement(), s -> getRegion(source, cloudPlatform)));
         stack.setCloudPlatform(cloudPlatform);
-        stack.setTags(getTags(source));
+        stack.setTags(getTags(source, environment));
         stack.setPlatformVariant(cloudPlatform);
     }
 
@@ -244,13 +249,25 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         return environmentResponse.getCloudPlatform();
     }
 
-    private Json getTags(StackV4Request source) {
+    private Json getTags(StackV4Request source, DetailedEnvironmentResponse environment) {
         try {
             TagsV4Request tags = source.getTags();
             if (tags == null) {
-                return new Json(new StackTags(new HashMap<>(), new HashMap<>(), new HashMap<>()));
+                return new Json(new StackTags(environment.getTags().getUserDefined(), new HashMap<>(), new HashMap<>()));
             }
-            return new Json(new StackTags(tags.getUserDefined(), tags.getApplication(), new HashMap<>()));
+
+            Map<String, String> userDefined = new HashMap<>();
+            if (environment.getTags() == null || environment.getTags().getUserDefined() == null) {
+                userDefined = environment.getTags().getUserDefined();
+            }
+
+            CDPTagMergeRequest request = CDPTagMergeRequest.Builder
+                    .builder()
+                    .withPlatform(source.getCloudPlatform().name())
+                    .withRequestTags(tags.getUserDefined())
+                    .withEnvironmentTags(userDefined)
+                    .build();
+            return new Json(new StackTags(costTagging.mergeTags(request), tags.getApplication(), new HashMap<>()));
         } catch (Exception ignored) {
             throw new BadRequestException("Failed to convert dynamic tags.");
         }

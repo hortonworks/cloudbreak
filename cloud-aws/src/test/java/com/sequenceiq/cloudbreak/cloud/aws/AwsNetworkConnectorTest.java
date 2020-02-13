@@ -58,7 +58,6 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AwsNetworkConnectorTest {
@@ -125,9 +124,6 @@ public class AwsNetworkConnectorTest {
     @Mock
     private AwsTaggingService awsTaggingService;
 
-    @Mock
-    private DefaultCostTaggingService defaultCostTaggingService;
-
     @Test
     public void testPlatformShouldReturnAwsPlatform() {
         Platform actual = underTest.platform();
@@ -173,7 +169,6 @@ public class AwsNetworkConnectorTest {
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest);
         verify(cfStackUtil).getOutputs(NETWORK_ID, cloudFormationRetryClient);
-        verify(defaultCostTaggingService, never()).prepareDefaultTags(any());
         verify(awsTaggingService, never()).prepareCloudformationTags(any(), any());
         verify(cloudFormationRetryClient, never()).createStack(any(CreateStackRequest.class));
         assertEquals(VPC_ID, actual.getNetworkId());
@@ -212,7 +207,6 @@ public class AwsNetworkConnectorTest {
         verify(awsNetworkCfTemplateProvider).provide(networkCidr, subnetRequestList, true);
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest);
-        verify(defaultCostTaggingService).prepareDefaultTags(any());
         verify(awsTaggingService).prepareCloudformationTags(any(), any());
         verify(cloudFormationRetryClient).createStack(any(CreateStackRequest.class));
         verify(cfStackUtil).getOutputs(NETWORK_ID, cloudFormationRetryClient);

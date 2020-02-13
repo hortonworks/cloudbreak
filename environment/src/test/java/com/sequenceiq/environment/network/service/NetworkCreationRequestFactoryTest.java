@@ -3,10 +3,12 @@ package com.sequenceiq.environment.network.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -16,8 +18,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
+import com.sequenceiq.cloudbreak.common.cost.CostTagging;
+import com.sequenceiq.cloudbreak.common.service.CDPTagMergeRequest;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
+import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -42,9 +47,12 @@ class NetworkCreationRequestFactoryTest {
 
     private final DefaultSubnetCidrProvider defaultSubnetCidrProvider = Mockito.mock(DefaultSubnetCidrProvider.class);
 
+    private final CostTagging costTagging = Mockito.mock(CostTagging.class);
+
     private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter = Mockito.mock(CredentialToCloudCredentialConverter.class);
 
-    private final NetworkCreationRequestFactory underTest = new NetworkCreationRequestFactory(defaultSubnetCidrProvider, credentialToCloudCredentialConverter);
+    private final NetworkCreationRequestFactory underTest = new NetworkCreationRequestFactory(defaultSubnetCidrProvider,
+            credentialToCloudCredentialConverter, costTagging);
 
     @Test
     void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsAreNotPresent() {
@@ -53,6 +61,8 @@ class NetworkCreationRequestFactoryTest {
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
         when(defaultSubnetCidrProvider.provide(NETWORK_CIDR)).thenReturn(SUBNET_CIDRS);
+        when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
+        when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
 
         NetworkCreationRequest actual = underTest.create(environmentDto);
 
@@ -94,6 +104,7 @@ class NetworkCreationRequestFactoryTest {
     private EnvironmentDto.Builder createEnvironmentDtoWithoutAureParams() {
         return EnvironmentDto.builder()
                 .withName(ENV_NAME)
+                .withTags(new EnvironmentTags(new HashMap<>(), new HashMap<>()))
                 .withCreator("creator")
                 .withCredential(new Credential())
                 .withCloudPlatform(CLOUD_PLATFORM)

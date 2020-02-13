@@ -17,6 +17,8 @@
 
   },
   "tags": {
-
+    "userDefined": {
+      "apple": "pear"
+    }
   }
 }

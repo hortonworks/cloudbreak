@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -78,6 +80,10 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
+
+    @Valid
+    @ApiModelProperty(EnvironmentModelDescription.TAGS)
+    private Map<String, String> tags = new HashMap<>();
 
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
@@ -199,5 +205,13 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setAws(AwsEnvironmentParameters aws) {
         this.aws = aws;
+    }
+
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Map<String, String> tags) {
+        this.tags = tags;
     }
 }
