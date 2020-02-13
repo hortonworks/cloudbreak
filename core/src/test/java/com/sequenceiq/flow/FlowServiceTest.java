@@ -26,6 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
@@ -172,11 +173,11 @@ public class FlowServiceTest {
         thrown.expect(NotFoundException.class);
         thrown.expectMessage("FlowChain not found by this flowChainId!");
 
-        when(flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(Optional.empty());
+        when(flowChainLogService.findByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(Lists.newArrayList());
 
         underTest.getFlowLogsByResourceNameAndChainId("myLittleSdx", "1");
 
-        verify(flowChainLogService).findFirstByFlowChainIdOrderByCreatedDesc(anyString());
+        verify(flowChainLogService).findByFlowChainIdOrderByCreatedDesc(anyString());
         verifyZeroInteractions(flowLogDBService, conversionService);
     }
 
@@ -185,24 +186,24 @@ public class FlowServiceTest {
         thrown.expect(NotFoundException.class);
         thrown.expectMessage("FlowChain not found by this flowChainId!");
 
-        when(flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(Optional.empty());
+        when(flowChainLogService.findByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(Lists.newArrayList());
 
         underTest.hasFlowRunning("myLittleSdx", "1");
 
-        verify(flowChainLogService).findFirstByFlowChainIdOrderByCreatedDesc(anyString());
+        verify(flowChainLogService).findByFlowChainIdOrderByCreatedDesc(anyString());
         verifyZeroInteractions(flowLogDBService, conversionService);
     }
 
     @Test
     public void testGetFlowLogsByResourceNameAndChainId() {
-        when(flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(Optional.of(new FlowChainLog()));
-        when(flowChainLogService.collectRelatedFlowChains(any(), any())).thenReturn(Lists.newArrayList(new FlowChainLog()));
+        when(flowChainLogService.findByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(Lists.newArrayList(new FlowChainLog()));
+        when(flowChainLogService.collectRelatedFlowChains(any())).thenReturn(Sets.newHashSet(new FlowChainLog()));
         when(flowLogDBService.getFlowLogsByResourceAndChainId(anyString(), any())).thenReturn(Lists.newArrayList(new FlowLog()));
 
         underTest.getFlowLogsByResourceNameAndChainId("myLittleSdx", "1");
 
-        verify(flowChainLogService).findFirstByFlowChainIdOrderByCreatedDesc(anyString());
-        verify(flowChainLogService).collectRelatedFlowChains(any(), any());
+        verify(flowChainLogService).findByFlowChainIdOrderByCreatedDesc(anyString());
+        verify(flowChainLogService).collectRelatedFlowChains(any());
         verify(flowLogDBService).getFlowLogsByResourceAndChainId(anyString(), any());
         verify(conversionService).convert(any(), eq(FlowLogResponse.class));
     }
@@ -238,15 +239,15 @@ public class FlowServiceTest {
     }
 
     private void verifyHasFlowRunningCalls() {
-        verify(flowChainLogService).findFirstByFlowChainIdOrderByCreatedDesc(anyString());
-        verify(flowChainLogService).collectRelatedFlowChains(any(), any());
+        verify(flowChainLogService).findByFlowChainIdOrderByCreatedDesc(anyString());
+        verify(flowChainLogService).collectRelatedFlowChains(any());
         verify(flowLogDBService).getFlowLogsByResourceAndChainId(anyString(), any());
         verify(flowChainLogService).checkIfAnyFlowChainHasEventInQueue(any());
     }
 
     private void mockHasFlowRunningCalls(Boolean hasAnyFlowEventInChain, Boolean hasPengingFlowEvent) {
-        when(flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(Optional.of(new FlowChainLog()));
-        when(flowChainLogService.collectRelatedFlowChains(any(), any())).thenReturn(Lists.newArrayList(new FlowChainLog()));
+        when(flowChainLogService.findByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(Lists.newArrayList(new FlowChainLog()));
+        when(flowChainLogService.collectRelatedFlowChains(any())).thenReturn(Sets.newHashSet(new FlowChainLog()));
         when(flowLogDBService.getFlowLogsByResourceAndChainId(anyString(), any())).thenReturn(Lists.newArrayList(new FlowLog()));
         when(flowChainLogService.checkIfAnyFlowChainHasEventInQueue(any())).thenReturn(hasAnyFlowEventInChain);
         when(flowLogDBService.hasPendingFlowEvent(any())).thenReturn(hasPengingFlowEvent);
