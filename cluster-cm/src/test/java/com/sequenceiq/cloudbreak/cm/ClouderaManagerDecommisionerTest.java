@@ -233,7 +233,7 @@ public class ClouderaManagerDecommisionerTest {
                     apiHosts.add(apiHostRef);
                 });
         apiHostRefList.setItems(apiHosts);
-        when(clustersResourceApi.listHosts(stack.getName())).thenReturn(apiHostRefList);
+        when(clustersResourceApi.listHosts(stack.getName(), "", "")).thenReturn(apiHostRefList);
         Set<InstanceMetaData> downscaleCandidates = underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, downscaledHostGroup, -2, 0,
                 downscaledHostGroup.getInstanceGroup().getAllInstanceMetaData());
         assertEquals(2, downscaleCandidates.size());
@@ -306,7 +306,7 @@ public class ClouderaManagerDecommisionerTest {
                     apiHosts.add(apiHostRef);
                 });
         apiHostRefList.setItems(apiHosts);
-        when(clustersResourceApi.listHosts(stack.getName())).thenReturn(apiHostRefList);
+        when(clustersResourceApi.listHosts(stack.getName(), "", "")).thenReturn(apiHostRefList);
         Set<InstanceMetaData> downscaleCandidates = underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, downscaledHostGroup, -2, 0,
                 downscaledHostGroup.getInstanceGroup().getAllInstanceMetaData());
         assertEquals(2, downscaleCandidates.size());

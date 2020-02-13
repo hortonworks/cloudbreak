@@ -58,7 +58,7 @@ public class TerminationTest extends AbstractIntegrationTest {
             when = "terminate an instance by instance id",
             then = "cannot remove that instance from stack because there is not enough nodes to dowsncale")
     public void testInstanceTerminationReplicationError(MockedTestContext testContext) {
-        String overrideWithFailingDecomission = ClouderaManagerMock.API_ROOT + "/commands/666";
+        String overrideWithFailingDecomission = ClouderaManagerMock.API_V31 + "/commands/666";
         testContext.getModel().getClouderaManagerMock().getDynamicRouteStack()
                 .post(SetupCmScalingMock.HOSTS_DECOMMISSION, (request, response) -> new ApiCommand().id(new BigDecimal("666")));
         testContext.getModel().getClouderaManagerMock().getDynamicRouteStack()

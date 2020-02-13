@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_2;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 
@@ -125,7 +127,12 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {
-            apiClient = clouderaManagerApiClientProvider.getClient(stack.getGatewayPort(), user, password, clientConfig);
+            ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(cluster.getId());
+            if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
+                apiClient = clouderaManagerApiClientProvider.getV40Client(stack.getGatewayPort(), user, password, clientConfig);
+            } else {
+                apiClient = clouderaManagerApiClientProvider.getClient(stack.getGatewayPort(), user, password, clientConfig);
+            }
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
@@ -135,7 +142,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     public void waitForServer() throws CloudbreakException, ClusterClientInitException {
         ApiClient client = null;
         try {
-            client = clouderaManagerApiClientProvider.getDefaultClient(stack.getGatewayPort(), clientConfig);
+            client = clouderaManagerApiClientProvider.getDefaultClient(stack.getGatewayPort(), clientConfig, ClouderaManagerApiClientProvider.API_V_31);
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
@@ -263,7 +270,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     private Optional<ApiHost> getCmHost(TemplatePreparationObject templatePreparationObject, ApiClient apiClient) throws ApiException {
         HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(apiClient);
-        return hostsResourceApi.readHosts(DataView.SUMMARY.name()).getItems().stream().filter(
+        return hostsResourceApi.readHosts("", "", DataView.SUMMARY.name()).getItems().stream().filter(
                 host -> host.getHostname().equals(templatePreparationObject.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN().get()))
                 .findFirst();
     }

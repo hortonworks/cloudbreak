@@ -54,9 +54,9 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
     public void testClusterCreationWithValidKerberos(MockedTestContext testContext, String blueprintName, KerberosTestData testData,
             @Description TestCaseDescription testCaseDescription) {
         DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
-        dynamicRouteStack.put(ClouderaManagerMock.API_ROOT + "/cm/config", (request, response) -> new ApiConfigList());
+        dynamicRouteStack.put(ClouderaManagerMock.API_V31 + "/cm/config", (request, response) -> new ApiConfigList());
         dynamicRouteStack
-                .post(ClouderaManagerMock.API_ROOT
+                .post(ClouderaManagerMock.API_V31
                         + "/cm/commands/importAdminCredentials", (request, response) -> new ApiCommand().id(new BigDecimal(1)));
 
         CreateKerberosConfigRequest request = testData.getRequest();
