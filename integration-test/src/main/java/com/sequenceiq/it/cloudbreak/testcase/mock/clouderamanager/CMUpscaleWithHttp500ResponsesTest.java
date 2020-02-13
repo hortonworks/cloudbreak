@@ -147,7 +147,7 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
                                 .pathVariableMapping(":clusterName", clusterName)
                                 .resolve())
                         .exactTimes(1))
-                .then(MockVerification.verify(GET, READ_HOSTS).exactTimes(6))
+                .then(MockVerification.verify(GET, READ_HOSTS).atLeast(6))
                 .then(MockVerification.verify(POST, new ClouderaManagerPathResolver(ADD_HOSTS)
                         .pathVariableMapping(":clusterName", clusterName)
                         .resolve())
