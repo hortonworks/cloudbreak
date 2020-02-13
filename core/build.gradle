@@ -241,6 +241,7 @@ dependencies {
   compile project(':template-manager-blueprint')
   compile project(':template-manager-recipe')
   compile project(':template-manager-cmtemplate')
+  compile project(':template-manager-tag')
   compile project(':cluster-api')
   compile project(':flow')
   compile project(':common')

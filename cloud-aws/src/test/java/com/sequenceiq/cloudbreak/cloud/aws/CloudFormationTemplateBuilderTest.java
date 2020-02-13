@@ -62,7 +62,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.CloudIdentityType;
@@ -85,7 +85,7 @@ public class CloudFormationTemplateBuilderTest {
     private static final String INSTANCE_PROFILE = "alma";
 
     @Mock
-    private DefaultCostTaggingService defaultCostTaggingService;
+    private CostTagging costTagging;
 
     @Mock
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;

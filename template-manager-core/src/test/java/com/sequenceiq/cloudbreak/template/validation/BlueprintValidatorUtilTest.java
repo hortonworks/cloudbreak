@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
@@ -78,7 +79,7 @@ public class BlueprintValidatorUtilTest {
 
         Exception e = assertThrows(BlueprintValidationException.class, () -> validateHostGroupCardinality(request, requirements));
         assertTrue(e.getMessage().contains("master"));
-        assertFalse(e.getMessage().contains("worker"));
+        Assert.assertFalse(e.getMessage().contains("worker"));
     }
 
     @Test

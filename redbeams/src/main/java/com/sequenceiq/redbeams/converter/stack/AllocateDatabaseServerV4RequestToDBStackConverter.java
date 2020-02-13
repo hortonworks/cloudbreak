@@ -25,12 +25,12 @@ import com.sequenceiq.cloudbreak.auth.security.CrnUser;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
-import com.sequenceiq.cloudbreak.common.cost.CostTagging;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
-import com.sequenceiq.cloudbreak.common.service.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.tag.CostTagging;
+import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
@@ -45,6 +45,7 @@ import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
 import com.sequenceiq.redbeams.exception.BadRequestException;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
+import com.sequenceiq.redbeams.service.AccountTagService;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.PasswordGeneratorService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
@@ -108,6 +109,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     @Inject
     private CostTagging costTagging;
 
+    @Inject
+    private AccountTagService accountTagService;
+
     @PostConstruct
     public void initSupportedPlatforms() {
         if (dbServiceSupportedPlatforms.isEmpty()) {
@@ -161,6 +165,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
                 .withResourceCrn(dbStack.getResourceCrn().toString())
                 .withIsInternalTenant(internalTenant)
                 .withUserName(dbStack.getUserName())
+                .withAccountTags(accountTagService.list())
                 .build();
 
         Map<String, String> defaultTags = costTagging.prepareDefaultTags(request);

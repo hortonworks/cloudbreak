@@ -31,10 +31,10 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
-import com.sequenceiq.cloudbreak.common.cost.CostTagging;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.service.CDPTagGenerationRequest;
+import com.sequenceiq.cloudbreak.tag.CostTagging;
+import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
@@ -50,6 +50,7 @@ import com.sequenceiq.freeipa.entity.SecurityGroup;
 import com.sequenceiq.freeipa.entity.SecurityRule;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.service.AccountTagService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Component
@@ -79,6 +80,9 @@ public class CreateFreeIpaRequestToStackConverter {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private AccountTagService accountTagService;
 
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
@@ -215,6 +219,7 @@ public class CreateFreeIpaRequestToStackConverter {
         Map<String, String> result = new HashMap<>();
         try {
             boolean internalTenant = entitlementService.internalTenant(user.getCrn(), stack.getAccountId());
+            Map<String, String> accountTags = accountTagService.list();
             CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
                     .withCreatorCrn(user.getCrn())
                     .withEnvironmentCrn(stack.getEnvironmentCrn())
@@ -223,6 +228,7 @@ public class CreateFreeIpaRequestToStackConverter {
                     .withResourceCrn(stack.getResourceCrn())
                     .withIsInternalTenant(internalTenant)
                     .withUserName(user.getEmail())
+                    .withAccountTags(accountTags)
                     .build();
 
             result.putAll(costTagging.prepareDefaultTags(request));

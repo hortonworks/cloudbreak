@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.TagType;
 import com.github.jknack.handlebars.Template;
+import com.sequenceiq.cloudbreak.HandlebarTemplate;
+import com.sequenceiq.cloudbreak.HandlebarUtils;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Component

@@ -104,6 +104,7 @@ dependencies {
   compile project(':auth-connector')
   compile project(':core-api')
   compile project(':redbeams-api')
+  compile project(':template-manager-tag')
   runtime project(':cloud-openstack')
   runtime project(':cloud-gcp')
   runtime project(':cloud-aws')
