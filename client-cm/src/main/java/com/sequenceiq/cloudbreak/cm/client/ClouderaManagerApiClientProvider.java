@@ -21,12 +21,14 @@ public class ClouderaManagerApiClientProvider {
 
     public static final String API_V_31 = API_ROOT + "/v31";
 
+    public static final String API_V_40 = API_ROOT + "/v40";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerApiClientProvider.class);
 
     private static final Integer CLUSTER_PROXY_TIMEOUT = 90000;
 
-    public ApiClient getDefaultClient(Integer gatewayPort, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
-        ApiClient client = getClouderaManagerClient(clientConfig, gatewayPort, "admin", "admin");
+    public ApiClient getDefaultClient(Integer gatewayPort, HttpClientConfig clientConfig, String apiVersion) throws ClouderaManagerClientInitException {
+        ApiClient client = getClouderaManagerClient(clientConfig, gatewayPort, "admin", "admin", apiVersion);
         if (clientConfig.isClusterProxyEnabled()) {
             client.addDefaultHeader("Proxy-Ignore-Auth", "true");
         }
@@ -34,11 +36,16 @@ public class ClouderaManagerApiClientProvider {
     }
 
     public ApiClient getClient(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
+        return getApiClientByApiVersion(gatewayPort, user, password, clientConfig, API_V_31);
+    }
+
+    private ApiClient getApiClientByApiVersion(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig, String apiVersion)
+            throws ClouderaManagerClientInitException {
         if (StringUtils.isNoneBlank(user, password)) {
             return getClouderaManagerClient(clientConfig,
-                    gatewayPort, user, password);
+                    gatewayPort, user, password, apiVersion);
         } else {
-            return getDefaultClient(gatewayPort, clientConfig);
+            return getDefaultClient(gatewayPort, clientConfig, apiVersion);
         }
     }
 
@@ -51,14 +58,14 @@ public class ClouderaManagerApiClientProvider {
         }
     }
 
-    public ApiClient getClouderaManagerClient(HttpClientConfig clientConfig, Integer port, String userName, String password)
+    public ApiClient getClouderaManagerClient(HttpClientConfig clientConfig, Integer port, String userName, String password, String apiVersion)
             throws ClouderaManagerClientInitException {
-        return getApiClientWithContext(clientConfig, port, userName, password, API_V_31);
+        return getApiClientWithContext(clientConfig, port, userName, password, apiVersion);
     }
 
     public ApiClient getClouderaManagerRootClient(HttpClientConfig clientConfig, Integer port, String userName, String password)
             throws ClouderaManagerClientInitException {
-        return getApiClientWithContext(clientConfig, port, userName, password, API_ROOT);
+        return getClouderaManagerClient(clientConfig, port, userName, password, API_ROOT);
     }
 
     private ApiClient getApiClientWithContext(HttpClientConfig clientConfig, Integer port, String userName, String password, String context)
@@ -100,12 +107,16 @@ public class ClouderaManagerApiClientProvider {
             cmClient.getHttpClient().setWriteTimeout(1L, TimeUnit.MINUTES);
             return cmClient;
         } catch (Exception e) {
-            LOGGER.info("Can not create SSL context for Cloudera Manager", e);
+            LOGGER.info("Cannot create SSL context for Cloudera Manager", e);
             throw new ClouderaManagerClientInitException("Couldn't create client", e);
         }
     }
 
     private boolean isCmSslConfigValidClientConfigValid(HttpClientConfig config) {
         return config.getClientCert() != null && config.getServerCert() != null && config.getClientKey() != null;
+    }
+
+    public ApiClient getV40Client(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
+        return getApiClientByApiVersion(gatewayPort, user, password, clientConfig, API_V_40);
     }
 }

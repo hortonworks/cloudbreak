@@ -55,7 +55,7 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerCom
 
     private List<String> fetchHeartbeatedHostIpsFromManager(ClouderaManagerPollerObject pollerObject) throws ApiException {
         HostsResourceApi hostsResourceApi = clouderaManagerApiPojoFactory.getHostsResourceApi(pollerObject.getApiClient());
-        ApiHostList hostList = hostsResourceApi.readHosts(VIEW_TYPE);
+        ApiHostList hostList = hostsResourceApi.readHosts("", "", VIEW_TYPE);
         List<String> hostIpsFromManager = filterForHeartBeatedIps(hostList);
         LOGGER.debug("Hosts in the list from manager: " + hostIpsFromManager);
         return hostIpsFromManager;

@@ -175,6 +175,6 @@ public class ParcelMockActivatorUtil {
     }
 
     private String getPathForGetParcels(String clusterName) {
-        return ClouderaManagerMock.API_ROOT + "/clusters/" + clusterName + "/parcels";
+        return ClouderaManagerMock.API_V31 + "/clusters/" + clusterName + "/parcels";
     }
 }
