@@ -41,7 +41,7 @@ public class LdapClusterTest extends AbstractIntegrationTest {
         DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
         dynamicRouteStack.get(ClouderaManagerMock.READ_AUTH_ROLES,
                 (request, response) -> new ApiAuthRoleMetadataList().items(List.of(new ApiAuthRoleMetadata().role("ROLE_ADMIN"))));
-        dynamicRouteStack.post(ClouderaManagerMock.API_ROOT + "/externalUserMappings",
+        dynamicRouteStack.post(ClouderaManagerMock.API_V31 + "/externalUserMappings",
                 (request, response) -> new ApiExternalUserMappingList());
 
         testContext
@@ -81,7 +81,7 @@ public class LdapClusterTest extends AbstractIntegrationTest {
 
     private static List<Assertion<StackTestDto, CloudbreakClient>> externalUserMappingsCall(int times) {
         List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
-        verifications.add(MockVerification.verify(HttpMethod.POST, ClouderaManagerMock.API_ROOT + "/externalUserMappings").exactTimes(times));
+        verifications.add(MockVerification.verify(HttpMethod.POST, ClouderaManagerMock.API_V31 + "/externalUserMappings").exactTimes(times));
         return verifications;
     }
 }

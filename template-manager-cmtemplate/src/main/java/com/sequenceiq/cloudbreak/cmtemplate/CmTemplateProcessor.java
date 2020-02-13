@@ -257,14 +257,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         if (instantiator.getClusterName() == null) {
             instantiator.setClusterName(templatePreparationObject.getGeneralClusterConfigs().getClusterName());
         }
-        if (Objects.nonNull(clouderaManagerRepoDetails)
-                && CMRepositoryVersionUtil.isKeepHostTemplateSupportedViaBlueprint(clouderaManagerRepoDetails)) {
-            instantiator.keepHostTemplates(Boolean.TRUE);
-        }
-        if (Objects.nonNull(clouderaManagerRepoDetails) && CMRepositoryVersionUtil.isEnableKerberosSupportedViaBlueprint(clouderaManagerRepoDetails)
-                && templatePreparationObject.getKerberosConfig().isPresent()) {
-            instantiator.setEnableKerberos(new ApiConfigureForKerberosArguments());
-        }
+        addCmVersionDependantConfigs(clouderaManagerRepoDetails, templatePreparationObject, instantiator);
         for (ApiClusterTemplateService service : ofNullable(cmTemplate.getServices()).orElse(List.of())) {
             List<String> nonBaseRefs = ofNullable(service.getRoleConfigGroups()).orElse(List.of())
                     .stream()
@@ -281,6 +274,22 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 .map(apiDataContextRefs -> new ApiClusterTemplateClusterSpec().dataContextRefs(apiDataContextRefs))
                 .ifPresent(instantiator::clusterSpec);
         cmTemplate.setInstantiator(instantiator);
+    }
+
+    private void addCmVersionDependantConfigs(ClouderaManagerRepo cmRepoDetails, TemplatePreparationObject templatePreparationObject,
+            ApiClusterTemplateInstantiator instantiator) {
+        if (Objects.nonNull(cmRepoDetails)
+                && CMRepositoryVersionUtil.isKeepHostTemplateSupportedViaBlueprint(cmRepoDetails)) {
+            instantiator.keepHostTemplates(Boolean.TRUE);
+        }
+        if (Objects.nonNull(cmRepoDetails)
+                && CMRepositoryVersionUtil.isIgnorePropertyValidationSupportedViaBlueprint(cmRepoDetails)) {
+            instantiator.setLenient(Boolean.TRUE);
+        }
+        if (Objects.nonNull(cmRepoDetails) && CMRepositoryVersionUtil.isEnableKerberosSupportedViaBlueprint(cmRepoDetails)
+                && templatePreparationObject.getKerberosConfig().isPresent()) {
+            instantiator.setEnableKerberos(new ApiConfigureForKerberosArguments());
+        }
     }
 
     public void addVariables(List<ApiClusterTemplateVariable> vars) {

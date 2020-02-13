@@ -76,7 +76,7 @@ public class ClouderaManagerHostHealthEvaluator implements ClusterManagerSpecifi
             String pass = secretService.get(cm.getPass());
             ApiClient client = clouderaManagerApiClientProvider.getClient(Integer.valueOf(cm.getPort()), user, pass, httpClientConfig);
             HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
-            return hostsResourceApi.readHosts(DataView.FULL.name()).getItems()
+            return hostsResourceApi.readHosts(null, null, DataView.FULL.name()).getItems()
                     .stream()
                     .filter(isAlertStateMet())
                     .peek(apiHost -> {
