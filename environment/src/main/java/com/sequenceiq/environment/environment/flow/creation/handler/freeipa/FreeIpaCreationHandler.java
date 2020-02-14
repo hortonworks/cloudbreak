@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
@@ -75,8 +76,6 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private static final List<String> DEFAULT_SECURITY_GROUP_PORTS = List.of("22");
 
-    private static final String YARN_NETWORK_CIDR = "172.27.0.0/16";
-
     private final EnvironmentService environmentService;
 
     private final FreeIpaService freeIpaService;
@@ -95,6 +94,10 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final CloudPlatformConnectors connectors;
 
+    private String yarnNetowrkCidr;
+
+    private Set<String> enabledChildPlatforms;
+
     public FreeIpaCreationHandler(
             EventSender eventSender,
             EnvironmentService environmentService,
@@ -105,7 +108,9 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             PollingService<FreeIpaPollerObject> freeIpaPollingService,
             FreeIpaServerRequestProvider freeIpaServerRequestProvider,
             TelemetryApiConverter telemetryApiConverter,
-            CloudPlatformConnectors connectors) {
+            CloudPlatformConnectors connectors,
+            @Value("${environment.freeipa.yarnNetworkCidr}") String yarnNetowrkCidr,
+            @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms) {
         super(eventSender);
         this.environmentService = environmentService;
         this.freeIpaService = freeIpaService;
@@ -116,6 +121,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         this.freeIpaServerRequestProvider = freeIpaServerRequestProvider;
         this.telemetryApiConverter = telemetryApiConverter;
         this.connectors = connectors;
+        this.yarnNetowrkCidr = yarnNetowrkCidr;
+        this.enabledChildPlatforms = enabledChildPlatforms;
     }
 
     @Override
@@ -160,22 +167,24 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private void attachParentFreeIpa(EnvironmentDto environmentDto) throws Exception {
-        String parentEnvironmentCrn = environmentDto.getParentEnvironmentCrn();
-        Optional<DescribeFreeIpaResponse> freeIpa = freeIpaService.describe(parentEnvironmentCrn);
-        if (freeIpa.isPresent() && CloudPlatform.YARN.name().equalsIgnoreCase(environmentDto.getCloudPlatform())) {
-            LOGGER.info("Using FreeIpa of parent environment '{}' .", parentEnvironmentCrn);
+        if (enabledChildPlatforms.stream().anyMatch(p -> p.equalsIgnoreCase(environmentDto.getCloudPlatform()))) {
+            String parentEnvironmentCrn = environmentDto.getParentEnvironmentCrn();
+            Optional<DescribeFreeIpaResponse> freeIpa = freeIpaService.describe(parentEnvironmentCrn);
+            if (freeIpa.isPresent()) {
+                LOGGER.info("Using FreeIpa of parent environment '{}' .", parentEnvironmentCrn);
 
-            AttachChildEnvironmentRequest attachChildEnvironmentRequest = new AttachChildEnvironmentRequest();
-            attachChildEnvironmentRequest.setChildEnvironmentCrn(environmentDto.getResourceCrn());
-            attachChildEnvironmentRequest.setParentEnvironmentCrn(parentEnvironmentCrn);
+                AttachChildEnvironmentRequest attachChildEnvironmentRequest = new AttachChildEnvironmentRequest();
+                attachChildEnvironmentRequest.setChildEnvironmentCrn(environmentDto.getResourceCrn());
+                attachChildEnvironmentRequest.setParentEnvironmentCrn(parentEnvironmentCrn);
 
-            freeIpaService.attachChildEnvironment(attachChildEnvironmentRequest);
+                freeIpaService.attachChildEnvironment(attachChildEnvironmentRequest);
 
-            AddDnsZoneForSubnetsRequest addDnsZoneForSubnetsRequest = new AddDnsZoneForSubnetsRequest();
-            addDnsZoneForSubnetsRequest.setEnvironmentCrn(parentEnvironmentCrn);
-            addDnsZoneForSubnetsRequest.setSubnets(Collections.singletonList(YARN_NETWORK_CIDR));
+                AddDnsZoneForSubnetsRequest addDnsZoneForSubnetsRequest = new AddDnsZoneForSubnetsRequest();
+                addDnsZoneForSubnetsRequest.setEnvironmentCrn(parentEnvironmentCrn);
+                addDnsZoneForSubnetsRequest.setSubnets(Collections.singletonList(yarnNetowrkCidr));
 
-            dnsV1Endpoint.addDnsZoneForSubnets(addDnsZoneForSubnetsRequest);
+                dnsV1Endpoint.addDnsZoneForSubnets(addDnsZoneForSubnetsRequest);
+            }
         }
     }
 

@@ -61,6 +61,7 @@ public class EnvironmentModelDescription {
     public static final String S3_GUARD_DYNAMO_TABLE_NAME = "S3Guard Dynamo table name.";
 
     public static final String PARENT_ENVIRONMENT_CRN = "Parent environment global identifier";
+    public static final String PARENT_ENVIRONMENT_NAME = "Parent environment name";
 
     private EnvironmentModelDescription() {
     }
