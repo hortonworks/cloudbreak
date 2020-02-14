@@ -23,6 +23,6 @@ public class CloudbreakMessagesService {
     }
 
     public String getMessage(String code, Collection<?> args) {
-        return messageSource.getMessage(code, args.toArray(), Locale.getDefault());
+        return messageSource.getMessage(code, args == null ? null : args.toArray(), Locale.getDefault());
     }
 }

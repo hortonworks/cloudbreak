@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+import static java.lang.String.format;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -33,6 +34,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
@@ -314,7 +316,7 @@ public class StackService implements ResourceIdProvider {
             throw new TransactionRuntimeExecutionException(e);
         }
         if (stack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE, id));
+            throw new NotFoundException(format(STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE, id));
         }
         return stack;
     }
@@ -327,7 +329,7 @@ public class StackService implements ResourceIdProvider {
             throw new TransactionRuntimeExecutionException(e);
         }
         if (stack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE, id));
+            throw new NotFoundException(format(STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE, id));
         }
         return stack;
     }
@@ -384,7 +386,7 @@ public class StackService implements ResourceIdProvider {
                 ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
                 Optional<Stack> stack = findByNameAndWorkspaceIdWithLists(name, workspace.getId(), stackType, showTerminatedClustersAfterConfig);
                 if (stack.isEmpty()) {
-                    throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
+                    throw new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
                 }
                 StackV4Response stackResponse = converterUtil.convert(stack.get(), StackV4Response.class);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack.get(), entries);
@@ -402,7 +404,7 @@ public class StackService implements ResourceIdProvider {
                 ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
                 Optional<Stack> stack = findByCrnAndWorkspaceIdWithLists(crn, workspace.getId(), stackType, showTerminatedClustersAfterConfig);
                 if (stack.isEmpty()) {
-                    throw new NotFoundException(String.format("Stack not found by crn '%s'", crn));
+                    throw new NotFoundException(format("Stack not found by crn '%s'", crn));
                 }
                 StackV4Response stackResponse = converterUtil.convert(stack.get(), StackV4Response.class);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack.get(), entries);
@@ -418,7 +420,7 @@ public class StackService implements ResourceIdProvider {
             return transactionService.required(() -> {
                 Optional<Stack> stack = findByNameAndWorkspaceIdWithLists(name, workspaceId);
                 if (stack.isEmpty()) {
-                    throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
+                    throw new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
                 }
                 StackV4Request request = converterUtil.convert(stack.get(), StackV4Request.class);
                 request.getCluster().setName(null);
@@ -436,7 +438,7 @@ public class StackService implements ResourceIdProvider {
                 ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
                 Optional<Stack> stack = findByCrnAndWorkspaceIdWithLists(crn, workspaceId, null, showTerminatedClustersAfterConfig);
                 if (stack.isEmpty()) {
-                    throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, crn));
+                    throw new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, crn));
                 }
                 StackV4Request request = converterUtil.convert(stack.get(), StackV4Request.class);
                 request.getCluster().setName(null);
@@ -450,12 +452,12 @@ public class StackService implements ResourceIdProvider {
 
     public Stack getByNameInWorkspace(String name, Long workspaceId) {
         return stackRepository.findByNameAndWorkspaceId(name, workspaceId)
-                .orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name)));
+                .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name)));
     }
 
     public Stack getByCrnInWorkspace(String crn, Long workspaceId) {
         return stackRepository.findByCrnAndWorkspaceId(crn, workspaceId)
-                .orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE, crn)));
+                .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE, crn)));
     }
 
     public Optional<Stack> getByNameInWorkspaceWithLists(String name, Long workspaceId) {
@@ -617,9 +619,9 @@ public class StackService implements ResourceIdProvider {
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
             containerOrchestrator.validateApiEndpoint(new OrchestrationCredential(orchestrator.getApiEndpoint(), orchestrator.getAttributes().getMap()));
         } catch (CloudbreakException e) {
-            throw new BadRequestException(String.format("Invalid orchestrator type: %s", e.getMessage()));
+            throw new BadRequestException(format("Invalid orchestrator type: %s", e.getMessage()));
         } catch (CloudbreakOrchestratorException e) {
-            throw new BadRequestException(String.format("Error occurred when trying to reach orchestrator API: %s", e.getMessage()));
+            throw new BadRequestException(format("Error occurred when trying to reach orchestrator API: %s", e.getMessage()));
         }
     }
 
@@ -664,7 +666,7 @@ public class StackService implements ResourceIdProvider {
         if (stackByNameAndWorkspaceId.isPresent()) {
             return stackByNameAndWorkspaceId.get().getId();
         }
-        throw new NotFoundException(String.format("Not found stack in the user's workspace with name %s", resourceName));
+        throw new NotFoundException(format("Not found stack in the user's workspace with name %s", resourceName));
     }
 
     private Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId, StackType stackType, ShowTerminatedClustersAfterConfig config) {
@@ -686,14 +688,14 @@ public class StackService implements ResourceIdProvider {
     private InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack, Long workspaceId, User user) {
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         InstanceMetaData metaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId)
-                .orElseThrow(() -> new NotFoundException(String.format("Metadata for instance %s has not found.", instanceId)));
+                .orElseThrow(() -> new NotFoundException(format("Metadata for instance %s has not found.", instanceId)));
         downscaleValidatorService.checkInstanceIsTheClusterManagerServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
         downscaleValidatorService.checkClusterInValidStatus(stack.getCluster());
         return metaData;
     }
 
     private Stack getByIdWithLists(Long id) {
-        return stackRepository.findOneWithLists(id).orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE, id)));
+        return stackRepository.findOneWithLists(id).orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE, id)));
     }
 
     private Stack getByCrnWithLists(String crn) {
@@ -735,13 +737,13 @@ public class StackService implements ResourceIdProvider {
         }
         if (cluster != null && !cluster.isStopped() && !stack.isStopFailed()) {
             if (!updateCluster) {
-                throw new BadRequestException(String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.",
-                        stack.getName()));
+                throw new BadRequestException(format("Cannot update the status of stack '%s' to STOPPED, because the cluster's state is %s.",
+                        stack.getName(), cluster.getStatus().name()));
             } else if (cluster.isClusterReadyForStop() || cluster.isStopFailed()) {
                 setStackStatusToStopRequested(stack);
                 clusterService.updateStatus(stack.getId(), StatusRequest.STOPPED);
             } else {
-                throw new BadRequestException(String.format("Cannot update the status of cluster '%s' to STOPPED, because the cluster's state is %s.",
+                throw new BadRequestException(format("Cannot update the status of cluster '%s' to STOPPED, because the cluster's state is %s.",
                         cluster.getName(), cluster.getStatus()));
             }
         } else {
@@ -758,10 +760,10 @@ public class StackService implements ResourceIdProvider {
             result = false;
         } else if (reason != StopRestrictionReason.NONE) {
             throw new BadRequestException(
-                    String.format("Cannot stop a stack '%s'. Reason: %s", stack.getName(), reason.getReason()));
+                    format("Cannot stop a stack '%s'. Reason: %s", stack.getName(), reason.getReason()));
         } else if (!stack.isAvailable() && !stack.isStopFailed()) {
             throw new BadRequestException(
-                    String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getName()));
+                    format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getName()));
         }
         return result;
     }
@@ -771,20 +773,29 @@ public class StackService implements ResourceIdProvider {
         eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), STACK_STOP_REQUESTED);
     }
 
-    private void start(Stack stack, Cluster cluster, boolean updateCluster, User user) {
+    @VisibleForTesting
+    void start(Stack stack, Cluster cluster, boolean updateCluster, User user) {
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        if (stack.isAvailable()) {
+        if (stack.isAvailable() && (cluster == null || cluster.isAvailable())) {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_START_IGNORED);
-        } else if ((!stack.isStopped() || (cluster != null && !cluster.isStopped())) && !stack.isStartFailed()) {
-            throw new BadRequestException(
-                    String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stack.getName()));
-        } else if (stack.isStopped() || stack.isStartFailed()) {
+        } else if (isStackStartable(stack) || isClusterStartable(cluster)) {
             Stack startStack = stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
             flowManager.triggerStackStart(stack.getId());
             if (updateCluster && cluster != null) {
                 clusterService.updateStatus(startStack, StatusRequest.STARTED);
             }
+        } else {
+            throw new BadRequestException(format("Cannot update the status of stack '%s' to STARTED, because it is in %s state",
+                    stack.getName(), stack.getStatus().name()));
         }
+    }
+
+    private boolean isClusterStartable(Cluster cluster) {
+        return cluster != null && (cluster.isStopped() || cluster.isStartFailed());
+    }
+
+    private boolean isStackStartable(Stack stack) {
+        return stack.isStopped() || stack.isStartFailed();
     }
 
     public void updateNodeCount(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, boolean withClusterEvent, User user) {
@@ -854,19 +865,19 @@ public class StackService implements ResourceIdProvider {
 
     private void validateScalingAdjustment(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, Stack stack) {
         if (0 == instanceGroupAdjustmentJson.getScalingAdjustment()) {
-            throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stack.getName()));
+            throw new BadRequestException(format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stack.getName()));
         }
         if (0 > instanceGroupAdjustmentJson.getScalingAdjustment()) {
             InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupAdjustmentJson.getInstanceGroup());
             if (-1 * instanceGroupAdjustmentJson.getScalingAdjustment() > instanceGroup.getNodeCount()) {
-                throw new BadRequestException(String.format("There are %s instances in instance group '%s'. Cannot remove %s instances.",
+                throw new BadRequestException(format("There are %s instances in instance group '%s'. Cannot remove %s instances.",
                         instanceGroup.getNodeCount(), instanceGroup.getGroupName(),
                         -1 * instanceGroupAdjustmentJson.getScalingAdjustment()));
             }
             int removableHosts = instanceMetaDataService.findRemovableInstances(stack.getId(), instanceGroupAdjustmentJson.getInstanceGroup()).size();
             if (removableHosts < -1 * instanceGroupAdjustmentJson.getScalingAdjustment()) {
                 throw new BadRequestException(
-                        String.format("There are %s unregistered instances in instance group '%s' but %s were requested. Decommission nodes from the cluster!",
+                        format("There are %s unregistered instances in instance group '%s' but %s were requested. Decommission nodes from the cluster!",
                                 removableHosts, instanceGroup.getGroupName(), instanceGroupAdjustmentJson.getScalingAdjustment() * -1));
             }
         }
@@ -882,7 +893,7 @@ public class StackService implements ResourceIdProvider {
                         .map(im -> im.getInstanceId() != null ? im.getInstanceId() : im.getPrivateId() + ": " + im.getInstanceStatus())
                         .collect(Collectors.joining(", "));
                 throw new BadRequestException(
-                        String.format("Upscale is not allowed because the following instances are not in running state: %s. Please remove them first!", ims));
+                        format("Upscale is not allowed because the following instances are not in running state: %s. Please remove them first!", ims));
             }
         }
     }
@@ -898,7 +909,7 @@ public class StackService implements ResourceIdProvider {
                         .map(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() + ": " + instanceMetaData.getInstanceStatus())
                         .collect(Collectors.joining(","));
                 throw new BadRequestException(
-                        String.format("Upscale is not allowed because the following hosts are not healthy: %s. Please remove them first!", notHealthyInstances));
+                        format("Upscale is not allowed because the following hosts are not healthy: %s. Please remove them first!", notHealthyInstances));
             }
         }
     }
@@ -907,14 +918,14 @@ public class StackService implements ResourceIdProvider {
         Optional<HostGroup> hostGroup = stack.getCluster().getHostGroups().stream()
                 .filter(input -> input.getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())).findFirst();
         if (!hostGroup.isPresent()) {
-            throw new BadRequestException(String.format("Instancegroup '%s' not found or not part of stack '%s'",
+            throw new BadRequestException(format("Instancegroup '%s' not found or not part of stack '%s'",
                     instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));
         }
     }
 
     private void validateStackStatus(Stack stack) {
         if (!stack.isAvailable()) {
-            throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.",
+            throw new BadRequestException(format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.",
                     stack.getName(), stack.getStatus()));
         }
     }
@@ -922,7 +933,7 @@ public class StackService implements ResourceIdProvider {
     private void validateClusterStatus(Stack stack) {
         Cluster cluster = stack.getCluster();
         if (cluster != null && !cluster.isAvailable()) {
-            throw new BadRequestException(String.format("Cluster '%s' is currently in '%s' state. Node count can only be updated if it's not available.",
+            throw new BadRequestException(format("Cluster '%s' is currently in '%s' state. Node count can only be updated if it's not available.",
                     cluster.getName(), cluster.getStatus()));
         }
     }
@@ -930,7 +941,7 @@ public class StackService implements ResourceIdProvider {
     private void validateInstanceGroup(Stack stack, String instanceGroupName) {
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         if (instanceGroup == null) {
-            throw new BadRequestException(String.format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getName(), instanceGroupName));
+            throw new BadRequestException(format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getName(), instanceGroupName));
         }
     }
 
