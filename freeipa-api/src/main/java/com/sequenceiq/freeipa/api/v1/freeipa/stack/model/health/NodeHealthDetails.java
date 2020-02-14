@@ -25,6 +25,9 @@ public class NodeHealthDetails {
     @NotNull
     private String name;
 
+    @NotNull
+    private String instanceId;
+
     public Status getStatus() {
         return status;
     }
@@ -57,5 +60,13 @@ public class NodeHealthDetails {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 }
