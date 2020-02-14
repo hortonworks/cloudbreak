@@ -73,6 +73,7 @@ environment:
     url: http://localhost:8090
     contextPath: /freeipa
     supportedPlatforms: AWS,AZURE
+    yarnNetworkCidr: 172.27.0.0/16
   sdx:
     url: http://localhost:8086
     contextPath: /dl
@@ -87,6 +88,8 @@ environment:
       cert.file: database.crt
       ssl: false
   enabledplatforms: AWS, AZURE, YARN
+  enabledParentPlatforms: AWS, MOCK
+  enabledChildPlatforms: YARN, MOCK
   tunnel:
     default: DIRECT
     ccm.validate.entitlement: false

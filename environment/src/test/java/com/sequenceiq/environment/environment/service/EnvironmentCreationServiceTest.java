@@ -208,7 +208,7 @@ class EnvironmentCreationServiceTest {
                         .withLatitude(0.1)
                         .withLongitude(0.1)
                         .build())
-                .withParentEnvironmentCrn("parentCrn")
+                .withParentEnvironmentName("parentCrn")
                 .build();
         final Environment environment = new Environment();
         environment.setName(ENVIRONMENT_NAME);
@@ -224,7 +224,7 @@ class EnvironmentCreationServiceTest {
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
 
-        when(environmentService.findByResourceCrnAndAccountIdAndArchivedIsFalse(any(), eq(ACCOUNT_ID))).thenReturn(Optional.of(parentEnvironment));
+        when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(any(), eq(ACCOUNT_ID))).thenReturn(Optional.of(parentEnvironment));
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
         when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(CRN)))

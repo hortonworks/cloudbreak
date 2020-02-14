@@ -49,13 +49,13 @@ public class EnvironmentCreationDto {
 
     private final ExperimentalFeatures experimentalFeatures;
 
-    private final String parentEnvironmentCrn;
+    private final String parentEnvironmentName;
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             String creator, LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
             Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, AuthenticationDto authentication,
             Long created, EnvironmentTelemetry telemetry, SecurityAccessDto securityAccess, String adminGroupName,
-            ParametersDto parameters, ExperimentalFeatures experimentalFeatures, String parentEnvironmentCrn) {
+            ParametersDto parameters, ExperimentalFeatures experimentalFeatures, String parentEnvironmentName) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -83,7 +83,7 @@ public class EnvironmentCreationDto {
         this.adminGroupName = adminGroupName;
         this.parameters = parameters;
         this.experimentalFeatures = experimentalFeatures != null ? experimentalFeatures : new ExperimentalFeatures();
-        this.parentEnvironmentCrn = parentEnvironmentCrn;
+        this.parentEnvironmentName = parentEnvironmentName;
     }
 
     public static Builder builder() {
@@ -162,8 +162,8 @@ public class EnvironmentCreationDto {
         return experimentalFeatures;
     }
 
-    public String getParentEnvironmentCrn() {
-        return parentEnvironmentCrn;
+    public String getParentEnvironmentName() {
+        return parentEnvironmentName;
     }
 
     public static final class Builder {
@@ -203,7 +203,7 @@ public class EnvironmentCreationDto {
 
         private ExperimentalFeatures experimentalFeatures;
 
-        private String parentEnvironmentCrn;
+        private String parentEnvironmentName;
 
         private Builder() {
         }
@@ -298,8 +298,8 @@ public class EnvironmentCreationDto {
             return this;
         }
 
-        public Builder withParentEnvironmentCrn(String parentEnvironmentCrn) {
-            this.parentEnvironmentCrn = parentEnvironmentCrn;
+        public Builder withParentEnvironmentName(String parentEnvironmentName) {
+            this.parentEnvironmentName = parentEnvironmentName;
             return this;
         }
 
@@ -307,7 +307,7 @@ public class EnvironmentCreationDto {
             return new EnvironmentCreationDto(name, description, cloudPlatform, accountId, creator,
                     location, network, credential, regions, proxyNames, createFreeIpa, authentication,
                     created, telemetry, securityAccess, adminGroupName, parameters, experimentalFeatures,
-                    parentEnvironmentCrn);
+                    parentEnvironmentName);
         }
     }
 }

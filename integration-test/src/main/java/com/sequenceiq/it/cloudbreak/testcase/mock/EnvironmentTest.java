@@ -155,6 +155,24 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "valid create environment request is sent",
+            then = "environment should be created")
+    public void testCreateEnvironmentAndChildEnvironment(TestContext testContext) {
+        testContext
+                .given(CredentialTestDto.class)
+                .when(credentialTestClient.create())
+                .given("parent", EnvironmentTestDto.class)
+                .when(environmentTestClient.create(), RunningParameter.key("parent"))
+                .given("child", EnvironmentTestDto.class)
+                .when(environmentTestClient.create(), RunningParameter.key("child"))
+                .when(environmentTestClient.list())
+                .then(this::checkEnvIsListed)
+                .validate();
+    }
+
     private EnvironmentTestDto checkEnvIsListed(TestContext testContext, EnvironmentTestDto environment, EnvironmentClient environmentClient) {
         Collection<SimpleEnvironmentResponse> simpleEnvironmentV4Respons = environment.getResponseSimpleEnvSet();
         List<SimpleEnvironmentResponse> result = simpleEnvironmentV4Respons.stream()
@@ -168,6 +186,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
 
     private static EnvironmentTestDto checkEnvironmentCrnIsNotEmpty(TestContext testContext,
             EnvironmentTestDto testDto, EnvironmentClient client) {
+
         if (testDto.getResponse() == null) {
             throw new TestFailException("Environment response by internal actor cannot be empty.");
         }

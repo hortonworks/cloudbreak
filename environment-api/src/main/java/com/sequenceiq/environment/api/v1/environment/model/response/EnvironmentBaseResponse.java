@@ -72,6 +72,9 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.PARENT_ENVIRONMENT_CRN)
     private String parentEnvironmentCrn;
 
+    @ApiModelProperty(EnvironmentModelDescription.PARENT_ENVIRONMENT_NAME)
+    private String parentEnvironmentName;
+
     public String getCrn() {
         return crn;
     }
@@ -230,5 +233,13 @@ public abstract class EnvironmentBaseResponse {
 
     public void setParentEnvironmentCrn(String parentEnvironmentCrn) {
         this.parentEnvironmentCrn = parentEnvironmentCrn;
+    }
+
+    public String getParentEnvironmentName() {
+        return parentEnvironmentName;
+    }
+
+    public void setParentEnvironmentName(String parentEnvironmentName) {
+        this.parentEnvironmentName = parentEnvironmentName;
     }
 }

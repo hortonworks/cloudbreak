@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.validation;
 
+import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -8,6 +9,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.environment.environment.EnvironmentStatus;
+import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
+import com.sequenceiq.environment.platformresource.PlatformParameterService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,27 +31,39 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
-import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentLogStorageLocationValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentRegionValidator;
-import com.sequenceiq.environment.parameters.validation.validators.AwsParameterProcessor;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentValidatorServiceTest {
 
-    @Mock
-    private EnvironmentRegionValidator regionValidator;
+    private static final String ACCOUNT = "account";
 
     @Mock
-    private EnvironmentLogStorageLocationValidator logStorageLocationValidator;
+    private EnvironmentRegionValidator environmentRegionValidator;
 
     @Mock
-    private AwsParameterProcessor awsParameterProcessor;
+    private NetworkCreationValidator networkCreationValidator;
+
+    @Mock
+    private PlatformParameterService platformParameterService;
 
     @Mock
     private EnvironmentResourceService environmentResourceService;
 
     @InjectMocks
     private EnvironmentValidatorService underTest;
+
+    @BeforeEach
+    public void initTests() {
+        underTest = new EnvironmentValidatorService(
+                environmentRegionValidator,
+                networkCreationValidator,
+                platformParameterService,
+                environmentResourceService,
+                singleton(CloudPlatform.AWS.name()),
+                singleton(CloudPlatform.YARN.name())
+        );
+    }
 
     @Test
     void testValidateAwsEnvironmentDtoNotAWS() {
@@ -250,5 +268,73 @@ class EnvironmentValidatorServiceTest {
 
         ValidationResult validationResult = underTest.validateAuthenticationModification(environmentEditDto, environment);
         assertEquals("1. The publicKeyId with name of 'pub-key-id' does not exists on the provider", validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void shouldNotFailInCaseOfVaildParentChildEnvironment() {
+        Environment environment = aValidEnvirontmentWithParent();
+
+        ValidationResult validationResult = underTest.validateParentChildRelation(environment, "parentEnvName");
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    void shouldFailOnExistingParentEnvironmentNameButMissingParentEntity() {
+        Environment environment = aValidEnvirontmentWithParent();
+        environment.setParentEnvironment(null);
+
+        ValidationResult validationResult = underTest.validateParentChildRelation(environment, "parentEnvName");
+        assertEquals("1. Active parent environment with name 'parentEnvName' is not available in account '" + ACCOUNT + "'.",
+                validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void shouldFailOnParentEnvironmentInNonActiveState() {
+        Environment environment = aValidEnvirontmentWithParent();
+        environment.getParentEnvironment().setStatus(EnvironmentStatus.ARCHIVED);
+        ValidationResult validationResult = underTest.validateParentChildRelation(environment, "parentEnvName");
+        assertEquals("1. Parent environment should be in 'AVAILABLE' status.",
+                validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void shouldFailOnParentEnvironmentHasParentEnvironmentAsWell() {
+        Environment environment = aValidEnvirontmentWithParent();
+        environment.getParentEnvironment().setParentEnvironment(new Environment());
+
+        ValidationResult validationResult = underTest.validateParentChildRelation(environment, "parentEnvName");
+        assertEquals("1. Parent environment is already a child environment.",
+                validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void shouldFailOnParentEnvironmentCloudPlatformNotSupported() {
+        Environment environment = aValidEnvirontmentWithParent();
+        environment.getParentEnvironment().setCloudPlatform(CloudPlatform.GCP.name());
+
+        ValidationResult validationResult = underTest.validateParentChildRelation(environment, "parentEnvName");
+        assertEquals("1. 'GCP' platform is not supported for parent environment.", validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void shouldFailOnChildEnvironmentCloudPlatformNotSupported() {
+        Environment environment = aValidEnvirontmentWithParent();
+        environment.setCloudPlatform(CloudPlatform.GCP.name());
+
+        ValidationResult validationResult = underTest.validateParentChildRelation(environment, "parentEnvName");
+        assertEquals("1. 'GCP' platform is not supported for child environment.", validationResult.getFormattedErrors());
+    }
+
+    private Environment aValidEnvirontmentWithParent() {
+        Environment parentEnvironment = new Environment();
+        parentEnvironment.setCloudPlatform(CloudPlatform.AWS.name());
+        parentEnvironment.setStatus(EnvironmentStatus.AVAILABLE);
+
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT);
+        environment.setCloudPlatform(CloudPlatform.YARN.name());
+        environment.setParentEnvironment(parentEnvironment);
+
+        return environment;
     }
 }

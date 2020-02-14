@@ -12,10 +12,10 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -78,8 +78,24 @@ public class FreeIpaCreationHandlerTest {
     @Mock
     private CloudPlatformConnectors connectors;
 
-    @InjectMocks
     private FreeIpaCreationHandler victim;
+
+    @BeforeEach
+    public void initTests() {
+        victim = new FreeIpaCreationHandler(
+                eventSender,
+                environmentService,
+                freeIpaService,
+                dnsV1Endpoint,
+                supportedPlatforms,
+                freeIpaNetworkProviderMapByCloudPlatform,
+                freeIpaPollingService,
+                freeIpaServerRequestProvider,
+                telemetryApiConverter,
+                connectors,
+                YARN_NETWORK_CIDR,
+                Collections.singleton(CloudPlatform.YARN.name()));
+    }
 
     @Test
     public void shouldAttachFreeIpaInCaseOfChildEnvironment() throws Exception {
@@ -121,13 +137,11 @@ public class FreeIpaCreationHandlerTest {
     }
 
     @Test
-    public void shouldNotAttachFreeIpaInCaseOfNonYarnEnvironment() throws Exception {
-        DescribeFreeIpaResponse describeFreeIpaResponse = mock(DescribeFreeIpaResponse.class);
+    public void shouldNotAttachFreeIpaInCaseOfNonSupportedCloudPlatform() throws Exception {
         EnvironmentDto environmentDto = aNonYarnEnvironmentDtoWithParentEnvironment();
         Environment environment = anEnvironmentWithParent();
 
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(of(environment));
-        when(freeIpaService.describe(PARENT_ENVIRONMENT_CRN)).thenReturn(of(describeFreeIpaResponse));
 
         victim.accept(new Event<>(environmentDto));
 
