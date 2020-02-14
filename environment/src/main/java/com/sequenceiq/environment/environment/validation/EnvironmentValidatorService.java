@@ -15,6 +15,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
@@ -53,12 +54,20 @@ public class EnvironmentValidatorService {
 
     private final EnvironmentResourceService environmentResourceService;
 
+    private Set<String> enabledParentPlatforms;
+
+    private Set<String> enabledChildPlatforms;
+
     public EnvironmentValidatorService(EnvironmentRegionValidator environmentRegionValidator, NetworkCreationValidator networkCreationValidator,
-            PlatformParameterService platformParameterService, EnvironmentResourceService environmentResourceService) {
+            PlatformParameterService platformParameterService, EnvironmentResourceService environmentResourceService,
+            @Value("${environment.enabledParentPlatforms}") Set<String> enabledParentPlatforms,
+            @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms) {
         this.environmentRegionValidator = environmentRegionValidator;
         this.networkCreationValidator = networkCreationValidator;
         this.platformParameterService = platformParameterService;
         this.environmentResourceService = environmentResourceService;
+        this.enabledChildPlatforms = enabledChildPlatforms;
+        this.enabledParentPlatforms = enabledParentPlatforms;
     }
 
     public ValidationResultBuilder validateRegionsAndLocation(String location, Set<String> requestedRegions,
@@ -75,19 +84,19 @@ public class EnvironmentValidatorService {
         return networkCreationValidator.validateNetworkCreation(environment, network, subnetMetas);
     }
 
-    public ValidationResult validateParentChildRelation(Environment environment, String parentEnvironmentCrn) {
+    public ValidationResult validateParentChildRelation(Environment environment, String parentEnvironmentName) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
-        resultBuilder.ifError(() -> Objects.nonNull(parentEnvironmentCrn) && Objects.isNull(environment.getParentEnvironment()),
-                String.format("Active parent environment with crn '%s' is not available in account '%s'.", parentEnvironmentCrn, environment.getAccountId()));
+        resultBuilder.ifError(() -> Objects.nonNull(parentEnvironmentName) && Objects.isNull(environment.getParentEnvironment()),
+                String.format("Active parent environment with name '%s' is not available in account '%s'.", parentEnvironmentName, environment.getAccountId()));
         if (Objects.nonNull(environment.getParentEnvironment())) {
             resultBuilder.ifError(() -> environment.getParentEnvironment().getStatus() != EnvironmentStatus.AVAILABLE,
                     "Parent environment should be in 'AVAILABLE' status.");
             resultBuilder.ifError(() -> Objects.nonNull(environment.getParentEnvironment().getParentEnvironment()),
                     "Parent environment is already a child environment.");
-            resultBuilder.ifError(() -> !CloudPlatform.YARN.name().equalsIgnoreCase(environment.getCloudPlatform()),
-                    String.format("Parent environment is not supported for '%s' platform.", environment.getCloudPlatform()));
-            resultBuilder.ifError(() -> !CloudPlatform.AWS.name().equalsIgnoreCase(environment.getParentEnvironment().getCloudPlatform()),
+            resultBuilder.ifError(() -> !platformEnabled(enabledChildPlatforms, environment.getCloudPlatform()),
+                    String.format("'%s' platform is not supported for child environment.", environment.getCloudPlatform()));
+            resultBuilder.ifError(() -> !platformEnabled(enabledParentPlatforms, environment.getParentEnvironment().getCloudPlatform()),
                     String.format("'%s' platform is not supported for parent environment.", environment.getParentEnvironment().getCloudPlatform()));
         }
 
@@ -185,5 +194,9 @@ public class EnvironmentValidatorService {
 
     private boolean allSecGroupMissing(SecurityAccessDto securityAccessDto) {
         return isEmpty(securityAccessDto.getDefaultSecurityGroupId()) && isEmpty(securityAccessDto.getSecurityGroupIdForKnox());
+    }
+
+    private boolean platformEnabled(Set<String> cloudPlatforms, String cloudPlatform) {
+        return cloudPlatforms.stream().anyMatch(p -> p.equalsIgnoreCase(cloudPlatform));
     }
 }

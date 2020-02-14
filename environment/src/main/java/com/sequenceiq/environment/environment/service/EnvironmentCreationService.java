@@ -94,9 +94,9 @@ public class EnvironmentCreationService {
         }
 
         Environment environment = initializeEnvironment(creationDto);
-        if (Objects.nonNull(creationDto.getParentEnvironmentCrn())) {
+        if (Objects.nonNull(creationDto.getParentEnvironmentName())) {
             Optional<Environment> parentEnvironment = environmentService.
-                    findByResourceCrnAndAccountIdAndArchivedIsFalse(creationDto.getParentEnvironmentCrn(), creationDto.getAccountId());
+                    findByNameAndAccountIdAndArchivedIsFalse(creationDto.getParentEnvironmentName(), creationDto.getAccountId());
             parentEnvironment.ifPresent(environment::setParentEnvironment);
         }
 
@@ -164,7 +164,7 @@ public class EnvironmentCreationService {
         ValidationResultBuilder networkValidation = validatorService.validateNetworkCreation(environment, creationDto.getNetwork(), subnetMetas);
         validationBuilder = validationBuilder.merge(networkValidation.build());
 
-        ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentCrn());
+        ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
         validationBuilder.merge(parentChildValidation);
 
         validationBuilder.ifError(() -> isTunnelInvalid(creationDto.getCreator(), creationDto.getExperimentalFeatures().getTunnel()),
