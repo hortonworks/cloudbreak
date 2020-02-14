@@ -14,14 +14,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.regchildenv.RegisterChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @ExtendWith(MockitoExtension.class)
-class RegisterChildEnvironmentRequestValidatorTest {
+class AttachChildEnvironmentRequestValidatorTest {
 
     private static final String ACCOUNT_ID = "accountId";
 
@@ -29,7 +29,7 @@ class RegisterChildEnvironmentRequestValidatorTest {
 
     private static final String PARENT_ENVIRONMENT_CRN = "crn:parent";
 
-    private static final RegisterChildEnvironmentRequest REQUEST = new RegisterChildEnvironmentRequest();
+    private static final AttachChildEnvironmentRequest REQUEST = new AttachChildEnvironmentRequest();
 
     static {
         REQUEST.setChildEnvironmentCrn(CHILD_ENVIRONMENT_CRN);
@@ -37,7 +37,7 @@ class RegisterChildEnvironmentRequestValidatorTest {
     }
 
     @InjectMocks
-    private RegisterChildEnvironmentRequestValidator underTest;
+    private AttachChildEnvironmentRequestValidator underTest;
 
     @Mock
     private StackService stackService;
@@ -64,10 +64,10 @@ class RegisterChildEnvironmentRequestValidatorTest {
 
         assertThat(result.hasError()).isTrue();
         assertThat(result.getErrors())
-                .contains(RegisterChildEnvironmentRequestValidator.PARENT_ENVIRONMENT_SHOULD_HAVE_A_STACK)
-                .contains(RegisterChildEnvironmentRequestValidator.CHILD_ENVIRONMENT_ALREADY_HAS_A_STACK)
-                .contains(RegisterChildEnvironmentRequestValidator.PARENT_ENVIRONMENT_CAN_NOT_BE_A_CHILD_ENVIRONMENT)
-                .contains(RegisterChildEnvironmentRequestValidator.CHILD_ENVIRONMENT_ALREADY_HAS_A_PARENT_ENVIRONMENT);
+                .contains(AttachChildEnvironmentRequestValidator.PARENT_ENVIRONMENT_SHOULD_HAVE_A_STACK)
+                .contains(AttachChildEnvironmentRequestValidator.CHILD_ENVIRONMENT_ALREADY_HAS_A_STACK)
+                .contains(AttachChildEnvironmentRequestValidator.PARENT_ENVIRONMENT_CAN_NOT_BE_A_CHILD_ENVIRONMENT)
+                .contains(AttachChildEnvironmentRequestValidator.CHILD_ENVIRONMENT_ALREADY_HAS_A_PARENT_ENVIRONMENT);
     }
 
     @Test

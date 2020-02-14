@@ -13,7 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.regchildenv.RegisterChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.ChildEnvironmentRepository;
 
@@ -52,10 +53,18 @@ class ChildEnvironmentServiceTest {
     }
 
     @Test
-    void registerChildEnvironment() {
-        RegisterChildEnvironmentRequest request = new RegisterChildEnvironmentRequest();
-        underTest.registerChildEnvironment(request, ACCOUNT_ID);
+    void attachChildEnvironment() {
+        AttachChildEnvironmentRequest request = new AttachChildEnvironmentRequest();
+        underTest.attachChildEnvironment(request, ACCOUNT_ID);
 
-        verify(stackService).registerChildEnvironment(request, ACCOUNT_ID);
+        verify(stackService).attachChildEnvironment(request, ACCOUNT_ID);
+    }
+
+    @Test
+    void detachChildEnvironment() {
+        DetachChildEnvironmentRequest request = new DetachChildEnvironmentRequest();
+        underTest.detachChildEnvironment(request, ACCOUNT_ID);
+
+        verify(stackService).detachChildEnvironment(request, ACCOUNT_ID);
     }
 }

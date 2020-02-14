@@ -1,17 +1,18 @@
-package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.deregchildenv;
+package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv;
+
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.validation.constraints.NotNull;
-
-@ApiModel("DeregisterChildEnvironmentV1Request")
+@ApiModel("DetachChildEnvironmentV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DeregisterChildEnvironmentRequest {
+public class DetachChildEnvironmentRequest {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.PARENT_ENVIRONMENT_CRN, required = true)
@@ -39,7 +40,7 @@ public class DeregisterChildEnvironmentRequest {
 
     @Override
     public String toString() {
-        return "DeregisterChildEnvironmentRequest{"
+        return "DetachChildEnvironmentRequest{"
                 + "parentEnvironmentCrn='" + parentEnvironmentCrn + '\''
                 + "childEnvironmentCrn='" + childEnvironmentCrn + '\''
                 + '}';

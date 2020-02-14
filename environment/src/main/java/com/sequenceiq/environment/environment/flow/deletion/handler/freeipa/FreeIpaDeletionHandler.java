@@ -25,7 +25,7 @@ import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.deregchildenv.DeregisterChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 import reactor.bus.Event;
@@ -70,10 +70,10 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
                         throw new FreeIpaOperationFailedException("Failed to delete FreeIpa! " + getIfNotNull(result.getRight(), Throwable::getMessage));
                     }
                 } else {
-                    DeregisterChildEnvironmentRequest deregisterChildEnvironmentRequest = new DeregisterChildEnvironmentRequest();
-                    deregisterChildEnvironmentRequest.setParentEnvironmentCrn(environment.getParentEnvironment().getResourceCrn());
-                    deregisterChildEnvironmentRequest.setChildEnvironmentCrn(environment.getResourceCrn());
-                    freeIpaService.deregisterChildEnvironment(deregisterChildEnvironmentRequest);
+                    DetachChildEnvironmentRequest detachChildEnvironmentRequest = new DetachChildEnvironmentRequest();
+                    detachChildEnvironmentRequest.setParentEnvironmentCrn(environment.getParentEnvironment().getResourceCrn());
+                    detachChildEnvironmentRequest.setChildEnvironmentCrn(environment.getResourceCrn());
+                    freeIpaService.detachChildEnvironment(detachChildEnvironmentRequest);
                 }
             }
             eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());

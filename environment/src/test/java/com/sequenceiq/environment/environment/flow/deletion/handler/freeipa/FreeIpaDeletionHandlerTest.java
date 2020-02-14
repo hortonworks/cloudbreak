@@ -27,7 +27,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.deregchildenv.DeregisterChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 import reactor.bus.Event;
@@ -57,7 +57,7 @@ class FreeIpaDeletionHandlerTest {
     private FreeIpaDeletionHandler victim;
 
     @Test
-    public void shouldDeregisterChildEnvironmentIfParentExists() {
+    public void shouldDetachChildEnvironmentIfParentExists() {
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setId(CHILD_ENVIRONMENT_ID);
 
@@ -66,14 +66,14 @@ class FreeIpaDeletionHandlerTest {
 
         victim.accept(new Event<>(environmentDto));
 
-        ArgumentCaptor<DeregisterChildEnvironmentRequest> unregisterChildEnvironmentRequestArgumentCaptor
-                = ArgumentCaptor.forClass(DeregisterChildEnvironmentRequest.class);
-        verify(freeIpaService).deregisterChildEnvironment(unregisterChildEnvironmentRequestArgumentCaptor.capture());
+        ArgumentCaptor<DetachChildEnvironmentRequest> detachChildEnvironmentRequestArgumentCaptor
+                = ArgumentCaptor.forClass(DetachChildEnvironmentRequest.class);
+        verify(freeIpaService).detachChildEnvironment(detachChildEnvironmentRequestArgumentCaptor.capture());
         verifyNoMoreInteractions(freeIpaService);
         verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
 
-        assertEquals(PARENT_ENVIRONMENT_CRN, unregisterChildEnvironmentRequestArgumentCaptor.getValue().getParentEnvironmentCrn());
-        assertEquals(ENVIRONMENT_CRN, unregisterChildEnvironmentRequestArgumentCaptor.getValue().getChildEnvironmentCrn());
+        assertEquals(PARENT_ENVIRONMENT_CRN, detachChildEnvironmentRequestArgumentCaptor.getValue().getParentEnvironmentCrn());
+        assertEquals(ENVIRONMENT_CRN, detachChildEnvironmentRequestArgumentCaptor.getValue().getChildEnvironmentCrn());
     }
 
     @Test
