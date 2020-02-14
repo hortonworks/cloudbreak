@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -x
+set -ex
 
 : ${INTEGRATIONTEST_SUITEFILES:=${INTEGRATIONTEST_SUITE_FILES}${ADDITIONAL_SUITEFILES+,$ADDITIONAL_SUITEFILES}}
 : ${INTEGRATIONTEST_TESTSUITE_POLLINGINTERVAL:=1000}
@@ -44,8 +44,9 @@ fi
 
 cd ..
 
-PUBLIC_IP=`echo $DOCKER_HOST | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'`
-
+if [[ "$DOCKER_HOST" ]]; then
+    PUBLIC_IP=`echo $DOCKER_HOST | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'`
+fi
 if [[ "$PUBLIC_IP" ]]; then
     PUBLIC_IP=$PUBLIC_IP
 else
