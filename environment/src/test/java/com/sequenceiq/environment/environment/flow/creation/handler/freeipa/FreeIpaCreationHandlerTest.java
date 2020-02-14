@@ -33,7 +33,7 @@ import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.regchildenv.RegisterChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 
 import reactor.bus.Event;
 
@@ -93,16 +93,16 @@ public class FreeIpaCreationHandlerTest {
 
         victim.accept(new Event<>(environmentDto));
 
-        ArgumentCaptor<RegisterChildEnvironmentRequest> registerChildEnvironmentRequestArgumentCaptor
-                = ArgumentCaptor.forClass(RegisterChildEnvironmentRequest.class);
+        ArgumentCaptor<AttachChildEnvironmentRequest> attachChildEnvironmentRequestArgumentCaptor
+                = ArgumentCaptor.forClass(AttachChildEnvironmentRequest.class);
         verify(dnsV1Endpoint).addDnsZoneForSubnets(addDnsZoneForSubnetsRequestArgumentCaptor.capture());
-        verify(freeIpaService).registerChildEnvironment(registerChildEnvironmentRequestArgumentCaptor.capture());
+        verify(freeIpaService).attachChildEnvironment(attachChildEnvironmentRequestArgumentCaptor.capture());
         verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
 
         assertEquals(PARENT_ENVIRONMENT_CRN, addDnsZoneForSubnetsRequestArgumentCaptor.getValue().getEnvironmentCrn());
         assertEquals(Collections.singletonList(YARN_NETWORK_CIDR), addDnsZoneForSubnetsRequestArgumentCaptor.getValue().getSubnets());
-        assertEquals(ENVIRONMENT_CRN, registerChildEnvironmentRequestArgumentCaptor.getValue().getChildEnvironmentCrn());
-        assertEquals(PARENT_ENVIRONMENT_CRN, registerChildEnvironmentRequestArgumentCaptor.getValue().getParentEnvironmentCrn());
+        assertEquals(ENVIRONMENT_CRN, attachChildEnvironmentRequestArgumentCaptor.getValue().getChildEnvironmentCrn());
+        assertEquals(PARENT_ENVIRONMENT_CRN, attachChildEnvironmentRequestArgumentCaptor.getValue().getParentEnvironmentCrn());
     }
 
     @Test
@@ -116,7 +116,7 @@ public class FreeIpaCreationHandlerTest {
         victim.accept(new Event<>(environmentDto));
 
         verify(dnsV1Endpoint, never()).addDnsZoneForSubnets(any(AddDnsZoneForSubnetsRequest.class));
-        verify(freeIpaService, never()).registerChildEnvironment(any(RegisterChildEnvironmentRequest.class));
+        verify(freeIpaService, never()).attachChildEnvironment(any(AttachChildEnvironmentRequest.class));
         verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
     }
 
@@ -132,7 +132,7 @@ public class FreeIpaCreationHandlerTest {
         victim.accept(new Event<>(environmentDto));
 
         verify(dnsV1Endpoint, never()).addDnsZoneForSubnets(any(AddDnsZoneForSubnetsRequest.class));
-        verify(freeIpaService, never()).registerChildEnvironment(any(RegisterChildEnvironmentRequest.class));
+        verify(freeIpaService, never()).attachChildEnvironment(any(AttachChildEnvironmentRequest.class));
         verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
     }
 

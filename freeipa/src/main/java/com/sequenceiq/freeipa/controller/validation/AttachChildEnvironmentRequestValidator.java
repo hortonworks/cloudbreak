@@ -6,13 +6,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.Validator;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.regchildenv.RegisterChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Component
-public class RegisterChildEnvironmentRequestValidator implements Validator<RegisterChildEnvironmentRequest> {
+public class AttachChildEnvironmentRequestValidator implements Validator<AttachChildEnvironmentRequest> {
 
     static final String PARENT_ENVIRONMENT_SHOULD_HAVE_A_STACK = "Parent environment should have a stack.";
 
@@ -32,7 +32,7 @@ public class RegisterChildEnvironmentRequestValidator implements Validator<Regis
     private ChildEnvironmentService childEnvironmentService;
 
     @Override
-    public ValidationResult validate(RegisterChildEnvironmentRequest subject) {
+    public ValidationResult validate(AttachChildEnvironmentRequest subject) {
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
         String accountId = crnService.getCurrentAccountId();

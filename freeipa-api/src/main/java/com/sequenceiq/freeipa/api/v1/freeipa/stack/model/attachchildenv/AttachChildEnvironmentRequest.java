@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.regchildenv;
+package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv;
 
 import javax.validation.constraints.NotNull;
 
@@ -9,10 +9,10 @@ import com.sequenceiq.service.api.doc.ModelDescriptions;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("RegisterChildEnvironmentV1Request")
+@ApiModel("AttachChildEnvironmentV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RegisterChildEnvironmentRequest {
+public class AttachChildEnvironmentRequest {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.PARENT_ENVIRONMENT_CRN, required = true)
@@ -40,7 +40,7 @@ public class RegisterChildEnvironmentRequest {
 
     @Override
     public String toString() {
-        return "RegisterChildEnvironmentRequest{"
+        return "AttachChildEnvironmentRequest{"
                 + "parentEnvironmentCrn='" + parentEnvironmentCrn + '\''
                 + "childEnvironmentCrn='" + childEnvironmentCrn + '\''
                 + '}';
