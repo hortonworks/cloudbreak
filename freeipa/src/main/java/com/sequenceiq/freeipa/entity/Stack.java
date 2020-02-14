@@ -376,7 +376,7 @@ public class Stack {
         this.minaSshdServiceId = minaSshdServiceId;
     }
 
-    public void registerChildEnvironment(String childEnvironmentCrn) {
+    public void attachChildEnvironment(String childEnvironmentCrn) {
         ChildEnvironment childEnvironment = new ChildEnvironment();
         childEnvironment.setEnvironmentCrn(childEnvironmentCrn);
         childEnvironment.setStack(this);

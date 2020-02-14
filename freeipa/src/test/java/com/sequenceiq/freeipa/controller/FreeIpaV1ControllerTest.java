@@ -26,12 +26,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.deregchildenv.DeregisterChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.regchildenv.RegisterChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.validation.CreateFreeIpaRequestValidator;
-import com.sequenceiq.freeipa.controller.validation.RegisterChildEnvironmentRequestValidator;
+import com.sequenceiq.freeipa.controller.validation.AttachChildEnvironmentRequestValidator;
 import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
@@ -75,7 +75,7 @@ class FreeIpaV1ControllerTest {
     private CreateFreeIpaRequestValidator createFreeIpaRequestValidatior;
 
     @Mock
-    private RegisterChildEnvironmentRequestValidator registerChildEnvironmentRequestValidator;
+    private AttachChildEnvironmentRequestValidator attachChildEnvironmentRequestValidator;
 
     @BeforeEach
     void setUp() {
@@ -92,13 +92,13 @@ class FreeIpaV1ControllerTest {
     }
 
     @Test
-    void registerChildEnvironment() {
-        RegisterChildEnvironmentRequest registerChildEnvironmentRequest = new RegisterChildEnvironmentRequest();
-        when(registerChildEnvironmentRequestValidator.validate(registerChildEnvironmentRequest)).thenReturn(ValidationResult.builder().build());
+    void attachChildEnvironment() {
+        AttachChildEnvironmentRequest attachChildEnvironmentRequest = new AttachChildEnvironmentRequest();
+        when(attachChildEnvironmentRequestValidator.validate(attachChildEnvironmentRequest)).thenReturn(ValidationResult.builder().build());
 
-        underTest.registerChildEnvironment(registerChildEnvironmentRequest);
+        underTest.attachChildEnvironment(attachChildEnvironmentRequest);
 
-        verify(childEnvironmentService, times(1)).registerChildEnvironment(registerChildEnvironmentRequest, ACCOUNT_ID);
+        verify(childEnvironmentService, times(1)).attachChildEnvironment(attachChildEnvironmentRequest, ACCOUNT_ID);
     }
 
     @Test
@@ -176,13 +176,13 @@ class FreeIpaV1ControllerTest {
     }
 
     @Test
-    void deregisterChildEnvironment() {
-        DeregisterChildEnvironmentRequest request = mock(DeregisterChildEnvironmentRequest.class);
+    void detachChildEnvironment() {
+        DetachChildEnvironmentRequest request = mock(DetachChildEnvironmentRequest.class);
 
         when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
 
-        underTest.deregisterChildEnvironment(request);
+        underTest.detachChildEnvironment(request);
 
-        verify(childEnvironmentService).deregisterChildEnvironment(request, ACCOUNT_ID);
+        verify(childEnvironmentService).detachChildEnvironment(request, ACCOUNT_ID);
     }
 }
