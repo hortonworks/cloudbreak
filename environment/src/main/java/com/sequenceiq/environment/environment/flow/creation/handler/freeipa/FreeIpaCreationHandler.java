@@ -58,7 +58,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.Securit
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.regchildenv.RegisterChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 
 import reactor.bus.Event;
 
@@ -165,11 +165,11 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         if (freeIpa.isPresent() && CloudPlatform.YARN.name().equalsIgnoreCase(environmentDto.getCloudPlatform())) {
             LOGGER.info("Using FreeIpa of parent environment '{}' .", parentEnvironmentCrn);
 
-            RegisterChildEnvironmentRequest registerChildEnvironmentRequest = new RegisterChildEnvironmentRequest();
-            registerChildEnvironmentRequest.setChildEnvironmentCrn(environmentDto.getResourceCrn());
-            registerChildEnvironmentRequest.setParentEnvironmentCrn(parentEnvironmentCrn);
+            AttachChildEnvironmentRequest attachChildEnvironmentRequest = new AttachChildEnvironmentRequest();
+            attachChildEnvironmentRequest.setChildEnvironmentCrn(environmentDto.getResourceCrn());
+            attachChildEnvironmentRequest.setParentEnvironmentCrn(parentEnvironmentCrn);
 
-            freeIpaService.registerChildEnvironment(registerChildEnvironmentRequest);
+            freeIpaService.attachChildEnvironment(attachChildEnvironmentRequest);
 
             AddDnsZoneForSubnetsRequest addDnsZoneForSubnetsRequest = new AddDnsZoneForSubnetsRequest();
             addDnsZoneForSubnetsRequest.setEnvironmentCrn(parentEnvironmentCrn);

@@ -6,8 +6,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.deregchildenv.DeregisterChildEnvironmentRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.regchildenv.RegisterChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.ChildEnvironmentRepository;
 
@@ -28,11 +28,11 @@ public class ChildEnvironmentService {
         return repository.findParentStackByChildEnvironmentCrn(environmentCrn, accountId);
     }
 
-    public void registerChildEnvironment(RegisterChildEnvironmentRequest request, String accountId) {
-        stackService.registerChildEnvironment(request, accountId);
+    public void attachChildEnvironment(AttachChildEnvironmentRequest request, String accountId) {
+        stackService.attachChildEnvironment(request, accountId);
     }
 
-    public void deregisterChildEnvironment(DeregisterChildEnvironmentRequest request, String accountId) {
-        stackService.deregisterChildEnvironment(request, accountId);
+    public void detachChildEnvironment(DetachChildEnvironmentRequest request, String accountId) {
+        stackService.detachChildEnvironment(request, accountId);
     }
 }
