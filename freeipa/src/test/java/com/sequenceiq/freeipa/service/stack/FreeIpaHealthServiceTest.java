@@ -141,8 +141,6 @@ public class FreeIpaHealthServiceTest {
         stack.getInstanceGroups().add(instanceGroup);
         instanceGroup.setInstanceGroupType(InstanceGroupType.MASTER);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setDiscoveryFQDN("localhost");
-        instanceMetaData.setInstanceId("i-0123456789");
         instanceGroup.setInstanceMetaData(Sets.newHashSet(instanceMetaData));
         instanceMetaData.setDiscoveryFQDN("host.domain");
         ipaClientException = new FreeIpaClientException("failure");
