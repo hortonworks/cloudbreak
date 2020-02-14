@@ -107,6 +107,11 @@ restore_systemctl:
     - group: root
     - mode: 755
     - force: True
+
+update_hostname_command:
+  cmd.run:
+    - name: hostname "$(hostname -f)"
+    - runas: root
 {% endif %}
 
 include:
