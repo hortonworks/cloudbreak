@@ -134,7 +134,7 @@ public class EnvironmentApiConverter {
                         .withTunnel(tunnelConverter.convert(request.getTunnel()))
                         .build())
                 .withParameters(getIfNotNull(request.getAws(), this::awsParamsToParametersDto))
-                .withParentEnvironmentCrn(request.getParentEnvironmentCrn());
+                .withParentEnvironmentName(request.getParentEnvironmentName());
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
@@ -290,7 +290,8 @@ public class EnvironmentApiConverter {
                 .withIdBrokerMappingSource(environmentDto.getExperimentalFeatures().getIdBrokerMappingSource())
                 .withAdminGroupName(environmentDto.getAdminGroupName())
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams))
-                .withParentEnvironmentCrn(environmentDto.getParentEnvironmentCrn());
+                .withParentEnvironmentCrn(environmentDto.getParentEnvironmentCrn())
+                .withParentEnvironmentName(environmentDto.getParentEnvironmentName());
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network ->
                 builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel())));
@@ -317,7 +318,7 @@ public class EnvironmentApiConverter {
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams))
-                .withParentEnvironmentCrn(environmentDto.getParentEnvironmentCrn());
+                .withParentEnvironmentName(environmentDto.getParentEnvironmentName());
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network ->
                 builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel())));

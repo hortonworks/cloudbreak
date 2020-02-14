@@ -85,8 +85,8 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(EnvironmentModelDescription.TAGS)
     private Map<String, String> tags = new HashMap<>();
 
-    @ApiModelProperty(value = EnvironmentModelDescription.PARENT_ENVIRONMENT_CRN)
-    private String parentEnvironmentCrn;
+    @ApiModelProperty(value = EnvironmentModelDescription.PARENT_ENVIRONMENT_NAME)
+    private String parentEnvironmentName;
 
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
@@ -218,11 +218,11 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
         this.tags = tags;
     }
 
-    public String getParentEnvironmentCrn() {
-        return parentEnvironmentCrn;
+    public String getParentEnvironmentName() {
+        return parentEnvironmentName;
     }
 
-    public void setParentEnvironmentCrn(String parentEnvironmentCrn) {
-        this.parentEnvironmentCrn = parentEnvironmentCrn;
+    public void setParentEnvironmentName(String parentEnvironmentName) {
+        this.parentEnvironmentName = parentEnvironmentName;
     }
 }
