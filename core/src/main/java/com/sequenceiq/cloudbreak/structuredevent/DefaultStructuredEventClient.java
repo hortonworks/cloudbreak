@@ -23,7 +23,7 @@ public class DefaultStructuredEventClient implements StructuredEventClient {
         for (StructuredEventSenderService structuredEventSenderService : structuredEventServices) {
             LOGGER.trace("Send event {} with eventsender {}", structuredEvent, structuredEventSenderService.getClass());
             if (structuredEventSenderService.isEnabled()) {
-                structuredEventSenderService.storeStructuredEvent(structuredEvent);
+                structuredEventSenderService.create(structuredEvent);
             }
         }
     }
