@@ -32,7 +32,7 @@ public class AsyncFileStructuredEventSender implements StructuredEventSenderServ
     }
 
     @Override
-    public void storeStructuredEvent(StructuredEvent structuredEvent) {
+    public void create(StructuredEvent structuredEvent) {
         sendAsyncEvent(SAVE_STRUCTURED_EVENT_TO_FILE, eventFactory.createEvent(structuredEvent));
     }
 
