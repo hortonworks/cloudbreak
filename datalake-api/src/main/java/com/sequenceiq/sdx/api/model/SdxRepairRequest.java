@@ -2,19 +2,12 @@ package com.sequenceiq.sdx.api.model;
 
 import java.util.List;
 
+import javax.validation.constraints.NotEmpty;
+
 public class SdxRepairRequest {
 
-    private String hostGroupName;
-
+    @NotEmpty(message = "Please specify at least one hostgroup to repair")
     private List<String> hostGroupNames;
-
-    public String getHostGroupName() {
-        return hostGroupName;
-    }
-
-    public void setHostGroupName(String hostGroupName) {
-        this.hostGroupName = hostGroupName;
-    }
 
     public List<String> getHostGroupNames() {
         return hostGroupNames;
