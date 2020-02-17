@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -22,4 +23,8 @@ public interface ChildEnvironmentRepository extends BaseCrudRepository<ChildEnvi
     @CheckPermission(action = ResourceAction.READ)
     @Query("SELECT c.stack FROM ChildEnvironment c WHERE c.environmentCrn = :childEnvironmentCrn AND c.stack.accountId = :accountId")
     Optional<Stack> findParentStackByChildEnvironmentCrn(@Param("childEnvironmentCrn") String childEnvironmentCrn, @Param("accountId") String accountId);
+
+    @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT c FROM ChildEnvironment c WHERE c.stack.id = :stackId AND c.stack.accountId = :accountId")
+    List<ChildEnvironment> findByStackId(@Param("stackId") Long stackId, @Param("accountId") String accountId);
 }

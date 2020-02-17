@@ -120,7 +120,7 @@ public class EnvironmentDeletionService {
     void validateDeletion(Environment environment) {
         List<String> childEnvNames = environmentService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(environment.getAccountId(), environment.getId());
         if (!childEnvNames.isEmpty()) {
-            throw new BadRequestException(String.format("The following Envrionment(s) must be deleted before Environment deletion [%s]",
+            throw new BadRequestException(String.format("The following Environment(s) must be deleted before Environment deletion [%s]",
                     String.join(", ", childEnvNames)));
         }
     }
