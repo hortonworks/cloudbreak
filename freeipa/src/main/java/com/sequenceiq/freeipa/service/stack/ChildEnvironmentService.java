@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
+import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.ChildEnvironment;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.ChildEnvironmentRepository;
@@ -35,10 +36,18 @@ public class ChildEnvironmentService {
     }
 
     public void attachChildEnvironment(AttachChildEnvironmentRequest request, String accountId) {
-        stackService.attachChildEnvironment(request, accountId);
+        Stack stack = stackService.getByOwnEnvironmentCrnAndAccountIdWithLists(request.getParentEnvironmentCrn(), accountId);
+        ChildEnvironment childEnvironment = new ChildEnvironment();
+        childEnvironment.setEnvironmentCrn(request.getChildEnvironmentCrn());
+        childEnvironment.setStack(stack);
+        repository.save(childEnvironment);
     }
 
     public void detachChildEnvironment(DetachChildEnvironmentRequest request, String accountId) {
-        stackService.detachChildEnvironment(request, accountId);
+        ChildEnvironment childEnvironment = repository.findByParentAndChildEnvironmentCrns(
+                request.getParentEnvironmentCrn(), request.getChildEnvironmentCrn(), accountId)
+            .orElseThrow(() -> new NotFoundException(String.format("ChildEnvironment by parent environment crn [%s] and child environment crn [%s] not found",
+                            request.getParentEnvironmentCrn(), request.getChildEnvironmentCrn())));
+        repository.delete(childEnvironment);
     }
 }

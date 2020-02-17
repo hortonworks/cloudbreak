@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
-import com.sequenceiq.freeipa.entity.ChildEnvironment;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
@@ -31,8 +30,6 @@ class FreeIpaToListFreeIpaResponseConverterTest {
 
     private static final String CRN_2 = "crn2";
 
-    private static final String CHILD_ENVIRONMENT_CRN = "crn:child";
-
     @InjectMocks
     private FreeIpaToListFreeIpaResponseConverter underTest;
 
@@ -47,7 +44,6 @@ class FreeIpaToListFreeIpaResponseConverterTest {
         assertEquals(ENV_CRN, actual.get(0).getEnvironmentCrn());
         assertEquals(NAME, actual.get(0).getName());
         assertEquals(Status.AVAILABLE, actual.get(0).getStatus());
-        assertEquals(List.of(CHILD_ENVIRONMENT_CRN), actual.get(0).getChildEnvironmentCrns());
 
         assertEquals(DOMAIN_2, actual.get(1).getDomain());
         assertEquals(CRN_2, actual.get(1).getCrn());
@@ -73,14 +69,7 @@ class FreeIpaToListFreeIpaResponseConverterTest {
         stack.setName(NAME);
         stack.setResourceCrn(crn);
         stack.setStackStatus(createStackStatus());
-        stack.setChildEnvironments(createChildEnvironments());
         return stack;
-    }
-
-    private List<ChildEnvironment> createChildEnvironments() {
-        ChildEnvironment childEnvironment = new ChildEnvironment();
-        childEnvironment.setEnvironmentCrn(CHILD_ENVIRONMENT_CRN);
-        return List.of(childEnvironment);
     }
 
     private StackStatus createStackStatus() {
