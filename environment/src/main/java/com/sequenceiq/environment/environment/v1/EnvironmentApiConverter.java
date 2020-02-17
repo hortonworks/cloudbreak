@@ -9,16 +9,18 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
@@ -43,6 +45,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.LocationResp
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
+import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverter;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
@@ -83,32 +87,38 @@ public class EnvironmentApiConverter {
 
     private final CredentialViewConverter credentialViewConverter;
 
+    private final CredentialService credentialService;
+
     private final TelemetryApiConverter telemetryApiConverter;
 
     private final TunnelConverter tunnelConverter;
 
-    @Inject
-    private SubnetIdProvider subnetIdProvider;
+    private final SubnetIdProvider subnetIdProvider;
 
     public EnvironmentApiConverter(RegionConverter regionConverter,
             CredentialToCredentialV1ResponseConverter credentialConverter,
             CredentialViewConverter credentialViewConverter,
             TelemetryApiConverter telemetryApiConverter,
-            TunnelConverter tunnelConverter) {
+            TunnelConverter tunnelConverter,
+            CredentialService credentialService,
+            SubnetIdProvider subnetIdProvider) {
         this.regionConverter = regionConverter;
         this.credentialConverter = credentialConverter;
         this.credentialViewConverter = credentialViewConverter;
         this.telemetryApiConverter = telemetryApiConverter;
         this.tunnelConverter = tunnelConverter;
+        this.credentialService = credentialService;
+        this.subnetIdProvider = subnetIdProvider;
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentCreationDto.Builder builder = EnvironmentCreationDto.builder()
-                .withAccountId(ThreadBasedUserCrnProvider.getAccountId())
+                .withAccountId(accountId)
                 .withCreator(ThreadBasedUserCrnProvider.getUserCrn())
                 .withName(request.getName())
                 .withDescription(request.getDescription())
-                .withCloudPlatform(request.getCloudPlatform())
+                .withCloudPlatform(getCloudPlatform(request, accountId))
                 .withCredential(request)
                 .withCreated(System.currentTimeMillis())
                 .withCreateFreeIpa(request.getFreeIpa() == null ? true : request.getFreeIpa().getCreate())
@@ -136,6 +146,20 @@ public class EnvironmentApiConverter {
             builder.withSecurityAccess(securityAccess);
         }
         return builder.build();
+    }
+
+    private String getCloudPlatform(EnvironmentRequest request, String accountId) {
+        if (!Strings.isNullOrEmpty(request.getCredentialName())) {
+            try {
+                Credential credential = credentialService.getByNameForAccountId(request.getCredentialName(), accountId);
+                return credential.getCloudPlatform();
+            } catch (NotFoundException e) {
+                throw new BadRequestException(String.format("No credential found with name [%s] in the workspace.",
+                        request.getCredentialName()), e);
+            }
+        } else {
+            throw new BadRequestException("No credential has been specified in request for environment creation.");
+        }
     }
 
     private String createCrn(@Nonnull String accountId) {
