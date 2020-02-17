@@ -217,7 +217,6 @@ cb:
         CDP 1.2 - Operational Database: Apache HBase, Phoenix=cdp-opdb-710;
         CDP 1.2 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-702;
         CDP 1.2 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-702;
-        CDP 1.2 - Data Engineering Hue HA: Apache Spark, Apache Hive, Hue, Apache Oozie=cdp-data-engineering-hueha-702;
         CDP 1.2 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-702;
         CDP 1.2 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small-702;
         7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-710;
@@ -227,7 +226,6 @@ cb:
         7.1.0 - Operational Database: Apache HBase, Phoenix=cdp-opdb-710;
         7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-710;
         7.1.0 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-710;
-        7.1.0 - Data Engineering Hue HA: Apache Spark, Apache Hive, Hue, Apache Oozie=cdp-data-engineering-hueha-710;
 
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
