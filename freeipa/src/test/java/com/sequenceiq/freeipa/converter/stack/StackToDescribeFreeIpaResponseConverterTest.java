@@ -95,7 +95,6 @@ class StackToDescribeFreeIpaResponseConverterTest {
         assertThat(result)
                 .returns(NAME, DescribeFreeIpaResponse::getName)
                 .returns(ENV_CRN, DescribeFreeIpaResponse::getEnvironmentCrn)
-                .returns(List.of(CHILD_ENVIRONMENT_CRN), DescribeFreeIpaResponse::getChildEnvironmentCrns)
                 .returns(RESOURCE_CRN, DescribeFreeIpaResponse::getCrn)
                 .returns(CLOUD_PLATFORM, DescribeFreeIpaResponse::getCloudPlatform)
                 .returns(STACK_AUTHENTICATION_RESPONSE, DescribeFreeIpaResponse::getAuthentication)
@@ -117,7 +116,6 @@ class StackToDescribeFreeIpaResponseConverterTest {
         stack.setName(NAME);
         stack.setResourceCrn(RESOURCE_CRN);
         stack.setStackStatus(createStackStatus());
-        stack.setChildEnvironments(createChildEnvironments());
         stack.setCloudPlatform(CLOUD_PLATFORM);
         stack.setStackAuthentication(new StackAuthentication());
         stack.setAppVersion(APP_VERSION);

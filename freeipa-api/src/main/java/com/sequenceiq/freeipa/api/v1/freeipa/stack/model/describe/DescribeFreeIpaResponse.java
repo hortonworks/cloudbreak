@@ -30,9 +30,6 @@ public class DescribeFreeIpaResponse {
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
-    @ApiModelProperty(ModelDescriptions.CHILD_ENVIRONMENT_CRN_LIST)
-    private List<String> childEnvironmentCrns;
-
     @NotNull
     @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_NAME, required = true)
     private String name;
@@ -88,14 +85,6 @@ public class DescribeFreeIpaResponse {
 
     public void setEnvironmentCrn(String environmentCrn) {
         this.environmentCrn = environmentCrn;
-    }
-
-    public List<String> getChildEnvironmentCrns() {
-        return childEnvironmentCrns;
-    }
-
-    public void setChildEnvironmentCrns(List<String> childEnvironmentCrns) {
-        this.childEnvironmentCrns = childEnvironmentCrns;
     }
 
     public String getCrn() {
