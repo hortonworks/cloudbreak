@@ -68,6 +68,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
+                .when(credentialTestClient.create())
                 .init(EnvironmentTestDto.class)
                 .withRegions(INVALID_REGION)
                 .when(environmentTestClient.create(), RunningParameter.key(forbiddenKey))
@@ -84,6 +85,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
+                .when(credentialTestClient.create())
                 .init(EnvironmentTestDto.class)
                 .withRegions(null)
                 .when(environmentTestClient.create(), RunningParameter.key(forbiddenKey))
