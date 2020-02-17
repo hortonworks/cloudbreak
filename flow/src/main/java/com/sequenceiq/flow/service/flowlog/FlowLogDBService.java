@@ -252,6 +252,8 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     public Boolean hasPendingFlowEvent(List<FlowLog> flowLogs) {
+        LOGGER.debug("Checking if there is a pending flowEvent based on these flowLogs {}", Joiner.on(",")
+                .join(flowLogs.stream().map(flowLog -> flowLog.minimizedString()).collect(Collectors.toList())));
         return flowLogs.stream().anyMatch(pendingFlowLogPredicate());
     }
 
