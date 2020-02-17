@@ -9,12 +9,16 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
@@ -33,6 +37,8 @@ import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourc
 @Component
 public class StructuredEventDBService extends AbstractWorkspaceAwareResourceService<StructuredEventEntity> implements StructuredEventService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StructuredEventDBService.class);
+
     @Inject
     private ConversionService conversionService;
 
@@ -46,7 +52,7 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
     private StackService stackService;
 
     @Override
-    public void storeStructuredEvent(StructuredEvent structuredEvent) {
+    public void create(StructuredEvent structuredEvent) {
         StructuredEventEntity structuredEventEntityEntity = conversionService.convert(structuredEvent, StructuredEventEntity.class);
         create(structuredEventEntityEntity, structuredEventEntityEntity.getWorkspace(), null);
     }
@@ -60,7 +66,9 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
     @Override
     public StructuredEventEntity create(StructuredEventEntity resource, Workspace workspace, User user) {
         resource.setWorkspace(workspace);
-        return repository().save(resource);
+        StructuredEventEntity saved = repository().save(resource);
+        LOGGER.info("Stored StructuredEventEntity: {}", AnonymizerUtil.anonymize(JsonUtil.writeValueAsStringSilent(saved)));
+        return saved;
     }
 
     public boolean isEnabled() {

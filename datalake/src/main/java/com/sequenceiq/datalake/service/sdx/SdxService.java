@@ -211,7 +211,7 @@ public class SdxService implements ResourceIdProvider {
     }
 
     public List<String> getDatalakeVersions() {
-        return cdpStackRequests.keySet().stream().map(CDPConfigKey::getCdpVersion).distinct().collect(Collectors.toList());
+        return cdpStackRequests.keySet().stream().map(CDPConfigKey::getRuntimeVersion).distinct().collect(Collectors.toList());
     }
 
     private String getRuntime(SdxClusterRequest sdxClusterRequest) {

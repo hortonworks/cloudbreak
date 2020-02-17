@@ -1,12 +1,13 @@
 package com.sequenceiq.datalake.configuration;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -23,26 +24,30 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 @Configuration
 public class CDPConfig {
 
+    public static final int RUNTIME_GROUP = 1;
+
+    public static final int CLOUDPLATFORM_GROUP = 2;
+
+    public static final int CLUSTERSHAPE_GROUP = 3;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPConfig.class);
 
     @Bean
     public Map<CDPConfigKey, StackV4Request> cdpStackRequests() {
         Map<CDPConfigKey, StackV4Request> cpdStackRequests = new HashMap<>();
-        PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver(getClass().getClassLoader());
+        PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
         try {
-            Resource[] resources = pathMatchingResourcePatternResolver.getResources("classpath*:/runtime/*");
+            Resource[] resources = pathMatchingResourcePatternResolver.getResources("classpath:runtime/*/*/*_duty.json");
             for (Resource resource : resources) {
-                String cdpVersion = resource.getFile().getName();
-                File[] cloudPlatformDirs = resource.getFile().listFiles();
-                for (File cloudPlatformFile : cloudPlatformDirs) {
-                    CloudPlatform cloudPlatform = CloudPlatform.valueOf(cloudPlatformFile.getName().toUpperCase());
-                    for (File dutyFile : cloudPlatformFile.listFiles()) {
-                        SdxClusterShape sdxClusterShape = SdxClusterShape.valueOf(dutyFile.getName().split(".json")[0].toUpperCase());
-                        CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, sdxClusterShape, cdpVersion);
-                        String templateString = FileUtils.readFileToString(dutyFile, Charset.defaultCharset());
-                        StackV4Request stackV4Request = JsonUtil.readValue(templateString, StackV4Request.class);
-                        cpdStackRequests.put(cdpConfigKey, stackV4Request);
-                    }
+                Matcher matcher = Pattern.compile(".*/runtime/(.*)/(.*)/(.*).json").matcher(resource.getURL().getPath());
+                if (matcher.find()) {
+                    String runtimeVersion = matcher.group(RUNTIME_GROUP);
+                    CloudPlatform cloudPlatform = CloudPlatform.valueOf(matcher.group(CLOUDPLATFORM_GROUP).toUpperCase());
+                    SdxClusterShape sdxClusterShape = SdxClusterShape.valueOf(matcher.group(CLUSTERSHAPE_GROUP).toUpperCase());
+                    CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, sdxClusterShape, runtimeVersion);
+                    String templateString = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8.name());
+                    StackV4Request stackV4Request = JsonUtil.readValue(templateString, StackV4Request.class);
+                    cpdStackRequests.put(cdpConfigKey, stackV4Request);
                 }
             }
             LOGGER.info("Cdp configs for datalakes: {}", cpdStackRequests);
