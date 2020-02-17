@@ -267,9 +267,6 @@ public class ServiceEndpointCollector {
                 case "KUDU":
                     addKuduUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls);
                     break;
-                case "KUDU_TABLET_SERVER":
-                    // skipping kudu tablet server url because this is not required
-                    break;
                 case "HIVE_SERVER":
                     // there is no HTTP endpoint for Hive server
                     break;

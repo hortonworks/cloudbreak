@@ -37,7 +37,7 @@ public class CDPConfig {
         Map<CDPConfigKey, StackV4Request> cpdStackRequests = new HashMap<>();
         PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
         try {
-            Resource[] resources = pathMatchingResourcePatternResolver.getResources("classpath:runtime/*/*/*_duty.json");
+            Resource[] resources = pathMatchingResourcePatternResolver.getResources("classpath:runtime/*/*/*.json");
             for (Resource resource : resources) {
                 Matcher matcher = Pattern.compile(".*/runtime/(.*)/(.*)/(.*).json").matcher(resource.getURL().getPath());
                 if (matcher.find()) {

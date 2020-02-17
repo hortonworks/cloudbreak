@@ -208,6 +208,8 @@
         "refName": "leader",
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
+          "hbase-GATEWAY-BASE",
+          "hdfs-GATEWAY-BASE",
           "hdfs-JOURNALNODE-BASE",
           "zookeeper-SERVER-BASE"
         ]

@@ -472,21 +472,7 @@
       "port": 8051,
       "tlsPort": 8051,
       "apiOnly": false,
-      "apiIncluded": true,
-      "visibleForDatalake": true,
-      "visibleForDatahub": true
-    },
-    {
-      "name": "KUDU_TABLET_SERVER",
-      "displayName": "Kudu Tablet Server",
-      "serviceName": "KUDU_TSERVER",
-      "knoxService": "KUDUUIT",
-      "knoxUrl": "/kuduui/",
-      "ssoSupported": true,
-      "port": 8050,
-      "tlsPort": 8050,
-      "apiOnly": false,
-      "apiIncluded": true,
+      "apiIncluded": false,
       "visibleForDatalake": true,
       "visibleForDatahub": true
     }
