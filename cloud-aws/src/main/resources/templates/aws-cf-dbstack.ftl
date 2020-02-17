@@ -149,9 +149,7 @@
                     }
               ],
               "Tags" : [
-                    { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-                    { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
-                    { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
+                    { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } }
               ],
               "VpcId" : { "Ref": "VPCIdParameter" }
             }
@@ -164,9 +162,7 @@
                 "DBSubnetGroupName": { "Ref": "DBSubnetGroupNameParameter" },
                 "SubnetIds": { "Ref": "DBSubnetGroupSubnetIdsParameter" },
                 "Tags": [
-                    { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-                    { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
-                    { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
+                    { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } }
                 ]
             }
         },
@@ -189,9 +185,7 @@
                 "StorageEncrypted": true,
                 "StorageType": { "Ref": "StorageTypeParameter" },
                 "Tags": [
-                    { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-                    { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
-                    { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
+                    { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } }
                 ],
                 <#if hasSecurityGroup>
                 "VPCSecurityGroups": { "Ref": "VPCSecurityGroupsParameter" }
