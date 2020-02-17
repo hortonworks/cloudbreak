@@ -22,6 +22,6 @@ public class StructuredEventHandler<T extends StructuredEvent> implements EventH
 
     @Override
     public void accept(Event<T> structuredEvent) {
-        structuredEventService.storeStructuredEvent(structuredEvent.getData());
+        structuredEventService.create(structuredEvent.getData());
     }
 }

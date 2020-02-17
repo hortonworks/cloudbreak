@@ -32,7 +32,7 @@ public class AsyncKafkaStructuredEventSender implements StructuredEventSenderSer
     }
 
     @Override
-    public void storeStructuredEvent(StructuredEvent structuredEvent) {
+    public void create(StructuredEvent structuredEvent) {
         sendAsyncEvent(KAFKA_EVENT_LOG_MESSAGE, eventFactory.createEvent(structuredEvent));
     }
 
