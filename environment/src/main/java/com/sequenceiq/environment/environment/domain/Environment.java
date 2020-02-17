@@ -351,24 +351,6 @@ public class Environment implements AuthResource {
         this.cidr = cidr;
     }
 
-    /**
-     * @deprecated
-     * The new getExperimentalFeaturesJson() method should be used.
-     */
-    @Deprecated
-    public ExperimentalFeatures getExperimentalFeatures() {
-        return getExperimentalFeaturesJson();
-    }
-
-    /**
-     * @deprecated
-     * The new setExperimentalFeaturesJson() method should be used.
-     */
-    @Deprecated
-    public void setExperimentalFeatures(ExperimentalFeatures experimentalFeatures) {
-        setExperimentalFeaturesJson(experimentalFeatures);
-    }
-
     public ExperimentalFeatures getExperimentalFeaturesJson() {
         if (experimentalFeaturesJson != null && experimentalFeaturesJson.getValue() != null) {
             return JsonUtil.readValueOpt(experimentalFeaturesJson.getValue(), ExperimentalFeatures.class).orElse(new ExperimentalFeatures());
