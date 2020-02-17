@@ -28,6 +28,6 @@ public interface FreeIpaRepository extends BaseCrudRepository<FreeIpa, Long> {
     Optional<FreeIpa> getByStackId(@Param("stackId") Long stackId);
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT f FROM FreeIpa f LEFT JOIN FETCH f.stack s LEFT JOIN FETCH s.childEnvironments c WHERE s.accountId = :accountId AND s.terminated = -1")
+    @Query("SELECT f FROM FreeIpa f LEFT JOIN FETCH f.stack s WHERE s.accountId = :accountId AND s.terminated = -1")
     List<FreeIpa> findByAccountId(@Param("accountId") String accountId);
 }

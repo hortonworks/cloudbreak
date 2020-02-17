@@ -23,7 +23,6 @@ import com.sequenceiq.freeipa.converter.image.ImageToImageSettingsResponseConver
 import com.sequenceiq.freeipa.converter.instance.InstanceGroupToInstanceGroupResponseConverter;
 import com.sequenceiq.freeipa.converter.network.NetworkToNetworkResponseConverter;
 import com.sequenceiq.freeipa.converter.telemetry.TelemetryConverter;
-import com.sequenceiq.freeipa.entity.ChildEnvironment;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Image;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -120,12 +119,6 @@ class StackToDescribeFreeIpaResponseConverterTest {
         stack.setStackAuthentication(new StackAuthentication());
         stack.setAppVersion(APP_VERSION);
         return stack;
-    }
-
-    private List<ChildEnvironment> createChildEnvironments() {
-        ChildEnvironment childEnvironment = new ChildEnvironment();
-        childEnvironment.setEnvironmentCrn(CHILD_ENVIRONMENT_CRN);
-        return List.of(childEnvironment);
     }
 
     private StackStatus createStackStatus() {
