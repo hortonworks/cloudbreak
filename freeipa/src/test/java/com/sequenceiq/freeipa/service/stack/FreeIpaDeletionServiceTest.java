@@ -4,12 +4,15 @@ import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEven
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+
+import javax.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.freeipa.entity.ChildEnvironment;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.termination.event.TerminationEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
@@ -40,6 +44,9 @@ class FreeIpaDeletionServiceTest {
 
     @Mock
     private StackService stackService;
+
+    @Mock
+    private ChildEnvironmentService childEnvironmentService;
 
     @Mock
     private FreeIpaFlowManager flowManager;
@@ -72,5 +79,15 @@ class FreeIpaDeletionServiceTest {
                 () -> assertEquals(STACK_ID, terminationEventArgumentCaptor.getValue().getResourceId()),
                 () -> assertFalse(terminationEventArgumentCaptor.getValue().getForced())
         );
+    }
+
+    @Test
+    void deleteInvalid() {
+        when(stackService.findAllByEnvironmentCrnAndAccountId(eq(ENVIRONMENT_CRN), eq(ACCOUNT_ID))).thenReturn(Collections.singletonList(stack));
+        when(childEnvironmentService.findChildEnvironments(stack, ACCOUNT_ID)).thenReturn(Collections.singletonList(new ChildEnvironment()));
+
+        assertThrows(BadRequestException.class, () -> underTest.delete(ENVIRONMENT_CRN, ACCOUNT_ID));
+        verify(stackService, times(1)).findAllByEnvironmentCrnAndAccountId(eq(ENVIRONMENT_CRN), eq(ACCOUNT_ID));
+        verify(childEnvironmentService, times(1)).findChildEnvironments(stack, ACCOUNT_ID);
     }
 }
