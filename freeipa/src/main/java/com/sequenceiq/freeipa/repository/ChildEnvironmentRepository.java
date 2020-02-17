@@ -25,6 +25,15 @@ public interface ChildEnvironmentRepository extends BaseCrudRepository<ChildEnvi
     Optional<Stack> findParentStackByChildEnvironmentCrn(@Param("childEnvironmentCrn") String childEnvironmentCrn, @Param("accountId") String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT c FROM ChildEnvironment c "
+            + "WHERE c.environmentCrn = :childEnvironmentCrn AND c.stack.environmentCrn = :parentEnvironmentCrn AND c.stack.accountId = :accountId")
+    Optional<ChildEnvironment> findByParentAndChildEnvironmentCrns(
+            @Param("parentEnvironmentCrn") String parentEnvironmentCrn,
+            @Param("childEnvironmentCrn") String childEnvironmentCrn,
+            @Param("accountId") String accountId);
+
+
+    @CheckPermission(action = ResourceAction.READ)
     @Query("SELECT c FROM ChildEnvironment c WHERE c.stack.id = :stackId AND c.stack.accountId = :accountId")
     List<ChildEnvironment> findByStackId(@Param("stackId") Long stackId, @Param("accountId") String accountId);
 }
