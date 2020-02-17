@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,8 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
@@ -143,67 +140,5 @@ class StackServiceTest {
         assertThrows(NotFoundException.class, () -> underTest.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID));
         verify(stackRepository).findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID);
         verify(stackRepository).findByChildEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID);
-    }
-
-    @Test
-    void attachChildEnvironmentShouldSucceed() {
-        AttachChildEnvironmentRequest attachChildEnvironmentRequest = createAttachChildEnvironmentRequest();
-        when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.of(stack));
-
-        underTest.attachChildEnvironment(attachChildEnvironmentRequest, ACCOUNT_ID);
-
-        Assertions.assertThat(stack.getChildEnvironmentCrns()).contains(CHILD_ENVIRONMENT_CRN);
-        verify(stackRepository).save(stack);
-    }
-
-    @Test
-    void attachChildEnvironmentShouldFail() {
-        AttachChildEnvironmentRequest attachChildEnvironmentRequest = createAttachChildEnvironmentRequest();
-        when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class, () -> underTest.attachChildEnvironment(attachChildEnvironmentRequest, ACCOUNT_ID));
-    }
-
-    @Test
-    void unattachChildEnvironmentShouldSucceed() {
-        stack.attachChildEnvironment(CHILD_ENVIRONMENT_CRN);
-
-        DetachChildEnvironmentRequest detachChildEnvironmentRequest = createDetachChildEnvironmentRequest();
-        when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.of(stack));
-
-        underTest.detachChildEnvironment(detachChildEnvironmentRequest, ACCOUNT_ID);
-
-        Assertions.assertThat(stack.getChildEnvironmentCrns()).doesNotContain(CHILD_ENVIRONMENT_CRN);
-        verify(stackRepository).save(stack);
-    }
-
-    @Test
-    void detachChildEnvironmentShouldFailOnMissingParent() {
-        DetachChildEnvironmentRequest detachChildEnvironmentRequest = createDetachChildEnvironmentRequest();
-        when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class, () -> underTest.detachChildEnvironment(detachChildEnvironmentRequest, ACCOUNT_ID));
-    }
-
-    @Test
-    void detachChildEnvironmentShouldFailOnMissingChild() {
-        DetachChildEnvironmentRequest detachChildEnvironmentRequest = createDetachChildEnvironmentRequest();
-        when(stackRepository.findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.of(stack));
-
-        assertThrows(NotFoundException.class, () -> underTest.detachChildEnvironment(detachChildEnvironmentRequest, ACCOUNT_ID));
-    }
-
-    private AttachChildEnvironmentRequest createAttachChildEnvironmentRequest() {
-        AttachChildEnvironmentRequest attachChildEnvironmentRequest = new AttachChildEnvironmentRequest();
-        attachChildEnvironmentRequest.setParentEnvironmentCrn(ENVIRONMENT_CRN);
-        attachChildEnvironmentRequest.setChildEnvironmentCrn(CHILD_ENVIRONMENT_CRN);
-        return attachChildEnvironmentRequest;
-    }
-
-    private DetachChildEnvironmentRequest createDetachChildEnvironmentRequest() {
-        DetachChildEnvironmentRequest detachChildEnvironmentRequest = new DetachChildEnvironmentRequest();
-        detachChildEnvironmentRequest.setParentEnvironmentCrn(ENVIRONMENT_CRN);
-        detachChildEnvironmentRequest.setChildEnvironmentCrn(CHILD_ENVIRONMENT_CRN);
-        return detachChildEnvironmentRequest;
     }
 }

@@ -68,7 +68,7 @@ public interface StackRepository extends BaseJpaRepository<Stack, Long> {
     Optional<Stack> findByEnvironmentCrnAndAccountIdWithList(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.childEnvironments c LEFT JOIN FETCH s.instanceGroups ig "
+    @Query("SELECT s FROM Stack s LEFT JOIN ChildEnvironment c ON c.stack.id = s.id LEFT JOIN FETCH s.instanceGroups ig "
             + "LEFT JOIN FETCH ig.instanceMetaData WHERE c.environmentCrn = :environmentCrn AND s.accountId = :accountId AND s.terminated = -1")
     Optional<Stack> findByChildEnvironmentCrnAndAccountIdWithList(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
 
