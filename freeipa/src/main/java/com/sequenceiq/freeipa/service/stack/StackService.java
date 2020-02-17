@@ -10,8 +10,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -87,6 +85,11 @@ public class StackService {
                 .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
     }
 
+    public Stack getByOwnEnvironmentCrnAndAccountIdWithLists(String environmentCrn, String accountId) {
+        return stackRepository.findByEnvironmentCrnAndAccountIdWithList(environmentCrn, accountId)
+                .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
+    }
+
     public List<Stack> getAllByAccountId(String accountId) {
         return stackRepository.findByAccountId(accountId);
     }
@@ -109,24 +112,5 @@ public class StackService {
         } else {
             return stackRepository.findMultipleByEnvironmentCrnAndAccountIdWithStatuses(environmentCrns, accountId, statuses);
         }
-    }
-
-    public void attachChildEnvironment(AttachChildEnvironmentRequest request, String accountId) {
-        String environmentCrn = request.getParentEnvironmentCrn();
-        Stack stack = stackRepository.findByEnvironmentCrnAndAccountIdWithList(environmentCrn, accountId)
-                .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
-        stack.attachChildEnvironment(request.getChildEnvironmentCrn());
-        stackRepository.save(stack);
-    }
-
-    public void detachChildEnvironment(DetachChildEnvironmentRequest request, String accountId) {
-        String environmentCrn = request.getParentEnvironmentCrn();
-        String childEnvironmentCrn = request.getChildEnvironmentCrn();
-        Stack stack = stackRepository.findByEnvironmentCrnAndAccountIdWithList(environmentCrn, accountId)
-                .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
-        if (!stack.getChildEnvironments().removeIf(ce -> ce.getEnvironmentCrn().equalsIgnoreCase(childEnvironmentCrn))) {
-            throw new NotFoundException(String.format("Child environment [%s] not found for parent environment [%s]", childEnvironmentCrn, environmentCrn));
-        }
-        stackRepository.save(stack);
     }
 }

@@ -26,7 +26,6 @@ public class FreeIpaToListFreeIpaResponseConverter {
             response.setName(stack.getName());
             response.setCrn(stack.getResourceCrn());
             response.setEnvironmentCrn(stack.getEnvironmentCrn());
-            response.setChildEnvironmentCrns(stack.getChildEnvironmentCrns());
             response.setStatus(stack.getStackStatus().getStatus());
             response.setStatusString(stack.getStackStatus().getStatusString());
         }
