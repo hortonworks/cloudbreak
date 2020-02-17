@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -33,9 +34,9 @@ import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
-import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceState;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -57,6 +58,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.util.CheckedFunction;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Service
@@ -187,30 +189,56 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     public void restartStaleServices(MgmtServiceResourceApi mgmtServiceResourceApi, ClustersResourceApi clustersResourceApi)
             throws ApiException, CloudbreakException {
         restartClouderaManagementServices(mgmtServiceResourceApi);
-        restartCMStaleServices(clustersResourceApi);
+        deployConfigAndRefreshCMStaleServices(clustersResourceApi);
     }
 
-    private void restartCMStaleServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
-        LOGGER.debug("Restarting stale services and redeploying client configurations in Cloudera Manager.");
+    @VisibleForTesting
+    void deployConfigAndRefreshCMStaleServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
+        LOGGER.debug("Redeploying client configurations and refreshing stale services in Cloudera Manager.");
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
         List<ApiService> services = servicesResourceApi.readServices(stack.getName(), SUMMARY).getItems();
-        boolean configStale = services.stream().anyMatch(service -> !ApiConfigStalenessStatus.FRESH.equals(service.getConfigStalenessStatus()));
-        if (configStale) {
-            Optional<ApiCommand> optionalRestartCommand = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems().stream()
-                    .filter(cmd -> "RestartWaitingForStalenessSuccess".equals(cmd.getName())).findFirst();
-            ApiCommand restartServicesCommand;
-            if (optionalRestartCommand.isPresent()) {
-                restartServicesCommand = optionalRestartCommand.get();
-                LOGGER.debug("Restart for stale services is already running with id: [{}]", restartServicesCommand.getId());
-            } else {
-                restartServicesCommand = clustersResourceApi.restartCommand(stack.getName(),
-                        new ApiRestartClusterArgs().redeployClientConfiguration(Boolean.TRUE).restartOnlyStaleServices(Boolean.TRUE));
-            }
-            pollRestart(restartServicesCommand);
-            LOGGER.debug("Restarted stale services in Cloudera Manager.");
+        List<ApiService> notFreshServices = getNotFreshServices(services, ApiService::getConfigStalenessStatus);
+        List<ApiService> notFreshClientServices = getNotFreshServices(services, ApiService::getClientConfigStalenessStatus);
+        if (!notFreshServices.isEmpty() || !notFreshClientServices.isEmpty()) {
+            deployConfigAndRefreshStalceServices(clustersResourceApi, notFreshServices, notFreshClientServices);
         } else {
             LOGGER.debug("No stale services found in Cloudera Manager.");
         }
+    }
+
+    private List<ApiService> getNotFreshServices(List<ApiService> services, Function<ApiService, ApiConfigStalenessStatus> status) {
+        return services.stream()
+                .filter(service -> !ApiConfigStalenessStatus.FRESH.equals(status.apply(service)))
+                .collect(Collectors.toList());
+    }
+
+    private void deployConfigAndRefreshStalceServices(ClustersResourceApi clustersResourceApi, List<ApiService> notFreshServices,
+            List<ApiService> notFreshClientServices) throws ApiException, CloudbreakException {
+        LOGGER.debug("Services with config staleness statuses: {}", notFreshServices.stream()
+                .map(it -> it.getName() + ": " + it.getConfigStalenessStatus())
+                .collect(Collectors.joining(", ")));
+        LOGGER.debug("Services with client config staleness statuses: {}", notFreshClientServices.stream()
+                .map(it -> it.getName() + ": " + it.getClientConfigStalenessStatus())
+                .collect(Collectors.joining(", ")));
+        List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems();
+        ApiCommand deployClientConfigCmd = getApiCommand(commands, "DeployClusterClientConfig", stack.getName(), clustersResourceApi::deployClientConfig);
+        pollDeployConfig(deployClientConfigCmd);
+        ApiCommand refreshServicesCmd = getApiCommand(commands, "RefreshCluster", stack.getName(), clustersResourceApi::refresh);
+        pollRefresh(refreshServicesCmd);
+        LOGGER.debug("Config deployed and stale services are refreshed in Cloudera Manager.");
+    }
+
+    private ApiCommand getApiCommand(List<ApiCommand> commands, String commandString, String clusterName, CheckedFunction<String, ApiCommand, ApiException> fn)
+            throws ApiException {
+        Optional<ApiCommand> optionalCommand = commands.stream().filter(cmd -> commandString.equals(cmd.getName())).findFirst();
+        ApiCommand command;
+        if (optionalCommand.isPresent()) {
+            command = optionalCommand.get();
+            LOGGER.debug("{} is already running with id: [{}]", commandString, command.getId());
+        } else {
+            command = fn.apply(clusterName);
+        }
+        return command;
     }
 
     private void restartClouderaManagementServices(MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException, CloudbreakException {
@@ -235,6 +263,28 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             throw new CancellationException("Cluster was terminated while waiting for service restart");
         } else if (isTimeout(hostTemplatePollingResult)) {
             throw new CloudbreakException("Timeout while Cloudera Manager was restarting services.");
+        }
+    }
+
+    @VisibleForTesting
+    void pollDeployConfig(ApiCommand restartCommand) throws CloudbreakException {
+        PollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(
+                stack, apiClient, restartCommand.getId());
+        if (isExited(hostTemplatePollingResult)) {
+            throw new CancellationException("Cluster was terminated while waiting for config deploy");
+        } else if (isTimeout(hostTemplatePollingResult)) {
+            throw new CloudbreakException("Timeout while Cloudera Manager was config deploying services.");
+        }
+    }
+
+    @VisibleForTesting
+    void pollRefresh(ApiCommand restartCommand) throws CloudbreakException {
+        PollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(
+                stack, apiClient, restartCommand.getId());
+        if (isExited(hostTemplatePollingResult)) {
+            throw new CancellationException("Cluster was terminated while waiting for service refresh");
+        } else if (isTimeout(hostTemplatePollingResult)) {
+            throw new CloudbreakException("Timeout while Cloudera Manager was refreshing services.");
         }
     }
 
