@@ -61,7 +61,7 @@ public class ApiKeyRequestFilter implements ClientRequestFilter {
         }
         headers.add(X_ALTUS_DATE, dateStringForAltus);
         headers.add(X_ALTUS_AUTH, authHeader(accessKey, secretKey, requestContext.getMethod(), headers.get("Content-Type").get(0).toString(),
-                requestContext.getUri().getPath(), dateStringForAltus));
+                requestContext.getUri().toURL().getFile(), dateStringForAltus));
     }
 
     private String authHeader(String accessKeyID, String privateKey, String contentType, String method, String path, String date) {
