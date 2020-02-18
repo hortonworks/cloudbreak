@@ -1,0 +1,12 @@
+name: "mock-performance-tests"
+tests:
+  - name: "newway mock performance testcases"
+    classes:
+      - com.sequenceiq.it.cloudbreak.testcase.mock.DistroXClusterStopStartTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.EnvironmentStartStopTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.KerberosConfigTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.RecipeClusterTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.DistroXClusterCreationTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.MockSdxTests
+      - com.sequenceiq.it.cloudbreak.testcase.mock.ClusterTemplateTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.MultiThreadTenantTest

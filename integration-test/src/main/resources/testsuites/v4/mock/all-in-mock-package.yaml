@@ -3,4 +3,36 @@ tests:
   - name: "newway mock testcases"
     packages:
       - com.sequenceiq.it.cloudbreak.testcase.info.*
-      - com.sequenceiq.it.cloudbreak.testcase.mock.*
+    classes:
+      - com.sequenceiq.it.cloudbreak.testcase.mock.EnvironmentClusterTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.KerberizedStackCreationTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.CMDownscaleWithHttp500ResponsesTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.KubernetesTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.FreeIpaStartStopTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.MockStackCreationTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.LdapClusterTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.ProxyConfigTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.AmbariPasswordUpdateTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.ClouderaManagerStackCreationTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.ShowBlueprintTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.ShowStackCliRequestTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.ClouderaManagerShowBlueprintTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.ClouderaManagerSetupTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.CMUpscaleWithHttp500ResponsesTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.CMStartStopWithHttp500ResponsesTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.VersionCheckTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.LdapConfigTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.CloudStorageMatrixTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.DeploymentPreferencesTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.AuditTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.ClusterCreationTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.RedbeamsDatabaseTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.StackMatrixTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.ImageCatalogTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.NotificationTestingTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.FreeIpaCreationTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.EnvironmentTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.RecipeTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.SecurityRulesTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.ImageCatalogBasicTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.CmTemplateBlueprintTest
