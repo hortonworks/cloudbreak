@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.job;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -13,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -41,9 +43,10 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
     @Override
     protected void executeInternal(JobExecutionContext context) {
         LOGGER.debug("Sdx StatusChecker Job is running for datalake: '{}'", getLocalId());
-        StackStatusV4Response stack = cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getStatusByCrn(getRemoteResourceCrn());
         Optional<SdxCluster> cluster = sdxClusterRepository.findById(Long.valueOf(getLocalId()));
         cluster.ifPresent(sdx -> {
+            buildMdcContext(sdx);
+            StackStatusV4Response stack = cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getStatusByCrn(getRemoteResourceCrn());
             SdxStatusEntity status = sdxStatusService.getActualStatusForSdx(sdx);
             switch (status.getStatus()) {
                 case RUNNING:
@@ -66,6 +69,12 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
                     LOGGER.debug("Sdx StatusChecker Job will ignore state '{}' for datalake: '{}'", status.getStatus(), getLocalId());
             }
         });
+        MDCBuilder.cleanupMdc();
+    }
+
+    private void buildMdcContext(SdxCluster sdx) {
+        MDCBuilder.buildMdcContext(sdx);
+        MDCBuilder.addRequestId(UUID.randomUUID().toString());
     }
 
     private void handleAmbiguousSdx(StackStatusV4Response stack, SdxCluster sdx) {

@@ -14,6 +14,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
@@ -103,6 +105,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         }
         try {
             Stack stack = stackService.get(getStackId());
+            buildMdcContext(stack);
             Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
             if (stack.isStackInDeletionOrFailedPhase()) {
                 LOGGER.debug("StackStatusCheckerJob cannot run, stack is being terminated: {}", getStackId());
@@ -124,7 +127,14 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             }
         } catch (Exception e) {
             LOGGER.info("Exception during cluster state check.", e);
+        } finally {
+            MDCBuilder.cleanupMdc();
         }
+    }
+
+    private void buildMdcContext(Stack stack) {
+        MDCBuilder.buildMdcContext(stack);
+        MDCBuilder.addRequestId(UUID.randomUUID().toString());
     }
 
     private void reportHealthAndSyncInstances(Stack stack, Collection<InstanceMetaData> runningInstances, Collection<InstanceMetaData> failedInstances,
