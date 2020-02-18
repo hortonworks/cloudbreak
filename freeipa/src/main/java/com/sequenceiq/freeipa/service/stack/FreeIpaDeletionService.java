@@ -37,5 +37,6 @@ public class FreeIpaDeletionService {
     private void unscheduleAndTriggerTerminate(Stack stack) {
         freeipaJobService.unschedule(stack);
         flowManager.notify(TERMINATION_EVENT.event(), new TerminationEvent(TERMINATION_EVENT.event(), stack.getId(), false));
+        flowManager.cancelRunningFlows(stack.getId());
     }
 }
