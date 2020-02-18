@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.event;
 import java.util.Collections;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.reactor.api.event.HostGroupPayload;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -40,7 +41,7 @@ public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPay
         this(selector, stackId, hostGroup, adjustment, Collections.emptySet(), false, false, false, ClusterManagerType.CLOUDERA_MANAGER);
     }
 
-    public ClusterScaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment, Promise<Boolean> accepted) {
+    public ClusterScaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment, Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.hostGroup = hostGroup;
         this.adjustment = adjustment;

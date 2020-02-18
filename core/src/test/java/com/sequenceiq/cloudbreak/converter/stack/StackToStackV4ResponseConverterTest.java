@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.stack;
 
-import static com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse.Builder.builder;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -42,7 +40,6 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
@@ -60,8 +57,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -79,9 +76,6 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
     private ImageService imageService;
 
     @Mock
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
-
-    @Mock
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Mock
@@ -97,7 +91,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
     private DatalakeResourcesService datalakeResourcesService;
 
     @Mock
-    private EnvironmentClientService environmentClientService;
+    private StackService stackService;
 
     @Mock
     private ServiceEndpointCollector serviceEndpointCollector;
@@ -137,16 +131,12 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(conversionService.convert(any(), eq(CloudbreakDetailsV4Response.class))).willReturn(new CloudbreakDetailsV4Response());
         given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
         given(conversionService.convert(any(), eq(TelemetryResponse.class))).willReturn(new TelemetryResponse());
-        given(environmentClientService.getByCrn(anyString())).willReturn(builder()
-                .withCredential(credentialResponse)
-                .withName("env-name")
-                .build());
         given(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupV4Response.class)).willReturn(new ArrayList<>());
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "environmentName", "credentialName", "credentialCrn", "telemetry"));
+                "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier"));
     }
 
     @Test
@@ -163,16 +153,12 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(conversionService.convert(any(), eq(CloudbreakDetailsV4Response.class))).willReturn(new CloudbreakDetailsV4Response());
         given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
         given(conversionService.convert(any(), eq(TelemetryResponse.class))).willReturn(new TelemetryResponse());
-        given(environmentClientService.getByCrn(anyString())).willReturn(builder()
-                .withCredential(credentialResponse)
-                .withName("env-name")
-                .build());
         given(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupV4Response.class)).willReturn(new ArrayList<>());
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("cluster", "gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry"));
+                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier"));
 
         assertNull(result.getCluster());
     }
@@ -191,16 +177,12 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(conversionService.convert(any(), eq(CloudbreakDetailsV4Response.class))).willReturn(new CloudbreakDetailsV4Response());
         given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
         given(conversionService.convert(any(), eq(TelemetryResponse.class))).willReturn(new TelemetryResponse());
-        given(environmentClientService.getByCrn(anyString())).willReturn(builder()
-                .withCredential(credentialResponse)
-                .withName("env-name")
-                .build());
         given(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupV4Response.class)).willReturn(new ArrayList<>());
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("network", "gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry"));
+                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier"));
 
         assertNull(result.getNetwork());
     }

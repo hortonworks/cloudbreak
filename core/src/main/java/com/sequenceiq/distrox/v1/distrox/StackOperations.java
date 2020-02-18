@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.distrox.v1.distrox.service.SdxServiceDecorator;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class StackOperations {
@@ -153,69 +154,69 @@ public class StackOperations {
         return stackViewV4Response;
     }
 
-    public void deleteInstance(@NotNull NameOrCrn nameOrCrn, Long workspaceId, boolean forced, String instanceId) {
+    public FlowIdentifier deleteInstance(@NotNull NameOrCrn nameOrCrn, Long workspaceId, boolean forced, String instanceId) {
         if (nameOrCrn.hasName()) {
-            stackCommonService.deleteInstanceByNameInWorkspace(nameOrCrn.getName(), workspaceId, instanceId, forced);
+            return stackCommonService.deleteInstanceByNameInWorkspace(nameOrCrn.getName(), workspaceId, instanceId, forced);
         } else {
-            stackCommonService.deleteInstanceByCrnInWorkspace(nameOrCrn.getCrn(), workspaceId, instanceId, forced);
+            return stackCommonService.deleteInstanceByCrnInWorkspace(nameOrCrn.getCrn(), workspaceId, instanceId, forced);
         }
     }
 
-    public void deleteInstances(NameOrCrn nameOrCrn, Long workspaceId, List<String> instanceIds, boolean forced) {
+    public FlowIdentifier deleteInstances(NameOrCrn nameOrCrn, Long workspaceId, List<String> instanceIds, boolean forced) {
         if (nameOrCrn.hasName()) {
-            stackCommonService.deleteMultipleInstancesByNameInWorkspace(nameOrCrn.getName(), workspaceId, instanceIds, forced);
+            return stackCommonService.deleteMultipleInstancesByNameInWorkspace(nameOrCrn.getName(), workspaceId, instanceIds, forced);
         } else {
-            stackCommonService.deleteMultipleInstancesByCrnInWorkspace(nameOrCrn.getCrn(), workspaceId, instanceIds, forced);
+            return stackCommonService.deleteMultipleInstancesByCrnInWorkspace(nameOrCrn.getCrn(), workspaceId, instanceIds, forced);
         }
     }
 
-    public void sync(NameOrCrn nameOrCrn, Long workspaceId) {
+    public FlowIdentifier sync(NameOrCrn nameOrCrn, Long workspaceId) {
         if (nameOrCrn.hasName()) {
-            stackCommonService.syncInWorkspace(nameOrCrn.getName(), null, workspaceId);
+            return stackCommonService.syncInWorkspace(nameOrCrn.getName(), null, workspaceId);
         } else {
-            stackCommonService.syncInWorkspace(null, nameOrCrn.getCrn(), workspaceId);
+            return stackCommonService.syncInWorkspace(null, nameOrCrn.getCrn(), workspaceId);
         }
     }
 
-    public void retry(NameOrCrn nameOrCrn, Long workspaceId) {
+    public FlowIdentifier retry(NameOrCrn nameOrCrn, Long workspaceId) {
         if (nameOrCrn.hasName()) {
-            stackCommonService.retryInWorkspaceByName(nameOrCrn.getName(), workspaceId);
+            return stackCommonService.retryInWorkspaceByName(nameOrCrn.getName(), workspaceId);
         } else {
-            stackCommonService.retryInWorkspaceByCrn(nameOrCrn.getCrn(), workspaceId);
+            return stackCommonService.retryInWorkspaceByCrn(nameOrCrn.getCrn(), workspaceId);
         }
     }
 
-    public void putStop(NameOrCrn nameOrCrn, Long workspaceId) {
+    public FlowIdentifier putStop(NameOrCrn nameOrCrn, Long workspaceId) {
         if (nameOrCrn.hasName()) {
-            stackCommonService.putStopInWorkspaceByName(nameOrCrn.getName(), workspaceId);
+            return stackCommonService.putStopInWorkspaceByName(nameOrCrn.getName(), workspaceId);
         } else {
-            stackCommonService.putStopInWorkspaceByCrn(nameOrCrn.getCrn(), workspaceId);
+            return stackCommonService.putStopInWorkspaceByCrn(nameOrCrn.getCrn(), workspaceId);
         }
     }
 
-    public void putStart(NameOrCrn nameOrCrn, Long workspaceId) {
+    public FlowIdentifier putStart(NameOrCrn nameOrCrn, Long workspaceId) {
         if (nameOrCrn.hasName()) {
-            stackCommonService.putStartInWorkspaceByName(nameOrCrn.getName(), workspaceId);
+            return stackCommonService.putStartInWorkspaceByName(nameOrCrn.getName(), workspaceId);
         } else {
-            stackCommonService.putStartInWorkspaceByCrn(nameOrCrn.getCrn(), workspaceId);
+            return stackCommonService.putStartInWorkspaceByCrn(nameOrCrn.getCrn(), workspaceId);
         }
     }
 
-    public void putScaling(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid StackScaleV4Request updateRequest) {
-        stackCommonService.putScalingInWorkspace(nameOrCrn.getName(), workspaceId, updateRequest);
+    public FlowIdentifier putScaling(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid StackScaleV4Request updateRequest) {
+        return stackCommonService.putScalingInWorkspace(nameOrCrn.getName(), workspaceId, updateRequest);
     }
 
-    public void repairCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid ClusterRepairV4Request clusterRepairRequest) {
+    public FlowIdentifier repairCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid ClusterRepairV4Request clusterRepairRequest) {
         if (nameOrCrn.hasName()) {
-            stackCommonService.repairClusterByName(workspaceId, nameOrCrn.getName(), clusterRepairRequest);
+            return stackCommonService.repairClusterByName(workspaceId, nameOrCrn.getName(), clusterRepairRequest);
         } else {
-            stackCommonService.repairClusterByCrn(workspaceId, nameOrCrn.getCrn(), clusterRepairRequest);
+            return stackCommonService.repairClusterByCrn(workspaceId, nameOrCrn.getCrn(), clusterRepairRequest);
         }
     }
 
-    public void upgradeCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+    public FlowIdentifier upgradeCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         if (nameOrCrn.hasName()) {
-            upgradeService.upgradeByStackName(workspaceId, nameOrCrn.getName());
+            return upgradeService.upgradeByStackName(workspaceId, nameOrCrn.getName());
         } else {
             LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
             throw new BadRequestException("Please provide a stack name for upgrade");
@@ -236,11 +237,11 @@ public class StackOperations {
         return stackCommonService.postStackForBlueprint(stackRequest);
     }
 
-    public void changeImage(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid StackImageChangeV4Request stackImageChangeRequest) {
+    public FlowIdentifier changeImage(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid StackImageChangeV4Request stackImageChangeRequest) {
         if (nameOrCrn.hasName()) {
-            stackCommonService.changeImageByNameInWorkspace(nameOrCrn.getName(), workspaceId, stackImageChangeRequest);
+            return stackCommonService.changeImageByNameInWorkspace(nameOrCrn.getName(), workspaceId, stackImageChangeRequest);
         } else {
-            stackCommonService.changeImageByCrnInWorkspace(nameOrCrn.getCrn(), workspaceId, stackImageChangeRequest);
+            return stackCommonService.changeImageByCrnInWorkspace(nameOrCrn.getCrn(), workspaceId, stackImageChangeRequest);
         }
     }
 
@@ -277,30 +278,30 @@ public class StackOperations {
         return converterUtil.convert(stack, StackStatusV4Response.class);
     }
 
-    public void putPassword(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid UserNamePasswordV4Request userNamePasswordJson) {
+    public FlowIdentifier putPassword(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid UserNamePasswordV4Request userNamePasswordJson) {
         Stack stack = nameOrCrn.hasName()
                 ? stackService.getByNameInWorkspace(nameOrCrn.getName(), workspaceId)
                 : stackService.getByCrnInWorkspace(nameOrCrn.getCrn(), workspaceId);
         UpdateClusterV4Request updateClusterJson = converterUtil.convert(userNamePasswordJson, UpdateClusterV4Request.class);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        clusterCommonService.put(stack.getResourceCrn(), updateClusterJson, user, workspace);
+        workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return clusterCommonService.put(stack.getResourceCrn(), updateClusterJson);
     }
 
-    public void setClusterMaintenanceMode(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @NotNull MaintenanceModeV4Request maintenanceMode) {
+    public FlowIdentifier setClusterMaintenanceMode(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @NotNull MaintenanceModeV4Request maintenanceMode) {
         Stack stack = nameOrCrn.hasName()
                 ? stackService.getByNameInWorkspace(nameOrCrn.getName(), workspaceId)
                 : stackService.getByCrnInWorkspace(nameOrCrn.getCrn(), workspaceId);
-        clusterCommonService.setMaintenanceMode(stack, maintenanceMode.getStatus());
+        return clusterCommonService.setMaintenanceMode(stack, maintenanceMode.getStatus());
     }
 
-    public void putCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid UpdateClusterV4Request updateJson) {
+    public FlowIdentifier putCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid UpdateClusterV4Request updateJson) {
         Stack stack = nameOrCrn.hasName()
                 ? stackService.getByNameInWorkspace(nameOrCrn.getName(), workspaceId)
                 : stackService.getByCrnInWorkspace(nameOrCrn.getCrn(), workspaceId);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        clusterCommonService.put(stack.getResourceCrn(), updateJson, user, workspace);
+        workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        return clusterCommonService.put(stack.getResourceCrn(), updateJson);
     }
 
     public String getClusterHostsInventory(Long workspaceId, String name) {

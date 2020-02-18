@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.reactor.api.event;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -13,7 +14,7 @@ public class StackEvent implements Selectable, Acceptable {
 
     private final Long stackId;
 
-    private final Promise<Boolean> accepted;
+    private final Promise<AcceptResult> accepted;
 
     public StackEvent(Long stackId) {
         this(null, stackId);
@@ -25,7 +26,7 @@ public class StackEvent implements Selectable, Acceptable {
         accepted = new Promise<>();
     }
 
-    public StackEvent(String selector, Long stackId, Promise<Boolean> accepted) {
+    public StackEvent(String selector, Long stackId, Promise<AcceptResult> accepted) {
         this.selector = selector;
         this.stackId = stackId;
         this.accepted = accepted;
@@ -42,7 +43,7 @@ public class StackEvent implements Selectable, Acceptable {
     }
 
     @Override
-    public Promise<Boolean> accepted() {
+    public Promise<AcceptResult> accepted() {
         return accepted;
     }
 

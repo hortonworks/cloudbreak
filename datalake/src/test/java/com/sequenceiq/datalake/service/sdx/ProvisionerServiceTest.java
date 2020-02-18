@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -97,7 +96,7 @@ class ProvisionerServiceTest {
 
         underTest.startStackProvisioning(CLUSTER_ID, getEnvironmentResponse(), getDatabaseServerResponse());
 
-        verify(cloudbreakFlowService).getAndSaveLastCloudbreakFlowChainId(sdxCluster);
+        verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, stackV4Response.getFlowIdentifier());
         verify(sdxClusterRepository, times(1)).save(any(SdxCluster.class));
     }
 
@@ -196,7 +195,6 @@ class ProvisionerServiceTest {
         when(sdxClusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(sdxCluster));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.CREATE_FAILED);
-        doNothing().when(stackV4Endpoint).delete(anyLong(), eq(sdxCluster.getClusterName()), eq(Boolean.TRUE));
 
         underTest.startStackDeletion(CLUSTER_ID, true);
 

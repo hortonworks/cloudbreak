@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.event;
 
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+
 import reactor.rx.Promise;
 
 public class ClusterDownscaleTriggerEvent extends ClusterScaleTriggerEvent {
@@ -15,7 +17,7 @@ public class ClusterDownscaleTriggerEvent extends ClusterScaleTriggerEvent {
         privateIds = null;
     }
 
-    public ClusterDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment, Promise<Boolean> accepted,
+    public ClusterDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment, Promise<AcceptResult> accepted,
             ClusterDownscaleDetails details) {
         super(selector, stackId, hostGroup, adjustment, accepted);
         this.details = details;
@@ -28,7 +30,7 @@ public class ClusterDownscaleTriggerEvent extends ClusterScaleTriggerEvent {
         this.privateIds = privateIds;
     }
 
-    public ClusterDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Set<Long> privateIds, Promise<Boolean> accepted,
+    public ClusterDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Set<Long> privateIds, Promise<AcceptResult> accepted,
             ClusterDownscaleDetails details) {
         super(selector, stackId, hostGroup, null, accepted);
         this.details = details;

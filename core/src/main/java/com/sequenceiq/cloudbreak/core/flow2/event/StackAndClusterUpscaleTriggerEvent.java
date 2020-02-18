@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.event;
 import java.util.Collections;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 
@@ -30,7 +31,7 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
     }
 
     public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, ScalingType scalingType,
-            Set<String> hostNames, boolean singlePrimaryGateway, boolean kerberosSecured, Promise<Boolean> accepted, boolean singleNodeCluster,
+            Set<String> hostNames, boolean singlePrimaryGateway, boolean kerberosSecured, Promise<AcceptResult> accepted, boolean singleNodeCluster,
             ClusterManagerType clusterManagerType) {
         super(selector, stackId, instanceGroup, adjustment, hostNames, accepted);
         this.scalingType = scalingType;

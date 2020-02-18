@@ -34,6 +34,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class SdxUpgradeService {
@@ -68,20 +69,20 @@ public class SdxUpgradeService {
         return stackV4Endpoint.checkForUpgrade(0L, cluster.getClusterName());
     }
 
-    public void triggerUpgradeByName(String userCrn, String clusterName) {
+    public FlowIdentifier triggerUpgradeByName(String userCrn, String clusterName) {
         UpgradeOptionV4Response upgradeOption = checkForUpgradeByName(userCrn, clusterName);
         validateUpgradeOption(upgradeOption);
         SdxCluster cluster = sdxService.getSdxByNameInAccount(userCrn, clusterName);
         MDCBuilder.buildMdcContext(cluster);
-        sdxReactorFlowManager.triggerDatalakeUpgradeFlow(cluster.getId(), upgradeOption);
+        return sdxReactorFlowManager.triggerDatalakeUpgradeFlow(cluster.getId(), upgradeOption);
     }
 
-    public void triggerUpgradeByCrn(String userCrn, String clusterCrn) {
+    public FlowIdentifier triggerUpgradeByCrn(String userCrn, String clusterCrn) {
         UpgradeOptionV4Response upgradeOption = checkForUpgradeByCrn(userCrn, clusterCrn);
         validateUpgradeOption(upgradeOption);
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
         MDCBuilder.buildMdcContext(cluster);
-        sdxReactorFlowManager.triggerDatalakeUpgradeFlow(cluster.getId(), upgradeOption);
+        return sdxReactorFlowManager.triggerDatalakeUpgradeFlow(cluster.getId(), upgradeOption);
     }
 
     public void changeImage(Long id, UpgradeOptionV4Response upgradeOption) {
@@ -95,8 +96,8 @@ public class SdxUpgradeService {
                     ResourceEvent.SDX_CHANGE_IMAGE_STARTED,
                     "Changing image",
                     cluster.get());
-            stackV4Endpoint.changeImage(0L, cluster.get().getClusterName(), stackImageChangeRequest);
-            cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(cluster.get());
+            FlowIdentifier flowIdentifier = stackV4Endpoint.changeImage(0L, cluster.get().getClusterName(), stackImageChangeRequest);
+            cloudbreakFlowService.saveLastCloudbreakFlowChainId(cluster.get(), flowIdentifier);
         } else {
             throw new NotFoundException("Not found cluster with id" + id);
         }
@@ -120,8 +121,8 @@ public class SdxUpgradeService {
                     ResourceEvent.SDX_UPGRADE_STARTED,
                     "Upgrade started",
                     cluster.get());
-            stackV4Endpoint.upgradeCluster(0L, cluster.get().getClusterName());
-            cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(cluster.get());
+            FlowIdentifier flowIdentifier = stackV4Endpoint.upgradeCluster(0L, cluster.get().getClusterName());
+            cloudbreakFlowService.saveLastCloudbreakFlowChainId(cluster.get(), flowIdentifier);
         } else {
             throw new NotFoundException("Not found cluster with id" + id);
         }

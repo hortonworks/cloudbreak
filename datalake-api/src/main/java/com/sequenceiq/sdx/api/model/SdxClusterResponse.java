@@ -1,6 +1,7 @@
 package com.sequenceiq.sdx.api.model;
 
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 public class SdxClusterResponse {
 
@@ -29,6 +30,8 @@ public class SdxClusterResponse {
     private FileSystemType cloudStorageFileSystemType;
 
     private String runtime;
+
+    private FlowIdentifier flowIdentifier;
 
     public SdxClusterResponse() {
     }
@@ -152,5 +155,13 @@ public class SdxClusterResponse {
 
     public void setRuntime(String runtime) {
         this.runtime = runtime;
+    }
+
+    public FlowIdentifier getFlowIdentifier() {
+        return flowIdentifier;
+    }
+
+    public void setFlowIdentifier(FlowIdentifier flowIdentifier) {
+        this.flowIdentifier = flowIdentifier;
     }
 }

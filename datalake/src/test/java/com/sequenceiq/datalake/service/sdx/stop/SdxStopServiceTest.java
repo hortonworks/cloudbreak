@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_FAILE
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -98,7 +99,7 @@ public class SdxStopServiceTest {
         verify(stackV4Endpoint).putStop(0L, CLUSTER_NAME);
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS,
                 ResourceEvent.SDX_STOP_STARTED, "Datalake stop in progress", sdxCluster);
-        verify(cloudbreakFlowService).getAndSaveLastCloudbreakFlowChainId(sdxCluster);
+        verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(eq(sdxCluster), any());
     }
 
     @Test
@@ -111,7 +112,7 @@ public class SdxStopServiceTest {
 
         verify(sdxStatusService, times(0)).setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS,
                 ResourceEvent.SDX_STOP_STARTED, "Datalake stop in progress", sdxCluster);
-        verify(cloudbreakFlowService, times(0)).getAndSaveLastCloudbreakFlowChainId(sdxCluster);
+        verify(cloudbreakFlowService, times(0)).saveLastCloudbreakFlowChainId(eq(sdxCluster), any());
     }
 
     @Test

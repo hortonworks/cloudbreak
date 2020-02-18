@@ -18,14 +18,18 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.datalake.flow.upgrade.event.SdxUpgradeStartEvent;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
@@ -43,40 +47,40 @@ public class SdxReactorFlowManager {
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
-    public void triggerSdxCreation(Long sdxId) {
+    public FlowIdentifier triggerSdxCreation(Long sdxId) {
         String selector = ENV_WAIT_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        notify(selector, new SdxEvent(selector, sdxId, userId));
+        return notify(selector, new SdxEvent(selector, sdxId, userId));
     }
 
-    public void triggerSdxDeletion(Long sdxId, boolean forced) {
+    public FlowIdentifier triggerSdxDeletion(Long sdxId, boolean forced) {
         String selector = SDX_DELETE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        notify(selector, new SdxDeleteStartEvent(selector, sdxId, userId, forced));
+        return notify(selector, new SdxDeleteStartEvent(selector, sdxId, userId, forced));
     }
 
-    public void triggerSdxRepairFlow(Long sdxId, SdxRepairRequest repairRequest) {
+    public FlowIdentifier triggerSdxRepairFlow(Long sdxId, SdxRepairRequest repairRequest) {
         String selector = SDX_REPAIR_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        notify(selector, new SdxRepairStartEvent(selector, sdxId, userId, repairRequest));
+        return notify(selector, new SdxRepairStartEvent(selector, sdxId, userId, repairRequest));
     }
 
-    public void triggerDatalakeUpgradeFlow(Long sdxId, UpgradeOptionV4Response upgradeOption) {
+    public FlowIdentifier triggerDatalakeUpgradeFlow(Long sdxId, UpgradeOptionV4Response upgradeOption) {
         String selector = SDX_UPGRADE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        notify(selector, new SdxUpgradeStartEvent(selector, sdxId, userId, upgradeOption));
+        return notify(selector, new SdxUpgradeStartEvent(selector, sdxId, userId, upgradeOption));
     }
 
-    public void triggerSdxStartFlow(Long sdxId) {
+    public FlowIdentifier triggerSdxStartFlow(Long sdxId) {
         String selector = SDX_START_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        notify(selector, new SdxStartStartEvent(selector, sdxId, userId));
+        return notify(selector, new SdxStartStartEvent(selector, sdxId, userId));
     }
 
-    public void triggerSdxStopFlow(Long sdxId) {
+    public FlowIdentifier triggerSdxStopFlow(Long sdxId) {
         String selector = SDX_STOP_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        notify(selector, new SdxStartStopEvent(selector, sdxId, userId));
+        return notify(selector, new SdxStartStopEvent(selector, sdxId, userId));
     }
 
     public void cancelRunningFlows(Long sdxId) {
@@ -85,19 +89,28 @@ public class SdxReactorFlowManager {
         reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancelEvent));
     }
 
-    private void notify(String selector, SdxEvent acceptable) {
+    private FlowIdentifier notify(String selector, SdxEvent acceptable) {
         Map<String, Object> flowTriggerUserCrnHeader = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, acceptable.getUserId());
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(flowTriggerUserCrnHeader, acceptable);
 
         reactor.notify(selector, event);
         try {
-            Boolean accepted = true;
-            if (event.getData().accepted() != null) {
-                accepted = event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
-            }
-            if (accepted == null || !accepted) {
-                throw new FlowsAlreadyRunningException(String.format("Sdx cluster %s has flows under operation, request not allowed.",
+            FlowAcceptResult accepted = (FlowAcceptResult) event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
+            if (accepted == null) {
+                throw new FlowNotAcceptedException(String.format("Timeout happened when trying to start the flow for sdx cluster %s.",
                         event.getData().getResourceId()));
+            } else {
+                switch (accepted.getResultType()) {
+                    case ALREADY_EXISTING_FLOW:
+                        throw new FlowsAlreadyRunningException(String.format("Sdx cluster %s has flows under operation, request not allowed.",
+                                event.getData().getResourceId()));
+                    case RUNNING_IN_FLOW:
+                        return new FlowIdentifier(FlowType.FLOW, accepted.getAsFlowId());
+                    case RUNNING_IN_FLOW_CHAIN:
+                        return new FlowIdentifier(FlowType.FLOW_CHAIN, accepted.getAsFlowChainId());
+                    default:
+                        throw new IllegalStateException("Unsupported accept result type: " + accepted.getClass());
+                }
             }
         } catch (InterruptedException e) {
             throw new CloudbreakApiException(e.getMessage());

@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQU
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -122,7 +123,7 @@ public class SdxStartServiceTest {
         underTest.start(CLUSTER_ID);
 
         verify(stackV4Endpoint).putStart(0L, CLUSTER_NAME);
-        verify(cloudbreakFlowService).getAndSaveLastCloudbreakFlowChainId(sdxCluster);
+        verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(eq(sdxCluster), any());
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.START_IN_PROGRESS, ResourceEvent.SDX_START_STARTED,
                 "Datalake start in progress", sdxCluster);
     }

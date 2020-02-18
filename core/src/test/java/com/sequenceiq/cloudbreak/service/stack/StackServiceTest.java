@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -83,20 +84,11 @@ public class StackServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
-    private static final String OWNER = "1234567";
-
     private static final String VARIANT_VALUE = "VARIANT_VALUE";
 
     private static final String STACK_NAME = "name";
 
-    private static final String STACK_DELETE_ACCESS_DENIED = "You cannot modify this Stack";
-
     private static final String STACK_NOT_FOUND_BY_ID_MESSAGE = "Stack '%d' not found";
-
-    private static final String STACK_NOT_FOUND_BY_NAME_MESSAGE = "Stack '%s' not found";
-
-    private static final String HAS_ATTACHED_CLUSTERS_MESSAGE = "Data Lake has attached Data Hub clusters! "
-            + "Please delete Data Hub cluster %s before deleting this Data Lake";
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -193,15 +185,15 @@ public class StackServiceTest {
 
     @Before
     public void setup() {
-        when(stack.getId()).thenReturn(STACK_ID);
-        when(stack.getName()).thenReturn(STACK_NAME);
-        when(stack.getWorkspace()).thenReturn(workspace);
-        when(workspace.getId()).thenReturn(WORKSPACE_ID);
-        when(user.getUserCrn()).thenReturn(USER_CRN);
+        lenient().when(stack.getId()).thenReturn(STACK_ID);
+        lenient().when(stack.getName()).thenReturn(STACK_NAME);
+        lenient().when(stack.getWorkspace()).thenReturn(workspace);
+        lenient().when(workspace.getId()).thenReturn(WORKSPACE_ID);
+        lenient().when(user.getUserCrn()).thenReturn(USER_CRN);
         DatalakeResources datalakeResources = new DatalakeResources();
         datalakeResources.setDatalakeStackId(STACK_ID);
         datalakeResources.setId(DATALAKE_RESOURCE_ID);
-        when(datalakeResourcesService.findByDatalakeStackId(anyLong())).thenReturn(Optional.of(datalakeResources));
+        lenient().when(datalakeResourcesService.findByDatalakeStackId(anyLong())).thenReturn(Optional.of(datalakeResources));
     }
 
     @Test
@@ -221,8 +213,6 @@ public class StackServiceTest {
         when(stackAuthentication.passwordAuthenticationRequired()).thenReturn(false);
 
         when(stackRepository.save(stack)).thenReturn(stack);
-
-        when(tlsSecurityService.generateSecurityKeys(any(Workspace.class))).thenReturn(securityConfig);
 
         expectedException.expectCause(org.hamcrest.Matchers.any(CloudbreakImageNotFoundException.class));
 
@@ -248,8 +238,6 @@ public class StackServiceTest {
         when(stackAuthentication.passwordAuthenticationRequired()).thenReturn(false);
 
         when(stackRepository.save(stack)).thenReturn(stack);
-
-        when(tlsSecurityService.generateSecurityKeys(any(Workspace.class))).thenReturn(securityConfig);
 
         try {
             stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
