@@ -194,6 +194,11 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return this;
     }
 
+    public DistroXTestDto withTemplate(String template) {
+        getRequest().getCluster().setBlueprintName(template);
+        return this;
+    }
+
     @Override
     public String investigate() {
         if (getResponse() == null || getResponse().getId() == null) {
