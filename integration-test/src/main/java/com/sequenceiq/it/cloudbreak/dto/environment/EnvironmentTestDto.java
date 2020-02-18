@@ -48,6 +48,8 @@ public class EnvironmentTestDto
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
 
+    private static final int ORDER = 600;
+
     private static final String DUMMY_SSH_KEY = "ssh-rsa "
             + "AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kc"
             + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
@@ -66,6 +68,8 @@ public class EnvironmentTestDto
 
     private EnvironmentChangeCredentialRequest enviornmentChangeCredentialRequest;
 
+    private int order = ORDER;
+
     public EnvironmentTestDto(TestContext testContext) {
         super(new EnvironmentRequest(), testContext);
     }
@@ -81,6 +85,10 @@ public class EnvironmentTestDto
     @Override
     public String getName() {
         return getRequest().getName();
+    }
+
+    public String getParentEnvironmentName() {
+        return getRequest().getParentEnvironmentName();
     }
 
     @Override
@@ -197,6 +205,16 @@ public class EnvironmentTestDto
         return this;
     }
 
+    public EnvironmentTestDto withParentEnvironmentName(String parentEnvironmentName) {
+        getRequest().setParentEnvironmentName(parentEnvironmentName);
+        if (parentEnvironmentName == null) {
+            order = ORDER;
+        } else {
+            order = ORDER - 1;
+        }
+        return this;
+    }
+
     public Collection<SimpleEnvironmentResponse> getResponseSimpleEnvSet() {
         return response;
     }
@@ -262,7 +280,7 @@ public class EnvironmentTestDto
 
     @Override
     public int order() {
-        return 600;
+        return order;
     }
 
     public EnvironmentChangeCredentialRequest getEnviornmentChangeCredentialRequest() {
