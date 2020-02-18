@@ -2,7 +2,4 @@ name: "aws-image-validation-tests"
 tests:
   - name: "aws image validation e2e tests"
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXTest
-        includedMethods:
-          - testCreateDistroX
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxDistroxTests

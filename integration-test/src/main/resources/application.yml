@@ -11,6 +11,9 @@ integrationtest:
   imageValidation:
     sourceCatalogName: v3-dev
     sourceCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-dev-cb-image-catalog.json
+    sdxTemplateName: "7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas"
+    distroxTemplateName: "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    runtimeVersion: 7.1.0
   spark:
     sparkPoolSize: 12
   command: suiteurls

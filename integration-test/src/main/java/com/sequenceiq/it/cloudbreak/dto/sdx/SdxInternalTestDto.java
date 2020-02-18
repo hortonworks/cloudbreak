@@ -58,9 +58,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     private static final String DEFAULT_SDX_NAME = "test-sdx" + '-' + UUID.randomUUID().toString().replaceAll("-", "");
 
-    private static final String DEFAULT_SDX_BLUEPRINT_NAME = "CDP 1.2 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas";
-
-    private static final String DEFAULT_SUBNET_CIDR = "10.0.0.0/16";
+    private static final String DEFAULT_SDX_BLUEPRINT_NAME = "7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas";
 
     private static final String DEFAULT_CM_PASSWORD = "Admin123";
 
@@ -105,6 +103,11 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     public SdxInternalTestDto withDatabase(SdxDatabaseRequest sdxDatabaseRequest) {
         getRequest().setExternalDatabase(sdxDatabaseRequest);
+        return this;
+    }
+
+    public SdxInternalTestDto withRuntimeVersion(String runtimeVersion) {
+        getRequest().setRuntime(runtimeVersion);
         return this;
     }
 
@@ -161,6 +164,12 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .withGatewayPort(getCloudProvider().gatewayPort(stack))
                 .withCluster(cluster);
         return withStackRequest(stack.getRequest());
+    }
+
+    public SdxInternalTestDto withTemplate(String template) {
+        ClusterTestDto cluster = getTestContext().given(ClusterTestDto.class);
+        cluster.withBlueprintName(template);
+        return this;
     }
 
     public SdxInternalTestDto withTemplate(JSONObject templateJson) {
