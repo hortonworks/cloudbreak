@@ -16,6 +16,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 @EnableConfigurationProperties(KibanaProps.class)
 public class KibanaSearchUrl implements SearchUrl {
 
+    private static final String KEY = "context.resourceName";
+
     private static KibanaProps kibanaProps;
 
     private List<Searchable> searchables;
@@ -56,9 +58,9 @@ public class KibanaSearchUrl implements SearchUrl {
     }
 
     private String getAppState() {
-        return String.format("(columns:!('@message','@app',cloudbreak_name),filters:!(%s('$state':(store:appState),"
-                        + "meta:(alias:!n,disabled:!f,index:'logstash-*',key:cloudbreak_name,negate:!f,params:!(%s),"
-                        + "type:phrases,value:%s),query:(bool:(minimum_should_match:1,should:!(%s"
+        return String.format("(columns:!('@message','@app'," + KEY + "),filters:!(%s('$state':(store:appState),"
+                        + "meta:(alias:!n,disabled:!f,index:'logstash-*',key:" + KEY + ",negate:!f,params:!(%s),"
+                        + "type:phrases,value:'%s'),query:(bool:(minimum_should_match:1,should:!(%s"
                         + "))))),index:'logstash-*',interval:auto,query:(match_all:()),sort:!('@timestamp',desc))",
                 getEnvironmentQuery(), getResourceList(), getResourceList(), getResourceQueries());
 
@@ -85,7 +87,7 @@ public class KibanaSearchUrl implements SearchUrl {
 
     private String getResourceQueries() {
         List<String> list = searchables.stream().map(Searchable::getSearchId).collect(Collectors.toList());
-        List<String> queryList = list.stream().map(str -> String.format("(match_phrase:(cloudbreak_name:%s))", str)).collect(Collectors.toList());
+        List<String> queryList = list.stream().map(str -> String.format("(match_phrase:(" + KEY + ":%s))", str)).collect(Collectors.toList());
         return String.join(",", queryList);
     }
 }
