@@ -22,6 +22,7 @@ services:
       - 7654:7654
     volumes:
       - ./:/it
+      - /etc/localtime:/etc/localtime:ro
     command: java -jar /it/build/libs/cloudbreak-integration-test.jar com.sequenceiq.it.IntegrationTestApp --integrationtest.command=suiteurls --integrationtest.suiteFiles=${INTEGRATIONTEST_SUITEFILES} | tee cbtest.log
     environment:
       - INTEGRATIONTEST_USER_ACCESSKEY=${INTEGRATIONTEST_USER_ACCESSKEY}
