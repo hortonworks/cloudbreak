@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -40,7 +39,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.event.validation.ParametersValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -412,11 +410,12 @@ public class StackCreatorService {
         }
         boolean shouldUseBaseCMImage = shouldUseBaseCMImage(clusterRequest);
         boolean baseImageEnabled = imageCatalogService.baseImageEnabled();
+        Map<String, String> mdcContext = MDCBuilder.getMdcContextMap();
         return executorService.submit(() -> {
-
+            MDCBuilder.buildMdcContextFromMap(mdcContext);
             LOGGER.info("The stack with name {} has base images enabled: {} and should use base images: {}",
                     stackName, baseImageEnabled, shouldUseBaseCMImage);
-            return imageService.determineImageFromCatalog(
+            StatedImage statedImage = imageService.determineImageFromCatalog(
                     workspace.getId(),
                     stackRequest.getImage(),
                     platformString,
@@ -425,6 +424,8 @@ public class StackCreatorService {
                     baseImageEnabled,
                     user,
                     image -> true);
+            MDCBuilder.cleanupMdc();
+            return statedImage;
         });
     }
 
@@ -449,15 +450,4 @@ public class StackCreatorService {
             }
         }).orElse(null);
     }
-
-    private String createCRN(String accountId) {
-        return Crn.builder()
-                .setService(Crn.Service.DATAHUB)
-                .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.CLUSTER)
-                .setResource(UUID.randomUUID().toString())
-                .build()
-                .toString();
-    }
-
 }

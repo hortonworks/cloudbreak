@@ -2,13 +2,13 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.dto;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 
 public class NameOrCrn {
-
-    private static final String NULL_DTO_EXCEPTION_MESSAGE = "Name or crn should not be null.";
 
     private static final String NAME_MUST_BE_PROVIDED_EXCEPTION_MESSAGE = "Name must be provided.";
 
@@ -74,5 +74,23 @@ public class NameOrCrn {
         }
         toString.append("']");
         return toString.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        NameOrCrn nameOrCrn = (NameOrCrn) o;
+        return Objects.equals(name, nameOrCrn.name) &&
+                Objects.equals(crn, nameOrCrn.crn);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, crn);
     }
 }
