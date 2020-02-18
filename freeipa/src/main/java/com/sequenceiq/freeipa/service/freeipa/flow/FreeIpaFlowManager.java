@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -25,6 +27,9 @@ import reactor.bus.EventBus;
 
 @Component
 public class FreeIpaFlowManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaFlowManager.class);
+
     private static final long WAIT_FOR_ACCEPT = 10L;
 
     @Inject
@@ -48,6 +53,7 @@ public class FreeIpaFlowManager {
     }
 
     public void cancelRunningFlows(Long stackId) {
+        LOGGER.info("Cancelling running flows for id [{}]", stackId);
         StackEvent cancelEvent = new StackEvent(Flow2Handler.FLOW_CANCEL, stackId);
         reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(createEventParameters(stackId), cancelEvent));
     }
