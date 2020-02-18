@@ -36,4 +36,9 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
     public List<String> getAllowedParallelFlows() {
         return PARALLEL_FLOWS;
     }
+
+    @Override
+    public List<Class<? extends FlowConfiguration<?>>> getTerminationFlow() {
+        return List.of(StackTerminationFlowConfig.class);
+    }
 }
