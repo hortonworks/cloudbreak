@@ -22,7 +22,9 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.converter.CrnConverter;
 
@@ -169,6 +171,14 @@ public class DBStack {
         this.parameters = parameters;
     }
 
+    public boolean isHa() {
+        boolean ha = true;
+        if (CloudPlatform.AWS.name().equalsIgnoreCase(cloudPlatform)) {
+            ha = parameters == null || !Boolean.FALSE.toString().equalsIgnoreCase(parameters.get(AwsDatabaseServerV4Parameters.MULTI_AZ));
+        }
+        return ha;
+    }
+
     public String getCloudPlatform() {
         return cloudPlatform;
     }
@@ -250,20 +260,20 @@ public class DBStack {
     @Override
     public String toString() {
         return "DBStack{"
-            + "id=" + id
-            + ",name='" + name
-            + "',displayName='" + displayName
-            + "',region='" + region
-            + "',availabilityZone='" + availabilityZone
-            + ",network=" + (network != null ? network.toString() : "null")
-            + ",databaseServer=" + (databaseServer != null ? databaseServer.toString() : "null")
-            + ",tags=" + (tags != null ? tags.getValue() : "null")
-            + ",parameters=" + parameters
-            + ",cloudPlatform='" + cloudPlatform
-            + "',platformVariant='" + platformVariant
-            + "',environmentId='" + environmentId
-            + "',ownerCrn='" + (ownerCrn != null ? ownerCrn.toString() : "null")
-            + "',resourceCrn='" + (resourceCrn != null ? resourceCrn.toString() : "null")
-            + '}';
+                + "id=" + id
+                + ",name='" + name
+                + "',displayName='" + displayName
+                + "',region='" + region
+                + "',availabilityZone='" + availabilityZone
+                + ",network=" + (network != null ? network.toString() : "null")
+                + ",databaseServer=" + (databaseServer != null ? databaseServer.toString() : "null")
+                + ",tags=" + (tags != null ? tags.getValue() : "null")
+                + ",parameters=" + parameters
+                + ",cloudPlatform='" + cloudPlatform
+                + "',platformVariant='" + platformVariant
+                + "',environmentId='" + environmentId
+                + "',ownerCrn='" + (ownerCrn != null ? ownerCrn.toString() : "null")
+                + "',resourceCrn='" + (resourceCrn != null ? resourceCrn.toString() : "null")
+                + '}';
     }
 }

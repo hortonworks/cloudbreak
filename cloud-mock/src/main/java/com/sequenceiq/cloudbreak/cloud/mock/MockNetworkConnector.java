@@ -1,13 +1,20 @@
 package com.sequenceiq.cloudbreak.cloud.mock;
 
+import java.util.List;
 import java.util.Set;
 
+import javax.ws.rs.BadRequestException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
@@ -16,6 +23,9 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 
 @Service
 public class MockNetworkConnector implements NetworkConnector {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MockNetworkConnector.class);
+
     @Override
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest request) {
         CreatedSubnet subnet1 = new CreatedSubnet();
@@ -43,6 +53,16 @@ public class MockNetworkConnector implements NetworkConnector {
     @Override
     public String getNetworkCidr(Network network, CloudCredential credential) {
         return "10.0.0.0/8";
+    }
+
+    @Override
+    public List<CloudSubnet> selectSubnets(List<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
+        if (subnetMetas == null || subnetMetas.isEmpty()) {
+            String message = "Mock subnet selection: there are no subnets to choose from";
+            LOGGER.debug(message);
+            throw new BadRequestException(message);
+        }
+        return subnetMetas;
     }
 
     @Override

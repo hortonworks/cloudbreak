@@ -34,9 +34,11 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
@@ -266,6 +268,38 @@ public class AzureNetworkConnectorTest {
         thrown.expectMessage(String.format("Network could not be fetch from Azure with resource group name: %s and network id: %s",
                 resourceGroupName, networkId));
         underTest.getNetworkCidr(network, credential);
+    }
+
+    public void testSelectSubnetsWhenOneSubnet() {
+        List<CloudSubnet> subnets = new SubnetBuilder().withPrivateSubnet().build();
+
+        List<CloudSubnet> selectedSubnets = underTest.selectSubnets(subnets, SubnetSelectionParameters.builder().build());
+
+        assertEquals(1, selectedSubnets.size());
+    }
+
+    public void testSelectSubnetsWhenTwoSubnets() {
+        List<CloudSubnet> subnets = new SubnetBuilder().withPrivateSubnet().withPrivateSubnet().build();
+
+        List<CloudSubnet> selectedSubnets = underTest.selectSubnets(subnets, SubnetSelectionParameters.builder().build());
+
+        assertEquals(1, selectedSubnets.size());
+    }
+
+    public void testSelectSubnetsWhenNoSubnets() {
+        List<CloudSubnet> subnets = new SubnetBuilder().build();
+
+        underTest.selectSubnets(subnets, SubnetSelectionParameters.builder().build());
+
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Azure subnet selection: there are no subnets to choose from.");
+    }
+
+    public void testSelectSubnetsNull() {
+        underTest.selectSubnets(null, SubnetSelectionParameters.builder().build());
+
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Azure subnet selection: there are no subnets to choose from.");
     }
 
     private Map<String, Map> createOutput() {
