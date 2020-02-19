@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.dto.environment;
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ARCHIVED;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static java.util.Objects.isNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -205,11 +207,12 @@ public class EnvironmentTestDto
         return this;
     }
 
-    public EnvironmentTestDto withParentEnvironmentName(String parentEnvironmentName) {
-        getRequest().setParentEnvironmentName(parentEnvironmentName);
-        if (parentEnvironmentName == null) {
+    public EnvironmentTestDto withParentEnvironment(RunningParameter parentEnvKey) {
+        CloudbreakTestDto parentEnvDto = getTestContext().get(parentEnvKey.getKey());
+        if (isNull(parentEnvDto)) {
             order = ORDER;
         } else {
+            getRequest().setParentEnvironmentName(parentEnvDto.getName());
             order = ORDER - 1;
         }
         return this;

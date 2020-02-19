@@ -177,7 +177,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .then(this::checkEnvIsListedByNameAndParentName)
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
-                .withParentEnvironmentName(testContext.get(PARENT_ENVIRONMENT).getName())
+                .withParentEnvironment(RunningParameter.key(PARENT_ENVIRONMENT))
                 .when(environmentTestClient.create())
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsListedByNameAndParentName)
@@ -198,12 +198,11 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
-                .withParentEnvironmentName(testContext.get(PARENT_ENVIRONMENT).getName())
+                .withParentEnvironment(RunningParameter.key(PARENT_ENVIRONMENT))
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .when(environmentTestClient.list())
                 .given(EnvironmentTestDto.class)
-                .withParentEnvironmentName(CHILD_ENVIRONMENT)
+                .withParentEnvironment(RunningParameter.key(CHILD_ENVIRONMENT))
                 .when(environmentTestClient.create(), RunningParameter.key(forbiddenKey))
                 .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
                 .validate();
@@ -212,15 +211,16 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak",
-            when = "child create request is sent for a non-existing parent environment",
+            when = "child create request is sent but parent is not created yet",
             then = "a BadRequestException should be returned")
     public void testCreateChildWithoutParentEnvironment(TestContext testContext) {
         String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
-                .given(EnvironmentTestDto.class)
-                .withParentEnvironmentName("non existing parent name")
+                .given(PARENT_ENVIRONMENT, EnvironmentTestDto.class)
+                .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
+                .withParentEnvironment(RunningParameter.key(PARENT_ENVIRONMENT))
                 .when(environmentTestClient.create(), RunningParameter.key(forbiddenKey))
                 .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
                 .validate();
@@ -240,7 +240,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
-                .withParentEnvironmentName(testContext.get(PARENT_ENVIRONMENT).getName())
+                .withParentEnvironment(RunningParameter.key(PARENT_ENVIRONMENT))
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(PARENT_ENVIRONMENT, EnvironmentTestDto.class)
@@ -262,7 +262,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
-                .withParentEnvironmentName(testContext.get(PARENT_ENVIRONMENT).getName())
+                .withParentEnvironment(RunningParameter.key(PARENT_ENVIRONMENT))
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.deleteByName())
