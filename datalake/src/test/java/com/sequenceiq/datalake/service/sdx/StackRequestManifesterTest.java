@@ -4,6 +4,9 @@ import static com.sequenceiq.datalake.service.sdx.StackRequestManifester.IAM_INT
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -22,8 +25,12 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
 import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
+import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 
@@ -76,13 +83,14 @@ public class StackRequestManifesterTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         clusterV4Request = new ClusterV4Request();
-        when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
-        when(stackV4Request.getName()).thenReturn(STACK_NAME);
         cloudStorage = new CloudStorageRequest();
     }
 
     @Test
     public void testSetupCloudStorageAccountMappingWhenNoCloudStorage() {
+        when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
+        when(stackV4Request.getName()).thenReturn(STACK_NAME);
+
         underTest.setupCloudStorageAccountMapping(stackV4Request, ENVIRONMENT_CRN, IdBrokerMappingSource.IDBMMS, CLOUD_PLATFORM_AWS);
 
         assertThat(clusterV4Request.getCloudStorage()).isNull();
@@ -90,6 +98,9 @@ public class StackRequestManifesterTest {
 
     @Test
     public void testSetupCloudStorageAccountMappingWhenCloudStorageWithExistingAccountMappingAndEmptyMaps() {
+        when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
+        when(stackV4Request.getName()).thenReturn(STACK_NAME);
+
         clusterV4Request.setCloudStorage(cloudStorage);
         AccountMappingBase accountMapping = new AccountMappingBase();
         cloudStorage.setAccountMapping(accountMapping);
@@ -104,6 +115,8 @@ public class StackRequestManifesterTest {
 
     @Test
     public void testSetupCloudStorageAccountMappingWhenCloudStorageWithExistingAccountMappingAndNonemptyMaps() {
+        when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
+        when(stackV4Request.getName()).thenReturn(STACK_NAME);
         clusterV4Request.setCloudStorage(cloudStorage);
         AccountMappingBase accountMapping = new AccountMappingBase();
         accountMapping.setGroupMappings(Map.ofEntries(Map.entry(GROUP_1, GROUP_ROLE_1)));
@@ -120,6 +133,8 @@ public class StackRequestManifesterTest {
 
     @Test
     public void testSetupCloudStorageAccountMappingWhenCloudStorageWithNoAccountMappingAndIdbmmsSourceAndSuccess() {
+        when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
+        when(stackV4Request.getName()).thenReturn(STACK_NAME);
         when(idbmmsClient.getMappingsConfig(IAM_INTERNAL_ACTOR_CRN, ENVIRONMENT_CRN, Optional.empty())).thenReturn(mappingsConfig);
         when(mappingsConfig.getGroupMappings()).thenReturn(Map.ofEntries(Map.entry(GROUP_2, GROUP_ROLE_2)));
         when(mappingsConfig.getActorMappings()).thenReturn(Map.ofEntries(Map.entry(USER_2, USER_ROLE_2)));
@@ -137,6 +152,8 @@ public class StackRequestManifesterTest {
 
     @Test
     public void testSetupCloudStorageAccountMappingWhenCloudStorageWithNoAccountMappingAndIdbmmsSourceAndFailure() {
+        when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
+        when(stackV4Request.getName()).thenReturn(STACK_NAME);
         when(idbmmsClient.getMappingsConfig(IAM_INTERNAL_ACTOR_CRN, BAD_ENVIRONMENT_CRN, Optional.empty()))
                 .thenThrow(new IdbmmsOperationException("Houston, we have a problem."));
 
@@ -149,6 +166,8 @@ public class StackRequestManifesterTest {
 
     @Test
     public void testSetupCloudStorageAccountMappingWhenCloudStorageWithNoAccountMappingAndMockSourceAndAws() {
+        when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
+        when(stackV4Request.getName()).thenReturn(STACK_NAME);
         clusterV4Request.setCloudStorage(cloudStorage);
 
         underTest.setupCloudStorageAccountMapping(stackV4Request, ENVIRONMENT_CRN, IdBrokerMappingSource.MOCK, CLOUD_PLATFORM_AWS);
@@ -159,6 +178,8 @@ public class StackRequestManifesterTest {
 
     @Test
     public void testSetupCloudStorageAccountMappingWhenCloudStorageWithNoAccountMappingAndMockSourceAndAzure() {
+        when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
+        when(stackV4Request.getName()).thenReturn(STACK_NAME);
         clusterV4Request.setCloudStorage(cloudStorage);
 
         underTest.setupCloudStorageAccountMapping(stackV4Request, ENVIRONMENT_CRN, IdBrokerMappingSource.MOCK, CLOUD_PLATFORM_AZURE);
@@ -169,12 +190,44 @@ public class StackRequestManifesterTest {
 
     @Test
     public void testSetupCloudStorageAccountMappingWhenCloudStorageWithNoAccountMappingAndNoneSource() {
+        when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
+        when(stackV4Request.getName()).thenReturn(STACK_NAME);
         clusterV4Request.setCloudStorage(cloudStorage);
 
         underTest.setupCloudStorageAccountMapping(stackV4Request, ENVIRONMENT_CRN, IdBrokerMappingSource.NONE, CLOUD_PLATFORM_AWS);
 
         assertThat(clusterV4Request.getCloudStorage()).isSameAs(cloudStorage);
         assertThat(clusterV4Request.getCloudStorage().getAccountMapping()).isNull();
+    }
+
+    @Test
+    public void testAddAzureIdbrokerMsiToTelemetry() {
+        Map<String, Object> attributes = new HashMap<>();
+        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
+        List<StorageIdentityBase> identities = new ArrayList<>();
+        StorageIdentityBase identity = new StorageIdentityBase();
+        identity.setType(CloudIdentityType.ID_BROKER);
+        AdlsGen2CloudStorageV1Parameters adlsGen2 = new AdlsGen2CloudStorageV1Parameters();
+        adlsGen2.setManagedIdentity("msi");
+        identity.setAdlsGen2(adlsGen2);
+        identities.add(identity);
+        cloudStorageRequest.setIdentities(identities);
+        when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
+        clusterV4Request.setCloudStorage(cloudStorageRequest);
+
+        underTest.addAzureIdbrokerMsiToTelemetry(attributes, stackV4Request);
+
+        assertThat(clusterV4Request.getCloudStorage()).isNotNull();
+        assertThat(attributes.get(FluentConfigView.AZURE_IDBROKER_INSTANCE_MSI)).isEqualTo("msi");
+    }
+
+    @Test
+    public void testAddAzureIdbrokerMsiToTelemetrWithoutCloudStoragey() {
+        Map<String, Object> attributes = new HashMap<>();
+        underTest.addAzureIdbrokerMsiToTelemetry(attributes, stackV4Request);
+
+        assertThat(clusterV4Request.getCloudStorage()).isNull();
+        assertThat(attributes.size()).isEqualTo(0);
     }
 
 }
