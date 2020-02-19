@@ -4,8 +4,8 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_RDBMS_DELETE_EVENT;
-import static java.util.Objects.isNull;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,8 +25,8 @@ import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 
 import reactor.bus.Event;
 
@@ -54,26 +54,13 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
     @Override
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
-        Optional<Environment> envOptional = environmentService.findEnvironmentById(environmentDto.getId());
+        Environment environment = environmentService.findEnvironmentById(environmentDto.getId()).orElse(null);
         try {
-            if (envOptional.isPresent() && envOptional.get().isCreateFreeIpa() && freeIpaExistsForEnvironment(envOptional.get())) {
-                Environment environment = envOptional.get();
-                if (isNull(environment.getParentEnvironment())) {
-                    freeIpaService.delete(environment.getResourceCrn());
-                    Pair<PollingResult, Exception> result = freeIpaPollingService.pollWithTimeout(
-                            new FreeIpaDeletionRetrievalTask(freeIpaService),
-                            new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn()),
-                            FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_INTERVAL,
-                            FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_COUNT,
-                            SINGLE_FAILURE);
-                    if (!isSuccess(result.getLeft())) {
-                        throw new FreeIpaOperationFailedException("Failed to delete FreeIpa! " + getIfNotNull(result.getRight(), Throwable::getMessage));
-                    }
+            if (shouldRemoveFreeIpa(environment)) {
+                if (Objects.nonNull(environment.getParentEnvironment())) {
+                    detachChildEnvironmentFromFreeIpa(environment);
                 } else {
-                    DetachChildEnvironmentRequest detachChildEnvironmentRequest = new DetachChildEnvironmentRequest();
-                    detachChildEnvironmentRequest.setParentEnvironmentCrn(environment.getParentEnvironment().getResourceCrn());
-                    detachChildEnvironmentRequest.setChildEnvironmentCrn(environment.getResourceCrn());
-                    freeIpaService.detachChildEnvironment(detachChildEnvironmentRequest);
+                    deleteFreeIpa(environment);
                 }
             }
             eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
@@ -85,6 +72,42 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
                     .withResourceName(environmentDto.getName())
                     .build();
             eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
+        }
+    }
+
+    private boolean shouldRemoveFreeIpa(Environment environment) {
+        return Objects.nonNull(environment)
+                && (environment.isCreateFreeIpa() || Objects.nonNull(environment.getParentEnvironment()))
+                && freeIpaExistsForEnvironment(environment);
+    }
+
+    private boolean freeIpaExistsForEnvironment(Environment env) {
+        LOGGER.debug("About to call freeipa describe with env crn '{}'.", env.getResourceCrn());
+        Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(env.getResourceCrn());
+        if (freeIpaResponse.isEmpty()) {
+            LOGGER.debug("Exception occurred during freeipa describe. Probably the resource does not exists, but worth a check.");
+            return false;
+        }
+        return true;
+    }
+
+    private void detachChildEnvironmentFromFreeIpa(Environment environment) {
+        DetachChildEnvironmentRequest detachChildEnvironmentRequest = new DetachChildEnvironmentRequest();
+        detachChildEnvironmentRequest.setParentEnvironmentCrn(environment.getParentEnvironment().getResourceCrn());
+        detachChildEnvironmentRequest.setChildEnvironmentCrn(environment.getResourceCrn());
+        freeIpaService.detachChildEnvironment(detachChildEnvironmentRequest);
+    }
+
+    private void deleteFreeIpa(Environment environment) {
+        freeIpaService.delete(environment.getResourceCrn());
+        Pair<PollingResult, Exception> result = freeIpaPollingService.pollWithTimeout(
+                new FreeIpaDeletionRetrievalTask(freeIpaService),
+                new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn()),
+                FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_INTERVAL,
+                FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_COUNT,
+                SINGLE_FAILURE);
+        if (!isSuccess(result.getLeft())) {
+            throw new FreeIpaOperationFailedException("Failed to delete FreeIpa! " + getIfNotNull(result.getRight(), Throwable::getMessage));
         }
     }
 
@@ -100,15 +123,5 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
                 .withResourceCrn(environmentDto.getResourceCrn())
                 .withSelector(START_RDBMS_DELETE_EVENT.selector())
                 .build();
-    }
-
-    private boolean freeIpaExistsForEnvironment(Environment env) {
-        LOGGER.debug("About to call freeipa describe with env crn '{}'.", env.getResourceCrn());
-        Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(env.getResourceCrn());
-        if (freeIpaResponse.isEmpty()) {
-            LOGGER.debug("Exception occurred during freeipa describe. Probably the resource does not exists, but worth a check.");
-            return false;
-        }
-        return true;
     }
 }

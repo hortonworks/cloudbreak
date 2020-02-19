@@ -4,6 +4,7 @@ package com.sequenceiq.environment.environment.flow.deletion.handler.freeipa;
 import static java.util.Optional.of;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -27,8 +28,8 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 
 import reactor.bus.Event;
 
@@ -106,7 +107,7 @@ class FreeIpaDeletionHandlerTest {
 
         victim.accept(new Event<>(environmentDto));
 
-        verifyNoMoreInteractions(freeIpaService);
+        verify(freeIpaService, never()).delete(ENVIRONMENT_CRN);
         verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
     }
 
