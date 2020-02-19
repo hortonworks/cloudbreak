@@ -66,7 +66,7 @@ public class AzurePlatformResources implements PlatformResources {
     @Value("${cb.azure.default.vmtype:Standard_D16_v3}")
     private String armVmDefault;
 
-    @Value("#{'${cb.azure.distrox.enabled.instance.types:}'.split(',')}")
+    @Value("${cb.azure.distrox.enabled.instance.types:}")
     private List<String> enabledDistroxInstanceTypes;
 
     @Value("${distrox.restrict.instance.types:true}")
@@ -74,9 +74,6 @@ public class AzurePlatformResources implements PlatformResources {
 
     private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> enabledDistroxInstanceTypes.stream()
             .filter(it -> !it.isEmpty())
-            .map(this::getMachineType)
-            .collect(Collectors.toList())
-            .stream()
             .anyMatch(di -> vmt.value().startsWith(di));
 
     @Inject
@@ -84,10 +81,6 @@ public class AzurePlatformResources implements PlatformResources {
 
     @Inject
     private AzureRegionProvider azureRegionProvider;
-
-    private String getMachineType(String it) {
-        return it.trim().replaceAll("\\s+", "");
-    }
 
     @Override
     public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {

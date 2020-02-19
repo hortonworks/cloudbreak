@@ -118,7 +118,7 @@ public class DefaultClusterTemplateCache {
         return defaultTemplates;
     }
 
-    private DefaultClusterTemplateV4Request getDefaultClusterTemplate(String defaultTemplateJson) {
+    public DefaultClusterTemplateV4Request getDefaultClusterTemplate(String defaultTemplateJson) {
         try {
             return JsonUtil.readValue(defaultTemplateJson, DefaultClusterTemplateV4Request.class);
         } catch (IOException e) {
