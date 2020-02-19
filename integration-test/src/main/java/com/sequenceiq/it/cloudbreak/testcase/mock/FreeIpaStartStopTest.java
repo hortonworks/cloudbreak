@@ -1,16 +1,11 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import static com.sequenceiq.it.cloudbreak.mock.ITResponse.MOCK_ROOT;
-import static com.sequenceiq.it.cloudbreak.mock.model.SPIMock.START_INSTANCE;
-import static com.sequenceiq.it.cloudbreak.mock.model.SPIMock.STOP_INSTANCE;
-
 import java.util.Collections;
 
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -66,64 +61,5 @@ public class FreeIpaStartStopTest extends AbstractIntegrationTest {
                 .when(freeIPATestClient.start())
                 .await(Status.AVAILABLE)
                 .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "environment is present",
-            when = "calling a freeipe stop",
-            then = "freeipa sould be failed stop")
-    public void testFailedStopFreeIpa(MockedTestContext testContext) {
-        DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
-        dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/login_password", (request, response) -> {
-            response.cookie("ipa_session", "dummysession");
-            return "";
-        });
-        testContext.getModel().getSpiMock().getDynamicRouteStack().get(MOCK_ROOT + STOP_INSTANCE, (request, response) -> {
-            throw new BadRequestException("Stop failed on mock instance");
-        });
-        dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/json", freeIpaRouteHandler);
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
-        testContext
-                .given(FreeIPATestDto.class).withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
-                .when(freeIPATestClient.create())
-                .await(Status.AVAILABLE);
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse(false, Collections.emptyList()));
-        testContext
-                .given(FreeIPATestDto.class)
-                .when(freeIPATestClient.stop())
-                .await(Status.UNHEALTHY)
-                .validate();
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "environment is present",
-            when = "calling a freeipe stop",
-            then = "freeipa sould be failed start")
-    public void testFailedStartFreeIpa(MockedTestContext testContext) {
-        DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
-        dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/login_password", (request, response) -> {
-            response.cookie("ipa_session", "dummysession");
-            return "";
-        });
-        testContext.getModel().getSpiMock().getDynamicRouteStack().get(MOCK_ROOT + START_INSTANCE, (request, response) -> {
-            throw new BadRequestException("Start failed on mock instance");
-        });
-        dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/json", freeIpaRouteHandler);
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
-        testContext
-                .given(FreeIPATestDto.class).withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
-                .when(freeIPATestClient.create())
-                .await(Status.AVAILABLE);
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse(false, Collections.emptyList()));
-        testContext.given(FreeIPATestDto.class)
-                .when(freeIPATestClient.stop())
-                .await(Status.STOPPED)
-                .when(freeIPATestClient.start())
-                .await(Status.UNHEALTHY)
-                .validate();
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
     }
 }
