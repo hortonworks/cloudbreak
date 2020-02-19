@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -29,11 +30,15 @@ public class DefaultClusterTemplateCacheTest {
     @Mock
     private ConverterUtil converterUtil;
 
+    @Before
+    public void setUp() throws Exception {
+        underTest.setDefaultTemplateDir("test/defaults/clustertemplates/");
+    }
+
     @Test
     public void testLoadClusterTemplatesFromFileWhenClusterTemplateNamesProvided() {
         ClusterTemplate clusterTemplate = new ClusterTemplate();
         clusterTemplate.setName("template");
-
         when(converterUtil.convert(any(), eq(ClusterTemplate.class))).thenReturn(clusterTemplate);
 
         underTest.setClusterTemplates(Collections.singletonList("default-template.json"));
@@ -46,7 +51,7 @@ public class DefaultClusterTemplateCacheTest {
     @Test
     public void testLoadClusterTemplatesFromFileWhenClusterTemplateNamesProvidedButDirNotExists() {
         underTest.setClusterTemplates(Collections.singletonList("default-template"));
-        underTest.setDefaultTemplateDir("defaults/clustertemplates/notexists");
+        underTest.setDefaultTemplateDir("test/defaults/clustertemplates/notexists");
         underTest.loadClusterTemplatesFromFile();
 
         Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
@@ -74,7 +79,6 @@ public class DefaultClusterTemplateCacheTest {
         clusterTemplateAzure.setName("cluster-template-azure");
         ClusterTemplate clusterTemplateAwsRanger = new ClusterTemplate();
         clusterTemplateAwsRanger.setName("cluster-template-aws-ranger");
-
         when(converterUtil.convert(any(DefaultClusterTemplateV4Request.class), eq(ClusterTemplate.class)))
                 .thenReturn(clusterTemplate)
                 .thenReturn(clusterTemplate2)
@@ -97,7 +101,7 @@ public class DefaultClusterTemplateCacheTest {
     @Test
     public void testLoadClusterTemplatesFromFileWhenResourceDirNotExists() {
         underTest.setClusterTemplates(Collections.emptyList());
-        underTest.setDefaultTemplateDir("defaults/clustertemplates/notexists");
+        underTest.setDefaultTemplateDir("test/defaults/clustertemplates/notexists");
         underTest.loadClusterTemplatesFromFile();
 
         Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();
@@ -107,7 +111,7 @@ public class DefaultClusterTemplateCacheTest {
     @Test
     public void testLoadClusterTemplatesFromFileWhenResourceDirEmpty() {
         underTest.setClusterTemplates(Collections.emptyList());
-        underTest.setDefaultTemplateDir("defaults/clustertemplates/empty");
+        underTest.setDefaultTemplateDir("test/defaults/clustertemplates/empty");
         underTest.loadClusterTemplatesFromFile();
 
         Map<String, ClusterTemplate> actual = underTest.defaultClusterTemplates();

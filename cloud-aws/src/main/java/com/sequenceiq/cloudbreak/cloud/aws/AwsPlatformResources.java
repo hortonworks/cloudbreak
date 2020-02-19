@@ -153,10 +153,10 @@ public class AwsPlatformResources implements PlatformResources {
     @Value("${cb.aws.vm.parameter.definition.path:}")
     private String awsVmParameterDefinitionPath;
 
-    @Value("#{'${cb.aws.disabled.instance.types:}'.split(',')}")
+    @Value("${cb.aws.disabled.instance.types:}")
     private List<String> disabledInstanceTypes;
 
-    @Value("#{'${cb.aws.distrox.enabled.instance.types:}'.split(',')}")
+    @Value("${cb.aws.distrox.enabled.instance.types:}")
     private List<String> enabledDistroxInstanceTypes;
 
     @Value("${cb.aws.fetch.max.items:500}")
@@ -171,9 +171,6 @@ public class AwsPlatformResources implements PlatformResources {
 
     private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> enabledDistroxInstanceTypes.stream()
             .filter(it -> !it.isEmpty())
-            .map(it -> getMachineType(it))
-            .collect(Collectors.toList())
-            .stream()
             .anyMatch(di -> vmt.value().startsWith(di));
 
     private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
@@ -191,10 +188,6 @@ public class AwsPlatformResources implements PlatformResources {
         regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone-coordinates"));
         regionCoordinates = readRegionCoordinates(resourceDefinition("zone-coordinates"));
         readVmTypes();
-    }
-
-    private String getMachineType(String it) {
-        return it.toLowerCase().trim().replaceAll("\\s+", "");
     }
 
     private String getDefinition(String parameter, String type) {

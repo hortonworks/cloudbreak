@@ -280,7 +280,7 @@ public class ServiceEndpointCollectorTest {
         cluster.setGateway(gateway);
         Blueprint blueprint = new Blueprint();
         try {
-            String testBlueprint = FileReaderUtils.readFileFromClasspath("defaults/blueprints/hdp26-data-science-spark2-text.bp");
+            String testBlueprint = FileReaderUtils.readFileFromClasspath("/test/defaults/blueprints/hdp26-data-science-spark2-text.bp");
             blueprint.setBlueprintText(testBlueprint);
         } catch (IOException e) {
             throw new RuntimeException(e);
