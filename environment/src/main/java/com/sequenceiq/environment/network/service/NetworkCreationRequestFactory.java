@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.network.service;
 
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
@@ -37,6 +36,8 @@ public class NetworkCreationRequestFactory {
     public NetworkCreationRequest create(EnvironmentDto environment) {
         NetworkDto networkDto = environment.getNetwork();
 
+        Cidrs cidrs = getSubNetCidrs(networkDto.getNetworkCidr());
+
         CDPTagMergeRequest mergeRequest = CDPTagMergeRequest.Builder
                 .builder()
                 .withEnvironmentTags(environment.getTags().getUserDefinedTags())
@@ -57,7 +58,8 @@ public class NetworkCreationRequestFactory {
                 .withUserName(getUserFromCrn(environment.getCreator()))
                 .withCreatorCrn(environment.getCreator())
                 .withTags(costTagging.mergeTags(mergeRequest))
-                .withSubnetCidrs(getSubNetCidrs(networkDto.getNetworkCidr()));
+                .withPrivateSubnetCidrs(cidrs.getPrivateSubnetCidrs())
+                .withPublicSubnetCidrs(cidrs.getPublicSubnetCidrs());
         getNoPublicIp(networkDto).ifPresent(builder::withNoPublicIp);
         return builder.build();
     }
@@ -74,7 +76,7 @@ public class NetworkCreationRequestFactory {
         return PrivateSubnetCreation.ENABLED == environmentDto.getNetwork().getPrivateSubnetCreation();
     }
 
-    private Set<String> getSubNetCidrs(String networkCidr) {
+    private Cidrs getSubNetCidrs(String networkCidr) {
         return extendedSubnetCidrProvider.provide(networkCidr);
     }
 
