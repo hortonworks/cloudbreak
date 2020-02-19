@@ -60,6 +60,8 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     private static final String DEFAULT_SDX_BLUEPRINT_NAME = "7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas";
 
+    private static final String DEFAULT_SDX_RUNTIME = "7.1.0";
+
     private static final String DEFAULT_CM_PASSWORD = "Admin123";
 
     private static final String DEFAULT_CM_USER = "admin";
@@ -163,7 +165,9 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .withStackAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
                 .withGatewayPort(getCloudProvider().gatewayPort(stack))
                 .withCluster(cluster);
-        return withStackRequest(stack.getRequest());
+        SdxInternalTestDto sdxInternalTestDto = withStackRequest(stack.getRequest());
+        sdxInternalTestDto.withRuntimeVersion(DEFAULT_SDX_RUNTIME);
+        return sdxInternalTestDto;
     }
 
     public SdxInternalTestDto withTemplate(String template) {
@@ -189,7 +193,9 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .withStackAuthentication(getAuthentication(getTestContext().given(StackAuthenticationTestDto.class), templateJson))
                 .withGatewayPort(getGatewayPort(stack, templateJson))
                 .withCluster(cluster);
-        return withStackRequest(stack.getRequest());
+        SdxInternalTestDto sdxInternalTestDto = withStackRequest(stack.getRequest());
+        sdxInternalTestDto.withRuntimeVersion(DEFAULT_SDX_RUNTIME);
+        return sdxInternalTestDto;
     }
 
     public SdxInternalTestDto withTags(Map<String, String> tags) {

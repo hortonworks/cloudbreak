@@ -1,7 +1,7 @@
 {
-  "description": "7.0.2 - Data Engineering",
+  "description": "7.1.0 - Data Engineering",
   "blueprint": {
-    "cdhVersion": "7.0.2",
+    "cdhVersion": "7.1.0",
     "displayName": "dataengineering",
     "services": [
       {
@@ -358,6 +358,16 @@
           "tez-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "yarn-NODEMANAGER-COMPUTE"
+        ]
+      },
+      {
+        "refName": "gateway",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+           "hms-GATEWAY-BASE",
+           "hive_on_tez-GATEWAY-BASE",
+           "tez-GATEWAY-BASE",
+           "spark_on_yarn-GATEWAY-BASE"
         ]
       }
     ]
