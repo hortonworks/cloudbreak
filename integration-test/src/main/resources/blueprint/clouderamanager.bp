@@ -1,7 +1,7 @@
 {
-  "description": "7.0.2 - Data Engineering",
+  "description": "7.1.0 - Data Engineering",
   "blueprint": {
-    "cdhVersion": "7.0.2",
+    "cdhVersion": "7.1.0",
     "displayName": "dataengineering",
     "services": [
       {
