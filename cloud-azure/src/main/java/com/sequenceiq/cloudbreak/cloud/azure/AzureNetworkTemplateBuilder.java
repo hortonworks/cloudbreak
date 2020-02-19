@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 import freemarker.template.Configuration;
@@ -33,9 +35,9 @@ public class AzureNetworkTemplateBuilder {
     @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
-    public String build(NetworkCreationRequest networkRequest) {
+    public String build(NetworkCreationRequest networkRequest, List<SubnetRequest> subnets) {
         try {
-            Map<String, Object> model = createModel(networkRequest);
+            Map<String, Object> model = createModel(networkRequest, subnets);
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(), model);
             LOGGER.debug("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;
@@ -53,12 +55,12 @@ public class AzureNetworkTemplateBuilder {
         }
     }
 
-    private Map<String, Object> createModel(NetworkCreationRequest networkRequest) {
+    private Map<String, Object> createModel(NetworkCreationRequest networkRequest, List<SubnetRequest> subnets) {
         Map<String, Object> model = new HashMap<>();
         model.put("virtualNetworkName", networkRequest.getEnvName());
         model.put("region", networkRequest.getRegion().value());
         model.put("networkPrefix", networkRequest.getNetworkCidr());
-        model.put("subnetPrefixList", networkRequest.getSubnetCidrs());
+        model.put("subnetDetails", subnets);
         model.put("resourceGroupName", networkRequest.getEnvName());
         model.put("noPublicIp", networkRequest.isNoPublicIp());
         model.put("noFirewallRules", false);

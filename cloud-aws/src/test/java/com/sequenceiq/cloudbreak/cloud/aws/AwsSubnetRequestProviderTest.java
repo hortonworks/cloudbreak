@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -45,50 +46,63 @@ public class AwsSubnetRequestProviderTest {
     @Test
     public void testProvideWhenTwoAzAvailable() {
         AmazonEC2Client ec2Client = createEc2Client(List.of(createAZ(AZ_1), createAZ(AZ_2)));
-        List<String> subnetCidrs = List.of(CIDR_1, CIDR_2, CIDR_3, CIDR_4, CIDR_5, CIDR_6);
+        List<String> publicSubnetCidrs = List.of(CIDR_4, CIDR_5, CIDR_6);
+        List<String> privateSubnetCidrs = List.of(CIDR_1, CIDR_2, CIDR_3);
 
-        List<SubnetRequest> actual = underTest.provide(ec2Client, subnetCidrs);
+        List<SubnetRequest> actual = underTest.provide(ec2Client, publicSubnetCidrs, privateSubnetCidrs);
 
-        assertEquals(CIDR_1, actual.get(0).getPublicSubnetCidr());
-        assertEquals(CIDR_2, actual.get(0).getPrivateSubnetCidr());
+        assertEquals(CIDR_4, actual.get(0).getPublicSubnetCidr());
         assertEquals(AZ_1, actual.get(0).getAvailabilityZone());
-        assertEquals(CIDR_3, actual.get(1).getPublicSubnetCidr());
-        assertEquals(CIDR_4, actual.get(1).getPrivateSubnetCidr());
+        assertEquals(CIDR_5, actual.get(1).getPublicSubnetCidr());
         assertEquals(AZ_2, actual.get(1).getAvailabilityZone());
-        assertEquals(CIDR_5, actual.get(2).getPublicSubnetCidr());
-        assertEquals(CIDR_6, actual.get(2).getPrivateSubnetCidr());
-        assertEquals(AZ_2, actual.get(2).getAvailabilityZone());
+        assertEquals(CIDR_6, actual.get(2).getPublicSubnetCidr());
+        assertEquals(AZ_1, actual.get(2).getAvailabilityZone());
+
+        assertEquals(CIDR_1, actual.get(3).getPrivateSubnetCidr());
+        assertEquals(AZ_1, actual.get(3).getAvailabilityZone());
+        assertEquals(CIDR_2, actual.get(4).getPrivateSubnetCidr());
+        assertEquals(AZ_2, actual.get(4).getAvailabilityZone());
+        assertEquals(CIDR_3, actual.get(5).getPrivateSubnetCidr());
+        assertEquals(AZ_1, actual.get(5).getAvailabilityZone());
     }
 
     @Test
     public void testProvideWhenFourAzAvailable() {
         AmazonEC2Client ec2Client = createEc2Client(List.of(createAZ(AZ_1), createAZ(AZ_2), createAZ(AZ_3), createAZ(AZ_4)));
-        List<String> subnetCidrs = List.of(CIDR_1, CIDR_2, CIDR_3, CIDR_4, CIDR_5, CIDR_6);
+        List<String> publicSubnetCidrs = List.of(CIDR_4, CIDR_5, CIDR_6);
+        List<String> privateSubnetCidrs = List.of(CIDR_1, CIDR_2, CIDR_3);
 
-        List<SubnetRequest> actual = underTest.provide(ec2Client, subnetCidrs);
+        List<SubnetRequest> actual = underTest.provide(ec2Client, publicSubnetCidrs, privateSubnetCidrs);
 
-        assertEquals(CIDR_1, actual.get(0).getPublicSubnetCidr());
-        assertEquals(CIDR_2, actual.get(0).getPrivateSubnetCidr());
+        assertEquals(CIDR_4, actual.get(0).getPublicSubnetCidr());
         assertEquals(AZ_1, actual.get(0).getAvailabilityZone());
-        assertEquals(CIDR_3, actual.get(1).getPublicSubnetCidr());
-        assertEquals(CIDR_4, actual.get(1).getPrivateSubnetCidr());
+        assertEquals(CIDR_5, actual.get(1).getPublicSubnetCidr());
         assertEquals(AZ_2, actual.get(1).getAvailabilityZone());
-        assertEquals(CIDR_5, actual.get(2).getPublicSubnetCidr());
-        assertEquals(CIDR_6, actual.get(2).getPrivateSubnetCidr());
+        assertEquals(CIDR_6, actual.get(2).getPublicSubnetCidr());
         assertEquals(AZ_3, actual.get(2).getAvailabilityZone());
+
+        assertEquals(CIDR_1, actual.get(3).getPrivateSubnetCidr());
+        assertEquals(AZ_1, actual.get(3).getAvailabilityZone());
+        assertEquals(CIDR_2, actual.get(4).getPrivateSubnetCidr());
+        assertEquals(AZ_2, actual.get(4).getAvailabilityZone());
+        assertEquals(CIDR_3, actual.get(5).getPrivateSubnetCidr());
+        assertEquals(AZ_3, actual.get(5).getAvailabilityZone());
     }
 
     @Test
     public void testProvideWhenOnlyTwoCidrProvided() {
         AmazonEC2Client ec2Client = createEc2Client(List.of(createAZ(AZ_1), createAZ(AZ_2), createAZ(AZ_3), createAZ(AZ_4)));
-        List<String> subnetCidrs = List.of(CIDR_1, CIDR_2);
+        List<String> publicSubnetCidrs = List.of(CIDR_1, CIDR_2);
 
-        List<SubnetRequest> actual = underTest.provide(ec2Client, subnetCidrs);
+        List<SubnetRequest> actual = underTest.provide(ec2Client, publicSubnetCidrs, new ArrayList<>());
 
         assertEquals(CIDR_1, actual.get(0).getPublicSubnetCidr());
-        assertEquals(CIDR_2, actual.get(0).getPrivateSubnetCidr());
         assertEquals(AZ_1, actual.get(0).getAvailabilityZone());
-        assertTrue(actual.size() == 1);
+
+        assertEquals(CIDR_2, actual.get(1).getPublicSubnetCidr());
+        assertEquals(AZ_2, actual.get(1).getAvailabilityZone());
+
+        assertTrue(actual.size() == 2);
     }
 
     private AmazonEC2Client createEc2Client(List<AvailabilityZone> availabilityZones) {
