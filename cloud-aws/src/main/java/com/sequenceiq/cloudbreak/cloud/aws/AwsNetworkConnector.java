@@ -39,13 +39,16 @@ import com.amazonaws.services.ec2.model.Vpc;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetSelectorStrategy;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
@@ -53,6 +56,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetSelectorStrategyType;
 
 @Service
 public class AwsNetworkConnector implements NetworkConnector {
@@ -86,6 +90,9 @@ public class AwsNetworkConnector implements NetworkConnector {
 
     @Inject
     private AwsTaggingService awsTaggingService;
+
+    @Inject
+    private Map<SubnetSelectorStrategyType, SubnetSelectorStrategy> subnetSelectorStrategyMap;
 
     @Override
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest) {
@@ -124,6 +131,19 @@ public class AwsNetworkConnector implements NetworkConnector {
             LOGGER.info("More than one vpc cidrs for VPC {}. We will use the first one: {}", existingVpc, vpcCidrs.get(0));
         }
         return vpcCidrs.get(0);
+    }
+
+    @Override
+    public List<CloudSubnet> selectSubnets(List<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
+        boolean preferPrivate = subnetSelectionParameters.isPreferPrivateNetwork() || subnetSelectionParameters.getTunnel().useCcm();
+
+        SubnetSelectorStrategyType subnetSelectorStrategyType;
+        if (subnetSelectionParameters.isHa()) {
+            subnetSelectorStrategyType = preferPrivate ? SubnetSelectorStrategyType.MULTIPLE_PREFER_PRIVATE : SubnetSelectorStrategyType.MULTIPLE_PREFER_PUBLIC;
+        } else {
+            subnetSelectorStrategyType = preferPrivate ? SubnetSelectorStrategyType.SINGLE_PREFER_PRIVATE : SubnetSelectorStrategyType.SINGLE_PREFER_PUBLIC;
+        }
+        return subnetSelectorStrategyMap.get(subnetSelectorStrategyType).select(subnetMetas);
     }
 
     private boolean networkDoesNotExist(AmazonServiceException e) {

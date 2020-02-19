@@ -144,7 +144,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
             asMap.forEach((key, value) -> parameter.put(key, value.toString()));
             dbStack.setParameters(parameter);
         }
-        dbStack.setNetwork(buildNetwork(source.getNetwork(), environment, cloudPlatform, dbStack.getParameters()));
+        dbStack.setNetwork(buildNetwork(source.getNetwork(), environment, cloudPlatform, dbStack));
 
         Instant now = clock.getCurrentInstant();
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.PROVISION_REQUESTED, now.toEpochMilli()));
@@ -220,9 +220,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     }
 
     private Map<String, Object> getSubnetsFromEnvironment(DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,
-            Map<String, String> dbParameters) {
+            DBStack dbStack) {
         List<CloudSubnet> subnets = subnetListerService.listSubnets(environmentResponse, cloudPlatform);
-        List<String> chosenSubnetIds = subnetChooserService.chooseSubnets(subnets, cloudPlatform, dbParameters).stream()
+        List<String> chosenSubnetIds = subnetChooserService.chooseSubnets(subnets, cloudPlatform, dbStack).stream()
                 .map(CloudSubnet::getId)
                 .collect(Collectors.toList());
 
@@ -230,13 +230,13 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     }
 
     private Network buildNetwork(NetworkV4StackRequest source, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,
-            Map<String, String> dbParameters) {
+            DBStack dbStack) {
         Network network = new Network();
         network.setName(generateNetworkName());
 
         Map<String, Object> parameters = source != null
                 ? providerParameterCalculator.get(source).asMap()
-                : getSubnetsFromEnvironment(environmentResponse, cloudPlatform, dbParameters);
+                : getSubnetsFromEnvironment(environmentResponse, cloudPlatform, dbStack);
 
         networkParameterAdder.addParameters(parameters, environmentResponse, cloudPlatform);
 

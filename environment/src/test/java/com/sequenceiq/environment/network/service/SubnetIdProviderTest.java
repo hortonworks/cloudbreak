@@ -1,16 +1,33 @@
 package com.sequenceiq.environment.network.service;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
+@ExtendWith(MockitoExtension.class)
 class SubnetIdProviderTest {
 
     private static final String SUBNET_ID_1 = "subnetId1";
@@ -19,136 +36,27 @@ class SubnetIdProviderTest {
 
     private static final String SUBNET_ID_3 = "subnetId3";
 
-    private final SubnetIdProvider underTest = new SubnetIdProvider();
+    @Mock
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @InjectMocks
+    private SubnetIdProvider underTest;
 
     @Test
-    void testProvideShouldReturnAPrivateWhenCcmAws() {
-        Map<String, CloudSubnet> subnetMetas = createSubnetMetas();
+    void testProvideThenNetworkSelectorCalled() {
         NetworkDto networkDto = NetworkDto.builder()
-                .withSubnetMetas(subnetMetas)
+                .withSubnetMetas(Map.of("AZ-a", new CloudSubnet()))
                 .build();
+        NetworkConnector networkConnector = setupConnector();
+        Tunnel tunnel = Tunnel.DIRECT;
 
-        String actual = underTest.provide(networkDto, Tunnel.CCM, CloudPlatform.AWS);
+        underTest.provide(networkDto, tunnel, CloudPlatform.AWS);
 
-        Assertions.assertTrue(StringUtils.isNotBlank(actual));
-        Assertions.assertTrue(subnetMetas.get(actual).isPrivateSubnet());
-    }
-
-    @Test
-    void testProvideShouldReturnAPublicSubnetIDWhenNoCcmAws() {
-        Map<String, CloudSubnet> subnetMetas = createSubnetMetas();
-        NetworkDto networkDto = NetworkDto.builder()
-                .withSubnetMetas(subnetMetas)
-                .build();
-
-        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
-
-        Assertions.assertTrue(StringUtils.isNotBlank(actual));
-        Assertions.assertFalse(subnetMetas.get(actual).isPrivateSubnet());
-    }
-
-    @Test
-    void testProvideShouldReturnAPrivateSubnetIDWhenCcmNoPublicIpAws() {
-        Map<String, CloudSubnet> subnetMetas = createSubnetMetasWithNoPublicIp();
-        NetworkDto networkDto = NetworkDto.builder()
-                .withSubnetMetas(subnetMetas)
-                .build();
-
-        String actual = underTest.provide(networkDto, Tunnel.CCM, CloudPlatform.AWS);
-
-        Assertions.assertTrue(StringUtils.isNotBlank(actual));
-        Assertions.assertTrue(subnetMetas.get(actual).isPrivateSubnet());
-    }
-
-    @Test
-    void testProvideShouldReturnAPrivateSubnetIDWhenNoCcmNoPublicIpAws() {
-        Map<String, CloudSubnet> subnetMetas = createSubnetMetasWithNoPublicIp();
-        NetworkDto networkDto = NetworkDto.builder()
-                .withSubnetMetas(subnetMetas)
-                .build();
-
-        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
-
-        Assertions.assertTrue(StringUtils.isNotBlank(actual));
-        Assertions.assertTrue(subnetMetas.get(actual).isPrivateSubnet());
-    }
-
-    @Test
-    void testProvideShouldReturnAPublicSubnetIDWhenCcmNoPrivateAws() {
-        Map<String, CloudSubnet> subnetMetas = createPublicSubnetMetas();
-        NetworkDto networkDto = NetworkDto.builder()
-                .withSubnetMetas(subnetMetas)
-                .build();
-
-        String actual = underTest.provide(networkDto, Tunnel.CCM, CloudPlatform.AWS);
-
-        Assertions.assertTrue(StringUtils.isNotBlank(actual));
-        Assertions.assertFalse(subnetMetas.get(actual).isPrivateSubnet());
-    }
-
-    @Test
-    void testProvideShouldReturnAPublicSubnetIDWhenNoCcmNoPrivateAws() {
-        Map<String, CloudSubnet> subnetMetas = createPublicSubnetMetas();
-        NetworkDto networkDto = NetworkDto.builder()
-                .withSubnetMetas(subnetMetas)
-                .build();
-
-        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
-
-        Assertions.assertTrue(StringUtils.isNotBlank(actual));
-        Assertions.assertFalse(subnetMetas.get(actual).isPrivateSubnet());
-    }
-
-    @Test
-    void testProvideShouldReturnAPrivateWhenCcmAndNoPublicAws() {
-        Map<String, CloudSubnet> subnetMetas = createPrivateSubnetMetas();
-        NetworkDto networkDto = NetworkDto.builder()
-                .withSubnetMetas(subnetMetas)
-                .build();
-
-        String actual = underTest.provide(networkDto, Tunnel.CCM, CloudPlatform.AWS);
-
-        Assertions.assertTrue(StringUtils.isNotBlank(actual));
-        Assertions.assertTrue(subnetMetas.get(actual).isPrivateSubnet());
-    }
-
-    @Test
-    void testProvideShouldReturnAPrivateWhenNoCcmAndNoPublicAws() {
-        Map<String, CloudSubnet> subnetMetas = createPrivateSubnetMetas();
-        NetworkDto networkDto = NetworkDto.builder()
-                .withSubnetMetas(subnetMetas)
-                .build();
-
-        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
-
-        Assertions.assertTrue(StringUtils.isNotBlank(actual));
-        Assertions.assertTrue(subnetMetas.get(actual).isPrivateSubnet());
-    }
-
-    @Test
-    void testProvideShouldReturnAPublicSubnetIDWhenCcmNoPrivateNoPublicIpAws() {
-        Map<String, CloudSubnet> subnetMetas = createPublicSubnetMetasWithNoPublicIp();
-        NetworkDto networkDto = NetworkDto.builder()
-                .withSubnetMetas(subnetMetas)
-                .build();
-
-        String actual = underTest.provide(networkDto, Tunnel.CCM, CloudPlatform.AWS);
-
-        Assertions.assertTrue(StringUtils.isNotBlank(actual));
-        Assertions.assertFalse(subnetMetas.get(actual).isPrivateSubnet());
-    }
-
-    @Test
-    void testProvideShouldReturnAPublicSubnetIDWhenNoCcmNoPrivateNoPublicIpAws() {
-        Map<String, CloudSubnet> subnetMetas = createPublicSubnetMetasWithNoPublicIp();
-        NetworkDto networkDto = NetworkDto.builder()
-                .withSubnetMetas(subnetMetas)
-                .build();
-
-        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
-
-        Assertions.assertTrue(StringUtils.isNotBlank(actual));
-        Assertions.assertFalse(subnetMetas.get(actual).isPrivateSubnet());
+        ArgumentCaptor<SubnetSelectionParameters> subnetSelectionParametersCaptor = ArgumentCaptor.forClass(SubnetSelectionParameters.class);
+        verify(networkConnector).selectSubnets(any(), subnetSelectionParametersCaptor.capture());
+        assertFalse(subnetSelectionParametersCaptor.getValue().isPreferPrivateNetwork());
+        assertFalse(subnetSelectionParametersCaptor.getValue().isHa());
+        assertEquals(tunnel, subnetSelectionParametersCaptor.getValue().getTunnel());
     }
 
     @Test
@@ -169,51 +77,13 @@ class SubnetIdProviderTest {
         Assertions.assertNull(actual);
     }
 
-    @Test
-    void testProvideShouldReturnASubnetAzure() {
-        Map<String, CloudSubnet> subnetMetas = createSubnetMetas();
-        NetworkDto networkDto = NetworkDto.builder()
-                .withSubnetMetas(subnetMetas)
-                .build();
-
-        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AZURE);
-
-        Assertions.assertTrue(StringUtils.isNotBlank(actual));
+    private NetworkConnector setupConnector() {
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        NetworkConnector networkConnector = mock(NetworkConnector.class);
+        when(networkConnector.selectSubnets(any(), any()))
+                .thenReturn(List.of(new CloudSubnet()));
+        when(cloudConnector.networkConnector()).thenReturn(networkConnector);
+        when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
+        return networkConnector;
     }
-
-    private Map<String, CloudSubnet> createSubnetMetas() {
-        return Map.of(
-                SUBNET_ID_1, new CloudSubnet(SUBNET_ID_1, SUBNET_ID_1, "az", "cidr", true, true, false),
-                SUBNET_ID_2, new CloudSubnet(SUBNET_ID_2, SUBNET_ID_2, "az", "cidr", false, true, true),
-                SUBNET_ID_3, new CloudSubnet(SUBNET_ID_3, SUBNET_ID_3, "az", "cidr", true, true, false));
-    }
-
-    private Map<String, CloudSubnet> createSubnetMetasWithNoPublicIp() {
-        return Map.of(
-                SUBNET_ID_1, new CloudSubnet(SUBNET_ID_1, SUBNET_ID_1, "az", "cidr", true, false, false),
-                SUBNET_ID_2, new CloudSubnet(SUBNET_ID_2, SUBNET_ID_2, "az", "cidr", false, false, true),
-                SUBNET_ID_3, new CloudSubnet(SUBNET_ID_3, SUBNET_ID_3, "az", "cidr", true, false, false));
-    }
-
-    private Map<String, CloudSubnet> createPublicSubnetMetas() {
-        return Map.of(
-                SUBNET_ID_1, new CloudSubnet(SUBNET_ID_1, SUBNET_ID_1, "az", "cidr", false, true, true),
-                SUBNET_ID_2, new CloudSubnet(SUBNET_ID_2, SUBNET_ID_2, "az", "cidr", false, true, true),
-                SUBNET_ID_3, new CloudSubnet(SUBNET_ID_3, SUBNET_ID_3, "az", "cidr", false, true, true));
-    }
-
-    private Map<String, CloudSubnet> createPublicSubnetMetasWithNoPublicIp() {
-        return Map.of(
-                SUBNET_ID_1, new CloudSubnet(SUBNET_ID_1, SUBNET_ID_1, "az", "cidr", false, false, true),
-                SUBNET_ID_2, new CloudSubnet(SUBNET_ID_2, SUBNET_ID_2, "az", "cidr", false, false, true),
-                SUBNET_ID_3, new CloudSubnet(SUBNET_ID_3, SUBNET_ID_3, "az", "cidr", false, false, true));
-    }
-
-    private Map<String, CloudSubnet> createPrivateSubnetMetas() {
-        return Map.of(
-                SUBNET_ID_1, new CloudSubnet(SUBNET_ID_1, SUBNET_ID_1, "az", "cidr", true, true, false),
-                SUBNET_ID_2, new CloudSubnet(SUBNET_ID_2, SUBNET_ID_2, "az", "cidr", true, true, false),
-                SUBNET_ID_3, new CloudSubnet(SUBNET_ID_3, SUBNET_ID_3, "az", "cidr", true, true, false));
-    }
-
 }
