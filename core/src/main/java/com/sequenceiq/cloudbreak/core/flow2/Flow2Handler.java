@@ -146,10 +146,10 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                         flowId = UUID.randomUUID().toString();
                         Flow flow = flowConfig.createFlow(flowId, payload.getStackId());
                         flow.initialize(contextParams);
+                        runningFlows.put(flow, flowChainId);
                         flowLogService.save(flowId, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
                         acceptFlow(payload);
                         logFlowId(flowId);
-                        runningFlows.put(flow, flowChainId);
                         flow.sendEvent(key, payload);
                     }
                 } else {
