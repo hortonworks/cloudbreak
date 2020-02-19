@@ -40,6 +40,10 @@ public enum Status {
     public static final Collection<Status> FREEIPA_UNREACHABLE_STATUSES = List.of(REQUESTED, UNREACHABLE, STOPPED, DELETED_ON_PROVIDER_SIDE,
             DELETE_IN_PROGRESS, DELETE_COMPLETED);
 
+    public static final Collection<Status> FREEIPA_STOPPABLE_STATUSES = List.of(AVAILABLE, STOP_FAILED);
+
+    public static final Collection<Status> FREEIPA_STARTABLE_STATUSES = List.of(STOPPED, START_FAILED);
+
     public boolean isRemovableStatus() {
         return REMOVABLE_STATUSES.contains(this);
     }
@@ -66,5 +70,13 @@ public enum Status {
 
     public boolean isFreeIpaUnreachableStatus() {
         return FREEIPA_UNREACHABLE_STATUSES.contains(this);
+    }
+
+    public Boolean isStoppable() {
+        return FREEIPA_STOPPABLE_STATUSES.contains(this);
+    }
+
+    public Boolean isStartable() {
+        return FREEIPA_STARTABLE_STATUSES.contains(this);
     }
 }

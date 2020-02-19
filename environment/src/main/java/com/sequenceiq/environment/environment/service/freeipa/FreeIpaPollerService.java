@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.service.freeipa;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptMaker;
 import com.sequenceiq.environment.environment.poller.FreeIpaPollerProvider;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Service
@@ -31,16 +33,17 @@ public class FreeIpaPollerService {
     }
 
     public void startAttachedFreeipaInstances(Long envId, String envCrn) {
-        executeFreeIpaOperationAndStartPolling(envCrn, freeIpaService::startFreeIpa, freeipaPollerProvider.startPoller(envId, envCrn));
+        executeFreeIpaOperationAndStartPolling(envCrn, freeIpaService::startFreeIpa, freeipaPollerProvider.startPoller(envId, envCrn), Status::isStartable);
     }
 
     public void stopAttachedFreeipaInstances(Long envId, String envCrn) {
-        executeFreeIpaOperationAndStartPolling(envCrn, freeIpaService::stopFreeIpa, freeipaPollerProvider.stopPoller(envId, envCrn));
+        executeFreeIpaOperationAndStartPolling(envCrn, freeIpaService::stopFreeIpa, freeipaPollerProvider.stopPoller(envId, envCrn), Status::isStoppable);
     }
 
-    private void executeFreeIpaOperationAndStartPolling(String envCrn, Consumer<String> freeIpaOperation, AttemptMaker<Void> attemptMaker) {
+    private void executeFreeIpaOperationAndStartPolling(String envCrn, Consumer<String> freeIpaOperation, AttemptMaker<Void> attemptMaker,
+            Function<Status, Boolean> shouldRun) {
         Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(envCrn);
-        if (freeIpaResponse.isPresent() && !freeIpaResponse.get().getStatus().isAvailable()) {
+        if (freeIpaResponse.isPresent() && shouldRun.apply(freeIpaResponse.get().getStatus())) {
             freeIpaOperation.accept(envCrn);
             Polling.stopAfterAttempt(attempt)
                     .stopIfException(true)
