@@ -104,6 +104,7 @@ public class OperationDescriptions {
         public static final String FAILURE_REPORT = "failure report";
         public static final String CHANGED_NODES_REPORT = "changed nodes report";
         public static final String REPAIR_CLUSTER = "repair the cluster";
+        public static final String GET_HOST_HOSTMETADATA_COUNT_BY_STACK_ID = "retrieve the hostmetadata count in host group";
     }
 
     public static class GatewayOpDescription {
