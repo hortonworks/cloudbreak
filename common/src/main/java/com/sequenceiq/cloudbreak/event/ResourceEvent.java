@@ -207,6 +207,8 @@ public enum ResourceEvent {
     CLUSTER_START_REQUESTED("cluster.start.requested"),
     CLUSTER_AUTORECOVERY_REQUESTED("cluster.autorecovery.requested"),
     CLUSTER_MANUALRECOVERY_REQUESTED("cluster.manualrecovery.requested"),
+    CLUSTER_MANUALRECOVERY_COULD_NOT_START("cluster.manualrecovery.could.not.start"),
+    CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER("cluster.manualrecovery.no.nodes.to.recover"),
     CLUSTER_RECOVERED_NODES_REPORTED("cluster.recoverednodes.reported"),
     CLUSTER_PRIMARY_GATEWAY_UNHEALTHY_SYNC_STARTED("cluster.pgw.unhealthy.sync.started"),
     CLUSTER_PACKAGES_ON_INSTANCES_ARE_DIFFERENT("cluster.sync.instance.different.packages"),

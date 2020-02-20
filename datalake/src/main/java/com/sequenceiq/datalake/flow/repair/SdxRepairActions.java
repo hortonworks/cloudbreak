@@ -22,6 +22,7 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
+import com.sequenceiq.datalake.flow.repair.event.SdxRepairCouldNotStartEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairFailedEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairSuccessEvent;
@@ -67,7 +68,7 @@ public class SdxRepairActions {
 
             @Override
             protected Object getFailurePayload(SdxRepairStartEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return SdxRepairFailedEvent.from(payload, ex);
+                return SdxRepairCouldNotStartEvent.from(payload, ex);
             }
         };
     }
@@ -119,6 +120,29 @@ public class SdxRepairActions {
 
             @Override
             protected Object getFailurePayload(SdxRepairSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return null;
+            }
+        };
+    }
+
+    @Bean(name = "SDX_REPAIR_COULD_NOT_START_STATE")
+    public Action<?, ?> repairCouldNotStart() {
+        return new AbstractSdxAction<>(SdxRepairCouldNotStartEvent.class) {
+            @Override
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    SdxRepairCouldNotStartEvent payload) {
+                return SdxContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(SdxContext context, SdxRepairCouldNotStartEvent payload, Map<Object, Object> variables) throws Exception {
+                Exception exception = payload.getException();
+                LOGGER.error("Datalake repair could not start for datalakeId: {}", payload.getResourceId(), exception);
+                sendEvent(context, SDX_REPAIR_FAILED_HANDLED_EVENT.event(), payload);
+            }
+
+            @Override
+            protected Object getFailurePayload(SdxRepairCouldNotStartEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return null;
             }
         };
