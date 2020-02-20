@@ -13,6 +13,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.Entity;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
@@ -50,6 +51,8 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     private String lastKnownFlowChainId;
 
     private String lastKnownFlowId;
+
+    private CloudPlatform cloudPlatform;
 
     protected AbstractTestDto(String newId) {
         super(newId);
@@ -165,8 +168,16 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
         return testContext.given(key, clss);
     }
 
+    public <O extends CloudbreakTestDto> O given(String key, Class<O> clss, CloudPlatform cloudPlatform) {
+        return testContext.given(key, clss, cloudPlatform);
+    }
+
     public <O extends CloudbreakTestDto> O given(Class<O> clss) {
         return testContext.given(clss);
+    }
+
+    public <O extends CloudbreakTestDto> O given(Class<O> clss, CloudPlatform cloudPlatform) {
+        return testContext.given(clss, cloudPlatform);
     }
 
     public <O extends CloudbreakTestDto> O init(Class<O> clss) {
@@ -252,5 +263,15 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     @Override
     public String toString() {
         return getClass().getSimpleName() + "[name: " + getName() + "]";
+    }
+
+    @Override
+    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
+
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return cloudPlatform;
     }
 }

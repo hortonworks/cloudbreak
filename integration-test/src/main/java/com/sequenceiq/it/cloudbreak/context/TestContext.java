@@ -23,6 +23,7 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.TestParameter;
@@ -38,6 +39,7 @@ import com.sequenceiq.it.cloudbreak.actor.Actor;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
@@ -98,6 +100,9 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Inject
     private CloudProviderProxy cloudProvider;
+
+    @Inject
+    private CommonCloudProperties commonCloudProperties;
 
     private DefaultModel model;
 
@@ -304,19 +309,39 @@ public abstract class TestContext implements ApplicationContextAware {
         return (O) bean.valid();
     }
 
+    public <O extends CloudbreakTestDto> O init(Class<O> clss, CloudPlatform cloudPlatform) {
+        checkShutdown();
+        LOGGER.info("init " + clss.getSimpleName());
+        CloudbreakTestDto bean = applicationContext.getBean(clss, getTestContext());
+        bean.setCloudPlatform(cloudPlatform);
+        initialized = true;
+        return (O) bean.valid();
+    }
+
     public <O extends CloudbreakTestDto> O given(Class<O> clss) {
         return given(clss.getSimpleName(), clss);
     }
 
+    public <O extends CloudbreakTestDto> O given(Class<O> clss, CloudPlatform cloudPlatform) {
+        return given(clss.getSimpleName(), clss, cloudPlatform);
+    }
+
     public <O extends CloudbreakTestDto> O given(String key, Class<O> clss) {
+        return given(key, clss, CloudPlatform.valueOf(commonCloudProperties.getCloudProvider()));
+    }
+
+    public <O extends CloudbreakTestDto> O given(String key, Class<O> clss, CloudPlatform cloudPlatform) {
         checkShutdown();
         O cloudbreakEntity = (O) resources.get(key);
         if (cloudbreakEntity == null) {
-            cloudbreakEntity = init(clss);
+            cloudbreakEntity = init(clss, cloudPlatform);
             resources.put(key, cloudbreakEntity);
             Log.given(LOGGER, cloudbreakEntity + " created");
         } else {
             Log.given(LOGGER, cloudbreakEntity + " retrieved");
+            if (cloudbreakEntity.getCloudPlatform() != cloudPlatform) {
+                throw new RuntimeException("Existing cloudbreak entity's cloud platform can not be changed!");
+            }
         }
         return cloudbreakEntity;
     }

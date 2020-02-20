@@ -6,6 +6,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
@@ -110,8 +111,18 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
+    public <O extends CloudbreakTestDto> O init(Class<O> clss, CloudPlatform cloudPlatform) {
+        return wrappedTestContext.init(clss, cloudPlatform);
+    }
+
+    @Override
     public <O extends CloudbreakTestDto> O given(String key, Class<O> clss) {
         return wrappedTestContext.given(key, clss);
+    }
+
+    @Override
+    public <O extends CloudbreakTestDto> O given(String key, Class<O> clss, CloudPlatform cloudPlatform) {
+        return wrappedTestContext.given(key, clss, cloudPlatform);
     }
 
     @Override
