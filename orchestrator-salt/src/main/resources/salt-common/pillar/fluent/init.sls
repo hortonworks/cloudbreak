@@ -22,6 +22,7 @@ fluent:
   azureStorageAccount:
   azureContainer:
   azureInstanceMsi:
+  azureIdBrokerInstanceMsi:
   azureStorageAccessKey:
   dbusClusterLogsCollection: false
   dbusClusterLogsCollectionDisableStop: false

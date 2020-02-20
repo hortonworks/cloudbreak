@@ -29,15 +29,18 @@ import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
 import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterDetails;
+import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
@@ -195,9 +198,26 @@ public class StackRequestManifester {
                 if (!fluentAttributes.containsKey(FluentClusterDetails.CLUSTER_CRN_KEY)) {
                     fluentAttributes.put(FluentClusterDetails.CLUSTER_CRN_KEY, sdxCluster.getCrn());
                 }
+                addAzureIdbrokerMsiToTelemetry(fluentAttributes, stackV4Request);
                 telemetryRequest.setFluentAttributes(fluentAttributes);
             }
             stackV4Request.setTelemetry(telemetryRequest);
+        }
+    }
+
+    void addAzureIdbrokerMsiToTelemetry(Map<String, Object> fluentAttributes, StackV4Request stackRequest) {
+        if (stackRequest.getCluster() != null && stackRequest.getCluster().getCloudStorage() != null
+                && stackRequest.getCluster().getCloudStorage().getIdentities() != null) {
+            List<StorageIdentityBase> identities = stackRequest.getCluster().getCloudStorage().getIdentities();
+            for (StorageIdentityBase identity : identities) {
+                if (CloudIdentityType.ID_BROKER.equals(identity.getType()) && identity.getAdlsGen2() != null) {
+                    if (!fluentAttributes.containsKey(FluentConfigView.AZURE_IDBROKER_INSTANCE_MSI)) {
+                        String idBrokerInstanceMsi = identity.getAdlsGen2().getManagedIdentity();
+                        LOGGER.info("Setting idbroker instance msi for telemetry: {}", idBrokerInstanceMsi);
+                        fluentAttributes.put(FluentConfigView.AZURE_IDBROKER_INSTANCE_MSI, idBrokerInstanceMsi);
+                    }
+                }
+            }
         }
     }
 
