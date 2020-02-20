@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.common.cost.CostTagging;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.CDPTagGenerationRequest;
+import com.sequenceiq.cloudbreak.common.service.CDPTagGenerationRequest.Builder;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
@@ -88,7 +89,7 @@ public class CreateFreeIpaRequestToStackConverter {
     @Value("#{'${freeipa.default.gateway.cidr}'.split(',')}")
     private Set<String> defaultGatewayCidr;
 
-    public Stack convert(CreateFreeIpaRequest source, String accountId, Future<User> userFuture, String cloudPlatform) {
+    public Stack convert(CreateFreeIpaRequest source, String accountId, Future<User> userFuture, String userCrn, String cloudPlatform) {
         Stack stack = new Stack();
         stack.setEnvironmentCrn(source.getEnvironmentCrn());
         stack.setAccountId(accountId);
@@ -107,7 +108,7 @@ public class CreateFreeIpaRequestToStackConverter {
         }
         stack.setTelemetry(telemetryConverter.convert(source.getTelemetry()));
         decorateStackWithTunnelAndCcm(stack, source);
-        updateOwnerRelatedFields(accountId, userFuture, stack);
+        updateOwnerRelatedFields(accountId, userFuture, userCrn, stack);
         extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack);
         return stack;
     }
@@ -151,17 +152,18 @@ public class CreateFreeIpaRequestToStackConverter {
         return securityRule;
     }
 
-    private void updateOwnerRelatedFields(String accountId, Future<User> userFuture, Stack stack) {
+    private void updateOwnerRelatedFields(String accountId, Future<User> userFuture, String userCrn, Stack stack) {
         String owner = accountId;
+        User user = User.newBuilder().setCrn(userCrn).setEmail(accountId).build();
         try {
-            User user = userFuture.get(userGetTimeout, TimeUnit.SECONDS);
+            user = userFuture.get(userGetTimeout, TimeUnit.SECONDS);
             owner = user.getEmail();
-            stack.setTags(getTags(user, stack));
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             String errorMessage = "Couldn't fetch user from UMS: ";
             LOGGER.error(errorMessage, e);
             stack.getStackStatus().setStatusReason(errorMessage + e.getMessage());
         }
+        stack.setTags(getTags(user, stack));
         stack.setOwner(owner);
     }
 
@@ -205,7 +207,7 @@ public class CreateFreeIpaRequestToStackConverter {
     private Map<String, String> getDefaultTags(User user, Stack stack) {
         Map<String, String> result = new HashMap<>();
         try {
-            CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
+            CDPTagGenerationRequest request = Builder.builder()
                     .withCreatorCrn(user.getCrn())
                     .withEnvironmentCrn(stack.getEnvironmentCrn())
                     .withPlatform(stack.getCloudPlatform())

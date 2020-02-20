@@ -107,7 +107,7 @@ public class FreeIpaCreationService {
         String userCrn = crnService.getUserCrn();
         Future<User> userFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn, userCrn, MDCUtils.getRequestId()));
         Credential credential = credentialService.getCredentialByEnvCrn(request.getEnvironmentCrn());
-        Stack stack = stackConverter.convert(request, accountId, userFuture, credential.getCloudPlatform());
+        Stack stack = stackConverter.convert(request, accountId, userFuture, userCrn, credential.getCloudPlatform());
         stack.setAppVersion(appVersion);
         GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack, credential);
 
