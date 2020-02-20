@@ -112,10 +112,7 @@ public class StackValidationRequestToStackValidationConverterTest {
         mockBlueprintsInWorkspace();
         environment = new DetailedEnvironmentResponse();
         environment.setCredential(credentialResponse);
-        when(environmentClientService.getByName(anyString())).thenReturn(environment);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environment);
-        when(credentialClientService.getByCrn(anyString())).thenReturn(credential);
-        when(credentialClientService.getByName(anyString())).thenReturn(credential);
         when(credentialConverter.convert(credentialResponse)).thenReturn(credential);
     }
 

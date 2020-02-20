@@ -38,15 +38,5 @@ dependencies {
     exclude group: 'org.hamcrest'
   }
   testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
-  testCompile        group: 'org.mockito',               name: 'mockito-junit-jupiter',          version: mockitoVersion
   testCompile        group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
-  testRuntime        group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
-  testRuntime        group: 'org.junit.vintage',         name: 'junit-vintage-engine',           version: junitJupiterVersion
-}
-
-test{
-  useJUnitPlatform {
-    includeEngines 'junit-jupiter', 'junit-vintage'
-  }
 }
