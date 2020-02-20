@@ -60,7 +60,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.util.KrbKeySetEncoder;
+import com.sequenceiq.freeipa.service.freeipa.user.kerberos.KrbKeySetEncoder;
 
 @Service
 public class UserSyncService {
