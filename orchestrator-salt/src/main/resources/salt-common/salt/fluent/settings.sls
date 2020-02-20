@@ -36,6 +36,11 @@
 {% set s3_log_bucket = salt['pillar.get']('fluent:s3LogArchiveBucketName') %}
 {% set azure_container = salt['pillar.get']('fluent:azureContainer') %}
 {% set azure_storage_instance_msi = salt['pillar.get']('fluent:azureInstanceMsi') %}
+{% if salt['pillar.get']('fluent:azureIdBrokerInstanceMsi') %}
+    {% set azure_storage_idbroker_instance_msi = salt['pillar.get']('fluent:azureIdBrokerInstanceMsi') %}
+{% else %}
+    {% set azure_storage_idbroker_instance_msi = salt['pillar.get']('fluent:azureInstanceMsi') %}
+{% endif %}
 {% set azore_storage_account = salt['pillar.get']('fluent:azureStorageAccount') %}
 {% set azure_storage_access_key = salt['pillar.get']('fluent:azureStorageAccessKey') %}
 
@@ -66,7 +71,7 @@
 {% set partition_interval = salt['pillar.get']('fluent:partitionIntervalMin') %}
 {% set cloudera_public_gem_repo = 'https://repository.cloudera.com/cloudera/api/gems/cloudera-gems/' %}
 {% set cloudera_azure_plugin_version = '1.0.1' %}
-{% set cloudera_azure_gen2_plugin_version = '0.2.4' %}
+{% set cloudera_azure_gen2_plugin_version = '0.2.7' %}
 {% set cloudera_databus_plugin_version = '1.0.3' %}
 {% set platform = salt['pillar.get']('fluent:platform') %}
 
@@ -115,6 +120,7 @@
     "azureStorageAccount": azore_storage_account,
     "azureContainer": azure_container,
     "azureInstanceMsi": azure_storage_instance_msi,
+    "azureIdBrokerInstanceMsi": azure_storage_idbroker_instance_msi,
     "azureStorageAccessKey": azure_storage_access_key,
     "dbusReportDeploymentLogs": dbus_report_deployment_logs_enabled,
     "dbusReportDeploymentLogsDisableStop": dbus_report_deployment_logs_disable_stop,
