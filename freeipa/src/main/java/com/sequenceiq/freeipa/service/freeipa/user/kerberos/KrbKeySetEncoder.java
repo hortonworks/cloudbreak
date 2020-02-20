@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.util;
+package com.sequenceiq.freeipa.service.freeipa.user.kerberos;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
 

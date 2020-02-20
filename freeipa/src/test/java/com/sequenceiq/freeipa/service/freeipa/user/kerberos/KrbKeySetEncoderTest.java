@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.util;
+package com.sequenceiq.freeipa.service.freeipa.user.kerberos;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
