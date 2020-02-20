@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.flow.repair;
 
 import static com.sequenceiq.datalake.flow.repair.SdxRepairState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.repair.SdxRepairState.INIT_STATE;
+import static com.sequenceiq.datalake.flow.repair.SdxRepairState.SDX_REPAIR_COULD_NOT_START_STATE;
 import static com.sequenceiq.datalake.flow.repair.SdxRepairState.SDX_REPAIR_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.repair.SdxRepairState.SDX_REPAIR_FINISHED_STATE;
 import static com.sequenceiq.datalake.flow.repair.SdxRepairState.SDX_REPAIR_IN_PROGRESS_STATE;
@@ -24,7 +25,8 @@ public class SdxRepairFlowConfig extends AbstractFlowConfiguration<SdxRepairStat
             .event(SdxRepairEvent.SDX_REPAIR_EVENT).noFailureEvent()
             .from(SDX_REPAIR_START_STATE)
             .to(SDX_REPAIR_IN_PROGRESS_STATE)
-            .event(SdxRepairEvent.SDX_REPAIR_IN_PROGRESS_EVENT).defaultFailureEvent()
+            .event(SdxRepairEvent.SDX_REPAIR_IN_PROGRESS_EVENT)
+                .failureState(SDX_REPAIR_COULD_NOT_START_STATE).failureEvent(SdxRepairEvent.SDX_REPAIR_COULD_NOT_START_EVENT)
             .from(SDX_REPAIR_IN_PROGRESS_STATE)
             .to(SDX_REPAIR_FINISHED_STATE)
             .event(SdxRepairEvent.SDX_REPAIR_SUCCESS_EVENT).failureEvent(SdxRepairEvent.SDX_REPAIR_FAILED_EVENT)

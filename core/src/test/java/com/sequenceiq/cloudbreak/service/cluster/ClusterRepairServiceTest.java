@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_COULD_NOT_START;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -13,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +51,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -290,8 +294,36 @@ public class ClusterRepairServiceTest {
             underTest.repairNodes(1L, Set.of("instanceId1"), false, false);
         });
         assertEquals("Repair cannot be performed, because there is already an active operation.", exception.getMessage());
-
+        verifyEventArguments(CLUSTER_MANUALRECOVERY_COULD_NOT_START, "Repair cannot be performed, because there is already an active operation.");
         verifyZeroInteractions(stackUpdater);
+    }
+
+    @Test
+    public void shouldNotUpdateStackStateWhenThereAreNoNodesToRepair() {
+        HostGroup hostGroup1 = new HostGroup();
+        hostGroup1.setName("hostGroup1");
+        hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
+        InstanceMetaData host1 = getHost("host1", hostGroup1.getName(), InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.CORE);
+        hostGroup1.setInstanceGroup(host1.getInstanceGroup());
+
+        when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
+        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(Collections.emptyList());
+        when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
+        when(stackService.getById(1L)).thenReturn(stack);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            underTest.repairHostGroups(1L, Set.of("hostGroup1"), false);
+        });
+
+        assertEquals("Could not trigger cluster repair  for stack 1, because node list is incorrect", exception.getMessage());
+        verifyEventArguments(CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER, "hostGroup1");
+        verifyZeroInteractions(stackUpdater);
+    }
+
+    private void verifyEventArguments(ResourceEvent resourceEvent, String messageAssert) {
+        final ArgumentCaptor<Collection> argument = ArgumentCaptor.forClass(Collection.class);
+        verify(eventService).fireCloudbreakEvent(any(), eq("RECOVERY"), eq(resourceEvent), argument.capture());
+        assertEquals(messageAssert, argument.getValue().iterator().next());
     }
 
     private InstanceMetaData getHost(String hostName, String groupName, InstanceStatus instanceStatus, InstanceGroupType instanceGroupType) {
