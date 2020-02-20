@@ -59,13 +59,13 @@ public class MetadataSetupServiceTest {
 
     private static final String PUBLIC_IP = "PUBLIC_IP";
 
-    private static final int SSH_PORT = 22;
+    private static final Integer SSH_PORT = 22;
 
     private static final String LOCALITY_INDICATOR = "LOCALITY_INDICATOR";
 
     private static final Long INSTANCE_GROUP_ID = 3L;
 
-    private static final long CURRENT_TIME = System.currentTimeMillis();
+    private static final Long CURRENT_TIME = System.currentTimeMillis();
 
     private static final com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus CREATED =
             com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.CREATED;

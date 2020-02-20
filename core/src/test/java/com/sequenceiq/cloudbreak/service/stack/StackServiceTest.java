@@ -6,7 +6,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -20,7 +19,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -49,7 +47,6 @@ import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -191,19 +188,6 @@ public class StackServiceTest {
     @Mock
     private FlowLogService flowLogService;
 
-    @Before
-    public void setup() {
-        when(stack.getId()).thenReturn(STACK_ID);
-        when(stack.getName()).thenReturn(STACK_NAME);
-        when(stack.getWorkspace()).thenReturn(workspace);
-        when(workspace.getId()).thenReturn(WORKSPACE_ID);
-        when(user.getUserCrn()).thenReturn(USER_CRN);
-        DatalakeResources datalakeResources = new DatalakeResources();
-        datalakeResources.setDatalakeStackId(STACK_ID);
-        datalakeResources.setId(DATALAKE_RESOURCE_ID);
-        when(datalakeResourcesService.findByDatalakeStackId(anyLong())).thenReturn(Optional.of(datalakeResources));
-    }
-
     @Test
     public void testWhenStackCouldNotFindByItsIdThenExceptionWouldThrown() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
@@ -221,8 +205,6 @@ public class StackServiceTest {
         when(stackAuthentication.passwordAuthenticationRequired()).thenReturn(false);
 
         when(stackRepository.save(stack)).thenReturn(stack);
-
-        when(tlsSecurityService.generateSecurityKeys(any(Workspace.class))).thenReturn(securityConfig);
 
         expectedException.expectCause(org.hamcrest.Matchers.any(CloudbreakImageNotFoundException.class));
 
@@ -248,8 +230,6 @@ public class StackServiceTest {
         when(stackAuthentication.passwordAuthenticationRequired()).thenReturn(false);
 
         when(stackRepository.save(stack)).thenReturn(stack);
-
-        when(tlsSecurityService.generateSecurityKeys(any(Workspace.class))).thenReturn(securityConfig);
 
         try {
             stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,

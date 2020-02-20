@@ -15,15 +15,11 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
-import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -55,12 +51,8 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     private ImageCatalogService underTest;
 
     @Before
-    public void beforeTest() throws Exception {
-        String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/no-default-imagecatalog.json");
-        CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
-        when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
+    public void beforeTest() {
         when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
-        when(userProfileService.getOrCreate(user)).thenReturn(new UserProfile());
     }
 
     @Test(expected = CloudbreakImageNotFoundException.class)

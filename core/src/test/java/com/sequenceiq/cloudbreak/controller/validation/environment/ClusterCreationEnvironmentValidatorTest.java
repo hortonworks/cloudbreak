@@ -79,8 +79,10 @@ class ClusterCreationEnvironmentValidatorTest {
     void setUp() {
         KerberosConfig kerberosConfig = KerberosConfigBuilder.aKerberosConfig().withType(KerberosType.FREEIPA).build();
         when(kerberosConfigService.get(any(), any())).thenReturn(Optional.of(kerberosConfig));
+        when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
         when(cloudPlatformConnectors.get(any(), any())).thenReturn(connector);
         when(connector.parameters()).thenReturn(platformParameters);
+        when(connector.displayNameToRegion(any())).thenReturn("region1");
         when(platformParameters.isAutoTlsSupported()).thenReturn(true);
     }
 
@@ -140,6 +142,7 @@ class ClusterCreationEnvironmentValidatorTest {
         // GIVEN
         Stack stack = getStack();
         stack.setRegion("region3");
+        when(connector.displayNameToRegion(any())).thenReturn("region666");
         ClusterV4Request clusterRequest = new ClusterV4Request();
         ProxyConfig proxyConfig = createProxyConfig("proxy");
         clusterRequest.setProxyConfigCrn(proxyConfig.getName());

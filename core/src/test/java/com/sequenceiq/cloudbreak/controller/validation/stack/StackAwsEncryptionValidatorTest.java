@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,8 +29,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.te
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.common.api.type.EncryptionType;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
@@ -41,6 +38,8 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.PlatformResourceClientService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -113,15 +112,10 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         credentialResponse = new CredentialResponse();
         credentialResponse.setName(CREDENTIAL_NAME);
         when(templateRequestValidator.validate(any())).thenReturn(ValidationResult.builder().build());
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(1L);
-        when(blueprintService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(blueprint);
         when(subject.getEnvironmentCrn()).thenReturn("envCrn");
         when(subject.getPlacement()).thenReturn(placementSettingsRequest);
-        when(subject.getCluster()).thenReturn(clusterRequest);
-        when(clusterRequest.getBlueprintName()).thenReturn("dummy");
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredential(credentialResponse);
-        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
     }
 

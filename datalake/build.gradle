@@ -67,11 +67,7 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',               version: springBootVersion
 
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: springBootVersion
-  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api',               version: junitJupiterVersion
-  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-params',           version: junitJupiterVersion
-  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',            version: junitJupiterVersion
-  testImplementation group: 'org.mockito',               name: 'mockito-core',                    version: mockitoVersion
-  testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter',           version: mockitoVersion
+  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
   implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                      version: '1.9.12'
@@ -101,10 +97,6 @@ bootJar {
     def grgit = Grgit.open(currentDir: project.projectDir)
     attributes "Implementation-Version": grgit.describe()
   }
-}
-
-test{
-  useJUnitPlatform()
 }
 
 task execute(type: JavaExec) {
