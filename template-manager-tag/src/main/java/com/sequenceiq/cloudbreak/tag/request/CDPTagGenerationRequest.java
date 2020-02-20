@@ -27,6 +27,8 @@ public class CDPTagGenerationRequest {
 
     private final Map<String, String> accountTags;
 
+    private final Map<String, String> userDefinedTags;
+
     private CDPTagGenerationRequest(CDPTagGenerationRequest.Builder builder) {
         this.platform = builder.platform;
         this.environmentCrn = builder.environmentCrn;
@@ -37,6 +39,7 @@ public class CDPTagGenerationRequest {
         this.accountId = builder.accountId;
         this.internalTenant = builder.internalTenant;
         this.accountTags = builder.accountTags;
+        this.userDefinedTags = builder.userDefinedTags;
     }
 
     public String getPlatform() {
@@ -79,6 +82,10 @@ public class CDPTagGenerationRequest {
         return accountTags;
     }
 
+    public Map<String, String> getUserDefinedTags() {
+        return userDefinedTags;
+    }
+
     public static class Builder {
 
         private String platform;
@@ -98,6 +105,8 @@ public class CDPTagGenerationRequest {
         private Map<String, String> sourceMap = new HashMap<>();
 
         private Map<String, String> accountTags = new HashMap<>();
+
+        private Map<String, String> userDefinedTags = new HashMap<>();
 
         public static Builder builder() {
             return new Builder();
@@ -145,6 +154,11 @@ public class CDPTagGenerationRequest {
 
         public Builder withAccountTags(Map<String, String> accountTags) {
             this.accountTags = accountTags;
+            return this;
+        }
+
+        public Builder withUserDefinedTags(Map<String, String> userDefinedTags) {
+            this.userDefinedTags = userDefinedTags;
             return this;
         }
 
