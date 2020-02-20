@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionsV4Response;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -167,5 +168,15 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     public String getClusterHostsInventory(Long workspaceId, String name) {
         return stackOperations.getClusterHostsInventory(workspaceId, name);
+    }
+
+    @Override
+    public UpgradeOptionsV4Response checkForStackUpgradeByName(Long workspaceId, String name) {
+        return stackOperations.checkForStackUpgrade(NameOrCrn.ofName(name), workspaceId);
+    }
+
+    @Override
+    public void upgradeStackByName(Long workspaceId, String name, String imageId) {
+        stackOperations.upgradeStack(NameOrCrn.ofName(name), workspaceId, imageId);
     }
 }

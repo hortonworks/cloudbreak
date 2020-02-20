@@ -18,6 +18,7 @@ import javax.ws.rs.core.MediaType;
 import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionsV4Response;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
@@ -182,4 +183,28 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "list datalake versions", produces = MediaType.APPLICATION_JSON, nickname = "versions")
     List<String> versions();
+
+    @GET
+    @Path("{name}/check_stack_upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "checks for upgrade options by name", nickname = "checkForStackUpgradeByName")
+    UpgradeOptionsV4Response checkForStackUpgradeByName(@PathParam("name") String name);
+
+    @GET
+    @Path("/crn/{crn}/check_stack_upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "checks for stack upgrade options by crn", nickname = "checkForStackUpgradeByCrn")
+    UpgradeOptionsV4Response checkForStackUpgradeByCrn(@PathParam("crn") String crn);
+
+    @POST
+    @Path("{name}/stack_upgrade/image/{image}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "upgrades the datalake stack by name", nickname = "upgradeStackByName")
+    void upgradeStackByName(@PathParam("name") String name,  @PathParam("image") String imageId);
+
+    @POST
+    @Path("/crn/{crn}/stack_upgrade/image/{image}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "upgrades the datalake stack by crn", nickname = "upgradeStackByCrn")
+    void upgradeStackByCrn(@PathParam("crn") String crn, @PathParam("image") String imageId);
 }

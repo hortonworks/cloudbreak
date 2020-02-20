@@ -79,7 +79,7 @@ import com.sequenceiq.periscope.controller.AutoScaleClusterV1Controller;
 import com.sequenceiq.periscope.controller.AutoScaleClusterV2Controller;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterManager;
-import com.sequenceiq.periscope.domain.ClusterManagerVariant;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.PeriscopeNode;

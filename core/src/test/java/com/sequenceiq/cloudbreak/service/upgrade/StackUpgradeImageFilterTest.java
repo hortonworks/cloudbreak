@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.image;
+package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -18,9 +18,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.cloud.CompareLevel;
 import com.sequenceiq.cloudbreak.cloud.CustomVersionComparator;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
+import com.sequenceiq.cloudbreak.service.image.VersionBasedImageFilter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackUpgradeImageFilterTest {
@@ -61,7 +62,7 @@ public class StackUpgradeImageFilterTest {
 
     private Image currentImage;
 
-    private com.sequenceiq.cloudbreak.cloud.model.catalog.Image properImage;
+    private Image properImage;
 
     @Before
     public void before() {
@@ -71,11 +72,11 @@ public class StackUpgradeImageFilterTest {
 
     @Test
     public void testFilterShouldReturnTheAvailableImage() {
-        List<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> properImage = List.of(this.properImage);
+        List<Image> properImages = List.of(properImage);
         when(customVersionComparator.compare(V_7_0_2, V_7_0_3, CompareLevel.MAINTENANCE)).thenReturn(-1);
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, properImage)).thenReturn(properImage);
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, properImages)).thenReturn(properImages);
 
-        Images actual = underTest.filter(properImage, supportedCbVersions, currentImage, CLOUD_PLATFORM);
+        Images actual = underTest.filter(properImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
 
         assertTrue(actual.getCdhImages().contains(this.properImage));
         assertEquals(1, actual.getCdhImages().size());
@@ -83,8 +84,8 @@ public class StackUpgradeImageFilterTest {
 
     @Test
     public void testFilterShouldReturnTheProperImageWhenTheCloudPlatformIsNotMatches() {
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image availableImages = createImageWithDifferentPlatform();
-        List<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> allImage = List.of(availableImages, properImage);
+        Image availableImages = createImageWithDifferentPlatform();
+        List<Image> allImage = List.of(availableImages, properImage);
 
         when(customVersionComparator.compare(V_7_0_2, V_7_0_3, CompareLevel.MAINTENANCE)).thenReturn(-1);
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(allImage);
@@ -97,9 +98,9 @@ public class StackUpgradeImageFilterTest {
 
     @Test
     public void testFilterShouldReturnTheProperImageWhenTheCmVersionIsNotGreater() {
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image lowerCmImage = createImageWithLowerCmVersion();
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image lowerCmAndCdpImage = createImageWithLowerCmAndCdpVersion();
-        List<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> availableImages = List.of(properImage, lowerCmImage, lowerCmAndCdpImage);
+        Image lowerCmImage = createImageWithLowerCmVersion();
+        Image lowerCmAndCdpImage = createImageWithLowerCmAndCdpVersion();
+        List<Image> availableImages = List.of(properImage, lowerCmImage, lowerCmAndCdpImage);
 
         when(customVersionComparator.compare(V_7_0_2, V_7_0_3, CompareLevel.MAINTENANCE)).thenReturn(-1);
         when(customVersionComparator.compare(V_7_0_2, V_7_0_2, CompareLevel.MAINTENANCE)).thenReturn(0);
@@ -114,8 +115,8 @@ public class StackUpgradeImageFilterTest {
 
     @Test
     public void testFilterShouldReturnTheProperImageWhenTheCmfVersionIsNotMatches() {
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image differentCmfVersionImage = createImageWithDifferentCmfVersion();
-        List<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> availableImages = List.of(properImage, differentCmfVersionImage);
+        Image differentCmfVersionImage = createImageWithDifferentCmfVersion();
+        List<Image> availableImages = List.of(properImage, differentCmfVersionImage);
 
         when(customVersionComparator.compare(V_7_0_2, V_7_0_3, CompareLevel.MAINTENANCE)).thenReturn(-1);
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(availableImages);
@@ -128,8 +129,8 @@ public class StackUpgradeImageFilterTest {
 
     @Test
     public void testFilterShouldReturnTheProperImageWhenTheCspVersionIsNotMatches() {
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image differentCspVersionImage = createImageWithDifferentCspVersion();
-        List<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> availableImages = List.of(properImage, differentCspVersionImage);
+        Image differentCspVersionImage = createImageWithDifferentCspVersion();
+        List<Image> availableImages = List.of(properImage, differentCspVersionImage);
 
         when(customVersionComparator.compare(V_7_0_2, V_7_0_3, CompareLevel.MAINTENANCE)).thenReturn(-1);
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(availableImages);
@@ -142,8 +143,8 @@ public class StackUpgradeImageFilterTest {
 
     @Test
     public void testFilterShouldReturnTheProperImageWhenTheSaltVersionIsNotMatches() {
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image differentSaltVersionImage = createImageWithDifferentSaltVersion();
-        List<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> availableImages = List.of(properImage, differentSaltVersionImage);
+        Image differentSaltVersionImage = createImageWithDifferentSaltVersion();
+        List<Image> availableImages = List.of(properImage, differentSaltVersionImage);
 
         when(customVersionComparator.compare(V_7_0_2, V_7_0_3, CompareLevel.MAINTENANCE)).thenReturn(-1);
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(availableImages);
@@ -156,8 +157,8 @@ public class StackUpgradeImageFilterTest {
 
     @Test
     public void testFilterShouldReturnTheProperImageWhenTheCurrentImageIsAlsoAvailable() {
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image imageWithSameId = createImageWithCurrentImageId();
-        List<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> availableImages = List.of(properImage, imageWithSameId);
+        Image imageWithSameId = createImageWithCurrentImageId();
+        List<Image> availableImages = List.of(properImage, imageWithSameId);
 
         when(customVersionComparator.compare(V_7_0_2, V_7_0_3, CompareLevel.MAINTENANCE)).thenReturn(-1);
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(availableImages);
@@ -170,7 +171,7 @@ public class StackUpgradeImageFilterTest {
 
     @Test
     public void testFilterShouldReturnEmptyListWhenTheCurrentCbVersionIsNotSupported() {
-        List<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> availableImages = List.of(this.properImage);
+        List<Image> availableImages = List.of(properImage);
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(Collections.emptyList());
 
         Images actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
@@ -180,51 +181,53 @@ public class StackUpgradeImageFilterTest {
     }
 
     private Image createCurrentImage() {
-        return new Image(null, null, OS, OS_TYPE, null, null, CURRENT_IMAGE_ID,
-                createPackageVersions(V_7_0_2, V_7_0_2, CMF_VERSION, CSP_VERSION, SALT_VERSION));
+        return new Image(null, null, null, OS, CURRENT_IMAGE_ID, null, null,
+                Map.of(CLOUD_PLATFORM, Collections.emptyMap()), null, OS_TYPE,
+                createPackageVersions(V_7_0_2, V_7_0_2, CMF_VERSION, CSP_VERSION, SALT_VERSION),
+                null, null, null);
     }
 
-    private com.sequenceiq.cloudbreak.cloud.model.catalog.Image createProperImage() {
-        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, null, null, OS, IMAGE_ID, null, null,
+    private Image createProperImage() {
+        return new Image(null, null, null, OS, IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, Collections.emptyMap()), null, OS_TYPE,
                 createPackageVersions(V_7_0_3, V_7_0_3, CMF_VERSION, CSP_VERSION, SALT_VERSION),
                 null, null, null);
     }
 
-    private com.sequenceiq.cloudbreak.cloud.model.catalog.Image createImageWithDifferentPlatform() {
-        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, null, null, OS, IMAGE_ID, null, null, Map.of("azure", IMAGE_MAP), null, OS_TYPE,
+    private Image createImageWithDifferentPlatform() {
+        return new Image(null, null, null, OS, IMAGE_ID, null, null, Map.of("azure", IMAGE_MAP), null, OS_TYPE,
                 createPackageVersions(V_7_0_3, V_7_0_3, CMF_VERSION, CSP_VERSION, SALT_VERSION),
                 null, null, null);
     }
 
-    private com.sequenceiq.cloudbreak.cloud.model.catalog.Image createImageWithLowerCmVersion() {
-        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, null, null, OS, IMAGE_ID, null, null,
+    private Image createImageWithLowerCmVersion() {
+        return new Image(null, null, null, OS, IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, IMAGE_MAP), null, OS_TYPE, createPackageVersions(V_7_0_2, V_7_0_3, CMF_VERSION, CSP_VERSION, SALT_VERSION),
                 null, null, null);
     }
 
-    private com.sequenceiq.cloudbreak.cloud.model.catalog.Image createImageWithLowerCmAndCdpVersion() {
-        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, null, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
+    private Image createImageWithLowerCmAndCdpVersion() {
+        return new Image(null, null, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
                 OS_TYPE, createPackageVersions(V_7_0_2, V_7_0_2, CMF_VERSION, CSP_VERSION, SALT_VERSION), null, null, null);
     }
 
-    private com.sequenceiq.cloudbreak.cloud.model.catalog.Image createImageWithDifferentCmfVersion() {
-        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, null, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
+    private Image createImageWithDifferentCmfVersion() {
+        return new Image(null, null, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
                 OS_TYPE, createPackageVersions(V_7_0_3, V_7_0_3, "3.0.0.0-121", CSP_VERSION, SALT_VERSION), null, null, null);
     }
 
-    private com.sequenceiq.cloudbreak.cloud.model.catalog.Image createImageWithDifferentCspVersion() {
-        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, null, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
+    private Image createImageWithDifferentCspVersion() {
+        return new Image(null, null, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
                 OS_TYPE, createPackageVersions(V_7_0_3, V_7_0_3, CMF_VERSION, "4.0.0.0-103", SALT_VERSION), null, null, null);
     }
 
-    private com.sequenceiq.cloudbreak.cloud.model.catalog.Image createImageWithDifferentSaltVersion() {
-        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, null, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
+    private Image createImageWithDifferentSaltVersion() {
+        return new Image(null, null, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
                 OS_TYPE, createPackageVersions(V_7_0_3, V_7_0_3, CMF_VERSION, CSP_VERSION, "2018.7.5"), null, null, null);
     }
 
-    private com.sequenceiq.cloudbreak.cloud.model.catalog.Image createImageWithCurrentImageId() {
-        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, null, null, OS, CURRENT_IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP),
+    private Image createImageWithCurrentImageId() {
+        return new Image(null, null, null, OS, CURRENT_IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP),
                 null, OS_TYPE, createPackageVersions(V_7_0_3, V_7_0_3, CMF_VERSION, CSP_VERSION, SALT_VERSION), null, null, null);
     }
 
