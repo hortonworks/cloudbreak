@@ -92,7 +92,7 @@ install_fluentd_plugins:
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
-    - mode: '0750'
+    - file_mode: 750
 
 check_fluentd_plugins:
    cmd.run:
@@ -117,7 +117,7 @@ fluent_stop:
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
-    - mode: '0640'
+    - file_mode: 640
     - context:
         databusClusterLogsCollection: "true"
         numberOfWorkers: {{ fluent.numberOfWorkers }}
@@ -128,7 +128,7 @@ fluent_stop:
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
-    - mode: '0640'
+    - file_mode: 640
     - context:
         databusClusterLogsCollection: "false"
 {%- if fluent.dbusClusterLogsCollection and (fluent.numberOfWorkers > 1) %}
@@ -259,7 +259,7 @@ copy_td_agent_conf:
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
-    - mode: 640
+    - file_mode: 640
 
 fluentd_start_with_update_systemd_units:
   file.copy:

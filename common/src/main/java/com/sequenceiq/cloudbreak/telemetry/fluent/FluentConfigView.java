@@ -12,8 +12,6 @@ import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
 public class FluentConfigView implements TelemetryConfigView {
 
-    public static final String AZURE_IDBROKER_INSTANCE_MSI = "azureIdBrokerInstanceMsi";
-
     private static final String LOG_FOLDER_DEFAULT = "/var/log";
 
     private static final String TD_AGENT_USER_DEFAULT = "root";
@@ -62,8 +60,6 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private final String azureInstanceMsi;
 
-    private final String azureIdBrokerInstanceMsi;
-
     private final String azureStorageAccessKey;
 
     private final String s3LogArchiveBucketName;
@@ -97,7 +93,6 @@ public class FluentConfigView implements TelemetryConfigView {
         this.azureContainer = builder.azureContainer;
         this.azureStorageAccount = builder.azureStorageAccount;
         this.azureInstanceMsi = builder.azureInstanceMsi;
-        this.azureIdBrokerInstanceMsi = builder.azureIdBrokerInstanceMsi;
         this.azureStorageAccessKey = builder.azureStorageAccessKey;
         this.anonymizationRules = builder.anonymizationRules;
         this.overrideAttributes = builder.overrideAttributes;
@@ -163,10 +158,6 @@ public class FluentConfigView implements TelemetryConfigView {
         return azureInstanceMsi;
     }
 
-    public String getAzureIdBrokerInstanceMsi() {
-        return azureIdBrokerInstanceMsi;
-    }
-
     public String getAzureStorageAccessKey() {
         return azureStorageAccessKey;
     }
@@ -219,7 +210,6 @@ public class FluentConfigView implements TelemetryConfigView {
         map.put("azureStorageAccount", ObjectUtils.defaultIfNull(this.azureStorageAccount, EMPTY_CONFIG_DEFAULT));
         map.put("azureStorageAccessKey", ObjectUtils.defaultIfNull(this.azureStorageAccessKey, EMPTY_CONFIG_DEFAULT));
         map.put("azureInstanceMsi", ObjectUtils.defaultIfNull(this.azureInstanceMsi, EMPTY_CONFIG_DEFAULT));
-        map.put(AZURE_IDBROKER_INSTANCE_MSI, ObjectUtils.defaultIfNull(this.azureIdBrokerInstanceMsi, EMPTY_CONFIG_DEFAULT));
         if (this.clusterDetails != null) {
             map.putAll(clusterDetails.toMap());
         }
@@ -279,8 +269,6 @@ public class FluentConfigView implements TelemetryConfigView {
         private String azureContainer;
 
         private String azureInstanceMsi;
-
-        private String azureIdBrokerInstanceMsi;
 
         private String azureStorageAccessKey;
 
@@ -354,11 +342,6 @@ public class FluentConfigView implements TelemetryConfigView {
 
         public Builder withAzureInstanceMsi(String azureInstanceMsi) {
             this.azureInstanceMsi = azureInstanceMsi;
-            return this;
-        }
-
-        public Builder withAzureIdBrokerInstanceMsi(String azureIdBrokerInstanceMsi) {
-            this.azureIdBrokerInstanceMsi = azureIdBrokerInstanceMsi;
             return this;
         }
 
