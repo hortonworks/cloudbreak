@@ -90,7 +90,7 @@ public class EnvironmentTestDto
                         .withDescription(getResourcePropertyProvider().getDescription("environment")))
                 .withCredentialName(getTestContext().get(CredentialTestDto.class).getName())
                 .withAuthentication(DUMMY_SSH_KEY)
-                .withCloudplatform(getCloudProvider().getCloudPlatform().name())
+                .withCloudplatform(getCloudPlatform().toString())
                 .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK);
     }
 
@@ -142,11 +142,6 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withCredentialName(String credentialName) {
         getRequest().setCredentialName(credentialName);
-        return this;
-    }
-
-    public EnvironmentTestDto withCloudplatform(String platform) {
-        getRequest().setCloudPlatform(platform);
         return this;
     }
 
@@ -287,5 +282,10 @@ public class EnvironmentTestDto
     @Override
     public String getSearchId() {
         return getName();
+    }
+
+    private EnvironmentTestDto withCloudplatform(String platform) {
+        getRequest().setCloudPlatform(platform);
+        return this;
     }
 }

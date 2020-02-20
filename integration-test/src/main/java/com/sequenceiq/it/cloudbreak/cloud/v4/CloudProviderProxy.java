@@ -15,6 +15,7 @@ import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
@@ -57,7 +58,6 @@ public class CloudProviderProxy implements CloudProvider {
 
     @PostConstruct
     private void init() {
-        Map<CloudPlatform, CloudProvider> cloudProviderMap = new HashMap<>();
         cloudProviders.forEach(cloudProvider -> {
             cloudProviderMap.put(cloudProvider.getCloudPlatform(), cloudProvider);
         });
@@ -81,77 +81,77 @@ public class CloudProviderProxy implements CloudProvider {
 
     @Override
     public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
-        return delegate.imageCatalog(imageCatalog);
+        return getDelegate(imageCatalog).imageCatalog(imageCatalog);
     }
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return delegate.imageSettings(imageSettings);
+        return getDelegate(imageSettings).imageSettings(imageSettings);
     }
 
     @Override
     public DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings) {
-        return delegate.imageSettings(imageSettings);
+        return getDelegate(imageSettings).imageSettings(imageSettings);
     }
 
     @Override
     public String getPreviousPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        return delegate.getPreviousPreWarmedImageID(testContext, imageCatalogTestDto, cloudbreakClient);
+        return getDelegate(imageCatalogTestDto).getPreviousPreWarmedImageID(testContext, imageCatalogTestDto, cloudbreakClient);
     }
 
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        return delegate.getLatestBaseImageID(testContext, imageCatalogTestDto, cloudbreakClient);
+        return getDelegate(imageCatalogTestDto).getLatestBaseImageID(testContext, imageCatalogTestDto, cloudbreakClient);
     }
 
     @Override
     public InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template) {
-        return delegate.template(template);
+        return getDelegate(template).template(template);
     }
 
     @Override
     public DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template) {
-        return delegate.template(template);
+        return getDelegate(template).template(template);
     }
 
     @Override
     public StackTestDtoBase stack(StackTestDtoBase stack) {
-        return delegate.stack(stack);
+        return getDelegate(stack).stack(stack);
     }
 
     @Override
     public ClusterTestDto cluster(ClusterTestDto cluster) {
-        return delegate.cluster(cluster);
+        return getDelegate(cluster).cluster(cluster);
     }
 
     @Override
     public DistroXTestDtoBase distrox(DistroXTestDtoBase distrox) {
-        return delegate.distrox(distrox);
+        return getDelegate(distrox).distrox(distrox);
     }
 
     @Override
     public DistroXClusterTestDto cluster(DistroXClusterTestDto cluster) {
-        return delegate.cluster(cluster);
+        return getDelegate(cluster).cluster(cluster);
     }
 
     @Override
     public SdxTestDto sdx(SdxTestDto sdx) {
-        return delegate.sdx(sdx);
+        return getDelegate(sdx).sdx(sdx);
     }
 
     @Override
     public SdxInternalTestDto sdxInternal(SdxInternalTestDto sdxInternal) {
-        return delegate.sdxInternal(sdxInternal);
+        return getDelegate(sdxInternal).sdxInternal(sdxInternal);
     }
 
     @Override
     public SdxRepairTestDto sdxRepair(SdxRepairTestDto sdxRepair) {
-        return delegate.sdxRepair(sdxRepair);
+        return getDelegate(sdxRepair).sdxRepair(sdxRepair);
     }
 
     @Override
     public SdxCloudStorageTestDto cloudStorage(SdxCloudStorageTestDto cloudStorage) {
-        return delegate.cloudStorage(cloudStorage);
+        return getDelegate(cloudStorage).cloudStorage(cloudStorage);
     }
 
     @Override
@@ -166,27 +166,27 @@ public class CloudProviderProxy implements CloudProvider {
 
     @Override
     public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
-        return delegate.attachedVolume(volume);
+        return getDelegate(volume).attachedVolume(volume);
     }
 
     @Override
     public DistroXVolumeTestDto attachedVolume(DistroXVolumeTestDto volume) {
-        return delegate.attachedVolume(volume);
+        return getDelegate(volume).attachedVolume(volume);
     }
 
     @Override
     public NetworkV4TestDto network(NetworkV4TestDto network) {
-        return delegate.network(network);
+        return getDelegate(network).network(network);
     }
 
     @Override
     public DistroXNetworkTestDto network(DistroXNetworkTestDto network) {
-        return delegate.network(network);
+        return getDelegate(network).network(network);
     }
 
     @Override
     public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
-        return delegate.network(network);
+        return getDelegate(network).network(network);
     }
 
     @Override
@@ -226,32 +226,32 @@ public class CloudProviderProxy implements CloudProvider {
 
     @Override
     public CredentialTestDto credential(CredentialTestDto credential) {
-        return delegate.credential(credential);
+        return getDelegate(credential).credential(credential);
     }
 
     @Override
     public EnvironmentTestDto environment(EnvironmentTestDto environment) {
-        return delegate.environment(environment);
+        return getDelegate(environment).environment(environment);
     }
 
     @Override
     public PlacementSettingsTestDto placement(PlacementSettingsTestDto placement) {
-        return delegate.placement(placement);
+        return getDelegate(placement).placement(placement);
     }
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        return delegate.stackAuthentication(stackAuthenticationEntity);
+        return getDelegate(stackAuthenticationEntity).stackAuthentication(stackAuthenticationEntity);
     }
 
     @Override
     public Integer gatewayPort(StackTestDtoBase stackEntity) {
-        return delegate.gatewayPort(stackEntity);
+        return getDelegate(stackEntity).gatewayPort(stackEntity);
     }
 
     @Override
     public Integer gatewayPort(FreeIPATestDto stackEntity) {
-        return delegate.gatewayPort(stackEntity);
+        return getDelegate(stackEntity).gatewayPort(stackEntity);
     }
 
     @Override
@@ -296,6 +296,14 @@ public class CloudProviderProxy implements CloudProvider {
 
     @Override
     public void setInstanceTemplateV1Parameters(InstanceTemplateV1Request instanceTemplateV1Request) {
-        delegate.setInstanceTemplateV1Parameters(instanceTemplateV1Request);
+        getDelegate(instanceTemplateV1Request.getCloudPlatform()).setInstanceTemplateV1Parameters(instanceTemplateV1Request);
+    }
+
+    private CloudProvider getDelegate(CloudPlatform cloudPlatform) {
+        return cloudProviderMap.getOrDefault(cloudPlatform, delegate);
+    }
+
+    private CloudProvider getDelegate(CloudbreakTestDto cloudbreakTestDto) {
+        return getDelegate(cloudbreakTestDto.getCloudPlatform());
     }
 }

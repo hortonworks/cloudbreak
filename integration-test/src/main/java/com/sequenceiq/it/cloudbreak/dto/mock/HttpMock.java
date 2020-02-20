@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -200,5 +201,10 @@ public class HttpMock implements CloudbreakTestDto {
 
     public SparkServer getSparkServer() {
         return sparkServer;
+    }
+
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.MOCK;
     }
 }
