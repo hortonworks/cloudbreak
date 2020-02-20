@@ -165,6 +165,26 @@ public class Flow2HandlerTest {
     }
 
     @Test
+    public void testFlowCanNotBeSaved() {
+        BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
+        given(flowConfig.createFlow(anyString(), anyLong())).willReturn(flow);
+        given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
+        given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(true);
+        given(flow.getCurrentState()).willReturn(flowState);
+        Event<Payload> event = new Event<>(payload);
+        event.setKey("KEY");
+        when(flowLogService.save(any(FlowParameters.class), nullable(String.class), anyString(), any(Payload.class), any(),
+                eq(flowConfig.getClass()), eq(flowState))).thenThrow(new RuntimeException("Can't save flow log"));
+        underTest.accept(event);
+        verify(flowConfigurationMap, times(1)).get(anyString());
+        verify(runningFlows, times(1)).put(eq(flow), isNull(String.class));
+        verify(flowLogService, times(1))
+                .save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
+        verify(runningFlows, times(1)).remove(anyString());
+        verify(flow, times(0)).sendEvent(anyString(), isNull(), any());
+    }
+
+    @Test
     public void testNewSyncFlowMaintenanceActive() {
         HelloWorldFlowConfig helloWorldFlowConfig = Mockito.mock(HelloWorldFlowConfig.class);
         given(helloWorldFlowConfig.getFlowTriggerCondition()).willReturn(new DefaultFlowTriggerCondition());
