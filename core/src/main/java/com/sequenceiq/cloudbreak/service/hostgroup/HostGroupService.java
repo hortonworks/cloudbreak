@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
@@ -34,6 +35,9 @@ public class HostGroupService {
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private ClusterRepository clusterRepository;
 
     public Set<HostGroup> getByCluster(Long clusterId) {
         return hostGroupRepository.findHostGroupsInCluster(clusterId);
@@ -114,5 +118,10 @@ public class HostGroupService {
 
     public Set<HostGroup> getByClusterWithRecipesAndHostmetadata(Long clusterId) {
         return hostGroupRepository.findHostGroupsInClusterWithRecipesAndHostmetadata(clusterId);
+    }
+
+    public Long getHostMetadataCountByHostGroupName(Long stackId, String hostGroupName) {
+        Long clusterId = clusterRepository.findIdByStackId(stackId);
+        return hostMetadataRepository.countByClusterIdAndHostGroupName(clusterId, hostGroupName);
     }
 }

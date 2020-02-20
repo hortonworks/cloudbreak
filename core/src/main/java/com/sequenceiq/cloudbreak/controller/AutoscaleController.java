@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -56,6 +57,9 @@ public class AutoscaleController implements AutoscaleEndpoint {
 
     @Inject
     private ClusterCommonService clusterCommonService;
+
+    @Inject
+    private HostGroupService hostGroupService;
 
     @Override
     public Response putStack(Long id, String owner, @Valid UpdateStackJson updateRequest) {
@@ -114,5 +118,10 @@ public class AutoscaleController implements AutoscaleEndpoint {
     @Override
     public CertificateResponse getCertificate(Long stackId) {
         return stackCommonService.getCertificate(stackId);
+    }
+
+    @Override
+    public Long getHostMetadataCountForAutoscale(Long id, String hostGroupName) {
+        return hostGroupService.getHostMetadataCountByHostGroupName(id, hostGroupName);
     }
 }
