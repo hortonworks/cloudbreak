@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterManager;
 import com.sequenceiq.periscope.domain.ClusterManagerVariant;
+import com.sequenceiq.periscope.monitor.evaluator.ClusterManagerException;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterManagerTotalHostsEvaluator;
 import com.sequenceiq.periscope.service.security.TlsHttpClientConfigurationService;
 import org.slf4j.Logger;
@@ -54,10 +55,10 @@ public class ClouderaManagerTotalHostsEvaluator implements ClusterManagerTotalHo
             String pass = secretService.get(cm.getPass());
             ApiClient client = clouderaManagerApiClientProvider.getClient(Integer.valueOf(cm.getPort()), user, pass, httpClientConfig);
             HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
-            return hostsResourceApi.readHosts(DataView.FULL.name()).getItems().size();
+            return hostsResourceApi.readHosts(DataView.SUMMARY.name()).getItems().size();
         } catch (Exception e) {
             LOGGER.info("Failed to retrieve number of total hosts. Original message: {}", e.getMessage());
-            throw new RuntimeException(e);
+            throw new ClusterManagerException("Failed to retrieve number of total hosts", e);
         }
     }
 }
