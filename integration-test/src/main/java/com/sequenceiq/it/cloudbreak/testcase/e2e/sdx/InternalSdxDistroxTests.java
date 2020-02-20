@@ -7,6 +7,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
@@ -45,6 +46,7 @@ public class InternalSdxDistroxTests extends ImageValidatorE2ETest {
                 .withTemplate(sdxTemplateName)
                 .withRuntimeVersion(runtimeVersion)
                 .when(sdxTestClient.createInternal())
+                .awaitForFlow(RunningParameter.key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .when(sdxTestClient.describeInternal())
                 .validate();

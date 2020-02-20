@@ -105,6 +105,7 @@ public class SdxRepairTests extends BasicSdxTests {
         testContext
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
+                .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .then((tc, testDto, client) -> waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState()))
                 .then((tc, testDto, client) -> {
@@ -117,6 +118,7 @@ public class SdxRepairTests extends BasicSdxTests {
                 .then((tc, testDto, client) -> waitUtil.waitForSdxInstancesStatus(testDto, client, instancesDeletedOnProviderSide))
                 .when(sdxTestClient.repair(), key(sdx))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx))
+                .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .then((tc, testDto, client) -> waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState()))
                 .then((tc, testDto, client) -> {
@@ -144,6 +146,7 @@ public class SdxRepairTests extends BasicSdxTests {
         testContext
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
+                .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .then((tc, testDto, client) -> {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
@@ -158,8 +161,8 @@ public class SdxRepairTests extends BasicSdxTests {
                     return waitUtil.waitForSdxInstanceStatus(testDto, client, IDBROKER.getName(), InstanceStatus.STOPPED);
                 })
                 .when(sdxTestClient.repair(), key(sdx))
-                .when(sdxTestClient.setFlowChainId(), key(sdx))
                 .awaitForFlow(key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .then((tc, testDto, client) -> {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
@@ -196,6 +199,7 @@ public class SdxRepairTests extends BasicSdxTests {
         testContext
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
+                .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .then((tc, testDto, client) -> {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
@@ -211,6 +215,7 @@ public class SdxRepairTests extends BasicSdxTests {
                 })
                 .when(sdxTestClient.repair(), key(sdx))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx))
+                .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .then((tc, testDto, client) -> {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
@@ -262,6 +267,7 @@ public class SdxRepairTests extends BasicSdxTests {
                 .given(stack, StackTestDto.class).withCluster(cluster).withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
                 .given(sdxInternal, SdxInternalTestDto.class).withStackRequest(stack, cluster)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
+                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then((tc, testDto, client) -> {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
@@ -281,6 +287,7 @@ public class SdxRepairTests extends BasicSdxTests {
                 })
                 .when(sdxTestClient.repairInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdxInternal))
+                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .then((tc, testDto, client) -> {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());

@@ -24,6 +24,7 @@ import org.testng.annotations.Test;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
 import com.sequenceiq.it.cloudbreak.actor.Actor;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
@@ -34,6 +35,7 @@ import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription.TestCaseDescriptionBuilder;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -81,6 +83,9 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
 
     @Inject
     private SdxTestClient sdxTestClient;
+
+    @Inject
+    private ResourcePropertyProvider resourcePropertyProvider;
 
     @BeforeMethod
     public void beforeTest(Method method, Object[] params) {
@@ -207,6 +212,7 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
+                .awaitForFlow(RunningParameter.key(resourcePropertyProvider.getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .given(DistroXTestDto.class)
                 .when(distroXTestClient.create())

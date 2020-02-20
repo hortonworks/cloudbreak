@@ -191,6 +191,11 @@ public class WaitUtil {
         return isFlowRunning(flowEndpoint, sdxTestDto.getLastKnownFlowChainId(), sdxTestDto.getLastKnownFlowId());
     }
 
+    public WaitResult waitBasedOnLastKnownFlow(SdxInternalTestDto sdxInternalTestDto, SdxClient sdxClient) {
+        FlowEndpoint flowEndpoint = sdxClient.getSdxClient().flowEndpoint();
+        return isFlowRunning(flowEndpoint, sdxInternalTestDto.getLastKnownFlowChainId(), sdxInternalTestDto.getLastKnownFlowId());
+    }
+
     public WaitResult waitBasedOnLastKnownFlow(CloudbreakTestDto distroXTestDto, CloudbreakClient cloudbreakClient) {
         FlowEndpoint flowEndpoint = cloudbreakClient.getCloudbreakClient().flowEndpoint();
         return isFlowRunning(flowEndpoint, distroXTestDto.getLastKnownFlowChainId(), distroXTestDto.getLastKnownFlowId());
@@ -203,8 +208,10 @@ public class WaitUtil {
         while (flowRunning && retryCount < maxRetry) {
             sleep(pollingInterval);
             if (StringUtils.isNotBlank(flowChainId)) {
+                LOGGER.info("Waiting for flow chain {}, retry count {}", flowChainId, retryCount);
                 flowRunning = flowEndpoint.hasFlowRunningByChainId(flowChainId).getHasActiveFlow();
             } else {
+                LOGGER.info("Waiting for flow {}, retry count {}", flowId, retryCount);
                 flowRunning = flowEndpoint.hasFlowRunningByFlowId(flowId).getHasActiveFlow();
             }
             retryCount++;

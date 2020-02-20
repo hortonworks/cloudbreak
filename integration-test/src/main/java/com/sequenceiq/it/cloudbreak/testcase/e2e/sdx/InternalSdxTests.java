@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
@@ -36,6 +38,7 @@ public class InternalSdxTests extends ImageValidatorE2ETest {
         sdxDatabaseRequest.setCreate(false);
         testContext.given(SdxInternalTestDto.class).withDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.createInternal())
+                .awaitForFlow(key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .when(sdxTestClient.describeInternal())
                 .validate();

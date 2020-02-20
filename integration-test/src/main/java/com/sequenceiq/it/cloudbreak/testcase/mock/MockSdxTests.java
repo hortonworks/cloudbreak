@@ -21,12 +21,16 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.it.util.ResourceUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class MockSdxTests extends AbstractIntegrationTest {
 
     private static final String TEMPLATE_JSON = "classpath:/templates/sdx-cluster-template.json";
+
+    @Inject
+    private WaitUtil waitUtil;
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -71,8 +75,10 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .withStackRequest(stack, cluster)
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
+                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then((tc, testDto, client) -> sdxTestClient.deleteInternal().action(tc, testDto, client))
+                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.DELETED)
                 .validate();
     }
@@ -109,8 +115,10 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .withTemplate(ResourceUtil.readResourceAsJson(applicationContext, TEMPLATE_JSON))
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
+                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then((tc, testDto, client) -> sdxTestClient.deleteInternal().action(tc, testDto, client))
+                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.DELETED)
                 .validate();
     }
@@ -124,8 +132,10 @@ public class MockSdxTests extends AbstractIntegrationTest {
     public void testSdxStopStart(MockedTestContext testContext) throws IOException {
         createSdx(testContext)
                 .when(sdxTestClient.stopInternal())
+                .awaitForFlow(key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.STOPPED)
                 .when(sdxTestClient.startInternal())
+                .awaitForFlow(key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .validate();
     }
@@ -155,6 +165,7 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .withStackRequest(stack, cluster)
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
+                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING);
     }
 }

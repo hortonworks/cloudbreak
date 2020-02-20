@@ -235,6 +235,11 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     @Override
+    public SdxInternalTestDto awaitForFlow(RunningParameter runningParameter) {
+        return getTestContext().awaitForFlow(this, runningParameter);
+    }
+
+    @Override
     public CloudbreakTestDto refresh(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Refresh resource with name: {}", getName());
         return when(sdxTestClient.describeInternal(), key("refresh-sdx-" + getName()));
@@ -243,8 +248,9 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up sdx with name: {}", getName());
-        when(sdxTestClient.forceDeleteInternal(), key("delete-sdx-" + getName()));
-        await(DELETED, new RunningParameter().withSkipOnFail(true));
+        when(sdxTestClient.forceDeleteInternal(), key("delete-sdx-" + getName()))
+                .awaitForFlow(key("delete-sdx-" + getName()))
+                .await(DELETED, new RunningParameter().withSkipOnFail(true));
     }
 
     @Override
