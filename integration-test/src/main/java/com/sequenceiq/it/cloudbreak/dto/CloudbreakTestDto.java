@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.Orderable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -36,13 +35,5 @@ public interface CloudbreakTestDto extends Orderable {
     default CloudbreakTestDto wait(Map<String, Status> desiredStatus, RunningParameter runningParameter) {
         LOGGER.warn("Did not wait: {}", getName());
         return this;
-    }
-
-    default void setCloudPlatform(CloudPlatform cloudPlatform) {
-        LOGGER.warn("Did not set cloud platform: {}", getName());
-    }
-
-    default CloudPlatform getCloudPlatform() {
-        return null;
     }
 }

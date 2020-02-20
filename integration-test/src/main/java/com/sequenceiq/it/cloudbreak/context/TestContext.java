@@ -23,8 +23,8 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -40,7 +40,9 @@ import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
+import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.dto.TestDtoCloudPlatformAccessor;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -313,7 +315,8 @@ public abstract class TestContext implements ApplicationContextAware {
         checkShutdown();
         LOGGER.info("init " + clss.getSimpleName());
         CloudbreakTestDto bean = applicationContext.getBean(clss, getTestContext());
-        bean.setCloudPlatform(cloudPlatform);
+        //bean.setCloudPlatform(cloudPlatform);
+        new TestDtoCloudPlatformAccessor((AbstractTestDto) bean).setCloudPlatform(cloudPlatform);
         initialized = true;
         return (O) bean.valid();
     }
@@ -339,7 +342,8 @@ public abstract class TestContext implements ApplicationContextAware {
             Log.given(LOGGER, cloudbreakEntity + " created");
         } else {
             Log.given(LOGGER, cloudbreakEntity + " retrieved");
-            if (cloudbreakEntity.getCloudPlatform() != cloudPlatform) {
+            CloudPlatform entityCloudPlatform = new TestDtoCloudPlatformAccessor((AbstractTestDto) cloudbreakEntity).getCloudPlatform();
+            if (entityCloudPlatform != cloudPlatform) {
                 throw new RuntimeException("Existing cloudbreak entity's cloud platform can not be changed!");
             }
         }

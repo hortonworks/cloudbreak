@@ -284,7 +284,7 @@ public class EnvironmentTestDto
     }
 
     @Override
-    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+    protected void setCloudPlatform(CloudPlatform cloudPlatform) {
         super.setCloudPlatform(cloudPlatform);
         getRequest().setCloudPlatform(cloudPlatform.name());
     }

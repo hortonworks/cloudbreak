@@ -265,13 +265,11 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
         return getClass().getSimpleName() + "[name: " + getName() + "]";
     }
 
-    @Override
-    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+    protected void setCloudPlatform(CloudPlatform cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
     }
 
-    @Override
-    public CloudPlatform getCloudPlatform() {
+    protected CloudPlatform getCloudPlatform() {
         return cloudPlatform;
     }
 }
