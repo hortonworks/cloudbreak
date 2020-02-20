@@ -31,10 +31,14 @@ import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiCommandList;
+import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
+import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceList;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -252,6 +256,79 @@ class ClouderaManagerModificationServiceTest {
 
         assertEquals(1, applyTemplateBodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", applyTemplateBodyCatcher.getValue().getItems().get(0).getHostname());
+    }
+
+    @Test
+    void testPollRefreshWhenCancelled() {
+        ApiCommand apiCommand = new ApiCommand();
+        when(clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(any(), any(), any())).thenReturn(PollingResult.EXIT);
+        CancellationException actual = assertThrows(CancellationException.class, () -> underTest.pollRefresh(apiCommand));
+        assertEquals("Cluster was terminated while waiting for service refresh", actual.getMessage());
+    }
+
+    @Test
+    void testPollRefreshWhenTimeout() {
+        ApiCommand apiCommand = new ApiCommand();
+        when(clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(any(), any(), any())).thenReturn(PollingResult.TIMEOUT);
+        CloudbreakException actual = assertThrows(CloudbreakException.class, () -> underTest.pollRefresh(apiCommand));
+        assertEquals("Timeout while Cloudera Manager was refreshing services.", actual.getMessage());
+    }
+
+    @Test
+    void testPollDeployConfigWhenCancelled() {
+        ApiCommand apiCommand = new ApiCommand();
+        when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(any(), any(), any())).thenReturn(PollingResult.EXIT);
+        CancellationException actual = assertThrows(CancellationException.class, () -> underTest.pollDeployConfig(apiCommand));
+        assertEquals("Cluster was terminated while waiting for config deploy", actual.getMessage());
+    }
+
+    @Test
+    void testPollDeployConfigWhenTimeout() {
+        ApiCommand apiCommand = new ApiCommand();
+        when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(any(), any(), any())).thenReturn(PollingResult.TIMEOUT);
+        CloudbreakException actual = assertThrows(CloudbreakException.class, () -> underTest.pollDeployConfig(apiCommand));
+        assertEquals("Timeout while Cloudera Manager was config deploying services.", actual.getMessage());
+    }
+
+    @Test
+    void testDeployConfigAndRefreshCMStaleServicesWhenNoStaleConfig() throws CloudbreakException, ApiException {
+        ApiService apiService = new ApiService().configStalenessStatus(ApiConfigStalenessStatus.FRESH)
+                .clientConfigStalenessStatus(ApiConfigStalenessStatus.FRESH);
+        List<ApiService> apiServices = List.of(apiService);
+        ApiServiceList apiServiceList = new ApiServiceList();
+        apiServiceList.setItems(apiServices);
+
+        when(clouderaManagerApiFactory.getServicesResourceApi(apiClientMock)).thenReturn(servicesResourceApi);
+        when(servicesResourceApi.readServices("stack_name", "SUMMARY")).thenReturn(apiServiceList);
+
+        underTest.deployConfigAndRefreshCMStaleServices(clustersResourceApi);
+
+        verify(clouderaManagerPollingServiceProvider, times(0)).startPollingCmClientConfigDeployment(eq(stack), eq(apiClientMock), any());
+    }
+
+    @Test
+    void testDeployConfigAndRefreshCMStaleServicesWhenConfigStale() throws CloudbreakException, ApiException {
+        ApiService apiService = new ApiService().configStalenessStatus(ApiConfigStalenessStatus.STALE)
+                .clientConfigStalenessStatus(ApiConfigStalenessStatus.FRESH);
+        List<ApiService> apiServices = List.of(apiService);
+        ApiServiceList apiServiceList = new ApiServiceList();
+        apiServiceList.setItems(apiServices);
+
+        List<ApiCommand> apiCommands = List.of(
+                new ApiCommand().name("DeployClusterClientConfig").id(BigDecimal.ONE),
+                new ApiCommand().name("RefreshCluster").id(BigDecimal.ONE)
+        );
+        ApiCommandList apiCommandList = new ApiCommandList();
+        apiCommandList.setItems(apiCommands);
+
+        when(clouderaManagerApiFactory.getServicesResourceApi(apiClientMock)).thenReturn(servicesResourceApi);
+        when(servicesResourceApi.readServices("stack_name", "SUMMARY")).thenReturn(apiServiceList);
+        when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY")).thenReturn(apiCommandList);
+
+        underTest.deployConfigAndRefreshCMStaleServices(clustersResourceApi);
+
+        verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmClientConfigDeployment(eq(stack), eq(apiClientMock), any());
+        verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmConfigurationRefresh(eq(stack), eq(apiClientMock), any());
     }
 
     private void setUpReadHosts() throws ApiException {
