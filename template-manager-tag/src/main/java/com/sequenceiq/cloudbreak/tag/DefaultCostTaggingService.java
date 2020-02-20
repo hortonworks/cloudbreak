@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.tag;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -9,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
@@ -27,6 +30,7 @@ public class DefaultCostTaggingService implements CostTagging {
         LOGGER.debug("About to prepare default tag(s)...");
         Map<String, String> result = new HashMap<>();
         String platform = request.getPlatform();
+        validateResourceTagsNotContainTheSameTag(request.getUserDefinedTags(), request.getAccountTags());
         addCDPCrnIfPresent(result, DefaultApplicationTag.ENVIRONMENT_CRN, request.getEnvironmentCrn(), platform);
         addCDPCrnIfPresent(result, DefaultApplicationTag.CREATOR_CRN, request.getCreatorCrn(), platform);
         addCDPCrnIfPresent(result, DefaultApplicationTag.RESOURCE_CRN, request.getResourceCrn(), platform);
@@ -87,5 +91,22 @@ public class DefaultCostTaggingService implements CostTagging {
         String valueAfterCheck = Strings.isNullOrEmpty(value) ? "unknown" : value;
         return "GCP".equalsIgnoreCase(platform)
                 ? valueAfterCheck.split("@")[0].toLowerCase().replaceAll("[^\\w]", "-") : valueAfterCheck;
+    }
+
+    private void validateResourceTagsNotContainTheSameTag(Map<String, String> userDefinedResourceTags, Map<String, String> accountTags) {
+        LOGGER.debug("Validating that there is no resource tag defined with the same key what is defined as account tag.");
+        if (!CollectionUtils.isEmpty(userDefinedResourceTags) && !CollectionUtils.isEmpty(accountTags)) {
+            Set<String> accountTagsDuplicatedInResourceTags = accountTags
+                    .keySet()
+                    .stream()
+                    .filter(userDefinedResourceTags::containsKey)
+                    .collect(Collectors.toSet());
+            if (!accountTagsDuplicatedInResourceTags.isEmpty()) {
+                String msg = String.format("The request must not contain tag(s) with key: '%s', because with the same key tag has already been defined "
+                        + "on account level!", String.join(", ", accountTagsDuplicatedInResourceTags));
+                LOGGER.info(msg);
+                throw new AccountTagValidationFailed(msg);
+            }
+        }
     }
 }

@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.general.GeneralClusterConfigsProvider;
@@ -50,6 +51,7 @@ import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
+import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
@@ -171,6 +173,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withResourceCrn(source.getResourceCrn())
                     .withUserName(source.getCreator().getUserName())
                     .withAccountTags(accountTagClientService.list())
+                    .withUserDefinedTags(getStackUserDefinedTags(source))
                     .build();
 
             Builder builder = Builder.builder()
@@ -196,9 +199,19 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             decorateBuilderWithAccountMapping(source, environment, credential, builder, virtualGroupRequest);
 
             return builder.build();
+        } catch (AccountTagValidationFailed aTVF) {
+            throw new CloudbreakServiceException(aTVF);
         } catch (BlueprintProcessingException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> getStackUserDefinedTags(Stack source) throws IOException {
+        Map<String, String> userDefinedTags = new HashMap<>();
+        if (source.getTags() != null && source.getTags().get(StackTags.class) != null) {
+            userDefinedTags = source.getTags().get(StackTags.class).getUserDefinedTags();
+        }
+        return userDefinedTags;
     }
 
     private Optional<DatalakeResources> getDataLakeResource(Stack source) {

@@ -111,6 +111,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
@@ -531,6 +532,7 @@ public class StackService implements ResourceIdProvider {
     private void setDefaultTags(Stack stack) {
         try {
             StackTags stackTag = stack.getTags().get(StackTags.class);
+            Map<String, String> userDefinedTags = stackTag.getUserDefinedTags();
 
             boolean internalTenant = entitlementService.internalTenant(stack.getCreator().getUserCrn(), stack.getCreator().getTenant().getName());
             CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
@@ -542,11 +544,14 @@ public class StackService implements ResourceIdProvider {
                     .withIsInternalTenant(internalTenant)
                     .withUserName(stack.getCreator().getUserName())
                     .withAccountTags(accountTagClientService.list())
+                    .withUserDefinedTags(userDefinedTags)
                     .build();
 
             Map<String, String> defaultTags = stackTag.getDefaultTags();
             defaultTags.putAll(costTagging.prepareDefaultTags(request));
-            stack.setTags(new Json(new StackTags(stackTag.getUserDefinedTags(), stackTag.getApplicationTags(), defaultTags)));
+            stack.setTags(new Json(new StackTags(userDefinedTags, stackTag.getApplicationTags(), defaultTags)));
+        } catch (AccountTagValidationFailed aTVF) {
+            throw new BadRequestException(aTVF.getMessage());
         } catch (Exception e) {
             LOGGER.debug("Exception during reading default tags.", e);
         }
