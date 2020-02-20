@@ -109,10 +109,16 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                         flowParameters.setFlowId(flowId);
                         Flow flow = flowConfig.createFlow(flowId, payload.getResourceId());
                         flow.initialize(contextParams);
-                        flowLogService.save(flowParameters, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
+                        runningFlows.put(flow, flowChainId);
+                        try {
+                            flowLogService.save(flowParameters, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
+                        } catch (Exception e) {
+                            LOGGER.error("Can't save flow: {}", flowId);
+                            runningFlows.remove(flowId);
+                            throw e;
+                        }
                         acceptFlow(payload);
                         logFlowId(flowId);
-                        runningFlows.put(flow, flowChainId);
                         flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload);
                     }
                 } else {

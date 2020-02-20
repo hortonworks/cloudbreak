@@ -119,12 +119,14 @@ public class HeartbeatService {
     @Scheduled(initialDelay = 35000L, fixedDelay = 30000L)
     public void scheduledFlowDistribution() {
         if (shouldRun()) {
+            LOGGER.info("Scheduled flow distribution on node: {}", nodeConfig.getId());
             List<Node> failedNodes = new ArrayList<>();
             try {
                 failedNodes.addAll(distributeFlows());
             } catch (TransactionExecutionException e) {
                 LOGGER.error("Failed to distribute the flow logs across the active nodes, somebody might have already done it. Message: {}", e.getMessage());
             }
+            LOGGER.info("Scheduled flow distribution failed nodes: {}", failedNodes);
             try {
                 cleanupNodes(failedNodes);
             } catch (TransactionExecutionException e) {
@@ -134,7 +136,9 @@ public class HeartbeatService {
             String nodeId = nodeConfig.getId();
             Set<String> allMyFlows = flowLogService.findAllByCloudbreakNodeId(nodeId).stream()
                     .map(FlowLog::getFlowId).collect(Collectors.toSet());
+            LOGGER.info("All my flows: {}", allMyFlows);
             Set<String> newFlows = allMyFlows.stream().filter(f -> runningFlows.get(f) == null).collect(Collectors.toSet());
+            LOGGER.info("Restarted flows: {}", newFlows);
             for (String flow : newFlows) {
                 try {
                     flow2Handler.restartFlow(flow);
