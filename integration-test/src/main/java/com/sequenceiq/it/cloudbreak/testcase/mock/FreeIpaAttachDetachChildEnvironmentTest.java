@@ -19,7 +19,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPAChildEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class FreeIpaAttachChildEnvironmentTest extends AbstractIntegrationTest {
+public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractIntegrationTest {
 
     @Inject
     private FreeIPATestClient freeIPATestClient;
