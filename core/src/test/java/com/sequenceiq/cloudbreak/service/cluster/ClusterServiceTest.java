@@ -11,7 +11,6 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
@@ -212,7 +211,6 @@ public class ClusterServiceTest {
         when(stackService.findByCrn(STACK_CRN)).thenReturn(stack);
         when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn("failed node");
         when(instanceMetaDataService.getPrimaryGatewayInstanceMetadata(anyLong())).thenReturn(Optional.of(instanceMd));
-        doNothing().when(flowManager).triggerStackSync(anyLong());
 
         underTest.reportHealthChange(STACK_CRN, Set.of(hostFQDN), Set.of());
 

@@ -46,11 +46,7 @@ dependencies {
   testImplementation ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'
   }
-  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api'
-  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-params',           version: junitJupiterVersion
   testImplementation group: 'org.mockito',               name: 'mockito-core'
-  testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter',       version: mockitoVersion
-
 
   implementation     group: 'io.projectreactor',         name: 'reactor-core',                          version: eventBusVersion
   implementation     group: 'io.projectreactor',         name: 'reactor-bus',                          version: eventBusVersion
@@ -59,9 +55,6 @@ dependencies {
   implementation     group: 'io.opentracing.contrib',    name: 'opentracing-spring-jaeger-starter',        version: opentracingSpringJaegerStarterVersion
   implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jaxrs2',                       version: opentracingJaxrs2Version
   implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jdbc',                         version: opentracingJdbcVersion
-
-  testRuntime        group: 'org.junit.jupiter',         name: 'junit-jupiter-engine'
-  testRuntime        group: 'org.junit.vintage',         name: 'junit-vintage-engine'
 
   constraints {
     compile            group: 'org.yaml',                  name: 'snakeyaml',                      version: '1.23'
@@ -86,10 +79,6 @@ dependencies {
     implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',     version: springBootVersion
     implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',   version: springBootVersion
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-    testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
-    testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
-    testRuntime        group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
-    testRuntime        group: 'org.junit.vintage',         name: 'junit-vintage-engine',           version: junitJupiterVersion
   }
   compile project(':authorization')
   
@@ -141,12 +130,6 @@ bootJar {
   manifest {
     def grgit = Grgit.open(currentDir: project.projectDir)
     attributes "Implementation-Version": grgit.describe()
-  }
-}
-
-test{
-  useJUnitPlatform {
-    includeEngines 'junit-jupiter', 'junit-vintage'
   }
 }
 

@@ -1,11 +1,7 @@
 package com.sequenceiq.freeipa.ldap.v1;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
-
-import org.springframework.stereotype.Controller;
-
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
+import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigResponse;
@@ -14,9 +10,15 @@ import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.util.CrnService;
 import com.sequenceiq.notification.NotificationController;
+import org.springframework.stereotype.Controller;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 @Controller
 @Transactional(TxType.NEVER)
+@InternalReady
 public class LdapConfigV1Controller extends NotificationController implements LdapConfigV1Endpoint {
     @Inject
     private LdapConfigV1Service ldapConfigV1Service;
@@ -30,7 +32,7 @@ public class LdapConfigV1Controller extends NotificationController implements Ld
     }
 
     @Override
-    public DescribeLdapConfigResponse getForCluster(String environmentCrn, String clusterName) throws FreeIpaClientException {
+    public DescribeLdapConfigResponse getForCluster(@ResourceCrn String environmentCrn, String clusterName) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
         return ldapConfigV1Service.getForCluster(environmentCrn, accountId, clusterName);
     }

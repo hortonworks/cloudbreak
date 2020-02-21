@@ -1,5 +1,22 @@
 package com.sequenceiq.cloudbreak.reactor.handler.kerberos;
 
+import static java.util.Optional.of;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.Base64;
+import java.util.Optional;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -13,24 +30,9 @@ import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabResponse;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
-import java.util.Base64;
-import java.util.Optional;
-
-import static java.util.Optional.of;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KeytabConfigurationHandlerTest {
@@ -102,12 +104,8 @@ public class KeytabConfigurationHandlerTest {
     public void shouldNotUpdateKeytabs() throws Exception {
         KeytabConfigurationRequest keytabConfigurationRequest = new KeytabConfigurationRequest(STACK_ID);
         Stack stack = mock(Stack.class);
-        Optional<KerberosConfig> kerberosConfig = of(mock(KerberosConfig.class));
 
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
-        when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(true);
-        when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, true, kerberosConfig)).thenReturn(false);
 
         victim.accept(new Event<>(keytabConfigurationRequest));
 

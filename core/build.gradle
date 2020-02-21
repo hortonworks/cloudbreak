@@ -129,12 +129,6 @@ dependencyManagement {
       exclude group: '*', name: 'servlet-api'
     }
 
-    dependencySet(group: 'org.junit.jupiter', version: junitJupiterVersion) {
-      entry 'junit-jupiter-api'
-      entry 'junit-jupiter-engine'
-      entry 'junit-vintage-engine'
-      entry 'junit-jupiter-params'
-    }
     dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: jacksonVersion
     dependency group: 'activation',                         name: 'activation',                  version: '1.0.2'
     dependency group: 'com.google.code.findbugs',           name: 'annotations',                 version: '3.0.1'
@@ -164,7 +158,6 @@ dependencyManagement {
     dependency group: 'javax.xml.bind',                     name: 'jaxb-api',                    version: '2.3.0'
     dependency group: 'org.mybatis',                        name: 'mybatis-migrations',          version: '3.2.0'
     dependency group: 'org.mockito',                        name: 'mockito-core',                version: mockitoVersion
-    dependency group: 'org.mockito',                        name: 'mockito-junit-jupiter',       version: mockitoVersion
     dependency group: 'org.apache.commons',                 name: 'commons-collections4',        version: commonsCollections4Version
     dependency group: 'com.sequenceiq',                     name: 'consul-api',                  version: '1.10'
     dependency group: 'com.cloudera.cdp',                   name: 'cdp-sdk-java',                version: cdpSdkVersion
@@ -282,20 +275,9 @@ dependencies {
   testCompile group: 'com.jayway.restassured',   name: 'rest-assured'
   testCompile group: 'com.jayway.restassured',   name: 'json-path'
   testCompile group: 'com.h2database',           name: 'h2'
-  testCompile group: 'org.mockito',              name: 'mockito-junit-jupiter'
-  testCompile group: 'org.junit.jupiter',        name: 'junit-jupiter-api'
-  testCompile group: 'org.junit.jupiter',        name: 'junit-jupiter-params'
-  testRuntime group: 'org.junit.vintage',        name: 'junit-vintage-engine'
-  testRuntime group: 'org.junit.jupiter',        name: 'junit-jupiter-engine'
-  testImplementation group: 'org.assertj',       name: 'assertj-core',                      version: assertjVersion
-  testImplementation     group: "org.yaml",                  name: "snakeyaml"
+  testImplementation group: 'org.assertj',       name: 'assertj-core',        version: assertjVersion
+  testImplementation group: "org.yaml",          name: "snakeyaml"
 
-}
-
-test{
-  useJUnitPlatform {
-    includeEngines 'junit-jupiter', 'junit-vintage'
-  }
 }
 
 task buildInfo(type: BuildInfoTask, dependsOn: processResources) {

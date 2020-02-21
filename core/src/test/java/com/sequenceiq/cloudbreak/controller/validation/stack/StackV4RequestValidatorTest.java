@@ -2,14 +2,10 @@ package com.sequenceiq.cloudbreak.controller.validation.stack;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -93,12 +89,6 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
 
     public StackV4RequestValidatorTest() {
         super(LoggerFactory.getLogger(StackV4RequestValidatorTest.class));
-    }
-
-    @Before
-    public void setUp() {
-        when(blueprintService.getByNameForWorkspaceId(anyString(), eq(WORKSPACE_ID))).thenReturn(blueprint);
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
     }
 
     @Test

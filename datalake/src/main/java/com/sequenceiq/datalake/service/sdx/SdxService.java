@@ -148,10 +148,10 @@ public class SdxService implements ResourceIdProvider {
     }
 
     public Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest,
-            final StackV4Request stackV4Request) {
+            final StackV4Request internalStackV4Request) {
         LOGGER.info("Creating SDX cluster with name {}", name);
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), getAccountIdFromCrn(userCrn));
-        validateInternalSdxRequest(stackV4Request, sdxClusterRequest.getClusterShape());
+        validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest.getClusterShape());
         DetailedEnvironmentResponse environment = getEnvironment(sdxClusterRequest.getEnvironment());
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setInitiatorUserCrn(userCrn);
@@ -173,10 +173,10 @@ public class SdxService implements ResourceIdProvider {
         }
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         externalDatabaseConfigurer.configure(cloudPlatform, sdxClusterRequest.getExternalDatabase(), sdxCluster);
-        updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(stackV4Request, environment.getCrn());
-        String runtimeVersion = getRuntime(sdxClusterRequest);
+        updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
+        String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request);
         sdxCluster.setRuntime(runtimeVersion);
-        StackV4Request stackRequest = getStackRequest(sdxClusterRequest, stackV4Request, cloudPlatform, runtimeVersion);
+        StackV4Request stackRequest = getStackRequest(sdxClusterRequest, internalStackV4Request, cloudPlatform, runtimeVersion);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
         try {
             sdxCluster.setStackRequest(JsonUtil.writeValueAsString(stackRequest));
@@ -217,9 +217,11 @@ public class SdxService implements ResourceIdProvider {
         return cdpStackRequests.keySet().stream().map(CDPConfigKey::getRuntimeVersion).distinct().collect(Collectors.toList());
     }
 
-    private String getRuntime(SdxClusterRequest sdxClusterRequest) {
+    private String getRuntime(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request) {
         if (sdxClusterRequest.getRuntime() != null) {
             return sdxClusterRequest.getRuntime();
+        } else if (stackV4Request != null) {
+            return null;
         } else {
             return defaultRuntime;
         }
