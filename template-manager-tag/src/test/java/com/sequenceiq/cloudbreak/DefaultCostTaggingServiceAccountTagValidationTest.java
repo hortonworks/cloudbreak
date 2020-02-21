@@ -27,24 +27,27 @@ public class DefaultCostTaggingServiceAccountTagValidationTest {
     private DefaultCostTaggingService underTest;
 
     @Test
-    void getWithResourceTagValidationWhenUserDefinedResourceTagsIsNullShouldThrowValidationFailed() throws AccountTagValidationFailed {
+    void prepareDefaultTagsWithResourceTagValidationWhenUserDefinedResourceTagsIsNullShouldThrowValidationFailed()
+            throws AccountTagValidationFailed {
         underTest.prepareDefaultTags(tagRequest(null));
     }
 
     @Test
-    void getWithResourceTagValidationWhenUserDefinedResourceTagsIsEmptyShouldThrowValidationFailed() throws AccountTagValidationFailed {
+    void prepareDefaultTagsWithResourceTagValidationWhenUserDefinedResourceTagsIsEmptyShouldThrowValidationFailed()
+            throws AccountTagValidationFailed {
         underTest.prepareDefaultTags(tagRequest(new HashMap<>()));
     }
 
     @Test
-    void getWithResourceTagValidationWhenUserDefinedResourceTagsNotContainsAccountTagsKey() throws AccountTagValidationFailed {
+    void prepareDefaultTagsWithResourceTagValidationWhenUserDefinedResourceTagsNotContainsAccountTagsKey()
+            throws AccountTagValidationFailed {
         Map<String, String> userDefinedTags = Map.of("aNotCollidingKey", "aValue");
 
         underTest.prepareDefaultTags(tagRequest(userDefinedTags));
     }
 
     @Test
-    void getWithResourceTagValidationWhenUserDefinedResourceTagsContainsAccountTagsKey() {
+    void prepareDefaultTagsWithResourceTagValidationWhenUserDefinedResourceTagsContainsAccountTagsKey() {
         String collidingTagKey = "accountTagKey2";
         Map<String, String> userDefinedTags = Map.of(collidingTagKey, "a colliding key's Value");
 
@@ -55,7 +58,7 @@ public class DefaultCostTaggingServiceAccountTagValidationTest {
     }
 
     @Test
-    void getWithResourceTagValidationWhenUserDefinedResourceTagsContainsMultipleAccountTagsKey() {
+    void prepareDefaultTagsWithResourceTagValidationWhenUserDefinedResourceTagsContainsMultipleAccountTagsKey() {
         String collidingTagKey = "accountTagKey2";
         String collidingTagKey2 = "accountTagKey";
         Map<String, String> resourceTags = Map.of(
@@ -70,7 +73,7 @@ public class DefaultCostTaggingServiceAccountTagValidationTest {
     }
 
     @Test
-    void getWithResourceTagValidationWhenAccountTagsIsEmpty() throws AccountTagValidationFailed {
+    void prepareDefaultTagsWithResourceTagValidationWhenAccountTagsIsEmpty() throws AccountTagValidationFailed {
         String notCollidingTagKey = "tagKey2";
         String notCollidingTagKey2 = "tagKey";
         Map<String, String> resourceTags = Map.of(
