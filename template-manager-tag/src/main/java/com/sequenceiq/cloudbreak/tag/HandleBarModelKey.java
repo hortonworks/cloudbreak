@@ -11,7 +11,6 @@ public enum HandleBarModelKey {
     CREATOR_CRN("creatorCrn"),
     TIME("time"),
     ACCOUNT_ID("accountId"),
-
     RESOURCE_CRN("resourceCrn");
 
     private final String modelKey;

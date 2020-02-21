@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak;
+package com.sequenceiq.cloudbreak.handlebar;
 
 import java.io.IOException;
 

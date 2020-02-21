@@ -1,25 +1,25 @@
-package com.sequenceiq.cloudbreak;
+package com.sequenceiq.cloudbreak.handlebar;
 
 import java.io.IOException;
 
 import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.Options;
 
-public class IfFalseHelper extends IfHelper {
+public class IfTrueHelper extends IfHelper {
 
     /**
      * A singleton instance of this helper.
      */
-    public static final Helper<Boolean> INSTANCE = new IfFalseHelper();
+    public static final Helper<Boolean> INSTANCE = new IfTrueHelper();
 
     /**
      * The helper's name.
      */
-    public static final String NAME = "if-false";
+    public static final String NAME = "if-true";
 
     @Override
     public Object apply(Boolean context, Options options)
             throws IOException {
-        return decision(context(context), options);
+        return decision(!context(context), options);
     }
 }

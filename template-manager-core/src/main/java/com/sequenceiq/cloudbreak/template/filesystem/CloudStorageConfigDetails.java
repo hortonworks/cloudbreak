@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
-import com.sequenceiq.cloudbreak.HandlebarTemplate;
-import com.sequenceiq.cloudbreak.HandlebarUtils;
+import com.sequenceiq.cloudbreak.handlebar.HandlebarTemplate;
+import com.sequenceiq.cloudbreak.handlebar.HandlebarUtils;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;

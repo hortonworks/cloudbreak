@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak;
+package com.sequenceiq.cloudbreak.handlebar;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;

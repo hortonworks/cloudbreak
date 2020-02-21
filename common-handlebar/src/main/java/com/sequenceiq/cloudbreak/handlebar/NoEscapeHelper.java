@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak;
+package com.sequenceiq.cloudbreak.handlebar;
 
 import com.github.jknack.handlebars.Handlebars.SafeString;
 import com.github.jknack.handlebars.Helper;

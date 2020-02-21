@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak;
+package com.sequenceiq.cloudbreak.handlebar;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
