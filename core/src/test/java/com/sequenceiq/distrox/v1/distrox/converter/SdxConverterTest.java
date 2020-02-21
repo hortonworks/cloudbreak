@@ -45,7 +45,7 @@ public class SdxConverterTest {
         sdxClusterResponse.setStatus(SdxClusterStatusResponse.EXTERNAL_DATABASE_CREATION_IN_PROGRESS);
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.getSharedService(sdxClusterResponse));
-        Assertions.assertEquals(exception.getMessage(), "Datalake should be running state. Current state is 'external db creation in progress' "
+        Assertions.assertEquals(exception.getMessage(), "Datalake should be running state. Current state is 'EXTERNAL_DATABASE_CREATION_IN_PROGRESS' "
                 + "instead of Running");
     }
 

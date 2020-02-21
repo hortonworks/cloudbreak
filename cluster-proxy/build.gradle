@@ -21,11 +21,6 @@ dependencyManagement {
       }
     }
 
-    dependencySet(group: 'org.junit.jupiter', version: '5.2.0') {
-      entry 'junit-jupiter-api'
-      entry 'junit-jupiter-engine'
-      entry 'junit-jupiter-params'
-    }
     dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: jacksonVersion
   }
 }
@@ -33,8 +28,6 @@ dependencyManagement {
 dependencies {
   compile project(':secret-engine')
   compile group: 'org.springframework.boot',           name: 'spring-boot-starter-web'
-
-  testCompile group: 'org.mockito',                     name: 'mockito-core', version: mockitoVersion
 }
 
 checkstyle {

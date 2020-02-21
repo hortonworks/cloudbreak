@@ -1,11 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import static org.junit.Assert.assertFalse;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -21,7 +18,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
@@ -64,10 +60,6 @@ public class SharedServiceValidatorTest {
     public void testWithValidRequest() {
         StackV4Request stackRequest = getStackV4Request(CloudPlatform.GCP);
         when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(Optional.ofNullable(getStackView()));
-        when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(getDatabase(RANGER_TYPE_STRING));
-        when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(getDatabase(HIVE_TYPE_STRING));
-        when(blueprintService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(mock(Blueprint.class));
-        when(ldapConfigService.isLdapConfigExistsForEnvironment(any(), anyString())).thenReturn(true);
 
         ValidationResult validationResult = underTest.checkSharedServiceStackRequirements(stackRequest, getWorkspace());
 

@@ -32,8 +32,6 @@ dependencies {
 
   testCompile group: 'junit', name: 'junit', version: junitVersion
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
-  testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitJupiterVersion
-  testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

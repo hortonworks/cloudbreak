@@ -19,6 +19,7 @@ buildscript {
 plugins {
   id 'org.ajoberstar.grgit' version '2.1.0'
   id "com.github.spotbugs" version "2.0.0"
+  id "com.adarshr.test-logger" version "2.0.0"
 }
 
 if (project.hasProperty("reckon.scope")) {
@@ -34,6 +35,8 @@ def cmPrivateRepoPassword = System.getenv("CM_PRIVATE_REPO_PASSWORD") ?: "$defau
 
 def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
 ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
+// spring dependeny management override, if you remove silent errors can happen
+ext['junit-jupiter.version'] = "$junitJupiterVersion"
 
 allprojects {
 
@@ -87,6 +90,7 @@ subprojects {
   apply plugin: 'checkstyle'
   apply plugin: 'com.github.spotbugs'
   apply plugin: 'jacoco'
+  apply plugin: 'com.adarshr.test-logger'
 
 
   sourceCompatibility = 11
@@ -99,7 +103,12 @@ subprojects {
   }
 
   dependencies {
+    checkstyle('com.puppycrawl.tools:checkstyle:8.11')
     deployerJars("org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE")
+    testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter',          version: mockitoVersion
+    testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter',                  version: junitJupiterVersion
+    //adds vintage engine automatically and ensures that Junit4 testcases are run by default for all projects
+    testRuntimeOnly    group: 'org.junit.vintage',         name: 'junit-vintage-engine',           version: junitJupiterVersion
   }
 
   uploadArchives {
@@ -146,6 +155,10 @@ subprojects {
   }
 
   test {
+    useJUnitPlatform ()
+    testlogger{
+      showSummary true
+    }
     jacoco {
       destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
       classDumpDir = file("$buildDir/jacoco/classpathdumps")
@@ -176,10 +189,6 @@ subprojects {
   }
 
   test.testLogging.showStandardStreams = project.hasProperty('showStandardStreams')
-
-  dependencies {
-    checkstyle('com.puppycrawl.tools:checkstyle:8.11')
-  }
 
   task allDeps(type: DependencyReportTask) {}
 

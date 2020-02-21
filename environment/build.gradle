@@ -6,7 +6,6 @@ plugins {
     id "jacoco"
     id "maven"
     id "org.springframework.boot" version "2.1.2.RELEASE"
-    id "com.adarshr.test-logger" version "1.7.0"
 }
 
 repositories {
@@ -81,8 +80,6 @@ dependencies {
     implementation     group: 'com.dyngr',                 name: 'polling',                                  version: '1.1.3'
 
     testImplementation project(path: ':common', configuration: 'tests')
-    testImplementation group: "org.junit.jupiter",         name: "junit-jupiter-api",                        version: junitJupiterVersion
-    testImplementation group: "org.junit.jupiter",         name: "junit-jupiter-params",                     version: junitJupiterVersion
     testImplementation group: "org.mockito",               name: "mockito-core",                             version: mockitoVersion
     testImplementation(group: "org.springframework.boot",  name: "spring-boot-starter-test",                 version: springBootVersion) {
         exclude group: "junit"
@@ -91,12 +88,8 @@ dependencies {
     testImplementation group: "org.ow2.asm",               name: "asm",                                      version: asmVersion
     testImplementation group: "com.h2database",            name: "h2",                                       version: h2databaseVersion
     testImplementation group: "org.mockito",               name: "mockito-core",                             version: mockitoVersion
-    testImplementation group: "org.mockito",               name: "mockito-junit-jupiter",                    version: mockitoVersion
     testImplementation group: "com.google.guava",          name: "guava",                                    version: guavaVersion
     testImplementation group: 'org.assertj',               name: 'assertj-core',                             version: assertjVersion
-
-    testRuntimeOnly    group: "org.junit.jupiter",         name: "junit-jupiter-engine",                     version: junitJupiterVersion
-    testRuntimeOnly    group: "org.junit.vintage",         name: "junit-vintage-engine",                     version: junitJupiterVersion
 }
 
 bootRun {
@@ -129,13 +122,6 @@ bootJar {
   manifest {
     def grgit = Grgit.open(currentDir: project.projectDir)
     attributes "Implementation-Version": grgit.describe()
-  }
-}
-
-test{
-  useJUnitPlatform {
-    excludeTags "outofscope"
-    includeEngines "junit-jupiter", "junit-vintage"
   }
 }
 
