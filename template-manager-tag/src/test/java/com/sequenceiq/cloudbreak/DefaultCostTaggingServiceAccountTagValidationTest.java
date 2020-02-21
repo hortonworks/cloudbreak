@@ -27,12 +27,12 @@ public class DefaultCostTaggingServiceAccountTagValidationTest {
     private DefaultCostTaggingService underTest;
 
     @Test
-    void getWithResourceTagValidationWhenUserDefinedResourceTagsIsNull() throws AccountTagValidationFailed {
+    void getWithResourceTagValidationWhenUserDefinedResourceTagsIsNullShouldThrowValidationFailed() throws AccountTagValidationFailed {
         underTest.prepareDefaultTags(tagRequest(null));
     }
 
     @Test
-    void getWithResourceTagValidationWhenUserDefinedResourceTagsIsEmpty() throws AccountTagValidationFailed {
+    void getWithResourceTagValidationWhenUserDefinedResourceTagsIsEmptyShouldThrowValidationFailed() throws AccountTagValidationFailed {
         underTest.prepareDefaultTags(tagRequest(new HashMap<>()));
     }
 

@@ -551,7 +551,7 @@ public class StackService implements ResourceIdProvider {
             defaultTags.putAll(costTagging.prepareDefaultTags(request));
             stack.setTags(new Json(new StackTags(userDefinedTags, stackTag.getApplicationTags(), defaultTags)));
         } catch (AccountTagValidationFailed aTVF) {
-            throw new BadRequestException(aTVF.getMessage());
+            throw new BadRequestException(aTVF.getMessage(), aTVF);
         } catch (Exception e) {
             LOGGER.debug("Exception during reading default tags.", e);
         }
