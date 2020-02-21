@@ -107,14 +107,18 @@ public class ClouderaManagerLdapServiceTest {
     }
 
     @Test
-    public void testSetupLdapWithGroupMapping() throws ApiException, ClouderaManagerClientInitException {
+    public void testSetupLdapWithFullAdminGroupMapping() throws ApiException, ClouderaManagerClientInitException {
         // GIVEN
-        ReflectionTestUtils.setField(underTest, "adminRole", "ROLE_CONFIGURATOR");
+        ReflectionTestUtils.setField(underTest, "adminRole", "ROLE_ADMIN");
+        ReflectionTestUtils.setField(underTest, "limitedAdminRole", "NO_ROLE_LIMITED_CLUSTER_ADMIN");
         ReflectionTestUtils.setField(underTest, "userRole", "ROLE_USER");
         LdapView ldapConfig = getLdapConfig();
         VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(TestConstants.CRN, "");
-        when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(new ApiAuthRoleMetadataList().addItemsItem(
-                new ApiAuthRoleMetadata().displayName("role").uuid("uuid").role("ROLE_CONFIGURATOR")));
+        ApiAuthRoleMetadataList apiAuthRoleMetadataList = new ApiAuthRoleMetadataList().addItemsItem(
+                new ApiAuthRoleMetadata().displayName("ROLE_LIMITED_CLUSTER_ADMIN").uuid("uuid").role("ROLE_LIMITED_CLUSTER_ADMIN"));
+        apiAuthRoleMetadataList.addItemsItem(
+                new ApiAuthRoleMetadata().displayName("ROLE_ADMIN").uuid("uuid").role("ROLE_ADMIN"));
+        when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(apiAuthRoleMetadataList);
         when(virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.CLOUDER_MANAGER_ADMIN.getRight())).thenReturn("virtualGroup");
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig, ldapConfig, virtualGroupRequest);
@@ -123,7 +127,33 @@ public class ClouderaManagerLdapServiceTest {
         verify(externalUserMappingsResourceApi).createExternalUserMappings(apiExternalUserMappingListArgumentCaptor.capture());
         ApiExternalUserMapping apiExternalUserMapping = apiExternalUserMappingListArgumentCaptor.getValue().getItems().get(0);
         ApiAuthRoleRef authRole = apiExternalUserMapping.getAuthRoles().get(0);
-        assertEquals("role", authRole.getDisplayName());
+        assertEquals("ROLE_ADMIN", authRole.getDisplayName());
+        assertEquals("uuid", authRole.getUuid());
+        assertEquals("virtualGroup", apiExternalUserMapping.getName());
+    }
+
+    @Test
+    public void testSetupLdapWithLimitedAdminGroupMapping() throws ApiException, ClouderaManagerClientInitException {
+        // GIVEN
+        ReflectionTestUtils.setField(underTest, "adminRole", "ROLE_ADMIN");
+        ReflectionTestUtils.setField(underTest, "limitedAdminRole", "ROLE_LIMITED_CLUSTER_ADMIN");
+        ReflectionTestUtils.setField(underTest, "userRole", "ROLE_USER");
+        LdapView ldapConfig = getLdapConfig();
+        VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(TestConstants.CRN, "");
+        ApiAuthRoleMetadataList apiAuthRoleMetadataList = new ApiAuthRoleMetadataList().addItemsItem(
+                new ApiAuthRoleMetadata().displayName("ROLE_LIMITED_CLUSTER_ADMIN").uuid("uuid").role("ROLE_LIMITED_CLUSTER_ADMIN"));
+        apiAuthRoleMetadataList.addItemsItem(
+                new ApiAuthRoleMetadata().displayName("ROLE_ADMIN").uuid("uuid").role("ROLE_ADMIN"));
+        when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(apiAuthRoleMetadataList);
+        when(virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.CLOUDER_MANAGER_ADMIN.getRight())).thenReturn("virtualGroup");
+        // WHEN
+        underTest.setupLdap(stack, cluster, httpClientConfig, ldapConfig, virtualGroupRequest);
+        // THEN
+        ArgumentCaptor<ApiExternalUserMappingList> apiExternalUserMappingListArgumentCaptor = ArgumentCaptor.forClass(ApiExternalUserMappingList.class);
+        verify(externalUserMappingsResourceApi).createExternalUserMappings(apiExternalUserMappingListArgumentCaptor.capture());
+        ApiExternalUserMapping apiExternalUserMapping = apiExternalUserMappingListArgumentCaptor.getValue().getItems().get(0);
+        ApiAuthRoleRef authRole = apiExternalUserMapping.getAuthRoles().get(0);
+        assertEquals("ROLE_LIMITED_CLUSTER_ADMIN", authRole.getDisplayName());
         assertEquals("uuid", authRole.getUuid());
         assertEquals("virtualGroup", apiExternalUserMapping.getName());
     }
@@ -132,6 +162,7 @@ public class ClouderaManagerLdapServiceTest {
     public void testSetupLdapWithNoRoleAdmin() throws ApiException, ClouderaManagerClientInitException {
         // GIVEN
         ReflectionTestUtils.setField(underTest, "adminRole", "ROLE_CONFIGURATOR");
+        ReflectionTestUtils.setField(underTest, "limitedAdminRole", "ROLE_CONFIGURATOR_2");
         ReflectionTestUtils.setField(underTest, "userRole", "ROLE_USER");
         LdapView ldapConfig = getLdapConfig();
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(new ApiAuthRoleMetadataList().addItemsItem(
