@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.converter.cloud;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -155,7 +156,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     private Map<String, String> getUserDefinedTags(Stack stack) {
         Map<String, String> result = Maps.newHashMap();
         try {
-            if (stack.getTags() != null) {
+            if (stack.getTags() != null && isNotBlank(stack.getTags().getValue())) {
                 StackTags stackTag = stack.getTags().get(StackTags.class);
                 Map<String, String> userDefined = stackTag.getUserDefinedTags();
                 Map<String, String> defaultTags = stackTag.getDefaultTags();
