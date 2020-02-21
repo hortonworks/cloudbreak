@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak;
+package com.sequenceiq.cloudbreak.handlebar;
 
 public enum HandlebarTemplate {
     DEFAULT_PREFIX("{{{"),
