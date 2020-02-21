@@ -40,7 +40,7 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
     }
 
     public DistroXTestDtoBase<T> valid() {
-        String name = getResourcePropertyProvider().getName();
+        String name = getResourcePropertyProvider().getName(15);
         withName(name)
                 .withTestNameAsTag()
                 .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.defaultHostGroup(getTestContext()))
