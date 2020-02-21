@@ -66,6 +66,7 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 .await(AVAILABLE)
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
+                .awaitForFlow(RunningParameter.key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .given("dx1", DistroXTestDto.class)
                 .when(distroXTestClient.create(), RunningParameter.key("dx1"))

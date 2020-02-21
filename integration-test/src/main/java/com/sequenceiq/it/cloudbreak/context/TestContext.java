@@ -528,6 +528,15 @@ public abstract class TestContext implements ApplicationContextAware {
         return entity;
     }
 
+    public <T extends SdxInternalTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
+        checkShutdown();
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
+        SdxInternalTestDto awaitEntity = get(key);
+        SdxClient sdxClient = getMicroserviceClient(SdxClient.class, getWho(runningParameter).getAccessKey());
+        waitUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, sdxClient);
+        return entity;
+    }
+
     public <T extends CloudbreakTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
         checkShutdown();
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);

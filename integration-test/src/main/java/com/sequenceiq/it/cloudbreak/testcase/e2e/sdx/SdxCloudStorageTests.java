@@ -40,6 +40,7 @@ public class SdxCloudStorageTests extends BasicSdxTests {
         testContext
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
+                .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then((tc, testDto, client) -> {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());

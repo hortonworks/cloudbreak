@@ -70,6 +70,7 @@ public class SdxBaseImageTests extends BasicSdxTests {
                 .given(stack, StackTestDto.class).withCluster(cluster).withImageSettings(imageSettings)
                 .given(sdxInternal, SdxInternalTestDto.class).withStackRequest(stack, cluster)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
+                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then((tc, testDto, client) -> {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());

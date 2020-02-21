@@ -750,8 +750,7 @@ public class StackService implements ResourceIdProvider {
                         stack.getName(), cluster.getStatus().name()));
             } else if (cluster.isClusterReadyForStop() || cluster.isStopFailed()) {
                 setStackStatusToStopRequested(stack);
-                clusterService.updateStatus(stack.getId(), StatusRequest.STOPPED);
-                return FlowIdentifier.notTriggered();
+                return clusterService.updateStatus(stack.getId(), StatusRequest.STOPPED);
             } else {
                 throw new BadRequestException(format("Cannot update the status of cluster '%s' to STOPPED, because the cluster's state is %s.",
                         cluster.getName(), cluster.getStatus()));
@@ -788,7 +787,6 @@ public class StackService implements ResourceIdProvider {
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
         if (stack.isAvailable() && (cluster == null || cluster.isAvailable())) {
-
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_START_IGNORED);
         } else if (isStackStartable(stack) || isClusterStartable(cluster)) {
             Stack startStack = stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);

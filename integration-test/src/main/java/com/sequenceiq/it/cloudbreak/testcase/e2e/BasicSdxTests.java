@@ -51,6 +51,7 @@ public class  BasicSdxTests extends AbstractE2ETest {
         testContext
                 .given(sdx, SdxTestDto.class)
                 .when(sdxTestClient.create(), key(sdx))
+                .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then((tc, testDto, client) -> {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, instancesHealthy);
