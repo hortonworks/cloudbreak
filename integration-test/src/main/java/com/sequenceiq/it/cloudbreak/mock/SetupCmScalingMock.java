@@ -29,40 +29,40 @@ import com.sequenceiq.it.util.HostNameUtil;
 
 public class SetupCmScalingMock {
 
-    public static final String HOSTS_DECOMMISSION = ClouderaManagerMock.API_V31 + "/cm/commands/hostsDecommission";
+    public static final String HOSTS_DECOMMISSION = ClouderaManagerMock.API_ROOT + "/cm/commands/hostsDecommission";
 
     public static final BigDecimal HOSTS_DECOMMISSION_COMMAND_ID = new BigDecimal(300);
 
-    private static final String LIST_HOSTS = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/hosts";
+    private static final String LIST_HOSTS = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/hosts";
 
-    private static final String READ_HOSTS = ClouderaManagerMock.API_V31 + "/hosts";
+    private static final String READ_HOSTS = ClouderaManagerMock.API_ROOT + "/hosts";
 
-    private static final String READ_HOSTTEMPLATES = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/hostTemplates";
+    private static final String READ_HOSTTEMPLATES = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/hostTemplates";
 
-    private static final String ADD_HOSTS = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/hosts";
+    private static final String ADD_HOSTS = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/hosts";
 
-    private static final String LIST_CLUSTER_COMMANDS = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/commands";
+    private static final String LIST_CLUSTER_COMMANDS = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/commands";
 
-    private static final String DEPLOY_CLIENT_CONFIG = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/commands/deployClientConfig";
+    private static final String DEPLOY_CLIENT_CONFIG = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/commands/deployClientConfig";
 
-    private static final String READ_PARCEL = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/parcels/products/:product/versions/:version";
+    private static final String READ_PARCEL = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/parcels/products/:product/versions/:version";
 
     private static final String APPLY_HOST_TEMPLATE =
-            ClouderaManagerMock.API_V31 + "/clusters/:clusterName/hostTemplates/:hostTemplateName/commands/applyHostTemplate";
+            ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/hostTemplates/:hostTemplateName/commands/applyHostTemplate";
 
-    private static final String READ_HOST = ClouderaManagerMock.API_V31 + "/hosts/:hostId";
+    private static final String READ_HOST = ClouderaManagerMock.API_ROOT + "/hosts/:hostId";
 
-    private static final String CLUSTERS_SERVICES = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/services";
+    private static final String CLUSTERS_SERVICES = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/services";
 
-    private static final String REMOVE_HOST = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/hosts/:hostId";
+    private static final String REMOVE_HOST = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/hosts/:hostId";
 
-    private static final String DELETE_HOST = ClouderaManagerMock.API_V31 + "/hosts/:hostId";
+    private static final String DELETE_HOST = ClouderaManagerMock.API_ROOT + "/hosts/:hostId";
 
-    private static final String DELETE_CREDENTIALS = ClouderaManagerMock.API_V31 + "/cm/commands/deleteCredentials";
+    private static final String DELETE_CREDENTIALS = ClouderaManagerMock.API_ROOT + "/cm/commands/deleteCredentials";
 
-    private static final String RESTART_MGMTSERVCIES_COMMAND = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/commands/restart";
+    private static final String RESTART_MGMTSERVCIES_COMMAND = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/commands/restart";
 
-    private static final String RESTART_CLUSTER_COMMAND = ClouderaManagerMock.API_V31 + "/cm/service/commands/restart";
+    private static final String RESTART_CLUSTER_COMMAND = ClouderaManagerMock.API_ROOT + "/cm/service/commands/restart";
 
     private static final BigDecimal DEPLOY_CLIENT_CONFIG_COMMAND_ID = new BigDecimal(100);
 

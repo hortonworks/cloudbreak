@@ -80,7 +80,7 @@ ClouderaManagerSecurityServiceTest {
         UsersResourceApi usersResourceApi = mock(UsersResourceApi.class);
         ApiUser2List oldUserList = createApiUser2List();
 
-        when(clouderaManagerApiClientProvider.getDefaultClient(GATEWAY_PORT, clientConfig, ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
+        when(clouderaManagerApiClientProvider.getDefaultClient(GATEWAY_PORT, clientConfig)).thenReturn(apiClient);
         when(clouderaManagerApiFactory.getUserResourceApi(any())).thenReturn(usersResourceApi);
         when(usersResourceApi.readUsers2("SUMMARY")).thenReturn(oldUserList);
 
@@ -109,22 +109,22 @@ ClouderaManagerSecurityServiceTest {
         ApiClient newApiClient = mock(ApiClient.class);
         ApiUser2List oldUserList = createApiUser2List();
 
-        when(clouderaManagerApiClientProvider.getDefaultClient(GATEWAY_PORT, clientConfig, ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
+        when(clouderaManagerApiClientProvider.getDefaultClient(GATEWAY_PORT, clientConfig)).thenReturn(apiClient);
         when(clouderaManagerApiFactory.getUserResourceApi(apiClient)).thenReturn(usersResourceApi);
 
         when(usersResourceApi.readUsers2("SUMMARY")).thenReturn(oldUserList);
 
         when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(newApiClient);
+                stack.getCluster().getCloudbreakAmbariPassword())).thenReturn(newApiClient);
         when(clouderaManagerApiFactory.getUserResourceApi(newApiClient)).thenReturn(newUsersResourceApi);
 
         underTest.changeOriginalCredentialsAndCreateCloudbreakUser(LDAP_DISABLED);
 
-        verify(clouderaManagerApiClientProvider).getDefaultClient(GATEWAY_PORT, clientConfig, ClouderaManagerApiClientProvider.API_V_31);
+        verify(clouderaManagerApiClientProvider).getDefaultClient(GATEWAY_PORT, clientConfig);
         verify(usersResourceApi).readUsers2("SUMMARY");
 
         verify(clouderaManagerApiClientProvider).getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31);
+                stack.getCluster().getCloudbreakAmbariPassword());
 
         ArgumentCaptor<ApiUser2List> createUserCaptor = ArgumentCaptor.forClass(ApiUser2List.class);
         verify(usersResourceApi, times(2)).createUsers2(createUserCaptor.capture());
@@ -152,21 +152,21 @@ ClouderaManagerSecurityServiceTest {
         ApiClient newApiClient = mock(ApiClient.class);
         ApiUser2List oldUserList = createApiUser2List();
 
-        when(clouderaManagerApiClientProvider.getDefaultClient(GATEWAY_PORT, clientConfig, ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
+        when(clouderaManagerApiClientProvider.getDefaultClient(GATEWAY_PORT, clientConfig)).thenReturn(apiClient);
         when(clouderaManagerApiFactory.getUserResourceApi(apiClient)).thenReturn(usersResourceApi);
 
         when(usersResourceApi.readUsers2("SUMMARY")).thenReturn(oldUserList);
 
         when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(newApiClient);
+                stack.getCluster().getCloudbreakAmbariPassword())).thenReturn(newApiClient);
         when(clouderaManagerApiFactory.getUserResourceApi(newApiClient)).thenReturn(newUsersResourceApi);
 
         underTest.changeOriginalCredentialsAndCreateCloudbreakUser(LDAP_ENABLED);
 
-        verify(clouderaManagerApiClientProvider).getDefaultClient(GATEWAY_PORT, clientConfig, ClouderaManagerApiClientProvider.API_V_31);
+        verify(clouderaManagerApiClientProvider).getDefaultClient(GATEWAY_PORT, clientConfig);
         verify(usersResourceApi).readUsers2("SUMMARY");
         verify(clouderaManagerApiClientProvider, times(2)).getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
-                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31);
+                stack.getCluster().getCloudbreakAmbariPassword());
 
         ArgumentCaptor<ApiUser2List> createUserCaptor = ArgumentCaptor.forClass(ApiUser2List.class);
         verify(usersResourceApi, times(2)).createUsers2(createUserCaptor.capture());

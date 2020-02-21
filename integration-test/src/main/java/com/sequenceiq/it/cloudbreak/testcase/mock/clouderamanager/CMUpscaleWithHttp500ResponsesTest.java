@@ -58,29 +58,29 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
 
     private static final String CLUSTER_KEY = "cmcluster";
 
-    private static final String LIST_HOSTS = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/hosts";
+    private static final String LIST_HOSTS = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/hosts";
 
-    private static final String READ_HOSTS = ClouderaManagerMock.API_V31 + "/hosts";
+    private static final String READ_HOSTS = ClouderaManagerMock.API_ROOT + "/hosts";
 
-    private static final String ADD_HOSTS = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/hosts";
+    private static final String ADD_HOSTS = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/hosts";
 
-    private static final String CLUSTERS_SERVICES = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/services";
+    private static final String CLUSTERS_SERVICES = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/services";
 
-    private static final String DEPLOY_CLIENT_CONFIG = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/commands/deployClientConfig";
+    private static final String DEPLOY_CLIENT_CONFIG = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/commands/deployClientConfig";
 
     private static final String APPLY_HOST_TEMPLATE =
-            ClouderaManagerMock.API_V31
+            ClouderaManagerMock.API_ROOT
                     + "/clusters/:clusterName/hostTemplates/:hostTemplateName/commands/applyHostTemplate";
 
-    private static final String READ_COMMAND = ClouderaManagerMock.API_V31 + "/commands/:commandId";
+    private static final String READ_COMMAND = ClouderaManagerMock.API_ROOT + "/commands/:commandId";
 
-    private static final String LIST_CLUSTER_COMMANDS = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/commands";
+    private static final String LIST_CLUSTER_COMMANDS = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/commands";
 
-    private static final String RESTART_MGMTSERVCIES_COMMAND = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/commands/restart";
+    private static final String RESTART_MGMTSERVCIES_COMMAND = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/commands/restart";
 
-    private static final String RESTART_CLUSTER_COMMAND = ClouderaManagerMock.API_V31 + "/cm/service/commands/restart";
+    private static final String RESTART_CLUSTER_COMMAND = ClouderaManagerMock.API_ROOT + "/cm/service/commands/restart";
 
-    private static final String READ_HOSTTEMPLATES = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/hostTemplates";
+    private static final String READ_HOSTTEMPLATES = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/hostTemplates";
 
     @Inject
     private BlueprintTestClient blueprintTestClient;
@@ -147,7 +147,7 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
                                 .pathVariableMapping(":clusterName", clusterName)
                                 .resolve())
                         .exactTimes(1))
-                .then(MockVerification.verify(GET, READ_HOSTS).atLeast(4))
+                .then(MockVerification.verify(GET, READ_HOSTS).atLeast(6))
                 .then(MockVerification.verify(POST, new ClouderaManagerPathResolver(ADD_HOSTS)
                         .pathVariableMapping(":clusterName", clusterName)
                         .resolve())

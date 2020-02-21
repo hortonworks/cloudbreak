@@ -4,4 +4,4 @@ tests:
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.stack.BasicStackTests
         includedMethods:
-          - testCreateScaleStopStartCluster
+          - testCreateAndScaleCluster

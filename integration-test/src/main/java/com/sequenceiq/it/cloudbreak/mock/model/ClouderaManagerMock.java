@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.model.ApiAuthRoleMetadataList;
 import com.cloudera.api.swagger.model.ApiAuthRoleRef;
-import com.cloudera.api.swagger.model.ApiCluster;
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
@@ -53,109 +52,85 @@ public class ClouderaManagerMock extends AbstractModelMock {
 
     public static final String PROFILE_RETURN_HTTP_500 = "cmHttp500";
 
-    public static final String API_V31 = "/api/v31";
+    public static final String API_ROOT = "/api/v31";
 
-    public static final String API_V40 = "/api/v40";
+    public static final String ECHO = API_ROOT + "/tools/echo";
 
-    public static final String ECHO = API_V31 + "/tools/echo";
+    public static final String USERS = API_ROOT + "/users";
 
-    public static final String USERS = API_V31 + "/users";
+    public static final String USERS_USER = API_ROOT + "/users/:user";
 
-    public static final String USERS_USER = API_V31 + "/users/:user";
+    public static final String IMPORT_CLUSTERTEMPLATE = API_ROOT + "/cm/importClusterTemplate";
 
-    public static final String IMPORT_CLUSTERTEMPLATE = "/api/v40/cm/importClusterTemplate";
+    public static final String COMMANDS_COMMAND = API_ROOT + "/commands/:commandId";
 
-    public static final String COMMANDS_COMMAND = API_V31 + "/commands/:commandId";
+    public static final String COMMANDS_STOP = API_ROOT + "/clusters/:cluster/commands/stop";
 
-    public static final String COMMANDS_COMMAND_V40 = API_V40 + "/commands/:commandId";
+    public static final String COMMANDS_START = API_ROOT + "/clusters/:cluster/commands/start";
 
-    public static final String COMMANDS_STOP = API_V31 + "/clusters/:cluster/commands/stop";
+    public static final String COMMANDS = API_ROOT + "/clusters/:clusterName/commands";
 
-    public static final String COMMANDS_START = API_V31 + "/clusters/:cluster/commands/start";
+    public static final String CLUSTER_DEPLOY_CLIENT_CONFIG = API_ROOT + "/clusters/:clusterName/commands/deployClientConfig";
 
-    public static final String COMMANDS = API_V31 + "/clusters/:clusterName/commands";
+    public static final String CM_REFRESH_PARCELREPOS = API_ROOT + "/cm/commands/refreshParcelRepos";
 
-    public static final String CLUSTER_DEPLOY_CLIENT_CONFIG = API_V31 + "/clusters/:clusterName/commands/deployClientConfig";
+    public static final String CLUSTER_PARCELS = API_ROOT + "/clusters/:clusterName/parcels";
 
-    public static final String CM_REFRESH_PARCELREPOS = API_V31 + "/cm/commands/refreshParcelRepos";
+    public static final String CLUSTER_SERVICES = API_ROOT + "/clusters/:clusterName/services";
 
-    public static final String CM_REFRESH_PARCELREPOS_V40 = API_V40 + "/cm/commands/refreshParcelRepos";
+    public static final String CLUSTER_HOSTS = API_ROOT + "/clusters/:clusterName/hosts";
 
-    public static final String CLUSTER_PARCELS = API_V31 + "/clusters/:clusterName/parcels";
+    public static final String CLUSTER_HOSTS_BY_HOSTID = API_ROOT + "/clusters/:clusterName/hosts/:hostId";
 
-    public static final String CLUSTER_SERVICES = API_V31 + "/clusters/:clusterName/services";
+    public static final String CLUSTER_SERVICE_ROLES = API_ROOT + "/clusters/:clusterName/services/:serviceName/roles";
 
-    public static final String CLUSTER_HOSTS = API_V31 + "/clusters/:clusterName/hosts";
+    public static final String CLUSTER_SERVICE_ROLES_BY_ROLE = API_ROOT + "/clusters/:clusterName/services/:serviceName/roles/:roleName";
 
-    public static final String CLUSTER_HOSTS_BY_HOSTID = API_V31 + "/clusters/:clusterName/hosts/:hostId";
+    public static final String CLUSTER_HOSTTEMPLATES = API_ROOT + "/clusters/:clusterName/hostTemplates";
 
-    public static final String CLUSTER_SERVICE_ROLES = API_V31 + "/clusters/:clusterName/services/:serviceName/roles";
+    public static final String CLUSTER_COMMANDS_REFRESH = API_ROOT + "/clusters/:clusterName/commands/refresh";
 
-    public static final String CLUSTER_SERVICE_ROLES_BY_ROLE = API_V31 + "/clusters/:clusterName/services/:serviceName/roles/:roleName";
+    public static final String CLUSTER_COMMANDS_RESTART = API_ROOT + "/clusters/:clusterName/commands/restart";
 
-    public static final String CLUSTER_HOSTTEMPLATES = API_V31 + "/clusters/:clusterName/hostTemplates";
+    public static final String HOSTS = API_ROOT + "/hosts";
 
-    public static final String CLUSTER_COMMANDS_REFRESH = API_V31 + "/clusters/:clusterName/commands/refresh";
+    public static final String HOST_BY_ID = API_ROOT + "/hosts/:hostId";
 
-    public static final String CLUSTER_COMMANDS_RESTART = API_V31 + "/clusters/:clusterName/commands/restart";
+    public static final String BEGIN_FREE_TRIAL = API_ROOT + "/cm/trial/begin";
 
-    public static final String HOSTS = API_V31 + "/hosts";
+    public static final String MANAGEMENT_SERVICE = API_ROOT + "/cm/service";
 
-    public static final String HOSTS_V40 = API_V40 + "/hosts";
+    public static final String START_MANAGEMENT_SERVICE = API_ROOT + "/cm/service/commands/start";
 
-    public static final String HOST_BY_ID = API_V31 + "/hosts/:hostId";
+    public static final String ACTIVE_COMMANDS = API_ROOT + "/cm/service/commands";
 
-    public static final String BEGIN_FREE_TRIAL = API_V31 + "/cm/trial/begin";
+    public static final String ROLE_TYPES = API_ROOT + "/cm/service/roleTypes";
 
-    public static final String MANAGEMENT_SERVICE = API_V31 + "/cm/service";
+    public static final String ROLES = API_ROOT + "/cm/service/roles";
 
-    public static final String MANAGEMENT_SERVICE_V40 = API_V40 + "/cm/service";
+    public static final String CONFIG = API_ROOT + "/cm/config";
 
-    public static final String START_MANAGEMENT_SERVICE = API_V31 + "/cm/service/commands/start";
+    public static final String CM_RESTART = API_ROOT + "/cm/service/commands/restart";
 
-    public static final String ACTIVE_COMMANDS = API_V31 + "/cm/service/commands";
+    public static final String CM_HOST_DECOMMISSION = API_ROOT + "/cm/commands/hostsDecommission";
 
-    public static final String ROLE_TYPES = API_V31 + "/cm/service/roleTypes";
+    public static final String CM_DELETE_CREDENTIALS = API_ROOT + "/cm/commands/deleteCredentials";
 
-    public static final String ROLE_TYPES_V40 = API_V40 + "/cm/service/roleTypes";
+    public static final String LIST_COMMANDS = API_ROOT + "/cm/commands";
 
-    public static final String ROLES = API_V31 + "/cm/service/roles";
-
-    public static final String ROLES_V40 = API_V40 + "/cm/service/roles";
-
-    public static final String CONFIG = API_V31 + "/cm/config";
-
-    public static final String CONFIG_V40 = API_V40 + "/cm/config";
-
-    public static final String CM_RESTART = API_V31 + "/cm/service/commands/restart";
-
-    public static final String CM_HOST_DECOMMISSION = API_V31 + "/cm/commands/hostsDecommission";
-
-    public static final String CM_DELETE_CREDENTIALS = API_V31 + "/cm/commands/deleteCredentials";
-
-    public static final String LIST_COMMANDS = API_V31 + "/cm/commands";
-
-    public static final String LIST_COMMANDS_V40 = API_V40 + "/cm/commands";
-
-    public static final String READ_AUTH_ROLES = API_V31 + "/authRoles/metadata";
+    public static final String READ_AUTH_ROLES = API_ROOT + "/authRoles/metadata";
 
     public static final String CDP_REMOTE_CONTEXT_BY_CLUSTER_CLUSTER_NAME = "/api/cdp/remoteContext/byCluster/:clusterName";
 
     public static final String CDP_REMOTE_CONTEXT = "/api/cdp/remoteContext";
 
-    public static final String CM_VERSION = API_V31 + "/cm/version";
+    public static final String CM_VERSION = API_ROOT + "/cm/version";
 
-    public static final String CM_VERSION_V40 = API_V40 + "/cm/version";
+    private static final String AUTO_CONFIGURE_COMMAND = API_ROOT + "/cm/service/autoConfigure";
 
-    private static final String AUTO_CONFIGURE_COMMAND = API_V31 + "/cm/service/autoConfigure";
+    private static final String CONFIGURE_KERBEROS = API_ROOT + "/clusters/:clusterName/commands/configureForKerberos";
 
-    private static final String AUTO_CONFIGURE_COMMAND_V40 = API_V40 + "/cm/service/autoConfigure";
-
-    private static final String CONFIGURE_KERBEROS = API_V31 + "/clusters/:clusterName/commands/configureForKerberos";
-
-    private static final String GENERATE_CREDENTIALS = API_V31 + "/cm/commands/generateCredentials";
-
-    private static final String CLUSTER = API_V40 + "/clusters/:clusterName";
+    private static final String GENERATE_CREDENTIALS = API_ROOT + "/cm/commands/generateCredentials";
 
     private DynamicRouteStack dynamicRouteStack;
 
@@ -177,31 +152,21 @@ public class ClouderaManagerMock extends AbstractModelMock {
         putUser();
         postUser();
         postImportClusterTemplate();
-        getCommand(COMMANDS_COMMAND);
-        getCommand(COMMANDS_COMMAND_V40);
+        getCommand();
         postStopCommand();
-        getHosts(HOSTS);
-        getHosts(HOSTS_V40);
+        getHosts();
         postStartCommand();
         postBeginTrial();
-        addManagementService(MANAGEMENT_SERVICE);
-        addManagementService(MANAGEMENT_SERVICE_V40);
-        getManagementService(MANAGEMENT_SERVICE);
-        getManagementService(MANAGEMENT_SERVICE_V40);
-        createRoles(ROLES);
-        createRoles(ROLES_V40);
-        listRoleTypes(ROLE_TYPES);
-        listRoleTypes(ROLE_TYPES_V40);
-        listRoles(ROLES_V40);
-        cmConfig(CONFIG);
-        updateCmConfig(CONFIG);
-        cmConfig(CONFIG_V40);
-        updateCmConfig(CONFIG_V40);
-        getCmVersion(CM_VERSION);
-        getCmVersion(CM_VERSION_V40);
+        addManagementService();
+        getManagementService();
+        createRoles();
+        listRoleTypes();
+        listRoles();
+        cmConfig();
+        updateCmConfig();
+        getCmVersion();
         startManagementService();
-        listCommands(LIST_COMMANDS);
-        listCommands(LIST_COMMANDS_V40);
+        listCommands();
         listActiveCommands();
         readAuthRoles();
         getCdpRemoteContext();
@@ -209,8 +174,7 @@ public class ClouderaManagerMock extends AbstractModelMock {
 
         getClusterServices();
         getClusterHosts();
-        postCMRefreshParcelRepos(CM_REFRESH_PARCELREPOS);
-        postCMRefreshParcelRepos(CM_REFRESH_PARCELREPOS_V40);
+        postCMRefreshParcelRepos();
         postClusterDeployClientConfig();
         getClusterParcels();
         postClusterCommandsRefresh();
@@ -225,8 +189,7 @@ public class ClouderaManagerMock extends AbstractModelMock {
         postClouderaManagerRestart();
         getCommands();
         postClusterCommandsRestart();
-        putAutoConfigure(AUTO_CONFIGURE_COMMAND);
-        putAutoConfigure(AUTO_CONFIGURE_COMMAND_V40);
+        putAutoConfigure();
         dynamicRouteStack.post(CONFIGURE_KERBEROS, new ProfileAwareRoute(
                 (request, response) -> new ApiCommand().id(BigDecimal.ONE).active(Boolean.TRUE).name("Configure Kerberos"), activeProfiles));
         dynamicRouteStack.post(GENERATE_CREDENTIALS, new ProfileAwareRoute(
@@ -295,8 +258,8 @@ public class ClouderaManagerMock extends AbstractModelMock {
                 -> getSuccessfulApiCommand(), activeProfiles));
     }
 
-    private void getCommand(String endpoint) {
-        dynamicRouteStack.get(endpoint, new ProfileAwareRoute((request, response)
+    private void getCommand() {
+        dynamicRouteStack.get(COMMANDS_COMMAND, new ProfileAwareRoute((request, response)
                 -> new ApiCommand().id(new BigDecimal(request.params("commandId"))).active(Boolean.FALSE).success(Boolean.TRUE), activeProfiles));
     }
 
@@ -327,11 +290,6 @@ public class ClouderaManagerMock extends AbstractModelMock {
     private void deleteClusterHosts() {
         dynamicRouteStack.delete(CLUSTER_HOSTS_BY_HOSTID,
                 new ProfileAwareRoute((request, response, model) -> getHosts(model), activeProfiles));
-    }
-
-    private void getCluster() {
-        dynamicRouteStack.get(CLUSTER,
-                new ProfileAwareRoute((request, response, model) -> new ApiCluster(), activeProfiles));
     }
 
     private void getClusterHostTemplates() {
@@ -370,8 +328,8 @@ public class ClouderaManagerMock extends AbstractModelMock {
         return result;
     }
 
-    private void postCMRefreshParcelRepos(String endpoint) {
-        dynamicRouteStack.post(endpoint, new ProfileAwareRoute((request, response) -> getSuccessfulApiCommand(), activeProfiles));
+    private void postCMRefreshParcelRepos() {
+        dynamicRouteStack.post(CM_REFRESH_PARCELREPOS, new ProfileAwareRoute((request, response) -> getSuccessfulApiCommand(), activeProfiles));
     }
 
     private void getClusterParcels() {
@@ -408,12 +366,12 @@ public class ClouderaManagerMock extends AbstractModelMock {
         dynamicRouteStack.post(BEGIN_FREE_TRIAL, new ProfileAwareRoute((request, response) -> null, activeProfiles));
     }
 
-    private void addManagementService(String endpoint) {
-        dynamicRouteStack.put(endpoint, new ProfileAwareRoute((request, response) -> new ApiService(), activeProfiles));
+    private void addManagementService() {
+        dynamicRouteStack.put(MANAGEMENT_SERVICE, new ProfileAwareRoute((request, response) -> new ApiService(), activeProfiles));
     }
 
-    private void getManagementService(String endpoint) {
-        dynamicRouteStack.get(endpoint, new ProfileAwareRoute((request, response)
+    private void getManagementService() {
+        dynamicRouteStack.get(MANAGEMENT_SERVICE, new ProfileAwareRoute((request, response)
                 -> new ApiService().serviceState(ApiServiceState.STARTED), activeProfiles));
     }
 
@@ -421,18 +379,18 @@ public class ClouderaManagerMock extends AbstractModelMock {
         dynamicRouteStack.post(START_MANAGEMENT_SERVICE, new ProfileAwareRoute((request, response) -> new ApiService(), activeProfiles));
     }
 
-    private void listRoleTypes(String endpoint) {
-        dynamicRouteStack.get(endpoint, new ProfileAwareRoute((request, response)
+    private void listRoleTypes() {
+        dynamicRouteStack.get(ROLE_TYPES, new ProfileAwareRoute((request, response)
                 -> new ApiRoleTypeList().items(new ArrayList<>()), activeProfiles));
     }
 
-    private void listRoles(String endpoint) {
-        dynamicRouteStack.get(endpoint, new ProfileAwareRoute((request, response)
+    private void listRoles() {
+        dynamicRouteStack.get(ROLES, new ProfileAwareRoute((request, response)
                 -> new ApiRoleTypeList().items(new ArrayList<>()), activeProfiles));
     }
 
-    private void createRoles(String endpoint) {
-        dynamicRouteStack.post(endpoint, new ProfileAwareRoute((request, response)
+    private void createRoles() {
+        dynamicRouteStack.post(ROLES, new ProfileAwareRoute((request, response)
                 -> new ApiRoleTypeList().items(new ArrayList<>()), activeProfiles));
     }
 
@@ -441,23 +399,23 @@ public class ClouderaManagerMock extends AbstractModelMock {
                 List.of(new ApiCommand().id(new BigDecimal(1)).active(Boolean.FALSE).success(Boolean.TRUE))), activeProfiles));
     }
 
-    private void listCommands(String endpoint) {
-        dynamicRouteStack.get(endpoint, new ProfileAwareRoute((request, response) -> new ApiCommandList().items(
+    private void listCommands() {
+        dynamicRouteStack.get(LIST_COMMANDS, new ProfileAwareRoute((request, response) -> new ApiCommandList().items(
                 List.of(new ApiCommand().id(new BigDecimal(1)).active(Boolean.FALSE).success(Boolean.TRUE))), activeProfiles));
     }
 
-    private void cmConfig(String endpoint) {
-        dynamicRouteStack.get(endpoint, new ProfileAwareRoute((request, response)
+    private void cmConfig() {
+        dynamicRouteStack.get(CONFIG, new ProfileAwareRoute((request, response)
                 -> new ApiConfigList().items(new ArrayList<>()), activeProfiles));
     }
 
-    private void updateCmConfig(String endpoint) {
-        dynamicRouteStack.put(endpoint, new ProfileAwareRoute((request, response)
+    private void updateCmConfig() {
+        dynamicRouteStack.put(CONFIG, new ProfileAwareRoute((request, response)
                 -> new ApiConfigList().items(new ArrayList<>()), activeProfiles));
     }
 
-    private void getCmVersion(String endpoint) {
-        dynamicRouteStack.get(endpoint, new ProfileAwareRoute((request, response)
+    private void getCmVersion() {
+        dynamicRouteStack.get(CM_VERSION, new ProfileAwareRoute((request, response)
                 -> new ApiVersionInfo().version("7.0.1"), activeProfiles));
     }
 
@@ -471,8 +429,8 @@ public class ClouderaManagerMock extends AbstractModelMock {
                 new ProfileAwareRoute((req, res) -> new ApiRemoteDataContext(), activeProfiles));
     }
 
-    private void getHosts(String endpoint) {
-        dynamicRouteStack.get(endpoint, new ProfileAwareRoute((request, response, model) -> {
+    private void getHosts() {
+        dynamicRouteStack.get(HOSTS, new ProfileAwareRoute((request, response, model) -> {
             Map<String, CloudVmMetaDataStatus> instanceMap = model.getInstanceMap();
             ApiHostList apiHostList = new ApiHostList();
             for (Map.Entry<String, CloudVmMetaDataStatus> entry : instanceMap.entrySet()) {
@@ -488,7 +446,7 @@ public class ClouderaManagerMock extends AbstractModelMock {
             }
             return apiHostList;
         }, activeProfiles));
-        dynamicRouteStack.get(endpoint, new ProfileAwareRoute((request, response, model) -> getHosts(model), activeProfiles));
+        dynamicRouteStack.get(HOSTS, new ProfileAwareRoute((request, response, model) -> getHosts(model), activeProfiles));
     }
 
     private void getHostById() {
@@ -501,8 +459,8 @@ public class ClouderaManagerMock extends AbstractModelMock {
                 new ProfileAwareRoute((request, response, model) -> getApiHost(model.getInstanceMap().get(request.params("hostId"))), activeProfiles));
     }
 
-    private void putAutoConfigure(String endpoint) {
-        dynamicRouteStack.put(endpoint, (request, response) -> new ApiCommand().id(new BigDecimal(2)));
+    private void putAutoConfigure() {
+        dynamicRouteStack.put(AUTO_CONFIGURE_COMMAND, (request, response) -> new ApiCommand().id(new BigDecimal(2)));
 
     }
 

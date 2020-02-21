@@ -126,7 +126,7 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     void upscaleClusterListHostsException() throws Exception {
-        when(clustersResourceApi.listHosts(eq(STACK_NAME), eq(""), eq(""))).thenThrow(new ApiException("Failed to get hosts"));
+        when(clustersResourceApi.listHosts(eq(STACK_NAME))).thenThrow(new ApiException("Failed to get hosts"));
         when(clouderaManagerApiFactory.getClustersResourceApi(eq(apiClientMock))).thenReturn(clustersResourceApi);
 
         InstanceMetaData instanceMetaData = new InstanceMetaData();
@@ -198,7 +198,7 @@ class ClouderaManagerModificationServiceTest {
 
     private void setUpListClusterHosts() throws ApiException {
         ApiHostRefList clusterHostsRef = new ApiHostRefList().items(List.of(new ApiHostRef().hostname("original")));
-        when(clustersResourceApi.listHosts(eq(STACK_NAME), eq(""), eq(""))).thenReturn(clusterHostsRef);
+        when(clustersResourceApi.listHosts(eq(STACK_NAME))).thenReturn(clusterHostsRef);
         when(clouderaManagerApiFactory.getClustersResourceApi(eq(apiClientMock))).thenReturn(clustersResourceApi);
     }
 
@@ -334,7 +334,7 @@ class ClouderaManagerModificationServiceTest {
     private void setUpReadHosts() throws ApiException {
         ApiHostList apiHostsRef = new ApiHostList().items(
                 List.of(new ApiHost().hostname("original"), new ApiHost().hostname("upscaled")));
-        when(hostResourceApi.readHosts(eq(""), eq(""), eq("SUMMARY"))).thenReturn(apiHostsRef);
+        when(hostResourceApi.readHosts(eq("SUMMARY"))).thenReturn(apiHostsRef);
         when(clouderaManagerApiFactory.getHostsResourceApi(eq(apiClientMock))).thenReturn(hostResourceApi);
     }
 

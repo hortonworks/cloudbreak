@@ -249,13 +249,13 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     }
 
     private ApiClient getDefaultClient(Integer gatewayPort, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
-        return clouderaManagerApiClientProvider.getDefaultClient(gatewayPort, clientConfig, ClouderaManagerApiClientProvider.API_V_31);
+        return clouderaManagerApiClientProvider.getDefaultClient(gatewayPort, clientConfig);
     }
 
     public ApiClient getClient(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
         if (StringUtils.isNoneBlank(user, password)) {
             return clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig,
-                    gatewayPort, user, password, ClouderaManagerApiClientProvider.API_V_31);
+                    gatewayPort, user, password);
         } else {
             return getDefaultClient(gatewayPort, clientConfig);
         }
