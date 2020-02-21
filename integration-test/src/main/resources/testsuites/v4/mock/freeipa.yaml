@@ -4,3 +4,5 @@ tests:
     parameters: {hostgroup: worker, min: 100, max: 150, times: 2}
     classes:
       - com.sequenceiq.it.cloudbreak.testcase.mock.FreeIpaStartStopTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.FreeIpaCreationTest
+      - com.sequenceiq.it.cloudbreak.testcase.mock.FreeIpaAttachDetachChildEnvironmentTest
