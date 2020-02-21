@@ -15,12 +15,13 @@ public class FreeIPAAttachChildEnvironmentAction implements Action<FreeIPAChildE
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIPAAttachChildEnvironmentAction.class);
 
+    @Override
     public FreeIPAChildEnvironmentTestDto action(TestContext testContext, FreeIPAChildEnvironmentTestDto testDto, FreeIPAClient client) throws Exception {
         Log.whenJson(LOGGER, format(" FreeIPA attach child environment:%n"), testDto.getRequest());
         client.getFreeIpaClient()
                 .getFreeIpaV1Endpoint()
                 .attachChildEnvironment(testDto.getRequest());
-        Log.when(LOGGER, " FreeIPA registered child environment successfully.");
+        Log.when(LOGGER, " FreeIPA attached child environment successfully.");
         return testDto;
     }
 }
