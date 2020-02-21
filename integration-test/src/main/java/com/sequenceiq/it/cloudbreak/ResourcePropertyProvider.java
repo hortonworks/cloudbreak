@@ -26,6 +26,10 @@ public class ResourcePropertyProvider {
         return trim(prefix() + '-' + uuid(), MAX_LENGTH);
     }
 
+    public String getName(int maxLength) {
+        return trim(prefix() + '-' + uuid(), maxLength);
+    }
+
     public String getEnvironmentName() {
         return trim(prefix() + '-' + uuid(), ENVIRONMENT_NAME_MAX_LENGTH);
     }
