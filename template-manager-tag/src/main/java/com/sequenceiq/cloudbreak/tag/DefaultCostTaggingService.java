@@ -35,7 +35,6 @@ public class DefaultCostTaggingService implements CostTagging {
         addCDPCrnIfPresent(result, DefaultApplicationTag.CREATOR_CRN, request.getCreatorCrn(), platform);
         addCDPCrnIfPresent(result, DefaultApplicationTag.RESOURCE_CRN, request.getResourceCrn(), platform);
 
-        // Generate Account Tags
         TagPreparationObject preparationObject = TagPreparationObject.Builder.builder()
                 .withAccountId(request.getAccountId())
                 .withCloudPlatform(request.getPlatform())

@@ -21,7 +21,7 @@ public class CentralTagUpdater {
             tagText = updateTagConfiguration(model, tagText);
         } catch (IOException e) {
             String message = String.format("Unable to update tag with default properties which was: %s", tagText);
-            LOGGER.warn(message);
+            LOGGER.warn(message, e);
             throw new TagProcessingException(message, e);
         }
         return tagText;

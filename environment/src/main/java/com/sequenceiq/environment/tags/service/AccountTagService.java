@@ -39,7 +39,7 @@ public class AccountTagService {
             }
             return result;
         } catch (DataIntegrityViolationException e) {
-            throw new AccessDeniedException("Access denied");
+            throw new AccessDeniedException("Access denied", e);
         }
     }
 
