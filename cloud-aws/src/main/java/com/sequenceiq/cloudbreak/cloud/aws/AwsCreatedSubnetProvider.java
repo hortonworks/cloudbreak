@@ -31,7 +31,7 @@ class AwsCreatedSubnetProvider {
                 createdPrivateSubnet.setAvailabilityZone(getValue(output, "Az" + i));
                 createdPrivateSubnet.setPublicSubnet(false);
                 createdPrivateSubnet.setMapPublicIpOnLaunch(false);
-                createdPrivateSubnet.setIgwAvailable(true);
+                createdPrivateSubnet.setIgwAvailable(false);
                 subnets.add(createdPrivateSubnet);
             }
         }
