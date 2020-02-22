@@ -6,6 +6,7 @@ import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DELETED;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -80,6 +81,10 @@ public class SdxStatusService {
         return sdxStatusRepository.findDistinctFirstByStatusInAndDatalakeIdInOrderByIdDesc(datalakeStatusEnums, datalakeIds);
     }
 
+    public Set<Long> findAllSdxClusterIdWhichHasDeletedState() {
+        return sdxStatusRepository.findAllSdxClusterIdWhichHasDeletedState();
+    }
+
     public SdxStatusEntity getActualStatusForSdx(SdxCluster sdxCluster) {
         return sdxStatusRepository.findFirstByDatalakeIsOrderByIdDesc(sdxCluster);
     }
@@ -94,4 +99,5 @@ public class SdxStatusService {
             LOGGER.info("Update {} datalake status in inmemory store to {}", sdxCluster.getClusterName(), PollGroup.POLLABLE.name());
         }
     }
+
 }

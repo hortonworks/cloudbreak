@@ -2,7 +2,9 @@ package com.sequenceiq.datalake.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -24,5 +26,9 @@ public interface SdxStatusRepository extends CrudRepository<SdxStatusEntity, Lon
     @CheckPermission(action = ResourceAction.READ)
     List<SdxStatusEntity> findDistinctFirstByStatusInAndDatalakeIdInOrderByIdDesc(Collection<DatalakeStatusEnum> datalakeStatusEnums,
             Collection<Long> datalakeId);
+
+    @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT sdxstatus.datalake.id FROM SdxStatusEntity sdxstatus WHERE sdxstatus.status IN ('DELETED') GROUP BY sdxstatus.datalake.id")
+    Set<Long> findAllSdxClusterIdWhichHasDeletedState();
 
 }

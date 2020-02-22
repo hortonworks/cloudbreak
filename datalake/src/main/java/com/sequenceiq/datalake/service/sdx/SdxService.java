@@ -339,17 +339,20 @@ public class SdxService implements ResourceIdProvider {
     public List<SdxCluster> listSdxByEnvCrn(String userCrn, String envCrn) {
         LOGGER.info("Listing SDX clusters by environment crn {}", envCrn);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNull(accountIdFromCrn, envCrn);
+        List<SdxCluster> clusters = sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNull(accountIdFromCrn, envCrn);
+        return filterOutClustersWithDeletedStatus(clusters);
     }
 
     public List<SdxCluster> listSdx(String userCrn, String envName) {
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
+        List<SdxCluster> clusters;
         if (envName != null) {
             LOGGER.info("Listing SDX clusters by environment name {}", envName);
-            return sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(accountIdFromCrn, envName);
+            clusters = sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(accountIdFromCrn, envName);
         } else {
-            return sdxClusterRepository.findByAccountIdAndDeletedIsNull(accountIdFromCrn);
+            clusters = sdxClusterRepository.findByAccountIdAndDeletedIsNull(accountIdFromCrn);
         }
+        return filterOutClustersWithDeletedStatus(clusters);
     }
 
     public void deleteSdxByClusterCrn(String userCrn, String clusterCrn, boolean forced) {
@@ -413,4 +416,14 @@ public class SdxService implements ResourceIdProvider {
     private DetailedEnvironmentResponse getEnvironment(String environmentName) {
         return environmentClientService.getByName(environmentName);
     }
+
+    private List<SdxCluster> filterOutClustersWithDeletedStatus(List<SdxCluster> sdxClusters) {
+        LOGGER.debug("Going to filter out sdx clusters from list which has no termination timestamp but has DELETED status.");
+        Set<Long> clusterIdsWichHasDeletedStatus = sdxStatusService.findAllSdxClusterIdWhichHasDeletedState();
+        List<SdxCluster> result = sdxClusters.stream().filter(sdxCluster -> !clusterIdsWichHasDeletedStatus.contains(sdxCluster.getId()))
+                .collect(Collectors.toList());
+        LOGGER.debug("{} cluster(s) has filtered out.", sdxClusters.size() - result.size());
+        return result;
+    }
+
 }
