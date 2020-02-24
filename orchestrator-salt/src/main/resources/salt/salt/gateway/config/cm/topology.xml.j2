@@ -157,6 +157,10 @@
                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
             <param>
+                <name>resourcemanager.acl</name>
+                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+            </param>
+            <param>
                 <name>zeppelinui.acl</name>
                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
@@ -239,6 +243,10 @@
              <param>
                  <name>YARNUIV2</name>
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+             </param>
+             <param>
+                <name>RESOURCEMANAGER</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
              </param>
              {%- endif %}
              {% if 'SOLR' in exposed and 'SOLR_SERVER' in salt['pillar.get']('gateway:location') -%}
@@ -438,6 +446,12 @@
         <role>YARNUIV2</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['YARNUIV2'] }}</url>
+        {%- endfor %}
+    </service>
+    <service>
+        <role>RESOURCEMANAGER</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['YARNUIV2'] }}/ws</url>
         {%- endfor %}
     </service>
     {%- endif %}
