@@ -89,7 +89,7 @@ environment:
       ssl: false
   enabledplatforms: AWS, AZURE, YARN
   enabledParentPlatforms: AWS, MOCK
-  enabledChildPlatforms: YARN, MOCK
+  enabledChildPlatforms: YARN, MOCK, AWS
   tunnel:
     default: DIRECT
     ccm.validate.entitlement: false
