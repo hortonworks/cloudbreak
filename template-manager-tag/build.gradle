@@ -14,22 +14,10 @@ dependencies {
     compile project(':common')
     compile project(':common-handlebar')
 
-    testCompile (group: 'junit', name: 'junit', version: junitVersion) {
-        exclude group: 'org.hamcrest'
-    }
-    testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
-        exclude group: 'org.hamcrest'
-    }
-
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-    testCompile group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
     testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
     testCompile 'net.javacrumbs.json-unit:json-unit:1.28.2'
-
-    testImplementation group: "org.mockito",               name: "mockito-core",                             version: mockitoVersion
-    testImplementation group: "org.mockito",               name: "mockito-junit-jupiter",                    version: mockitoVersion
-    testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-params',                     version: junitJupiterVersion
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {
