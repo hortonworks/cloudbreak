@@ -92,7 +92,7 @@ public class SdxService implements ResourceIdProvider {
     @Inject
     private Map<CDPConfigKey, StackV4Request> cdpStackRequests;
 
-    @Value("${sdx.default.runtime:7.0.2}")
+    @Value("${sdx.default.runtime:7.1.0}")
     private String defaultRuntime;
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
