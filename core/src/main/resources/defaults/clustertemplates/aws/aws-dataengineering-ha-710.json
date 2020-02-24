@@ -1,0 +1,133 @@
+{
+  "name": "7.1.0 - Data Engineering HA for AWS",
+  "description": "",
+  "type": "DATAENGINEERING",
+  "featureState": "PREVIEW",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.1.0 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie"
+    },
+    "instanceGroups": [{
+      "nodeCount": 1,
+      "name": "manager",
+      "type": "GATEWAY",
+      "recoveryMode": "MANUAL",
+      "template": {
+        "aws": {},
+        "instanceType": "m5.2xlarge",
+        "rootVolume": {
+          "size": 50
+        },
+        "attachedVolumes": [{
+          "size": 100,
+          "count": 1,
+          "type": "standard"
+        }],
+        "cloudPlatform": "AWS"
+      },
+      "recipeNames": []
+    },
+      {
+        "nodeCount": 0,
+        "name": "compute",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "aws": {},
+          "instanceType": "m5.2xlarge",
+          "rootVolume": {
+            "size": 50
+          },
+          "attachedVolumes": [{
+            "size": 100,
+            "count": 1,
+            "type": "standard"
+          }],
+          "cloudPlatform": "AWS"
+        },
+        "recipeNames": []
+      },
+      {
+        "nodeCount": 0,
+        "name": "gateway",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "aws": {},
+          "instanceType": "m5.2xlarge",
+          "rootVolume": {
+            "size": 50
+          },
+          "attachedVolumes": [{
+            "size": 100,
+            "count": 1,
+            "type": "standard"
+          }],
+          "cloudPlatform": "AWS"
+        },
+        "recipeNames": []
+      },
+      {
+        "nodeCount": 3,
+        "name": "quorum",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "aws": {},
+          "instanceType": "m5.2xlarge",
+          "rootVolume": {
+            "size": 50
+          },
+          "attachedVolumes": [{
+            "size": 100,
+            "count": 1,
+            "type": "standard"
+          }],
+          "cloudPlatform": "AWS"
+        },
+        "recipeNames": []
+      },
+      {
+        "nodeCount": 3,
+        "name": "worker",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "aws": {},
+          "instanceType": "m5.2xlarge",
+          "rootVolume": {
+            "size": 50
+          },
+          "attachedVolumes": [{
+            "size": 100,
+            "count": 1,
+            "type": "standard"
+          }],
+          "cloudPlatform": "AWS"
+        },
+        "recipeNames": []
+      },
+      {
+        "nodeCount": 2,
+        "name": "master",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "aws": {},
+          "instanceType": "m5.2xlarge",
+          "rootVolume": {
+            "size": 50
+          },
+          "attachedVolumes": [{
+            "size": 100,
+            "count": 1,
+            "type": "standard"
+          }],
+          "cloudPlatform": "AWS"
+        },
+        "recipeNames": []
+      }
+    ]
+  }
+}
