@@ -181,6 +181,8 @@ public class AzureProperties {
 
         private Boolean secure;
 
+        private Integer zeroBlobLengthToleration = 5;
+
         public String getAccountKey() {
             return accountKey;
         }
@@ -223,6 +225,14 @@ public class AzureProperties {
 
         public void setSecure(Boolean secure) {
             this.secure = secure;
+        }
+
+        public Integer getZeroBlobLengthToleration() {
+            return zeroBlobLengthToleration;
+        }
+
+        public void setZeroBlobLengthToleration(Integer zeroBlobLengthToleration) {
+            this.zeroBlobLengthToleration = zeroBlobLengthToleration;
         }
 
         public static class AdlsGen2 {

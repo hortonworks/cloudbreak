@@ -3,9 +3,12 @@ package com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.action;
 import static java.lang.String.format;
 
 import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -149,6 +152,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
             throws URISyntaxException, StorageException {
 
         CloudBlobDirectory blobDirectory = cloudBlobContainer.getDirectoryReference(directoryName);
+        Set<String> blobsWithZeroLength = new HashSet<>();
 
         for (ListBlobItem blobItem : blobDirectory.listBlobs()) {
             if (blobItem instanceof CloudBlobDirectory) {
@@ -158,11 +162,11 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
             } else if (blobItem instanceof CloudPageBlob) {
                 LOGGER.info("Azure Adls Gen 2 Cloud Page Blob is present with Name: {} and with bytes of content: {} at URI: {}",
                         ((CloudPageBlob) blobItem).getName(), ((CloudPageBlob) blobItem).getProperties().getLength(), blobItem.getUri().getPath());
-                validateBlobItemLength(blobItem, zeroContent);
+                validateBlobItemLength(blobItem, zeroContent, blobsWithZeroLength);
             } else if (blobItem instanceof CloudBlockBlob) {
                 LOGGER.info("Azure Adls Gen 2 Cloud Block Blob is present with Name: {} and with bytes of content: {} at URI: {}",
                         ((CloudBlockBlob) blobItem).getName(), ((CloudBlockBlob) blobItem).getProperties().getLength(), blobItem.getUri().getPath());
-                validateBlobItemLength(blobItem, zeroContent);
+                validateBlobItemLength(blobItem, zeroContent, blobsWithZeroLength);
             } else {
                 LOGGER.error("Azure Adls Gen 2 Cloud Storage Item that is present at URI: {} cannot be classify as CloudBlob, CloudPageBlob and " +
                         "CloudBlockBlob. ", blobItem.getUri().getPath());
@@ -172,10 +176,18 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
         }
     }
 
-    private void validateBlobItemLength(ListBlobItem blobItem, Boolean zeroContent) {
+    private void validateBlobItemLength(ListBlobItem blobItem, Boolean zeroContent, Set<String> blobsWithZeroLength) {
         if (((CloudBlob) blobItem).getProperties().getLength() == 0 && !zeroContent) {
-            LOGGER.error(" Azure Adls Gen 2 Blob: {} has 0 bytes of content!", ((CloudBlob) blobItem).getName());
-            throw new TestFailException(String.format("Azure Adls Gen 2 Blob: %s has 0 bytes of content!", ((CloudBlob) blobItem).getName()));
+            blobsWithZeroLength.add(((CloudBlob) blobItem).getName());
+            Integer zeroBlobLengthToleration = azureProperties.getCloudstorage().getZeroBlobLengthToleration();
+            if (blobsWithZeroLength.size() >= zeroBlobLengthToleration) {
+                LOGGER.error("Zero blob length toleration limit ({}) reached! The following blobs has 0 bytes content: {}",
+                        zeroBlobLengthToleration, StringUtils.join(blobsWithZeroLength, ", "));
+                throw new TestFailException(String.format("Azure Adls Gen 2 Blob: %s has 0 bytes of content!", ((CloudBlob) blobItem).getName()));
+            } else {
+                LOGGER.warn(" Azure Adls Gen 2 Blob: {} has 0 bytes of content! (blobs with no content - occurrence: {}, limit: {})",
+                        ((CloudBlob) blobItem).getName(), blobsWithZeroLength.size(), zeroBlobLengthToleration);
+            }
         } else {
             LOGGER.info("Azure Adls Gen 2 Block Blob is present with Name: {} and with bytes of content: {} at URI: {}",
                     ((CloudBlob) blobItem).getName(), ((CloudBlob) blobItem).getProperties().getLength(), blobItem.getUri().getPath());
@@ -328,6 +340,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
             CloudBlobDirectory logsDirectory = cloudBlobContainer.getDirectoryReference("cluster-logs");
             CloudBlobDirectory selectedLogsDirectory = logsDirectory.getDirectoryReference(selectedDirectory);
             LOGGER.info("Selected Adls Gen 2 Blob directory: {}", selectedLogsDirectory.getPrefix());
+            Set<String> blobsWithZeroLength = new HashSet<>();
 
             for (ListBlobItem blob : selectedLogsDirectory.listBlobs()) {
                 String blobName = blob.getUri().getPath().split("/", 3)[2];
@@ -338,7 +351,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
                     if (((CloudBlob) blob).exists()) {
                         LOGGER.info("Azure Adls Gen 2 Blob is present with Name: {} and with bytes of content: {} at URI: {}",
                                 ((CloudBlob) blob).getName(), ((CloudBlob) blob).getProperties().getLength(), blobUriPath);
-                        validateBlobItemLength(blob, zeroContent);
+                        validateBlobItemLength(blob, zeroContent, blobsWithZeroLength);
                     } else {
                         LOGGER.error("Azure Adls Gen 2 Blob is NOT present with Name: {} and with bytes of content: {} at URI: {}",
                                 ((CloudBlob) blob).getName(), ((CloudBlob) blob).getProperties().getLength(), blobUriPath);
