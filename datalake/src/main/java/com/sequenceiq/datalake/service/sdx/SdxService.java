@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -24,8 +25,10 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
@@ -38,6 +41,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -175,6 +179,7 @@ public class SdxService implements ResourceIdProvider {
         sdxCluster.setRuntime(runtimeVersion);
         StackV4Request stackRequest = getStackRequest(sdxClusterRequest, internalStackV4Request, cloudPlatform, runtimeVersion);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
+        prepareDefaultSecurityConfigs(internalStackV4Request, stackRequest, cloudPlatform);
         try {
             sdxCluster.setStackRequest(JsonUtil.writeValueAsString(stackRequest));
         } catch (JsonProcessingException e) {
@@ -245,6 +250,35 @@ public class SdxService implements ResourceIdProvider {
     public void syncByCrn(String userCrn, String crn) {
         SdxCluster sdxCluster = getByCrn(userCrn, crn);
         stackV4Endpoint.sync(0L, sdxCluster.getClusterName());
+    }
+
+    protected StackV4Request prepareDefaultSecurityConfigs(StackV4Request internalRequest, StackV4Request stackV4Request, CloudPlatform cloudPlatform) {
+        if (internalRequest == null && !List.of("MOCK", "YARN").contains(cloudPlatform)) {
+            stackV4Request.getInstanceGroups().forEach(instance -> {
+                SecurityGroupV4Request groupRequest = new SecurityGroupV4Request();
+                if (InstanceGroupType.CORE.equals(instance.getType())) {
+                    groupRequest.setSecurityRules(rulesWithPorts("22"));
+                } else if (InstanceGroupType.GATEWAY.equals(instance.getType())) {
+                    groupRequest.setSecurityRules(rulesWithPorts("443", "22"));
+                } else {
+                    throw new IllegalStateException("Unknown instance group type " + instance.getType());
+                }
+                instance.setSecurityGroup(groupRequest);
+            });
+        }
+        return stackV4Request;
+    }
+
+    private List<SecurityRuleV4Request> rulesWithPorts(String... ports) {
+        return Stream.of(ports)
+                .map(port -> {
+                    SecurityRuleV4Request ruleRequest = new SecurityRuleV4Request();
+                    ruleRequest.setSubnet("0.0.0.0/0");
+                    ruleRequest.setPorts(List.of(port));
+                    ruleRequest.setProtocol("tcp");
+                    return ruleRequest;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
