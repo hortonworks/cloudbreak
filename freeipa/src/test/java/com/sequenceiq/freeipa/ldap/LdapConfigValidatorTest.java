@@ -1,23 +1,19 @@
 package com.sequenceiq.freeipa.ldap;
 
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.sequenceiq.cloudbreak.service.secret.SecretTestUtil;
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
+import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 
-@RunWith(MockitoJUnitRunner.class)
-@Ignore("Will be fixed in a followup PR -> CB-5659")
+@ExtendWith(MockitoExtension.class)
 public class LdapConfigValidatorTest {
-
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private LdapConfigValidator underTest;
@@ -26,9 +22,10 @@ public class LdapConfigValidatorTest {
     public void testInvalidLdapConnection() {
         LdapConfig ldapConfig = ldapConfig();
         ldapConfig.setProtocol("ldap://");
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid name: /localhost:389");
-        underTest.validateLdapConnection(ldapConfig);
+        BadRequestException ex = Assertions.assertThrows(BadRequestException.class, () -> {
+            underTest.validateLdapConnection(ldapConfig);
+        });
+        assertEquals("Failed to connect to LDAP server: Invalid name: /localhost:389", ex.getMessage());
     }
 
     private LdapConfig ldapConfig() {

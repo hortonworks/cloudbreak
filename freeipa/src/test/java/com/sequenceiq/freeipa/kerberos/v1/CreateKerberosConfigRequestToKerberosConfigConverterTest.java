@@ -1,32 +1,28 @@
 package com.sequenceiq.freeipa.kerberos.v1;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.KerberosType;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.ActiveDirectoryKerberosDescriptor;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.FreeIPAKerberosDescriptor;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.KerberosDescriptorBase;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.MITKerberosDescriptor;
+import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 
-@RunWith(MockitoJUnitRunner.class)
-@Ignore("Will be fixed in a followup PR -> CB-5659")
+@ExtendWith(MockitoExtension.class)
 public class CreateKerberosConfigRequestToKerberosConfigConverterTest {
     private static final String NAME = "somename";
 
-    private static final String IMPROPER_KERBEROS_MESSAGE = "Improper KerberosV4Request!";
+    private static final String IMPROPER_KERBEROS_MESSAGE = "Improper CreateKerberosConfigRequest!";
 
     private static final String ADMIN_URL = "someurl";
 
@@ -50,18 +46,15 @@ public class CreateKerberosConfigRequestToKerberosConfigConverterTest {
 
     private static final Boolean TCP_ALLOWED = false;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @InjectMocks
     private CreateKerberosConfigRequestToKerberosConfigConverter underTest;
 
     @Test
     public void testNullValidation() {
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(IMPROPER_KERBEROS_MESSAGE);
-
-        underTest.convert(null);
+        BadRequestException ex = Assertions.assertThrows(BadRequestException.class, () -> {
+            underTest.convert(null);
+        });
+        assertEquals(IMPROPER_KERBEROS_MESSAGE, ex.getMessage());
     }
 
     @Test
@@ -70,10 +63,10 @@ public class CreateKerberosConfigRequestToKerberosConfigConverterTest {
         request.setActiveDirectory(new ActiveDirectoryKerberosDescriptor());
         request.setMit(new MITKerberosDescriptor());
 
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(IMPROPER_KERBEROS_MESSAGE);
-
-        underTest.convert(request);
+        BadRequestException ex = Assertions.assertThrows(BadRequestException.class, () -> {
+            underTest.convert(request);
+        });
+        assertEquals(IMPROPER_KERBEROS_MESSAGE, ex.getMessage());
     }
 
     @Test
@@ -133,10 +126,10 @@ public class CreateKerberosConfigRequestToKerberosConfigConverterTest {
         CreateKerberosConfigRequest request = new CreateKerberosConfigRequest();
         request.setActiveDirectory(new ActiveDirectoryKerberosDescriptor());
 
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(IMPROPER_KERBEROS_MESSAGE);
-
-        underTest.convert(request);
+        BadRequestException ex = Assertions.assertThrows(BadRequestException.class, () -> {
+            underTest.convert(request);
+        });
+        assertEquals(IMPROPER_KERBEROS_MESSAGE, ex.getMessage());
     }
 
     @Test
@@ -144,10 +137,10 @@ public class CreateKerberosConfigRequestToKerberosConfigConverterTest {
         CreateKerberosConfigRequest request = new CreateKerberosConfigRequest();
         request.setMit(new MITKerberosDescriptor());
 
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(IMPROPER_KERBEROS_MESSAGE);
-
-        underTest.convert(request);
+        BadRequestException ex = Assertions.assertThrows(BadRequestException.class, () -> {
+            underTest.convert(request);
+        });
+        assertEquals(IMPROPER_KERBEROS_MESSAGE, ex.getMessage());
     }
 
     @Test
@@ -155,10 +148,10 @@ public class CreateKerberosConfigRequestToKerberosConfigConverterTest {
         CreateKerberosConfigRequest request = new CreateKerberosConfigRequest();
         request.setFreeIpa(new FreeIPAKerberosDescriptor());
 
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(IMPROPER_KERBEROS_MESSAGE);
-
-        underTest.convert(request);
+        BadRequestException ex = Assertions.assertThrows(BadRequestException.class, () -> {
+            underTest.convert(request);
+        });
+        assertEquals(IMPROPER_KERBEROS_MESSAGE, ex.getMessage());
     }
 
     private ActiveDirectoryKerberosDescriptor createActiveDirectoryKerberosDescriptor(boolean withDomain) {
@@ -245,7 +238,7 @@ public class CreateKerberosConfigRequestToKerberosConfigConverterTest {
     }
 
     private void checkCommonParams(KerberosConfig kerberosConfig) {
-        Assert.assertEquals(NAME, kerberosConfig.getName());
+        assertEquals(NAME, kerberosConfig.getName());
         assertEquals(PRINCIPAL, kerberosConfig.getPrincipal());
         assertEquals(NAME_SERVERS, kerberosConfig.getNameServers());
         assertEquals(PASSWORD, kerberosConfig.getPassword());
