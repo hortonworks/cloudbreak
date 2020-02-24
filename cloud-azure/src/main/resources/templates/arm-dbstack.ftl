@@ -136,7 +136,7 @@
             "defaultValue": {
                 <#if serverTags?? && serverTags?has_content>
                     <#list serverTags?keys as key>
-                      "${key}": "${serverTags[key]}",
+                      "${key}": "${serverTags[key]}"<#if key_has_next>,</#if>
                       </#list>
                 </#if>
             },
