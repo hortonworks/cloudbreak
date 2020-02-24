@@ -80,6 +80,7 @@ public class CentralCmTemplateUpdater implements BlueprintUpdater {
             TemplatePreparationObject source, Map<String, List<Map<String, String>>> hostGroupMappings, String sdxContextName) {
         processor.addInstantiator(clouderaManagerRepoDetails, source, sdxContextName);
         processor.addHosts(hostGroupMappings);
+        processor.addDiagnosticTags(source, clouderaManagerRepoDetails);
         cmTemplateComponentConfigProviderProcessor.process(processor, source);
         cmTemplateConfigInjectorProcessor.process(processor, source);
         cmHostGroupRoleConfigProviderProcessor.process(processor, source);
