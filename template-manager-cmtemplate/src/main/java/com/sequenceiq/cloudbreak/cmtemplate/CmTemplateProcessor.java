@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceCount.atLeast;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceCount.exactly;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isTagsResourceSupportedViaBlueprint;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -42,8 +43,10 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.cloudera.api.swagger.model.ApiDataContextRef;
+import com.cloudera.api.swagger.model.ApiEntityTag;
 import com.cloudera.api.swagger.model.ApiProductVersion;
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
@@ -436,6 +439,29 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     public void setServices(List<ApiClusterTemplateService> services) {
         cmTemplate.setServices(services);
+    }
+
+    public void addDiagnosticTags(TemplatePreparationObject templatePreparationObject, ClouderaManagerRepo clouderaManagerRepo) {
+        if (Objects.nonNull(clouderaManagerRepo) && isTagsResourceSupportedViaBlueprint(clouderaManagerRepo)) {
+            cmTemplate.addTagsItem(new ApiEntityTag().name("_cldr_cb_origin").value("cloudbreak"));
+            cmTemplate.addTagsItem(new ApiEntityTag().name("_cldr_cb_clustertype").value(getClusterType(templatePreparationObject.getStackType())));
+        }
+    }
+
+    private String getClusterType(StackType stackType) {
+        String clusterType;
+        switch (stackType) {
+            case WORKLOAD:
+                clusterType = "Data Hub";
+                break;
+            case DATALAKE:
+                clusterType = "SDX";
+                break;
+            default:
+                clusterType = "Unknown";
+        }
+        LOGGER.debug("Cluster type tag set to {}", clusterType);
+        return clusterType;
     }
 
     @VisibleForTesting
