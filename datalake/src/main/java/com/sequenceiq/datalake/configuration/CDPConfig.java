@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
@@ -32,6 +34,9 @@ public class CDPConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPConfig.class);
 
+    @Value("${datalake.unsupported.runtimes:}")
+    private Set<String> unsupportedRuntimes;
+
     @Bean
     public Map<CDPConfigKey, StackV4Request> cdpStackRequests() {
         Map<CDPConfigKey, StackV4Request> cpdStackRequests = new HashMap<>();
@@ -42,12 +47,14 @@ public class CDPConfig {
                 Matcher matcher = Pattern.compile(".*/runtime/(.*)/(.*)/(.*).json").matcher(resource.getURL().getPath());
                 if (matcher.find()) {
                     String runtimeVersion = matcher.group(RUNTIME_GROUP);
-                    CloudPlatform cloudPlatform = CloudPlatform.valueOf(matcher.group(CLOUDPLATFORM_GROUP).toUpperCase());
-                    SdxClusterShape sdxClusterShape = SdxClusterShape.valueOf(matcher.group(CLUSTERSHAPE_GROUP).toUpperCase());
-                    CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, sdxClusterShape, runtimeVersion);
-                    String templateString = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8.name());
-                    StackV4Request stackV4Request = JsonUtil.readValue(templateString, StackV4Request.class);
-                    cpdStackRequests.put(cdpConfigKey, stackV4Request);
+                    if (!unsupportedRuntimes.contains(runtimeVersion)) {
+                        CloudPlatform cloudPlatform = CloudPlatform.valueOf(matcher.group(CLOUDPLATFORM_GROUP).toUpperCase());
+                        SdxClusterShape sdxClusterShape = SdxClusterShape.valueOf(matcher.group(CLUSTERSHAPE_GROUP).toUpperCase());
+                        CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, sdxClusterShape, runtimeVersion);
+                        String templateString = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8.name());
+                        StackV4Request stackV4Request = JsonUtil.readValue(templateString, StackV4Request.class);
+                        cpdStackRequests.put(cdpConfigKey, stackV4Request);
+                    }
                 }
             }
             LOGGER.info("Cdp configs for datalakes: {}", cpdStackRequests);
