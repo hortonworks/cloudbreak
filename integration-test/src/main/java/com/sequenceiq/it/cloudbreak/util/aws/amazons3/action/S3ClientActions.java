@@ -45,8 +45,6 @@ public class S3ClientActions extends S3Client {
                 do {
                     List<DeleteObjectsRequest.KeyVersion> deletableObjects = Lists.newArrayList();
                     for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
-                        LOGGER.info("Removing Amazon S3 key with name: {} and with bytes of content {}",
-                                objectSummary.getKey(), objectSummary.getSize());
                         deletableObjects.add(new DeleteObjectsRequest.KeyVersion(objectSummary.getKey()));
                     }
                     DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
@@ -108,10 +106,8 @@ public class S3ClientActions extends S3Client {
                     S3ObjectInputStream inputStream = object.getObjectContent();
 
                     if (object.getObjectMetadata().getContentLength() == 0 && !zeroContent) {
+                        LOGGER.error("Amazon S3 path: {} has 0 bytes of content!", object.getKey());
                         throw new TestFailException(String.format("Amazon S3 path: %s has 0 bytes of content!", object.getKey()));
-                    } else {
-                        LOGGER.info("Amazon S3 object is present with path: {} and with bytes of content {}",
-                                object.getKey(), object.getObjectMetadata().getContentLength());
                     }
                     try {
                         inputStream.abort();
