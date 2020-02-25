@@ -5,12 +5,14 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_RDBMS_DELETE_EVENT;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.polling.PollingResult;
@@ -25,6 +27,7 @@ import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
+import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 
@@ -43,12 +46,23 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final PollingService<FreeIpaPollerObject> freeIpaPollingService;
 
-    protected FreeIpaDeletionHandler(EventSender eventSender, EnvironmentService environmentService, FreeIpaService freeIpaService,
-            PollingService<FreeIpaPollerObject> freeIpaPollingService) {
+    private final DnsV1Endpoint dnsV1Endpoint;
+
+    private final String yarnNetworkCidr;
+
+    protected FreeIpaDeletionHandler(
+            EventSender eventSender,
+            EnvironmentService environmentService,
+            FreeIpaService freeIpaService,
+            PollingService<FreeIpaPollerObject> freeIpaPollingService,
+            DnsV1Endpoint dnsV1Endpoint,
+            @Value("${environment.freeipa.yarnNetworkCidr}") String yarnNetworkCidr) {
         super(eventSender);
         this.environmentService = environmentService;
         this.freeIpaService = freeIpaService;
         this.freeIpaPollingService = freeIpaPollingService;
+        this.dnsV1Endpoint = dnsV1Endpoint;
+        this.yarnNetworkCidr = yarnNetworkCidr;
     }
 
     @Override
@@ -96,6 +110,22 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
         detachChildEnvironmentRequest.setParentEnvironmentCrn(environment.getParentEnvironment().getResourceCrn());
         detachChildEnvironmentRequest.setChildEnvironmentCrn(environment.getResourceCrn());
         freeIpaService.detachChildEnvironment(detachChildEnvironmentRequest);
+
+        if (lastChildEnvironmentIsGettingDeleted(environment)) {
+            try {
+                dnsV1Endpoint.deleteDnsZoneBySubnet(environment.getParentEnvironment().getResourceCrn(), yarnNetworkCidr);
+            } catch (Exception e) {
+                LOGGER.warn("Failed to delete dns zone of child environment.", e);
+            }
+        }
+    }
+
+    private boolean lastChildEnvironmentIsGettingDeleted(Environment environment) {
+        List<String> siblingEnvironmentNames = environmentService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(
+                environment.getAccountId(),
+                environment.getParentEnvironment().getId());
+        return siblingEnvironmentNames.stream()
+                .noneMatch(siblingName -> !siblingName.equals(environment.getName()));
     }
 
     private void deleteFreeIpa(Environment environment) {

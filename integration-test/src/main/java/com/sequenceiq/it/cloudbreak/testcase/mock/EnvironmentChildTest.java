@@ -59,7 +59,7 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsListedByNameAndParentName)
-                .then(verifyFreeIpaRequest("dnszone_add"))
+                .then(verifyFreeIpaRequest("dnszone_add", 1))
                 .validate();
     }
 
@@ -120,7 +120,8 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
     @Description(
             given = "there is an available child environment with a referenced available parent environment",
             when = "a delete request is sent for the child environment",
-            then = "the child environment should be deleted")
+            then = "the child environment should be deleted",
+            and = "dns zone should be deleted")
     public void testDeleteChildEnvironment(TestContext testContext) {
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
@@ -131,6 +132,30 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.ARCHIVED)
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsNotListedByNameAndParentName)
+                .then(verifyFreeIpaRequest("dnszone_del", 1))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is an available child environment with a referenced available parent environment",
+            when = "a delete request is sent for the child environment",
+            then = "the child environment should be deleted, but dns zone should not be removed")
+    public void testDeleteChildEnvironmentThatHasSibling(TestContext testContext) {
+        testContext
+                .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
+                    .withParentEnvironment()
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .given("child2", EnvironmentTestDto.class)
+                    .withParentEnvironment()
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .when(environmentTestClient.deleteByName())
+                .await(EnvironmentStatus.ARCHIVED)
+                .when(environmentTestClient.list())
+                .then(this::checkEnvIsNotListedByNameAndParentName)
+                .then(verifyFreeIpaRequest("dnszone_del", 0))
                 .validate();
     }
 
@@ -174,10 +199,11 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
     }
 
     @SuppressWarnings("unchecked")
-    private Assertion<EnvironmentTestDto, EnvironmentClient> verifyFreeIpaRequest(String method) {
+    private Assertion<EnvironmentTestDto, EnvironmentClient> verifyFreeIpaRequest(String method, int times) {
         return (testContext1, testDto, client) ->
                 testDto.then(
                         MockVerification.verify(HttpMethod.POST, ITResponse.FREEIPA_ROOT + "/session/json")
-                                .bodyContains(method));
+                                .bodyContains(method)
+                                .exactTimes(times));
     }
 }

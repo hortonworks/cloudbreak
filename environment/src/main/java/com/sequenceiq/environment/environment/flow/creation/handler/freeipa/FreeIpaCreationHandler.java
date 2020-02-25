@@ -94,7 +94,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final CloudPlatformConnectors connectors;
 
-    private String yarnNetowrkCidr;
+    private String yarnNetworkCidr;
 
     private Set<String> enabledChildPlatforms;
 
@@ -109,7 +109,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             FreeIpaServerRequestProvider freeIpaServerRequestProvider,
             TelemetryApiConverter telemetryApiConverter,
             CloudPlatformConnectors connectors,
-            @Value("${environment.freeipa.yarnNetworkCidr}") String yarnNetowrkCidr,
+            @Value("${environment.freeipa.yarnNetworkCidr}") String yarnNetworkCidr,
             @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms) {
         super(eventSender);
         this.environmentService = environmentService;
@@ -121,7 +121,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         this.freeIpaServerRequestProvider = freeIpaServerRequestProvider;
         this.telemetryApiConverter = telemetryApiConverter;
         this.connectors = connectors;
-        this.yarnNetowrkCidr = yarnNetowrkCidr;
+        this.yarnNetworkCidr = yarnNetworkCidr;
         this.enabledChildPlatforms = enabledChildPlatforms;
     }
 
@@ -181,7 +181,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
                 AddDnsZoneForSubnetsRequest addDnsZoneForSubnetsRequest = new AddDnsZoneForSubnetsRequest();
                 addDnsZoneForSubnetsRequest.setEnvironmentCrn(parentEnvironmentCrn);
-                addDnsZoneForSubnetsRequest.setSubnets(Collections.singletonList(yarnNetowrkCidr));
+                addDnsZoneForSubnetsRequest.setSubnets(Collections.singletonList(yarnNetworkCidr));
 
                 dnsV1Endpoint.addDnsZoneForSubnets(addDnsZoneForSubnetsRequest);
             }
