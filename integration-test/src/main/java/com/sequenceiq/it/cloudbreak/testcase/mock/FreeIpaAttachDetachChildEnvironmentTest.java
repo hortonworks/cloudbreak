@@ -17,9 +17,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPAChildEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
-import com.sequenceiq.it.cloudbreak.mock.ITResponse;
-import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
-import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractIntegrationTest {
@@ -30,25 +27,13 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractIntegration
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
-    @Inject
-    private FreeIpaRouteHandler freeIpaRouteHandler;
-
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultEnvironmentWithNetwork(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
-        initializeFreeIpaResponse((MockedTestContext) testContext);
-    }
-
-    private void initializeFreeIpaResponse(MockedTestContext mockedTestContext) {
-        DynamicRouteStack dynamicRouteStack = mockedTestContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
-        dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/login_password", (request, response) -> {
-            response.cookie("ipa_session", "dummysession");
-            return "";
-        });
-        dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/json", freeIpaRouteHandler);
+        setUpFreeIpaRouteStubbing((MockedTestContext) testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
