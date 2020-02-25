@@ -90,7 +90,7 @@ public class WorkspaceServiceTest {
         testWorkspace.setId(1L);
         testWorkspace.setTenant(testTenant);
         testWorkspace.setResourceCrn("crn:cdp:iam:us-west-1:1:workspace:1");
-        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
+        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
         when(workspaceRepository.getByName(anyString(), eq(testTenant))).thenReturn(testWorkspace);
     }
 

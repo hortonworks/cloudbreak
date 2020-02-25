@@ -145,7 +145,7 @@ public class ClusterServiceTest {
         stack.setStackStatus(stackStatus);
         cluster.setStack(stack);
 
-        lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
+        lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }
 
     @Test

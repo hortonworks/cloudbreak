@@ -125,7 +125,7 @@ public class HeartbeatServiceTest {
             } catch (RuntimeException e) {
                 throw new TransactionExecutionException("", e);
             }
-        }).when(transactionService).required(any());
+        }).when(transactionService).required(any(Supplier.class));
     }
 
     @Test

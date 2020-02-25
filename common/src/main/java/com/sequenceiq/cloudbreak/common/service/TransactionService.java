@@ -28,6 +28,17 @@ public class TransactionService {
         }
     }
 
+    public void required(Runnable callback) throws TransactionExecutionException {
+        TransactionMetricsContext context = transactionMetricsService.createTransactionMetricsContext();
+        try {
+            transactionExecutorService.required(callback);
+        } catch (RuntimeException e) {
+            throw new TransactionExecutionException("Transaction failed", e);
+        } finally {
+            transactionMetricsService.processTransactionDuration(context);
+        }
+    }
+
     public <T> T requiresNew(Supplier<T> callback) throws TransactionExecutionException {
         TransactionMetricsContext context = transactionMetricsService.createTransactionMetricsContext();
         try {
@@ -145,6 +156,42 @@ public class TransactionService {
         @Transactional(TxType.NEVER)
         public <T> T never(Supplier<T> callback) {
             return callback.get();
+        }
+
+        @Override
+        @Transactional(TxType.REQUIRED)
+        public void required(Runnable callback) {
+            callback.run();
+        }
+
+        @Override
+        @Transactional(TxType.REQUIRES_NEW)
+        public void requiresNew(Runnable callback) {
+            callback.run();
+        }
+
+        @Override
+        @Transactional(TxType.MANDATORY)
+        public void mandatory(Runnable callback) {
+            callback.run();
+        }
+
+        @Override
+        @Transactional(TxType.SUPPORTS)
+        public void supports(Runnable callback) {
+            callback.run();
+        }
+
+        @Override
+        @Transactional(TxType.NOT_SUPPORTED)
+        public void notSupported(Runnable callback) {
+            callback.run();
+        }
+
+        @Override
+        @Transactional(TxType.NEVER)
+        public void never(Runnable callback) {
+            callback.run();
         }
     }
 }

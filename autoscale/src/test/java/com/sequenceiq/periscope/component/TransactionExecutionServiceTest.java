@@ -29,4 +29,34 @@ public class TransactionExecutionServiceTest implements TransactionExecutorServi
         return callback.get();
     }
 
+    @Override
+    public void required(Runnable callback) {
+        callback.run();
+    }
+
+    @Override
+    public void requiresNew(Runnable callback) {
+        callback.run();
+    }
+
+    @Override
+    public void mandatory(Runnable callback) {
+        callback.run();
+    }
+
+    @Override
+    public void supports(Runnable callback) {
+        callback.run();
+    }
+
+    @Override
+    public void notSupported(Runnable callback) {
+        callback.run();
+    }
+
+    @Override
+    public void never(Runnable callback) {
+        callback.run();
+    }
+
 }
