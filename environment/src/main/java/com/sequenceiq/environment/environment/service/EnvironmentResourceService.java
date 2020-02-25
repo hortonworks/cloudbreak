@@ -72,7 +72,7 @@ public class EnvironmentResourceService {
         return credential;
     }
 
-    public void createAndUpdateSshKey(Environment environment) {
+    public boolean createAndUpdateSshKey(Environment environment) {
         LOGGER.debug("Environment {} requested managed public key. Creating.", environment.getName());
         String publicKeyId = String.format("%s-%s", environment.getName(), environment.getResourceCrn());
 
@@ -92,6 +92,7 @@ public class EnvironmentResourceService {
         if (created) {
             environment.getAuthentication().setPublicKeyId(publicKeyId);
         }
+        return created;
     }
 
     private boolean createPublicKey(Environment environment, String publicKeyId) {

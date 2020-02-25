@@ -5,6 +5,8 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,9 +23,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
+import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
@@ -48,6 +53,9 @@ class PublicKeyCreationHandlerTest {
 
     @Mock
     private Event<EnvironmentDto> environmentDtoEvent;
+
+    @Mock
+    private EnvironmentResourceService environmentResourceService;
 
     @Mock
     private Headers headers;
@@ -80,6 +88,7 @@ class PublicKeyCreationHandlerTest {
         underTest.accept(environmentDtoEvent);
 
         verify(eventSender).sendEvent(baseNamedFlowEvent.capture(), headersArgumentCaptor.capture());
+        verify(environmentService, never()).save(any());
         verifyEnvCreationEvent();
     }
 
@@ -89,8 +98,57 @@ class PublicKeyCreationHandlerTest {
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenThrow(error);
 
         underTest.accept(environmentDtoEvent);
+
         verify(eventSender).sendEvent(baseNamedFlowEvent.capture(), headersArgumentCaptor.capture());
         verifyEnvCreationFailedEvent(error);
+    }
+
+    @Test
+    void acceptTestEnvironmentShouldBeUpdatedWhenSshKeyHasBeenCreated() {
+        EnvironmentAuthentication authentication = new EnvironmentAuthentication();
+        authentication.setManagedKey(true);
+        Environment environment = new Environment();
+        environment.setAuthentication(authentication);
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        when(environmentResourceService.createAndUpdateSshKey(environment)).thenReturn(Boolean.TRUE);
+
+        underTest.accept(environmentDtoEvent);
+
+        verify(eventSender).sendEvent(baseNamedFlowEvent.capture(), headersArgumentCaptor.capture());
+        verify(environmentService, times(1)).save(environment);
+        verifyEnvCreationEvent();
+    }
+
+    @Test
+    void acceptTestEnvironmentShouldNotBeUpdatedWhenSshKeyHasNotBeenCreated() {
+        EnvironmentAuthentication authentication = new EnvironmentAuthentication();
+        authentication.setManagedKey(true);
+        Environment environment = new Environment();
+        environment.setAuthentication(authentication);
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        when(environmentResourceService.createAndUpdateSshKey(environment)).thenReturn(Boolean.FALSE);
+
+        underTest.accept(environmentDtoEvent);
+
+        verify(eventSender).sendEvent(baseNamedFlowEvent.capture(), headersArgumentCaptor.capture());
+        verify(environmentService, never()).save(any());
+        verifyEnvCreationEvent();
+    }
+
+    @Test
+    void acceptTestEnvironmentShouldNotBeUpdatedWhenAuthenticationDoesNotContainManagedKey() {
+        EnvironmentAuthentication authentication = new EnvironmentAuthentication();
+        authentication.setManagedKey(false);
+        Environment environment = new Environment();
+        environment.setAuthentication(authentication);
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+
+        underTest.accept(environmentDtoEvent);
+
+        verify(eventSender).sendEvent(baseNamedFlowEvent.capture(), headersArgumentCaptor.capture());
+        verify(environmentResourceService, never()).createAndUpdateSshKey(environment);
+        verify(environmentService, never()).save(any());
+        verifyEnvCreationEvent();
     }
 
     @Test
