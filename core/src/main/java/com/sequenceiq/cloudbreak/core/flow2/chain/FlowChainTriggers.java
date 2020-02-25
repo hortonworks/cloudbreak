@@ -35,6 +35,8 @@ public class FlowChainTriggers {
 
     public static final String CLUSTER_PROXY_RE_REGISTER_EVENT = "CLUSTER_PROXY_RE_REGISTER_EVENT";
 
+    public static final String RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT = "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

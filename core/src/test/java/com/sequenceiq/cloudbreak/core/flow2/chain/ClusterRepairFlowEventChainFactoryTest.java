@@ -92,7 +92,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
 
         List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("STACK_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT"), triggeredOperations);
+        assertEquals(List.of("STACK_DOWNSCALE_TRIGGER_EVENT",
+                "FULL_UPSCALE_TRIGGER_EVENT",
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT"), triggeredOperations);
     }
 
     @Test
@@ -104,7 +106,10 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
 
         List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("STACK_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT", "EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT"), triggeredOperations);
+        assertEquals(List.of("STACK_DOWNSCALE_TRIGGER_EVENT",
+                "FULL_UPSCALE_TRIGGER_EVENT",
+                "EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT",
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT"), triggeredOperations);
     }
 
     @Test
@@ -122,7 +127,11 @@ public class ClusterRepairFlowEventChainFactoryTest {
                 new TriggerEventBuilder(stack).withFailedPrimaryGateway().withFailedCore().build());
 
         List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("STACK_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT", "FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT"),
+        assertEquals(List.of("STACK_DOWNSCALE_TRIGGER_EVENT",
+                "FULL_UPSCALE_TRIGGER_EVENT",
+                "FULL_DOWNSCALE_TRIGGER_EVENT",
+                "FULL_UPSCALE_TRIGGER_EVENT",
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT"),
                 triggeredOperations);
     }
 
@@ -138,7 +147,8 @@ public class ClusterRepairFlowEventChainFactoryTest {
         assertEquals(List.of(
                 "CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
-                "FULL_UPSCALE_TRIGGER_EVENT"), triggeredOperations);
+                "FULL_UPSCALE_TRIGGER_EVENT",
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT"), triggeredOperations);
     }
 
     @Test
@@ -154,7 +164,8 @@ public class ClusterRepairFlowEventChainFactoryTest {
                 "CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
-                "EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT"), triggeredOperations);
+                "EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT",
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT"), triggeredOperations);
     }
 
     @Test
@@ -166,7 +177,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
 
         List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT"), triggeredOperations);
+        assertEquals(List.of("FULL_DOWNSCALE_TRIGGER_EVENT",
+                "FULL_UPSCALE_TRIGGER_EVENT",
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT"), triggeredOperations);
     }
 
     @Test
@@ -178,7 +191,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
 
         List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT"), triggeredOperations);
+        assertEquals(List.of("FULL_DOWNSCALE_TRIGGER_EVENT",
+                "FULL_UPSCALE_TRIGGER_EVENT",
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT"), triggeredOperations);
     }
 
     private void setupHostGroup(boolean gatewayInstanceGroup) {
