@@ -30,13 +30,6 @@ public class NullUtil {
         return null;
     }
 
-    public static <T, R> R getIfNotNullOtherwise(T value, Function<T, R> consumer, R toReturnIfValueIsNull) {
-        if (value != null) {
-            return consumer.apply(value);
-        }
-        return toReturnIfValueIsNull;
-    }
-
     public static <T, U, R> R getIfNotNull(T firstArgument, U secondArgument, BiFunction<T, U, R> consumer) {
         if (firstArgument != null && secondArgument != null) {
             return consumer.apply(firstArgument, secondArgument);

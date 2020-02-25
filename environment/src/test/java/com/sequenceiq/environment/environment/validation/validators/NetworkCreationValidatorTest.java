@@ -15,7 +15,6 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.EnvironmentTestData;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
@@ -48,11 +47,11 @@ public class NetworkCreationValidatorTest {
         environment.setCloudPlatform("aZuRe");
         environment.setCidr(null);
 
-        ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto);
+        ValidationResult.ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto, null);
 
         ValidationResult validationResult = resultBuilder.build();
         assertFalse(validationResult.hasError());
-        verify(environmentNetworkValidatorMock).validateDuringRequest(networkDto, resultBuilder);
+        verify(environmentNetworkValidatorMock).validateDuringRequest(networkDto, null, resultBuilder);
     }
 
     @Test
@@ -62,7 +61,7 @@ public class NetworkCreationValidatorTest {
         environment.setCloudPlatform(CloudPlatform.AZURE.name());
         environment.setCidr(null);
 
-        ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto);
+        ValidationResult.ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto, null);
         ValidationResult validationResult = resultBuilder.build();
         assertTrue(validationResult.hasError());
         assertEquals(1, validationResult.getErrors().size());
@@ -77,7 +76,7 @@ public class NetworkCreationValidatorTest {
         environment.setCloudPlatform(CloudPlatform.AZURE.name());
         environment.setCidr(null);
 
-        ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto);
+        ValidationResult.ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto, null);
 
         ValidationResult validationResult = resultBuilder.build();
         assertFalse(validationResult.hasError());
@@ -90,7 +89,7 @@ public class NetworkCreationValidatorTest {
         environment.setCloudPlatform(CloudPlatform.AZURE.name());
         environment.setCidr(null);
 
-        ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto);
+        ValidationResult.ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto, null);
         ValidationResult validationResult = resultBuilder.build();
         assertFalse(validationResult.hasError());
     }
@@ -101,9 +100,8 @@ public class NetworkCreationValidatorTest {
         environment.setCloudPlatform(CloudPlatform.YARN.name());
         environment.setCidr(null);
 
-        ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto);
+        ValidationResult.ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto, null);
         ValidationResult validationResult = resultBuilder.build();
         assertFalse(validationResult.hasError());
     }
-
 }

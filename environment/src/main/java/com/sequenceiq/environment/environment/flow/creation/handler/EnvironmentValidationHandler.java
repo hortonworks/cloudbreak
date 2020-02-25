@@ -14,10 +14,8 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
-import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
-import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
@@ -29,27 +27,19 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
 
     private final EnvironmentFlowValidatorService validatorService;
 
-    private final CloudNetworkService cloudNetworkService;
-
     private final EnvironmentService environmentService;
 
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
-
-    private final EnvironmentResourceService environmentResourceService;
 
     protected EnvironmentValidationHandler(
             EventSender eventSender,
             EnvironmentFlowValidatorService validatorService,
             EnvironmentService environmentService,
-            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor,
-            CloudNetworkService cloudNetworkService,
-            EnvironmentResourceService environmentResourceService) {
+            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
         super(eventSender);
         this.validatorService = validatorService;
         this.environmentService = environmentService;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
-        this.cloudNetworkService = cloudNetworkService;
-        this.environmentResourceService = environmentResourceService;
     }
 
     @Override
@@ -67,14 +57,8 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
                                 validationResult = validationResult.merge(validatorService.validateNetworkWithProvider(environmentDto));
                                 if (validationResult.hasError()) {
                                     goToFailedState(environmentDtoEvent, validationResult.getFormattedErrors());
-                                } else {
-                                    environmentDto.getNetwork().setSubnetMetas(cloudNetworkService.retrieveSubnetMetadata(environmentDto,
-                                            environmentDto.getNetwork()));
-                                    environmentResourceService.createAndSetNetwork(environment, environmentDto.getNetwork(), environment.getAccountId(),
-                                            environmentDto.getNetwork().getSubnetMetas());
-                                    environmentService.save(environment);
-                                    goToNetworkCreationState(environmentDtoEvent, environmentDto);
                                 }
+                                goToNetworkCreationState(environmentDtoEvent, environmentDto);
                             } catch (WebApplicationException e) {
                                 String responseMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
                                 goToFailedState(environmentDtoEvent, e.getMessage() + ". " + responseMessage);
@@ -119,5 +103,4 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
     public String selector() {
         return VALIDATE_ENVIRONMENT_EVENT.selector();
     }
-
 }

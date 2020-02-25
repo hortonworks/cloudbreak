@@ -3,7 +3,10 @@ package com.sequenceiq.environment.environment.validation.network;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,9 +16,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.network.CloudNetworkService;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Component
@@ -23,48 +25,8 @@ public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidat
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsEnvironmentNetworkValidator.class);
 
-    private final CloudNetworkService cloudNetworkService;
-
-    public AwsEnvironmentNetworkValidator(CloudNetworkService cloudNetworkService) {
-        this.cloudNetworkService = cloudNetworkService;
-    }
-
     @Override
-    public void validateDuringFlow(EnvironmentDto environmentDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
-        String message;
-        if (networkDto != null && networkDto.getNetworkCidr() == null) {
-            Map<String, CloudSubnet> cloudmetadata = cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto);
-            if (StringUtils.isEmpty(networkDto.getNetworkCidr()) && StringUtils.isEmpty(networkDto.getNetworkId())) {
-                message = "Either the AWS network id or cidr needs to be defined!";
-                LOGGER.info(message);
-                resultBuilder.error(message);
-                return;
-            }
-            if (networkDto.getSubnetMetas().size() != cloudmetadata.size()) {
-                message = String.format("Subnets of the environment (%s) are not found in the vpc (%s).",
-                        environmentDto.getName(), String.join(", ", getSubnetDiff(networkDto.getSubnetIds(), cloudmetadata.keySet())));
-                LOGGER.info(message);
-                resultBuilder.error(message);
-                return;
-            }
-            if (cloudmetadata.size() < 2) {
-                message = "There should be at least two subnets in the network";
-                LOGGER.info(message);
-                resultBuilder.error(message);
-                return;
-            }
-            Map<String, Long> zones = cloudmetadata.values().stream()
-                    .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone, Collectors.counting()));
-            if (zones.size() < 2) {
-                message = "The subnets in the vpc should be present at least in two different availability zones";
-                LOGGER.info(message);
-                resultBuilder.error(message);
-            }
-        }
-    }
-
-    @Override
-    public void validateDuringRequest(NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
+    public void validateDuringFlow(NetworkDto networkDto, ValidationResult.ValidationResultBuilder resultBuilder) {
         if (networkDto != null) {
             if (networkDto.getAws() != null) {
                 if (StringUtils.isEmpty(networkDto.getAws().getVpcId())) {
@@ -77,8 +39,50 @@ public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidat
     }
 
     @Override
+    public void validateDuringRequest(
+            NetworkDto networkV1Request, Map<String, CloudSubnet> subnetMetas, ValidationResult.ValidationResultBuilder resultBuilder) {
+        String message;
+        if (networkV1Request != null && networkV1Request.getNetworkCidr() == null) {
+            if (StringUtils.isEmpty(networkV1Request.getNetworkCidr()) && StringUtils.isEmpty(networkV1Request.getNetworkId())) {
+                message = String.format("Either the AWS network id or cidr needs to be defined!");
+                LOGGER.info(message);
+                resultBuilder.error(message);
+            }
+
+            if (networkV1Request.getSubnetIds().size() < 2) {
+                message = "There should be at least two subnets in the network";
+                LOGGER.info(message);
+                resultBuilder.error(message);
+            }
+            if (subnetMetas.size() != networkV1Request.getSubnetIds().size()) {
+                message = String.format("Subnets of the environment (%s) are not found in the vpc (%s).",
+                        String.join(",", getSubnetDiff(networkV1Request.getSubnetIds(), subnetMetas.keySet())),
+                        Optional.of(networkV1Request).map(NetworkDto::getAws).map(AwsParams::getVpcId).orElse(""));
+                LOGGER.info(message);
+                resultBuilder.error(message);
+            }
+            Map<String, Long> zones = subnetMetas.values().stream()
+                    .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone, Collectors.counting()));
+            if (zones.size() < 2) {
+                message = "The subnets in the vpc should be present at least in two different availability zones";
+                LOGGER.info(message);
+                resultBuilder.error(message);
+            }
+        }
+    }
+
+    @Override
     public CloudPlatform getCloudPlatform() {
         return AWS;
     }
 
+    private Set<String> getSubnetDiff(Set<String> envSubnets, Set<String> vpcSubnets) {
+        Set<String> diff = new HashSet<>();
+        for (String envSubnet : envSubnets) {
+            if (!vpcSubnets.contains(envSubnet)) {
+                diff.add(envSubnet);
+            }
+        }
+        return diff;
+    }
 }

@@ -10,18 +10,23 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
+import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
@@ -30,6 +35,8 @@ import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dao.repository.BaseNetworkRepository;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
+import com.sequenceiq.environment.platformresource.PlatformParameterService;
+import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 
 @ExtendWith(MockitoExtension.class)
 public class NetworkServiceTest {
@@ -38,7 +45,7 @@ public class NetworkServiceTest {
 
     private Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap = mock(Map.class);
 
-    private CloudNetworkService cloudNetworkService = mock(CloudNetworkService.class);
+    private PlatformParameterService platformParameterService = mock(PlatformParameterService.class);
 
     private EnvironmentNetworkService environmentNetworkService = mock(EnvironmentNetworkService.class);
 
@@ -49,7 +56,7 @@ public class NetworkServiceTest {
     private NetworkService underTest = new NetworkService(
             networkRepository,
             environmentNetworkConverterMap,
-            cloudNetworkService,
+            platformParameterService,
             environmentNetworkService,
             networkCreationValidator);
 
@@ -102,8 +109,7 @@ public class NetworkServiceTest {
         verify(environmentNetworkService, times(0)).getNetworkCidr(eq(network), anyString(), eq(credential));
     }
 
-    // TODO: 2020. 01. 31. move these tests to the new CloudNetworkServiceTest class
-    /*@Test
+    @Test
     public void testRetrieveSubnetMetadataIfNetworkNull() {
         Map<String, CloudSubnet> actual = underTest.retrieveSubnetMetadata(null, null);
         Assertions.assertTrue(actual.isEmpty());
@@ -117,7 +123,7 @@ public class NetworkServiceTest {
         region.setName("region1");
         environment.setRegions(Set.of(region));
         NetworkDto networkDto = NetworkDto.builder().withSubnetMetas(Map.of("sub", new CloudSubnet())).build();
-        when(cloudNetworkService.getCloudNetworks(any(PlatformResourceRequest.class))).thenReturn(new CloudNetworks(Map.of("region1", Set.of())));
+        when(platformParameterService.getCloudNetworks(any(PlatformResourceRequest.class))).thenReturn(new CloudNetworks(Map.of("region1", Set.of())));
         Map<String, CloudSubnet> actual = underTest.retrieveSubnetMetadata(environment, networkDto);
         Assertions.assertTrue(actual.isEmpty());
     }
@@ -134,7 +140,7 @@ public class NetworkServiceTest {
         CloudSubnet providerSubnet = new CloudSubnet();
         providerSubnet.setId("sub");
         CloudNetwork cloudNetwork = new CloudNetwork("network", "network", Set.of(providerSubnet), Collections.emptyMap());
-        when(cloudNetworkService.getCloudNetworks(any(PlatformResourceRequest.class))).thenReturn(new CloudNetworks(Map.of("region1",
+        when(platformParameterService.getCloudNetworks(any(PlatformResourceRequest.class))).thenReturn(new CloudNetworks(Map.of("region1",
                 Set.of(cloudNetwork))));
         Map<String, CloudSubnet> actual = underTest.retrieveSubnetMetadata(environment, networkDto);
         Assertions.assertEquals(1, actual.size());
@@ -153,11 +159,11 @@ public class NetworkServiceTest {
         CloudSubnet providerSubnet = new CloudSubnet();
         providerSubnet.setId("diff-sub");
         CloudNetwork cloudNetwork = new CloudNetwork("network", "network", Set.of(providerSubnet), Collections.emptyMap());
-        when(cloudNetworkService.getCloudNetworks(any(PlatformResourceRequest.class))).thenReturn(new CloudNetworks(Map.of("region1",
+        when(platformParameterService.getCloudNetworks(any(PlatformResourceRequest.class))).thenReturn(new CloudNetworks(Map.of("region1",
                 Set.of(cloudNetwork))));
         Map<String, CloudSubnet> actual = underTest.retrieveSubnetMetadata(environment, networkDto);
         Assertions.assertEquals(0, actual.size());
-    }*/
+    }
 
     @Test
     public void testMergeNetworkDtoWithNetworkIfNetworkCreateNew() {

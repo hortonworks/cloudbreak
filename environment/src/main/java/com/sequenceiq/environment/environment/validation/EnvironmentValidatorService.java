@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
 
+import com.sequenceiq.environment.environment.EnvironmentStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,13 +20,15 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
-import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -77,8 +80,8 @@ public class EnvironmentValidatorService {
         return regionValidationResult.merge(locationValidationResult.build());
     }
 
-    public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network) {
-        return networkCreationValidator.validateNetworkCreation(environment, network);
+    public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network, Map<String, CloudSubnet> subnetMetas) {
+        return networkCreationValidator.validateNetworkCreation(environment, network, subnetMetas);
     }
 
     public ValidationResult validateParentChildRelation(Environment environment, String parentEnvironmentName) {
@@ -102,7 +105,7 @@ public class EnvironmentValidatorService {
 
     public ValidationResult validateAwsEnvironmentRequest(EnvironmentRequest environmentRequest, String cloudPlatform) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
-        resultBuilder.ifError(() -> !AWS.name().equalsIgnoreCase(cloudPlatform),
+        resultBuilder.ifError(() -> !CloudPlatform.AWS.name().equalsIgnoreCase(cloudPlatform),
                 "Environment request is not for AWS.");
 
         resultBuilder.ifError(() -> StringUtils.isBlank(Optional.ofNullable(environmentRequest.getAws())
@@ -122,15 +125,15 @@ public class EnvironmentValidatorService {
     public ValidationResult validateSecurityAccessModification(SecurityAccessDto securityAccessDto, Environment environment) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         resultBuilder.ifError(() -> isNotEmpty(securityAccessDto.getCidr()), "The CIDR could not be updated in the environment");
-        resultBuilder.ifError(() -> isNotEmpty(environment.getCidr()) && isAnySecurityGroupMissing(securityAccessDto),
+        resultBuilder.ifError(() -> isNotEmpty(environment.getCidr()) && anySecGroupMissing(securityAccessDto),
                 "The CIDR can be replaced with the default and knox security groups, please add to the request");
-        resultBuilder.ifError(() -> isAllSecurityGroupMissing(securityAccessDto),
+        resultBuilder.ifError(() -> allSecGroupMissing(securityAccessDto),
                 "Please add the default or knox security groups, we cannot edit with empty value.");
         return resultBuilder.build();
     }
 
     public ValidationResult validateSecurityGroups(EnvironmentEditDto editDto, Environment environment) {
-        ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        ValidationResult.ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
         getSecurityGroupIdSet(editDto).forEach(sg -> {
             try {
                 fetchSecurityGroup(editDto, environment, sg);
@@ -169,7 +172,7 @@ public class EnvironmentValidatorService {
         return validationResultBuilder.build();
     }
 
-    private void fetchSecurityGroup(EnvironmentEditDto editDto, Environment environment, String securityGroupId) {
+    private CloudSecurityGroups fetchSecurityGroup(EnvironmentEditDto editDto, Environment environment, String securityGroupId) {
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 editDto.getAccountId(),
                 environment.getCredential().getName(),
@@ -178,23 +181,22 @@ public class EnvironmentValidatorService {
                 environment.getCloudPlatform(),
                 null);
         request.setFilters(Map.of("groupId", securityGroupId));
-        platformParameterService.getSecurityGroups(request);
+        return platformParameterService.getSecurityGroups(request);
     }
 
     private Set<String> getSecurityGroupIdSet(EnvironmentEditDto editDto) {
         return Set.of(editDto.getSecurityAccess().getSecurityGroupIdForKnox(), editDto.getSecurityAccess().getDefaultSecurityGroupId());
     }
 
-    private boolean isAnySecurityGroupMissing(SecurityAccessDto securityAccessDto) {
+    private boolean anySecGroupMissing(SecurityAccessDto securityAccessDto) {
         return isEmpty(securityAccessDto.getDefaultSecurityGroupId()) || isEmpty(securityAccessDto.getSecurityGroupIdForKnox());
     }
 
-    private boolean isAllSecurityGroupMissing(SecurityAccessDto securityAccessDto) {
+    private boolean allSecGroupMissing(SecurityAccessDto securityAccessDto) {
         return isEmpty(securityAccessDto.getDefaultSecurityGroupId()) && isEmpty(securityAccessDto.getSecurityGroupIdForKnox());
     }
 
     private boolean platformEnabled(Set<String> cloudPlatforms, String cloudPlatform) {
         return cloudPlatforms.stream().anyMatch(p -> p.equalsIgnoreCase(cloudPlatform));
     }
-
 }
