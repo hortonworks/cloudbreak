@@ -96,7 +96,7 @@ public class UpgradeServiceTest {
 
     @BeforeEach
     public void setUp() throws TransactionExecutionException {
-        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
+        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }
 
     @Test

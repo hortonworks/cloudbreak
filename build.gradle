@@ -158,6 +158,7 @@ subprojects {
     useJUnitPlatform ()
     testlogger{
       showSummary true
+      showStandardStreams true
     }
     jacoco {
       destinationFile = file("$buildDir/jacoco/jacocoTest.exec")

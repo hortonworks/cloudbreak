@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
@@ -61,7 +62,7 @@ class ProvisionerServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
 
-    private static final long CLUSTER_ID = 2L;
+    private static final AtomicLong CLUSTER_ID = new AtomicLong(10000L);
 
     private static final boolean HAS_RUNNING_FLOW = true;
 
@@ -90,12 +91,13 @@ class ProvisionerServiceTest {
 
     @Test
     void startProvisioning() {
-        SdxCluster sdxCluster = generateValidSdxCluster(CLUSTER_ID);
+        long clusterId = CLUSTER_ID.incrementAndGet();
+        SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
         StackV4Response stackV4Response = new StackV4Response();
         when(stackV4Endpoint.post(anyLong(), any(StackV4Request.class))).thenReturn(stackV4Response);
-        when(sdxClusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
 
-        underTest.startStackProvisioning(CLUSTER_ID, getEnvironmentResponse(), getDatabaseServerResponse());
+        underTest.startStackProvisioning(clusterId, getEnvironmentResponse(), getDatabaseServerResponse());
 
         verify(cloudbreakFlowService).getAndSaveLastCloudbreakFlowChainId(sdxCluster);
         verify(sdxClusterRepository, times(1)).save(any(SdxCluster.class));
@@ -103,18 +105,20 @@ class ProvisionerServiceTest {
 
     @Test
     void startProvisioningSdxNotFound() {
-        when(sdxClusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.empty());
+        long clusterId = CLUSTER_ID.incrementAndGet();
+        when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.empty());
 
         Assertions.assertThrows(com.sequenceiq.cloudbreak.exception.NotFoundException.class,
-                () -> underTest.startStackProvisioning(CLUSTER_ID, getEnvironmentResponse(), getDatabaseServerResponse()));
+                () -> underTest.startStackProvisioning(clusterId, getEnvironmentResponse(), getDatabaseServerResponse()));
 
         verifyZeroInteractions(cloudbreakFlowService);
     }
 
     @Test
     void waitCloudbreakClusterCreationFailedByTimeout() {
+        long clusterId = CLUSTER_ID.incrementAndGet();
         SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setId(CLUSTER_ID);
+        sdxCluster.setId(clusterId);
         sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         sdxCluster.setEnvName("envir");
         sdxCluster.setInitiatorUserCrn(USER_CRN);
@@ -124,10 +128,10 @@ class ProvisionerServiceTest {
         stackV4Response.setStatus(Status.REQUESTED);
         when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet())).thenReturn(stackV4Response);
 
-        when(sdxClusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 100, TimeUnit.MILLISECONDS);
 
-        Assertions.assertThrows(PollerStoppedException.class, () -> underTest.waitCloudbreakClusterCreation(CLUSTER_ID, pollingConfig));
+        Assertions.assertThrows(PollerStoppedException.class, () -> underTest.waitCloudbreakClusterCreation(clusterId, pollingConfig));
 
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS,
@@ -136,15 +140,16 @@ class ProvisionerServiceTest {
 
     @Test
     void waitCloudbreakClusterCreationFailedByFailedStack() {
-        SdxCluster sdxCluster = generateValidSdxCluster(CLUSTER_ID);
+        long clusterId = CLUSTER_ID.incrementAndGet();
+        SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.CREATE_FAILED);
         when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet())).thenReturn(stackV4Response);
-        when(sdxClusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 500, TimeUnit.MILLISECONDS);
 
         Assertions.assertThrows(UserBreakException.class, () -> underTest
-                .waitCloudbreakClusterCreation(CLUSTER_ID, pollingConfig), "Stack creation failed");
+                .waitCloudbreakClusterCreation(clusterId, pollingConfig), "Stack creation failed");
 
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS,
@@ -153,7 +158,8 @@ class ProvisionerServiceTest {
 
     @Test
     void waitCloudbreakClusterCreationSuccess() {
-        SdxCluster sdxCluster = generateValidSdxCluster(CLUSTER_ID);
+        long clusterId = CLUSTER_ID.incrementAndGet();
+        SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.AVAILABLE);
         ClusterV4Response cluster = new ClusterV4Response();
@@ -163,10 +169,10 @@ class ProvisionerServiceTest {
                 .thenReturn(HAS_RUNNING_FLOW)
                 .thenReturn(NO_RUNNING_FLOW);
         when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet())).thenReturn(stackV4Response);
-        when(sdxClusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 1000, TimeUnit.MILLISECONDS);
 
-        underTest.waitCloudbreakClusterCreation(CLUSTER_ID, pollingConfig);
+        underTest.waitCloudbreakClusterCreation(clusterId, pollingConfig);
 
         verify(cloudbreakFlowService, times(2)).isLastKnownFlowRunning(sdxCluster);
         verify(sdxStatusService, times(1))
@@ -179,60 +185,65 @@ class ProvisionerServiceTest {
 
     @Test
     void startStackDeletionStackNotFound() {
-        SdxCluster sdxCluster = generateValidSdxCluster(CLUSTER_ID);
-        when(sdxClusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(sdxCluster));
+        long clusterId = CLUSTER_ID.incrementAndGet();
+        SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
+        when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.CREATE_FAILED);
         doThrow(new NotFoundException()).when(stackV4Endpoint).delete(anyLong(), eq(sdxCluster.getClusterName()), eq(Boolean.FALSE));
 
-        underTest.startStackDeletion(CLUSTER_ID, false);
+        underTest.startStackDeletion(clusterId, false);
 
         verify(stackV4Endpoint).delete(0L, null, false);
     }
 
     @Test
     void startForcedStackDeletionStackFound() {
-        SdxCluster sdxCluster = generateValidSdxCluster(CLUSTER_ID);
-        when(sdxClusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(sdxCluster));
+        long clusterId = CLUSTER_ID.incrementAndGet();
+        SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
+        when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.CREATE_FAILED);
         doNothing().when(stackV4Endpoint).delete(anyLong(), eq(sdxCluster.getClusterName()), eq(Boolean.TRUE));
 
-        underTest.startStackDeletion(CLUSTER_ID, true);
+        underTest.startStackDeletion(clusterId, true);
 
         verify(stackV4Endpoint).delete(0L, null, true);
     }
 
     @Test
     void startStackDeletionButClientError() {
-        SdxCluster sdxCluster = generateValidSdxCluster(CLUSTER_ID);
-        when(sdxClusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(sdxCluster));
+        long clusterId = CLUSTER_ID.incrementAndGet();
+        SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
+        when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.CREATE_FAILED);
         doThrow(new InternalServerErrorException())
                 .when(stackV4Endpoint).delete(anyLong(), eq(sdxCluster.getClusterName()), eq(Boolean.FALSE));
 
-        Assertions.assertThrows(InternalServerErrorException.class, () -> underTest.startStackDeletion(CLUSTER_ID, false));
+        Assertions.assertThrows(InternalServerErrorException.class, () -> underTest.startStackDeletion(clusterId, false));
 
         verify(stackV4Endpoint).delete(0L, null, false);
     }
 
     @Test
     void waitCloudbreakClusterDeletionButTimeout() {
-        SdxCluster sdxCluster = generateValidSdxCluster(CLUSTER_ID);
-        when(sdxClusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(sdxCluster));
+        long clusterId = CLUSTER_ID.incrementAndGet();
+        SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
+        when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         StackV4Response firstStackV4Response = new StackV4Response();
         firstStackV4Response.setStatus(Status.AVAILABLE);
         when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet())).thenReturn(firstStackV4Response);
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
 
-        Assertions.assertThrows(PollerStoppedException.class, () -> underTest.waitCloudbreakClusterDeletion(CLUSTER_ID, pollingConfig));
+        Assertions.assertThrows(PollerStoppedException.class, () -> underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig));
     }
 
     @Test
     void waitCloudbreakClusterDeletionButFailed() {
-        SdxCluster sdxCluster = generateValidSdxCluster(CLUSTER_ID);
-        when(sdxClusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(sdxCluster));
+        long clusterId = CLUSTER_ID.incrementAndGet();
+        SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
+        when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         StackV4Response firstStackV4Response = new StackV4Response();
         firstStackV4Response.setStatus(Status.AVAILABLE);
         StackV4Response secondStackV4Response = new StackV4Response();
@@ -241,17 +252,18 @@ class ProvisionerServiceTest {
                 .thenReturn(secondStackV4Response);
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
 
-        Assertions.assertThrows(UserBreakException.class, () -> underTest.waitCloudbreakClusterDeletion(CLUSTER_ID, pollingConfig));
+        Assertions.assertThrows(UserBreakException.class, () -> underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig));
     }
 
     @Test
     void waitCloudbreakClusterDeletionSuccessful() {
-        SdxCluster sdxCluster = generateValidSdxCluster(CLUSTER_ID);
-        when(sdxClusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(sdxCluster));
+        long clusterId = CLUSTER_ID.incrementAndGet();
+        SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
+        when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet())).thenThrow(new NotFoundException());
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
 
-        underTest.waitCloudbreakClusterDeletion(CLUSTER_ID, pollingConfig);
+        underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig);
 
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETED,

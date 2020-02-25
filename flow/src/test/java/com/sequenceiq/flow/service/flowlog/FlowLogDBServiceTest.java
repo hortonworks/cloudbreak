@@ -214,7 +214,7 @@ public class FlowLogDBServiceTest {
         when(realFlowLog1.getId()).thenReturn(10L);
         when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(eq("flow1"))).thenReturn(Optional.of(realFlowLog1));
         when(applicationFlowInformation.getTerminationFlow()).thenReturn(Collections.singletonList(TerminationFlowConfig.class));
-        when(transactionService.required(any())).thenAnswer(invocation -> ((Supplier) invocation.getArguments()[0]).get());
+        when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> ((Supplier) invocation.getArguments()[0]).get());
         when(nodeConfig.getId()).thenReturn("node1");
         underTest.cancelTooOldTerminationFlowForResource(1L, 10000L);
         verify(flowLogRepository).finalizeByFlowId(eq("flow1"));

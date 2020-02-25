@@ -119,7 +119,7 @@ public class LeaderElectionServiceTest {
     @Test
     public void testElectionNeededAndFails() throws TransactionExecutionException {
         when(periscopeNodeRepository.countByLeaderIsTrueAndLastUpdatedIsGreaterThan(anyLong())).thenReturn(0L);
-        when(transactionService.required(any())).thenThrow(new TransactionExecutionException("Persisting went wrong", new RuntimeException()));
+        when(transactionService.required(any(Supplier.class))).thenThrow(new TransactionExecutionException("Persisting went wrong", new RuntimeException()));
 
         underTest.leaderElection();
 
