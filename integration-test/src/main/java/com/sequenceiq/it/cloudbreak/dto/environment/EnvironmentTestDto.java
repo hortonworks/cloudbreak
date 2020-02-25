@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -38,6 +37,7 @@ import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.DeletableEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -207,8 +207,17 @@ public class EnvironmentTestDto
         return this;
     }
 
-    public EnvironmentTestDto withParentEnvironment(RunningParameter parentEnvKey) {
-        CloudbreakTestDto parentEnvDto = getTestContext().get(parentEnvKey.getKey());
+    public EnvironmentTestDto withParentEnvironment(RunningParameter runningParameter) {
+        CloudbreakTestDto parentEnvDto = getTestContext().get(runningParameter.getKey());
+        return withParentEnvironment(parentEnvDto);
+    }
+
+    public EnvironmentTestDto withParentEnvironment() {
+        CloudbreakTestDto parentEnvDto = getTestContext().given(EnvironmentTestDto.class);
+        return withParentEnvironment(parentEnvDto);
+    }
+
+    private EnvironmentTestDto withParentEnvironment(CloudbreakTestDto parentEnvDto) {
         if (isNull(parentEnvDto)) {
             order = ORDER;
         } else {
