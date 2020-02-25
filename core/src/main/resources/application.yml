@@ -214,7 +214,6 @@ cb:
         CDP 1.2 - Data Mart: Apache Impala, Hue=cdp-data-mart-702;
         CDP 1.2 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart-702;
         CDP 1.2 - Operational Database: Apache HBase=cdp-opdb-702;
-        CDP 1.2 - Operational Database: Apache HBase, Phoenix=cdp-opdb-710;
         CDP 1.2 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-702;
         CDP 1.2 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-702;
         CDP 1.2 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-702;
@@ -222,7 +221,6 @@ cb:
         7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-710;
         7.1.0 - Data Mart: Apache Impala, Hue=cdp-data-mart-710;
         7.1.0 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart-710;
-        7.1.0 - Operational Database: Apache HBase=cdp-opdb-710;
         7.1.0 - Operational Database: Apache HBase, Phoenix=cdp-opdb-710;
         7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-710;
         7.1.0 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-710;

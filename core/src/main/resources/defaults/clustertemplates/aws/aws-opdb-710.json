@@ -1,8 +1,8 @@
 {
-  "name": "7.1.0 - Operational Database with Phoenix for AWS",
+  "name": "7.1.0 - Operational Database with SQL for AWS",
   "description": "",
   "type": "OPERATIONALDATABASE",
-  "featureState": "PREVIEW",
+  "featureState": "RELEASED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
