@@ -1,37 +1,41 @@
 package com.sequenceiq.freeipa.ldap;
 
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.freeipa.controller.exception.BadRequestException;
+import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.util.CrnService;
 
-@RunWith(MockitoJUnitRunner.class)
-@Ignore("Will be fixed in a followup PR -> CB-5659")
+@ExtendWith(MockitoExtension.class)
 public class LdapConfigServiceTest {
     private static final String ENVIRONMENT_ID = "environmentId";
 
-    private static final String ACCOUNT_ID = "accountId";
+    private static final String RESOURCE_CRN = "crn:cdp:environments:us-west-1:accountId:ldapconfig:4c5ba74b-c35e-45e9-9f47-123456789876";
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    private static final String ACCOUNT_ID = "accountId";
 
     @Mock
     private LdapConfigRepository ldapConfigRepository;
 
     @Mock
     private CrnService crnService;
+
+    @Mock
+    private Clock clock;
 
     @Mock
     private LdapConfigValidator ldapConfigValidator;
@@ -45,11 +49,12 @@ public class LdapConfigServiceTest {
         LdapConfig ldapConfig = new LdapConfig();
         ldapConfig.setEnvironmentCrn(ENVIRONMENT_ID);
         Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        Mockito.when(crnService.createCrn(ACCOUNT_ID, Crn.ResourceType.LDAP)).thenReturn(RESOURCE_CRN);
         Mockito.when(ldapConfigRepository.save(ldapConfig)).thenReturn(ldapConfig);
         // WHEN
         underTest.createLdapConfig(ldapConfig);
         // THEN
-        Assert.assertNotNull(ldapConfig.getResourceCrn());
+        assertNotNull(ldapConfig.getResourceCrn());
     }
 
     @Test
@@ -60,10 +65,12 @@ public class LdapConfigServiceTest {
         Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         Mockito.when(ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(ACCOUNT_ID, ENVIRONMENT_ID))
                 .thenReturn(Optional.of(new LdapConfig()));
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("environment is already exists");
+
+        BadRequestException ex = Assertions.assertThrows(BadRequestException.class, () -> {
+            underTest.createLdapConfig(ldapConfig);
+        });
+        assertEquals("LdapConfig in the [accountId] account's [environmentId] environment is already exists", ex.getMessage());
         // WHEN
-        underTest.createLdapConfig(ldapConfig);
         // THEN BadRequestException has to be thrown
     }
 
@@ -77,18 +84,19 @@ public class LdapConfigServiceTest {
         // WHEN
         LdapConfig actualResult = underTest.get(ENVIRONMENT_ID);
         // THEN
-        Assert.assertEquals(expectedLdapConfig, actualResult);
+        assertEquals(expectedLdapConfig, actualResult);
     }
 
     @Test
     public void testGetNotFound() {
         // GIVEN
         Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        thrown.expect(NotFoundException.class);
-        thrown.expectMessage("LdapConfig for environment");
-        // WHEN
-        underTest.get(ENVIRONMENT_ID);
-        // THEN NotFoundException has to be thrown
+
+        NotFoundException ex = Assertions.assertThrows(NotFoundException.class, () -> {
+            // WHEN
+            underTest.get(ENVIRONMENT_ID);
+        });
+        assertEquals("LdapConfig for environment 'environmentId' not found.", ex.getMessage());
     }
 
     @Test
@@ -100,18 +108,18 @@ public class LdapConfigServiceTest {
         // WHEN
         underTest.delete(ENVIRONMENT_ID);
         // THEN
-        Mockito.verify(ldapConfigRepository).delete(ldapConfig);
+        Mockito.verify(ldapConfigRepository).save(ldapConfig);
     }
 
     @Test
     public void testDeleteNotFound() {
         // GIVEN
         Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        thrown.expect(NotFoundException.class);
-        thrown.expectMessage("LdapConfig for environment");
-        // WHEN
-        underTest.delete(ENVIRONMENT_ID);
-        // THEN NotFoundException has to be thrown
+        NotFoundException ex = Assertions.assertThrows(NotFoundException.class, () -> {
+            // WHEN
+            underTest.delete(ENVIRONMENT_ID);
+        });
+        assertEquals("LdapConfig for environment 'environmentId' not found.", ex.getMessage());
     }
 
     @Test
@@ -123,7 +131,7 @@ public class LdapConfigServiceTest {
         // WHEN
         String actualResult = underTest.testConnection(ENVIRONMENT_ID, null);
         // THEN
-        Assert.assertEquals("connected", actualResult);
+        assertEquals("connected", actualResult);
     }
 
     @Test
@@ -133,7 +141,7 @@ public class LdapConfigServiceTest {
         // WHEN
         String actualResult = underTest.testConnection(null, ldapConfig);
         // THEN
-        Assert.assertEquals("connected", actualResult);
+        assertEquals("connected", actualResult);
     }
 
     @Test
@@ -144,6 +152,6 @@ public class LdapConfigServiceTest {
         // WHEN
         String actualResult = underTest.testConnection(null, ldapConfig);
         // THEN
-        Assert.assertEquals("connection failed", actualResult);
+        assertEquals("connection failed", actualResult);
     }
 }

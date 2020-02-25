@@ -53,6 +53,7 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
 
     @Override
     public void create(StructuredEvent structuredEvent) {
+        LOGGER.info("Stored StructuredEventEntity: {}", AnonymizerUtil.anonymize(JsonUtil.writeValueAsStringSilent(structuredEvent)));
         StructuredEventEntity structuredEventEntityEntity = conversionService.convert(structuredEvent, StructuredEventEntity.class);
         create(structuredEventEntityEntity, structuredEventEntityEntity.getWorkspace(), null);
     }
@@ -66,9 +67,7 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
     @Override
     public StructuredEventEntity create(StructuredEventEntity resource, Workspace workspace, User user) {
         resource.setWorkspace(workspace);
-        StructuredEventEntity saved = repository().save(resource);
-        LOGGER.info("Stored StructuredEventEntity: {}", AnonymizerUtil.anonymize(JsonUtil.writeValueAsStringSilent(saved)));
-        return saved;
+        return repository().save(resource);
     }
 
     public boolean isEnabled() {
