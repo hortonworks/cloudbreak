@@ -16,8 +16,12 @@
       path /var/log/td-agent/{{fluent.providerPrefix}}
       timekey {{fluent.partitionIntervalMin}}m
       timekey_wait 0s
-      chunk_limit_size 256m
+      total_limit_size  2048MB
+      chunk_limit_size  60m
       flush_at_shutdown true
+      overflow_action drop_oldest_chunk
+      disable_chunk_backup  true
+      retry_timeout 1h
     </buffer>
     utc
     format single_value
@@ -38,8 +42,12 @@
       path /var/log/td-agent/{{fluent.providerPrefix}}_CM_COMMAND
       timekey {{fluent.partitionIntervalMin}}m
       timekey_wait 0s
-      chunk_limit_size 256m
+      total_limit_size  1024MB
+      chunk_limit_size  60m
       flush_at_shutdown true
+      overflow_action drop_oldest_chunk
+      disable_chunk_backup  true
+      retry_timeout 1h
     </buffer>
     utc
     format single_value
@@ -77,8 +85,11 @@
       path /var/log/td-agent/{{fluent.providerPrefix}}
       timekey {{fluent.partitionIntervalMin}}m
       timekey_wait 0s
-      chunk_limit_size 60m
+      total_limit_size  2048MB
+      chunk_limit_size  60m
       flush_at_shutdown true
+      overflow_action   drop_oldest_chunk
+      disable_chunk_backup  true
       retry_type        periodic
       retry_max_times   3
       retry_wait        5s
@@ -116,8 +127,11 @@
       path /var/log/td-agent/{{fluent.providerPrefix}}_CM_COMMAND
       timekey {{fluent.partitionIntervalMin}}m
       timekey_wait 0s
-      chunk_limit_size 60m
+      total_limit_size  1024MB
+      chunk_limit_size  60m
       flush_at_shutdown true
+      overflow_action   drop_oldest_chunk
+      disable_chunk_backup  true
       retry_type        periodic
       retry_max_times   3
       retry_wait        5s
