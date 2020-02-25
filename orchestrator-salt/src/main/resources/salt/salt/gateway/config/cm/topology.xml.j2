@@ -352,6 +352,13 @@
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
              </param>
              {%- endif %}
+
+             {% if 'SCHEMA-REGISTRY' in exposed and 'SCHEMA_REGISTRY_SERVER' in salt['pillar.get']('gateway:location') -%}
+             <param>
+                 <name>SCHEMA-REGISTRY</name>
+                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+             </param>
+             {%- endif %}
          </provider>
 
     </gateway>
