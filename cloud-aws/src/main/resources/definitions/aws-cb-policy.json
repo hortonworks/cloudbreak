@@ -213,6 +213,16 @@
       ]
     },
     {
+      "Sid": "ServiceQuotas",
+      "Action": [
+        "servicequotas:ListServiceQuotas"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "*"
+      ]
+    },
+    {
       "Sid": "KeyManagementServiceFull",
       "Action": [
         "kms:CreateAlias",
