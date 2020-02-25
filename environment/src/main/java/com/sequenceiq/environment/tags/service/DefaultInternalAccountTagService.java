@@ -14,10 +14,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.environment.api.v1.tags.model.AccountTagStatus;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponses;
+import com.sequenceiq.environment.tags.domain.AccountTag;
 
 @Service
 public class DefaultInternalAccountTagService {
@@ -68,6 +70,19 @@ public class DefaultInternalAccountTagService {
                     .findFirst();
             if (!first.isPresent()) {
                 accountTagResponses.add(response);
+            }
+        }
+
+    }
+
+    public void validate(List<AccountTag> accountTags) {
+        for (AccountTagResponse defaultTag : getDefaults().getResponses()) {
+            Optional<AccountTag> requestContainsUnmodifiableTag = accountTags
+                    .stream()
+                    .filter(e -> e.getTagKey().equals(defaultTag.getKey()))
+                    .findFirst();
+            if (requestContainsUnmodifiableTag.isPresent()) {
+                throw new BadRequestException(String.format("Tag with %s key exist as an unmodifiable tag.", defaultTag.getKey()));
             }
         }
 
