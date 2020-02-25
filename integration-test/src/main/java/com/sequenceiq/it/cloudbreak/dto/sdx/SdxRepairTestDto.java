@@ -27,6 +27,11 @@ public class SdxRepairTestDto extends AbstractSdxTestDto<SdxRepairRequest, SdxCl
         return getCloudProvider().sdxRepair(this);
     }
 
+    public SdxRepairTestDto withHostGroupName(String hostGroupName) {
+        getRequest().setHostGroupName(hostGroupName);
+        return this;
+    }
+
     public SdxRepairTestDto withHostGroupNames(List<String> hostGroupNames) {
         getRequest().setHostGroupNames(hostGroupNames);
         return this;
