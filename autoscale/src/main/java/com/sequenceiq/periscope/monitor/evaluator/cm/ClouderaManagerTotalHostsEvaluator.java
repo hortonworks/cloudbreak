@@ -48,7 +48,7 @@ public class ClouderaManagerTotalHostsEvaluator {
             String pass = secretService.get(cm.getPass());
             ApiClient client = clouderaManagerApiClientProvider.getClient(Integer.valueOf(cm.getPort()), user, pass, httpClientConfig);
             HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
-            return hostsResourceApi.readHosts(DataView.SUMMARY.name()).getItems().size();
+            return hostsResourceApi.readHosts(null, null, DataView.SUMMARY.name()).getItems().size();
         } catch (Exception e) {
             LOGGER.info("Failed to retrieve number of total hosts. Original message: {}", e.getMessage());
             throw new ClusterManagerException("Failed to retrieve number of total hosts", e);
