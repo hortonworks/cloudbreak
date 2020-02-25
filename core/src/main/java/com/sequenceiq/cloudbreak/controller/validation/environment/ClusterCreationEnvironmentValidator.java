@@ -118,7 +118,7 @@ public class ClusterCreationEnvironmentValidator {
         Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         boolean freeipa = kerberosConfig.map(kc -> KerberosType.FREEIPA == kc.getType()).orElse(Boolean.FALSE);
         if (!freeipa) {
-            resultBuilder.error("AutoTls is only enabled for clusters with FreeIpa!");
+            resultBuilder.error("FreeIPA is not available in your environment!");
         }
     }
 }

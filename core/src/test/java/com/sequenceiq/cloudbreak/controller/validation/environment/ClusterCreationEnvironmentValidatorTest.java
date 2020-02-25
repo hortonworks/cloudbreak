@@ -277,7 +277,7 @@ class ClusterCreationEnvironmentValidatorTest {
         // THEN
         assertTrue(actualResult.hasError());
         assertEquals(1, actualResult.getErrors().size());
-        assertTrue(actualResult.getErrors().contains("AutoTls is only enabled for clusters with FreeIpa!"));
+        assertTrue(actualResult.getErrors().contains("FreeIPA is not available in your environment!"));
     }
 
     private Stack getStack() {
