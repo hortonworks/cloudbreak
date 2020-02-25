@@ -11,7 +11,10 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
@@ -56,6 +59,10 @@ public class SdxReactorFlowManager {
     }
 
     public void triggerSdxRepairFlow(Long sdxId, SdxRepairRequest repairRequest) {
+        if (StringUtils.isNotBlank(repairRequest.getHostGroupName()) && CollectionUtils.isNotEmpty(repairRequest.getHostGroupNames())) {
+            throw new BadRequestException("Please send only one hostGroupName in the 'hostGroupName' field " +
+                    "or multiple hostGroups in the 'hostGroupNames' fields");
+        }
         String selector = SDX_REPAIR_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         notify(selector, new SdxRepairStartEvent(selector, sdxId, userId, repairRequest));

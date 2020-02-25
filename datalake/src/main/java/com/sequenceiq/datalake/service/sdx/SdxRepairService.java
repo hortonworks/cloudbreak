@@ -3,12 +3,14 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 
 import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -83,7 +85,7 @@ public class SdxRepairService {
 
     protected void startRepairInCb(SdxCluster sdxCluster, SdxRepairRequest repairRequest) {
         try {
-            LOGGER.info("Triggering repair flow for cluster {} with hostgroups {}", sdxCluster.getClusterName(), repairRequest.getHostGroupNames());
+            LOGGER.info("Triggering repair flow for cluster {} with hostgroups {}", sdxCluster.getClusterName(), repairRequest.getHostGroupName());
             stackV4Endpoint.repairCluster(0L, sdxCluster.getClusterName(), createRepairRequest(repairRequest));
             cloudbreakFlowService.getAndSaveLastCloudbreakFlowChainId(sdxCluster);
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, ResourceEvent.SDX_REPAIR_STARTED,
@@ -102,7 +104,13 @@ public class SdxRepairService {
 
     private ClusterRepairV4Request createRepairRequest(SdxRepairRequest sdxRepairRequest) {
         ClusterRepairV4Request repairRequest = new ClusterRepairV4Request();
-        repairRequest.setHostGroups(sdxRepairRequest.getHostGroupNames());
+        List<String> hostGroupNames;
+        if (StringUtils.isNotBlank(sdxRepairRequest.getHostGroupName())) {
+            hostGroupNames = List.of(sdxRepairRequest.getHostGroupName());
+        } else {
+            hostGroupNames = sdxRepairRequest.getHostGroupNames();
+        }
+        repairRequest.setHostGroups(hostGroupNames);
         return repairRequest;
     }
 

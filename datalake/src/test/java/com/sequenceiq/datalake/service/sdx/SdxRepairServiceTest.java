@@ -9,8 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -67,7 +65,7 @@ public class SdxRepairServiceTest {
         cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
         SdxRepairRequest sdxRepairRequest = new SdxRepairRequest();
-        sdxRepairRequest.setHostGroupNames(List.of("master"));
+        sdxRepairRequest.setHostGroupName("master");
         doNothing().when(cloudbreakFlowService).getAndSaveLastCloudbreakFlowChainId(any());
         underTest.startRepairInCb(cluster, sdxRepairRequest);
         verify(stackV4Endpoint).repairCluster(eq(0L), eq(CLUSTER_NAME), captor.capture());
