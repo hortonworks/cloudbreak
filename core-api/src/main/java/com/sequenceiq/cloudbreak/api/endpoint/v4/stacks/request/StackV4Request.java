@@ -62,6 +62,7 @@ public class StackV4Request extends StackV4Base {
     private List<InstanceGroupV4Request> instanceGroups = new ArrayList<>();
 
     @NotNull(message = "You should define authentication for stack!")
+    @Valid
     @ApiModelProperty(StackModelDescription.AUTHENTICATION)
     private StackAuthenticationV4Request authentication;
 

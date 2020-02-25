@@ -46,6 +46,7 @@ public class CreateFreeIpaRequest {
     private List<InstanceGroupRequest> instanceGroups;
 
     @NotNull
+    @Valid
     @ApiModelProperty(value = FreeIpaModelDescriptions.AUTHENTICATION, required = true)
     private StackAuthenticationRequest authentication;
 
