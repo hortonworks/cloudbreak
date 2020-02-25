@@ -54,7 +54,7 @@ public class AccountTagController extends NotificationController implements Acco
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Set<AccountTag> accountTags = accountTagService.get(accountId);
         List<AccountTagResponse> accountTagResponses = accountTagToAccountTagResponsesConverter.convert(accountTags);
-        accountTagResponses.addAll(defaultInternalAccountTagService.getDefaults().getResponses());
+        defaultInternalAccountTagService.merge(accountTagResponses);
         return new AccountTagResponses(new HashSet<>(accountTagResponses));
     }
 
