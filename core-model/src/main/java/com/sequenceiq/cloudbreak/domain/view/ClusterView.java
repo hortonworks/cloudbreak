@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain.view;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQUESTED;
 
@@ -44,5 +45,9 @@ public class ClusterView extends CompactView {
 
     public boolean isStartRequested() {
         return START_REQUESTED.equals(status);
+    }
+
+    public boolean isAvailable() {
+        return AVAILABLE.equals(status);
     }
 }
