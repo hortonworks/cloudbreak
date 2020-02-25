@@ -2,7 +2,9 @@ package com.sequenceiq.environment.tags.service;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.environment.api.v1.tags.model.AccountTagStatus;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponses;
 
@@ -39,12 +42,13 @@ public class DefaultInternalAccountTagService {
             AccountTagResponse accountTagResponse = new AccountTagResponse();
             accountTagResponse.setKey(entry.getKey());
             accountTagResponse.setValue(entry.getValue());
+            accountTagResponse.setStatus(AccountTagStatus.DEFAULT);
             responses.add(accountTagResponse);
         }
         internalAccountTagResponses = new AccountTagResponses(responses);
     }
 
-    public AccountTagResponses getDefaults() {
+    private AccountTagResponses getDefaults() {
         Set<AccountTagResponse> accountTagResponses = new HashSet<>();
 
         if (applyInternalTags) {
@@ -54,5 +58,18 @@ public class DefaultInternalAccountTagService {
                     .collect(Collectors.toSet());
         }
         return new AccountTagResponses(accountTagResponses);
+    }
+
+    public void merge(List<AccountTagResponse> accountTagResponses) {
+        for (AccountTagResponse response : getDefaults().getResponses()) {
+            Optional<AccountTagResponse> first = accountTagResponses
+                    .stream()
+                    .filter(e -> e.getKey().equals(response.getKey()))
+                    .findFirst();
+            if (!first.isPresent()) {
+                accountTagResponses.add(response);
+            }
+        }
+
     }
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.environment.api.v1.tags.model.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.v1.tags.model.AccountTagBase;
+import com.sequenceiq.environment.api.v1.tags.model.AccountTagStatus;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AccountTagResponse extends AccountTagBase {
@@ -9,6 +10,8 @@ public class AccountTagResponse extends AccountTagBase {
     private String accountId;
 
     private String resourceCrn;
+
+    private AccountTagStatus status = AccountTagStatus.DEFAULT;
 
     public AccountTagResponse() {
     }
@@ -29,4 +32,11 @@ public class AccountTagResponse extends AccountTagBase {
         this.resourceCrn = resourceCrn;
     }
 
+    public AccountTagStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AccountTagStatus status) {
+        this.status = status;
+    }
 }
