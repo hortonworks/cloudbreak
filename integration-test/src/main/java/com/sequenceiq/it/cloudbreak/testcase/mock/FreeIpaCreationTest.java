@@ -36,10 +36,9 @@ public class FreeIpaCreationTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "environment is present",
-            when = "calling a freeipe creation",
-            then = "freeipa sould be available with kerberos and ldap config")
+            when = "calling a freeipa creation",
+            then = "freeipa should be available with kerberos and ldap config")
     public void testCreateFreeIpa(MockedTestContext testContext) {
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
         DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
         dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/login_password", (request, response) -> {
             response.cookie("ipa_session", "dummysession");
@@ -47,7 +46,7 @@ public class FreeIpaCreationTest extends AbstractIntegrationTest {
         });
         dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/json", freeIpaRouteHandler);
         testContext
-                .given(FreeIPATestDto.class).withCatalog(mockedTestContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                .given(FreeIPATestDto.class).withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIPATestClient.create())
                 .await(Status.AVAILABLE)
                 .then(FreeIpaKerberosTestAssertion.validate())

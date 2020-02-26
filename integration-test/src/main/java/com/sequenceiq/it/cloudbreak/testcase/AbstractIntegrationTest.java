@@ -123,6 +123,8 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/host_find", freeIpaRouteHandler);
         dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/service_find", freeIpaRouteHandler);
         dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/dnszone_find", freeIpaRouteHandler);
+        dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/dnszone_add", freeIpaRouteHandler);
+        dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/dnszone_del", freeIpaRouteHandler);
         dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/dnsrecord_find", freeIpaRouteHandler);
         dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/host_del", freeIpaRouteHandler);
         dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/role_find", freeIpaRouteHandler);

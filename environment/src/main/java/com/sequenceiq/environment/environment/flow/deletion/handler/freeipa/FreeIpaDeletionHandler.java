@@ -124,8 +124,8 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
         List<String> siblingEnvironmentNames = environmentService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(
                 environment.getAccountId(),
                 environment.getParentEnvironment().getId());
-        return siblingEnvironmentNames.stream()
-                .noneMatch(siblingName -> !siblingName.equals(environment.getName()));
+        siblingEnvironmentNames.remove(environment.getName());
+        return siblingEnvironmentNames.isEmpty();
     }
 
     private void deleteFreeIpa(Environment environment) {
