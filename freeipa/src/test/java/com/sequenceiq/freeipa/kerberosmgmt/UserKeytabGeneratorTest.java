@@ -1,7 +1,8 @@
-package com.sequenceiq.freeipa.service.freeipa.user.kerberos;
+package com.sequenceiq.freeipa.kerberosmgmt;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.freeipa.kerberosmgmt.v1.UserKeytabGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

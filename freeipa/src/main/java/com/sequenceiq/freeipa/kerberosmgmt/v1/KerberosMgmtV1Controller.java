@@ -3,7 +3,12 @@ package com.sequenceiq.freeipa.kerberosmgmt.v1;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.freeipa.controller.exception.BadRequestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
@@ -26,11 +31,17 @@ import com.sequenceiq.freeipa.util.CrnService;
 @Transactional(Transactional.TxType.NEVER)
 @AuthorizationResource(type = AuthorizationResourceType.ENVIRONMENT)
 public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosMgmtV1Controller.class);
+
     @Inject
     private KerberosMgmtV1Service kerberosMgmtV1Service;
 
     @Inject
     private CrnService crnService;
+
+    @Inject
+    private UserKeytabService userKeytabService;
 
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
     public ServiceKeytabResponse generateServiceKeytab(@Valid ServiceKeytabRequest request) throws FreeIpaClientException {
@@ -79,4 +90,26 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         String accountId = crnService.getCurrentAccountId();
         kerberosMgmtV1Service.cleanupByEnvironment(environmentCrn, accountId);
     }
+
+    @Override
+    public String getUserKeytab(@NotEmpty String environmentCrn, @NotEmpty String targetUserCrn) {
+        String actorCrn = checkActorCrn();
+        LOGGER.debug("getUserKeytab() request for environmentCrn={} for targetUserCrn={} as actorCrn={}",
+                environmentCrn, actorCrn, targetUserCrn);
+        // TODO: For now we only allow retrieving keytab for the calling user. When we enable calling this against
+        //       other users we need to ensure the caller has the neccessary authorization / rights.
+        if (!actorCrn.equals(targetUserCrn)) {
+            throw new BadRequestException("Retrieving a keytab for another user is unsupported");
+        }
+        return userKeytabService.getKeytabBase64(targetUserCrn, environmentCrn);
+    }
+
+    private String checkActorCrn() {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        if (userCrn == null) {
+            throw new BadRequestException("An actor CRN must be provided");
+        }
+        return userCrn;
+    }
+
 }
