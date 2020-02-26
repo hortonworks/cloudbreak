@@ -30,10 +30,10 @@ public class PlatformConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlatformConfig.class);
 
-    @Value("${datalake.supported.externaldb.platform:AWS}")
+    @Value("${datalake.supported.externaldb.platform:AWS,AZURE}")
     private Set<CloudPlatform> dbServiceSupportedPlatforms;
 
-    @Value("${datalake.experimental.externaldb.platform:AZURE,MOCK}")
+    @Value("${datalake.experimental.externaldb.platform:MOCK}")
     private Set<CloudPlatform> dbServiceExperimentalPlatforms;
 
     @Inject

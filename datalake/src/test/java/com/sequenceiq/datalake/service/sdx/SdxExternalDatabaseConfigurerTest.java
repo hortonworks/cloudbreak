@@ -65,15 +65,75 @@ public class SdxExternalDatabaseConfigurerTest {
     }
 
     @Test
-    public void whenPlatformIsAzureWithDefaultsShouldCreateDatabase() {
+    public void whenPlatformIsAzureWithoutRuntimeVerionSet() {
         CloudPlatform cloudPlatform = CloudPlatform.AZURE;
-        when(platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)).thenReturn(false);
+        when(platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)).thenReturn(true);
+        when(platformConfig.isExternalDatabaseSupportedOrExperimental(CloudPlatform.AZURE)).thenReturn(true);
         SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
         SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("clusterName");
+
+        underTest.configure(cloudPlatform, dbRequest, sdxCluster);
+
+        assertEquals(true, sdxCluster.isCreateDatabase());
+    }
+
+    @Test
+    public void whenPlatformIsAzureWithoutRuntimeVerionSetAndNoDbRequested() {
+        CloudPlatform cloudPlatform = CloudPlatform.AZURE;
+        when(platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)).thenReturn(true);
+        SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
+        dbRequest.setCreate(false);
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("clusterName");
 
         underTest.configure(cloudPlatform, dbRequest, sdxCluster);
 
         assertEquals(false, sdxCluster.isCreateDatabase());
+    }
+
+    @Test
+    public void whenPlatformIsAzureWithNotSupportedRuntime() {
+        CloudPlatform cloudPlatform = CloudPlatform.AZURE;
+        when(platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)).thenReturn(true);
+        SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("clusterName");
+        sdxCluster.setRuntime("7.0.2");
+
+        underTest.configure(cloudPlatform, dbRequest, sdxCluster);
+
+        assertEquals(false, sdxCluster.isCreateDatabase());
+    }
+
+    @Test
+    public void whenPlatformIsAzureWithMinSupportedVersion() {
+        CloudPlatform cloudPlatform = CloudPlatform.AZURE;
+        when(platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)).thenReturn(true);
+        when(platformConfig.isExternalDatabaseSupportedOrExperimental(CloudPlatform.AZURE)).thenReturn(true);
+        SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("clusterName");
+        sdxCluster.setRuntime("7.1.0");
+
+        underTest.configure(cloudPlatform, dbRequest, sdxCluster);
+
+        assertEquals(true, sdxCluster.isCreateDatabase());
+    }
+
+    @Test
+    public void whenPlatformIsAzureWithNewerSupportedVersion() {
+        CloudPlatform cloudPlatform = CloudPlatform.AZURE;
+        when(platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)).thenReturn(true);
+        when(platformConfig.isExternalDatabaseSupportedOrExperimental(CloudPlatform.AZURE)).thenReturn(true);
+        SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("clusterName");
+        sdxCluster.setRuntime("7.2.0");
+
+        underTest.configure(cloudPlatform, dbRequest, sdxCluster);
+
+        assertEquals(true, sdxCluster.isCreateDatabase());
     }
 
     @Test
