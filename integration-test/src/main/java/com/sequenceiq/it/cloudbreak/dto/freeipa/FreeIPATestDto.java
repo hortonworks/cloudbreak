@@ -231,4 +231,10 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
     public String getSearchId() {
         return getName();
     }
+
+    @Override
+    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
+        LOGGER.info("Cleaning up resource with name: {}", getName());
+        when(freeIPATestClient.delete(), key("delete-freeipa-" + getName()).withSkipOnFail(false));
+    }
 }
