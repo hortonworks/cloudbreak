@@ -52,7 +52,9 @@ public class HueConfigProviderTest {
 
     @Test
     public void getServiceConfigs() {
-        TemplatePreparationObject tpo = new Builder().build();
+        BlueprintView blueprintView = getMockBlueprintView("7.0.2", "7.0.2");
+
+        TemplatePreparationObject tpo = new Builder().withBlueprintView(blueprintView).build();
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
         Map<String, String> paramToVariable =
                 result.stream().collect(Collectors.toMap(ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getVariable));
@@ -68,12 +70,15 @@ public class HueConfigProviderTest {
 
     @Test
     public void getServiceConfigsWhenKnoxConfiguredToExternalDomain() {
+        BlueprintView blueprintView = getMockBlueprintView("7.0.2", "7.0.2");
+
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setExternalFQDN("myaddress.cloudera.site");
         generalClusterConfigs.setKnoxUserFacingCertConfigured(true);
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("private-gateway.cloudera.site"));
         TemplatePreparationObject tpo = new Builder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
+                .withBlueprintView(blueprintView)
                 .withGateway(new Gateway(), "", new HashSet<>())
                 .build();
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
@@ -92,15 +97,7 @@ public class HueConfigProviderTest {
 
     @Test
     public void getServiceConfigVariables() {
-        BlueprintView blueprintView = mock(BlueprintView.class);
-        when(blueprintView.getVersion()).thenReturn("7.1.1");
-
-        CmTemplateProcessor templateProcessor = mock(CmTemplateProcessor.class);
-        when(templateProcessor.getVersion()).thenReturn(Optional.ofNullable("7.1.0"));
-        when(blueprintView.getProcessor()).thenReturn(templateProcessor);
-
-        when(blueprintView.getProcessor()).thenReturn(templateProcessor);
-
+        BlueprintView blueprintView = getMockBlueprintView("7.1.1", "7.1.0");
 
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setType(HUE);
@@ -126,13 +123,7 @@ public class HueConfigProviderTest {
 
     @Test
     public void getServiceConfigVariablesWhenKnoxConfiguredToExternalDomain() {
-        BlueprintView blueprintView = mock(BlueprintView.class);
-        when(blueprintView.getVersion()).thenReturn("7.0.1");
-
-        CmTemplateProcessor templateProcessor = mock(CmTemplateProcessor.class);
-        when(templateProcessor.getVersion()).thenReturn(Optional.ofNullable("7.0.1"));
-
-        when(blueprintView.getProcessor()).thenReturn(templateProcessor);
+        BlueprintView blueprintView = getMockBlueprintView("7.0.1", "7.0.1");
 
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setType(HUE);
@@ -267,5 +258,17 @@ public class HueConfigProviderTest {
 
         boolean result = underTest.isConfigurationNeeded(mockTemplateProcessor, tpo);
         assertThat(result).isFalse();
+    }
+
+    private BlueprintView getMockBlueprintView(String bpVersion, String tmplVersion) {
+        BlueprintView blueprintView = mock(BlueprintView.class);
+        when(blueprintView.getVersion()).thenReturn(bpVersion);
+
+        CmTemplateProcessor templateProcessor = mock(CmTemplateProcessor.class);
+        when(templateProcessor.getVersion()).thenReturn(Optional.ofNullable(tmplVersion));
+        when(blueprintView.getProcessor()).thenReturn(templateProcessor);
+
+        when(blueprintView.getProcessor()).thenReturn(templateProcessor);
+        return blueprintView;
     }
 }

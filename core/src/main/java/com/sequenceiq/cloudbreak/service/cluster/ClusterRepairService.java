@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_COULD_NOT_START;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_REQUESTED;
 import static com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName.hostGroupName;
 import static java.util.stream.Collectors.toList;
@@ -362,6 +364,7 @@ public class ClusterRepairService {
     private FlowIdentifier triggerRepairOrThrowBadRequest(Long stackId, Result<Map<HostGroupName, Set<InstanceMetaData>>,
             RepairValidation> repairValidationResult, boolean removeOnly, Set<String> recoveryMessageArgument) {
         if (repairValidationResult.isError()) {
+            eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_COULD_NOT_START, repairValidationResult.getError().getValidationErrors());
             throw new BadRequestException(String.join(" ", repairValidationResult.getError().getValidationErrors()));
         } else {
             if (!repairValidationResult.getSuccess().isEmpty()) {
@@ -370,6 +373,7 @@ public class ClusterRepairService {
                 eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_REQUESTED, recoveryMessageArgument);
                 return flowIdentifier;
             } else {
+                eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER, recoveryMessageArgument);
                 throw new BadRequestException(String.format("Could not trigger cluster repair  for stack %s, because node list is incorrect", stackId));
             }
         }

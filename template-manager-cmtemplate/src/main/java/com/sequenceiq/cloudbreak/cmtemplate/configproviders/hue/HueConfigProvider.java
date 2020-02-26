@@ -49,7 +49,11 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
         result.add(new ApiClusterTemplateConfig().name("database_type").variable(HUE_HUE_DATABASE_TYPE));
         result.add(new ApiClusterTemplateConfig().name("database_user").variable(HUE_HUE_DATABASE_USER));
         result.add(new ApiClusterTemplateConfig().name("database_password").variable(HUE_DATABASE_PASSWORD));
-        configureKnoxProxyHostsServiceConfig(source, result);
+        String cdhVersion = getCdhVersionString(source);
+        // CDPD version 7.1.0 and above have a dedicated knox_proxyhosts property to set the knox proxy hosts.
+        if (!isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
+            configureKnoxProxyHostsServiceConfigSafetyValve(source, result);
+        }
         return result;
     }
 
@@ -87,7 +91,7 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
         return List.of();
     }
 
-    private void configureKnoxProxyHostsServiceConfig(TemplatePreparationObject source, List<ApiClusterTemplateConfig> result) {
+    private void configureKnoxProxyHostsServiceConfigSafetyValve(TemplatePreparationObject source, List<ApiClusterTemplateConfig> result) {
         GatewayView gateway = source.getGatewayView();
         GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
         if (externalFQDNShouldConfigured(gateway, generalClusterConfigs)) {
@@ -97,7 +101,7 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
 
     private void configureKnoxProxyHostsConfigVariables(TemplatePreparationObject source, List<ApiClusterTemplateVariable> result) {
         GatewayView gateway = source.getGatewayView();
-        String cdhVersion = source.getBlueprintView().getProcessor().getVersion().orElse("");
+        String cdhVersion = getCdhVersionString(source);
         GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
         if (externalFQDNShouldConfigured(gateway, generalClusterConfigs)) {
             String proxyHosts = String.join(",", generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().get(),
@@ -109,6 +113,10 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
                 result.add(new ApiClusterTemplateVariable().name(HUE_SAFETY_VALVE).value(valveValue));
             }
         }
+    }
+
+    private String getCdhVersionString(TemplatePreparationObject source) {
+        return source.getBlueprintView().getProcessor().getVersion().orElse("");
     }
 
     private boolean externalFQDNShouldConfigured(GatewayView gateway, GeneralClusterConfigs generalClusterConfigs) {
