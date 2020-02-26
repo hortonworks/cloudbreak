@@ -23,7 +23,7 @@ public class DatahubPollerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatahubPollerService.class);
 
-    @Value("${env.stop.polling.attemptCount:90}")
+    @Value("${env.stop.polling.attemptCount:360}")
     private Integer attemptCount;
 
     @Value("${env.stop.polling.sleep.time.seconds:5}")
