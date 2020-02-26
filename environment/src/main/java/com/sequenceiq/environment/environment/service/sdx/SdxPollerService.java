@@ -28,7 +28,7 @@ public class SdxPollerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxPollerService.class);
 
-    @Value("${env.stop.polling.attempt:90}")
+    @Value("${env.stop.polling.attempt:360}")
     private Integer attempt;
 
     @Value("${env.stop.polling.sleep.time:5}")
