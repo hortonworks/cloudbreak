@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.flow.stack.start.action;
 
-import static java.util.Collections.emptyList;
-
 import java.util.List;
 import java.util.Map;
 
@@ -18,9 +16,12 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
+import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
+import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackFailureAction;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
@@ -30,6 +31,7 @@ import com.sequenceiq.freeipa.flow.stack.start.StackStartContext;
 import com.sequenceiq.freeipa.flow.stack.start.StackStartEvent;
 import com.sequenceiq.freeipa.flow.stack.start.StackStartService;
 import com.sequenceiq.freeipa.flow.stack.start.StackStartState;
+import com.sequenceiq.freeipa.service.resource.ResourceService;
 
 @Configuration
 public class StackStartActions {
@@ -43,6 +45,12 @@ public class StackStartActions {
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
+
+    @Inject
+    private ResourceService resourceService;
+
+    @Inject
+    private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
 
     @Bean(name = "START_STATE")
     public Action<?, ?> stackStartAction() {
@@ -58,7 +66,8 @@ public class StackStartActions {
                 Stack stack = context.getStack();
                 LOGGER.debug("Assembling start request for stack: {}", stack);
                 List<CloudInstance> cloudInstances = metadataConverter.convert(stack.getNotDeletedInstanceMetaDataSet());
-                return new StartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), emptyList(), cloudInstances);
+                List<CloudResource> cloudResources = getCloudResources(stack.getId());
+                return new StartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
             }
         };
     }
@@ -75,7 +84,8 @@ public class StackStartActions {
             @Override
             protected Selectable createRequest(StackStartContext context) {
                 List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(context.getStack());
-                return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), emptyList(), cloudInstances, cloudInstances);
+                List<CloudResource> cloudResources = getCloudResources(context.getStack().getId());
+                return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances, cloudInstances);
             }
         };
     }
@@ -112,4 +122,8 @@ public class StackStartActions {
         };
     }
 
+    private List<CloudResource> getCloudResources(Long stackId) {
+        List<Resource> resources = resourceService.findAllByStackId(stackId);
+        return resourceToCloudResourceConverter.convert(resources);
+    }
 }
