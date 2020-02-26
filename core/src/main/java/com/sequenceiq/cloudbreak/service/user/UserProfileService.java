@@ -89,7 +89,7 @@ public class UserProfileService {
                 userProfile.setUserName(user.getUserName());
                 addUiProperties(userProfile);
                 userProfile.setUser(user);
-                userProfile = userProfileRepository.save(userProfile);
+                userProfile = saveUserProfile(userProfile);
                 LOGGER.debug("UserProfile record created. {} ({})", userProfile.getUserName(), userProfile.getId());
             }
         }
@@ -110,6 +110,18 @@ public class UserProfileService {
             }
         }
         return userProfile;
+    }
+
+    private UserProfile saveUserProfile(UserProfile userProfile) {
+        try {
+            return userProfileRepository.save(userProfile);
+        } catch (RuntimeException ex) {
+            String userName = userProfile.getUser().getUserName();
+            LOGGER.warn(String.format("Exception has thrown during saving the userProfile for %s user to the DB." +
+                    " It might be saved earlier, trying to get it from the DB.", userName), ex);
+            return userProfileRepository.findOneByUser(userProfile.getUser().getId()).orElseThrow(
+                    () -> new AccessDeniedException(String.format("UserProfile cannot be created for %s user", userName), ex));
+        }
     }
 
     private UserProfile updateUserProfileUser(User user) {
