@@ -1,19 +1,20 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static java.util.Objects.isNull;
-import static org.mockito.ArgumentMatchers.any;
 
 import java.util.Collection;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
-import org.mockito.Mockito;
+import org.springframework.http.HttpMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
+import com.sequenceiq.it.cloudbreak.assertion.Assertion;
+import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -21,7 +22,7 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.mock.freeipa.AbstractFreeIpaResponse;
+import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class EnvironmentChildTest extends AbstractIntegrationTest {
@@ -48,9 +49,6 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
             when = "valid create child environment request is sent",
             then = "environment should be created and parent environment should be referenced in the child environment")
     public void testCreateChildEnvironment(MockedTestContext testContext) {
-        AbstractFreeIpaResponse<?> dnsZoneAddResponse = Mockito.mock(AbstractFreeIpaResponse.class);
-        getFreeIpaRouteHandler().updateResponse("dnszone_add", dnsZoneAddResponse);
-
         testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.list())
@@ -61,10 +59,7 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsListedByNameAndParentName)
-                .then((testContext1, testDto, client) -> {
-                    Mockito.verify(dnsZoneAddResponse).handle(any(), any());
-                    return testDto;
-                })
+                .then(verifyFreeIpaRequest("dnszone_add"))
                 .validate();
     }
 
@@ -176,5 +171,13 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
     private boolean parentNameEquals(EnvironmentTestDto environment, SimpleEnvironmentResponse environmentResponse) {
         return isNull(environment.getParentEnvironmentName()) && isNull(environmentResponse.getParentEnvironmentName()) ||
                 environment.getParentEnvironmentName().equals(environmentResponse.getParentEnvironmentName());
+    }
+
+    @SuppressWarnings("unchecked")
+    private Assertion<EnvironmentTestDto, EnvironmentClient> verifyFreeIpaRequest(String method) {
+        return (testContext1, testDto, client) ->
+                testDto.then(
+                        MockVerification.verify(HttpMethod.POST, ITResponse.FREEIPA_ROOT + "/session/json")
+                                .bodyContains(method));
     }
 }
