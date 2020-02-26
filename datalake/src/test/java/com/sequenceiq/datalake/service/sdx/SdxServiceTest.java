@@ -278,19 +278,6 @@ class SdxServiceTest {
         assertEquals("s3a://some/dir", createdSdxCluster.getCloudStorageBaseLocation());
     }
 
-    private void mockEnvironmentCall(SdxClusterRequest sdxClusterRequest, CloudPlatform cloudPlatform) {
-        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
-        detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
-        detailedEnvironmentResponse.setCloudPlatform(cloudPlatform.name());
-        detailedEnvironmentResponse.setCrn(Crn.builder()
-                .setService(Crn.Service.ENVIRONMENTS)
-                .setResourceType(Crn.ResourceType.ENVIRONMENT)
-                .setResource(UUID.randomUUID().toString())
-                .setAccountId(UUID.randomUUID().toString())
-                .build().toString());
-        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
-    }
-
     @Test
     void testListSdxClustersWhenEnvironmentNameProvidedAndTwoSdxIsInTheDatabaseShouldListAllSdxClusterWhichIsTwo() {
         List<SdxCluster> sdxClusters = List.of(new SdxCluster(), new SdxCluster());
@@ -365,6 +352,19 @@ class SdxServiceTest {
 
     private void mockCBCallForDistroXClusters(Set<StackViewV4Response> stackViews) {
         when(distroxService.getAttachedDistroXClusters(anyString())).thenReturn(stackViews);
+    }
+
+    private void mockEnvironmentCall(SdxClusterRequest sdxClusterRequest, CloudPlatform cloudPlatform) {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
+        detailedEnvironmentResponse.setCloudPlatform(cloudPlatform.name());
+        detailedEnvironmentResponse.setCrn(Crn.builder()
+                .setService(Crn.Service.ENVIRONMENTS)
+                .setResourceType(Crn.ResourceType.ENVIRONMENT)
+                .setResource(UUID.randomUUID().toString())
+                .setAccountId(UUID.randomUUID().toString())
+                .build().toString());
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
     }
 
     private SdxCluster getSdxClusterForDeletionTest() {

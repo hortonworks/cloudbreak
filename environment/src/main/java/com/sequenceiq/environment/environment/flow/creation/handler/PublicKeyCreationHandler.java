@@ -45,7 +45,12 @@ public class PublicKeyCreationHandler extends EventSenderAwareHandler<Environmen
         try {
             environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(environment -> {
                 if (environment.getAuthentication().isManagedKey()) {
-                    environmentResourceService.createAndUpdateSshKey(environment);
+                    boolean created = environmentResourceService.createAndUpdateSshKey(environment);
+                    if (created) {
+                        String publicKeyId = environment.getAuthentication().getPublicKeyId();
+                        LOGGER.info("Update the environment and it's authentication with the created public SSH key id: '{}'", publicKeyId);
+                        environmentService.save(environment);
+                    }
                 } else {
                     LOGGER.debug("Environment {} requested no managed public key", environment.getName());
                 }
