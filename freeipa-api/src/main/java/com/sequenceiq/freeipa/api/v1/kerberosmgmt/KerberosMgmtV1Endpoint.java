@@ -60,6 +60,13 @@ public interface KerberosMgmtV1Endpoint {
             notes = KeytabModelNotes.GET_HOST_KEYTAB_NOTES, nickname = "getHostKeytabV1")
     HostKeytabResponse getHostKeytab(@Valid HostKeytabRequest request) throws Exception;
 
+    @GET
+    @Path("userkeytab")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_USER_KEYTAB, produces = MediaType.APPLICATION_JSON,
+            notes = KeytabModelNotes.GET_USER_KEYTAB_NOTES, nickname = "getUserKeytabV1")
+    String getUserKeytab(@NotEmpty @QueryParam("environmentCrn") String environmentCrn, @NotEmpty @QueryParam("userCrn") String userCrn) throws Exception;
+
     @DELETE
     @Path("serviceprincipal")
     @Produces(MediaType.APPLICATION_JSON)

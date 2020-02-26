@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.freeipa.user.kerberos;
+package com.sequenceiq.freeipa.kerberosmgmt.v1;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -26,13 +26,14 @@ import static java.util.Objects.requireNonNull;
  * belonging to an actor in User Management Service.
  */
 @Component
-public final class UserKeytabGenerator {
+public class UserKeytabGenerator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserKeytabGenerator.class);
 
     // For the key version number (kvno) in the keytab entries, we use a value of 0. Based on
     // expirementiation we've found that for user principles, keytab entries with kvno of zero
-    // works fine, regardless of what the actual key versions are set in the KDC / Directory Server.
+    // works fine (in fact, any arbitrary number should work), regardless of what the actual key
+    // versions are set in the KDC / Directory Server.
     private static final int KEY_VERSION_NUMBER_ZERO = 0;
 
     @Inject
@@ -54,7 +55,7 @@ public final class UserKeytabGenerator {
         return new KeytabEntry(principalName, time, KEY_VERSION_NUMBER_ZERO, encryptionKey);
     }
 
-    public String generateKeytabBase64(String username, String realm, List<ActorKerberosKey> actorKerberosKeys) throws IOException {
+    public String generateKeytabBase64(String username, String realm, List<ActorKerberosKey> actorKerberosKeys) {
         LOGGER.info("Generating keytab for username = {} with realm = {}", username, realm);
 
         if (actorKerberosKeys.isEmpty()) {
@@ -70,6 +71,8 @@ public final class UserKeytabGenerator {
             keytab.store(outputStream);
             byte[] keyBytes = outputStream.toByteArray();
             return Base64.getEncoder().encodeToString(keyBytes);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to generate keytab", e);
         }
     }
 }
