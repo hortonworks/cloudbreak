@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.flow.stack.stop.action;
 
-import static java.util.Collections.emptyList;
-
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +15,10 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
+import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackFailureAction;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.StackFailureContext;
@@ -26,6 +27,7 @@ import com.sequenceiq.freeipa.flow.stack.stop.StackStopContext;
 import com.sequenceiq.freeipa.flow.stack.stop.StackStopEvent;
 import com.sequenceiq.freeipa.flow.stack.stop.StackStopService;
 import com.sequenceiq.freeipa.flow.stack.stop.StackStopState;
+import com.sequenceiq.freeipa.service.resource.ResourceService;
 
 @Configuration
 public class StackStopActions {
@@ -36,6 +38,12 @@ public class StackStopActions {
 
     @Inject
     private StackStopService stackStopService;
+
+    @Inject
+    private ResourceService resourceService;
+
+    @Inject
+    private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
 
     @Bean(name = "STOP_STATE")
     public Action<?, ?> stackStopAction() {
@@ -49,7 +57,8 @@ public class StackStopActions {
             @Override
             protected Selectable createRequest(StackStopContext context) {
                 List<CloudInstance> cloudInstances = converterUtil.convertAll(context.getInstanceMetaData(), CloudInstance.class);
-                return new StopInstancesRequest<StopInstancesResult>(context.getCloudContext(), context.getCloudCredential(), emptyList(), cloudInstances);
+                List<CloudResource> cloudResources = getCloudResources(context.getStack().getId());
+                return new StopInstancesRequest<StopInstancesResult>(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
             }
         };
     }
@@ -84,5 +93,10 @@ public class StackStopActions {
                 return new StackEvent(StackStopEvent.STOP_FAIL_HANDLED_EVENT.event(), context.getStack().getId());
             }
         };
+    }
+
+    private List<CloudResource> getCloudResources(Long stackId) {
+        List<Resource> resources = resourceService.findAllByStackId(stackId);
+        return resourceToCloudResourceConverter.convert(resources);
     }
 }
