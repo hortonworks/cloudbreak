@@ -107,7 +107,6 @@ public class AwsMetaDataCollectorTest {
 
         when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
         when(awsClient.createAutoScalingRetryClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
-        when(awsClient.createAccess(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonEC2Client);
 
         when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationRetryClient.class), eq("cbgateway")))
                 .thenReturn("cbgateway-AAA");
@@ -155,7 +154,6 @@ public class AwsMetaDataCollectorTest {
 
         when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
         when(awsClient.createAutoScalingRetryClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
-        when(awsClient.createAccess(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonEC2Client);
 
         when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationRetryClient.class), eq("cbgateway")))
                 .thenReturn("cbgateway-AAA");
@@ -211,7 +209,6 @@ public class AwsMetaDataCollectorTest {
 
         when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
         when(awsClient.createAutoScalingRetryClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
-        when(awsClient.createAccess(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonEC2Client);
 
         when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationRetryClient.class), eq("cbgateway")))
                 .thenReturn("cbgateway-AAA");
@@ -270,7 +267,6 @@ public class AwsMetaDataCollectorTest {
 
         when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
         when(awsClient.createAutoScalingRetryClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
-        when(awsClient.createAccess(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonEC2Client);
 
         when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationRetryClient.class), eq("cbgateway")))
                 .thenReturn("cbgateway-AAA");
@@ -316,6 +312,8 @@ public class AwsMetaDataCollectorTest {
         CloudContext cloudContext = new CloudContext(5L, "name", "platform", "variant",
                 location, USER_ID, WORKSPACE_ID);
         CloudCredential credential = new CloudCredential("crn", null, null);
-        return new AuthenticatedContext(cloudContext, credential);
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, credential);
+        authenticatedContext.putParameter(AmazonEC2Client.class, amazonEC2Client);
+        return authenticatedContext;
     }
 }

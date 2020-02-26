@@ -22,6 +22,7 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -68,7 +69,7 @@ public class AwsMetadataCollector implements MetadataCollector {
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AmazonCloudFormationRetryClient amazonCFClient = awsClient.createCloudFormationRetryClient(new AwsCredentialView(ac.getCloudCredential()), region);
         AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(new AwsCredentialView(ac.getCloudCredential()), region);
-        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), region);
+        AmazonEC2Client amazonEC2Client = new AuthenticatedContextView(ac).getAmazonEC2Client();
 
         Multimap<String, CloudInstance> instanceGroupMap = getInstanceGroupMap(vms);
 

@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -35,7 +36,8 @@ import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.poller.PollerUtil;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.util.AwsInstanceStatusMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -51,9 +53,6 @@ public class AwsInstanceConnector implements InstanceConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsInstanceConnector.class);
 
     @Inject
-    private AwsClient awsClient;
-
-    @Inject
     private PollerUtil pollerUtil;
 
     @Value("${cb.aws.hostkey.verify:}")
@@ -64,8 +63,7 @@ public class AwsInstanceConnector implements InstanceConnector {
         if (!verifyHostKey) {
             throw new CloudOperationNotSupportedException("Host key verification is disabled on AWS");
         }
-        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(authenticatedContext.getCloudCredential()),
-                authenticatedContext.getCloudContext().getLocation().getRegion().value());
+        AmazonEC2Client amazonEC2Client = new AuthenticatedContextView(authenticatedContext).getAmazonEC2Client();
         GetConsoleOutputRequest getConsoleOutputRequest = new GetConsoleOutputRequest().withInstanceId(vm.getInstanceId());
         GetConsoleOutputResult getConsoleOutputResult = amazonEC2Client.getConsoleOutput(getConsoleOutputRequest);
         try {
@@ -78,48 +76,47 @@ public class AwsInstanceConnector implements InstanceConnector {
 
     @Retryable(
             value = SdkClientException.class,
-            maxAttempts = 15,
-            backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
+            maxAttemptsExpression = "#{${cb.vm.retry.attempt:15}}",
+            backoff = @Backoff(delayExpression = "#{${cb.vm.retry.backoff.delay:1000}}",
+                    multiplierExpression = "#{${cb.vm.retry.backoff.multiplier:2}}",
+                    maxDelayExpression = "#{${cb.vm.retry.backoff.maxdelay:10000}}")
     )
     @Override
     public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
-        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
-                ac.getCloudContext().getLocation().getRegion().value());
-        try {
-            Collection<String> instances = instanceIdsWhichAreNotInCorrectState(vms, amazonEC2Client, "Running");
-            if (!instances.isEmpty()) {
-                amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
-            }
-        } catch (AmazonEC2Exception e) {
-            handleEC2Exception(vms, e);
-        } catch (SdkClientException e) {
-            LOGGER.warn("Failed to send start request to AWS: ", e);
-            throw e;
-        }
-        return pollerUtil.waitFor(ac, vms, Sets.newHashSet(InstanceStatus.STARTED, InstanceStatus.FAILED));
+        return setCloudVmInstanceStatuses(ac, vms, "Running",
+                (ec2Client, instances) -> ec2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances)),
+                "Failed to send start request to AWS: ");
     }
 
     @Retryable(
             value = SdkClientException.class,
-            maxAttempts = 15,
-            backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
+            maxAttemptsExpression = "#{${cb.vm.retry.attempt:15}}",
+            backoff = @Backoff(delayExpression = "#{${cb.vm.retry.backoff.delay:1000}}",
+                    multiplierExpression = "#{${cb.vm.retry.backoff.multiplier:2}}",
+                    maxDelayExpression = "#{${cb.vm.retry.backoff.maxdelay:10000}}")
     )
     @Override
     public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
-        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
-                ac.getCloudContext().getLocation().getRegion().value());
+        return setCloudVmInstanceStatuses(ac, vms, "Stopped",
+                (ec2Client, instances) -> ec2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instances)),
+                "Failed to send start request to AWS: ");
+    }
+
+    private List<CloudVmInstanceStatus> setCloudVmInstanceStatuses(AuthenticatedContext ac, List<CloudInstance> vms, String status,
+            BiConsumer<AmazonEC2Client, Collection<String>> consumer, String exceptionText) {
+        AmazonEC2Client amazonEC2Client = new AuthenticatedContextView(ac).getAmazonEC2Client();
         try {
-            Collection<String> instances = instanceIdsWhichAreNotInCorrectState(vms, amazonEC2Client, "Stopped");
+            Collection<String> instances = instanceIdsWhichAreNotInCorrectState(vms, amazonEC2Client, status);
             if (!instances.isEmpty()) {
-                amazonEC2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instances));
+                consumer.accept(amazonEC2Client, instances);
             }
         } catch (AmazonEC2Exception e) {
             handleEC2Exception(vms, e);
         } catch (SdkClientException e) {
-            LOGGER.warn("Failed to send stop request to AWS: ", e);
+            LOGGER.warn(exceptionText, e);
             throw e;
         }
-        return pollerUtil.waitFor(ac, vms, Sets.newHashSet(InstanceStatus.STOPPED, InstanceStatus.FAILED));
+        return pollerUtil.waitFor(ac, vms, Sets.newHashSet(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(status), InstanceStatus.FAILED));
     }
 
     private void handleEC2Exception(List<CloudInstance> vms, AmazonEC2Exception e) throws AmazonEC2Exception {
@@ -138,8 +135,10 @@ public class AwsInstanceConnector implements InstanceConnector {
 
     @Retryable(
             value = SdkClientException.class,
-            maxAttempts = 15,
-            backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
+            maxAttemptsExpression = "#{${cb.vm.retry.attempt:15}}",
+            backoff = @Backoff(delayExpression = "#{${cb.vm.retry.backoff.delay:1000}}",
+                    multiplierExpression = "#{${cb.vm.retry.backoff.multiplier:2}}",
+                    maxDelayExpression = "#{${cb.vm.retry.backoff.maxdelay:10000}}")
     )
     @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
@@ -154,8 +153,7 @@ public class AwsInstanceConnector implements InstanceConnector {
 
         String region = ac.getCloudContext().getLocation().getRegion().value();
         try {
-            DescribeInstancesResult result = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
-                    ac.getCloudContext().getLocation().getRegion().value())
+            DescribeInstancesResult result = new AuthenticatedContextView(ac).getAmazonEC2Client()
                     .describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceIds));
             LOGGER.debug("Result from AWS: {}", result);
             return fillCloudVmInstanceStatuses(ac, cloudIntancesWithInstanceId, region, result);
@@ -178,23 +176,10 @@ public class AwsInstanceConnector implements InstanceConnector {
                         .findFirst();
                 if (cloudInstanceForInstanceId.isPresent()) {
                     CloudInstance cloudInstance = cloudInstanceForInstanceId.get();
-                    if ("Stopped".equalsIgnoreCase(instance.getState().getName())) {
-                        LOGGER.debug("AWS instance [{}] is in {} state, region: {}, stack: {}",
-                                instance.getInstanceId(), instance.getState().getName(), region, ac.getCloudContext().getId());
-                        cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STOPPED));
-                    } else if ("Running".equalsIgnoreCase(instance.getState().getName())) {
-                        LOGGER.debug("AWS instance [{}] is in {} state, region: {}, stack: {}",
-                                instance.getInstanceId(), instance.getState().getName(), region, ac.getCloudContext().getId());
-                        cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED));
-                    } else if ("Terminated".equalsIgnoreCase(instance.getState().getName())) {
-                        LOGGER.debug("AWS instance [{}] is in {} state, region: {}, stack: {}",
-                                instance.getInstanceId(), instance.getState().getName(), region, ac.getCloudContext().getId());
-                        cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.TERMINATED));
-                    } else {
-                        LOGGER.debug("AWS instance [{}] is in {} state, region: {}, stack: {}",
-                                instance.getInstanceId(), instance.getState().getName(), region, ac.getCloudContext().getId());
-                        cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
-                    }
+                    LOGGER.debug("AWS instance [{}] is in {} state, region: {}, stack: {}",
+                            instance.getInstanceId(), instance.getState().getName(), region, ac.getCloudContext().getId());
+                    cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(cloudInstance,
+                            AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(instance.getState().getName())));
                 }
             }
         }
