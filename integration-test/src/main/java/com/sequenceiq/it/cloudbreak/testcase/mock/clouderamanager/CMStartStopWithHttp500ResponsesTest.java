@@ -38,6 +38,12 @@ public class CMStartStopWithHttp500ResponsesTest extends AbstractClouderaManager
     @Inject
     private StackTestClient stackTestClient;
 
+    private StatefulRoute stoppedStateSpi;
+
+    private StatefulRoute startedStateSpi;
+
+    private StatefulRoute defaultStateSpi;
+
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
@@ -72,14 +78,17 @@ public class CMStartStopWithHttp500ResponsesTest extends AbstractClouderaManager
                 .when(stackTestClient.createV4(), key(stack))
                 .await(STACK_AVAILABLE, key(stack))
                 .when(stackTestClient.stopV4(), key(stack))
+                .mockSwitch(defaultStateSpi, (route) -> route = stoppedStateSpi)
                 .await(STACK_STOPPED, key(stack))
+                //fix mock here
                 .when(stackTestClient.startV4(), key(stack))
+                .mockSwitch(defaultStateSpi, (route) -> route = startedStateSpi)
                 .await(STACK_AVAILABLE, key(stack))
                 .validate();
     }
 
     private void mockSpi(MockedTestContext testContext) {
-        StatefulRoute okState = (request, response, model) -> {
+        defaultStateSpi = (request, response, model) -> {
             String resultJson = Mock.gson().toJson(new CloudVmInstanceStatuses(model.getInstanceMap()).createCloudVmInstanceStatuses());
             response.body(resultJson);
             response.type(TEXT_PLAIN);
@@ -87,7 +96,7 @@ public class CMStartStopWithHttp500ResponsesTest extends AbstractClouderaManager
             return "";
         };
 
-        StatefulRoute stoppedStateSpi = (request, response, model) -> {
+        stoppedStateSpi = (request, response, model) -> {
             String resultJson = Mock.gson().toJson(new CloudVmInstanceStatuses(model.getInstanceMap()).createCloudVmInstanceStatuses());
             response.body(resultJson.replaceAll(STARTED.name(), STOPPED.name()));
             response.type(TEXT_PLAIN);
@@ -95,7 +104,7 @@ public class CMStartStopWithHttp500ResponsesTest extends AbstractClouderaManager
             return "";
         };
 
-        StatefulRoute startedStateSpi = (request, response, model) -> {
+        startedStateSpi = (request, response, model) -> {
             String resultJson = Mock.gson().toJson(new CloudVmInstanceStatuses(model.getInstanceMap()).createCloudVmInstanceStatuses());
             response.body(resultJson.replaceAll(STOPPED.name(), STARTED.name()));
             response.type(TEXT_PLAIN);
@@ -104,7 +113,7 @@ public class CMStartStopWithHttp500ResponsesTest extends AbstractClouderaManager
         };
 
         testContext.getModel().getSpiMock().getDynamicRouteStack().clearPost(CLOUD_INSTANCE_STATUSES);
-        testContext.getModel().getSpiMock().getDynamicRouteStack().post(CLOUD_INSTANCE_STATUSES, okState);
+        testContext.getModel().getSpiMock().getDynamicRouteStack().post(CLOUD_INSTANCE_STATUSES, defaultStateSpi);
         testContext.getModel().getSpiMock().getDynamicRouteStack().post(CLOUD_INSTANCE_STATUSES, startedStateSpi);
         testContext.getModel().getSpiMock().getDynamicRouteStack().post(CLOUD_INSTANCE_STATUSES, stoppedStateSpi);
     }

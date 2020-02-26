@@ -6,6 +6,7 @@ import static com.sequenceiq.it.cloudbreak.finder.Finders.same;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -25,6 +26,7 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
+import com.sequenceiq.it.cloudbreak.spark.StatefulRoute;
 
 public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U extends MicroserviceClient> extends Entity implements CloudbreakTestDto {
 
@@ -230,6 +232,11 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
 
     public T await(Map<String, Status> statuses) {
         return await(statuses, emptyRunningParameter());
+    }
+
+    public T mockSwitch(StatefulRoute route, Consumer<StatefulRoute> supplier) {
+        supplier.accept(route);
+        return (T) this;
     }
 
     public T await(Map<String, Status> statuses, RunningParameter runningParameter) {
