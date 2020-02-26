@@ -4,6 +4,13 @@
     {
       "Effect": "Allow",
       "Action": [
+        "s3:ListBucket"
+      ],
+      "Resource": "arn:aws:s3:::${LOGS_BUCKET}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
         "s3:AbortMultipartUpload",
         "s3:GetObject",
         "s3:ListMultipartUploadParts",
