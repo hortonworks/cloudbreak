@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClien
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsCreateStackStatusCheckerTask;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
@@ -115,7 +116,9 @@ public class AwsLaunchTest extends AwsComponentTest {
 
         InMemoryStateStore.putStack(1L, PollGroup.POLLABLE);
 
-        awsResourceConnector.launch(getAuthenticatedContext(), getStackForLaunch(InstanceStatus.CREATE_REQUESTED, InstanceStatus.CREATE_REQUESTED),
+        AuthenticatedContext authenticatedContext = getAuthenticatedContext();
+        authenticatedContext.putParameter(AmazonEC2Client.class, amazonEC2Client);
+        awsResourceConnector.launch(authenticatedContext, getStackForLaunch(InstanceStatus.CREATE_REQUESTED, InstanceStatus.CREATE_REQUESTED),
                 persistenceNotifier, AdjustmentType.EXACT, Long.MAX_VALUE);
 
         // assert

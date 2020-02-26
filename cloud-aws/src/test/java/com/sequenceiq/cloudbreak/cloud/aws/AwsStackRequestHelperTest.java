@@ -85,6 +85,7 @@ public class AwsStackRequestHelperTest {
         initMocks(this);
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(authenticatedContext.getParameter(any())).thenReturn(amazonEC2Client);
 
         when(cloudStack.getImage()).thenReturn(image);
         when(cloudStack.getNetwork()).thenReturn(network);

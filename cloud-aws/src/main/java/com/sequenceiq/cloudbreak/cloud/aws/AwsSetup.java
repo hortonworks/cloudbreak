@@ -33,6 +33,7 @@ import com.amazonaws.services.ec2.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
@@ -110,7 +111,7 @@ public class AwsSetup implements Setup {
         verifySpotInstances(stack);
         if (awsNetworkView.isExistingVPC()) {
             try {
-                AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, region);
+                AmazonEC2Client amazonEC2Client = new AuthenticatedContextView(ac).getAmazonEC2Client();
                 validateExistingIGW(awsNetworkView, amazonEC2Client);
                 validateExistingSubnet(awsNetworkView, amazonEC2Client);
             } catch (AmazonServiceException e) {
@@ -121,7 +122,7 @@ public class AwsSetup implements Setup {
 
         }
         validateRegionAndZone(ac.getCloudCredential(), ac.getCloudContext().getLocation());
-        validateExistingKeyPair(stack.getInstanceAuthentication(), credentialView, region);
+        validateExistingKeyPair(stack.getInstanceAuthentication(), credentialView, region, ac);
         LOGGER.debug("setup has been executed");
     }
 
@@ -193,12 +194,13 @@ public class AwsSetup implements Setup {
 
     }
 
-    private void validateExistingKeyPair(InstanceAuthentication instanceAuthentication, AwsCredentialView credentialView, String region) {
+    private void validateExistingKeyPair(InstanceAuthentication instanceAuthentication, AwsCredentialView credentialView, String region,
+            AuthenticatedContext ac) {
         String keyPairName = awsClient.getExistingKeyPairName(instanceAuthentication);
         if (StringUtils.isNotEmpty(keyPairName)) {
             boolean keyPairIsPresentOnEC2 = false;
             try {
-                AmazonEC2Client client = awsClient.createAccess(credentialView, region);
+                AmazonEC2Client client = new AuthenticatedContextView(ac).getAmazonEC2Client();
                 DescribeKeyPairsResult describeKeyPairsResult = client.describeKeyPairs(new DescribeKeyPairsRequest().withKeyNames(keyPairName));
                 keyPairIsPresentOnEC2 = describeKeyPairsResult.getKeyPairs().stream().findFirst().isPresent();
             } catch (RuntimeException e) {

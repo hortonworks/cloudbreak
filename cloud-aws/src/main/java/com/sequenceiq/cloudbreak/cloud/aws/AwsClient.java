@@ -1,5 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
+import java.io.IOException;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
@@ -24,6 +35,7 @@ import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -31,15 +43,6 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationEx
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.service.Retry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.io.IOException;
-
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Component
 public class AwsClient {
@@ -64,7 +67,12 @@ public class AwsClient {
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
         try {
-            authenticatedContext.putParameter(AmazonEC2Client.class, createAccess(authenticatedContext.getCloudCredential()));
+            AuthenticatedContextView authenticatedContextView = new AuthenticatedContextView(authenticatedContext);
+            String region = authenticatedContextView.getRegion();
+            AmazonEC2Client amazonEC2Client = region != null ?
+                    createAccess(authenticatedContextView.getAwsCredentialView(), region) : createAccess(cloudCredential);
+            authenticatedContext.putParameter(AmazonEC2Client.class,
+                    amazonEC2Client);
         } catch (AmazonServiceException e) {
             throw new CredentialVerificationException(e.getErrorMessage(), e);
         }
@@ -77,10 +85,18 @@ public class AwsClient {
 
     public AmazonEC2Client createAccess(AwsCredentialView awsCredential, String regionName) {
         AmazonEC2Client client = isRoleAssumeRequired(awsCredential) ?
-                new AmazonEC2Client(createAwsSessionCredentialProvider(awsCredential)) :
-                new AmazonEC2Client(createAwsCredentials(awsCredential));
+                getAmazonEC2Client(createAwsSessionCredentialProvider(awsCredential)) :
+                getAmazonEC2Client(createAwsCredentials(awsCredential));
         client.setRegion(RegionUtils.getRegion(regionName));
         return client;
+    }
+
+    public AmazonEC2Client getAmazonEC2Client(AwsSessionCredentialProvider awsSessionCredentialProvider) {
+        return new AmazonEC2Client(awsSessionCredentialProvider);
+    }
+
+    public AmazonEC2Client getAmazonEC2Client(BasicAWSCredentials basicAWSCredentials) {
+        return new AmazonEC2Client(basicAWSCredentials);
     }
 
     public AWSSecurityTokenService createAwsSecurityTokenService(AwsCredentialView awsCredential) {
@@ -182,28 +198,33 @@ public class AwsClient {
     }
 
     public void validateEnvironmentForRoleAssuming(AwsCredentialView awsCredential, boolean awsAccessKeyAvailable, boolean awsSecretAccessKeyAvailable) {
-        String accesKeyString = awsEnvironmentVariableChecker.getAwsAccessKeyString(awsCredential);
+        String accessKeyString = awsEnvironmentVariableChecker.getAwsAccessKeyString(awsCredential);
         String secretAccesKeyString = awsEnvironmentVariableChecker.getAwsSecretAccessKey(awsCredential);
 
         if (awsAccessKeyAvailable && !awsSecretAccessKeyAvailable) {
-            throw new CredentialVerificationException(String.format("If '%s' available then '%s' must be set!", accesKeyString, secretAccesKeyString));
+            throw new CredentialVerificationException(String.format("If '%s' available then '%s' must be set!", accessKeyString, secretAccesKeyString));
         } else if (awsSecretAccessKeyAvailable && !awsAccessKeyAvailable) {
-            throw new CredentialVerificationException(String.format("If '%s' available then '%s' must be set!", accesKeyString, secretAccesKeyString));
+            throw new CredentialVerificationException(String.format("If '%s' available then '%s' must be set!", secretAccesKeyString, accessKeyString));
         } else if (!awsAccessKeyAvailable) {
             try {
-                try (InstanceProfileCredentialsProvider provider = new InstanceProfileCredentialsProvider()) {
+                try (InstanceProfileCredentialsProvider provider = getInstanceProfileProvider()) {
                     provider.getCredentials();
                 } catch (IOException e) {
                     LOGGER.error("Unable to create AWS provider", e);
+                    throw new CredentialVerificationException("Unable to create AWS provider");
                 }
             } catch (AmazonClientException ignored) {
                 StringBuilder sb = new StringBuilder();
-                sb.append(String.format("The '%s' and '%s' environment variables must be set ", accesKeyString, secretAccesKeyString));
+                sb.append(String.format("The '%s' and '%s' environment variables must be set ", accessKeyString, secretAccesKeyString));
                 sb.append("or an instance profile role should be available.");
                 LOGGER.info(sb.toString());
                 throw new CredentialVerificationException(sb.toString());
             }
         }
+    }
+
+    public InstanceProfileCredentialsProvider getInstanceProfileProvider() {
+        return new InstanceProfileCredentialsProvider();
     }
 
     public boolean roleBasedCredential(AwsCredentialView awsCredential) {
