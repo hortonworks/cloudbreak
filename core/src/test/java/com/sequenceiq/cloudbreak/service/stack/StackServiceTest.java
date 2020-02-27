@@ -237,7 +237,7 @@ public class StackServiceTest {
 
     @Test
     public void testGetAllForAutoscaleWithNullSetFromDb() throws TransactionExecutionException {
-        when(transactionService.required(any())).thenAnswer(invocation -> {
+        when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> {
             Supplier<AutoscaleStackV4Response> callback = invocation.getArgument(0);
             return callback.get();
         });
@@ -255,7 +255,7 @@ public class StackServiceTest {
 
     @Test
     public void testGetAllForAutoscaleWithAvailableStack() throws TransactionExecutionException {
-        when(transactionService.required(any())).thenAnswer(invocation -> {
+        when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> {
             Supplier<AutoscaleStackV4Response> callback = invocation.getArgument(0);
             return callback.get();
         });
@@ -279,7 +279,7 @@ public class StackServiceTest {
 
     @Test
     public void testGetAllForAutoscaleWithDeleteInProgressStack() throws TransactionExecutionException {
-        when(transactionService.required(any())).thenAnswer(invocation -> {
+        when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> {
             Supplier<AutoscaleStackV4Response> callback = invocation.getArgument(0);
             return callback.get();
         });

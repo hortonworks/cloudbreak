@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -174,7 +175,7 @@ class StackCreatorServiceRecipeValidationTest {
 
         when(recipeService.get(any(NameOrCrn.class), eq(WORKSPACE_ID))).thenReturn(getRecipeWithName(existingRecipeName));
         when(converterUtil.convert(request, Stack.class)).thenReturn(TestUtil.stack());
-        when(transactionService.required(any())).thenReturn(TestUtil.stack());
+        when(transactionService.required(any(Supplier.class))).thenReturn(TestUtil.stack());
         when(stackService.getIdByNameInWorkspace(anyString(), any(Long.class))).thenThrow(new NotFoundException("stack not found by name"));
         underTest.createStack(user, workspace, request);
 
@@ -189,7 +190,7 @@ class StackCreatorServiceRecipeValidationTest {
                 getInstanceGroupWithRecipe(INSTANCE_GROUP_COMPUTE, null)));
 
         when(converterUtil.convert(request, Stack.class)).thenReturn(TestUtil.stack());
-        when(transactionService.required(any())).thenReturn(TestUtil.stack());
+        when(transactionService.required(any(Supplier.class))).thenReturn(TestUtil.stack());
         when(stackService.getIdByNameInWorkspace(anyString(), any(Long.class))).thenThrow(new NotFoundException("stack not found by name"));
 
         underTest.createStack(user, workspace, request);

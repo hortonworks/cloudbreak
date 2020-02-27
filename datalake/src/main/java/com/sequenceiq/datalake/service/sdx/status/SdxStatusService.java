@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -38,6 +40,12 @@ public class SdxStatusService {
     @Inject
     private SdxNotificationService sdxNotificationService;
 
+    @Inject
+    private TransactionService transactionService;
+
+    @Inject
+    private Clock clock;
+
     public void setStatusForDatalakeAndNotify(DatalakeStatusEnum status, ResourceEvent event, String statusReason, SdxCluster sdxCluster) {
         setStatusForDatalake(status, statusReason, sdxCluster);
         sdxNotificationService.send(event, sdxCluster);
@@ -51,24 +59,45 @@ public class SdxStatusService {
         }).orElseThrow(() -> new NotFoundException("SdxCluster was not found with ID: " + datalakeId));
     }
 
-    public void setStatusForDatalake(DatalakeStatusEnum status, String statusReason, SdxCluster sdxCluster) {
-        SdxStatusEntity previous = getActualStatusForSdx(sdxCluster);
-        if (statusChangeIsValid(previous)) {
-            SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
-            sdxStatusEntity.setCreated(new Date().getTime());
-            sdxStatusEntity.setStatus(status);
-            sdxStatusEntity.setStatusReason(statusReason);
-            sdxStatusEntity.setDatalake(sdxCluster);
-            sdxStatusRepository.save(sdxStatusEntity);
-            updateInMemoryStateStore(sdxCluster);
-            String prevStatusText = previous == null ? "null" : previous.getStatus().name();
-            LOGGER.info("Updated status of Datalake with name: {} from {} to {} with statusReason {}",
-                    sdxCluster.getClusterName(), prevStatusText, status, statusReason);
-        } else if (DELETED.equals(previous.getStatus())) {
-            throw notFoundException("SDX cluster", sdxCluster.getClusterName());
-        } else {
-            throw new DatalakeStatusUpdateException(getActualStatusForSdx(sdxCluster).getStatus(), status);
+    private void setStatusForDatalake(DatalakeStatusEnum status, String statusReason, SdxCluster sdxCluster) {
+        try {
+            transactionService.required(() -> {
+                SdxStatusEntity previous = getActualStatusForSdx(sdxCluster);
+                if (statusChangeIsValid(previous)) {
+                    SdxStatusEntity sdxStatusEntity = createStatusEntity(status, statusReason, sdxCluster);
+                    if (DELETED.equals(status)) {
+                        sdxClusterRepository.findById(sdxCluster.getId()).ifPresent(sdx -> {
+                            sdx.setDeleted(clock.getCurrentTimeMillis());
+                            sdxClusterRepository.save(sdx);
+                        });
+                    }
+                    sdxStatusRepository.save(sdxStatusEntity);
+                    updateInMemoryStateStore(sdxCluster);
+                    LOGGER.info("Updated status of Datalake with name: {} from {} to {} with statusReason {}",
+                            sdxCluster.getClusterName(), getPreviousStatusText(previous), status, statusReason);
+                } else if (DELETED.equals(previous.getStatus())) {
+                    throw notFoundException("SDX cluster", sdxCluster.getClusterName());
+                } else {
+                    throw new DatalakeStatusUpdateException(getActualStatusForSdx(sdxCluster).getStatus(), status);
+                }
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            LOGGER.error("Exception happened while transaction was executed", e);
+            throw e.getCause();
         }
+    }
+
+    private String getPreviousStatusText(SdxStatusEntity previous) {
+        return previous == null ? "null" : previous.getStatus().name();
+    }
+
+    private SdxStatusEntity createStatusEntity(DatalakeStatusEnum status, String statusReason, SdxCluster sdxCluster) {
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setCreated(new Date().getTime());
+        sdxStatusEntity.setStatus(status);
+        sdxStatusEntity.setStatusReason(statusReason);
+        sdxStatusEntity.setDatalake(sdxCluster);
+        return sdxStatusEntity;
     }
 
     private boolean statusChangeIsValid(SdxStatusEntity currentStatus) {

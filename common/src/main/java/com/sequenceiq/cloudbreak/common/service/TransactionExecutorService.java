@@ -15,4 +15,16 @@ public interface TransactionExecutorService {
     <T> T notSupported(Supplier<T> callback);
 
     <T> T never(Supplier<T> callback);
+
+    void required(Runnable callback);
+
+    void requiresNew(Runnable callback);
+
+    void mandatory(Runnable callback);
+
+    void supports(Runnable callback);
+
+    void notSupported(Runnable callback);
+
+    void never(Runnable callback);
 }
