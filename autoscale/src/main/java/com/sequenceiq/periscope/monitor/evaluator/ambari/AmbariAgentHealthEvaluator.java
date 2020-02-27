@@ -14,7 +14,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
+import com.sequenceiq.periscope.domain.ClusterManagerVariant;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterManagerSpecificHostHealthEvaluator;
 import com.sequenceiq.periscope.monitor.evaluator.EventPublisher;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;

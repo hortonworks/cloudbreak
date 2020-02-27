@@ -55,8 +55,6 @@ public class OperationDescriptions {
         public static final String DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE = "deletes multiple instances from the stack's cluster in workspace";
         public static final String CHECK_IMAGE_IN_WORKSPACE = "checks image in stack by name in workspace";
         public static final String GENERATE_HOSTS_INVENTORY = "Generate hosts inventory";
-        public static final String CHECK_STACK_UPGRADE = "Checks for upgrade options by name";
-        public static final String STACK_UPGRADE = "Upgrades a cluster to the latest CM or CDH version";
         public static final String LIST_RETRYABLE_FLOWS = "List retryable failed flows";
     }
 

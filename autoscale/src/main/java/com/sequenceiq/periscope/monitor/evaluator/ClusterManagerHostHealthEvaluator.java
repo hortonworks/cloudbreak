@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.ChangedNodesReportV4Request;
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
+import com.sequenceiq.periscope.domain.ClusterManagerVariant;
 import com.sequenceiq.periscope.domain.FailedNode;
 import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;

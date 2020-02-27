@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterManager;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
+import com.sequenceiq.periscope.domain.ClusterManagerVariant;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterManagerSpecificHostHealthEvaluator;
 import com.sequenceiq.periscope.monitor.evaluator.EventPublisher;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;

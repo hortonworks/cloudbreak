@@ -123,4 +123,11 @@ public interface ImageCatalogV4Endpoint {
             notes = IMAGE_CATALOG_NOTES, nickname = "getImagesByNameInWorkspace")
     ImagesV4Response getImagesByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("stackName") String stackName, @QueryParam("platform") String platform) throws Exception;
+
+    @GET
+    @Path("{name}/upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGES_FOR_UPGRADE, produces = MediaType.APPLICATION_JSON,
+            notes = IMAGE_CATALOG_NOTES, nickname = "getImagesForUpgrade")
+    ImagesV4Response getImagesForUpgrade(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String stackName) throws Exception;
 }

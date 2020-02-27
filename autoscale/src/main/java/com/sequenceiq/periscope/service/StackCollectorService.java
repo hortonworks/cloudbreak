@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
+import com.sequenceiq.periscope.domain.ClusterManagerVariant;
 import com.sequenceiq.periscope.monitor.context.ClusterCreationEvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterCreationEvaluator;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;

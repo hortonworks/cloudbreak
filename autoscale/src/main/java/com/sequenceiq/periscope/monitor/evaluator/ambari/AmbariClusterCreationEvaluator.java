@@ -22,7 +22,7 @@ import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterManager;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
+import com.sequenceiq.periscope.domain.ClusterManagerVariant;
 import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.SecurityConfig;

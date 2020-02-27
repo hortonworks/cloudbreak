@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
 
-import java.util.Map;
-
 public class ImageInfoV4Response {
 
     private String imageName;
@@ -12,8 +10,6 @@ public class ImageInfoV4Response {
 
     private long created;
 
-    private Map<String, String> componentVersions;
-
     public ImageInfoV4Response() {
     }
 
@@ -22,14 +18,6 @@ public class ImageInfoV4Response {
         this.imageId = imageId;
         this.imageCatalogName = imageCatalogName;
         this.created = created;
-    }
-
-    public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, long created, Map<String, String> componentVersions) {
-        this.imageName = imageName;
-        this.imageId = imageId;
-        this.imageCatalogName = imageCatalogName;
-        this.created = created;
-        this.componentVersions = componentVersions;
     }
 
     public String getImageName() {
@@ -62,13 +50,5 @@ public class ImageInfoV4Response {
 
     public void setCreated(long created) {
         this.created = created;
-    }
-
-    public Map<String, String> getComponentVersions() {
-        return componentVersions;
-    }
-
-    public void setComponentVersions(Map<String, String> componentVersions) {
-        this.componentVersions = componentVersions;
     }
 }

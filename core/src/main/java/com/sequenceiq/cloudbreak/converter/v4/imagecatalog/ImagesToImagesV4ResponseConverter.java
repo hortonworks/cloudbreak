@@ -106,7 +106,6 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
 
     private void copyImageFieldsToJson(Image source, ImageV4Response json) {
         json.setDate(source.getDate());
-        json.setCreated(source.getCreated());
         json.setDescription(source.getDescription());
         json.setOs(source.getOs());
         json.setOsType(source.getOsType());

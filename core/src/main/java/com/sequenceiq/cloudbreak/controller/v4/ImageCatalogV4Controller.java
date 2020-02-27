@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.StackUpgradeImagesService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 
 @Controller
@@ -34,6 +35,9 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Inject
     private ConverterUtil converterUtil;
+
+    @Inject
+    private StackUpgradeImagesService stackUpgradeImagesService;
 
     @Override
     public ImageCatalogV4Responses list(Long workspaceId) {
@@ -120,6 +124,12 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Override
     public ImagesV4Response getImagesByName(Long workspaceId, String name, String stackName, String platform) throws Exception {
         Images images = imageCatalogService.getImagesByCatalogName(workspaceId, name, stackName, platform);
+        return converterUtil.convert(images, ImagesV4Response.class);
+    }
+
+    @Override
+    public ImagesV4Response getImagesForUpgrade(Long workspaceId, String stackName) {
+        Images images = stackUpgradeImagesService.getImagesToUpgrade(workspaceId, stackName);
         return converterUtil.convert(images, ImagesV4Response.class);
     }
 }

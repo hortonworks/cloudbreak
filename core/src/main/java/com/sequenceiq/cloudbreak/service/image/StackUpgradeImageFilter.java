@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.upgrade;
+package com.sequenceiq.cloudbreak.service.image;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.cloud.CustomVersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
-import com.sequenceiq.cloudbreak.service.image.VersionBasedImageFilter;
 
 @Component
 public class StackUpgradeImageFilter {
@@ -38,11 +37,11 @@ public class StackUpgradeImageFilter {
     @Inject
     private VersionBasedImageFilter versionBasedImageFilter;
 
-    Images filter(List<Image> availableImages, Versions supportedVersions, Image currentImage, String cloudPlatform) {
+    Images filter(List<Image> availableImages, Versions supportedVersions, com.sequenceiq.cloudbreak.cloud.model.Image currentImage, String cloudPlatform) {
         return new Images(null, null, null, getImages(availableImages, supportedVersions, currentImage, cloudPlatform), null);
     }
 
-    private List<Image> getImages(List<Image> images, Versions versions, Image currentImage, String cloudPlatform) {
+    private List<Image> getImages(List<Image> images, Versions versions, com.sequenceiq.cloudbreak.cloud.model.Image currentImage, String cloudPlatform) {
         List<Image> imagesForCbVersion = getImagesForCbVersion(versions, images);
         return filterImages(imagesForCbVersion, currentImage, cloudPlatform);
     }
@@ -51,7 +50,7 @@ public class StackUpgradeImageFilter {
         return versionBasedImageFilter.getCdhImagesForCbVersion(supportedVersions, availableImages);
     }
 
-    private List<Image> filterImages(List<Image> availableImages, Image currentImage, String cloudPlatform) {
+    private List<Image> filterImages(List<Image> availableImages, com.sequenceiq.cloudbreak.cloud.model.Image currentImage, String cloudPlatform) {
         return availableImages.stream()
                 .filter(validateCmVersion(currentImage).or(validateStackVersion(currentImage)))
                 .filter(validateCloudPlatform(cloudPlatform))
@@ -63,20 +62,20 @@ public class StackUpgradeImageFilter {
                 .collect(Collectors.toList());
     }
 
-    private Predicate<Image> validateOsVersion(Image currentImage) {
+    private Predicate<Image> validateOsVersion(com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
         return image -> isOsVersionsMatch(currentImage, image);
     }
 
-    private boolean isOsVersionsMatch(Image currentImage, Image newImage) {
+    private boolean isOsVersionsMatch(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image newImage) {
         return newImage.getOs().equalsIgnoreCase(currentImage.getOs())
                 && newImage.getOsType().equalsIgnoreCase(currentImage.getOsType());
     }
 
-    private Predicate<Image> validateCmVersion(Image currentImage) {
+    private Predicate<Image> validateCmVersion(com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
         return image -> compareVersion(currentImage.getPackageVersions().get(CM_PACKAGE_KEY), image.getPackageVersions().get(CM_PACKAGE_KEY));
     }
 
-    private Predicate<Image> validateStackVersion(Image currentImage) {
+    private Predicate<Image> validateStackVersion(com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
         return image -> compareVersion(currentImage.getPackageVersions().get(STACK_PACKAGE_KEY), image.getPackageVersions().get(STACK_PACKAGE_KEY));
     }
 
@@ -84,20 +83,20 @@ public class StackUpgradeImageFilter {
         return image -> image.getImageSetsByProvider().keySet().stream().anyMatch(key -> key.equalsIgnoreCase(cloudPlatform));
     }
 
-    private Predicate<Image> validateCfmVersion(Image currentImage) {
+    private Predicate<Image> validateCfmVersion(com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
         return image -> image.getPackageVersions().get(CFM_PACKAGE_KEY).equals(currentImage.getPackageVersions().get(CFM_PACKAGE_KEY));
     }
 
-    private Predicate<Image> validateCspVersion(Image currentImage) {
+    private Predicate<Image> validateCspVersion(com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
         return image -> image.getPackageVersions().get(CSP_PACKAGE_KEY).equals(currentImage.getPackageVersions().get(CSP_PACKAGE_KEY));
     }
 
-    private Predicate<Image> validateSaltVersion(Image currentImage) {
+    private Predicate<Image> validateSaltVersion(com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
         return image -> image.getPackageVersions().get(SALT_PACKAGE_KEY).equals(currentImage.getPackageVersions().get(SALT_PACKAGE_KEY));
     }
 
-    private Predicate<Image> filterCurrentImage(Image currentImage) {
-        return image -> !image.getUuid().equals(currentImage.getUuid());
+    private Predicate<Image> filterCurrentImage(com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
+        return image -> !image.getUuid().equals(currentImage.getImageId());
     }
 
     private boolean compareVersion(String currentVersion, String newVersion) {

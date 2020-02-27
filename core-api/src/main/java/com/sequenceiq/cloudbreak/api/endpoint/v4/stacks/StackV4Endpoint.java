@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescr
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_NAME;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_FOR_UPGRADE_CLUSTER_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_IMAGE_IN_WORKSPACE;
-import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_STACK_UPGRADE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CREATE_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_INSTANCE_BY_ID_IN_WORKSPACE;
@@ -20,7 +19,6 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.REPAIR_CLUSTER_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.RETRY_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.SCALE_BY_NAME_IN_WORKSPACE;
-import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.STACK_UPGRADE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.START_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.STOP_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.SYNC_BY_NAME_IN_WORKSPACE;
@@ -57,7 +55,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionsV4Response;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -241,17 +238,5 @@ public interface StackV4Endpoint {
     @Produces(MediaType.TEXT_PLAIN)
     @ApiOperation(value = GENERATE_HOSTS_INVENTORY, produces = MediaType.TEXT_PLAIN, nickname = "getClusterHostsInventory")
     String getClusterHostsInventory(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
-
-    @GET
-    @Path("{name}/check_stack_upgrade")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CHECK_STACK_UPGRADE, nickname = "checkForUpgradeByName")
-    UpgradeOptionsV4Response checkForStackUpgradeByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
-
-    @POST
-    @Path("{name}/stack_upgrade")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = STACK_UPGRADE, nickname = "upgradeStackByName")
-    void upgradeStackByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, String imageId);
 
 }
