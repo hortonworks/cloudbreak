@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +41,8 @@ public class SdxRepairServiceTest {
 
     private static final String CLUSTER_NAME = "dummyCluster";
 
+    private static final AtomicLong CLUSTER_ID = new AtomicLong(20000L);
+
     @Mock
     private StackV4Endpoint stackV4Endpoint;
 
@@ -64,6 +67,7 @@ public class SdxRepairServiceTest {
     @Test
     public void triggerCloudbreakRepair() {
         SdxCluster cluster = new SdxCluster();
+        cluster.setId(CLUSTER_ID.incrementAndGet());
         cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
         SdxRepairRequest sdxRepairRequest = new SdxRepairRequest();
@@ -80,6 +84,7 @@ public class SdxRepairServiceTest {
     @Test
     public void waitCloudbreakClusterRepairWhenThereIsNoActiveFlow() throws JsonProcessingException {
         SdxCluster cluster = new SdxCluster();
+        cluster.setId(CLUSTER_ID.incrementAndGet());
         cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
         StackV4Response resp = new StackV4Response();
@@ -93,6 +98,7 @@ public class SdxRepairServiceTest {
     @Test
     public void waitCloudbreakClusterRepairWhenThereIsActiveFlow() throws JsonProcessingException {
         SdxCluster cluster = new SdxCluster();
+        cluster.setId(CLUSTER_ID.incrementAndGet());
         cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 

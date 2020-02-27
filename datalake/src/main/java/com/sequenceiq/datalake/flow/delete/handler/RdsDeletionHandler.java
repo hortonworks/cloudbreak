@@ -13,7 +13,6 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -37,9 +36,6 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
 
     @Inject
     private SdxStatusService sdxStatusService;
-
-    @Inject
-    private Clock clock;
 
     @Override
     public String selector() {
@@ -86,13 +82,7 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
     }
 
     private void setDeletedStatus(SdxCluster cluster) {
-        finalizeDelete(cluster);
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETED,
                 ResourceEvent.SDX_RDS_DELETION_FINISHED, "Datalake External RDS deleted", cluster);
-    }
-
-    private void finalizeDelete(SdxCluster cluster) {
-        cluster.setDeleted(clock.getCurrentTimeMillis());
-        sdxClusterRepository.save(cluster);
     }
 }
