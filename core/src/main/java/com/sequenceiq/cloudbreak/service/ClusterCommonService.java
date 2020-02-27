@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.decorator.HostGroupDecorator;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -53,6 +54,9 @@ public class ClusterCommonService {
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private ClusterOperationService clusterOperationService;
 
     @Inject
     private HostGroupService hostGroupService;
@@ -79,7 +83,7 @@ public class ClusterCommonService {
             flowIdentifier = clusterManagerUserNamePasswordChange(stackId, stack, userNamePasswordJson);
         } else if (updateJson.getStatus() != null) {
             LOGGER.debug("Cluster status update request received. Stack id:  {}, status: {} ", stackId, updateJson.getStatus());
-            flowIdentifier = clusterService.updateStatus(stackId, updateJson.getStatus());
+            flowIdentifier = clusterOperationService.updateStatus(stackId, updateJson.getStatus());
         } else if (updateJson.getBlueprintName() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
             LOGGER.debug("Cluster rebuild request received. Stack id:  {}", stackId);
             try {
@@ -114,7 +118,7 @@ public class ClusterCommonService {
             cmTemplateValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(),
                     updateJson.getHostGroupAdjustment().getScalingAdjustment());
         }
-        return clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
+        return clusterOperationService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
     }
 
     private FlowIdentifier recreateCluster(Stack stack, UpdateClusterV4Request updateCluster) throws TransactionExecutionException {
@@ -124,7 +128,7 @@ public class ClusterCommonService {
             hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack, false);
             hostGroups.add(hostGroup);
         }
-        return clusterService.recreate(stack, updateCluster.getBlueprintName(), hostGroups, updateCluster.getValidateBlueprint());
+        return clusterOperationService.recreate(stack, updateCluster.getBlueprintName(), hostGroups, updateCluster.getValidateBlueprint());
     }
 
     private FlowIdentifier clusterManagerUserNamePasswordChange(Long stackId, Stack stack, UserNamePasswordV4Request userNamePasswordJson) {
@@ -140,7 +144,7 @@ public class ClusterCommonService {
         }
         LOGGER.debug("Cluster username password update request received. Stack id:  {}, username: {}",
                 stackId, userNamePasswordJson.getUserName());
-        return clusterService.updateUserNamePassword(stackId, userNamePasswordJson);
+        return clusterOperationService.updateUserNamePassword(stackId, userNamePasswordJson);
     }
 
     public FlowIdentifier setMaintenanceMode(Stack stack, MaintenanceModeStatus maintenanceMode) {
@@ -172,7 +176,7 @@ public class ClusterCommonService {
                             cluster.getId(),
                             cluster.getStatus()));
                 }
-                flowIdentifier = clusterService.triggerMaintenanceModeValidation(stack);
+                flowIdentifier = clusterOperationService.triggerMaintenanceModeValidation(stack);
                 clusterService.save(cluster);
                 break;
             default:

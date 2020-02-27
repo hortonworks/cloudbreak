@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -69,6 +70,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private ClusterOperationService clusterOperationService;
 
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
@@ -142,7 +146,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         Set<String> failedNodeNames = failedInstances.stream()
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(toSet());
-        clusterService.reportHealthChange(stack.getResourceCrn(), failedNodeNames, newHealtyHostNames);
+        clusterOperationService.reportHealthChange(stack.getResourceCrn(), failedNodeNames, newHealtyHostNames);
         if (failedNodeNames.size() > 0) {
             clusterService.updateClusterStatusByStackId(stack.getId(), Status.AMBIGUOUS);
         } else if (EnumSet.of(Status.AMBIGUOUS, Status.STOPPED).contains(stack.getCluster().getStatus())) {
