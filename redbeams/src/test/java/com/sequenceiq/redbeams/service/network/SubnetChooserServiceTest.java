@@ -1,10 +1,13 @@
 package com.sequenceiq.redbeams.service.network;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,20 +63,7 @@ public class SubnetChooserServiceTest {
     }
 
     @Test
-    public void testChooseSubnetsAzure2() {
-        List<CloudSubnet> subnets = List.of(
-                new CloudSubnet(SUBNET_1, ""),
-                new CloudSubnet(SUBNET_2, "")
-        );
-
-        List<CloudSubnet> chosenSubnets = underTest.chooseSubnets(subnets, CloudPlatform.AZURE, null);
-
-        assertEquals(1, chosenSubnets.size());
-        assertTrue(subnets.contains(chosenSubnets.get(0)));
-    }
-
-    @Test
-    public void testChooseSubnetsAzure3() {
+    public void testChooseSubnetsAzureWhenThreeSubnetsThenAllThreeReturned() {
         List<CloudSubnet> subnets = List.of(
                 new CloudSubnet(SUBNET_1, ""),
                 new CloudSubnet(SUBNET_2, ""),
@@ -82,8 +72,11 @@ public class SubnetChooserServiceTest {
 
         List<CloudSubnet> chosenSubnets = underTest.chooseSubnets(subnets, CloudPlatform.AZURE, null);
 
-        assertEquals(1, chosenSubnets.size());
-        assertTrue(subnets.contains(chosenSubnets.get(0)));
+        assertEquals(3, chosenSubnets.size());
+        List<String> chosenSubnetIds = chosenSubnets.stream().map(CloudSubnet::getId).collect(Collectors.toList());
+        assertThat(chosenSubnetIds, hasItem(SUBNET_1));
+        assertThat(chosenSubnetIds, hasItem(SUBNET_2));
+        assertThat(chosenSubnetIds, hasItem(SUBNET_3));
     }
 
     @Test(expected = BadRequestException.class)

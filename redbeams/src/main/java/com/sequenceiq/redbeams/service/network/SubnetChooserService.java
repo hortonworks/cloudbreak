@@ -35,7 +35,7 @@ public class SubnetChooserService {
         if (subnetMetas.isEmpty()) {
             throw new BadRequestException("Insufficient number of subnets: at least one subnet needed");
         }
-        return subnetMetas.subList(0, 1);
+        return subnetMetas;
     }
 
     private List<CloudSubnet> chooseSubnetsMock(List<CloudSubnet> subnetMetas) {
