@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.dto.environment;
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ARCHIVED;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static java.util.Objects.isNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,6 +37,7 @@ import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.DeletableEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -47,6 +49,8 @@ public class EnvironmentTestDto
         implements Searchable {
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
+
+    private static final int ORDER = 600;
 
     private static final String DUMMY_SSH_KEY = "ssh-rsa "
             + "AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kc"
@@ -66,6 +70,8 @@ public class EnvironmentTestDto
 
     private EnvironmentChangeCredentialRequest enviornmentChangeCredentialRequest;
 
+    private int order = ORDER;
+
     public EnvironmentTestDto(TestContext testContext) {
         super(new EnvironmentRequest(), testContext);
     }
@@ -81,6 +87,10 @@ public class EnvironmentTestDto
     @Override
     public String getName() {
         return getRequest().getName();
+    }
+
+    public String getParentEnvironmentName() {
+        return getRequest().getParentEnvironmentName();
     }
 
     @Override
@@ -197,6 +207,26 @@ public class EnvironmentTestDto
         return this;
     }
 
+    public EnvironmentTestDto withParentEnvironment(RunningParameter runningParameter) {
+        CloudbreakTestDto parentEnvDto = getTestContext().get(runningParameter.getKey());
+        return withParentEnvironment(parentEnvDto);
+    }
+
+    public EnvironmentTestDto withParentEnvironment() {
+        CloudbreakTestDto parentEnvDto = getTestContext().given(EnvironmentTestDto.class);
+        return withParentEnvironment(parentEnvDto);
+    }
+
+    private EnvironmentTestDto withParentEnvironment(CloudbreakTestDto parentEnvDto) {
+        if (isNull(parentEnvDto)) {
+            order = ORDER;
+        } else {
+            getRequest().setParentEnvironmentName(parentEnvDto.getName());
+            order = ORDER - 1;
+        }
+        return this;
+    }
+
     public Collection<SimpleEnvironmentResponse> getResponseSimpleEnvSet() {
         return response;
     }
@@ -262,7 +292,7 @@ public class EnvironmentTestDto
 
     @Override
     public int order() {
-        return 600;
+        return order;
     }
 
     public EnvironmentChangeCredentialRequest getEnviornmentChangeCredentialRequest() {
