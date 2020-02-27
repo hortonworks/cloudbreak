@@ -201,7 +201,7 @@ public class ClusterServiceTest {
     }
 
     @Test
-    public void shouldTriggerSync() {
+    public void shouldNotTriggerSync() {
         String hostFQDN = "host2Name.stopped";
         InstanceMetaData instanceMd = getHost(hostFQDN, "master", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
         when(hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), instanceMd.getInstanceGroup().getGroupName()))
@@ -210,11 +210,10 @@ public class ClusterServiceTest {
 
         when(stackService.findByCrn(STACK_CRN)).thenReturn(stack);
         when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn("failed node");
-        when(instanceMetaDataService.getPrimaryGatewayInstanceMetadata(anyLong())).thenReturn(Optional.of(instanceMd));
 
         underTest.reportHealthChange(STACK_CRN, Set.of(hostFQDN), Set.of());
 
-        verify(flowManager, times(1)).triggerStackSync(eq(stack.getId()));
+        verify(flowManager, times(0)).triggerStackSync(eq(stack.getId()));
     }
 
     @Test
