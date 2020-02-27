@@ -47,7 +47,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterManager;
-import com.sequenceiq.periscope.domain.ClusterManagerVariant;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.periscope.model.RejectedThread;
 import com.sequenceiq.periscope.modul.rejected.RejectedThreadContext.SpringConfig;
 import com.sequenceiq.periscope.monitor.ClusterManagerHostHealthMonitor;

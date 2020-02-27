@@ -9,7 +9,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.periscope.domain.ClusterManagerVariant;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterCreationEvaluator;
 
 @Service

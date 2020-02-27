@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionsV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
+import com.sequenceiq.cloudbreak.service.upgrade.StackUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
@@ -83,6 +85,9 @@ public class StackOperations {
 
     @Inject
     private UpgradeService upgradeService;
+
+    @Inject
+    private StackUpgradeService stackUpgradeService;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -190,6 +195,19 @@ public class StackOperations {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         if (nameOrCrn.hasName()) {
             return upgradeService.getUpgradeOptionByStackNameOrCrn(workspaceId, nameOrCrn, user);
+        } else {
+            LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
+            throw new BadRequestException("Please provide a stack name for upgrade");
+        }
+    }
+
+    public void upgradeStack(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String imageId) {
+        LOGGER.debug("Staring to upgrade cluster: " + nameOrCrn);
+    }
+
+    public UpgradeOptionsV4Response checkForStackUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+        if (nameOrCrn.hasName()) {
+            return stackUpgradeService.checkForUpgradesByName(workspaceId, nameOrCrn.getName());
         } else {
             LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
             throw new BadRequestException("Please provide a stack name for upgrade");
