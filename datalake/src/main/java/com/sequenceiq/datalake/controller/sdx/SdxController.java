@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionsV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
@@ -26,6 +27,7 @@ import com.sequenceiq.datalake.service.sdx.SdxUpgradeService;
 import com.sequenceiq.datalake.service.sdx.start.SdxStartService;
 import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.datalake.service.upgrade.SdxStackUpgradeService;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
@@ -58,6 +60,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private SdxMetricService metricService;
+
+    @Inject
+    private SdxStackUpgradeService sdxStackUpgradeService;
 
     @Override
     public SdxClusterResponse create(@ValidStackNameFormat @ValidStackNameLength String name, @Valid SdxClusterRequest createSdxClusterRequest) {
@@ -227,4 +232,25 @@ public class SdxController implements SdxEndpoint {
         return sdxService.getDatalakeVersions();
     }
 
+    @Override
+    public UpgradeOptionsV4Response checkForStackUpgradeByName(String name) {
+        return sdxStackUpgradeService.checkForStackUpgradeByName(name);
+    }
+
+    @Override
+    public UpgradeOptionsV4Response checkForStackUpgradeByCrn(String crn) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return sdxStackUpgradeService.checkForStackUpgradeByCrn(crn, userCrn);
+    }
+
+    @Override
+    public void upgradeStackByName(String name, String imageId) {
+        sdxStackUpgradeService.upgradeStackByName(name, imageId);
+    }
+
+    @Override
+    public void upgradeStackByCrn(String crn, String imageId) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        sdxStackUpgradeService.upgradeStackByCrn(crn, imageId, userCrn);
+    }
 }
