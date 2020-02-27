@@ -119,6 +119,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final String CDP_BASE_IMAGE = "CDP_BASE_IMAGE";
 
+    private static final String LOCAL_DEV = "LOCAL_DEV";
+
     @Inject
     private JsonUtil jsonUtil;
 
@@ -351,6 +353,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                                 .addEntitlements(createEntitlement(CDP_AZURE))
                                 .addEntitlements(createEntitlement(CDP_AUTOMATIC_USERSYNC_POLLER))
                                 .addEntitlements(createEntitlement(CLOUDERA_INTERNAL_ACCOUNT))
+                                .addEntitlements(createEntitlement(LOCAL_DEV))
                                 .setPasswordPolicy(workloadPasswordPolicy)
                                 .build())
                         .build());
