@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -27,9 +30,9 @@ import com.sequenceiq.cloudbreak.common.type.Versioned;
 @Scope("prototype")
 public class ClouderaManagerConfigService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerConfigService.class);
+    static final String KNOX_AUTORESTART_ON_STOP = "autorestart_on_stop";
 
-    private static final String KNOX_AUTORESTART_ON_STOP = "autorestart_on_stop";
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerConfigService.class);
 
     private static final String KNOX_SERVICE = "KNOX";
 
@@ -82,23 +85,35 @@ public class ClouderaManagerConfigService {
     }
 
     private void disableKnoxAutorestart(ApiClient client, String clusterName) {
-        try {
             ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
-            String knoxServiceName = getKnoxServiceName(clusterName, servicesResourceApi);
-
-            ApiConfig autorestartConfig = new ApiConfig().name(KNOX_AUTORESTART_ON_STOP).value(Boolean.FALSE.toString());
-            ApiServiceConfig serviceConfig = new ApiServiceConfig().addItemsItem(autorestartConfig);
-            servicesResourceApi.updateServiceConfig(clusterName, knoxServiceName, "", serviceConfig);
-        } catch (ApiException e) {
-            LOGGER.debug("Failed to set autorestart_on_stop to KNOX in Cloudera Manager.", e);
-        }
+            getKnoxServiceName(clusterName, servicesResourceApi)
+                    .ifPresentOrElse(
+                            doDisableKnoxAutorestart(clusterName, servicesResourceApi),
+                            () -> LOGGER.info("KNOX service name is missing, skipping disabling the autorestart property."));
     }
 
-    private String getKnoxServiceName(String clusterName, ServicesResourceApi servicesResourceApi) throws ApiException {
-        ApiServiceList serviceList = servicesResourceApi.readServices(clusterName, DataView.SUMMARY.name());
-        return serviceList.getItems().stream()
-                .filter(service -> KNOX_SERVICE.equals(service.getType()))
-                .map(ApiService::getName)
-                .findFirst().orElse(KNOX_SERVICE);
+    private Consumer<String> doDisableKnoxAutorestart(String clusterName, ServicesResourceApi servicesResourceApi) {
+        return knoxServiceName -> {
+            ApiConfig autorestartConfig = new ApiConfig().name(KNOX_AUTORESTART_ON_STOP).value(Boolean.FALSE.toString());
+            ApiServiceConfig serviceConfig = new ApiServiceConfig().addItemsItem(autorestartConfig);
+            try {
+                servicesResourceApi.updateServiceConfig(clusterName, knoxServiceName, "", serviceConfig);
+            } catch (ApiException e) {
+                LOGGER.debug("Failed to set autorestart_on_stop to KNOX in Cloudera Manager.", e);
+            }
+        };
+    }
+
+    private Optional<String> getKnoxServiceName(String clusterName, ServicesResourceApi servicesResourceApi) {
+        try {
+            ApiServiceList serviceList = servicesResourceApi.readServices(clusterName, DataView.SUMMARY.name());
+            return serviceList.getItems().stream()
+                    .filter(service -> KNOX_SERVICE.equals(service.getType()))
+                    .map(ApiService::getName)
+                    .findFirst();
+        } catch (ApiException e) {
+            LOGGER.debug("Failed to get KNOX service name from Cloudera Manager.", e);
+            return Optional.empty();
+        }
     }
 }
