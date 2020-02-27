@@ -13,7 +13,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.R
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AUTORECOVERY_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_HOST_STATUS_UPDATED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PRIMARY_GATEWAY_UNHEALTHY_SYNC_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NODES_REPORTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_REQUESTED;
@@ -502,20 +501,12 @@ public class ClusterService {
                         CLUSTER_AUTORECOVERY_REQUESTED);
             }
             if (!failedHostMetadata.isEmpty()) {
-                updateChangedHosts(cluster, failedHostMetadata.keySet(), Set.of(SERVICES_HEALTHY), SERVICES_UNHEALTHY,
+                updateChangedHosts(cluster, failedHostMetadata.keySet(), Set.of(SERVICES_HEALTHY, SERVICES_RUNNING), SERVICES_UNHEALTHY,
                         CLUSTER_FAILED_NODES_REPORTED);
             }
             if (!newHealthyNodes.isEmpty()) {
                 updateChangedHosts(cluster, newHealthyNodes, Set.of(SERVICES_UNHEALTHY, SERVICES_RUNNING), SERVICES_HEALTHY,
                         CLUSTER_RECOVERED_NODES_REPORTED);
-            }
-
-            if (!hasAutoRecoverableNodes) {
-                Optional<InstanceMetaData> primaryGateway = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(cluster.getStack().getId());
-                if (primaryGateway.isPresent() && failedHostMetadata.containsKey(primaryGateway.get().getDiscoveryFQDN())) {
-                    eventService.fireCloudbreakEvent(cluster.getStack().getId(), RECOVERY, CLUSTER_PRIMARY_GATEWAY_UNHEALTHY_SYNC_STARTED);
-                    flowManager.triggerStackSync(cluster.getStack().getId());
-                }
             }
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
