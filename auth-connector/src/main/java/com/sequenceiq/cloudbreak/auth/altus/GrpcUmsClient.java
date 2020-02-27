@@ -325,7 +325,7 @@ public class GrpcUmsClient {
 
     @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right, #resource }")
     public boolean checkRight(String actorCrn, String userCrn, String right, String resource, Optional<String> requestId) {
-        if (InternalCrnBuilder.isInternalCrn(actorCrn)) {
+        if (InternalCrnBuilder.isInternalCrn(userCrn)) {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
             return true;
         }
