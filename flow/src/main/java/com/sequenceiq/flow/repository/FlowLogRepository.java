@@ -48,6 +48,8 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
 
     List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long resourceId);
 
+    List<FlowLog> findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(Long resourceId);
+
     List<FlowLog> findAllByFlowIdOrderByCreatedDesc(String flowId);
 
     List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long resourceId, Pageable page);

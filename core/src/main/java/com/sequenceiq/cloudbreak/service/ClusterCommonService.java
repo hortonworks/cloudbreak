@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterFlowService;
 import com.sequenceiq.cloudbreak.service.decorator.HostGroupDecorator;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -54,6 +55,9 @@ public class ClusterCommonService {
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private ClusterFlowService clusterFlowService;
 
     @Inject
     private HostGroupService hostGroupService;
@@ -79,7 +83,7 @@ public class ClusterCommonService {
             ambariUserNamePasswordChange(stackId, stack, userNamePasswordJson);
         } else if (updateJson.getStatus() != null) {
             LOGGER.debug("Cluster status update request received. Stack id:  {}, status: {} ", stackId, updateJson.getStatus());
-            clusterService.updateStatus(stackId, updateJson.getStatus());
+            clusterFlowService.updateStatus(stackId, updateJson.getStatus());
         } else if (updateJson.getBlueprintName() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
             LOGGER.debug("Cluster rebuild request received. Stack id:  {}", stackId);
             try {
@@ -113,7 +117,7 @@ public class ClusterCommonService {
             cmTemplateValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(),
                     updateJson.getHostGroupAdjustment().getScalingAdjustment());
         }
-        clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
+        clusterFlowService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
     }
 
     private void recreateCluster(Stack stack, UpdateClusterV4Request updateCluster, User user, Workspace workspace) throws TransactionExecutionException {
@@ -123,7 +127,7 @@ public class ClusterCommonService {
             hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack, false);
             hostGroups.add(hostGroup);
         }
-        clusterService.recreate(stack, updateCluster.getBlueprintName(), hostGroups, updateCluster.getValidateBlueprint(), null);
+        clusterFlowService.recreate(stack, updateCluster.getBlueprintName(), hostGroups, updateCluster.getValidateBlueprint(), null);
     }
 
     private void ambariUserNamePasswordChange(Long stackId, Stack stack, UserNamePasswordV4Request userNamePasswordJson) {
@@ -139,7 +143,7 @@ public class ClusterCommonService {
         }
         LOGGER.debug("Cluster username password update request received. Stack id:  {}, username: {}",
                 stackId, userNamePasswordJson.getUserName());
-        clusterService.updateUserNamePassword(stackId, userNamePasswordJson);
+        clusterFlowService.updateUserNamePassword(stackId, userNamePasswordJson);
     }
 
     public void setMaintenanceMode(Stack stack, MaintenanceModeStatus maintenanceMode) {
@@ -170,7 +174,7 @@ public class ClusterCommonService {
                             cluster.getId(),
                             cluster.getStatus()));
                 }
-                clusterService.triggerMaintenanceModeValidation(stack);
+                clusterFlowService.triggerMaintenanceModeValidation(stack);
                 clusterService.save(cluster);
                 break;
             default:

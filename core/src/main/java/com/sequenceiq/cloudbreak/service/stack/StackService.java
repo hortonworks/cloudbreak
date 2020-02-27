@@ -1,12 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_IGNORED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.lang.String.format;
@@ -15,8 +9,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,15 +26,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
-import com.sequenceiq.authorization.resource.ResourceAction;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -68,10 +54,8 @@ import com.sequenceiq.cloudbreak.converter.stack.StackIdViewToStackResponseConve
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
-import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
@@ -81,10 +65,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
@@ -97,8 +78,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
-import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
@@ -109,10 +88,8 @@ import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigServic
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
-import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -124,8 +101,6 @@ public class StackService implements ResourceIdProvider {
 
     public static final Set<String> REATTACH_COMPATIBLE_PLATFORMS = Set.of(CloudConstants.AWS, CloudConstants.AZURE, CloudConstants.GCP, CloudConstants.MOCK);
 
-    public static final long MINUTE_IN_MS = 60 * 1000;
-
     private static final String STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE = "Stack not found by id '%d'";
 
     private static final String STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE = "Stack not found by name '%s'";
@@ -135,9 +110,6 @@ public class StackService implements ResourceIdProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
     private static final String SSH_USER_CB = "cloudbreak";
-
-    @Value("${cb.termination.retry.allowed.in.minute:60}")
-    private long terminationRetryAllowedInMinute;
 
     @Inject
     private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
@@ -152,16 +124,10 @@ public class StackService implements ResourceIdProvider {
     private ContainerOrchestratorResolver containerOrchestratorResolver;
 
     @Inject
-    private StackDownscaleValidatorService downscaleValidatorService;
-
-    @Inject
     private DatalakeResourcesService datalakeResourcesService;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
-    private PermissionCheckingUtils permissionCheckingUtils;
 
     @Inject
     private OpenSshPublicKeyValidator rsaPublicKeyValidator;
@@ -185,9 +151,6 @@ public class StackService implements ResourceIdProvider {
     private TransactionService transactionService;
 
     @Inject
-    private CloudbreakEventService eventService;
-
-    @Inject
     private StackViewService stackViewService;
 
     @Inject
@@ -197,19 +160,10 @@ public class StackService implements ResourceIdProvider {
     private StackRepository stackRepository;
 
     @Inject
-    private ReactorFlowManager flowManager;
-
-    @Inject
-    private ClusterService clusterService;
-
-    @Inject
     private ConverterUtil converterUtil;
 
     @Inject
     private ImageService imageService;
-
-    @Inject
-    private StackUpdater stackUpdater;
 
     @Inject
     private CostTagging costTagging;
@@ -549,47 +503,6 @@ public class StackService implements ResourceIdProvider {
         stack.setPlatformVariant(connector.checkAndGetPlatformVariant(stack).value());
     }
 
-    public void removeInstance(Stack stack, Long workspaceId, String instanceId, boolean forced, User user) {
-        InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, workspaceId, user);
-        flowManager.triggerStackRemoveInstance(stack.getId(), metaData.getInstanceGroupName(), metaData.getPrivateId(), forced);
-    }
-
-    public void removeInstances(Stack stack, Long workspaceId, Collection<String> instanceIds, boolean forced, User user) {
-        Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
-        for (String instanceId : instanceIds) {
-            InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, workspaceId, user);
-            instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
-        }
-        flowManager.triggerStackRemoveInstances(stack.getId(), instanceIdsByHostgroupMap, forced);
-    }
-
-    public void updateStatus(Long stackId, StatusRequest status, boolean updateCluster, User user) {
-        Stack stack = getByIdWithLists(stackId);
-        Cluster cluster = null;
-        if (stack.getCluster() != null) {
-            cluster = clusterService.findOneWithLists(stack.getCluster().getId()).orElse(null);
-        }
-        switch (status) {
-            case SYNC:
-                sync(stack, false, user);
-                break;
-            case FULL_SYNC:
-                sync(stack, true, user);
-                break;
-            case REPAIR_FAILED_NODES:
-                repairFailedNodes(stack, user);
-                break;
-            case STOPPED:
-                stop(stack, cluster, updateCluster, user);
-                break;
-            case STARTED:
-                start(stack, cluster, updateCluster, user);
-                break;
-            default:
-                throw new BadRequestException("Cannot update the status of stack because status request not valid.");
-        }
-    }
-
     Optional<Stack> findTemplateWithLists(Long id) {
         return stackRepository.findTemplateWithLists(id);
     }
@@ -649,11 +562,6 @@ public class StackService implements ResourceIdProvider {
         return stackRepository.findByNetwork(network);
     }
 
-    public void updateImage(Long stackId, Long workspaceId, String imageId, String imageCatalogName, String imageCatalogUrl, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        flowManager.triggerStackImageUpdate(stackId, imageId, imageCatalogName, imageCatalogUrl);
-    }
-
     @Override
     public Long getResourceIdByResourceCrn(String resourceCrn) {
         return getByCrn(resourceCrn).getId();
@@ -685,148 +593,12 @@ public class StackService implements ResourceIdProvider {
         return stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId, false, 0L);
     }
 
-    private InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack, Long workspaceId, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        InstanceMetaData metaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId)
-                .orElseThrow(() -> new NotFoundException(format("Metadata for instance %s has not found.", instanceId)));
-        downscaleValidatorService.checkInstanceIsTheClusterManagerServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
-        downscaleValidatorService.checkClusterInValidStatus(stack.getCluster());
-        return metaData;
-    }
-
-    private Stack getByIdWithLists(Long id) {
+    public Stack getByIdWithLists(Long id) {
         return stackRepository.findOneWithLists(id).orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE, id)));
     }
 
     private Stack getByCrnWithLists(String crn) {
         return stackRepository.findOneByCrnWithLists(crn).orElseThrow(NotFoundException.notFound("Stack", crn));
-    }
-
-    private void repairFailedNodes(Stack stack, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        LOGGER.debug("Received request to replace failed nodes: " + stack.getId());
-        flowManager.triggerManualRepairFlow(stack.getId());
-    }
-
-    private void sync(Stack stack, boolean full, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        // TODO: is it a good condition?
-        if (!stack.isDeleteInProgress() && !stack.isStackInDeletionPhase() && !stack.isModificationInProgress()) {
-            if (full) {
-                flowManager.triggerFullSync(stack.getId());
-            } else {
-                flowManager.triggerStackSync(stack.getId());
-            }
-        } else {
-            LOGGER.debug("Stack could not be synchronized in {} state!", stack.getStatus());
-        }
-    }
-
-    private void stop(Stack stack, Cluster cluster, boolean updateCluster, User user) {
-        if (cluster != null && cluster.isStopInProgress()) {
-            setStackStatusToStopRequested(stack);
-        } else {
-            triggerStackStopIfNeeded(stack, cluster, updateCluster, user);
-        }
-    }
-
-    private void triggerStackStopIfNeeded(Stack stack, Cluster cluster, boolean updateCluster, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        if (!isStopNeeded(stack)) {
-            return;
-        }
-        if (cluster != null && !cluster.isStopped() && !stack.isStopFailed()) {
-            if (!updateCluster) {
-                throw new BadRequestException(format("Cannot update the status of stack '%s' to STOPPED, because the cluster's state is %s.",
-                        stack.getName(), cluster.getStatus().name()));
-            } else if (cluster.isClusterReadyForStop() || cluster.isStopFailed()) {
-                setStackStatusToStopRequested(stack);
-                clusterService.updateStatus(stack.getId(), StatusRequest.STOPPED);
-            } else {
-                throw new BadRequestException(format("Cannot update the status of cluster '%s' to STOPPED, because the cluster's state is %s.",
-                        cluster.getName(), cluster.getStatus()));
-            }
-        } else {
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED);
-            flowManager.triggerStackStop(stack.getId());
-        }
-    }
-
-    private boolean isStopNeeded(Stack stack) {
-        boolean result = true;
-        StopRestrictionReason reason = stack.isInfrastructureStoppable();
-        if (stack.isStopped()) {
-            eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), STACK_STOP_IGNORED);
-            result = false;
-        } else if (reason != StopRestrictionReason.NONE) {
-            throw new BadRequestException(
-                    format("Cannot stop a stack '%s'. Reason: %s", stack.getName(), reason.getReason()));
-        } else if (!stack.isAvailable() && !stack.isStopFailed()) {
-            throw new BadRequestException(
-                    format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getName()));
-        }
-        return result;
-    }
-
-    private void setStackStatusToStopRequested(Stack stack) {
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
-        eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), STACK_STOP_REQUESTED);
-    }
-
-    @VisibleForTesting
-    void start(Stack stack, Cluster cluster, boolean updateCluster, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        if (stack.isAvailable() && (cluster == null || cluster.isAvailable())) {
-            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_START_IGNORED);
-        } else if (isStackStartable(stack) || isClusterStartable(cluster)) {
-            Stack startStack = stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
-            flowManager.triggerStackStart(stack.getId());
-            if (updateCluster && cluster != null) {
-                clusterService.updateStatus(startStack, StatusRequest.STARTED);
-            }
-        } else {
-            throw new BadRequestException(format("Cannot update the status of stack '%s' to STARTED, because it is in %s state",
-                    stack.getName(), stack.getStatus().name()));
-        }
-    }
-
-    private boolean isClusterStartable(Cluster cluster) {
-        return cluster != null && (cluster.isStopped() || cluster.isStartFailed());
-    }
-
-    private boolean isStackStartable(Stack stack) {
-        return stack.isStopped() || stack.isStartFailed();
-    }
-
-    public void updateNodeCount(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, boolean withClusterEvent, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        try {
-            transactionService.required(() -> {
-                Stack stackWithLists = getByIdWithLists(stack.getId());
-                validateStackStatus(stackWithLists);
-                validateInstanceGroup(stackWithLists, instanceGroupAdjustmentJson.getInstanceGroup());
-                validateScalingAdjustment(instanceGroupAdjustmentJson, stackWithLists);
-                validateInstanceStatuses(stackWithLists, instanceGroupAdjustmentJson);
-                if (withClusterEvent) {
-                    validateClusterStatus(stackWithLists);
-                    validateHostGroupAdjustment(instanceGroupAdjustmentJson, stackWithLists, instanceGroupAdjustmentJson.getScalingAdjustment());
-                    validataHostMetadataStatuses(stackWithLists, instanceGroupAdjustmentJson);
-                }
-                if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
-                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_REQUESTED);
-                    flowManager.triggerStackUpscale(stackWithLists.getId(), instanceGroupAdjustmentJson, withClusterEvent);
-                } else {
-                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.DOWNSCALE_REQUESTED);
-                    flowManager.triggerStackDownscale(stackWithLists.getId(), instanceGroupAdjustmentJson);
-                }
-                return null;
-            });
-        } catch (TransactionExecutionException e) {
-            if (e.getCause() instanceof BadRequestException) {
-                throw e.getCause();
-            }
-            throw new TransactionRuntimeExecutionException(e);
-        }
     }
 
     public void updateMetaDataStatusIfFound(Long id, String hostName, InstanceStatus status, String statusReason) {
@@ -861,88 +633,6 @@ public class StackService implements ResourceIdProvider {
         return instanceMetaDataList.stream()
                 .filter(instanceMetaData -> hostNames.contains(instanceMetaData.getDiscoveryFQDN()))
                 .collect(Collectors.toSet());
-    }
-
-    private void validateScalingAdjustment(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, Stack stack) {
-        if (0 == instanceGroupAdjustmentJson.getScalingAdjustment()) {
-            throw new BadRequestException(format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stack.getName()));
-        }
-        if (0 > instanceGroupAdjustmentJson.getScalingAdjustment()) {
-            InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupAdjustmentJson.getInstanceGroup());
-            if (-1 * instanceGroupAdjustmentJson.getScalingAdjustment() > instanceGroup.getNodeCount()) {
-                throw new BadRequestException(format("There are %s instances in instance group '%s'. Cannot remove %s instances.",
-                        instanceGroup.getNodeCount(), instanceGroup.getGroupName(),
-                        -1 * instanceGroupAdjustmentJson.getScalingAdjustment()));
-            }
-            int removableHosts = instanceMetaDataService.findRemovableInstances(stack.getId(), instanceGroupAdjustmentJson.getInstanceGroup()).size();
-            if (removableHosts < -1 * instanceGroupAdjustmentJson.getScalingAdjustment()) {
-                throw new BadRequestException(
-                        format("There are %s unregistered instances in instance group '%s' but %s were requested. Decommission nodes from the cluster!",
-                                removableHosts, instanceGroup.getGroupName(), instanceGroupAdjustmentJson.getScalingAdjustment() * -1));
-            }
-        }
-    }
-
-    private void validateInstanceStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
-        if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
-            List<InstanceMetaData> instanceMetaDataList =
-                    stack.getInstanceMetaDataAsList().stream().filter(im -> !im.isTerminated() && !im.isRunning() && !im.isCreated())
-                            .collect(Collectors.toList());
-            if (!instanceMetaDataList.isEmpty()) {
-                String ims = instanceMetaDataList.stream()
-                        .map(im -> im.getInstanceId() != null ? im.getInstanceId() : im.getPrivateId() + ": " + im.getInstanceStatus())
-                        .collect(Collectors.joining(", "));
-                throw new BadRequestException(
-                        format("Upscale is not allowed because the following instances are not in running state: %s. Please remove them first!", ims));
-            }
-        }
-    }
-
-    private void validataHostMetadataStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
-        if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
-            List<InstanceMetaData> instanceMetaDataAsList = stack.getInstanceMetaDataAsList();
-            List<InstanceMetaData> unhealthyInstanceMetadataList = instanceMetaDataAsList.stream()
-                    .filter(instanceMetaData -> InstanceStatus.SERVICES_UNHEALTHY.equals(instanceMetaData.getInstanceStatus()))
-                    .collect(Collectors.toList());
-            if (!unhealthyInstanceMetadataList.isEmpty()) {
-                String notHealthyInstances = unhealthyInstanceMetadataList.stream()
-                        .map(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() + ": " + instanceMetaData.getInstanceStatus())
-                        .collect(Collectors.joining(","));
-                throw new BadRequestException(
-                        format("Upscale is not allowed because the following hosts are not healthy: %s. Please remove them first!", notHealthyInstances));
-            }
-        }
-    }
-
-    private void validateHostGroupAdjustment(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
-        Optional<HostGroup> hostGroup = stack.getCluster().getHostGroups().stream()
-                .filter(input -> input.getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())).findFirst();
-        if (!hostGroup.isPresent()) {
-            throw new BadRequestException(format("Instancegroup '%s' not found or not part of stack '%s'",
-                    instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));
-        }
-    }
-
-    private void validateStackStatus(Stack stack) {
-        if (!stack.isAvailable()) {
-            throw new BadRequestException(format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.",
-                    stack.getName(), stack.getStatus()));
-        }
-    }
-
-    private void validateClusterStatus(Stack stack) {
-        Cluster cluster = stack.getCluster();
-        if (cluster != null && !cluster.isAvailable()) {
-            throw new BadRequestException(format("Cluster '%s' is currently in '%s' state. Node count can only be updated if it's not available.",
-                    cluster.getName(), cluster.getStatus()));
-        }
-    }
-
-    private void validateInstanceGroup(Stack stack, String instanceGroupName) {
-        InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
-        if (instanceGroup == null) {
-            throw new BadRequestException(format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getName(), instanceGroupName));
-        }
     }
 
     private void addTemplateForStack(Stack stack, String template) {
@@ -1033,12 +723,6 @@ public class StackService implements ResourceIdProvider {
 
     public int setMinaSshdServiceIdByStackId(Long id, String minaSshdServiceId) {
         return stackRepository.setMinaSshdServiceIdByStackId(id, minaSshdServiceId);
-    }
-
-    public void renewCertificate(String stackName) {
-        Workspace workspace = workspaceService.getForCurrentUser();
-        Stack stack = getByNameInWorkspace(stackName, workspace.getId());
-        flowManager.triggerClusterCertificationRenewal(stack.getId());
     }
 
     StackRepository repository() {

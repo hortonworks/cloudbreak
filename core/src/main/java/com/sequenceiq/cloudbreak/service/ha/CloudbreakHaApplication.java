@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
-import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.core.flow2.service.FlowCancelService;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -28,10 +28,10 @@ public class CloudbreakHaApplication implements HaApplication {
     private StackService stackService;
 
     @Inject
-    private ReactorFlowManager reactorFlowManager;
+    private FlowRegister runningFlows;
 
     @Inject
-    private FlowRegister runningFlows;
+    private FlowCancelService flowCancelService;
 
     @Override
     public Set<Long> getDeletingResources(Set<Long> resourceIds) {
@@ -58,7 +58,7 @@ public class CloudbreakHaApplication implements HaApplication {
     @Override
     public void cancelRunningFlow(Long resourceId) {
         InMemoryStateStore.putStack(resourceId, PollGroup.CANCELLED);
-        reactorFlowManager.cancelRunningFlows(resourceId);
+        flowCancelService.cancelRunningFlows(resourceId);
     }
 
     @Override

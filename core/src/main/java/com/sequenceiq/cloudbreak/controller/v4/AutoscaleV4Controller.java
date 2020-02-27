@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterFlowService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -70,7 +70,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     private StackCommonService stackCommonService;
 
     @Inject
-    private ClusterService clusterService;
+    private ClusterFlowService clusterFlowService;
 
     @Inject
     private WorkspaceService workspaceService;
@@ -111,13 +111,13 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     public void failureReport(@ResourceCrn String crn, FailureReportV4Request failureReport) {
-        clusterService.reportHealthChange(crn, Set.copyOf(failureReport.getFailedNodes()), Set.of());
+        clusterFlowService.reportHealthChange(crn, Set.copyOf(failureReport.getFailedNodes()), Set.of());
     }
 
     @Override
     public void changedNodesReport(@ResourceCrn String crn, ChangedNodesReportV4Request changedNodesReport) {
         if (!changedNodedReportDisabled) {
-            clusterService.reportHealthChange(crn, Set.copyOf(changedNodesReport.getNewFailedNodes()), Set.copyOf(changedNodesReport.getNewHealthyNodes()));
+            clusterFlowService.reportHealthChange(crn, Set.copyOf(changedNodesReport.getNewFailedNodes()), Set.copyOf(changedNodesReport.getNewHealthyNodes()));
         }
     }
 

@@ -179,15 +179,20 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         Set<String> flowIds = flowLogService.findAllRunningNonTerminationFlowIdsByStackId(stackId);
         LOGGER.debug("flow cancellation arrived: ids: {}", flowIds);
         for (String id : flowIds) {
-            String flowChainId = runningFlows.getFlowChainId(id);
-            if (flowChainId != null) {
-                flowChains.removeFullFlowChain(flowChainId);
-            }
-            Flow flow = runningFlows.remove(id);
-            if (flow != null) {
-                flow.stop();
-                flowLogService.cancel(stackId, id);
-            }
+            cancelFlow(stackId, id);
+        }
+    }
+
+    public void cancelFlow(Long stackId, String flowId) throws TransactionExecutionException {
+        LOGGER.debug("Cancel flow [{}] for stack [{}]", flowId, stackId);
+        String flowChainId = runningFlows.getFlowChainId(flowId);
+        if (flowChainId != null) {
+            flowChains.removeFullFlowChain(flowChainId);
+        }
+        Flow flow = runningFlows.remove(flowId);
+        if (flow != null) {
+            flow.stop();
+            flowLogService.cancel(stackId, flowId);
         }
     }
 
