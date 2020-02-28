@@ -3,9 +3,9 @@ package com.sequenceiq.environment.environment.validation.network;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +40,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
 
         AzureParams azureParams = networkDto.getAzure();
         if (azureParams != null) {
-            checkSubnetsProvidedWhenExistingNetwork(resultBuilder, azureParams, subnetMetas);
+            checkSubnetsProvidedWhenExistingNetwork(resultBuilder, networkDto, azureParams, subnetMetas);
             checkExistingNetworkParamsProvidedWhenSubnetsPresent(networkDto, resultBuilder);
             checkResourceGroupNameWhenExistingNetwork(resultBuilder, azureParams);
             checkNetworkIdWhenExistingNetwork(resultBuilder, azureParams);
@@ -50,14 +50,22 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         }
     }
 
-    private void checkSubnetsProvidedWhenExistingNetwork(ValidationResult.ValidationResultBuilder resultBuilder,
+    private void checkSubnetsProvidedWhenExistingNetwork(ValidationResult.ValidationResultBuilder resultBuilder, NetworkDto network,
             AzureParams azureParams, Map<String, CloudSubnet> subnetMetas) {
-        if (StringUtils.isNotEmpty(azureParams.getNetworkId()) && StringUtils.isNotEmpty(azureParams.getResourceGroupName())
-                && MapUtils.isEmpty(subnetMetas)) {
-            String message = String.format("If networkId (%s) and resourceGroupName (%s) are specified then subnet ids must be specified as well.",
-                    azureParams.getNetworkId(), azureParams.getResourceGroupName());
-            LOGGER.info(message);
-            resultBuilder.error(message);
+        if (StringUtils.isNotEmpty(azureParams.getNetworkId()) && StringUtils.isNotEmpty(azureParams.getResourceGroupName())) {
+            if (CollectionUtils.isEmpty(network.getSubnetIds())) {
+                String message = String.format("If networkId (%s) and resourceGroupName (%s) are specified then subnet ids must be specified as well.",
+                        azureParams.getNetworkId(), azureParams.getResourceGroupName());
+                LOGGER.info(message);
+                resultBuilder.error(message);
+            } else if (subnetMetas.size() != network.getSubnetIds().size()) {
+                String message = String.format("If networkId (%s) and resourceGroupName (%s) are specified then subnet ids must be specified and should exist " +
+                                "on azure as well. Given subnetids: [%s], exisiting ones: [%s]", azureParams.getNetworkId(), azureParams.getResourceGroupName(),
+                        network.getSubnetIds().stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")),
+                        subnetMetas.keySet().stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")));
+                LOGGER.info(message);
+                resultBuilder.error(message);
+            }
         }
     }
 

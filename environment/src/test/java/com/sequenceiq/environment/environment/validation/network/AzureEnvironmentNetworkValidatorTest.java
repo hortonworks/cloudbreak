@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.validation.network;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -101,6 +102,18 @@ class AzureEnvironmentNetworkValidatorTest {
 
         NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
                 "If networkId (aNetworkId) and resourceGroupName (aResourceGroupId) are specified then subnet ids must be specified as well."));
+    }
+
+    @Test
+    void testValidateDuringRequestWhenNetworkIdWithSubnetsNotExistsOnAzure() {
+        AzureParams azureParams = NetworkTestUtils.getAzureParams(true, true, true);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(azureParams, null, null, azureParams.getNetworkId(), null, 1);
+
+        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
+        underTest.validateDuringRequest(networkDto, Map.of(), resultBuilder);
+
+        NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of("If networkId (aNetworkId) and resourceGroupName (aResourceGroupId) are specified then" +
+                " subnet ids must be specified and should exist on azure as well. Given subnetids: [\"key0\"], exisiting ones: []"));
     }
 
     @Test
