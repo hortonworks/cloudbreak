@@ -49,11 +49,13 @@ public class ClusterCreationEnvironmentValidator {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         String regionName = cloudPlatformConnectors.getDefault(platform(stack.cloudPlatform()))
                 .displayNameToRegion(stack.getRegion());
+        String displayName = cloudPlatformConnectors.getDefault(platform(stack.cloudPlatform()))
+                .regionToDisplayName(stack.getRegion());
         if (environment != null && !CollectionUtils.isEmpty(environment.getRegions().getNames())
                 && environment.getRegions()
                 .getNames()
                 .stream()
-                .noneMatch(region -> region.equals(regionName))) {
+                .noneMatch(region -> region.equals(regionName) || region.equals(displayName))) {
             resultBuilder.error(String.format("[%s] region is not enabled in [%s] environment. Enabled regions: [%s]", stack.getRegion(),
                     environment.getName(), environment.getRegions().getNames().stream().sorted().collect(Collectors.joining(","))));
         }
