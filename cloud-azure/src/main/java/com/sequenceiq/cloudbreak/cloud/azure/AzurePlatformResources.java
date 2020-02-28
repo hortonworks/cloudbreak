@@ -17,6 +17,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -96,8 +97,15 @@ public class AzurePlatformResources implements PlatformResources {
         String networkId = filters.get("networkId");
         String resourceGroupName = filters.get("resourceGroupName");
         if (!StringUtils.isEmpty(networkId) && !StringUtils.isEmpty(resourceGroupName)) {
+            LOGGER.info("Query network with id '{}' and resource group {}", networkId, resourceGroupName);
             Network network = client.getNetworkByResourceGroup(resourceGroupName, networkId);
-            addToResultIfRegionsAreMatch(region, result, network);
+            if (network != null) {
+                LOGGER.info("Network was successfully queried for network with id '{}' and resource group {}: {}",
+                        networkId, resourceGroupName, network);
+                addToResultIfRegionsAreMatch(region, result, network);
+            } else {
+                LOGGER.info("Network with id '{}' does not exist in resource group {}", networkId, resourceGroupName);
+            }
         } else {
             for (Network network : client.getNetworks()) {
                 addToResultIfRegionsAreMatch(region, result, network);
@@ -110,13 +118,22 @@ public class AzurePlatformResources implements PlatformResources {
     }
 
     private void addToResultIfRegionsAreMatch(Region region, Map<String, Set<CloudNetwork>> result, Network network) {
-        String actualRegionLabel = network.region().label();
-        String actualRegionName = network.region().name();
+        if (network.region() != null) {
+            String actualRegionLabel = network.region().label();
+            String actualRegionName = network.region().name();
 
-        if (regionMatch(actualRegionLabel, region) || regionMatch(actualRegionName, region)) {
-            CloudNetwork cloudNetwork = convertToCloudNetwork(network);
-            result.computeIfAbsent(actualRegionLabel, s -> new HashSet<>()).add(cloudNetwork);
-            result.computeIfAbsent(actualRegionName, s -> new HashSet<>()).add(cloudNetwork);
+            LOGGER.info("The region label '{}' and the region name '{}' are for Azure network id: {} name: {}",
+                    actualRegionLabel, actualRegionName, network.id(), network.name());
+            if (regionMatch(actualRegionLabel, region) || regionMatch(actualRegionName, region)) {
+                CloudNetwork cloudNetwork = convertToCloudNetwork(network);
+                result.computeIfAbsent(actualRegionLabel, s -> new HashSet<>()).add(cloudNetwork);
+                result.computeIfAbsent(actualRegionName, s -> new HashSet<>()).add(cloudNetwork);
+            }
+        } else {
+            LOGGER.info("Network with id {} and name {} has no region which is not supported by CDP: {}",
+                    network.id(), network.name(), network);
+            throw new BadRequestException(String.format("Network with id %s and name %s has no region which is not supported by CDP.",
+                    network.id(), network.name()));
         }
     }
 
