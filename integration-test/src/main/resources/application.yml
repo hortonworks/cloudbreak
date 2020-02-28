@@ -105,8 +105,8 @@ integrationtest:
             - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-161/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-161.jar
 
   user:
-    accessKey: Y3JuOmFsdHVzOmlhbTp1cy13ZXN0LTE6Y2xvdWRlcmE6dXNlcjptb2NrdXNlcg==
-    secretKey: nHkdxgZR0BaNHaSYM3ooS6rIlpV5E+k1CIkr+jFId2g=
+    accesskey: Y3JuOmFsdHVzOmlhbTp1cy13ZXN0LTE6Y2xvdWRlcmE6dXNlcjptb2NrdXNlcg==
+    secretkey: nHkdxgZR0BaNHaSYM3ooS6rIlpV5E+k1CIkr+jFId2g=
   database:
     connectionUrl: jdbc:postgresql://localhost:5432/
     username: postgres
