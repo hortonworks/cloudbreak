@@ -469,6 +469,12 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
                 .collect(Collectors.toSet());
     }
 
+    public Set<InstanceMetaData> getReachableInstanceMetaDataSet() {
+        return instanceGroups.stream()
+                .flatMap(instanceGroup -> instanceGroup.getReachableInstanceMetaDataSet().stream())
+                .collect(Collectors.toSet());
+    }
+
     public Set<InstanceMetaData> getRunningInstanceMetaDataSet() {
         return instanceGroups.stream()
                 .flatMap(instanceGroup -> instanceGroup.getRunningInstanceMetaDataSet().stream())

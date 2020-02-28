@@ -14,10 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.autoscaling.model.Activity;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
-import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest;
 import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest;
 import com.amazonaws.services.autoscaling.model.SuspendProcessesRequest;
 import com.amazonaws.services.autoscaling.model.TerminateInstanceInAutoScalingGroupRequest;
@@ -68,11 +66,6 @@ public class AwsAutoScalingService {
         }
     }
 
-    public void scheduleStatusChecks(Map<String, Integer> groupsWithSize, AuthenticatedContext ac)
-            throws AmazonAutoscalingFailed {
-        scheduleStatusChecks(groupsWithSize, ac, null);
-    }
-
     public void scheduleStatusChecks(Map<String, Integer> groupsWithSize, AuthenticatedContext ac, Date timeBeforeASUpdate)
             throws AmazonAutoscalingFailed {
         for (Map.Entry<String, Integer> groupWithSize : groupsWithSize.entrySet()) {
@@ -86,14 +79,14 @@ public class AwsAutoScalingService {
         }
     }
 
-    public void scheduleStatusChecks(CloudStack stack, AuthenticatedContext ac, AmazonCloudFormationRetryClient cloudFormationClient)
+    public void scheduleStatusChecks(List<Group> groups, AuthenticatedContext ac, AmazonCloudFormationRetryClient cloudFormationClient)
             throws AmazonAutoscalingFailed {
-        scheduleStatusChecks(stack, ac, cloudFormationClient, null);
+        scheduleStatusChecks(groups, ac, cloudFormationClient, null);
     }
 
-    public void scheduleStatusChecks(CloudStack stack, AuthenticatedContext ac, AmazonCloudFormationRetryClient cloudFormationClient, Date timeBeforeASUpdate)
+    public void scheduleStatusChecks(List<Group> groups, AuthenticatedContext ac, AmazonCloudFormationRetryClient cloudFormationClient, Date timeBeforeASUpdate)
             throws AmazonAutoscalingFailed {
-        for (Group group : stack.getGroups()) {
+        for (Group group : groups) {
             String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, group.getName());
             LOGGER.debug("Polling Auto Scaling group until new instances are ready. [stack: {}, asGroup: {}]", ac.getCloudContext().getId(),
                     asGroupName);
@@ -105,12 +98,6 @@ public class AwsAutoScalingService {
                 throw new AmazonAutoscalingFailed(e.getMessage(), e);
             }
         }
-    }
-
-    public List<Activity> getAutoScalingActivities(AmazonAutoScalingRetryClient amazonASClient, String autoScalingGroupName) {
-        DescribeScalingActivitiesRequest describeScalingActivitiesRequest =
-                new DescribeScalingActivitiesRequest().withAutoScalingGroupName(autoScalingGroupName);
-        return amazonASClient.describeScalingActivities(describeScalingActivitiesRequest).getActivities();
     }
 
     public List<AutoScalingGroup> getAutoscalingGroups(AmazonAutoScalingRetryClient amazonASClient, Set<String> groupNames) {
