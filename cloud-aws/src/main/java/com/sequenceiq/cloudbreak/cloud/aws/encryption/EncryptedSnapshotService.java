@@ -30,6 +30,7 @@ import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
@@ -41,7 +42,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -67,7 +67,7 @@ public class EncryptedSnapshotService {
     private AwsPollTaskFactory awsPollTaskFactory;
 
     @Inject
-    private SyncPollingScheduler<Boolean> syncPollingScheduler;
+    private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
 
     @Inject
     private AwsTaggingService awsTaggingService;
@@ -149,7 +149,7 @@ public class EncryptedSnapshotService {
         try {
             Boolean statePollerResult = snapshotReadyChecker.call();
             if (!snapshotReadyChecker.completed(statePollerResult)) {
-                syncPollingScheduler.schedule(snapshotReadyChecker);
+                awsBackoffSyncPollingScheduler.schedule(snapshotReadyChecker);
             }
         } catch (Exception e) {
             throw new CloudConnectorException(e.getMessage(), e);
@@ -161,7 +161,7 @@ public class EncryptedSnapshotService {
         try {
             Boolean statePollerResult = ebsVolumeStateChecker.call();
             if (!ebsVolumeStateChecker.completed(statePollerResult)) {
-                syncPollingScheduler.schedule(ebsVolumeStateChecker);
+                awsBackoffSyncPollingScheduler.schedule(ebsVolumeStateChecker);
             }
         } catch (Exception e) {
             throw new CloudConnectorException(e.getMessage(), e);
