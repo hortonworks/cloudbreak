@@ -2,40 +2,29 @@ package com.sequenceiq.periscope.monitor.evaluator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.ChangedNodesReportV4Request;
-import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
-import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterManager;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.periscope.domain.FailedNode;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.repository.FailedNodeRepository;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
 import com.sequenceiq.periscope.service.evaluator.HostHealthEvaluatorService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -51,9 +40,6 @@ public class ClusterManagerHostHealthEvaluatorTest {
 
     private static final String OLD_FAILED = "OLD_FAILED";
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Mock
     private ClusterService clusterService;
 
@@ -64,9 +50,6 @@ public class ClusterManagerHostHealthEvaluatorTest {
     private ClusterManagerSpecificHostHealthEvaluator clusterManagerSpecificHostHealthEvaluator;
 
     @Mock
-    private CloudbreakClientConfiguration cloudbreakClientConfiguration;
-
-    @Mock
     private FailedNodeRepository failedNodeRepository;
 
     @InjectMocks
@@ -75,17 +58,11 @@ public class ClusterManagerHostHealthEvaluatorTest {
     @Mock
     private EvaluatorContext evaluatorContext;
 
-    @Mock
-    private CloudbreakInternalCrnClient cloudbreakInternalCrnClient;
-
-    @Mock
-    private CloudbreakServiceCrnEndpoints cloudbreakServiceCrnEndpoints;
-
-    @Mock
-    private AutoscaleV4Endpoint autoscaleV4Endpoint;
+    @Captor
+    private ArgumentCaptor<List<FailedNode>> captorSave;
 
     @Captor
-    private ArgumentCaptor<ChangedNodesReportV4Request> captor;
+    private ArgumentCaptor<List<FailedNode>> captorDelete;
 
     @Before
     public void setUp() {
@@ -93,10 +70,6 @@ public class ClusterManagerHostHealthEvaluatorTest {
         when(hostHealthEvaluatorService.get(ClusterManagerVariant.CLOUDERA_MANAGER)).thenReturn(clusterManagerSpecificHostHealthEvaluator);
 
         underTest.setContext(evaluatorContext);
-
-        when(cloudbreakClientConfiguration.cloudbreakInternalCrnClientClient()).thenReturn(cloudbreakInternalCrnClient);
-        when(cloudbreakInternalCrnClient.withInternalCrn()).thenReturn(cloudbreakServiceCrnEndpoints);
-        when(cloudbreakServiceCrnEndpoints.autoscaleEndpoint()).thenReturn(autoscaleV4Endpoint);
     }
 
     @Test
@@ -110,7 +83,8 @@ public class ClusterManagerHostHealthEvaluatorTest {
 
         underTest.execute();
 
-        verify(autoscaleV4Endpoint).changedNodesReport(eq(STACK_CRN), captor.capture());
+        verify(failedNodeRepository).saveAll(captorSave.capture());
+        verify(failedNodeRepository).deleteAll(captorDelete.capture());
         FailedNode newFailedNode = new FailedNode();
         newFailedNode.setClusterId(CLUSTER_ID);
         newFailedNode.setName(NEW_FAILED);
@@ -119,25 +93,10 @@ public class ClusterManagerHostHealthEvaluatorTest {
         verify(failedNodeRepository).deleteAll(List.of(newHealthyNode));
         verifyNoMoreInteractions(failedNodeRepository);
 
-        ChangedNodesReportV4Request request = captor.getValue();
-        assertThat(request.getNewFailedNodes(), is(List.of(NEW_FAILED)));
-        assertThat(request.getNewHealthyNodes(), is(List.of(NEW_HEALTHY)));
-    }
-
-    @Test
-    public void shouldNotUpdateFailedNodesIfErrorHappens() {
-        Cluster cluster = getCluster();
-        when(clusterService.findById(CLUSTER_ID)).thenReturn(cluster);
-        when(clusterManagerSpecificHostHealthEvaluator.determineHostnamesToRecover(cluster)).thenReturn(List.of(NEW_FAILED));
-        doThrow(new RuntimeException("API exception")).when(autoscaleV4Endpoint).changedNodesReport(anyString(), ArgumentMatchers.any());
-
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("API exception");
-
-        underTest.execute();
-
-        verify(failedNodeRepository).findByClusterId(CLUSTER_ID);
-        verifyNoMoreInteractions(failedNodeRepository);
+        List<FailedNode> saveRequest = captorSave.getValue();
+        assertThat(saveRequest.stream().map(FailedNode::getName).collect(Collectors.toList()), is(List.of(NEW_FAILED)));
+        List<FailedNode> deleteRequest = captorDelete.getValue();
+        assertThat(deleteRequest.stream().map(FailedNode::getName).collect(Collectors.toList()), is(List.of(NEW_HEALTHY)));
     }
 
     @Test
@@ -150,7 +109,6 @@ public class ClusterManagerHostHealthEvaluatorTest {
 
         underTest.execute();
 
-        verifyZeroInteractions(cloudbreakInternalCrnClient);
         verify(failedNodeRepository).findByClusterId(CLUSTER_ID);
         verifyNoMoreInteractions(failedNodeRepository);
     }

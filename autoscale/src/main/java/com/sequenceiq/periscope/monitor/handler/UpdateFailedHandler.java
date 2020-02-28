@@ -1,6 +1,5 @@
 package com.sequenceiq.periscope.monitor.handler;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.FailureReportV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -115,10 +113,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
     private void reportClusterManagerServerFailure(Cluster cluster, StackV4Response stackResponse) {
         Optional<InstanceMetaDataV4Response> pgw = stackResponseUtils.getNotTerminatedPrimaryGateways(stackResponse);
         if (pgw.isPresent()) {
-            FailureReportV4Request failureReport = new FailureReportV4Request();
-            failureReport.setFailedNodes(Collections.singletonList(pgw.get().getDiscoveryFQDN()));
             try {
-                cloudbreakCommunicator.failureReport(cluster.getStackCrn(), failureReport);
                 FailedNode failedNode = new FailedNode();
                 failedNode.setClusterId(cluster.getId());
                 failedNode.setName(pgw.get().getDiscoveryFQDN());
