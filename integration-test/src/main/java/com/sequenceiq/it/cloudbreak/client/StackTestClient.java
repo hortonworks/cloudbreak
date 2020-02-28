@@ -13,7 +13,6 @@ import com.sequenceiq.it.cloudbreak.action.v4.stack.StackDeleteInstanceAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackModifyAmbariPasswordAction;
-import com.sequenceiq.it.cloudbreak.action.v4.stack.StackNodeUnhealthyAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackRequestAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackScalePostAction;
@@ -24,10 +23,6 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 
 @Service
 public class StackTestClient {
-
-    public Action<StackTestDto, CloudbreakClient> nodeUnhealthyV4(String hostgroup, int nodeCount) {
-        return new StackNodeUnhealthyAction(hostgroup, nodeCount);
-    }
 
     public StackScalePostAction scalePostV4() {
         return new StackScalePostAction();

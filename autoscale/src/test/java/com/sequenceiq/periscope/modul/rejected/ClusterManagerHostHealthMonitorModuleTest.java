@@ -5,8 +5,6 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,24 +37,20 @@ import org.springframework.test.context.TestContextManager;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.ChangedNodesReportV4Request;
-import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
-import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterManager;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.periscope.model.RejectedThread;
 import com.sequenceiq.periscope.modul.rejected.RejectedThreadContext.SpringConfig;
 import com.sequenceiq.periscope.monitor.ClusterManagerHostHealthMonitor;
 import com.sequenceiq.periscope.monitor.MonitorContext;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
+import com.sequenceiq.periscope.repository.FailedNodeRepository;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
-import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
 
 @RunWith(Silent.class)
 @SpringBootTest(classes = SpringConfig.class)
@@ -75,9 +69,6 @@ public class ClusterManagerHostHealthMonitorModuleTest extends RejectedThreadCon
     private AmbariClientProvider ambariClientProvider;
 
     @Inject
-    private CloudbreakClientConfiguration cloudbreakClientConfiguration;
-
-    @Inject
     private RejectedThreadService rejectedThreadService;
 
     @Mock
@@ -89,11 +80,8 @@ public class ClusterManagerHostHealthMonitorModuleTest extends RejectedThreadCon
     @Mock
     private JobDetail jobDetail;
 
-    @Mock
-    private CloudbreakInternalCrnClient internalCrnClient;
-
-    @Mock
-    private CloudbreakServiceCrnEndpoints cbEndpoint;
+    @Inject
+    private FailedNodeRepository failedNodeRepository;
 
     @Before
     public void setUp() throws Exception {
@@ -105,14 +93,12 @@ public class ClusterManagerHostHealthMonitorModuleTest extends RejectedThreadCon
         when(jobDetail.getJobDataMap()).thenReturn(map);
 
         when(ambariClientProvider.createAmbariClient(any())).thenReturn(ambariClient);
-        when(cloudbreakClientConfiguration.cloudbreakInternalCrnClientClient()).thenReturn(internalCrnClient);
 
         ReflectionTestUtils.setField(rejectedThreadService, "rejectedThreads", new ConcurrentHashMap<>());
     }
 
     @Test
     public void testWhenHeartBeatCritical() {
-        AutoscaleV4Endpoint autoscaleEndpoint = mock(AutoscaleV4Endpoint.class);
         Cluster cluster = new Cluster();
         long clusterId = 1L;
         String stackCrn = "someCrn";
@@ -122,8 +108,6 @@ public class ClusterManagerHostHealthMonitorModuleTest extends RejectedThreadCon
 
         when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-heart-beat-critical"));
         when(clusterService.findById(clusterId)).thenReturn(cluster);
-        when(internalCrnClient.withInternalCrn()).thenReturn(cbEndpoint);
-        when(cbEndpoint.autoscaleEndpoint()).thenReturn(autoscaleEndpoint);
 
         Map<String, Object> map = new HashMap<>();
         map.put("state", "CRITICAL");
@@ -136,7 +120,7 @@ public class ClusterManagerHostHealthMonitorModuleTest extends RejectedThreadCon
 
         waitForTasksToFinish();
 
-        verify(autoscaleEndpoint, times(1)).changedNodesReport(eq(stackCrn), any(ChangedNodesReportV4Request.class));
+        verify(failedNodeRepository, times(1)).saveAll(any());
     }
 
     @Test

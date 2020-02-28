@@ -17,14 +17,13 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.ChangedNodesReportV4Request;
-import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
+import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.FailedNode;
 import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.repository.FailedNodeRepository;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
 import com.sequenceiq.periscope.service.evaluator.HostHealthEvaluatorService;
 
 @Component("ClusterManagerHostHealthEvaluator")
@@ -40,9 +39,6 @@ public class ClusterManagerHostHealthEvaluator extends EvaluatorExecutor {
 
     @Inject
     private HostHealthEvaluatorService hostHealthEvaluatorService;
-
-    @Inject
-    private CloudbreakClientConfiguration cloudbreakClientConfiguration;
 
     private long clusterId;
 
@@ -77,9 +73,6 @@ public class ClusterManagerHostHealthEvaluator extends EvaluatorExecutor {
                     clusterId,
                     changedNodesRequest.get().getNewFailedNodes(),
                     changedNodesRequest.get().getNewHealthyNodes());
-            cloudbreakClientConfiguration.cloudbreakInternalCrnClientClient()
-                    .withInternalCrn()
-                    .autoscaleEndpoint().changedNodesReport(cluster.getStackCrn(), changedNodesRequest.get());
             updateFailedNodes(failedNodes, changedNodesRequest.get());
         } else {
             LOGGER.debug("Nodes state not changed for cluster {}", clusterId);
