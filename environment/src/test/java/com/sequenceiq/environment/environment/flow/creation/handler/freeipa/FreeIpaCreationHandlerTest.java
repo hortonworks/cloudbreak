@@ -28,6 +28,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.v1.TelemetryApiConverter;
+import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
@@ -93,7 +94,6 @@ public class FreeIpaCreationHandlerTest {
                 freeIpaServerRequestProvider,
                 telemetryApiConverter,
                 connectors,
-                YARN_NETWORK_CIDR,
                 Collections.singleton(CloudPlatform.YARN.name()));
     }
 
@@ -156,6 +156,9 @@ public class FreeIpaCreationHandlerTest {
         environmentDto.setResourceCrn(ENVIRONMENT_CRN);
         environmentDto.setParentEnvironmentCrn(PARENT_ENVIRONMENT_CRN);
         environmentDto.setCloudPlatform(CloudPlatform.YARN.name());
+        environmentDto.setNetwork(NetworkDto.builder()
+                .withNetworkCidr(YARN_NETWORK_CIDR)
+                .build());
 
         return environmentDto;
     }

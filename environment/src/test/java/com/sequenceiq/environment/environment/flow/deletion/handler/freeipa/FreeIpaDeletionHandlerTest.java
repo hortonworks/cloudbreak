@@ -30,6 +30,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.FreeIpaPollerObject;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.environment.network.dao.domain.YarnNetwork;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
@@ -47,7 +48,11 @@ class FreeIpaDeletionHandlerTest {
 
     private static final Long CHILD_ENVIRONMENT_ID = 1L;
 
+    private static final Long ANOTHER_CHILD_ENVIRONMENT_ID = 2L;
+
     private static final Long PARENT_ENVIRONMENT_ID = 123L;
+
+    private static final String YARN_NETWORK_CIDR = "172.27.0.0/16";
 
     @Mock
     private EventSender eventSender;
@@ -72,7 +77,7 @@ class FreeIpaDeletionHandlerTest {
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setId(CHILD_ENVIRONMENT_ID);
 
-        when(environmentService.findEnvironmentById(CHILD_ENVIRONMENT_ID)).thenReturn(of(anEnvironmentWithParent()));
+        when(environmentService.findEnvironmentById(CHILD_ENVIRONMENT_ID)).thenReturn(of(anEnvironmentWithParent(CHILD_ENVIRONMENT_ID)));
         when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(of(new DescribeFreeIpaResponse()));
 
         victim.accept(new Event<>(environmentDto));
@@ -93,9 +98,10 @@ class FreeIpaDeletionHandlerTest {
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setId(CHILD_ENVIRONMENT_ID);
 
-        when(environmentService.findEnvironmentById(CHILD_ENVIRONMENT_ID)).thenReturn(of(anEnvironmentWithParent()));
-        when(environmentService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(anyString(), eq(PARENT_ENVIRONMENT_ID)))
-                .thenReturn(List.of(ENVIRONMENT_CRN, "otherChildEnvCrn"));
+        Environment environment = anEnvironmentWithParent(CHILD_ENVIRONMENT_ID);
+        when(environmentService.findEnvironmentById(CHILD_ENVIRONMENT_ID)).thenReturn(of(environment));
+        when(environmentService.findAllByAccountIdAndParentEnvIdAndArchivedIsFalse(anyString(), eq(PARENT_ENVIRONMENT_ID)))
+                .thenReturn(List.of(environment, anEnvironmentWithParent(ANOTHER_CHILD_ENVIRONMENT_ID)));
         when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(of(new DescribeFreeIpaResponse()));
 
         victim.accept(new Event<>(environmentDto));
@@ -137,17 +143,27 @@ class FreeIpaDeletionHandlerTest {
         verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
     }
 
-    private Environment anEnvironmentWithParent() {
+    private Environment anEnvironmentWithParent(Long id) {
         Environment environment = new Environment();
+        environment.setId(id);
+        environment.setParentEnvironment(getParentEnvironment());
+        environment.setResourceCrn(ENVIRONMENT_CRN);
+        environment.setCreateFreeIpa(Boolean.TRUE);
+        environment.setNetwork(getYarnNetwork());
+        return environment;
+    }
+
+    private Environment getParentEnvironment() {
         Environment parentEnvironment = new Environment();
         parentEnvironment.setId(PARENT_ENVIRONMENT_ID);
         parentEnvironment.setResourceCrn(PARENT_ENVIRONMENT_CRN);
+        return parentEnvironment;
+    }
 
-        environment.setParentEnvironment(parentEnvironment);
-        environment.setResourceCrn(ENVIRONMENT_CRN);
-        environment.setCreateFreeIpa(Boolean.TRUE);
-
-        return environment;
+    private YarnNetwork getYarnNetwork() {
+        YarnNetwork network = new YarnNetwork();
+        network.setNetworkCidr(YARN_NETWORK_CIDR);
+        return network;
     }
 
     private Environment anEnvironmentWithoutParent(boolean createFreeIpa) {

@@ -12,7 +12,6 @@ import java.util.Optional;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.polling.PollingResult;
@@ -48,21 +47,17 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final DnsV1Endpoint dnsV1Endpoint;
 
-    private final String yarnNetworkCidr;
-
     protected FreeIpaDeletionHandler(
             EventSender eventSender,
             EnvironmentService environmentService,
             FreeIpaService freeIpaService,
             PollingService<FreeIpaPollerObject> freeIpaPollingService,
-            DnsV1Endpoint dnsV1Endpoint,
-            @Value("${environment.freeipa.yarnNetworkCidr}") String yarnNetworkCidr) {
+            DnsV1Endpoint dnsV1Endpoint) {
         super(eventSender);
         this.environmentService = environmentService;
         this.freeIpaService = freeIpaService;
         this.freeIpaPollingService = freeIpaPollingService;
         this.dnsV1Endpoint = dnsV1Endpoint;
-        this.yarnNetworkCidr = yarnNetworkCidr;
     }
 
     @Override
@@ -111,21 +106,30 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
         detachChildEnvironmentRequest.setChildEnvironmentCrn(environment.getResourceCrn());
         freeIpaService.detachChildEnvironment(detachChildEnvironmentRequest);
 
-        if (lastChildEnvironmentIsGettingDeleted(environment)) {
+        if (lastChildEnvironmentInNetworkIsGettingDeleted(environment)) {
             try {
-                dnsV1Endpoint.deleteDnsZoneBySubnet(environment.getParentEnvironment().getResourceCrn(), yarnNetworkCidr);
+                dnsV1Endpoint.deleteDnsZoneBySubnet(environment.getParentEnvironment().getResourceCrn(), environment.getNetwork().getNetworkCidr());
             } catch (Exception e) {
                 LOGGER.warn("Failed to delete dns zone of child environment.", e);
             }
         }
     }
 
-    private boolean lastChildEnvironmentIsGettingDeleted(Environment environment) {
-        List<String> siblingEnvironmentNames = environmentService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(
+    private boolean lastChildEnvironmentInNetworkIsGettingDeleted(Environment environment) {
+        List<Environment> siblingEnvironments = environmentService.findAllByAccountIdAndParentEnvIdAndArchivedIsFalse(
                 environment.getAccountId(),
                 environment.getParentEnvironment().getId());
-        siblingEnvironmentNames.remove(environment.getName());
-        return siblingEnvironmentNames.isEmpty();
+        return siblingEnvironments.stream()
+                .filter(sibling -> notTheSameEnvironment(environment, sibling))
+                .noneMatch(sibling -> isInSameNetwork(environment, sibling));
+    }
+
+    private boolean notTheSameEnvironment(Environment environment, Environment sibling) {
+        return !Objects.equals(sibling.getId(), environment.getId());
+    }
+
+    private boolean isInSameNetwork(Environment environment, Environment sibling) {
+        return Objects.equals(sibling.getNetwork().getNetworkCidr(), environment.getNetwork().getNetworkCidr());
     }
 
     private void deleteFreeIpa(Environment environment) {

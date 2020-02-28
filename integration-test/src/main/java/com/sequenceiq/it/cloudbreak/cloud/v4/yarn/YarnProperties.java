@@ -17,6 +17,8 @@ public class YarnProperties {
 
     private String queue;
 
+    private String networkCidr;
+
     private String blueprintCdhVersion;
 
     private final Credential credential = new Credential();
@@ -63,6 +65,14 @@ public class YarnProperties {
 
     public void setQueue(String queue) {
         this.queue = queue;
+    }
+
+    public String getNetworkCidr() {
+        return networkCidr;
+    }
+
+    public void setNetworkCidr(String networkCidr) {
+        this.networkCidr = networkCidr;
     }
 
     public Credential getCredential() {
