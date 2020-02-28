@@ -5,9 +5,7 @@ buildscript {
   repositories {
     mavenLocal()
     maven { url = "$repoUrl" }
-    maven { url 'http://repo.spring.io/libs-release' }
-    mavenLocal()
-    maven { url = "$repoUrl" }
+    maven { url '= "$springRepoUrl"' }
     mavenCentral()
     jcenter()
   }
