@@ -168,7 +168,7 @@ class AwsUpscaleServiceTest {
         List<CloudResource> cloudResourceList = Collections.emptyList();
         awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList);
         verify(awsAutoScalingService, times(1)).updateAutoscalingGroup(any(AmazonAutoScalingRetryClient.class), eq("workerASG"), eq(5));
-        verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(cloudStack), eq(authenticatedContext),  eq(amazonCloudFormationRetryClient), any());
+        verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(List.of(worker)), eq(authenticatedContext),  eq(amazonCloudFormationRetryClient), any());
         verify(awsAutoScalingService, times(1)).suspendAutoScaling(eq(authenticatedContext), eq(cloudStack));
         ArgumentCaptor<List<CloudResource>> captor = ArgumentCaptor.forClass(List.class);
         verify(awsComputeResourceService, times(1))
@@ -219,7 +219,7 @@ class AwsUpscaleServiceTest {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "AWS", "AWS",
                 Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")), "1", "1"), new CloudCredential());
 
-        ArrayList<CloudResource> allInstances = new ArrayList<>();
+        List<CloudResource> allInstances = new ArrayList<>();
         allInstances.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
                 .name("worker1").group("worker").instanceId("i-worker1").build());
         allInstances.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
@@ -263,13 +263,13 @@ class AwsUpscaleServiceTest {
                 .thenReturn(Collections.singletonList(newWorkerASGroup));
 
         doThrow(new AmazonAutoscalingFailed("autoscaling failed"))
-                .when(awsAutoScalingService).scheduleStatusChecks(eq(cloudStack),
+                .when(awsAutoScalingService).scheduleStatusChecks(eq(List.of(worker)),
                 eq(authenticatedContext), eq(amazonCloudFormationRetryClient), any(Date.class));
 
         assertThrows(CloudConnectorException.class, () -> awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList),
                 "Autoscaling group update failed: 'autoscaling failed' Original autoscaling group state has been recovered.");
         verify(awsAutoScalingService, times(1)).updateAutoscalingGroup(any(AmazonAutoScalingRetryClient.class), eq("workerASG"), eq(5));
-        verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(cloudStack), eq(authenticatedContext),  eq(amazonCloudFormationRetryClient), any());
+        verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(List.of(worker)), eq(authenticatedContext),  eq(amazonCloudFormationRetryClient), any());
         verify(awsComputeResourceService, times(0)).buildComputeResourcesForUpscale(eq(authenticatedContext), eq(cloudStack),
                 anyList(), anyList(), any(), any());
         verify(awsAutoScalingService, times(1)).suspendAutoScaling(eq(authenticatedContext), eq(cloudStack));
