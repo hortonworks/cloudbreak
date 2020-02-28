@@ -154,6 +154,16 @@ public class ClusterRepairService {
         return repairable;
     }
 
+    public Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> checkRepairAll(Stack stack) {
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
+                repair(ManualClusterRepairMode.DRY_RUN, stack.getId(), Set.of(), NOT_DELETE_VOLUMES);
+        boolean repairable = repairStart.isSuccess();
+        if (!repairable) {
+            LOGGER.info("Stack {} is not repairable. {}", stack.getId(), repairStart.getError().getValidationErrors());
+        }
+        return repairStart;
+    }
+
     private Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repair(ManualClusterRepairMode repairMode, Long stackId,
             Set<String> selectedParts, boolean deleteVolumes) {
         try {

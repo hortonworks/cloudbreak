@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -9,13 +8,17 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionsV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -24,6 +27,12 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
+import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
+import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
+import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -61,12 +70,15 @@ public class StackUpgradeServiceTest {
     @Mock
     private ImageProvider imageProvider;
 
+    @Mock
+    private ClusterRepairService clusterRepairService;
+
     @Test
     public void testCheckForUpgradesByNameShouldReturnsImagesWhenThereAreAvailableImages()
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        Stack stack = createStack();
+        Stack stack = createStack(createStackStatus(Status.AVAILABLE));
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage();
-
+        Result result = Mockito.mock(Result.class);
         Image currentImageFromCatalog = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         Image properImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         Image otherImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
@@ -74,6 +86,8 @@ public class StackUpgradeServiceTest {
         UpgradeOptionsV4Response response = new UpgradeOptionsV4Response();
 
         when(stackService.getByNameInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(clusterRepairService.checkRepairAll(stack)).thenReturn(result);
+        when(result.isError()).thenReturn(false);
         when(imageService.getImage(stack.getId())).thenReturn(currentImage);
         when(imageCatalogProvider.getImageCatalogV2(CATALOG_URL)).thenReturn(imageCatalog);
         Images filteredImages = createFilteredImages(properImage);
@@ -97,7 +111,10 @@ public class StackUpgradeServiceTest {
 
     @Test
     public void testGetImagesToUpgradeShouldReturnsEmptyListWhenCurrentImageIsNotFound() throws CloudbreakImageNotFoundException {
-        Stack stack = createStack();
+        Stack stack = createStack(createStackStatus(Status.AVAILABLE));
+        Result result = Mockito.mock(Result.class);
+        when(clusterRepairService.checkRepairAll(stack)).thenReturn(result);
+        when(result.isError()).thenReturn(false);
         when(stackService.getByNameInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
         when(imageService.getImage(stack.getId())).thenThrow(new CloudbreakImageNotFoundException("Image not found."));
 
@@ -105,13 +122,51 @@ public class StackUpgradeServiceTest {
 
         assertNull(actual.getCurrent());
         assertNull(actual.getUpgradeCandidates());
-        assertNotNull(actual.getReason());
+        assertEquals("Failed to retrieve imaged due to Image not found.", actual.getReason());
     }
 
-    private Stack createStack() {
+    @Test
+    public void testGetImagesToUpgradeShouldReturnsEmptyListWhenTheClusterIsNotAvailable() {
+        Stack stack = createStack(createStackStatus(Status.CREATE_FAILED));
+        when(stackService.getByNameInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+
+        UpgradeOptionsV4Response actual = underTest.checkForUpgradesByName(WORKSPACE_ID, STACK_NAME);
+
+        assertNull(actual.getCurrent());
+        assertNull(actual.getUpgradeCandidates());
+        assertEquals("Cannot upgrade cluster because its in CREATE_FAILED state.", actual.getReason());
+    }
+
+    @Test
+    public void testGetImagesToUpgradeShouldReturnsEmptyListWhenTheClusterIsNotRepairable() {
+        Stack stack = createStack(createStackStatus(Status.AVAILABLE));
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> result = mock(Result.class);
+        RepairValidation repairValidation = mock(RepairValidation.class);
+        when(clusterRepairService.checkRepairAll(stack)).thenReturn(result);
+        when(result.isError()).thenReturn(true);
+        String validationError = "External RDS is not attached.";
+        when(result.getError()).thenReturn(repairValidation);
+        when(repairValidation.getValidationErrors()).thenReturn(Collections.singletonList(validationError));
+        when(stackService.getByNameInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+
+        UpgradeOptionsV4Response actual = underTest.checkForUpgradesByName(WORKSPACE_ID, STACK_NAME);
+
+        assertNull(actual.getCurrent());
+        assertNull(actual.getUpgradeCandidates());
+        assertEquals(validationError, actual.getReason());
+    }
+
+    private StackStatus createStackStatus(Status status) {
+        StackStatus stackStatus = new StackStatus();
+        stackStatus.setStatus(status);
+        return stackStatus;
+    }
+
+    private Stack createStack(StackStatus stackStatus) {
         Stack stack = new Stack();
         stack.setId(2L);
         stack.setCloudPlatform("AWS");
+        stack.setStackStatus(stackStatus);
         return stack;
     }
 

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -15,7 +17,12 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
+import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
+import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
+import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -44,10 +51,28 @@ public class StackUpgradeService {
     @Inject
     private ImageProvider imageProvider;
 
+    @Inject
+    private ClusterRepairService clusterRepairService;
+
     public UpgradeOptionsV4Response checkForUpgradesByName(Long workspaceId, String stackName) {
         UpgradeOptionsV4Response upgradeOptions = new UpgradeOptionsV4Response();
+        Stack stack = stackService.getByNameInWorkspace(stackName, workspaceId);
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.checkRepairAll(stack);
+        if (!stack.getStatus().isAvailable()) {
+            upgradeOptions.setReason(String.format("Cannot upgrade cluster because its in %s state.", stack.getStatus()));
+            LOGGER.warn(upgradeOptions.getReason());
+        } else if (validationResult.isError()) {
+            upgradeOptions.setReason(String.join(",", validationResult.getError().getValidationErrors()));
+            LOGGER.warn(String.format("Cannot upgrade cluster because: %s", upgradeOptions.getReason()));
+        } else {
+            upgradeOptions = checkForUpgrades(stack);
+        }
+        return upgradeOptions;
+    }
+
+    private UpgradeOptionsV4Response checkForUpgrades(Stack stack) {
+        UpgradeOptionsV4Response upgradeOptions = new UpgradeOptionsV4Response();
         try {
-            Stack stack = stackService.getByNameInWorkspace(stackName, workspaceId);
             LOGGER.info(String.format("Retrieving images for upgrading stack %s", stack.getName()));
             com.sequenceiq.cloudbreak.cloud.model.Image currentImage = getImage(stack);
             CloudbreakImageCatalogV2 imageCatalog = getImagesFromCatalog(currentImage.getImageCatalogUrl());
@@ -56,7 +81,7 @@ public class StackUpgradeService {
             LOGGER.info(String.format("%d possible image found for stack upgrade.", filteredImages.getCdhImages().size()));
             upgradeOptions = createResponse(image, filteredImages, stack.getCloudPlatform(), stack.getRegion(), currentImage.getImageCatalogName());
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException | NotFoundException e) {
-            LOGGER.error("Failed to get images", e);
+            LOGGER.warn("Failed to get images", e);
             upgradeOptions.setReason(String.format("Failed to retrieve imaged due to %s", e.getMessage()));
         }
         return upgradeOptions;
