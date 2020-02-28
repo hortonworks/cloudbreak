@@ -2,6 +2,7 @@ package com.sequenceiq.environment.network.v1.converter;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
@@ -15,9 +16,13 @@ import com.sequenceiq.environment.network.dto.YarnParams;
 @Component
 public class YarnEnvironmentNetworkConverter extends EnvironmentBaseNetworkConverter {
 
+    @Value("${cb.yarn.networkCidr}")
+    private String yarnNetworkCidr;
+
     @Override
     BaseNetwork createProviderSpecificNetwork(NetworkDto network) {
         YarnNetwork yarnNetwork = new YarnNetwork();
+        yarnNetwork.setNetworkCidr(yarnNetworkCidr);
         if (network.getYarn() != null) {
             yarnNetwork.setQueue(network.getYarn().getQueue());
         }

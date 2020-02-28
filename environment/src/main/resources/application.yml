@@ -73,7 +73,6 @@ environment:
     url: http://localhost:8090
     contextPath: /freeipa
     supportedPlatforms: AWS,AZURE
-    yarnNetworkCidr: 172.27.0.0/16
   sdx:
     url: http://localhost:8086
     contextPath: /dl
@@ -112,6 +111,7 @@ cb:
     domain: default.com
     defaultQueue: "default"
     defaultLifeTime: -1
+    networkCidr: 172.27.0.0/16
   os:
     enable.autoimport: true
     import:

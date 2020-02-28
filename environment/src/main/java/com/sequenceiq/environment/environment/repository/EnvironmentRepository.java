@@ -66,4 +66,11 @@ public interface EnvironmentRepository extends BaseJpaRepository<Environment, Lo
             + "WHERE pe.id = :parentEnvironmentId AND e.accountId = :accountId AND e.archived = false")
     List<String> findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(@Param("accountId") String accountId,
         @Param("parentEnvironmentId") Long parentEnvironmentId);
+
+    @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT e FROM Environment e "
+            + "JOIN e.parentEnvironment pe "
+            + "WHERE pe.id = :parentEnvironmentId AND e.accountId = :accountId AND e.archived = false")
+    List<Environment> findAllByAccountIdAndParentEnvIdAndArchivedIsFalse(@Param("accountId") String accountId,
+            @Param("parentEnvironmentId") Long parentEnvironmentId);
 }

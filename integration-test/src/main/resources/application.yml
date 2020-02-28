@@ -262,6 +262,7 @@ integrationtest:
       volumeSize: 0
       volumeCount: 0
     queue: cloudbreak-tests
+    networkCidr: 172.27.0.0/16
     baseimage:
       imageId:
 
