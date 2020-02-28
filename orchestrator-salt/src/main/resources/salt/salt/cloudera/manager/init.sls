@@ -54,6 +54,9 @@ cloudera_manager_setup_ldap:
 /etc/cloudera-scm-server/license.txt:
   file.managed:
     - source: salt://cloudera/manager/license.txt
+    - user: cloudera-scm
+    - group: cloudera-scm
+    - mode: 600
     - template: jinja
 
 {% endif %}
