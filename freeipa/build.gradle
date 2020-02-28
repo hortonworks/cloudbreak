@@ -11,10 +11,9 @@ plugins {
 repositories {
   mavenLocal()
   maven { url = "$repoUrl" }
+  maven { url = "$springRepoUrl" }
   mavenCentral()
-  maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
-  maven { url "https://repo.spring.io/release" }
-  maven { url "https://plugins.gradle.org/m2/" }
+  jcenter()
 }
 
 dependencies {
@@ -125,17 +124,23 @@ springBoot {
   mainClassName = 'com.sequenceiq.freeipa.FreeIpaApplication'
 }
 
-jar {
-  baseName = 'freeipa'
-  archiveName = 'freeipa.jar'
-}
-
 bootJar {
   baseName = 'freeipa'
   archiveName = 'freeipa.jar'
   manifest {
     def grgit = Grgit.open(currentDir: project.projectDir)
     attributes "Implementation-Version": grgit.describe()
+  }
+}
+
+uploadBootArchives {
+  repositories {
+    mavenDeployer {
+      configuration = configurations.deployerJars
+      repository(url: "$System.env.NEXUS_URL") {
+        authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASSWORD")
+      }
+    }
   }
 }
 
@@ -149,7 +154,7 @@ task execute(type: JavaExec) {
 task buildInfo(type: BuildInfoTask, dependsOn: processResources) {
   destination = file("$buildDir")
   applicationPropertiesPath = "$buildDir"
-  basename = jar.baseName
+  basename = bootJar.baseName
   buildVersion = version
 }
 
