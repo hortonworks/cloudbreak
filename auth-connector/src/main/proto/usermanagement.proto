@@ -2292,6 +2292,8 @@ message GetActorWorkloadCredentialsResponse {
   uint64 passwordHashExpirationDate = 3;
   // A list of kerberos keys for the actor.
   repeated ActorKerberosKey kerberosKeys = 2;
+  // The workload username for the actor.
+  string workloadUsername = 4;
 }
 
 message GetEventGenerationIdsRequest {
