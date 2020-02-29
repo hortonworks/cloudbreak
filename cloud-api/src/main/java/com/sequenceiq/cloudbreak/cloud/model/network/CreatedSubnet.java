@@ -14,6 +14,8 @@ public class CreatedSubnet {
 
     private String availabilityZone;
 
+    private SubnetType type;
+
     public CreatedSubnet() {
     }
 
@@ -63,5 +65,13 @@ public class CreatedSubnet {
 
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
+    }
+
+    public SubnetType getType() {
+        return type;
+    }
+
+    public void setType(SubnetType type) {
+        this.type = type;
     }
 }

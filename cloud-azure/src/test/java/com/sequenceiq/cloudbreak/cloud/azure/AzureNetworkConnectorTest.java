@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 
 import okhttp3.MediaType;
@@ -122,7 +123,7 @@ public class AzureNetworkConnectorTest {
     @Test
     public void testCreateNetworkWithSubnetsShouldReturnTheNetworkNameAndSubnetName() {
         String networkCidr = "0.0.0.0/16";
-        Set<String> subnetCidrs = new HashSet<>(Arrays.asList(SUBNET_CIDR_0, SUBNET_CIDR_1));
+        Set<NetworkSubnetRequest> subnets = new HashSet<>(Arrays.asList(createSubnetRequest(SUBNET_CIDR_0), createSubnetRequest(SUBNET_CIDR_1)));
         Deployment templateDeployment = mock(Deployment.class);
         ResourceGroup resourceGroup = mock(ResourceGroup.class);
         Map<String, Map> outputs = createOutput();
@@ -132,7 +133,7 @@ public class AzureNetworkConnectorTest {
                 publicSubnetRequest("10.0.1.0/24", 1));
 
 
-        NetworkCreationRequest networkCreationRequest = createNetworkRequest(networkCidr, subnetCidrs);
+        NetworkCreationRequest networkCreationRequest = createNetworkRequest(networkCidr, subnets);
         when(azureSubnetRequestProvider.provide(anyString(), anyList(), anyList())).thenReturn(subnetRequests);
         when(azureClientService.getClient(networkCreationRequest.getCloudCredential())).thenReturn(azureClient);
         when(azureNetworkTemplateBuilder.build(networkCreationRequest, subnetRequests)).thenReturn(TEMPLATE);
@@ -301,7 +302,7 @@ public class AzureNetworkConnectorTest {
         return outputs;
     }
 
-    private NetworkCreationRequest createNetworkRequest(String networkCidr, Set<String> subnetCidrs) {
+    private NetworkCreationRequest createNetworkRequest(String networkCidr, Set<NetworkSubnetRequest> subnets) {
         return new NetworkCreationRequest.Builder()
                 .withStackName(STACK_NAME)
                 .withEnvName(ENV_NAME)
@@ -309,8 +310,8 @@ public class AzureNetworkConnectorTest {
                 .withCloudCredential(new CloudCredential("1", "credential"))
                 .withRegion(REGION)
                 .withNetworkCidr(networkCidr)
-                .withPublicSubnetCidrs(subnetCidrs)
-                .withPrivateSubnetCidrs(subnetCidrs)
+                .withPublicSubnets(subnets)
+                .withPrivateSubnets(subnets)
                 .build();
     }
 
@@ -336,4 +337,7 @@ public class AzureNetworkConnectorTest {
         return new CloudException("error", Response.success(ResponseBody.create(MediaType.get("application/json; charset=utf-8"), "error body")));
     }
 
+    private NetworkSubnetRequest createSubnetRequest(String s) {
+        return new NetworkSubnetRequest(s, PUBLIC);
+    }
 }

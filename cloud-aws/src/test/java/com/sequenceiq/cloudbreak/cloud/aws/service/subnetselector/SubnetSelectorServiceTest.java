@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetB
 import static com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetBuilder.AZ_B;
 import static com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetBuilder.AZ_C;
 import static com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetBuilder.AZ_D;
+import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -326,7 +327,7 @@ public class SubnetSelectorServiceTest {
         Map<String, CloudSubnet> subnetsPerAz = new HashMap<>();
         int subnetId = 1;
         for (String az : azs) {
-            subnetsPerAz.putIfAbsent(az, new CloudSubnet("subnet-" + subnetId, "", az, "", true, false, false));
+            subnetsPerAz.putIfAbsent(az, new CloudSubnet("subnet-" + subnetId, "", az, "", true, false, false, PUBLIC));
         }
         return subnetsPerAz;
     }

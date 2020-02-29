@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.network.service;
 
+import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static com.sequenceiq.environment.network.service.Cidrs.cidrs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -9,8 +10,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -20,9 +21,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
-import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
@@ -46,7 +48,7 @@ class NetworkCreationRequestFactoryTest {
 
     private static final String CLOUD_PLATFORM = "AWS";
 
-    private static final Set<String> SUBNET_CIDRS = Collections.singleton("10.10.1.1/24");
+    private static final Set<NetworkSubnetRequest> SUBNET_CIDRS = Collections.singleton(new NetworkSubnetRequest("10.10.1.1/24", PUBLIC));
 
     private final DefaultSubnetCidrProvider defaultSubnetCidrProvider = Mockito.mock(DefaultSubnetCidrProvider.class);
 
@@ -54,8 +56,8 @@ class NetworkCreationRequestFactoryTest {
 
     private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter = Mockito.mock(CredentialToCloudCredentialConverter.class);
 
-    private final NetworkCreationRequestFactory underTest = new NetworkCreationRequestFactory(defaultSubnetCidrProvider,
-            credentialToCloudCredentialConverter, costTagging);
+    private final NetworkCreationRequestFactory underTest = new NetworkCreationRequestFactory(Collections.emptyList(),
+            credentialToCloudCredentialConverter, costTagging, defaultSubnetCidrProvider);
 
     @Test
     void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsAreNotPresent() {
@@ -77,7 +79,7 @@ class NetworkCreationRequestFactoryTest {
         assertEquals(CLOUD_PLATFORM, actual.getVariant());
         assertEquals(REGION, actual.getRegion().value());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
-        assertEquals(SUBNET_CIDRS, actual.getPublicSubnetCidrs());
+        assertEquals(SUBNET_CIDRS, actual.getPublicSubnets());
         assertFalse(actual.isNoPublicIp());
     }
 
@@ -100,7 +102,7 @@ class NetworkCreationRequestFactoryTest {
         assertEquals(CLOUD_PLATFORM, actual.getVariant());
         assertEquals(REGION, actual.getRegion().value());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
-        assertEquals(SUBNET_CIDRS, actual.getPublicSubnetCidrs());
+        assertEquals(SUBNET_CIDRS, actual.getPublicSubnets());
         assertTrue(actual.isNoPublicIp());
     }
 

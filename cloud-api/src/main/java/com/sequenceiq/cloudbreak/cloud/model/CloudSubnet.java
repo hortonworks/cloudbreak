@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -17,6 +18,8 @@ public class CloudSubnet implements Serializable {
     private String availabilityZone;
 
     private String cidr;
+
+    private SubnetType type;
 
     private boolean privateSubnet;
 
@@ -39,7 +42,8 @@ public class CloudSubnet implements Serializable {
         this.cidr = cidr;
     }
 
-    public CloudSubnet(String id, String name, String availabilityZone, String cidr, boolean privateSubnet, boolean mapPublicIpOnLaunch, boolean igwAvailable) {
+    public CloudSubnet(String id, String name, String availabilityZone, String cidr, boolean privateSubnet, boolean mapPublicIpOnLaunch, boolean igwAvailable,
+            SubnetType type) {
         this.id = id;
         this.name = name;
         this.availabilityZone = availabilityZone;
@@ -47,6 +51,7 @@ public class CloudSubnet implements Serializable {
         this.privateSubnet = privateSubnet;
         this.mapPublicIpOnLaunch = mapPublicIpOnLaunch;
         this.igwAvailable = igwAvailable;
+        this.type = type;
     }
 
     public String getId() {
@@ -105,8 +110,16 @@ public class CloudSubnet implements Serializable {
         this.igwAvailable = igwAvailable;
     }
 
+    public SubnetType getType() {
+        return type;
+    }
+
+    public void setType(SubnetType type) {
+        this.type = type;
+    }
+
     public CloudSubnet withId(String newId) {
-        return new CloudSubnet(newId, name, availabilityZone, cidr, privateSubnet, mapPublicIpOnLaunch, igwAvailable);
+        return new CloudSubnet(newId, name, availabilityZone, cidr, privateSubnet, mapPublicIpOnLaunch, igwAvailable, type);
     }
 
     @Override

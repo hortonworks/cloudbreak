@@ -28,6 +28,15 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
     @ApiModelProperty(value = EnvironmentModelDescription.SUBNET_METAS)
     private Map<String, CloudSubnet> subnetMetas;
 
+    @ApiModelProperty(value = EnvironmentModelDescription.CB_SUBNETS)
+    private Map<String, CloudSubnet> cbSubnets;
+
+    @ApiModelProperty(value = EnvironmentModelDescription.DWX_SUBNETS)
+    private Map<String, CloudSubnet> dwxSubnets;
+
+    @ApiModelProperty(value = EnvironmentModelDescription.MLX_SUBNETS)
+    private Map<String, CloudSubnet> mlxSubnets;
+
     @ApiModelProperty(value = EnvironmentModelDescription.EXISTING_NETWORK)
     private boolean existingNetwork;
 
@@ -58,6 +67,30 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
         this.subnetMetas = subnetMetas;
     }
 
+    public Map<String, CloudSubnet> getCbSubnets() {
+        return cbSubnets;
+    }
+
+    public void setCbSubnets(Map<String, CloudSubnet> cbSubnets) {
+        this.cbSubnets = cbSubnets;
+    }
+
+    public Map<String, CloudSubnet> getDwxSubnets() {
+        return dwxSubnets;
+    }
+
+    public void setDwxSubnets(Map<String, CloudSubnet> dwxSubnets) {
+        this.dwxSubnets = dwxSubnets;
+    }
+
+    public Map<String, CloudSubnet> getMlxSubnets() {
+        return mlxSubnets;
+    }
+
+    public void setMlxSubnets(Map<String, CloudSubnet> mlxSubnets) {
+        this.mlxSubnets = mlxSubnets;
+    }
+
     public boolean isExistingNetwork() {
         return existingNetwork;
     }
@@ -84,6 +117,12 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
         private String networkCidr;
 
         private Map<String, CloudSubnet> subnetMetas;
+
+        private Map<String, CloudSubnet> cbSubnets;
+
+        private Map<String, CloudSubnet> dwxSubnets;
+
+        private Map<String, CloudSubnet> mlxSubnets;
 
         private boolean existingNetwork;
 
@@ -123,6 +162,21 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
         public EnvironmentNetworkResponseBuilder withSubnetMetas(Map<String, CloudSubnet> subnetMetas) {
             this.subnetMetas = subnetMetas;
+            return this;
+        }
+
+        public EnvironmentNetworkResponseBuilder withCbSubnets(Map<String, CloudSubnet> cbSubnets) {
+            this.cbSubnets = cbSubnets;
+            return this;
+        }
+
+        public EnvironmentNetworkResponseBuilder withDwxSubnets(Map<String, CloudSubnet> dwxSubnets) {
+            this.dwxSubnets = dwxSubnets;
+            return this;
+        }
+
+        public EnvironmentNetworkResponseBuilder withMlxSubnets(Map<String, CloudSubnet> mlxSubnets) {
+            this.mlxSubnets = mlxSubnets;
             return this;
         }
 
@@ -180,6 +234,9 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             environmentNetworkResponse.setMock(mock);
             environmentNetworkResponse.setPreferedSubnetId(preferedSubnetId);
             environmentNetworkResponse.setPrivateSubnetCreation(privateSubnetCreation);
+            environmentNetworkResponse.setCbSubnets(cbSubnets);
+            environmentNetworkResponse.setMlxSubnets(mlxSubnets);
+            environmentNetworkResponse.setDwxSubnets(dwxSubnets);
             return environmentNetworkResponse;
         }
     }

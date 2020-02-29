@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector;
 
+import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +65,6 @@ public class SubnetBuilder {
 
     private CloudSubnet getSubnet(String az, boolean privateSubnet, boolean mapPublicOnLaunch) {
         String nextSubnetId = "subnet-" + nextId++;
-        return new CloudSubnet(nextSubnetId, "", az, "", privateSubnet, mapPublicOnLaunch, !privateSubnet);
+        return new CloudSubnet(nextSubnetId, "", az, "", privateSubnet, mapPublicOnLaunch, !privateSubnet, PUBLIC);
     }
 }

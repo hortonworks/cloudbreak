@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -16,8 +14,15 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 
 public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetworkConverter {
 
-    @Inject
-    private EnvironmentViewConverter environmentViewConverter;
+    private final EnvironmentViewConverter environmentViewConverter;
+
+    private final SubnetTypeConverter subnetTypeConverter;
+
+    protected EnvironmentBaseNetworkConverter(EnvironmentViewConverter environmentViewConverter,
+            SubnetTypeConverter subnetTypeConverter) {
+        this.environmentViewConverter = environmentViewConverter;
+        this.subnetTypeConverter = subnetTypeConverter;
+    }
 
     @Override
     public BaseNetwork convert(Environment environment, NetworkDto creationDto, Map<String, CloudSubnet> subnetMetas) {
@@ -42,6 +47,9 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
                 .withPrivateSubnetCreation(source.getPrivateSubnetCreation())
                 .withRegistrationType(source.getRegistrationType())
                 .withNetworkId(source.getNetworkId());
+
+        subnetTypeConverter.convertSubnets(source, builder);
+
         return setProviderSpecificFields(builder, source);
     }
 

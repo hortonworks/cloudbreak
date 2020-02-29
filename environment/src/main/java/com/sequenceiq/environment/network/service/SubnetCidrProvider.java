@@ -6,4 +6,6 @@ package com.sequenceiq.environment.network.service;
 public interface SubnetCidrProvider {
 
     Cidrs provide(String networkCidr);
+
+    String cloudPlatform();
 }

@@ -2,26 +2,28 @@ package com.sequenceiq.environment.network.service;
 
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
+
 public class Cidrs {
 
-    private final Set<String> publicSubnetCidrs;
+    private final Set<NetworkSubnetRequest> publicSubnets;
 
-    private final Set<String> privateSubnetCidrs;
+    private final Set<NetworkSubnetRequest> privateSubnets;
 
-    private Cidrs(Set<String> publicSubnetCidrs, Set<String> privateSubnetCidrs) {
-        this.publicSubnetCidrs = publicSubnetCidrs;
-        this.privateSubnetCidrs = privateSubnetCidrs;
+    private Cidrs(Set<NetworkSubnetRequest> publicSubnets, Set<NetworkSubnetRequest> privateSubnets) {
+        this.publicSubnets = publicSubnets;
+        this.privateSubnets = privateSubnets;
     }
 
-    public Set<String> getPublicSubnetCidrs() {
-        return publicSubnetCidrs;
+    public Set<NetworkSubnetRequest> getPublicSubnets() {
+        return publicSubnets;
     }
 
-    public Set<String> getPrivateSubnetCidrs() {
-        return privateSubnetCidrs;
+    public Set<NetworkSubnetRequest> getPrivateSubnets() {
+        return privateSubnets;
     }
 
-    public static Cidrs cidrs(Set<String> publicSubnetCidrs, Set<String> privateSubnetCidrs) {
-        return new Cidrs(publicSubnetCidrs, privateSubnetCidrs);
+    public static Cidrs cidrs(Set<NetworkSubnetRequest> publicSubnets, Set<NetworkSubnetRequest> privateSubnets) {
+        return new Cidrs(publicSubnets, privateSubnets);
     }
 }

@@ -101,7 +101,6 @@ public class AwsNetworkConnector implements NetworkConnector {
         AwsCredentialView credentialView = new AwsCredentialView(networkRequest.getCloudCredential());
         AmazonCloudFormationRetryClient cloudFormationRetryClient = getCloudFormationRetryClient(credentialView, networkRequest.getRegion().value());
         List<SubnetRequest> subnetRequests = getCloudSubNets(networkRequest);
-        String cloudFormationTemplate = createTemplate(networkRequest, subnetRequests);
         String cfStackName = networkRequest.getStackName();
         try {
             cloudFormationRetryClient.describeStacks(new DescribeStacksRequest().withStackName(cfStackName));
@@ -111,6 +110,7 @@ public class AwsNetworkConnector implements NetworkConnector {
             if (networkDoesNotExist(e)) {
                 LOGGER.warn("{} occurred during describe AWS CloudFormation stack for Network with stack name: '{}'. "
                         + "Assuming the CF Stack does not exist, so creating a new one. Exception message: {}", e.getClass(), cfStackName, e.getMessage());
+                String cloudFormationTemplate = createTemplate(networkRequest, subnetRequests);
                 return createNewCfNetworkStack(networkRequest, credentialView, cloudFormationRetryClient, cloudFormationTemplate, subnetRequests);
             } else {
                 throw new CloudConnectorException("Failed to create network.", e);
@@ -157,8 +157,8 @@ public class AwsNetworkConnector implements NetworkConnector {
         AmazonEC2Client awsClientAccess = awsClient.createAccess(awsCredential, networkRequest.getRegion().value());
         return awsSubnetRequestProvider.provide(
                 awsClientAccess,
-                new ArrayList<>(networkRequest.getPublicSubnetCidrs()),
-                new ArrayList<>(networkRequest.getPrivateSubnetCidrs()));
+                new ArrayList<>(networkRequest.getPublicSubnets()),
+                new ArrayList<>(networkRequest.getPrivateSubnets()));
     }
 
     private AmazonCloudFormationRetryClient getCloudFormationRetryClient(AwsCredentialView credentialView, String region) {

@@ -47,13 +47,15 @@ class SubnetIdProviderTest {
     @Test
     void testProvideThenNetworkSelectorCalled() {
         NetworkDto networkDto = NetworkDto.builder()
+                .withCbSubnets(Map.of("AZ-a", new CloudSubnet()))
                 .withSubnetMetas(Map.of("AZ-a", new CloudSubnet()))
                 .build();
         NetworkConnector networkConnector = setupConnector();
         Tunnel tunnel = Tunnel.DIRECT;
 
-        underTest.provide(networkDto, tunnel, CloudPlatform.AWS);
+        String provide = underTest.provide(networkDto, tunnel, CloudPlatform.AWS);
 
+        assertEquals("id", provide);
         ArgumentCaptor<SubnetSelectionParameters> subnetSelectionParametersCaptor = ArgumentCaptor.forClass(SubnetSelectionParameters.class);
         verify(networkConnector).selectSubnets(any(), subnetSelectionParametersCaptor.capture());
         assertFalse(subnetSelectionParametersCaptor.getValue().isForDatabase());
@@ -71,7 +73,7 @@ class SubnetIdProviderTest {
     @Test
     void testProvideShouldReturnNullWhenNoSubnetMetas() {
         NetworkDto networkDto = NetworkDto.builder()
-                .withSubnetMetas(Map.of())
+                .withCbSubnets(Map.of())
                 .build();
 
         String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
@@ -83,10 +85,13 @@ class SubnetIdProviderTest {
     void testProvideShouldReturnAnySubnetWhenResultHasError() {
         setupConnector("error choosing");
         NetworkDto networkDto = NetworkDto.builder()
+                .withCbSubnets(Map.of(
+                        "AZ-a", new CloudSubnet("id-1", "name-1"),
+                        "AZ-b", new CloudSubnet("id-2", "name-2")))
                 .withSubnetMetas(Map.of(
                         "AZ-a", new CloudSubnet("id-1", "name-1"),
                         "AZ-b", new CloudSubnet("id-2", "name-2")
-                        ))
+                ))
                 .build();
 
         String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
@@ -102,7 +107,7 @@ class SubnetIdProviderTest {
         CloudConnector cloudConnector = mock(CloudConnector.class);
         NetworkConnector networkConnector = mock(NetworkConnector.class);
         SubnetSelectionResult subnetSelectionResult = StringUtils.isEmpty(errorMessage)
-                ? new SubnetSelectionResult(List.of(new CloudSubnet()))
+                ? new SubnetSelectionResult(List.of(new CloudSubnet("id", "name")))
                 : new SubnetSelectionResult(errorMessage);
         when(networkConnector.selectSubnets(any(), any()))
                 .thenReturn(subnetSelectionResult);

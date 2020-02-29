@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -8,8 +9,8 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
@@ -84,18 +86,18 @@ public class AzureNetworkTemplateBuilderTest {
                 .withEnvCrn(ENV_CRN)
                 .withRegion(Region.region(REGION))
                 .withNetworkCidr(NETWORK_CIDR)
-                .withPublicSubnetCidrs(createSubnetCidrs())
-                .withPrivateSubnetCidrs(createSubnetCidrs())
+                .withPublicSubnets(createSubnets())
+                .withPrivateSubnets(createSubnets())
                 .withNoPublicIp(false)
                 .withStackName(STACK_NAME)
                 .build();
     }
 
-    private Set<String> createSubnetCidrs() {
-        Set<String> subnetCidrs = new TreeSet();
-        subnetCidrs.add("2.2.2.2/24");
-        subnetCidrs.add("3.3.3.3/24");
-        return subnetCidrs;
+    private Set<NetworkSubnetRequest> createSubnets() {
+        Set<NetworkSubnetRequest> subnets = new HashSet<>();
+        subnets.add(createSubnetRequest("2.2.2.2/24"));
+        subnets.add(createSubnetRequest("3.3.3.3/24"));
+        return subnets;
     }
 
     public SubnetRequest publicSubnetRequest(String cidr, int index) {
@@ -105,5 +107,9 @@ public class AzureNetworkTemplateBuilderTest {
         subnetRequest.setSubnetGroup(index % 3);
         subnetRequest.setAvailabilityZone("az");
         return subnetRequest;
+    }
+
+    private NetworkSubnetRequest createSubnetRequest(String s) {
+        return new NetworkSubnetRequest(s, PUBLIC);
     }
 }

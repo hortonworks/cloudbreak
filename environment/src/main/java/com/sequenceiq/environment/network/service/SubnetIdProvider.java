@@ -26,13 +26,13 @@ public class SubnetIdProvider {
 
     public String provide(NetworkDto network, Tunnel tunnel, CloudPlatform cloudPlatform) {
         LOGGER.debug("Choosing subnet, network: {},  platform: {}, tunnel: {}", network, cloudPlatform, tunnel);
-        if (network == null || network.getSubnetIds() == null || network.getSubnetIds().isEmpty() || network.getSubnetMetas().isEmpty()) {
+        if (network == null || network.getSubnetIds() == null || network.getSubnetIds().isEmpty() || network.getCbSubnets().isEmpty()) {
             LOGGER.debug("Check failed, returning null");
             return null;
         }
         SubnetSelectionResult subnetSelectionResult = cloudPlatformConnectors.get(new CloudPlatformVariant(cloudPlatform.name(), cloudPlatform.name()))
                 .networkConnector()
-                .selectSubnets(new ArrayList<>(network.getSubnetMetas().values()), SubnetSelectionParameters.builder().withTunnel(tunnel).build());
+                .selectSubnets(new ArrayList<>(network.getCbSubnets().values()), SubnetSelectionParameters.builder().withTunnel(tunnel).build());
         CloudSubnet selectedSubnet = subnetSelectionResult.hasResult()
                 ? subnetSelectionResult.getResult().get(0)
                 : fallback(network);

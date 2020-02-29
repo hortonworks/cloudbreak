@@ -68,8 +68,11 @@ class AwsEnvironmentNetworkConverterTest {
     @Mock
     private EnvironmentViewConverter environmentViewConverter;
 
+    @Mock
+    private SubnetTypeConverter subnetTypeConverter;
+
     @InjectMocks
-    private AwsEnvironmentNetworkConverter underTest = new AwsEnvironmentNetworkConverter();
+    private AwsEnvironmentNetworkConverter underTest;
 
     @Test
     void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDto() {
