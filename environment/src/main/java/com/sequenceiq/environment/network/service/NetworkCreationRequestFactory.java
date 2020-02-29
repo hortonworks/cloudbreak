@@ -1,6 +1,9 @@
 package com.sequenceiq.environment.network.service;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -19,24 +22,27 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 @Service
 public class NetworkCreationRequestFactory {
 
-    private final SubnetCidrProvider extendedSubnetCidrProvider;
+    private final Map<String, SubnetCidrProvider> subnetCidrProviders;
+
+    private final DefaultSubnetCidrProvider defaultSubnetCidrProvider;
 
     private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     private final CostTagging costTagging;
 
-    public NetworkCreationRequestFactory(SubnetCidrProvider extendedSubnetCidrProvider,
+    public NetworkCreationRequestFactory(Collection<SubnetCidrProvider> subnetCidrProviders,
             CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
-            CostTagging costTagging) {
-        this.extendedSubnetCidrProvider = extendedSubnetCidrProvider;
+            CostTagging costTagging, DefaultSubnetCidrProvider defaultSubnetCidrProvider) {
+        this.subnetCidrProviders = subnetCidrProviders.stream().collect(Collectors.toMap(SubnetCidrProvider::cloudPlatform, s -> s));
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
         this.costTagging = costTagging;
+        this.defaultSubnetCidrProvider = defaultSubnetCidrProvider;
     }
 
     public NetworkCreationRequest create(EnvironmentDto environment) {
         NetworkDto networkDto = environment.getNetwork();
 
-        Cidrs cidrs = getSubNetCidrs(networkDto.getNetworkCidr());
+        Cidrs cidrs = getSubNetCidrs(environment.getCloudPlatform(), networkDto.getNetworkCidr());
 
         CDPTagMergeRequest mergeRequest = CDPTagMergeRequest.Builder
                 .builder()
@@ -58,8 +64,8 @@ public class NetworkCreationRequestFactory {
                 .withUserName(getUserFromCrn(environment.getCreator()))
                 .withCreatorCrn(environment.getCreator())
                 .withTags(costTagging.mergeTags(mergeRequest))
-                .withPrivateSubnetCidrs(cidrs.getPrivateSubnetCidrs())
-                .withPublicSubnetCidrs(cidrs.getPublicSubnetCidrs());
+                .withPrivateSubnets(cidrs.getPrivateSubnets())
+                .withPublicSubnets(cidrs.getPublicSubnets());
         getNoPublicIp(networkDto).ifPresent(builder::withNoPublicIp);
         return builder.build();
     }
@@ -76,8 +82,9 @@ public class NetworkCreationRequestFactory {
         return PrivateSubnetCreation.ENABLED == environmentDto.getNetwork().getPrivateSubnetCreation();
     }
 
-    private Cidrs getSubNetCidrs(String networkCidr) {
-        return extendedSubnetCidrProvider.provide(networkCidr);
+    private Cidrs getSubNetCidrs(String cloudPlatform, String networkCidr) {
+        SubnetCidrProvider subnetCidrProvider = subnetCidrProviders.getOrDefault(cloudPlatform, defaultSubnetCidrProvider);
+        return subnetCidrProvider.provide(networkCidr);
     }
 
     private Optional<Boolean> getNoPublicIp(NetworkDto networkDto) {

@@ -23,8 +23,8 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
+import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -68,8 +68,11 @@ class AzureEnvironmentNetworkConverterTest {
     @Mock
     private EnvironmentViewConverter environmentViewConverter;
 
+    @Mock
+    private SubnetTypeConverter subnetTypeConverter;
+
     @InjectMocks
-    private AzureEnvironmentNetworkConverter underTest = new AzureEnvironmentNetworkConverter();
+    private AzureEnvironmentNetworkConverter underTest;
 
     @Test
     void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDto() {

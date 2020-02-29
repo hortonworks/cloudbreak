@@ -32,6 +32,7 @@ class AwsCreatedSubnetProvider {
                 createdPublicSubnet.setMapPublicIpOnLaunch(true);
                 createdPublicSubnet.setIgwAvailable(true);
             }
+            createdPublicSubnet.setType(subnetRequest.getType());
             subnets.add(createdPublicSubnet);
         }
         return subnets;

@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 
 @Component
 public class DefaultSubnetCidrProvider implements SubnetCidrProvider {
@@ -27,16 +29,21 @@ public class DefaultSubnetCidrProvider implements SubnetCidrProvider {
 
     @Override
     public Cidrs provide(String networkCidr) {
-        Set<String> result = new HashSet<>();
+        Set<NetworkSubnetRequest> result = new HashSet<>();
 
         for (int i = 0; i < SUBNETS; i++) {
             String subnet = calculateSubnet(networkCidr, result);
-            result.add(subnet);
+            result.add(new NetworkSubnetRequest(subnet, SubnetType.PUBLIC));
         }
         return cidrs(result, Sets.newHashSet());
     }
 
-    private String calculateSubnet(String networkCidr, Iterable<String> subnetCidrs) {
+    @Override
+    public String cloudPlatform() {
+        return "DEFAULT";
+    }
+
+    private String calculateSubnet(String networkCidr, Iterable<NetworkSubnetRequest> subnetCidrs) {
         SubnetUtils.SubnetInfo vpcInfo = new SubnetUtils(networkCidr).getInfo();
         String[] cidrParts = vpcInfo.getCidrSignature().split("/");
         int netmask = Integer.parseInt(cidrParts[cidrParts.length - 1]);
@@ -57,7 +64,7 @@ public class DefaultSubnetCidrProvider implements SubnetCidrProvider {
         return cidr;
     }
 
-    private String getSubnetCidrInRange(String networkCidr, Iterable<String> subnetCidrs, int start, int end) {
+    private String getSubnetCidrInRange(String networkCidr, Iterable<NetworkSubnetRequest> subnetCidrs, int start, int end) {
         SubnetUtils.SubnetInfo vpcInfo = new SubnetUtils(networkCidr).getInfo();
         String lowProbe = incrementIp(vpcInfo.getLowAddress());
         String highProbe = new SubnetUtils(toSubnetCidr(lowProbe)).getInfo().getHighAddress();
@@ -69,8 +76,8 @@ public class DefaultSubnetCidrProvider implements SubnetCidrProvider {
         boolean foundProbe = false;
         for (int i = start; i < end; i++) {
             boolean overlapping = false;
-            for (String subnetCidr : subnetCidrs) {
-                SubnetUtils.SubnetInfo subnetInfo = new SubnetUtils(subnetCidr).getInfo();
+            for (NetworkSubnetRequest subnetCidr : subnetCidrs) {
+                SubnetUtils.SubnetInfo subnetInfo = new SubnetUtils(subnetCidr.getCidr()).getInfo();
                 if (isInRange(lowProbe, subnetInfo) || isInRange(highProbe, subnetInfo)) {
                     overlapping = true;
                     break;

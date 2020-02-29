@@ -12,6 +12,8 @@ public class SubnetRequest {
 
     private int index;
 
+    private SubnetType type;
+
     public String getPublicSubnetCidr() {
         return publicSubnetCidr;
     }
@@ -50,5 +52,13 @@ public class SubnetRequest {
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public void setType(SubnetType type) {
+        this.type = type;
+    }
+
+    public SubnetType getType() {
+        return type;
     }
 }

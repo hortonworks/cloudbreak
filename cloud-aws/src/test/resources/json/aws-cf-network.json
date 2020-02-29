@@ -86,7 +86,7 @@
                     },
                     {
                         "Key": "Name",
-                        "Value": "ps{subnet.index}-1"
+                        "Value": "ps0-1"
                     }
                 ]
             }
@@ -221,7 +221,7 @@
                     },
                     {
                         "Key": "Name",
-                        "Value": "ps{subnet.index}-1"
+                        "Value": "ps1-1"
                     }
                 ]
             }

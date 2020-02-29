@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -20,6 +21,11 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Component
 public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConverter {
+
+    public AzureEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter,
+            SubnetTypeConverter subnetTypeConverter) {
+        super(environmentViewConverter, subnetTypeConverter);
+    }
 
     @Override
     BaseNetwork createProviderSpecificNetwork(NetworkDto network) {
@@ -48,7 +54,8 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                                 subnet.getCidr(),
                                 subnet.isPublicSubnet(),
                                 subnet.isMapPublicIpOnLaunch(),
-                                subnet.isIgwAvailable())
+                                subnet.isIgwAvailable(),
+                                subnet.getType())
                         )
                 )
         );

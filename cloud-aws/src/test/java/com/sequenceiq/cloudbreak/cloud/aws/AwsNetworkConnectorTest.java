@@ -5,6 +5,7 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_FAI
 import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_COMPLETE;
 import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
+import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -56,6 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 
@@ -141,20 +143,19 @@ public class AwsNetworkConnectorTest {
     @Test
     public void testCreateNetworkWithSubnetsShouldReturnTheNetworkAndSubnets() {
         String networkCidr = "0.0.0.0/16";
-        Set<String> subnetCidrs = Set.of("1.1.1.1/8", "1.1.1.2/8");
+        Set<NetworkSubnetRequest> subnets = Set.of(new NetworkSubnetRequest("1.1.1.1/8", PUBLIC), new NetworkSubnetRequest("1.1.1.2/8", PUBLIC));
         AmazonCloudFormationRetryClient cloudFormationRetryClient = mock(AmazonCloudFormationRetryClient.class);
         AmazonCloudFormationClient cfClient = mock(AmazonCloudFormationClient.class);
         AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
         PollTask pollTask = mock(PollTask.class);
         Map<String, String> output = createOutput();
-        NetworkCreationRequest networkCreationRequest = createNetworkRequest(networkCidr, subnetCidrs);
+        NetworkCreationRequest networkCreationRequest = createNetworkRequest(networkCidr, subnets);
         List<SubnetRequest> subnetRequestList = createSubnetRequestList();
         Set<CreatedSubnet> createdSubnets = Set.of(new CreatedSubnet(), new CreatedSubnet(), new CreatedSubnet());
 
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
-        when(awsSubnetRequestProvider.provide(ec2Client, new ArrayList<>(subnetCidrs), new ArrayList<>(subnetCidrs))).thenReturn(subnetRequestList);
+        when(awsSubnetRequestProvider.provide(ec2Client, new ArrayList<>(subnets), new ArrayList<>(subnets))).thenReturn(subnetRequestList);
         when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cloudFormationRetryClient);
-        when(awsNetworkCfTemplateProvider.provide("testEnv", 1L, networkCidr, subnetRequestList, true)).thenReturn(CF_TEMPLATE);
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cfClient);
         when(awsPollTaskFactory.newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest))
                 .thenReturn(pollTask);
@@ -164,7 +165,6 @@ public class AwsNetworkConnectorTest {
         CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest);
 
         verify(awsClient).createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()));
-        verify(awsNetworkCfTemplateProvider).provide("testEnv", 1L, networkCidr, subnetRequestList, true);
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest);
         verify(cfStackUtil).getOutputs(NETWORK_ID, cloudFormationRetryClient);
@@ -177,7 +177,7 @@ public class AwsNetworkConnectorTest {
     @Test
     public void testCreateNewNetworkWithSubnetsShouldCreateTheNetworkAndSubnets() {
         String networkCidr = "0.0.0.0/16";
-        Set<String> subnetCidrs = Set.of("1.1.1.1/8", "1.1.1.2/8");
+        Set<NetworkSubnetRequest> subnets = Set.of(new NetworkSubnetRequest("1.1.1.1/8", PUBLIC), new NetworkSubnetRequest("1.1.1.2/8", PUBLIC));
         AmazonCloudFormationRetryClient cloudFormationRetryClient = mock(AmazonCloudFormationRetryClient.class);
         AmazonServiceException amazonServiceException = new AmazonServiceException("does not exist");
         amazonServiceException.setStatusCode(400);
@@ -186,12 +186,12 @@ public class AwsNetworkConnectorTest {
         AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
         PollTask pollTask = mock(PollTask.class);
         Map<String, String> output = createOutput();
-        NetworkCreationRequest networkCreationRequest = createNetworkRequest(networkCidr, subnetCidrs);
+        NetworkCreationRequest networkCreationRequest = createNetworkRequest(networkCidr, subnets);
         List<SubnetRequest> subnetRequestList = createSubnetRequestList();
         Set<CreatedSubnet> createdSubnets = Set.of(new CreatedSubnet(), new CreatedSubnet(), new CreatedSubnet());
 
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
-        when(awsSubnetRequestProvider.provide(ec2Client, new ArrayList<>(subnetCidrs), new ArrayList<>(subnetCidrs))).thenReturn(subnetRequestList);
+        when(awsSubnetRequestProvider.provide(ec2Client, new ArrayList<>(subnets), new ArrayList<>(subnets))).thenReturn(subnetRequestList);
         when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cloudFormationRetryClient);
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cfClient);
         when(awsPollTaskFactory.newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest))
@@ -338,7 +338,7 @@ public class AwsNetworkConnectorTest {
         return output;
     }
 
-    private NetworkCreationRequest createNetworkRequest(String networkCidr, Set<String> subnetCidrs) {
+    private NetworkCreationRequest createNetworkRequest(String networkCidr, Set<NetworkSubnetRequest> subnets) {
         return new NetworkCreationRequest.Builder()
                 .withStackName(STACK_NAME)
                 .withEnvName(ENV_NAME)
@@ -347,8 +347,8 @@ public class AwsNetworkConnectorTest {
                 .withCloudCredential(new CloudCredential("1", "credential"))
                 .withRegion(REGION)
                 .withNetworkCidr(networkCidr)
-                .withPrivateSubnetCidrs(subnetCidrs)
-                .withPublicSubnetCidrs(subnetCidrs)
+                .withPrivateSubnets(subnets)
+                .withPublicSubnets(subnets)
                 .withPrivateSubnetEnabled(true)
                 .withUserName("user@cloudera.com")
                 .withCreatorCrn("user-crn")

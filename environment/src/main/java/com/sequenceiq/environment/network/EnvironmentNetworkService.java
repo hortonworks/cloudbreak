@@ -59,7 +59,6 @@ public class EnvironmentNetworkService {
         NetworkCreationRequest networkCreationRequest = networkCreationRequestFactory.create(environment);
         EnvironmentNetworkConverter converter = environmentNetworkConverterMap.get(getCloudPlatform(environment));
 
-
         CreatedCloudNetwork createdCloudNetwork = networkConnector.createNetworkWithSubnets(networkCreationRequest);
         return converter.setCreatedCloudNetwork(baseNetwork, createdCloudNetwork);
     }

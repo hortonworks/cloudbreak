@@ -71,8 +71,8 @@ public class AzureNetworkConnector implements NetworkConnector {
         AzureClient azureClient = azureClientService.getClient(networkRequest.getCloudCredential());
         List<SubnetRequest> subnetRequests = azureSubnetRequestProvider.provide(
                 networkRequest.getRegion().value(),
-                Lists.newArrayList(networkRequest.getPublicSubnetCidrs()),
-                Lists.newArrayList(networkRequest.getPrivateSubnetCidrs()));
+                Lists.newArrayList(networkRequest.getPublicSubnets()),
+                Lists.newArrayList(networkRequest.getPrivateSubnets()));
         String template = azureNetworkTemplateBuilder.build(networkRequest, subnetRequests);
         String envName = networkRequest.getEnvName();
         Deployment templateDeployment;
@@ -184,6 +184,7 @@ public class AzureNetworkConnector implements NetworkConnector {
                     createdSubnet.setCidr(subnetRequest.getPublicSubnetCidr());
                 }
                 createdSubnet.setAvailabilityZone(region);
+                createdSubnet.setType(subnetRequest.getType());
                 createdSubnets.add(createdSubnet);
             } else {
                 throw new CloudConnectorException("Subnet could not be found in the Azure deployment output.");

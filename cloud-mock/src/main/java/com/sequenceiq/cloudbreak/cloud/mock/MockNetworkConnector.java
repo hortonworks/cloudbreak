@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.mock;
 
+import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
+
 import java.util.List;
 import java.util.Set;
 
@@ -38,6 +40,8 @@ public class MockNetworkConnector implements NetworkConnector {
         subnet2.setPublicSubnet(true);
         subnet1.setSubnetId("1");
         subnet2.setSubnetId("2");
+        subnet1.setType(PUBLIC);
+        subnet2.setType(PUBLIC);
 
         CreatedCloudNetwork result = new CreatedCloudNetwork(request.getStackName(),
                 "mockedNetwork1",

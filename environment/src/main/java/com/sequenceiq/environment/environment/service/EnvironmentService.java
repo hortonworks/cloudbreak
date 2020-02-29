@@ -88,10 +88,8 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
     }
 
     public EnvironmentDto getByNameAndAccountId(String environmentName, String accountId) {
-        Optional<Environment> environment = environmentRepository
-                .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId);
-        MDCBuilder.buildMdcContext(environment
-                .orElseThrow(notFound("Environment with name:", environmentName)));
+        Optional<Environment> environment = environmentRepository.findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId);
+        MDCBuilder.buildMdcContext(environment.orElseThrow(notFound("Environment with name:", environmentName)));
         return environmentDtoConverter.environmentToDto(environment.get());
     }
 
