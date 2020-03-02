@@ -33,6 +33,10 @@ if (project.hasProperty("reckon.scope")) {
 def cmPrivateRepoUser = System.getenv("CM_PRIVATE_REPO_USER") ?: "$defaultCmPrivateRepoUser"
 def cmPrivateRepoPassword = System.getenv("CM_PRIVATE_REPO_PASSWORD") ?: "$defaultCmPrivateRepoPassword"
 
+def springBootApps() {
+  subprojects.findAll { subproject -> subproject.plugins.hasPlugin('org.springframework.boot') }
+}
+
 def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
 ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
 // spring dependeny management override, if you remove silent errors can happen
@@ -109,17 +113,6 @@ subprojects {
     testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter',                  version: junitJupiterVersion
     //adds vintage engine automatically and ensures that Junit4 testcases are run by default for all projects
     testRuntimeOnly    group: 'org.junit.vintage',         name: 'junit-vintage-engine',           version: junitJupiterVersion
-  }
-
-  uploadArchives {
-    repositories {
-      mavenDeployer {
-        configuration = configurations.deployerJars
-        repository(url: "$System.env.NEXUS_URL") {
-          authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASSWORD")
-        }
-      }
-    }
   }
 
   spotbugs {
