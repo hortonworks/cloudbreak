@@ -92,9 +92,9 @@
         "template": {
           "attachedVolumes": [
             {
-              "count": 1,
-              "size": 7500,
-              "type": "ephemeral"
+              "count": 7,
+              "size": 1000,
+              "type": "StandardSSD_LRS"
             }
           ],
           "azure": {
@@ -118,9 +118,9 @@
         "template": {
           "attachedVolumes": [
             {
-              "count": 1,
-              "size": 7500,
-              "type": "ephemeral"
+              "count": 7,
+              "size": 1000,
+              "type": "StandardSSD_LRS"
             }
           ],
           "azure": {
