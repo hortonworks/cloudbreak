@@ -3,10 +3,9 @@ apply plugin: 'java'
 repositories {
     mavenLocal()
     maven { url = "$repoUrl" }
-    maven { url 'http://repo.spring.io/libs-release' }
+    maven { url = "$springRepoUrl" }
     mavenLocal()
     mavenCentral()
-    maven { url = "$repoUrl" }
 }
 
 jar {

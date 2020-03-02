@@ -4,7 +4,7 @@ apply plugin: 'info.solidsoft.pitest'
 repositories {
   mavenLocal()
   maven { url = "$repoUrl" }
-  maven { url 'http://repo.spring.io/libs-release' }
+  maven { url = "$springRepoUrl" }
   mavenCentral()
 }
 

@@ -15,6 +15,7 @@ buildscript {
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'info.solidsoft.pitest'
+apply plugin: 'java'
 
 bootRun {
     systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
@@ -25,9 +26,8 @@ bootRun {
     }
 }
 
-jar {
-    baseName = 'periscope'
-    archiveName = 'periscope.jar'
+springBoot {
+  mainClassName = 'com.sequenceiq.periscope.PeriscopeApplication'
 }
 
 bootJar {
@@ -39,8 +39,15 @@ bootJar {
     }
 }
 
-springBoot {
-    mainClassName = 'com.sequenceiq.periscope.PeriscopeApplication'
+uploadBootArchives {
+  repositories {
+    mavenDeployer {
+      configuration = configurations.deployerJars
+      repository(url: "$System.env.NEXUS_URL") {
+        authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASSWORD")
+      }
+    }
+  }
 }
 
 configurations {
@@ -178,7 +185,7 @@ dependencies {
 task buildInfo(type: BuildInfoTask, dependsOn: processResources) {
     destination = file("$buildDir")
     applicationPropertiesPath = "$buildDir"
-    basename = jar.baseName
+    basename = bootJar.baseName
     buildVersion = version
 }
 
