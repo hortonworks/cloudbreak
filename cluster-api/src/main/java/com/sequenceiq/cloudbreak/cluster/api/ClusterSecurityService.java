@@ -14,6 +14,8 @@ public interface ClusterSecurityService {
 
     void disableSecurity();
 
+    void deregisterServices(String clusterName);
+
     void changeOriginalCredentialsAndCreateCloudbreakUser(boolean ldapConfigured) throws CloudbreakException;
 
     void setupLdapAndSSO(String primaryGatewayPublicAddress, LdapView ldapConfig, VirtualGroupRequest virtualGroupRequest) throws CloudbreakException;
