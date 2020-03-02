@@ -23,6 +23,7 @@ import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
+import com.sequenceiq.cloudbreak.cloud.azure.subnet.selector.AzureSubnetSelectorService;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -54,6 +55,9 @@ public class AzureNetworkConnector implements NetworkConnector {
 
     @Inject
     private AzureUtils azureUtils;
+
+    @Inject
+    private AzureSubnetSelectorService azureSubnetSelectorService;
 
     @Override
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest) {
@@ -141,12 +145,7 @@ public class AzureNetworkConnector implements NetworkConnector {
 
     @Override
     public List<CloudSubnet> selectSubnets(List<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
-        if (subnetMetas == null || subnetMetas.isEmpty()) {
-            String message = "Azure subnet selection: there are no subnets to choose from.";
-            LOGGER.debug(message);
-            throw new BadRequestException(message);
-        }
-        return List.of(subnetMetas.get(0));
+        return azureSubnetSelectorService.select(subnetMetas, subnetSelectionParameters);
     }
 
     @Override

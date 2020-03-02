@@ -135,7 +135,7 @@ public class AwsNetworkConnector implements NetworkConnector {
 
     @Override
     public List<CloudSubnet> selectSubnets(List<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
-        boolean preferPrivate = subnetSelectionParameters.isPreferPrivateNetwork() || subnetSelectionParameters.getTunnel().useCcm();
+        boolean preferPrivate = subnetSelectionParameters.isForDatabase() || subnetSelectionParameters.getTunnel().useCcm();
 
         SubnetSelectorStrategyType subnetSelectorStrategyType;
         if (subnetSelectionParameters.isHa()) {
