@@ -3,5 +3,3 @@ tests:
   - name: "aws distrox e2e tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.stack.BasicStackTests
-        includedMethods:
-          - testCreateAndScaleCluster
