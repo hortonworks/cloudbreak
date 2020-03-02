@@ -60,6 +60,9 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     @Value("${cb.cm.mgmt.username:cmmgmt}")
     private String cmMgmtUsername;
 
+    @Value("${cb.cm.monitoring.username:cmmonitoring}")
+    private String cmMonitoringUser;
+
     @Inject
     private CloudStorageValidationUtil cloudStorageValidationUtil;
 
@@ -86,6 +89,8 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setExecutorType(source.getExecutorType());
         cluster.setCloudbreakUser(ambariUserName);
         cluster.setCloudbreakPassword(PasswordUtil.generatePassword());
+        cluster.setCloudbreakClusterManagerMonitoringUser(cmMonitoringUser);
+        cluster.setCloudbreakClusterManagerMonitoringPassword(PasswordUtil.generatePassword());
         cluster.setDpUser(cmMgmtUsername);
         cluster.setDpPassword(PasswordUtil.generatePassword());
         cluster.setDatabaseServerCrn(source.getDatabaseServerCrn());

@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
 import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
-import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterDetails;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
@@ -195,8 +195,8 @@ public class StackRequestManifester {
             }
             if (envTelemetry.getFluentAttributes() != null) {
                 Map<String, Object> fluentAttributes = envTelemetry.getFluentAttributes();
-                if (!fluentAttributes.containsKey(FluentClusterDetails.CLUSTER_CRN_KEY)) {
-                    fluentAttributes.put(FluentClusterDetails.CLUSTER_CRN_KEY, sdxCluster.getCrn());
+                if (!fluentAttributes.containsKey(TelemetryClusterDetails.CLUSTER_CRN_KEY)) {
+                    fluentAttributes.put(TelemetryClusterDetails.CLUSTER_CRN_KEY, sdxCluster.getCrn());
                 }
                 addAzureIdbrokerMsiToTelemetry(fluentAttributes, stackV4Request);
                 telemetryRequest.setFluentAttributes(fluentAttributes);

@@ -30,11 +30,13 @@ import com.sequenceiq.cloudbreak.service.altus.AltusAnonymizationRulesService;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
-import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterDetails;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfigService;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfigView;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigService;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -52,6 +54,9 @@ public class TelemetryDecoratorTest {
     private MeteringConfigService meteringConfigService;
 
     @Mock
+    private MonitoringConfigService monitoringConfigService;
+
+    @Mock
     private AltusMachineUserService altusMachineUserService;
 
     @Mock
@@ -64,14 +69,15 @@ public class TelemetryDecoratorTest {
         given(altusMachineUserService.generateDatabusMachineUserForFluent(any(Stack.class), any(Telemetry.class)))
                 .willReturn(Optional.of(altusCredential));
         underTest = new TelemetryDecorator(databusConfigService, fluentConfigService,
-                meteringConfigService, altusMachineUserService, altusAnonymizationRulesService, "1.0.0");
+                meteringConfigService, monitoringConfigService, altusMachineUserService,
+                altusAnonymizationRulesService, "1.0.0");
     }
 
     @Test
     public void testS3DecorateWithDefaultPath() {
         // GIVEN
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
-        FluentClusterDetails clusterDetails = FluentClusterDetails.Builder.builder().withPlatform("AWS").build();
+        TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder().withPlatform("AWS").build();
         FluentConfigView fluentConfigView = new FluentConfigView.Builder()
                 .withClusterDetails(clusterDetails)
                 .withEnabled(true)
@@ -94,7 +100,7 @@ public class TelemetryDecoratorTest {
         assertEquals(results.get("enabled"), true);
         assertEquals(results.get("platform"), CloudPlatform.AWS.name());
         assertEquals(results.get("user"), "root");
-        verify(fluentConfigService, times(1)).createFluentConfigs(any(FluentClusterDetails.class),
+        verify(fluentConfigService, times(1)).createFluentConfigs(any(TelemetryClusterDetails.class),
                 anyBoolean(), anyBoolean(), any(Telemetry.class), anyList());
         verify(meteringConfigService, times(1)).createMeteringConfigs(anyBoolean(), anyString(), anyString(), anyString(),
                 anyString());
@@ -106,7 +112,7 @@ public class TelemetryDecoratorTest {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         Map<String, Object> overrides = new HashMap<>();
         overrides.put("providerPrefix", "s3a");
-        FluentClusterDetails clusterDetails = FluentClusterDetails.Builder.builder().withPlatform("AWS").build();
+        TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder().withPlatform("AWS").build();
         FluentConfigView fluentConfigView = new FluentConfigView.Builder()
                 .withClusterDetails(clusterDetails)
                 .withEnabled(true)
@@ -150,6 +156,34 @@ public class TelemetryDecoratorTest {
         Map<String, Object> results = createMapFromFluentPillars(result, "metering");
         assertEquals(results.get("serviceType"), "DATAHUB");
         assertEquals(results.get("serviceVersion"), "1.0.0");
+        assertEquals(results.get("clusterCrn"), "myClusterCrn");
+        assertEquals(results.get("enabled"), true);
+    }
+
+    @Test
+    public void testDecorateWithMonitoring() {
+        // GIVEN
+        Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+        TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder()
+                .withCrn("myClusterCrn")
+                .withType("datahub")
+                .withVersion("1.0.0")
+                .build();
+        MonitoringConfigView monitoringConfigView = new MonitoringConfigView.Builder()
+                .withEnabled(true)
+                .withClusterDetails(clusterDetails)
+                .build();
+        DatabusConfigView dataConfigView = new DatabusConfigView.Builder()
+                .build();
+        MeteringConfigView meteringConfigView = new MeteringConfigView.Builder().build();
+        mockConfigServiceResults(dataConfigView, new FluentConfigView.Builder().build(), meteringConfigView, monitoringConfigView);
+        // WHEN
+        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar,
+                createStack(), new Telemetry());
+        // THEN
+        Map<String, Object> results = createMapFromFluentPillars(result, "monitoring");
+        assertEquals(results.get("clusterType"), "datahub");
+        assertEquals(results.get("clusterVersion"), "1.0.0");
         assertEquals(results.get("clusterCrn"), "myClusterCrn");
         assertEquals(results.get("enabled"), true);
     }
@@ -203,6 +237,8 @@ public class TelemetryDecoratorTest {
         stack.setResourceCrn("stackCrn");
         Cluster cluster = new Cluster();
         cluster.setName("cl1");
+        cluster.setCloudbreakClusterManagerMonitoringUser("myUsr");
+        cluster.setCloudbreakClusterManagerMonitoringPassword("myPass");
         stack.setCluster(cluster);
         User creator = new User();
         creator.setUserCrn("userCrn");
@@ -213,13 +249,20 @@ public class TelemetryDecoratorTest {
 
     private void mockConfigServiceResults(DatabusConfigView databusConfigView, FluentConfigView fluentConfigView,
             MeteringConfigView meteringConfigView) {
+        mockConfigServiceResults(databusConfigView, fluentConfigView, meteringConfigView, new MonitoringConfigView.Builder().build());
+    }
+
+    private void mockConfigServiceResults(DatabusConfigView databusConfigView, FluentConfigView fluentConfigView,
+            MeteringConfigView meteringConfigView, MonitoringConfigView monitoringConfigView) {
         given(databusConfigService.createDatabusConfigs(anyString(), any(), isNull(), isNull()))
                 .willReturn(databusConfigView);
-        given(fluentConfigService.createFluentConfigs(any(FluentClusterDetails.class),
+        given(fluentConfigService.createFluentConfigs(any(TelemetryClusterDetails.class),
                 anyBoolean(), anyBoolean(), any(Telemetry.class), anyList()))
                 .willReturn(fluentConfigView);
         given(meteringConfigService.createMeteringConfigs(anyBoolean(), anyString(), anyString(), anyString(),
                 anyString())).willReturn(meteringConfigView);
+        given(monitoringConfigService.createMonitoringConfig(any(), any(), any()))
+                .willReturn(monitoringConfigView);
     }
 
 }

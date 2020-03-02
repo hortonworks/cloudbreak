@@ -14,12 +14,16 @@ public class TelemetryConfiguration {
 
     private final boolean meteringEnabled;
 
+    private final boolean monitoringEnabled;
+
     public TelemetryConfiguration(AltusDatabusConfiguration altusDatabusConfiguration,
             @Value("${cluster.logs.collection.enabled:false}") boolean clusterLogsCollection,
-            @Value("${metering.enabled:false}") boolean meteringEnabled) {
+            @Value("${metering.enabled:false}") boolean meteringEnabled,
+            @Value("${cluster.monitoring.enabled:false}") boolean monitoringEnabled) {
         this.altusDatabusConfiguration = altusDatabusConfiguration;
         this.clusterLogsCollection = clusterLogsCollection;
         this.meteringEnabled = meteringEnabled;
+        this.monitoringEnabled = monitoringEnabled;
     }
 
     public AltusDatabusConfiguration getAltusDatabusConfiguration() {
@@ -32,5 +36,9 @@ public class TelemetryConfiguration {
 
     public boolean isMeteringEnabled() {
         return meteringEnabled;
+    }
+
+    public boolean isMonitoringEnabled() {
+        return monitoringEnabled;
     }
 }

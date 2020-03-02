@@ -33,7 +33,7 @@ public class TelemetryApiConverterTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration("", true, "****", "****");
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true);
+        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true, false);
         underTest = new TelemetryApiConverter(telemetryConfiguration);
     }
 

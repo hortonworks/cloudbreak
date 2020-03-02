@@ -120,11 +120,19 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     @Convert(converter = SecretToString.class)
     @SecretValue
+    private Secret cloudbreakClusterManagerMonitoringUser = Secret.EMPTY;
+
+    @Convert(converter = SecretToString.class)
+    @SecretValue
     private Secret cloudbreakAmbariPassword = Secret.EMPTY;
 
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret cloudbreakClusterManagerPassword = Secret.EMPTY;
+
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret cloudbreakClusterManagerMonitoringPassword = Secret.EMPTY;
 
     @Convert(converter = SecretToString.class)
     @SecretValue
@@ -462,6 +470,10 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         return getIfNotNull(cloudbreakClusterManagerUser, Secret::getSecret);
     }
 
+    public String getCloudbreakClusterManagerMonitoringUser() {
+        return getIfNotNull(cloudbreakClusterManagerMonitoringUser, Secret::getRaw);
+    }
+
     public void setCloudbreakAmbariUser(String cloudbreakAmbariUser) {
         this.cloudbreakAmbariUser = new Secret(cloudbreakAmbariUser);
     }
@@ -473,6 +485,10 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setCloudbreakClusterManagerUser(String cloudbreakClusterManagerUser) {
         this.cloudbreakClusterManagerUser = new Secret(cloudbreakClusterManagerUser);
+    }
+
+    public void setCloudbreakClusterManagerMonitoringUser(String cloudbreakClusterManagerMonitoringUser) {
+        this.cloudbreakClusterManagerMonitoringUser = new Secret(cloudbreakClusterManagerMonitoringUser);
     }
 
     public String getCloudbreakAmbariPassword() {
@@ -491,6 +507,10 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         return getIfNotNull(cloudbreakClusterManagerPassword, Secret::getSecret);
     }
 
+    public String getCloudbreakClusterManagerMonitoringPassword() {
+        return getIfNotNull(cloudbreakClusterManagerMonitoringPassword, Secret::getRaw);
+    }
+
     public void setCloudbreakAmbariPassword(String cloudbreakAmbariPassword) {
         this.cloudbreakAmbariPassword = new Secret(cloudbreakAmbariPassword);
     }
@@ -502,6 +522,10 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setCloudbreakClusterManagerPassword(String password) {
         cloudbreakClusterManagerPassword = new Secret(password);
+    }
+
+    public void setCloudbreakClusterManagerMonitoringPassword(String cloudbreakClusterManagerMonitoringPassword) {
+        this.cloudbreakClusterManagerMonitoringPassword = new Secret(cloudbreakClusterManagerMonitoringPassword);
     }
 
     public String getDpAmbariUser() {

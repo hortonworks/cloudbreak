@@ -65,6 +65,7 @@ base:
     - gateway.init
     - gateway.ldap
     - gateway.settings
+    - monitoring.init
 
   'roles:knox_gateway':
     - match: grain

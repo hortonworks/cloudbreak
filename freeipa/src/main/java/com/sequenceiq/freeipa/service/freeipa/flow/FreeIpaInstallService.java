@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
-import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterDetails;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
@@ -130,7 +130,7 @@ public class FreeIpaInstallService {
         Telemetry telemetry = stack.getTelemetry();
         if (telemetry != null) {
             boolean databusEnabled = telemetry.isClusterLogsCollectionEnabled();
-            final FluentClusterDetails clusterDetails = FluentClusterDetails.Builder.builder()
+            final TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder()
                     .withOwner(stack.getOwner())
                     .withName(stack.getName())
                     .withType(FluentClusterType.FREEIPA.value())

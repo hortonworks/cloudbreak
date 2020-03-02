@@ -1,11 +1,11 @@
-package com.sequenceiq.cloudbreak.telemetry.fluent;
+package com.sequenceiq.cloudbreak.telemetry;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 
-public class FluentClusterDetails {
+public class TelemetryClusterDetails {
 
     public static final String CLUSTER_CRN_KEY = "clusterCrn";
 
@@ -25,7 +25,7 @@ public class FluentClusterDetails {
 
     private final String version;
 
-    private FluentClusterDetails(Builder builder) {
+    private TelemetryClusterDetails(Builder builder) {
         this.name = builder.name;
         this.type = builder.type;
         this.crn = builder.crn;
@@ -90,8 +90,8 @@ public class FluentClusterDetails {
             return new Builder();
         }
 
-        public FluentClusterDetails build() {
-            return new FluentClusterDetails(this);
+        public TelemetryClusterDetails build() {
+            return new TelemetryClusterDetails(this);
         }
 
         public Builder withName(String name) {

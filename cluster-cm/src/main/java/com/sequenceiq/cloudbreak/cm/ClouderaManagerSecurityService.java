@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -106,6 +107,34 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
             }
         } catch (ApiException | ClouderaManagerClientInitException e) {
             LOGGER.info("Can't replace admin password due to: ", e);
+            throw new CloudbreakException("Can't replace admin password due to: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void setupMonitoringUser() throws CloudbreakException {
+        Cluster cluster = stack.getCluster();
+        String user = cluster.getCloudbreakAmbariUser();
+        String password = cluster.getCloudbreakAmbariPassword();
+        try {
+            ApiClient client = getClient(stack.getGatewayPort(), user, password, clientConfig);
+            UsersResourceApi usersResourceApi = clouderaManagerApiFactory.getUserResourceApi(client);
+            String monitoringUser = cluster.getCloudbreakClusterManagerMonitoringUser();
+            String monitoringPassword = cluster.getCloudbreakClusterManagerMonitoringPassword();
+            ApiUser2List userList = usersResourceApi.readUsers2("SUMMARY");
+            Optional<ApiUser2> mUser = userList.getItems().stream()
+                    .filter(apiUser2 -> apiUser2.getName().equals(monitoringUser))
+                    .findFirst();
+            if (mUser.isPresent()) {
+                LOGGER.info("Monitoring user '{}' already exists. Skipping user generation", monitoringUser);
+            } else {
+                List<ApiAuthRoleRef> authRoles = new ArrayList<>();
+                ApiAuthRoleRef apiAuthRoleRef = new ApiAuthRoleRef();
+                apiAuthRoleRef.setName("ROLE_ADMIN");
+                authRoles.add(apiAuthRoleRef);
+                createNewUser(usersResourceApi, authRoles, monitoringUser, monitoringPassword);
+            }
+        } catch (ApiException | ClouderaManagerClientInitException e) {
             throw new CloudbreakException("Can't replace admin password due to: " + e.getMessage());
         }
     }

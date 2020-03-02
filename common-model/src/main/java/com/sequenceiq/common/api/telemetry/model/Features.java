@@ -14,6 +14,9 @@ public class Features extends FeaturesBase {
     @JsonProperty("metering")
     private FeatureSetting metering;
 
+    @JsonProperty("monitoring")
+    private FeatureSetting monitoring;
+
     @JsonProperty("useSharedAltusCredential")
     private FeatureSetting useSharedAltusCredential;
 
@@ -23,6 +26,14 @@ public class Features extends FeaturesBase {
 
     public void setMetering(FeatureSetting metering) {
         this.metering = metering;
+    }
+
+    public FeatureSetting getMonitoring() {
+        return monitoring;
+    }
+
+    public void setMonitoring(FeatureSetting monitoring) {
+        this.monitoring = monitoring;
     }
 
     public FeatureSetting getUseSharedAltusCredential() {
@@ -37,6 +48,12 @@ public class Features extends FeaturesBase {
     public void addMetering(boolean enabled) {
         metering = new FeatureSetting();
         metering.setEnabled(enabled);
+    }
+
+    @JsonIgnore
+    public void addMonitoring(boolean enabled) {
+        monitoring = new FeatureSetting();
+        monitoring.setEnabled(enabled);
     }
 
     @JsonIgnore

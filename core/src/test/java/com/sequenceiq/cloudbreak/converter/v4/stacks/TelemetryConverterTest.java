@@ -40,7 +40,7 @@ public class TelemetryConverterTest {
     @Before
     public void setUp() {
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, true, "****", "****");
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true);
+        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true, true);
         underTest = new TelemetryConverter(telemetryConfiguration, true, true);
     }
 
@@ -77,6 +77,7 @@ public class TelemetryConverterTest {
         assertNotNull(result.getFeatures().getWorkloadAnalytics());
         assertFalse(result.getFeatures().getClusterLogsCollection().isEnabled());
         assertTrue(result.getFeatures().getMetering().isEnabled());
+        assertTrue(result.getFeatures().getMonitoring().isEnabled());
         assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
         assertTrue(result.getFeatures().getUseSharedAltusCredential().isEnabled());
         assertEquals(DATABUS_ENDPOINT, result.getDatabusEndpoint());
@@ -172,7 +173,7 @@ public class TelemetryConverterTest {
         // GIVEN
         SdxClusterResponse sdxClusterResponse = null;
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, false, "", null);
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true);
+        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true, false);
         TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, true, false);
         // WHEN
         TelemetryRequest result = converter.convert(null, sdxClusterResponse);
@@ -243,7 +244,7 @@ public class TelemetryConverterTest {
         sdxClusterResponse.setCrn("crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
         sdxClusterResponse.setName("sdxName");
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, false, "", null);
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true);
+        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true, false);
         TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, false, true);
         // WHEN
         TelemetryRequest result = converter.convert(response, sdxClusterResponse);

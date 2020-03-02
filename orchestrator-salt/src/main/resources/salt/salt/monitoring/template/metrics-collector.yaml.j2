@@ -1,0 +1,42 @@
+{%- from 'monitoring/settings.sls' import monitoring with context %}
+config:
+    metricsCollectPeriod: 120
+    availableClusterUpdatePeriod: 600
+    availableServicesUpdatePeriod: 240
+    availableMetricsUpdatePeriod: 300
+clouderaManager:
+    apiVersion: "v40"
+    user: "{{ monitoring.cmUsername }}"
+    password: "{{ monitoring.cmPassword }}"
+    clusterType: "{{ monitoring.cmClusterType }}"
+    protocol: "https"
+    port: "7183"
+services:
+    - name: hdfs
+      metrics:
+        - jvm_max_memory_mb_across_datanodes
+        - jvm_max_memory_mb_across_namenodes
+        - files_total
+      health_checks:
+roles:
+globalFields:
+    clusterCrn: "{{ monitoring.clusterCrn }}"
+    clusterName: "{{ monitoring.clusterName }}"
+    clusterVersion: "{{ monitoring.clusterVersion }}"
+    clusterType: "{{ monitoring.clusterType }}"
+    platform: "{{ monitoring.platform }}"
+logger:
+    path: /var/log/metrics-collector/metrics-collector.log
+    max_bytes: 10485760
+    backup_count: 10
+    debug: True
+jsonMetricsLogger:
+    name: metrics_logger
+    path: /var/log/metrics-collector/metrics.json
+    max_bytes: 10485760
+    backup_count: 10
+jsonHealthChecksLogger:
+    name: health_checks_logger
+    path: /var/log/metrics-collector/health_checks.json
+    max_bytes: 10485760
+    backup_count: 10
