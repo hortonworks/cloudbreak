@@ -5,11 +5,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface CheckPermissionByResourceCrnList {
-    AuthorizationResourceAction action() default AuthorizationResourceAction.READ;
+@Target(ElementType.TYPE)
+public @interface AuthorizationResource {
+
+    AuthorizationResourceType type();
 }

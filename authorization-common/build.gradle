@@ -32,6 +32,7 @@ dependencies {
   testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   testCompile group: 'org.awaitility',            name: 'awaitility',                     version: '3.1.6'
+  testCompile group: 'org.reflections',           name: 'reflections',                    version: '0.9.11'
 
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',             version: springBootVersion
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',         version: springBootVersion

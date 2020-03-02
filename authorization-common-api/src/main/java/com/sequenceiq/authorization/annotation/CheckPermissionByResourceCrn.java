@@ -10,6 +10,6 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface CheckPermissionByResourceNameList {
-    AuthorizationResourceAction action() default AuthorizationResourceAction.READ;
+public @interface CheckPermissionByResourceCrn {
+    AuthorizationResourceAction action();
 }

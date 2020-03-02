@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
@@ -35,6 +36,7 @@ import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 @Controller
 @Transactional(TxType.NEVER)
 @WorkspaceEntityType(ClusterTemplate.class)
+@DisableCheckPermissions
 public class ClusterTemplateV4Controller extends NotificationController implements ClusterTemplateV4Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateV4Controller.class);

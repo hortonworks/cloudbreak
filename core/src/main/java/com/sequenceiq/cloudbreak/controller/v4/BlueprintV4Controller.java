@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.stereotype.Controller;
 
 import com.cloudera.cdp.datahub.model.CreateClusterTemplateRequest;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 @Controller
 @Transactional(TxType.NEVER)
 @WorkspaceEntityType(Blueprint.class)
+@DisableCheckPermissions
 public class BlueprintV4Controller extends NotificationController implements BlueprintV4Endpoint {
 
     @Inject

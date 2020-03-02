@@ -10,8 +10,9 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.AmbariAddressV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
@@ -37,7 +38,8 @@ import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 
-@Component
+@Controller
+@DisableCheckPermissions
 @Transactional(TxType.NEVER)
 @InternalReady
 public class AutoscaleV4Controller implements AutoscaleV4Endpoint {

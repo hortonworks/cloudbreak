@@ -6,12 +6,14 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.service.FlowService;
 
 @Controller
+@DisableCheckPermissions
 public class FlowController implements FlowEndpoint {
 
     @Inject

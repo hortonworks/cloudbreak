@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,7 +29,8 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -124,7 +126,9 @@ public class PermissionCheckServiceTest {
 
     @Test
     public void testHasPermissionIfThereIsNoAnnotationOnMethod() throws NoSuchMethodException {
+        when(proceedingJoinPoint.getTarget()).thenReturn(new ExampleClass());
         when(commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint)).thenReturn(Optional.of(ExampleClass.class));
+        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUser(any(), any(), any());
         when(commonPermissionCheckingUtils.getClassAnnotation(any())).thenReturn(Optional.of(new AuthorizationResource() {
 
             @Override
@@ -139,13 +143,11 @@ public class PermissionCheckServiceTest {
         }));
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("withoutAnnotation"));
 
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage("Method must be annotated");
-
         underTest.hasPermission(proceedingJoinPoint);
 
         verify(permissionChecker, times(0)).checkPermissions(any(), any(), anyString(), any(), any(), anyLong());
-        verify(commonPermissionCheckingUtils, times(0)).proceed(any(), any(), anyLong());
+        verify(commonPermissionCheckingUtils).checkPermissionForUser(any(), eq(AuthorizationResourceAction.WRITE), any());
+        verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
     }
 
     @Test
@@ -182,7 +184,7 @@ public class PermissionCheckServiceTest {
         }
 
         @DisableCheckPermissions
-        @CheckPermissionByAccount
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
         public void tooManyAnnotation() {
 
         }
@@ -191,7 +193,7 @@ public class PermissionCheckServiceTest {
 
         }
 
-        @CheckPermissionByAccount
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
         public void correctMethod() {
 
         }

@@ -18,7 +18,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.annotation.ResourceObject;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -60,7 +60,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public CredentialResponses list() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return new CredentialResponses(
@@ -71,7 +71,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByResourceName
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.READ)
     public CredentialResponse getByName(@ResourceName String credentialName) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByNameForAccountId(credentialName, accountId);
@@ -79,7 +79,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByResourceCrn
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.READ)
     public CredentialResponse getByEnvironmentCrn(@ResourceCrn String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
@@ -87,7 +87,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByResourceName
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.READ)
     public CredentialResponse getByEnvironmentName(@ResourceName String environmentName) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByEnvironmentNameAndAccountId(environmentName, accountId);
@@ -95,7 +95,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByResourceCrn
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.READ)
     public CredentialResponse getByResourceCrn(@ResourceCrn String credentialCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return credentialConverter.convert(credentialService.getByCrnForAccountId(credentialCrn, accountId));
@@ -191,7 +191,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByResourceName
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.READ)
     public CredentialResponse verifyByName(@ResourceName String name) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByNameForAccountId(name, accountId);
@@ -200,7 +200,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByResourceCrn
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.READ)
     public CredentialResponse verifyByCrn(@ResourceCrn String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByCrnForAccountId(crn, accountId);
@@ -209,6 +209,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public Object getCreateCredentialForCli(CredentialRequest credentialRequest) {
         if (!CloudPlatform.AWS.equalsIgnoreCase(credentialRequest.getCloudPlatform())) {
             return new EmptyResponse();

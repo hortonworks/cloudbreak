@@ -5,7 +5,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface DisableCheckPermissions {
+public @interface CheckPermissionByResourceCrnList {
+    AuthorizationResourceAction action();
 }

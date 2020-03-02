@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
@@ -36,6 +37,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
 @WorkspaceEntityType(Stack.class)
+@DisableCheckPermissions
 public class StackV4Controller extends NotificationController implements StackV4Endpoint {
 
     @Inject

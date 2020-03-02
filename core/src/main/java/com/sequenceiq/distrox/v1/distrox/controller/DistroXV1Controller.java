@@ -15,7 +15,7 @@ import org.springframework.stereotype.Controller;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -85,7 +85,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     private EnvironmentClientService environmentClientService;
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public StackViewV4Responses list(String environmentName, String environmentCrn) {
         StackViewV4Responses stackViewV4Responses;
         List<StackType> stackTypes = List.of(StackType.WORKLOAD);
@@ -104,7 +104,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public StackV4Response getByName(String name, Set<String> entries) {
         return stackOperations.get(
                 NameOrCrn.ofName(name),
@@ -114,7 +114,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public StackV4Response getByCrn(@ResourceCrn String crn, Set<String> entries) {
         return stackOperations.get(
                 NameOrCrn.ofCrn(crn),
@@ -136,7 +136,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public void deleteMultiple(DistroXMultiDeleteV1Request multiDeleteRequest, Boolean forced) {
         validateMultidelete(multiDeleteRequest);
         if (CollectionUtils.isNotEmpty(multiDeleteRequest.getNames())) {
@@ -190,7 +190,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public List<RetryableFlowResponse> listRetryableFlows(String name) {
         List<RetryableFlow> retryableFlows = stackOperations.getRetryableFlows(name, workspaceService.getForCurrentUser().getId());
         return retryableFlows.stream()
@@ -289,7 +289,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public GeneratedBlueprintV4Response postStackForBlueprintByName(String name, @Valid DistroXV1Request stackRequest) {
         return stackOperations.postStackForBlueprint(
                 NameOrCrn.ofName(name),
@@ -298,7 +298,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public GeneratedBlueprintV4Response postStackForBlueprintByCrn(String crn, @Valid DistroXV1Request stackRequest) {
         return stackOperations.postStackForBlueprint(
                 NameOrCrn.ofCrn(crn),
@@ -313,14 +313,14 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public Object getRequestfromCrn(String crn) {
         StackV4Request stackV4Request = getStackV4Request(NameOrCrn.ofCrn(crn));
         return getCreateAWSClusterRequest(stackV4Request);
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public StackStatusV4Response getStatusByName(String name) {
         return stackOperations.getStatus(
                 NameOrCrn.ofName(name),
@@ -328,7 +328,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public StackStatusV4Response getStatusByCrn(String crn) {
         return stackOperations.getStatusByCrn(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
@@ -413,7 +413,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public Object getCreateAwsClusterForCli(DistroXV1Request request) {
         DetailedEnvironmentResponse env = environmentClientService.getByName(request.getEnvironmentName());
         if (!CloudPlatform.AWS.name().equals(env.getCloudPlatform())) {

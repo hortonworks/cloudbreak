@@ -26,8 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceName;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 
@@ -125,6 +126,15 @@ public class CommonPermissionCheckingUtilsTest {
     }
 
     @Test
+    public void testCheckIfAuthorizationDisabled() {
+        when(proceedingJoinPoint.getTarget()).thenReturn(new ExampleDisabledAuthorizationResourceClass());
+        assertTrue(underTest.isAuthorizationDisabled(proceedingJoinPoint));
+
+        when(proceedingJoinPoint.getTarget()).thenReturn(new ExampleAuthorizationResourceClass());
+        assertFalse(underTest.isAuthorizationDisabled(proceedingJoinPoint));
+    }
+
+    @Test
     public void testGetParameterWithCorrectlyAnnotatedMethod() throws NoSuchMethodException {
         when(methodSignature.getMethod())
                 .thenReturn(ExampleAuthorizationResourceClass.class.getMethod("exampleMethodWithAnnotation", String.class, String.class));
@@ -194,6 +204,11 @@ public class CommonPermissionCheckingUtilsTest {
         public void exampleMethodWithTooManyAnnotation(@ResourceCrn String name, @ResourceCrn String other) {
             LOGGER.info(name + other);
         }
+    }
+
+    @DisableCheckPermissions
+    private static class ExampleDisabledAuthorizationResourceClass {
+
     }
 
 }
