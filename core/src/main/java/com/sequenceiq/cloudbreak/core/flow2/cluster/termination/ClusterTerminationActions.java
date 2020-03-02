@@ -11,6 +11,8 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.DisableKerberosResultToStackFailureEventConverter;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DeregisterServicesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DeregisterServicesResult;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
@@ -51,11 +53,26 @@ public class ClusterTerminationActions {
         };
     }
 
-    @Bean(name = "DISABLE_KERBEROS_STATE")
-    public Action<?, ?> disableKerboros() {
+    @Bean(name = "DEREGISTER_SERVICES_STATE")
+    public Action<?, ?> deregisterServices() {
         return new AbstractClusterAction<>(PrepareClusterTerminationResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, PrepareClusterTerminationResult payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new DeregisterServicesRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "DISABLE_KERBEROS_STATE")
+    public Action<?, ?> disableKerberos() {
+        return new AbstractClusterAction<>(DeregisterServicesResult.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, DeregisterServicesResult payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 

@@ -125,6 +125,16 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     }
 
     @Override
+    public void deregisterServices() {
+        try {
+            ApiClient client = getDefaultClient(stack.getGatewayPort(), clientConfig);
+            clouderaManagerApiFactory.getClouderaManagerResourceApi(client).rem
+        } catch (Exception e) {
+            LOGGER.warn("Couldn't remove services. It's possible CM isn't started.", e);
+        }
+    }
+
+    @Override
     public void changeOriginalCredentialsAndCreateCloudbreakUser(boolean ldapConfigured) throws CloudbreakException {
         LOGGER.debug("change original admin user and create cloudbreak user");
         try {
