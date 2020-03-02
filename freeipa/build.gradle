@@ -105,6 +105,8 @@ dependencies {
   runtime project(':cloud-mock')
   runtime project(':cloud-azure')
   testCompile group: 'com.hubspot.jinjava', name: 'jinjava', version: jinjavaVersion
+
+  testImplementation project(path: ':authorization-common', configuration: 'tests')
 }
 
 bootRun {

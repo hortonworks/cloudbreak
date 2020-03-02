@@ -7,7 +7,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -33,7 +34,7 @@ public class SdxInternalController implements SdxInternalEndpoint {
     private SdxMetricService metricService;
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
     public SdxClusterResponse create(String name, @Valid SdxInternalClusterRequest createSdxClusterRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Pair<SdxCluster, FlowIdentifier> result = sdxService.createSdx(userCrn, name, createSdxClusterRequest, createSdxClusterRequest.getStackV4Request());

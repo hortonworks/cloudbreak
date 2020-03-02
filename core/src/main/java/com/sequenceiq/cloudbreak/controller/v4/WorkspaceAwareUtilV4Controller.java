@@ -5,11 +5,13 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Controller;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.WorkspaceAwareUtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Responses;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 
 @Controller
+@DisableCheckPermissions
 public class WorkspaceAwareUtilV4Controller extends NotificationController implements WorkspaceAwareUtilV4Endpoint {
 
     @Inject

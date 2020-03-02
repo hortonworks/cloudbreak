@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableDeleteRequest;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.cloudprovider.CloudProviderService;
 
 @Controller
+@DisableCheckPermissions
 public class CloudProviderServicesV4Controller implements CloudProviderServicesV4Endopint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderServicesV4Controller.class);

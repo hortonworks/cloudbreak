@@ -9,6 +9,7 @@ import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.NameComparator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.UserIdComparator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Endpoint;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Controller
+@DisableCheckPermissions
 @Transactional(Transactional.TxType.NEVER)
 public class WorkspaceV4Controller extends NotificationController implements WorkspaceV4Endpoint {
 

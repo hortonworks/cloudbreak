@@ -22,7 +22,7 @@ public class CheckPermissionsAspects {
     private AbstractPermissionCheckerService permissionCheckerService;
 
     @Pointcut("within(@org.springframework.stereotype.Controller *) "
-            + "&& within(@com.sequenceiq.authorization.resource.AuthorizationResource *)")
+            + "&& within(@com.sequenceiq.authorization.annotation.AuthorizationResource *)")
     public void allEndpoints() {
     }
 

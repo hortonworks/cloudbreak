@@ -46,6 +46,7 @@ dependencies {
   testImplementation ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'
   }
+  testImplementation project(path: ':authorization-common', configuration: 'tests')
   testImplementation group: 'org.mockito',               name: 'mockito-core'
 
   implementation     group: 'io.projectreactor',         name: 'reactor-core',                          version: eventBusVersion

@@ -7,6 +7,7 @@ import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.requests.ShowTerminatedClustersPreferencesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.ShowTerminatedClusterPreferencesV4Response;
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.service.user.UserProfileDecorator;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 
 @Controller
+@DisableCheckPermissions
 @Transactional(TxType.NEVER)
 public class UserProfileV4Controller implements UserProfileV4Endpoint {
 

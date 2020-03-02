@@ -11,6 +11,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.service.audit.AuditEventService;
 
 @Controller
+@DisableCheckPermissions
 public class AuditEventV4Controller implements AuditEventV4Endpoint {
 
     @Inject

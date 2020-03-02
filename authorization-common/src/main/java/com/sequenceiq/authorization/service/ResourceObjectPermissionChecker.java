@@ -22,7 +22,7 @@ import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
-import com.sequenceiq.authorization.resource.ResourceObjectField;
+import com.sequenceiq.authorization.annotation.ResourceObjectField;
 
 @Component
 public class ResourceObjectPermissionChecker implements PermissionChecker<CheckPermissionByResourceObject> {

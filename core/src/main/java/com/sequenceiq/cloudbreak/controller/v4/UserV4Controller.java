@@ -9,6 +9,7 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.user.UserV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.user.responses.UserEvictV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.user.responses.UserV4Responses;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
 @Transactional(TxType.NEVER)
+@DisableCheckPermissions
 public class UserV4Controller implements UserV4Endpoint {
 
     @Inject

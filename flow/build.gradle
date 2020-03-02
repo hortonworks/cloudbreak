@@ -19,6 +19,7 @@ jar {
 dependencies {
   compile project(':common')
   compile project(':flow-api')
+  compile project(':authorization-common-api')
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
   compile group: 'net.bytebuddy',                         name: 'byte-buddy',                     version: '1.9.12'
@@ -43,4 +44,6 @@ dependencies {
   testCompile group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
   testCompile group: 'junit',                             name: 'junit',                          version: junitVersion
   testCompile group: 'org.springframework.boot',          name: 'spring-boot-starter-test',       version: springBootVersion
+  testCompile group: 'org.reflections',                   name: 'reflections',                    version: '0.9.11'
+  testCompile project(path: ':authorization-common', configuration: 'tests')
 }

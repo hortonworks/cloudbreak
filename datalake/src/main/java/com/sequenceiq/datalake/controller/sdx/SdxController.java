@@ -11,7 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -98,7 +98,7 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public SdxClusterResponse get(String name) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
@@ -106,7 +106,7 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public SdxClusterResponse getByCrn(String clusterCrn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, clusterCrn);
@@ -114,7 +114,7 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public List<SdxClusterResponse> getByEnvCrn(@ValidCrn String envCrn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         List<SdxCluster> sdxClusters = sdxService.listSdxByEnvCrn(userCrn, envCrn);
@@ -124,7 +124,7 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public SdxClusterDetailResponse getDetailByCrn(String clusterCrn, Set<String> entries) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, clusterCrn);
@@ -148,14 +148,14 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public UpgradeOptionV4Response checkForUpgradeByName(String clusterName) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return sdxUpgradeService.checkForUpgradeByName(userCrn, clusterName);
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public UpgradeOptionV4Response checkForUpgradeByCrn(String clusterCrn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return sdxUpgradeService.checkForUpgradeByCrn(userCrn, clusterCrn);
@@ -176,7 +176,7 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public SdxClusterDetailResponse getDetail(String name, Set<String> entries) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
@@ -186,7 +186,7 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public List<SdxClusterResponse> list(String envName) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         List<SdxCluster> sdxClusters = sdxService.listSdx(userCrn, envName);
@@ -257,32 +257,32 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public List<String> versions() {
         return sdxService.getDatalakeVersions();
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public UpgradeOptionsV4Response checkForStackUpgradeByName(String name) {
         return sdxStackUpgradeService.checkForStackUpgradeByName(name);
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public UpgradeOptionsV4Response checkForStackUpgradeByCrn(String crn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return sdxStackUpgradeService.checkForStackUpgradeByCrn(crn, userCrn);
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public void upgradeStackByName(String name, String imageId) {
         sdxStackUpgradeService.upgradeStackByName(name, imageId);
     }
 
     @Override
-    @CheckPermissionByAccount
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public void upgradeStackByCrn(String crn, String imageId) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         sdxStackUpgradeService.upgradeStackByCrn(crn, imageId, userCrn);

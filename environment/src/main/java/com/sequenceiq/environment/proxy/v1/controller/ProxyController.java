@@ -11,6 +11,10 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
@@ -25,6 +29,7 @@ import com.sequenceiq.notification.NotificationController;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 @Controller
+@AuthorizationResource(type = AuthorizationResourceType.ENVIRONMENT)
 @Transactional(TxType.NEVER)
 public class ProxyController extends NotificationController implements ProxyEndpoint {
 
@@ -47,6 +52,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public ProxyResponses list() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Set<ProxyConfig> listInAccount = proxyConfigService.listInAccount(accountId);
@@ -54,6 +60,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public ProxyResponse getByName(String name) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         ProxyConfig config = proxyConfigService.getByNameForAccountId(name, accountId);
@@ -61,6 +68,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public ProxyResponse getByResourceCrn(String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         ProxyConfig config = proxyConfigService.getByCrnForAccountId(crn, accountId);
@@ -68,6 +76,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
     public ProxyResponse post(ProxyRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
@@ -78,6 +87,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
     public ProxyResponse deleteByName(String name) {
         ProxyResponse proxyResponse = proxyConfigToProxyResponseConverter.convert(
                 proxyConfigService.deleteByNameInAccount(name, ThreadBasedUserCrnProvider.getAccountId()));
@@ -86,6 +96,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
     public ProxyResponse deleteByCrn(String crn) {
         ProxyResponse proxyResponse = proxyConfigToProxyResponseConverter.convert(
                 proxyConfigService.deleteByCrnInAccount(crn, ThreadBasedUserCrnProvider.getAccountId()));
@@ -94,6 +105,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
     public ProxyResponses deleteMultiple(Set<String> names) {
         notify(ResourceEvent.PROXY_CONFIG_DELETED);
         Set<ProxyConfig> responses = proxyConfigService.deleteMultipleInAccount(names, ThreadBasedUserCrnProvider.getAccountId());
@@ -104,6 +116,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public ProxyRequest getRequest(String name) {
         ProxyConfig proxyConfig = proxyConfigService.getByNameForAccountId(name, TEMP_ACCOUNT_ID);
         return proxyConfigToProxyRequestConverter.convert(proxyConfig);

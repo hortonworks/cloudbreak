@@ -8,6 +8,7 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintUtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintServicesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.GeneratedCmTemplateV4Response;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Controller
+@DisableCheckPermissions
 @Transactional(TxType.NEVER)
 @WorkspaceEntityType(Blueprint.class)
 public class BlueprintUtilV4Controller extends NotificationController implements BlueprintUtilV4Endpoint {

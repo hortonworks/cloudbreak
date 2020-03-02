@@ -3,11 +3,13 @@ package com.sequenceiq.datalake.controller.util;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.common.api.util.versionchecker.ClientVersionUtil;
 import com.sequenceiq.common.api.util.versionchecker.VersionCheckResult;
 import com.sequenceiq.sdx.api.endpoint.UtilEndpoint;
 
 @Controller
+@DisableCheckPermissions
 public class UtilController implements UtilEndpoint {
 
     @Value("${info.app.version:}")
