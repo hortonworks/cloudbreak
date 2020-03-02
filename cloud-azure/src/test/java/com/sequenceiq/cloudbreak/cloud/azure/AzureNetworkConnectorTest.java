@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -32,9 +33,9 @@ import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
+import com.sequenceiq.cloudbreak.cloud.azure.subnet.selector.AzureSubnetSelectorService;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -92,6 +93,9 @@ public class AzureNetworkConnectorTest {
 
     @Mock
     private AzureUtils azureUtils;
+
+    @Mock
+    private AzureSubnetSelectorService azureSubnetSelectorService;
 
     @Test
     public void testPlatformShouldReturnAzurePlatform() {
@@ -270,36 +274,10 @@ public class AzureNetworkConnectorTest {
         underTest.getNetworkCidr(network, credential);
     }
 
-    public void testSelectSubnetsWhenOneSubnet() {
-        List<CloudSubnet> subnets = new SubnetBuilder().withPrivateSubnet().build();
+    public void testSelectSubnetsThenSubnetSelectorIsCalled() {
+        underTest.selectSubnets(List.of(), SubnetSelectionParameters.builder().build());
 
-        List<CloudSubnet> selectedSubnets = underTest.selectSubnets(subnets, SubnetSelectionParameters.builder().build());
-
-        assertEquals(1, selectedSubnets.size());
-    }
-
-    public void testSelectSubnetsWhenTwoSubnets() {
-        List<CloudSubnet> subnets = new SubnetBuilder().withPrivateSubnet().withPrivateSubnet().build();
-
-        List<CloudSubnet> selectedSubnets = underTest.selectSubnets(subnets, SubnetSelectionParameters.builder().build());
-
-        assertEquals(1, selectedSubnets.size());
-    }
-
-    public void testSelectSubnetsWhenNoSubnets() {
-        List<CloudSubnet> subnets = new SubnetBuilder().build();
-
-        underTest.selectSubnets(subnets, SubnetSelectionParameters.builder().build());
-
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Azure subnet selection: there are no subnets to choose from.");
-    }
-
-    public void testSelectSubnetsNull() {
-        underTest.selectSubnets(null, SubnetSelectionParameters.builder().build());
-
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Azure subnet selection: there are no subnets to choose from.");
+        verify(azureSubnetSelectorService).select(anyList(), any());
     }
 
     private Map<String, Map> createOutput() {

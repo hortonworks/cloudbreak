@@ -54,7 +54,7 @@ class SubnetIdProviderTest {
 
         ArgumentCaptor<SubnetSelectionParameters> subnetSelectionParametersCaptor = ArgumentCaptor.forClass(SubnetSelectionParameters.class);
         verify(networkConnector).selectSubnets(any(), subnetSelectionParametersCaptor.capture());
-        assertFalse(subnetSelectionParametersCaptor.getValue().isPreferPrivateNetwork());
+        assertFalse(subnetSelectionParametersCaptor.getValue().isForDatabase());
         assertFalse(subnetSelectionParametersCaptor.getValue().isHa());
         assertEquals(tunnel, subnetSelectionParametersCaptor.getValue().getTunnel());
     }
