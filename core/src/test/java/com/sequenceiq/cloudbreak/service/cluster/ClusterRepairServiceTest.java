@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
@@ -170,9 +171,9 @@ public class ClusterRepairServiceTest {
         when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(Collections.emptyList());
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
 
-        boolean result = underTest.canRepairAll(stack);
+        Result result = underTest.repairWithDryRun(stack.getId());
 
-        assertTrue(result);
+        assertTrue(result.isSuccess());
         verifyZeroInteractions(stackUpdater, flowManager, resourceService);
     }
 
@@ -193,9 +194,9 @@ public class ClusterRepairServiceTest {
         when(image.isPrewarmed()).thenReturn(true);
         when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
 
-        boolean result = underTest.canRepairAll(stack);
+        Result result = underTest.repairWithDryRun(stack.getId());
 
-        assertTrue(result);
+        assertTrue(result.isSuccess());
         verifyZeroInteractions(stackUpdater, flowManager, resourceService);
     }
 
@@ -216,9 +217,9 @@ public class ClusterRepairServiceTest {
         when(image.isPrewarmed()).thenReturn(false);
         when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
 
-        boolean result = underTest.canRepairAll(stack);
+        Result result = underTest.repairWithDryRun(stack.getId());
 
-        assertFalse(result);
+        assertFalse(result.isSuccess());
         verifyZeroInteractions(stackUpdater, flowManager, resourceService);
     }
 
@@ -238,9 +239,9 @@ public class ClusterRepairServiceTest {
         when(image.isPrewarmed()).thenReturn(true);
         when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
 
-        boolean result = underTest.canRepairAll(stack);
+        Result result = underTest.repairWithDryRun(stack.getId());
 
-        assertFalse(result);
+        assertFalse(result.isSuccess());
         verifyZeroInteractions(stackUpdater, flowManager, resourceService);
     }
 

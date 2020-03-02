@@ -34,4 +34,13 @@ public class UpgradeOptionV4Response {
     public void setReason(String reason) {
         this.reason = reason;
     }
+
+    @Override
+    public String toString() {
+        return "UpgradeOptionV4Response{" +
+                "current=" + current +
+                ", upgrade=" + upgrade +
+                ", reason='" + reason + '\'' +
+                '}';
+    }
 }
