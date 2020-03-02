@@ -53,6 +53,9 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
+    @Inject
+    private ClouderaManagerDeregisterService clouderaManagerDeregisterService;
+
     private final Stack stack;
 
     private final HttpClientConfig clientConfig;
@@ -150,6 +153,15 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
             kerberosService.deleteCredentials(clientConfig, stack);
         } catch (Exception e) {
             LOGGER.warn("Couldn't cleanup kerberos. It's possible CM isn't started.", e);
+        }
+    }
+
+    @Override
+    public void deregisterServices(String clusterName) {
+        try {
+            clouderaManagerDeregisterService.deregisterServices(clientConfig, stack);
+        } catch (Exception e) {
+            LOGGER.warn("Couldn't remove services. It's possible CM isn't started.", e);
         }
     }
 
