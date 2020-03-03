@@ -49,7 +49,7 @@ class SubnetIdProviderTest {
         NetworkDto networkDto = NetworkDto.builder()
                 .withSubnetMetas(Map.of("AZ-a", new CloudSubnet()))
                 .build();
-        NetworkConnector networkConnector = setupConnector();
+        NetworkConnector networkConnector = setupConnectorWithSelectionResult(List.of(new CloudSubnet()));
         Tunnel tunnel = Tunnel.DIRECT;
 
         underTest.provide(networkDto, tunnel, CloudPlatform.AWS);
@@ -81,7 +81,7 @@ class SubnetIdProviderTest {
 
     @Test
     void testProvideShouldReturnAnySubnetWhenResultHasError() {
-        setupConnector("error choosing");
+        setupConnectorWithSelectionError("error message");
         NetworkDto networkDto = NetworkDto.builder()
                 .withSubnetMetas(Map.of(
                         "AZ-a", new CloudSubnet("id-1", "name-1"),
@@ -94,15 +94,34 @@ class SubnetIdProviderTest {
         Assertions.assertNotNull(actual);
     }
 
-    private NetworkConnector setupConnector() {
-        return setupConnector(null);
+    @Test
+    void testProvideShouldReturnAnySubnetWhenResultIsEmptyAndNoError() {
+        setupConnectorWithSelectionResult(List.of());
+        NetworkDto networkDto = NetworkDto.builder()
+                .withSubnetMetas(Map.of(
+                        "AZ-a", new CloudSubnet("id-1", "name-1"),
+                        "AZ-b", new CloudSubnet("id-2", "name-2")
+                ))
+                .build();
+
+        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
+
+        Assertions.assertNotNull(actual);
     }
 
-    private NetworkConnector setupConnector(String errorMessage) {
+    private NetworkConnector setupConnectorWithSelectionResult(List<CloudSubnet> selectedSubnets) {
+        return setupConnector(null, selectedSubnets);
+    }
+
+    private NetworkConnector setupConnectorWithSelectionError(String errorMessage) {
+        return setupConnector(errorMessage, null);
+    }
+
+    private NetworkConnector setupConnector(String errorMessage, List<CloudSubnet> selectedSubnets) {
         CloudConnector cloudConnector = mock(CloudConnector.class);
         NetworkConnector networkConnector = mock(NetworkConnector.class);
         SubnetSelectionResult subnetSelectionResult = StringUtils.isEmpty(errorMessage)
-                ? new SubnetSelectionResult(List.of(new CloudSubnet()))
+                ? new SubnetSelectionResult(selectedSubnets)
                 : new SubnetSelectionResult(errorMessage);
         when(networkConnector.selectSubnets(any(), any()))
                 .thenReturn(subnetSelectionResult);
