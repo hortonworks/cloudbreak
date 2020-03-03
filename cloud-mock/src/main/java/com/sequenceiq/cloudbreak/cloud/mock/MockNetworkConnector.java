@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 
 @Service
 public class MockNetworkConnector implements NetworkConnector {
@@ -56,13 +57,13 @@ public class MockNetworkConnector implements NetworkConnector {
     }
 
     @Override
-    public List<CloudSubnet> selectSubnets(List<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
+    public SubnetSelectionResult selectSubnets(List<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
         if (subnetMetas == null || subnetMetas.isEmpty()) {
             String message = "Mock subnet selection: there are no subnets to choose from";
             LOGGER.debug(message);
             throw new BadRequestException(message);
         }
-        return subnetMetas;
+        return new SubnetSelectionResult(subnetMetas);
     }
 
     @Override

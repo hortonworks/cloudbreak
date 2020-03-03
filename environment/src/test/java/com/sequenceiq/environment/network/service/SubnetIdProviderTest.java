@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -77,11 +79,33 @@ class SubnetIdProviderTest {
         Assertions.assertNull(actual);
     }
 
+    @Test
+    void testProvideShouldReturnAnySubnetWhenResultHasError() {
+        setupConnector("error choosing");
+        NetworkDto networkDto = NetworkDto.builder()
+                .withSubnetMetas(Map.of(
+                        "AZ-a", new CloudSubnet("id-1", "name-1"),
+                        "AZ-b", new CloudSubnet("id-2", "name-2")
+                        ))
+                .build();
+
+        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
+
+        Assertions.assertNotNull(actual);
+    }
+
     private NetworkConnector setupConnector() {
+        return setupConnector(null);
+    }
+
+    private NetworkConnector setupConnector(String errorMessage) {
         CloudConnector cloudConnector = mock(CloudConnector.class);
         NetworkConnector networkConnector = mock(NetworkConnector.class);
+        SubnetSelectionResult subnetSelectionResult = StringUtils.isEmpty(errorMessage)
+                ? new SubnetSelectionResult(List.of(new CloudSubnet()))
+                : new SubnetSelectionResult(errorMessage);
         when(networkConnector.selectSubnets(any(), any()))
-                .thenReturn(List.of(new CloudSubnet()));
+                .thenReturn(subnetSelectionResult);
         when(cloudConnector.networkConnector()).thenReturn(networkConnector);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         return networkConnector;
