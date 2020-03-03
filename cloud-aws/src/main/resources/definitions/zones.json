@@ -1,5 +1,9 @@
 {
-  "AWS GovCloud (US)": {
+  "AWS GovCloud East(US)": {
+    "zoneid": "us-gov-east-1",
+    "defaultvm": "i2.4xlarge"
+  },
+  "AWS GovCloud West(US)": {
     "zoneid": "us-gov-west-1",
     "defaultvm": "i2.4xlarge"
   },

@@ -65,8 +65,12 @@
       "displayName": "US East (Ohio)"
     },
     {
+      "name": "us-gov-east-1",
+      "displayName": "GovCloud East(US)"
+    },
+    {
       "name": "us-gov-west-1",
-      "displayName": "GovCloud (US)"
+      "displayName": "GovCloud West(US)"
     }
   ]
 }
