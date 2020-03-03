@@ -36,6 +36,7 @@ cb:
     cf.template.newdb.path: templates/aws-cf-dbstack.ftl
     default.inbound.security.group:
     vpc:
+    credential.cache.ttl: 60
 
 
   clustertemplate.defaults:

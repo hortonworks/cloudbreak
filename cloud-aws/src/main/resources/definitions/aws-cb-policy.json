@@ -154,17 +154,6 @@
       ]
     },
     {
-      "Sid": "ElasticComputeCloudLimited",
-      "Action": [
-        "ec2:DeleteTags"
-      ],
-      "Effect": "Allow",
-      "Resource": [
-        "arn:aws:ec2:*:*:subnet/*",
-        "arn:aws:ec2:*:*:vpc/*"
-      ]
-    },
-    {
       "Sid": "IdentityAccessManagementFull",
       "Action": [
         "iam:AttachRolePolicy",

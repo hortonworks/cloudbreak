@@ -96,7 +96,7 @@ public class AwsCredentialVerifierTest {
             Assert.assertThat(e.getMessage(), not(CoreMatchers.containsString("accepted_action")));
         }
         List<SimulatePrincipalPolicyRequest> allSimulatePrincipalPolicyRequest = requestArgumentCaptor.getAllValues();
-        int simulateRequestNumber = 6;
+        int simulateRequestNumber = 4;
         assertEquals("expect if " + simulateRequestNumber + " simulate request has been sent",
                 simulateRequestNumber, allSimulatePrincipalPolicyRequest.size());
         allSimulatePrincipalPolicyRequest.forEach(simulatePrincipalPolicyRequest ->
