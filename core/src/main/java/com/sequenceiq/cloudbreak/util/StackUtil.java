@@ -1,5 +1,19 @@
 package com.sequenceiq.cloudbreak.util;
 
+import java.time.Duration;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
 import com.gs.collections.impl.tuple.AbstractImmutableEntry;
 import com.gs.collections.impl.tuple.ImmutableEntry;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -17,18 +31,6 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.time.Duration;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 @Service
 public class StackUtil {
@@ -60,6 +62,21 @@ public class StackUtil {
             }
         }
         return agents;
+    }
+
+    public Set<Node> collectReachableNodes(Stack stack) {
+        return stack.getInstanceGroups()
+                .stream()
+                .filter(ig -> ig.getNodeCount() != 0)
+                .flatMap(ig -> ig.getReachableInstanceMetaDataSet().stream())
+                .filter(im -> im.getDiscoveryFQDN() != null)
+                .map(im -> {
+                    String instanceId = im.getInstanceId();
+                    String instanceType = im.getInstanceGroup().getTemplate().getInstanceType();
+                    return new Node(im.getPrivateIp(), im.getPublicIp(), instanceId, instanceType,
+                            im.getDiscoveryFQDN(), im.getInstanceGroupName());
+                })
+                .collect(Collectors.toSet());
     }
 
     public Set<Node> collectNodesFromHostnames(Stack stack, Set<String> hostnames) {

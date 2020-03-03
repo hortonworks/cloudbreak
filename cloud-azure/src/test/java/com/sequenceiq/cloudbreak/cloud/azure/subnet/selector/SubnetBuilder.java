@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.azure;
+package com.sequenceiq.cloudbreak.cloud.azure.subnet.selector;
 
 import java.util.ArrayList;
 import java.util.List;

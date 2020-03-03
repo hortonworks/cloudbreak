@@ -85,7 +85,7 @@ public class AwsUpscaleService {
         Date timeBeforeASUpdate = new Date();
         updateAutoscalingGroups(amazonASClient, desiredAutoscalingGroupsByName, originalAutoScalingGroupsBySize);
         try {
-            awsAutoScalingService.scheduleStatusChecks(stack, ac, cloudFormationClient, timeBeforeASUpdate);
+            awsAutoScalingService.scheduleStatusChecks(scaledGroups, ac, cloudFormationClient, timeBeforeASUpdate);
         } catch (AmazonAutoscalingFailed amazonAutoscalingFailed) {
             return recoverOriginalState(ac, stack, amazonASClient, desiredAutoscalingGroupsByName, originalAutoScalingGroupsBySize,
                     amazonAutoscalingFailed);

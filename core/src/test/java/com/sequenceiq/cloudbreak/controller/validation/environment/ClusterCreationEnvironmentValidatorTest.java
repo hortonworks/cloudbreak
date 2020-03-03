@@ -98,14 +98,88 @@ class ClusterCreationEnvironmentValidatorTest {
         assertFalse(actualResult.hasError());
     }
 
-    private DetailedEnvironmentResponse getEnvironmentResponse() {
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
-        environmentResponse.setCloudPlatform("AWS");
-        environmentResponse.setCredential(new CredentialResponse());
-        CompactRegionResponse compactRegionResponse = new CompactRegionResponse();
-        compactRegionResponse.setNames(Lists.newArrayList("region1"));
-        environmentResponse.setRegions(compactRegionResponse);
-        return environmentResponse;
+    @Test
+    void testValidateShouldBeSuccessWhenStackRegionIsRegionNameAndEnvironmentsRegionsAreDisplayNames() {
+        // GIVEN
+        String westUs2RegionName = "westus2";
+        String westUs2RegionDisplayName = "West US 2";
+        Stack stack = getStack();
+        stack.setRegion(westUs2RegionName);
+        ClusterV4Request clusterRequest = new ClusterV4Request();
+        DetailedEnvironmentResponse environment = getEnvironmentResponse();
+        CompactRegionResponse regions = new CompactRegionResponse();
+        regions.getNames().add(westUs2RegionDisplayName);
+        regions.getNames().add("West US");
+        environment.setRegions(regions);
+        when(connector.displayNameToRegion(any())).thenReturn(westUs2RegionName);
+        when(connector.regionToDisplayName(any())).thenReturn(westUs2RegionDisplayName);
+        // WHEN
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        // THEN
+        assertFalse(actualResult.hasError());
+    }
+
+    @Test
+    void testValidateShouldBeSuccessWhenStackRegionIsRegionDisplayNameAndEnvironmentsRegionsAreDisplayNames() {
+        // GIVEN
+        String westUs2RegionName = "westus2";
+        String westUs2RegionDisplayName = "West US 2";
+        Stack stack = getStack();
+        stack.setRegion(westUs2RegionDisplayName);
+        ClusterV4Request clusterRequest = new ClusterV4Request();
+        DetailedEnvironmentResponse environment = getEnvironmentResponse();
+        CompactRegionResponse regions = new CompactRegionResponse();
+        regions.getNames().add(westUs2RegionDisplayName);
+        regions.getNames().add("West US");
+        environment.setRegions(regions);
+        when(connector.displayNameToRegion(any())).thenReturn(westUs2RegionName);
+        when(connector.regionToDisplayName(any())).thenReturn(westUs2RegionDisplayName);
+        // WHEN
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        // THEN
+        assertFalse(actualResult.hasError());
+    }
+
+    @Test
+    void testValidateShouldBeSuccessWhenStackRegionIsRegionNameAndEnvironmentsRegionsAreRegionNames() {
+        // GIVEN
+        String westUs2RegionName = "westus2";
+        String westUs2RegionDisplayName = "West US 2";
+        Stack stack = getStack();
+        stack.setRegion(westUs2RegionName);
+        ClusterV4Request clusterRequest = new ClusterV4Request();
+        DetailedEnvironmentResponse environment = getEnvironmentResponse();
+        CompactRegionResponse regions = new CompactRegionResponse();
+        regions.getNames().add(westUs2RegionName);
+        regions.getNames().add("westus");
+        environment.setRegions(regions);
+        when(connector.displayNameToRegion(any())).thenReturn(westUs2RegionName);
+        when(connector.regionToDisplayName(any())).thenReturn(westUs2RegionDisplayName);
+        // WHEN
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        // THEN
+        assertFalse(actualResult.hasError());
+    }
+
+    @Test
+    void testValidateShouldBeSuccessWhenStackRegionIsRegionDisplayNameAndEnvironmentsRegionsAreRegionNames() {
+        // GIVEN
+        String westUs2RegionName = "westus2";
+        String westUs2RegionDisplayName = "West US 2";
+        Stack stack = getStack();
+        stack.setRegion(westUs2RegionDisplayName);
+        ClusterV4Request clusterRequest = new ClusterV4Request();
+        DetailedEnvironmentResponse environment = getEnvironmentResponse();
+        CompactRegionResponse regions = new CompactRegionResponse();
+        regions.getNames().add(westUs2RegionName);
+        regions.getNames().add("westus");
+        environment.setRegions(regions);
+        when(connector.displayNameToRegion(any())).thenReturn(westUs2RegionName);
+        when(connector.regionToDisplayName(any())).thenReturn(westUs2RegionDisplayName);
+        // WHEN
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        // THEN
+        assertFalse(actualResult.hasError());
     }
 
     @Test
@@ -278,6 +352,16 @@ class ClusterCreationEnvironmentValidatorTest {
         assertTrue(actualResult.hasError());
         assertEquals(1, actualResult.getErrors().size());
         assertTrue(actualResult.getErrors().contains("FreeIPA is not available in your environment!"));
+    }
+
+    private DetailedEnvironmentResponse getEnvironmentResponse() {
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCloudPlatform("AWS");
+        environmentResponse.setCredential(new CredentialResponse());
+        CompactRegionResponse compactRegionResponse = new CompactRegionResponse();
+        compactRegionResponse.setNames(Lists.newArrayList("region1"));
+        environmentResponse.setRegions(compactRegionResponse);
+        return environmentResponse;
     }
 
     private Stack getStack() {

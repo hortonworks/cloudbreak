@@ -26,7 +26,7 @@ public class SubnetChooserService {
                         subnetMetas,
                         SubnetSelectionParameters.builder()
                                 .withHa(dbStack.isHa())
-                                .withPreferPrivateNetwork()
+                                .withForDatabase()
                                 .build()
                 );
     }

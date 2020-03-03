@@ -8,12 +8,12 @@ public class SubnetSelectionParameters {
 
     private final boolean ha;
 
-    private final boolean preferPrivateNetwork;
+    private final boolean forDatabase;
 
-    private SubnetSelectionParameters(Tunnel tunnel, boolean ha, boolean preferPrivateNetwork) {
+    private SubnetSelectionParameters(Tunnel tunnel, boolean ha, boolean forDatabase) {
         this.tunnel = tunnel;
         this.ha = ha;
-        this.preferPrivateNetwork = preferPrivateNetwork;
+        this.forDatabase = forDatabase;
     }
 
     public Tunnel getTunnel() {
@@ -24,8 +24,8 @@ public class SubnetSelectionParameters {
         return ha;
     }
 
-    public boolean isPreferPrivateNetwork() {
-        return preferPrivateNetwork;
+    public boolean isForDatabase() {
+        return forDatabase;
     }
 
     public static Builder builder() {
@@ -37,7 +37,7 @@ public class SubnetSelectionParameters {
 
         private boolean ha;
 
-        private boolean preferPrivateNetwork;
+        private boolean forDatabase;
 
         public Builder withTunnel(Tunnel tunnel) {
             this.tunnel = tunnel;
@@ -49,13 +49,13 @@ public class SubnetSelectionParameters {
             return this;
         }
 
-        public Builder withPreferPrivateNetwork() {
-            preferPrivateNetwork = true;
+        public Builder withForDatabase() {
+            forDatabase = true;
             return this;
         }
 
         public SubnetSelectionParameters build() {
-            return new SubnetSelectionParameters(tunnel, ha, preferPrivateNetwork);
+            return new SubnetSelectionParameters(tunnel, ha, forDatabase);
         }
     }
 }

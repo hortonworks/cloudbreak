@@ -81,10 +81,22 @@ public class MountDisks {
 
         Set<Node> allNodes = stackUtil.collectNodes(stack);
         Set<Node> nodes = stackUtil.collectNodesWithDiskData(stack);
-        mountDisks(stackId, stack, nodes, allNodes);
+        mountDisks(stack, nodes, allNodes);
     }
 
-    private void mountDisks(Long stackId, Stack stack, Set<Node> nodes, Set<Node> allNodes) throws CloudbreakException {
+    public void mountDisksOnNewNodes(Long stackId, Set<String> upscaleCandidateAddresses) throws CloudbreakException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
+        if (!StackService.REATTACH_COMPATIBLE_PLATFORMS.contains(stack.getPlatformVariant())) {
+            return;
+        }
+
+        Set<Node> allNodes = stackUtil.collectReachableNodes(stack);
+        Set<Node> nodes = stackUtil.collectNewNodesWithDiskData(stack, upscaleCandidateAddresses);
+        mountDisks(stack, nodes, allNodes);
+    }
+
+    private void mountDisks(Stack stack, Set<Node> nodes, Set<Node> allNodes) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         if (orchestratorType.containerOrchestrator()) {
@@ -134,18 +146,6 @@ public class MountDisks {
                     resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
                 }))
                 .collect(Collectors.toList()));
-    }
-
-    public void mountDisksOnNewNodes(Long stackId, Set<String> upscaleCandidateAddresses) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
-        if (!StackService.REATTACH_COMPATIBLE_PLATFORMS.contains(stack.getPlatformVariant())) {
-            return;
-        }
-
-        Set<Node> allNodes = stackUtil.collectNodes(stack);
-        Set<Node> nodes = stackUtil.collectNewNodesWithDiskData(stack, upscaleCandidateAddresses);
-        mountDisks(stackId, stack, nodes, allNodes);
     }
 
     private boolean isCbVersionPostOptimisation(Stack stack) {

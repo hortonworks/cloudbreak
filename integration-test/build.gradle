@@ -3,8 +3,9 @@ import org.ajoberstar.grgit.Grgit
 buildscript {
   repositories {
     mavenLocal()
-    mavenCentral()
     maven { url = "$repoUrl" }
+    maven { url = "$springRepoUrl" }
+    mavenCentral()
     jcenter()
   }
   dependencies {
@@ -15,10 +16,6 @@ buildscript {
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
-springBoot {
-  mainClassName = 'com.sequenceiq.it.IntegrationTestApp'
-}
-
 bootRun {
   systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
   systemProperty 'spring.config.location', System.properties['spring.config.location']
@@ -28,9 +25,8 @@ bootRun {
   }
 }
 
-jar {
-  baseName = 'cloudbreak-integration-test'
-  archiveName = 'cloudbreak-integration-test.jar'
+springBoot {
+  mainClassName = 'com.sequenceiq.it.IntegrationTestApp'
 }
 
 bootJar {
@@ -39,6 +35,17 @@ bootJar {
   manifest {
     def grgit = Grgit.open(currentDir: project.projectDir)
     attributes "Implementation-Version": grgit.describe()
+  }
+}
+
+uploadBootArchives {
+  repositories {
+    mavenDeployer {
+      configuration = configurations.deployerJars
+      repository(url: "$System.env.NEXUS_URL") {
+        authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASSWORD")
+      }
+    }
   }
 }
 
@@ -126,7 +133,7 @@ dependencies {
 task buildInfo(type: BuildInfoTask, dependsOn: processResources) {
     destination = file("$buildDir")
     applicationPropertiesPath = "$buildDir"
-    basename = jar.baseName
+    basename = bootJar.baseName
     buildVersion = version
 }
 

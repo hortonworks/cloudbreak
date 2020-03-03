@@ -269,8 +269,12 @@ public class EnvironmentTestDto
     @Override
     public void cleanUp(TestContext context, CloudbreakClient client) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
-        when(environmentTestClient.forceDelete(), key("delete-environment-" + getName()).withSkipOnFail(false));
-        await(ARCHIVED, new RunningParameter().withSkipOnFail(true));
+        if (getResponse() != null) {
+            when(environmentTestClient.forceDelete(), key("delete-environment-" + getName()).withSkipOnFail(false));
+            await(ARCHIVED, new RunningParameter().withSkipOnFail(true));
+        } else {
+            LOGGER.info("Response field is null for env: {}", getName());
+        }
     }
 
     @Override
