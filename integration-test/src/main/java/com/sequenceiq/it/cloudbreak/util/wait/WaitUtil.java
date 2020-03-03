@@ -94,7 +94,7 @@ public class WaitUtil {
             retryCount++;
         }
 
-        if (currentStatus.name().contains("FAILED") && FREE_IPA_DELETE_COMPLETED != desiredStatus && FREE_IPA_DELETE_COMPLETED == currentStatus) {
+        if (currentStatus.name().contains("FAILED") || (FREE_IPA_DELETE_COMPLETED != desiredStatus && FREE_IPA_DELETE_COMPLETED == currentStatus)) {
             waitResult = WaitResult.FAILED;
             LOGGER.info("Desired status(es) are {} for {} but status(es) are {}", desiredStatus, environmentCrn, currentStatus);
         } else if (retryCount == maxRetry) {
@@ -134,7 +134,7 @@ public class WaitUtil {
             retryCount++;
         }
 
-        if (currentStatus.name().contains("FAILED") && EnvironmentStatus.ARCHIVED != desiredStatus && EnvironmentStatus.ARCHIVED == currentStatus) {
+        if (currentStatus.name().contains("FAILED") || (EnvironmentStatus.ARCHIVED != desiredStatus && EnvironmentStatus.ARCHIVED == currentStatus)) {
             waitResult = WaitResult.FAILED;
             LOGGER.info("Desired status(es) are {} for {} but status(es) are {}", desiredStatus, name, currentStatus);
         } else if (retryCount == maxRetry) {
@@ -262,8 +262,7 @@ public class WaitUtil {
             waitResult = waitForStatuses(environmentClient, name, desiredStatus);
         }
         if (waitResult == WaitResult.FAILED) {
-            StringBuilder builder = new StringBuilder("The stack has failed: ").append(System.lineSeparator());
-            throw new RuntimeException(builder.toString());
+            throw new RuntimeException("The creation of [" + name + "] environment has failed.");
         } else if (waitResult == WaitResult.TIMEOUT) {
             throw new RuntimeException("Timeout happened");
         } else if (EnvironmentStatus.ARCHIVED != desiredStatus) {
