@@ -443,6 +443,7 @@ To run Auth Mock from the command line, run the following Gradle command:
 
 ```
 ./gradlew :mock-caas:bootRun -PjvmArgs="\
+-Dserver.port=10080 \
 -Dauth.config.dir=<CBD_LOCAL_ETC> \
 -Dspring.config.location=$(pwd)/mock-caas/src/main/resources/application.yml"
 ```
