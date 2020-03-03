@@ -119,6 +119,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final String CDP_BASE_IMAGE = "CDP_BASE_IMAGE";
 
+    private static final String CDP_FREEIPA_HA = "CDP_FREEIPA_HA";
+
     @Inject
     private JsonUtil jsonUtil;
 
@@ -151,6 +153,9 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Value("${auth.mock.baseimage.enable}")
     private boolean enableBaseImages;
+
+    @Value("${auth.mock.freeipa.ha.enable}")
+    private boolean enableFreeIpaHa;
 
     private String cbLicense;
 
@@ -342,6 +347,9 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         }
         if (enableBaseImages) {
             builder.addEntitlements(createEntitlement(CDP_BASE_IMAGE));
+        }
+        if (enableFreeIpaHa) {
+            builder.addEntitlements(createEntitlement(CDP_FREEIPA_HA));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

@@ -14,3 +14,4 @@ auth:
     baseimage.enable: true
     event-generation:
       expiration-minutes: 10
+    freeipa.ha.enable: true
