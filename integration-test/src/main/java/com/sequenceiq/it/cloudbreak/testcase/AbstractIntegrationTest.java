@@ -141,7 +141,8 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .when(environmentTestClient.describe());
+                .when(environmentTestClient.describe())
+                .validate();
     }
 
     protected void createDefaultEnvironmentWithNetwork(TestContext testContext) {
@@ -152,18 +153,21 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .when(environmentTestClient.describe());
+                .when(environmentTestClient.describe())
+                .validate();
     }
 
     protected void createDefaultCredential(TestContext testContext) {
         testContext.given(CredentialTestDto.class)
-                .when(credentialTestClient.create());
+                .when(credentialTestClient.create())
+                .validate();
     }
 
     protected void createDefaultImageCatalog(TestContext testContext) {
         testContext
                 .given(ImageCatalogTestDto.class)
-                .when(new ImageCatalogCreateRetryAction());
+                .when(new ImageCatalogCreateRetryAction())
+                .validate();
     }
 
     protected Set<String> createDefaultLdapConfig(TestContext testContext) {
@@ -208,7 +212,8 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .withCreateFreeIpa(Boolean.TRUE)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .when(environmentTestClient.describe());
+                .when(environmentTestClient.describe())
+                .validate();
     }
 
     protected void createEnvironmentWithoutTelemetry(TestContext testContext) {
@@ -221,7 +226,8 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .withCreateFreeIpa(Boolean.TRUE)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .when(environmentTestClient.describe());
+                .when(environmentTestClient.describe())
+                .validate();
     }
 
     protected void createEnvironmentForSdx(TestContext testContext) {
@@ -236,14 +242,16 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .withS3Guard()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .when(environmentTestClient.describe());
+                .when(environmentTestClient.describe())
+                .validate();
     }
 
     protected void createImageCatalog(TestContext testContext, String name) {
         testContext
                 .given(ImageCatalogTestDto.class)
                 .withName(name)
-                .when(imageCatalogTestClient.createV4(), key(name));
+                .when(imageCatalogTestClient.createV4(), key(name))
+                .validate();
     }
 
     protected void createDefaultUser(TestContext testContext) {
@@ -257,7 +265,8 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     protected void initializeDefaultBlueprints(TestContext testContext) {
         testContext
                 .init(BlueprintTestDto.class)
-                .when(blueprintTestClient.listV4());
+                .when(blueprintTestClient.listV4())
+                .validate();
     }
 
     protected void initializeAzureCloudStorage(TestContext testContext) {
