@@ -302,12 +302,7 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <O extends CloudbreakTestDto> O init(Class<O> clss) {
-        checkShutdown();
-        LOGGER.info("init " + clss.getSimpleName());
-        CloudbreakTestDto bean = applicationContext.getBean(clss, getTestContext());
-        bean.setCloudPlatform(CloudPlatform.valueOf(commonCloudProperties.getCloudProvider()));
-        initialized = true;
-        return (O) bean.valid();
+        return init(clss, CloudPlatform.valueOf(commonCloudProperties.getCloudProvider()));
     }
 
     public <O extends CloudbreakTestDto> O init(Class<O> clss, CloudPlatform cloudPlatform) {
@@ -315,8 +310,16 @@ public abstract class TestContext implements ApplicationContextAware {
         LOGGER.info("init " + clss.getSimpleName());
         CloudbreakTestDto bean = applicationContext.getBean(clss, getTestContext());
         bean.setCloudPlatform(cloudPlatform);
+        String key = bean.getClass().getSimpleName();
         initialized = true;
-        return (O) bean.valid();
+        try {
+            return (O) bean.valid();
+        } catch (Exception e) {
+            LOGGER.error("init of [{}] bean is failed: {}, name: {}", key, ResponseUtil.getErrorMessage(e), bean.getName(), e);
+            Log.when(null, key + " initialization is failed: " + ResponseUtil.getErrorMessage(e));
+            getExceptionMap().put(key, e);
+        }
+        return (O) bean;
     }
 
     public <O extends CloudbreakTestDto> O given(Class<O> clss) {
