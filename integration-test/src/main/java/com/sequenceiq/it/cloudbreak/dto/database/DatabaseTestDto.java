@@ -48,7 +48,7 @@ public class DatabaseTestDto extends DeletableTestDto<DatabaseV4Request, Databas
     }
 
     public DatabaseTestDto valid() {
-        return withName(getResourcePropertyProvider().getName())
+        return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withDescription(getResourcePropertyProvider().getDescription("database"))
                 .withConnectionUserName("user")
                 .withConnectionPassword("password")

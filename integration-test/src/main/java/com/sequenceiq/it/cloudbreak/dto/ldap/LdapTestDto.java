@@ -38,7 +38,7 @@ public class LdapTestDto extends AbstractFreeIPATestDto<CreateLdapConfigRequest,
     }
 
     public LdapTestDto valid() {
-        return withName(getResourcePropertyProvider().getName())
+        return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withEnvironment(EnvironmentTestDto.class)
                 .withDescription(getResourcePropertyProvider().getDescription("LDAP"))
                 .withBindPassword("bindPassword")

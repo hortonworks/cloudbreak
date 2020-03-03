@@ -84,7 +84,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     @Override
     public SdxInternalTestDto valid() {
-        withName(getResourcePropertyProvider().getName())
+        withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withTestNameAsTag()
                 .withStackRequest()
                 .withEnvironmentName(getTestContext().get(EnvironmentTestDto.class).getName())
@@ -267,7 +267,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     @Override
     public boolean deletable(SdxClusterResponse entity) {
-        return getName().startsWith(getResourcePropertyProvider().prefix());
+        return getName().startsWith(getResourcePropertyProvider().prefix(getCloudPlatform()));
     }
 
     @Override

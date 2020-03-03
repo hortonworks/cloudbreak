@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
@@ -26,12 +27,24 @@ public class ResourcePropertyProvider {
         return trim(prefix() + '-' + uuid(), MAX_LENGTH);
     }
 
+    public String getName(CloudPlatform cloudPlatform) {
+        return trim(prefix(cloudPlatform) + '-' + uuid(), MAX_LENGTH);
+    }
+
     public String getName(int maxLength) {
         return trim(prefix() + '-' + uuid(), maxLength);
     }
 
+    public String getName(int maxLength, CloudPlatform cloudPlatform) {
+        return trim(prefix(cloudPlatform) + '-' + uuid(), maxLength);
+    }
+
     public String getEnvironmentName() {
         return trim(prefix() + '-' + uuid(), ENVIRONMENT_NAME_MAX_LENGTH);
+    }
+
+    public String getEnvironmentName(CloudPlatform cloudPlatform) {
+        return trim(prefix(cloudPlatform) + '-' + uuid(), ENVIRONMENT_NAME_MAX_LENGTH);
     }
 
     public String getInvalidName() {
@@ -44,6 +57,14 @@ public class ResourcePropertyProvider {
 
     public String prefix() {
         return commonCloudProperties.getCloudProvider().toLowerCase() + "-test";
+    }
+
+    public String prefix(CloudPlatform cloudPlatform) {
+        String cloudPlatformPrefix = commonCloudProperties.getCloudProvider().toLowerCase();
+        if (cloudPlatform != null) {
+            cloudPlatformPrefix = cloudPlatform.name().toLowerCase();
+        }
+        return cloudPlatformPrefix + "-test";
     }
 
     private String dateTime() {

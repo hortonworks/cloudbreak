@@ -17,7 +17,7 @@ public abstract class DeletableRedbeamsTestDto<R, S, T extends CloudbreakTestDto
 
     @Override
     public boolean deletable(Z entity) {
-        return name(entity).startsWith(getResourcePropertyProvider().prefix());
+        return name(entity).startsWith(getResourcePropertyProvider().prefix(getCloudPlatform()));
     }
 
     protected abstract String name(Z entity);

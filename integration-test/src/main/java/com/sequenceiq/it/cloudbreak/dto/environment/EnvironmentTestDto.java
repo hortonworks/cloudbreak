@@ -27,6 +27,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCh
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -97,7 +98,7 @@ public class EnvironmentTestDto
     @Override
     public EnvironmentTestDto valid() {
         return getCloudProvider()
-                .environment(withName(getResourcePropertyProvider().getEnvironmentName())
+                .environment(withName(getResourcePropertyProvider().getEnvironmentName(getCloudPlatform()))
                         .withDescription(getResourcePropertyProvider().getDescription("environment")))
                 .withCredentialName(getTestContext().get(CredentialTestDto.class).getName())
                 .withAuthentication(DUMMY_SSH_KEY)
@@ -327,6 +328,24 @@ public class EnvironmentTestDto
 
     private EnvironmentTestDto withCloudplatform(String platform) {
         getRequest().setCloudPlatform(platform);
+        return this;
+    }
+
+    public EnvironmentTestDto withDefaultSecurityGroupId(String defaultSecurityGroupId) {
+        if (getRequest().getSecurityAccess() == null) {
+            getRequest().setSecurityAccess(new SecurityAccessRequest());
+        }
+
+        getRequest().getSecurityAccess().setDefaultSecurityGroupId(defaultSecurityGroupId);
+        return this;
+    }
+
+    public EnvironmentTestDto withSecurityGroupIdForKnox(String securityGroupIdForKnox) {
+        if (getRequest().getSecurityAccess() == null) {
+            getRequest().setSecurityAccess(new SecurityAccessRequest());
+        }
+
+        getRequest().getSecurityAccess().setSecurityGroupIdForKnox(securityGroupIdForKnox);
         return this;
     }
 }

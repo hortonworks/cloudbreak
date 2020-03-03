@@ -51,7 +51,7 @@ public class KubernetesTestDto extends DeletableTestDto<KubernetesV4Request, Kub
     }
 
     public KubernetesTestDto valid() {
-        return withName(getResourcePropertyProvider().getName())
+        return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withContent("content")
                 .withDesription("great kubernetes config");
     }

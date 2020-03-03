@@ -32,7 +32,7 @@ public class ImageSettingsTestDto extends AbstractCloudbreakTestDto<ImageSetting
 
     @Override
     public ImageSettingsTestDto valid() {
-        return getCloudProvider().imageSettings(withName(getResourcePropertyProvider().getName()));
+        return getCloudProvider().imageSettings(withName(getResourcePropertyProvider().getName(getCloudPlatform())));
     }
 
     public ImageSettingsTestDto withImageCatalog(String imageCatalog) {
