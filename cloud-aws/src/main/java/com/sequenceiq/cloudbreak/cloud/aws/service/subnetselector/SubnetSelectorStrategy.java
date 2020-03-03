@@ -1,55 +1,61 @@
 package com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
-import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 
 public abstract class SubnetSelectorStrategy {
 
+    static final String NOT_ENOUGH_AZ = "Acceptable subnets are in %d different AZs, but subnets in %d different AZs required.";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SubnetSelectorStrategy.class);
 
-    public List<CloudSubnet> select(List<CloudSubnet> subnetMetas) {
+    public SubnetSelectionResult select(List<CloudSubnet> subnetMetas) {
         LOGGER.debug("Subnet selection with strategy '{}'", getType());
-        quickValidate(subnetMetas);
-        List<CloudSubnet> selectedNetworks = selectInternal(subnetMetas);
-        LOGGER.debug("Selected subnets: {}", String.join(", ", selectedNetworks.stream().toString()));
-        return selectedNetworks;
+        Optional<String> errorMessage = quickValidate(subnetMetas);
+        if (errorMessage.isPresent()) {
+            return new SubnetSelectionResult(errorMessage.get());
+        }
+        SubnetSelectionResult selectionResult = selectInternal(subnetMetas);
+        logResult(selectionResult);
+        return selectionResult;
     }
 
-    private void quickValidate(List<CloudSubnet> subnetMetas) {
-        if (subnetMetas == null || subnetMetas.isEmpty()) {
-            error("There are no subnets in this network.");
-        }
-        if (subnetMetas.size() < getMinimumNumberOfSubnets()) {
-            error(String.format("There are not enough subnets in this network, found: %d, expected: %d.", subnetMetas.size(), getMinimumNumberOfSubnets()));
-        }
-    }
-
-    protected abstract List<CloudSubnet> selectInternal(List<CloudSubnet> subnets);
+    protected abstract SubnetSelectionResult selectInternal(List<CloudSubnet> subnets);
 
     public abstract SubnetSelectorStrategyType getType();
 
     protected abstract int getMinimumNumberOfSubnets();
 
-    protected void error(String message) {
-        LOGGER.debug("Error when selecting subnets with strategy '{}': {}", getType(), message);
-        throw new BadRequestException(String.format("Error when selecting subnets with strategy '%s': %s", getType().getDescription(), message));
+    private Optional<String> quickValidate(List<CloudSubnet> subnetMetas) {
+        if (subnetMetas == null || subnetMetas.isEmpty()) {
+            return Optional.of("There are no subnets in this network.");
+        }
+        if (subnetMetas.size() < getMinimumNumberOfSubnets()) {
+            return Optional.of(String.format("There are not enough subnets in this network, found: %d, expected: %d.",
+                    subnetMetas.size(), getMinimumNumberOfSubnets()));
+        }
+        return Optional.empty();
     }
 
-    void errorNotEnoughAZs(int found, int expected) {
-        error(String.format("Acceptable subnets are in %d different AZs, but subnets in %d different AZs required.", found, expected));
-
+    private void logResult(SubnetSelectionResult selectionResult) {
+        if (selectionResult.hasError()) {
+            LOGGER.debug("Subnet selection returned with error: '{}'", selectionResult.getErrorMessage());
+        } else {
+            LOGGER.debug("Selected subnets: '{}'", String.join(", ", selectionResult.getResult().stream().toString()));
+        }
     }
 
-    void errorNoSuitableSubnets(List<CloudSubnet> subnetMetas) {
-        error(String.format("No suitable subnet found as there were neither private nor any suitable public subnets in '%s'.",
-                subnetMetas.stream().map(CloudSubnet::getId).collect(Collectors.joining(", "))));
-
+    String formatErrorNoSuitableSubnets(List<CloudSubnet> subnetMetas) {
+        return String.format(
+                "No suitable subnet found as there were neither private nor any suitable public subnets in '%s'.",
+                subnetMetas.stream().map(CloudSubnet::getId).collect(Collectors.joining(", "))
+        );
     }
 }

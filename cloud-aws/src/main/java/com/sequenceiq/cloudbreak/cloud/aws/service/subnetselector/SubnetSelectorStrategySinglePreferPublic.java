@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 
 @Component
 public class SubnetSelectorStrategySinglePreferPublic extends SubnetSelectorStrategy {
@@ -20,15 +21,15 @@ public class SubnetSelectorStrategySinglePreferPublic extends SubnetSelectorStra
     private SubnetSelectorService subnetSelectorService;
 
     @Override
-    public List<CloudSubnet> selectInternal(List<CloudSubnet> subnetMetas) {
+    public SubnetSelectionResult selectInternal(List<CloudSubnet> subnetMetas) {
         Optional<CloudSubnet> foundSubnet = subnetSelectorService.getOnePublicSubnet(subnetMetas);
         if (foundSubnet.isEmpty()) {
             foundSubnet = subnetSelectorService.getOnePrivateSubnet(subnetMetas);
             if (foundSubnet.isEmpty()) {
-                errorNoSuitableSubnets(subnetMetas);
+                return new SubnetSelectionResult(formatErrorNoSuitableSubnets(subnetMetas));
             }
         }
-        return List.of(foundSubnet.get());
+        return new SubnetSelectionResult(List.of(foundSubnet.get()));
     }
 
     @Override

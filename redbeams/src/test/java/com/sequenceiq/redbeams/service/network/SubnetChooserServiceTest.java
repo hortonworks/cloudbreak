@@ -11,7 +11,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -24,8 +27,10 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.exception.BadRequestException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SubnetChooserServiceTest {
@@ -39,6 +44,9 @@ public class SubnetChooserServiceTest {
     private static final String SUBNET_2 = "subnet-2";
 
     private static final String SUBNET_3 = "subnet-3";
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -109,9 +117,29 @@ public class SubnetChooserServiceTest {
         assertTrue(subnetSelectionParametersCaptor.getValue().isHa());
     }
 
+    @Test
+    public void testChooseSubnetsWhenSubnetChooserReturnsErrorThenThrows() {
+        List<CloudSubnet> subnets = List.of();
+        setupConnector("my error message");
+        DBStack dbStack = mock(DBStack.class);
+        when(dbStack.isHa()).thenReturn(true);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("my error message");
+
+        underTest.chooseSubnets(subnets, CloudPlatform.AWS, dbStack);
+    }
+
     private NetworkConnector setupConnector() {
+        return setupConnector(null);
+    }
+
+    private NetworkConnector setupConnector(String errorMessage) {
         CloudConnector cloudConnector = mock(CloudConnector.class);
         NetworkConnector networkConnector = mock(NetworkConnector.class);
+        SubnetSelectionResult subnetSelectionResult = StringUtils.isEmpty(errorMessage)
+                ? new SubnetSelectionResult(List.of())
+                : new SubnetSelectionResult(errorMessage);
+        when(networkConnector.selectSubnets(any(), any())).thenReturn(subnetSelectionResult);
         when(cloudConnector.networkConnector()).thenReturn(networkConnector);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         return networkConnector;
