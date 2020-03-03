@@ -7,6 +7,7 @@ install-freeipa-replica:
         - REALM: {{salt['pillar.get']('freeipa:realm')}}
         - ADMIN_USER: {{salt['pillar.get']('freeipa:admin_user')}}
         - FREEIPA_TO_REPLICATE: {{salt['pillar.get']('freeipa:freeipa_to_replicate')}}
+    - failhard: True
     - unless: test -f /var/log/freeipa_install-executed
     - require:
         - file: /opt/salt/scripts/freeipa_install.sh

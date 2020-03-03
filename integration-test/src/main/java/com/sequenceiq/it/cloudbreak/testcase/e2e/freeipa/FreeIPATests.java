@@ -42,4 +42,29 @@ public class FreeIPATests extends AbstractE2ETest {
                 .await(FREEIPA_DELETE_COMPLETED)
                 .validate();
     }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "a valid stack create request is sent with 2 FreeIPA instances AND the stack is stopped AND the stack is started",
+            then = "the stack should be available AND deletable")
+    public void testCreateStopStartFreeIpaWithTwoInstances(TestContext testContext) {
+        String freeIpa = resourcePropertyProvider().getName();
+
+        int instanceGroupCount = 1;
+        int instanceCountByGroup = 2;
+
+        testContext
+                .given(freeIpa, FreeIPATestDto.class)
+                .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
+                .when(freeIPATestClient.create(), key(freeIpa))
+                .await(FREEIPA_AVAILABLE)
+                .when(freeIPATestClient.stop())
+                .await(Status.STOPPED)
+                .when(freeIPATestClient.start())
+                .await(Status.AVAILABLE)
+                .then((tc, testDto, client) -> freeIPATestClient.delete().action(tc, testDto, client))
+                .await(FREEIPA_DELETE_COMPLETED)
+                .validate();
+    }
 }

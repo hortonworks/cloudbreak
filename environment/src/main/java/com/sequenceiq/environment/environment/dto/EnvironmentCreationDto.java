@@ -35,7 +35,7 @@ public class EnvironmentCreationDto {
 
     private final Set<String> proxyNames;
 
-    private final boolean createFreeIpa;
+    private final FreeIpaCreationDto freeIpaCreation;
 
     private final AuthenticationDto authentication;
 
@@ -60,7 +60,7 @@ public class EnvironmentCreationDto {
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             String creator, LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
-            Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, AuthenticationDto authentication,
+            Set<String> regions, Set<String> proxyNames, FreeIpaCreationDto freeIpaCreation, AuthenticationDto authentication,
             Long created, EnvironmentTelemetry telemetry, SecurityAccessDto securityAccess, String adminGroupName,
             ParametersDto parameters, ExperimentalFeatures experimentalFeatures, Map<String, String> tags, String crn,
             String parentEnvironmentName) {
@@ -73,7 +73,7 @@ public class EnvironmentCreationDto {
         this.location = location;
         this.network = network;
         this.credential = credential;
-        this.createFreeIpa = createFreeIpa;
+        this.freeIpaCreation = freeIpaCreation;
         this.created = created;
         if (CollectionUtils.isEmpty(regions)) {
             this.regions = new HashSet<>();
@@ -148,8 +148,8 @@ public class EnvironmentCreationDto {
         return telemetry;
     }
 
-    public boolean isCreateFreeIpa() {
-        return createFreeIpa;
+    public FreeIpaCreationDto getFreeIpaCreation() {
+        return freeIpaCreation;
     }
 
     public AuthenticationDto getAuthentication() {
@@ -211,7 +211,7 @@ public class EnvironmentCreationDto {
 
         private EnvironmentTelemetry telemetry;
 
-        private boolean createFreeIpa = true;
+        private FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder().build();
 
         private AuthenticationDto authentication;
 
@@ -284,8 +284,8 @@ public class EnvironmentCreationDto {
             return this;
         }
 
-        public Builder withCreateFreeIpa(boolean createFreeIpa) {
-            this.createFreeIpa = createFreeIpa;
+        public Builder withFreeIpaCreation(FreeIpaCreationDto freeIpaCreation) {
+            this.freeIpaCreation = freeIpaCreation;
             return this;
         }
 
@@ -341,7 +341,7 @@ public class EnvironmentCreationDto {
 
         public EnvironmentCreationDto build() {
             return new EnvironmentCreationDto(name, description, cloudPlatform, accountId, creator,
-                    location, network, credential, regions, proxyNames, createFreeIpa, authentication,
+                    location, network, credential, regions, proxyNames, freeIpaCreation, authentication,
                     created, telemetry, securityAccess, adminGroupName, parameters, experimentalFeatures, tags, crn,
                     parentEnvironmentName);
         }

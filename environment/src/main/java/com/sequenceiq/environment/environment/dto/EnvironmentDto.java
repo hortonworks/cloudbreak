@@ -55,7 +55,7 @@ public class EnvironmentDto implements Payload {
 
     private String creator;
 
-    private boolean createFreeIpa = true;
+    private FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder().build();
 
     private AuthenticationDto authentication;
 
@@ -220,12 +220,12 @@ public class EnvironmentDto implements Payload {
         this.creator = creator;
     }
 
-    public boolean isCreateFreeIpa() {
-        return createFreeIpa;
+    public FreeIpaCreationDto getFreeIpaCreation() {
+        return freeIpaCreation;
     }
 
-    public void setCreateFreeIpa(boolean createFreeIpa) {
-        this.createFreeIpa = createFreeIpa;
+    public void setFreeIpaCreation(FreeIpaCreationDto freeIpaCreation) {
+        this.freeIpaCreation = freeIpaCreation;
     }
 
     public AuthenticationDto getAuthentication() {
@@ -359,7 +359,7 @@ public class EnvironmentDto implements Payload {
 
         private String statusReason;
 
-        private boolean createFreeIpa = true;
+        private FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder().build();
 
         private AuthenticationDto authentication;
 
@@ -462,8 +462,8 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
-        public Builder withCreateFreeIpa(boolean createFreeIpa) {
-            this.createFreeIpa = createFreeIpa;
+        public Builder withFreeIpaCreation(FreeIpaCreationDto freeIpaCreation) {
+            this.freeIpaCreation = freeIpaCreation;
             return this;
         }
 
@@ -541,7 +541,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setResourceCrn(resourceCrn);
             environmentDto.setStatus(environmentStatus);
             environmentDto.setCreator(creator);
-            environmentDto.setCreateFreeIpa(createFreeIpa);
+            environmentDto.setFreeIpaCreation(freeIpaCreation);
             environmentDto.setAuthentication(authentication);
             environmentDto.setStatusReason(statusReason);
             environmentDto.setCreated(created);

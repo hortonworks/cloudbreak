@@ -66,6 +66,8 @@ public class Environment implements AuthResource {
     @Column(nullable = false)
     private boolean createFreeIpa;
 
+    private Integer freeIpaInstanceCountByGroup;
+
     @Column(nullable = false)
     private String locationDisplayName;
 
@@ -305,6 +307,14 @@ public class Environment implements AuthResource {
 
     public void setCreateFreeIpa(boolean createFreeIpa) {
         this.createFreeIpa = createFreeIpa;
+    }
+
+    public Integer getFreeIpaInstanceCountByGroup() {
+        return freeIpaInstanceCountByGroup;
+    }
+
+    public void setFreeIpaInstanceCountByGroup(Integer freeIpaInstanceCountByGroup) {
+        this.freeIpaInstanceCountByGroup = freeIpaInstanceCountByGroup;
     }
 
     public EnvironmentAuthentication getAuthentication() {

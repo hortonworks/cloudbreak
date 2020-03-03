@@ -85,7 +85,9 @@ public class AwsStackRequestHelper {
         }
 
         Collection<Parameter> parameters = new ArrayList<>();
-        addParameterChunks(parameters, "CBUserData", stack.getImage().getUserDataByType(InstanceGroupType.CORE), CHUNK_COUNT);
+        if (stack.getImage().getUserDataByType(InstanceGroupType.CORE) != null) {
+            addParameterChunks(parameters, "CBUserData", stack.getImage().getUserDataByType(InstanceGroupType.CORE), CHUNK_COUNT);
+        }
         addParameterChunks(parameters, "CBGateWayUserData", stack.getImage().getUserDataByType(InstanceGroupType.GATEWAY), CHUNK_COUNT);
         parameters.addAll(asList(
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
@@ -98,7 +100,8 @@ public class AwsStackRequestHelper {
         if (awsInstanceProfileView.isInstanceProfileAvailable()) {
             parameters.add(new Parameter().withParameterKey("InstanceProfile").withParameterValue(awsInstanceProfileView.getInstanceProfile()));
         }
-        if (ac.getCloudContext().getLocation().getAvailabilityZone().value() != null) {
+        if (ac.getCloudContext().getLocation().getAvailabilityZone() != null
+                && ac.getCloudContext().getLocation().getAvailabilityZone().value() != null) {
             parameters.add(new Parameter().withParameterKey("AvailabilitySet")
                     .withParameterValue(ac.getCloudContext().getLocation().getAvailabilityZone().value()));
         }

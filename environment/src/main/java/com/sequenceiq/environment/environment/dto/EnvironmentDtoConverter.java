@@ -83,7 +83,7 @@ public class EnvironmentDtoConverter {
                 .withEnvironmentStatus(environment.getStatus())
                 .withCreator(environment.getCreator())
                 .withAuthentication(authenticationDtoConverter.authenticationToDto(environment.getAuthentication()))
-                .withCreateFreeIpa(environment.isCreateFreeIpa())
+                .withFreeIpaCreation(environmentToFreeIpaCreationDto(environment))
                 .withCreated(environment.getCreated())
                 .withStatusReason(environment.getStatusReason())
                 .withExperimentalFeatures(environment.getExperimentalFeaturesJson())
@@ -115,7 +115,8 @@ public class EnvironmentDtoConverter {
         environment.setTelemetry(creationDto.getTelemetry());
         environment.setLocationDisplayName(creationDto.getLocation().getDisplayName());
         environment.setStatus(EnvironmentStatus.CREATION_INITIATED);
-        environment.setCreateFreeIpa(creationDto.isCreateFreeIpa());
+        environment.setCreateFreeIpa(creationDto.getFreeIpaCreation().getCreate());
+        environment.setFreeIpaInstanceCountByGroup(creationDto.getFreeIpaCreation().getInstanceCountByGroup());
         environment.setAdminGroupName(creationDto.getAdminGroupName());
         environment.setCreated(System.currentTimeMillis());
         environment.setTags(getTags(creationDto));
@@ -170,5 +171,12 @@ public class EnvironmentDtoConverter {
         } catch (Exception ignored) {
             throw new BadRequestException("Failed to convert dynamic tags.");
         }
+    }
+
+    private FreeIpaCreationDto environmentToFreeIpaCreationDto(Environment environment) {
+        FreeIpaCreationDto.Builder builder = FreeIpaCreationDto.builder()
+                .withCreate(environment.isCreateFreeIpa());
+        doIfNotNull(environment.getFreeIpaInstanceCountByGroup(), freeIpaInstanceCountByGroup -> builder.withInstanceCountByGroup(freeIpaInstanceCountByGroup));
+        return builder.build();
     }
 }

@@ -37,6 +37,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private boolean createFreeIpa;
 
+        private FreeIpaResponse freeIpa;
+
         private CompactRegionResponse regions;
 
         private String cloudPlatform;
@@ -128,6 +130,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withFreeIpa(FreeIpaResponse freeIpa) {
+            this.freeIpa = freeIpa;
+            return this;
+        }
+
         public Builder withStatusReason(String statusReason) {
             this.statusReason = statusReason;
             return this;
@@ -176,6 +183,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setNetwork(network);
             simpleEnvironmentResponse.setEnvironmentStatus(environmentStatus);
             simpleEnvironmentResponse.setCreateFreeIpa(createFreeIpa);
+            simpleEnvironmentResponse.setFreeIpa(freeIpa);
             simpleEnvironmentResponse.setStatusReason(statusReason);
             simpleEnvironmentResponse.setCreated(created);
             simpleEnvironmentResponse.setTelemetry(telemetry);

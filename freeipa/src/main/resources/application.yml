@@ -70,6 +70,9 @@ freeipa:
       timeout-millis: 1800000
       initial-delay-millis: 60000
       fixed-delay-millis: 60000
+  max:
+    instances: 4
+    instance.groups: 1
   usersync:
     max-subjects-per-request: 10
     poller:
@@ -143,7 +146,7 @@ cb:
     hostkey.verify: false
     external.id: provision-ambari
     role.session.name: hadoop-provisioning
-    cf.template.new.path: templates/aws-cf-stack.ftl
+    cf.template.new.path: templates/aws-cf-stack-freeipa.ftl
     cf.template.newdb.path: templates/aws-cf-dbstack.ftl
     default.inbound.security.group:
     vpc:
@@ -165,15 +168,8 @@ cb:
     date >> /tmp/custom-user-data
 
   arm:
-    template.path: templates/arm-v2.ftl
-    parameter.path: templates/parameters.ftl
-    app.creation.template:
-      command.path: templates/app-creation-command.ftl
-      json.path: templates/app-creation.json
-      resource:
-        app.id: 797f4846-ba00-4fd7-ba43-dac1f8f63013
-        access.scope.id: 41094075-9dad-400e-a0bd-54e686782033
-
+    template.path: templates/arm-v2-freeipa.ftl
+    parameter.path: templates/parameters-freeipa.ftl
 
   openstack:
     heat.template.path: templates/openstack-heat.ftl
