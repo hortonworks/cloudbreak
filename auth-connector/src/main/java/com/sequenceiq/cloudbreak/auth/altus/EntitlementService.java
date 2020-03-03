@@ -32,6 +32,10 @@ public class EntitlementService {
         return isEntitlementRegistered(actorCrn, accountId, "CDP_AUTOMATIC_USERSYNC_POLLER");
     }
 
+    public boolean freeIpaHaEnabled(String actorCrn, String accountID) {
+        return isEntitlementRegistered(actorCrn, accountID, "CDP_FREEIPA_HA");
+    }
+
     public boolean internalTenant(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, "CLOUDERA_INTERNAL_ACCOUNT");
     }
