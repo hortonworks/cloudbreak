@@ -7,6 +7,7 @@
 
 * Documentation: https://docs.cloudera.com/management-console/cloud/index.html
 
+
 # Local Development Setup
 As of now this document focuses on setting up your development environment on macOS. You'll need Homebrew to install certain components in case you don't have them already. To get Homebrew please follow the install instructions on the Homebrew homepage: https://brew.sh
 
