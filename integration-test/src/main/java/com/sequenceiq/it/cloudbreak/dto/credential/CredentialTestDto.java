@@ -38,7 +38,7 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
     }
 
     public CredentialTestDto valid() {
-        withName(getResourcePropertyProvider().getName());
+        withName(getResourcePropertyProvider().getName(getCloudPlatform()));
         withDescription(getResourcePropertyProvider().getDescription("credential"));
         return getCloudProvider().credential(this);
     }
@@ -102,7 +102,7 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
 
     @Override
     public boolean deletable(CredentialResponse entity) {
-        return entity.getName().startsWith(getResourcePropertyProvider().prefix());
+        return entity.getName().startsWith(getResourcePropertyProvider().prefix(getCloudPlatform()));
     }
 
     @Override

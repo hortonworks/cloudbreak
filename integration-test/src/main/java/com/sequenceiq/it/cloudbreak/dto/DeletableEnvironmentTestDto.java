@@ -17,7 +17,7 @@ public abstract class DeletableEnvironmentTestDto<R, S, T extends CloudbreakTest
 
     @Override
     public boolean deletable(Z entity) {
-        return name(entity).startsWith(getResourcePropertyProvider().prefix());
+        return name(entity).startsWith(getResourcePropertyProvider().prefix(getCloudPlatform()));
     }
 
     protected abstract String name(Z entity);

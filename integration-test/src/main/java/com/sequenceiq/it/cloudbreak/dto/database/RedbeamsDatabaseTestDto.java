@@ -43,7 +43,7 @@ public class RedbeamsDatabaseTestDto extends DeletableRedbeamsTestDto<DatabaseV4
             throw new IllegalStateException("Cannot create valid instance, test context is not available");
         }
         String environmentCrn = ((RedbeamsClient) testContext.getMicroserviceClient(RedbeamsClient.class)).getEnvironmentCrn();
-        return withName(getResourcePropertyProvider().getName())
+        return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withDescription(getResourcePropertyProvider().getDescription("database"))
                 .withConnectionUserName("user")
                 .withConnectionPassword("password")

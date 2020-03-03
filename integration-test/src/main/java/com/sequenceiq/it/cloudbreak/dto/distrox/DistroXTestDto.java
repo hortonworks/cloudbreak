@@ -87,7 +87,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Override
     public boolean deletable(StackV4Response entity) {
-        return entity.getName().startsWith(getResourcePropertyProvider().prefix());
+        return entity.getName().startsWith(getResourcePropertyProvider().prefix(getCloudPlatform()));
     }
 
     @Override

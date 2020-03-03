@@ -20,7 +20,7 @@ public class DistroXImageTestDto extends AbstractCloudbreakTestDto<DistroXImageV
 
     @Override
     public DistroXImageTestDto valid() {
-        return getCloudProvider().imageSettings(withName(getResourcePropertyProvider().getName()));
+        return getCloudProvider().imageSettings(withName(getResourcePropertyProvider().getName(getCloudPlatform())));
     }
 
     public DistroXImageTestDto withImageCatalog(String imageCatalog) {

@@ -1,0 +1,5 @@
+name: "aws-ycloud-hybrid-cloud-tests"
+tests:
+  - name: "aws ycloud hybrid cloud e2e tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.hybrid.AwsYcloudHybridCloudTest

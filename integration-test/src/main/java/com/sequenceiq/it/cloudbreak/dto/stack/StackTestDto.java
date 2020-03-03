@@ -86,7 +86,7 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
 
     @Override
     public boolean deletable(StackV4Response entity) {
-        return entity.getName().startsWith(getResourcePropertyProvider().prefix());
+        return entity.getName().startsWith(getResourcePropertyProvider().prefix(getCloudPlatform()));
     }
 
     @Override

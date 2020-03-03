@@ -30,7 +30,7 @@ public class DatabaseTestTestDto extends AbstractCloudbreakTestDto<DatabaseTestV
 
     public DatabaseTestTestDto valid() {
         return withRequest(new DatabaseV4Request())
-                .withName(getResourcePropertyProvider().getName())
+                .withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withConnectionUserName("user")
                 .withConnectionPassword("password")
                 .withConnectionURL("jdbc:postgresql://somedb.com:5432/mydb")
