@@ -195,6 +195,48 @@ public class ClouderaManagerHostStatusCheckerTest {
         assertTrue(result);
     }
 
+    @Test
+    public void shouldBeTrueWhenOneInstanceIsStopped() throws ApiException {
+        InstanceMetaData instanceMetaData = validInstanceMetadata();
+        InstanceMetaData instanceMetaData2 = validInstanceMetadata();
+        instanceMetaData2.setPrivateIp("2.2.2.2");
+        instanceMetaData2.setInstanceStatus(InstanceStatus.STOPPED);
+        ApiHost apiHost = getValidApiHost(instanceMetaData);
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
+
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2), new CommandsResourceApi());
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void shouldBeTrueWhenOneInstanceIsFailed() throws ApiException {
+        InstanceMetaData instanceMetaData = validInstanceMetadata();
+        InstanceMetaData instanceMetaData2 = validInstanceMetadata();
+        instanceMetaData2.setPrivateIp("2.2.2.2");
+        instanceMetaData2.setInstanceStatus(InstanceStatus.FAILED);
+        ApiHost apiHost = getValidApiHost(instanceMetaData);
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
+
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2), new CommandsResourceApi());
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void shouldBeTrueWhenOneInstanceIsOrchestrationFailed() throws ApiException {
+        InstanceMetaData instanceMetaData = validInstanceMetadata();
+        InstanceMetaData instanceMetaData2 = validInstanceMetadata();
+        instanceMetaData2.setPrivateIp("2.2.2.2");
+        instanceMetaData2.setInstanceStatus(InstanceStatus.ORCHESTRATION_FAILED);
+        ApiHost apiHost = getValidApiHost(instanceMetaData);
+        when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
+
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2), new CommandsResourceApi());
+
+        assertTrue(result);
+    }
+
     private ApiHost getValidApiHost(InstanceMetaData instanceMetaData) {
         return new ApiHost()
                     .ipAddress(instanceMetaData.getPrivateIp())

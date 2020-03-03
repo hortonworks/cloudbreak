@@ -21,7 +21,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.util.Joiner;
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
@@ -52,9 +51,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 class OrchestratorRecipeExecutor {
-
-    private static final Set<String> DEFAULT_RECIPES = Collections.unmodifiableSet(
-            Sets.newHashSet());
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
@@ -102,7 +98,7 @@ class OrchestratorRecipeExecutor {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
-            hostOrchestrator.preClusterManagerStartRecipes(gatewayConfig, stackUtil.collectNodes(stack),
+            hostOrchestrator.preClusterManagerStartRecipes(gatewayConfig, stackUtil.collectReachableNodes(stack),
                     clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
             throw new CloudbreakException("Pre cluster manager start" + getRecipeTimeoutErrorMessage(timeoutException), timeoutException);
@@ -116,7 +112,7 @@ class OrchestratorRecipeExecutor {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
-            hostOrchestrator.postClusterManagerStartRecipes(gatewayConfig, stackUtil.collectNodes(stack),
+            hostOrchestrator.postClusterManagerStartRecipes(gatewayConfig, stackUtil.collectReachableNodes(stack),
                     clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
             throw new CloudbreakException("Post cluster manager start" + getRecipeTimeoutErrorMessage(timeoutException), timeoutException);
@@ -130,7 +126,7 @@ class OrchestratorRecipeExecutor {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
-            hostOrchestrator.postInstallRecipes(gatewayConfig, stackUtil.collectNodes(stack),
+            hostOrchestrator.postInstallRecipes(gatewayConfig, stackUtil.collectReachableNodes(stack),
                     clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
             throw new CloudbreakException("Post install" + getRecipeTimeoutErrorMessage(timeoutException), timeoutException);

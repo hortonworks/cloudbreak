@@ -186,8 +186,10 @@ public class ClusterBootstrapper {
         Set<Node> nodes = new HashSet<>();
         Set<Node> allNodes = new HashSet<>();
         boolean recoveredNodes = Integer.valueOf(recoveryHostNames.size()).equals(upscaleCandidateAddresses.size());
-        Set<InstanceMetaData> metaDataSet = stack.getNotDeletedInstanceMetaDataSet().stream()
-                .filter(im -> im.getPrivateIp() != null && im.getPublicIpWrapper() != null).collect(Collectors.toSet());
+        Set<InstanceMetaData> metaDataSet = stack.getReachableInstanceMetaDataSet()
+                .stream()
+                .filter(im -> im.getPrivateIp() != null && im.getPublicIpWrapper() != null)
+                .collect(Collectors.toSet());
         String clusterDomain = getClusterDomain(metaDataSet, stack.getCustomDomain());
 
         Iterator<String> iterator = recoveryHostNames.iterator();

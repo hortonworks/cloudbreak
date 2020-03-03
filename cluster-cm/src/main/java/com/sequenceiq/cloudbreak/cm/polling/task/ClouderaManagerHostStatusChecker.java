@@ -48,7 +48,7 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerCom
     private List<InstanceMetaData> collectNotKnownInstancesByManager(ClouderaManagerPollerObject pollerObject, List<String> hostIpsFromManager) {
         return pollerObject.getStack().getInstanceMetaDataAsList().stream()
                 .filter(metaData -> metaData.getDiscoveryFQDN() != null)
-                .filter(metaData -> !metaData.isTerminated() && !metaData.isDeletedOnProvider())
+                .filter(InstanceMetaData::isReachable)
                 .filter(metaData -> !hostIpsFromManager.contains(metaData.getPrivateIp()))
                 .collect(Collectors.toList());
     }

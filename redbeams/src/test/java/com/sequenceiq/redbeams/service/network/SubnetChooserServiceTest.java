@@ -75,7 +75,7 @@ public class SubnetChooserServiceTest {
 
         ArgumentCaptor<SubnetSelectionParameters> subnetSelectionParametersCaptor = ArgumentCaptor.forClass(SubnetSelectionParameters.class);
         verify(networkConnector).selectSubnets(eq(subnets), subnetSelectionParametersCaptor.capture());
-        assertTrue(subnetSelectionParametersCaptor.getValue().isPreferPrivateNetwork());
+        assertTrue(subnetSelectionParametersCaptor.getValue().isForDatabase());
         assertTrue(subnetSelectionParametersCaptor.getValue().isHa());
     }
 
@@ -90,7 +90,7 @@ public class SubnetChooserServiceTest {
 
         ArgumentCaptor<SubnetSelectionParameters> subnetSelectionParametersCaptor = ArgumentCaptor.forClass(SubnetSelectionParameters.class);
         verify(networkConnector).selectSubnets(eq(subnets), subnetSelectionParametersCaptor.capture());
-        assertTrue(subnetSelectionParametersCaptor.getValue().isPreferPrivateNetwork());
+        assertTrue(subnetSelectionParametersCaptor.getValue().isForDatabase());
         assertFalse(subnetSelectionParametersCaptor.getValue().isHa());
     }
 
@@ -105,7 +105,7 @@ public class SubnetChooserServiceTest {
 
         ArgumentCaptor<SubnetSelectionParameters> subnetSelectionParametersCaptor = ArgumentCaptor.forClass(SubnetSelectionParameters.class);
         verify(networkConnector).selectSubnets(eq(subnets), subnetSelectionParametersCaptor.capture());
-        assertTrue(subnetSelectionParametersCaptor.getValue().isPreferPrivateNetwork());
+        assertTrue(subnetSelectionParametersCaptor.getValue().isForDatabase());
         assertTrue(subnetSelectionParametersCaptor.getValue().isHa());
     }
 

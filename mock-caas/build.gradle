@@ -3,8 +3,9 @@ import org.ajoberstar.grgit.Grgit
 buildscript {
   repositories {
     mavenLocal()
-    mavenCentral()
     maven { url = "$repoUrl" }
+    maven { url = "$springRepoUrl" }
+    mavenCentral()
     jcenter()
   }
   dependencies {
@@ -14,6 +15,7 @@ buildscript {
 
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'java'
 
 bootRun {
   systemProperty "spring.profiles.active", System.properties["spring.profiles.active"]
@@ -27,17 +29,23 @@ springBoot {
   mainClassName = 'com.sequenceiq.caas.MockCaasApplication'
 }
 
-jar {
-  archiveBaseName = 'mock-caas'
-  archiveFileName = 'mock-caas.jar'
-}
-
 bootJar {
-  archiveBaseName = 'mock-caas'
-  archiveFileName = 'mock-caas.jar'
+  baseName = 'mock-caas'
+  archiveName = 'mock-caas.jar'
   manifest {
     def grgit = Grgit.open(currentDir: project.projectDir)
     attributes "Implementation-Version": grgit.describe()
+  }
+}
+
+uploadBootArchives {
+  repositories {
+    mavenDeployer {
+      configuration = configurations.deployerJars
+      repository(url: "$System.env.NEXUS_URL") {
+        authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASSWORD")
+      }
+    }
   }
 }
 

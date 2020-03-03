@@ -168,12 +168,16 @@ public class ClusterRepairService {
             Set<String> selectedParts, boolean deleteVolumes) {
         try {
             return transactionService.required(() -> {
-                Stack stack = stackService.getById(stackId);
+                Stack stack = stackService.getByIdWithListsInTransaction(stackId);
                 boolean reattach = !deleteVolumes;
                 Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult;
                 if (hasPendingFlow(stackId)) {
                     repairStartResult = Result.error(RepairValidation
                             .of("Repair cannot be performed, because there is already an active operation."));
+                } else if (hasStoppedNotSelectedInstance(stack, repairMode, selectedParts)) {
+                    repairStartResult = Result.error(RepairValidation
+                            .of("Repair cannot be performed, because stopped nodes are in the cluster. " +
+                                    "Please select them for repair or start the stopped nodes."));
                 } else if (reattachNotSupportedOnProvider(stack, reattach)) {
                     repairStartResult = Result.error(RepairValidation
                             .of(String.format("Volume reattach currently not supported on %s platform!", stack.getPlatformVariant())));
@@ -192,6 +196,21 @@ public class ClusterRepairService {
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
+    }
+
+    private boolean hasStoppedNotSelectedInstance(Stack stack, ManualClusterRepairMode repairMode, Set<String> selectedParts) {
+        if (ManualClusterRepairMode.HOST_GROUP.equals(repairMode)) {
+            return stack.getInstanceMetaDataAsList()
+                    .stream()
+                    .filter(im -> !selectedParts.contains(im.getInstanceGroup().getGroupName()))
+                    .anyMatch(im -> InstanceStatus.STOPPED.equals(im.getInstanceStatus()));
+        } else if (ManualClusterRepairMode.NODE_ID.equals(repairMode)) {
+            return stack.getInstanceMetaDataAsList()
+                    .stream()
+                    .filter(im -> !selectedParts.contains(im.getInstanceId()))
+                    .anyMatch(im -> InstanceStatus.STOPPED.equals(im.getInstanceStatus()));
+        }
+        return false;
     }
 
     private boolean hasPendingFlow(Long stackId) {
@@ -374,7 +393,8 @@ public class ClusterRepairService {
     private FlowIdentifier triggerRepairOrThrowBadRequest(Long stackId, Result<Map<HostGroupName, Set<InstanceMetaData>>,
             RepairValidation> repairValidationResult, boolean removeOnly, Set<String> recoveryMessageArgument) {
         if (repairValidationResult.isError()) {
-            eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_COULD_NOT_START, repairValidationResult.getError().getValidationErrors());
+            eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_COULD_NOT_START,
+                    repairValidationResult.getError().getValidationErrors());
             throw new BadRequestException(String.join(" ", repairValidationResult.getError().getValidationErrors()));
         } else {
             if (!repairValidationResult.getSuccess().isEmpty()) {
