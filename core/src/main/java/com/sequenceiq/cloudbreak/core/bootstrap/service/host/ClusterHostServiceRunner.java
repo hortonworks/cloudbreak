@@ -252,13 +252,16 @@ public class ClusterHostServiceRunner {
         saveCustomNameservers(stack, kerberosConfig, servicePillar);
         addKerberosConfig(servicePillar, kerberosConfig);
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
+        String virtualGroupsEnvironmentCrn = environmentConfigProvider.getParentEnvironmentCrn(stack.getEnvironmentCrn());
+        boolean deployedInChildEnvironment = !virtualGroupsEnvironmentCrn.equals(stack.getEnvironmentCrn());
         Map<String, ? extends Serializable> clusterProperties = Map.of("name", stack.getCluster().getName(),
-                "deployedInChildEnvironment", environmentConfigProvider.isChildEnvironment(stack.getEnvironmentCrn()));
+                "deployedInChildEnvironment", deployedInChildEnvironment);
         servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
         Map<String, List<String>> serviceLocations = getServiceLocations(cluster);
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
-        saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar, ldapView, connector, kerberosConfig, serviceLocations);
+        VirtualGroupRequest virtualGroupRequest = getVirtualGroupRequest(virtualGroupsEnvironmentCrn, ldapView);
+        saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar, virtualGroupRequest, connector, kerberosConfig, serviceLocations);
 
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
@@ -325,6 +328,11 @@ public class ClusterHostServiceRunner {
             sssdConnfig.put("password", kerberosConfig.getPassword());
             servicePillar.put("sssd-ad", new SaltPillarProperties("/sssd/ad.sls", singletonMap("sssd-ad", sssdConnfig)));
         }
+    }
+
+    private VirtualGroupRequest getVirtualGroupRequest(String virtualGroupsEnvironmentCrn, Optional<LdapView> ldapView) {
+        String adminGroup = ldapView.isPresent() ? ldapView.get().getAdminGroup() : "";
+        return new VirtualGroupRequest(virtualGroupsEnvironmentCrn, adminGroup);
     }
 
     private void saveSssdIpaPillar(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig,
@@ -453,8 +461,9 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar, Optional<LdapView> ldapView,
-            ClusterPreCreationApi connector, KerberosConfig kerberosConfig, Map<String, List<String>> serviceLocations) throws IOException {
+    private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar,
+            VirtualGroupRequest virtualGroupRequest, ClusterPreCreationApi connector, KerberosConfig kerberosConfig, Map<String, List<String>> serviceLocations)
+            throws IOException {
         Map<String, Object> gateway = new HashMap<>();
         gateway.put("address", gatewayConfig.getPublicAddress());
         gateway.put("username", cluster.getUserName());
@@ -473,8 +482,6 @@ public class ClusterHostServiceRunner {
             gateway.put("signkey", clusterGateway.getSignKey());
             gateway.put("tokencert", clusterGateway.getTokenCert());
             gateway.put("mastersecret", clusterGateway.getKnoxMasterSecret());
-            String adminGroup = ldapView.isPresent() ? ldapView.get().getAdminGroup() : "";
-            VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(cluster.getEnvironmentCrn(), adminGroup);
             gateway.put("envAccessGroup", virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.ENVIRONMENT_ACCESS.getRight()));
             List<Map<String, Object>> topologies = getTopologies(clusterGateway);
             gateway.put("topologies", topologies);
