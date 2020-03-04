@@ -52,7 +52,6 @@ public interface EnvironmentRepository extends JpaRepository<Environment, Long> 
     List<String> findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(@Param("accountId") String accountId,
         @Param("parentEnvironmentId") Long parentEnvironmentId);
 
-    @CheckPermission(action = ResourceAction.READ)
     @Query("SELECT e FROM Environment e "
             + "JOIN e.parentEnvironment pe "
             + "WHERE pe.id = :parentEnvironmentId AND e.accountId = :accountId AND e.archived = false")
