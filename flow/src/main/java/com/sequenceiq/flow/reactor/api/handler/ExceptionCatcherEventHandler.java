@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.flow.create.handler;
+package com.sequenceiq.flow.reactor.api.handler;
 
 import javax.inject.Inject;
 
@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;

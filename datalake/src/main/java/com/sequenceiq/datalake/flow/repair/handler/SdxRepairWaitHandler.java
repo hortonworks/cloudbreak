@@ -17,22 +17,16 @@ import com.sequenceiq.datalake.flow.repair.event.SdxRepairSuccessEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
 @Component
-public class SdxRepairWaitHandler implements EventHandler<SdxRepairWaitRequest> {
+public class SdxRepairWaitHandler extends ExceptionCatcherEventHandler<SdxRepairWaitRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxRepairWaitHandler.class);
 
     private static final int SLEEP_TIME_IN_SEC = 20;
 
     private static final int DURATION_IN_MINUTES = 40;
-
-    @Inject
-    private EventBus eventBus;
 
     @Inject
     private SdxRepairService repairService;
@@ -43,7 +37,12 @@ public class SdxRepairWaitHandler implements EventHandler<SdxRepairWaitRequest> 
     }
 
     @Override
-    public void accept(Event<SdxRepairWaitRequest> event) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+        return new SdxRepairFailedEvent(resourceId, null, e);
+    }
+
+    @Override
+    protected void doAccept(HandlerEvent event) {
         SdxRepairWaitRequest sdxRepairWaitRequest = event.getData();
         Long sdxId = sdxRepairWaitRequest.getResourceId();
         String userId = sdxRepairWaitRequest.getUserId();
@@ -64,6 +63,6 @@ public class SdxRepairWaitHandler implements EventHandler<SdxRepairWaitRequest> 
             LOGGER.info("Repair polling failed for stack: {}", sdxId);
             response = new SdxRepairFailedEvent(sdxId, userId, exception);
         }
-        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
+        sendEvent(response, event);
     }
 }
