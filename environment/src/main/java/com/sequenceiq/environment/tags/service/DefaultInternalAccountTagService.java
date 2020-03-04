@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -23,6 +25,8 @@ import com.sequenceiq.environment.tags.domain.AccountTag;
 
 @Service
 public class DefaultInternalAccountTagService {
+
+    private static final String ACCOUNT_TAG_PATTERN = "^(?!microsoft|azure|aws|windows|\\\\s)[^,]*$";
 
     @Value("${env.apply.internal.tags:true}")
     private boolean applyInternalTags;
@@ -85,6 +89,18 @@ public class DefaultInternalAccountTagService {
                 throw new BadRequestException(String.format("Tag with %s key exist as an unmodifiable tag.", defaultTag.getKey()));
             }
         }
-
+        for (AccountTag accountTag : accountTags) {
+            Pattern pattern = Pattern.compile(ACCOUNT_TAG_PATTERN);
+            Matcher keyMatcher = pattern.matcher(accountTag.getTagKey());
+            Matcher valueMatcher = pattern.matcher(accountTag.getTagValue());
+            if (!keyMatcher.matches()) {
+                throw new BadRequestException(
+                        String.format("The key '%s' can only can not start with microsoft or azure or aws or windows or space", accountTag.getTagKey()));
+            }
+            if (!valueMatcher.matches()) {
+                throw new BadRequestException(
+                        String.format("The value '%s' can only can not start with microsoft or azure or aws or windows or space", accountTag.getTagValue()));
+            }
+        }
     }
 }
