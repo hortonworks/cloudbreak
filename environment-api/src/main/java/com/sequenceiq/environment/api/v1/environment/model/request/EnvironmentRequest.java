@@ -10,23 +10,25 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.google.common.collect.Maps;
+import com.sequenceiq.authorization.resource.AuthorizableFieldInfoModel;
+import com.sequenceiq.authorization.resource.AuthorizationApiRequest;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
-import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "EnvironmentV1Request")
-public class EnvironmentRequest extends EnvironmentBaseRequest implements CredentialAwareEnvRequest {
+public class EnvironmentRequest extends EnvironmentBaseRequest implements CredentialAwareEnvRequest, AuthorizationApiRequest {
 
     static final String LENGHT_INVALID_MSG = "The length of the environments's name has to be in range of 5 to 28";
 
@@ -41,8 +43,6 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ResourceObjectField(type = AuthorizationResourceType.CREDENTIAL,
-            action = AuthorizationResourceAction.READ, variableType = AuthorizationVariableType.NAME)
     @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_NAME_REQUEST)
     private String credentialName;
 
@@ -242,5 +242,13 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setParentEnvironmentName(String parentEnvironmentName) {
         this.parentEnvironmentName = parentEnvironmentName;
+    }
+
+    @Override
+    public Map<String, AuthorizableFieldInfoModel> getAuthorizableFields() {
+        Map<String, AuthorizableFieldInfoModel> authorizableFields = Maps.newHashMap();
+        authorizableFields.put(credentialName, new AuthorizableFieldInfoModel(AuthorizationResourceType.CREDENTIAL,
+                AuthorizationResourceAction.READ, AuthorizationVariableType.NAME));
+        return authorizableFields;
     }
 }

@@ -1,7 +1,6 @@
 package com.sequenceiq.authorization.service;
 
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,6 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
@@ -19,10 +17,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.ResourceObject;
+import com.sequenceiq.authorization.resource.AuthorizableFieldInfoModel;
+import com.sequenceiq.authorization.resource.AuthorizationApiRequest;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
 
 @Component
 public class ResourceObjectPermissionChecker implements PermissionChecker<CheckPermissionByResourceObject> {
@@ -46,39 +45,36 @@ public class ResourceObjectPermissionChecker implements PermissionChecker<CheckP
     @Override
     public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resourceType, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
-        // first check the API related resource and method relacted action
+        // first check the API related resource and method related action
         CheckPermissionByResourceObject methodAnnotation = (CheckPermissionByResourceObject) rawMethodAnnotation;
         AuthorizationResourceAction action = methodAnnotation.action();
         commonPermissionCheckingUtils.checkPermissionForUser(resourceType, action, userCrn);
-        // then check fields of resourceObject
-        Object resourceObject = commonPermissionCheckingUtils.getParameter(proceedingJoinPoint, methodSignature, ResourceObject.class, Object.class);
+        // then check resourceObject
+        AuthorizationApiRequest resourceObject = commonPermissionCheckingUtils.getParameter(proceedingJoinPoint, methodSignature,
+                ResourceObject.class, AuthorizationApiRequest.class);
         checkPermissionOnResourceObjectFields(userCrn, resourceObject);
         return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
     }
 
-    private void checkPermissionOnResourceObjectFields(String userCrn, Object resourceObject) {
-        Arrays.stream(FieldUtils.getFieldsWithAnnotation(resourceObject.getClass(), ResourceObjectField.class)).forEach(field -> {
-            try {
-                field.setAccessible(true);
-                ResourceObjectField resourceObjectField = field.getAnnotation(ResourceObjectField.class);
-                Object resultObject = field.get(resourceObject);
-                if (!(resultObject instanceof String)) {
-                    throw new AccessDeniedException("Annotated field within resource object is not string, thus access is denied!");
-                }
-                String resourceNameOrCrn = (String) resultObject;
-                String resourceCrn = resourceObjectField.variableType().equals(AuthorizationVariableType.NAME)
-                        ? resourceBasedCrnProviderMap.get(resourceObjectField.type()).getResourceCrnByResourceName(resourceNameOrCrn)
+    private void checkPermissionOnResourceObjectFields(String userCrn, AuthorizationApiRequest resourceObject) {
+        try {
+            resourceObject.getAuthorizableFields().entrySet().stream().forEach(entry -> {
+                String resourceNameOrCrn = entry.getKey();
+                AuthorizableFieldInfoModel infoModel = entry.getValue();
+                AuthorizationResourceType resourceType = infoModel.getResourceType();
+                String resourceCrn = infoModel.getFieldVariableType().equals(AuthorizationVariableType.NAME)
+                        ? resourceBasedCrnProviderMap.get(resourceType).getResourceCrnByResourceName(resourceNameOrCrn)
                         : resourceNameOrCrn;
-                AuthorizationResourceAction action = resourceObjectField.action();
-                commonPermissionCheckingUtils.checkPermissionForUserOnResource(resourceObjectField.type(), action, userCrn, resourceCrn);
-            } catch (AccessDeniedException e) {
-                LOGGER.error("Error happened while traversing the resource object: ", e);
-                throw e;
-            } catch (Exception e) {
-                LOGGER.error("Error happened while traversing the resource object: ", e);
-                throw new AccessDeniedException("Error happened during permission check of resource object, thus access is denied!", e);
-            }
-        });
+                AuthorizationResourceAction action = infoModel.getAction();
+                commonPermissionCheckingUtils.checkPermissionForUserOnResource(resourceType, action, userCrn, resourceCrn);
+            });
+        } catch (AccessDeniedException e) {
+            LOGGER.error("Error happened while traversing the resource object: ", e);
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Error happened while traversing the resource object: ", e);
+            throw new AccessDeniedException("Error happened during permission check of resource object, thus access is denied!", e);
+        }
     }
 
     @Override

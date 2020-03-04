@@ -15,4 +15,9 @@ public class EnforceAuthorizationAnnotationsTest {
     public void testIfControllerClassHasAuthorizationAnnotation() {
         EnforceAuthorizationAnnotationsUtil.testIfControllerClassHasAuthorizationAnnotation();
     }
+
+    @Test
+    public void testIfRequestObjectHasProperAuthorizationInterfaceImplemented() {
+        EnforceAuthorizationAnnotationsUtil.testIfRequestObjectHasProperAuthorizationInterfaceImplemented();
+    }
 }

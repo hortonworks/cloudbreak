@@ -1,5 +1,6 @@
 package com.sequenceiq.authorization.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -75,5 +76,10 @@ public class ResourceNameListPermissionCheckerTest {
         verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), any(), anyString());
         verify(commonPermissionCheckingUtils).checkPermissionForUserOnResources(eq(AuthorizationResourceType.CREDENTIAL),
                 eq(AuthorizationResourceAction.WRITE), eq(USER_CRN), any());
+    }
+
+    @Test
+    public void testGetSupportedAnnotation() {
+        assertEquals(CheckPermissionByResourceNameList.class, underTest.supportedAnnotation());
     }
 }

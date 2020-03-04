@@ -1,5 +1,6 @@
 package com.sequenceiq.authorization.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -45,5 +46,10 @@ public class DisabledPermissionCheckerTest {
         verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
         verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), any(), anyString());
         verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUserOnResource(any(), any(), anyString(), anyString());
+    }
+
+    @Test
+    public void testGetSupportedAnnotation() {
+        assertEquals(DisableCheckPermissions.class, underTest.supportedAnnotation());
     }
 }
