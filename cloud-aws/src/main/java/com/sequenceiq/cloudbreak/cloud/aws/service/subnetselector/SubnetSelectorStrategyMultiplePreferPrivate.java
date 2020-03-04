@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 
 @Component
 public class SubnetSelectorStrategyMultiplePreferPrivate extends SubnetSelectorStrategy {
@@ -31,16 +32,16 @@ public class SubnetSelectorStrategyMultiplePreferPrivate extends SubnetSelectorS
     private SubnetSelectorService subnetSelectorService;
 
     @Override
-    public List<CloudSubnet> selectInternal(List<CloudSubnet> subnetMetas) {
+    public SubnetSelectionResult selectInternal(List<CloudSubnet> subnetMetas) {
         Map<String, CloudSubnet> selectedSubnets = subnetSelectorService.collectOnePrivateSubnetPerAz(subnetMetas, maxSubnetCountInDifferentAz);
         if (selectedSubnets.size() < minSubnetCountInDifferentAz) {
             Map<String, CloudSubnet> publicSubnetsPerAz = subnetSelectorService.collectOnePublicSubnetPerAz(subnetMetas, minSubnetCountInDifferentAz);
             subnetSelectorService.collectSubnetsOfMissingAz(selectedSubnets, publicSubnetsPerAz, minSubnetCountInDifferentAz);
             if (selectedSubnets.size() < minSubnetCountInDifferentAz) {
-                errorNotEnoughAZs(selectedSubnets.size(), minSubnetCountInDifferentAz);
+                return new SubnetSelectionResult(String.format(NOT_ENOUGH_AZ, selectedSubnets.size(), minSubnetCountInDifferentAz));
             }
         }
-        return new ArrayList<>(selectedSubnets.values());
+        return new SubnetSelectionResult(new ArrayList<>(selectedSubnets.values()));
     }
 
     @Override

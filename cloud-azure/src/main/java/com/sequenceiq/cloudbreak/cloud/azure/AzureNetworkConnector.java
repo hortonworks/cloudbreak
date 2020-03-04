@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 
 @Service
 public class AzureNetworkConnector implements NetworkConnector {
@@ -144,7 +145,7 @@ public class AzureNetworkConnector implements NetworkConnector {
     }
 
     @Override
-    public List<CloudSubnet> selectSubnets(List<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
+    public SubnetSelectionResult selectSubnets(List<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
         return azureSubnetSelectorService.select(subnetMetas, subnetSelectionParameters);
     }
 

@@ -49,6 +49,10 @@
                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
             <param>
+                <name>avatica.acl</name>
+                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+            </param>
+            <param>
                 <name>cm-api.acl</name>
                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
@@ -186,6 +190,12 @@
             {% if 'NIFI_REST' in exposed and 'NIFI_NODE' in salt['pillar.get']('gateway:location') -%}
              <param>
                  <name>NIFI</name>
+                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+             </param>
+            {%- endif %}
+            {% if 'AVATICA' in exposed and 'PHOENIX_QUERY_SERVER' in salt['pillar.get']('gateway:location') -%}
+             <param>
+                 <name>AVATICA</name>
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
              </param>
              {%- endif %}
@@ -408,12 +418,23 @@
 
     {% if 'SCHEMA_REGISTRY_SERVER' in salt['pillar.get']('gateway:location') -%}
     {% if 'SCHEMA-REGISTRY' in exposed -%}
-        <service>
-            <role>SCHEMA-REGISTRY</role>
-            {% for hostloc in salt['pillar.get']('gateway:location')['SCHEMA_REGISTRY_SERVER'] -%}
-            <url>{{ protocol }}://{{ hostloc }}:{{ ports['SCHEMA-REGISTRY'] }}</url>
-            {%- endfor %}
-        </service>
+    <service>
+        <role>SCHEMA-REGISTRY</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['SCHEMA_REGISTRY_SERVER'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SCHEMA-REGISTRY'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'PHOENIX_QUERY_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'AVATICA' in exposed -%}
+    <service>
+        <role>AVATICA</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['PHOENIX_QUERY_SERVER'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['AVATICA'] }}</url>
+        {%- endfor %}
+    </service>
     {%- endif %}
     {%- endif %}
 

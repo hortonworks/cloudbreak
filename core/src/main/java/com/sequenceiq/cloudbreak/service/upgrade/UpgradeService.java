@@ -9,9 +9,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
@@ -31,9 +34,13 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
+import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
+import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
+import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
@@ -51,6 +58,8 @@ public class UpgradeService {
     private static final boolean NOT_BASE_IMAGE = false;
 
     private static final String SALT_BOOTSTRAP = "salt-bootstrap";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeService.class);
 
     @Inject
     private StackService stackService;
@@ -114,21 +123,28 @@ public class UpgradeService {
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image image = componentConfigProviderService.getImage(stack.getId());
         UpgradeOptionV4Response upgradeResponse;
-        if (clusterRepairService.canRepairAll(stack)) {
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairResult = clusterRepairService.repairWithDryRun(stack.getId());
+        if (repairResult.isSuccess()) {
             StatedImage latestImage = getLatestImage(workspaceId, stack, image, user);
-            if (!Objects.equals(image.getImageId(), latestImage.getImage().getUuid())) {
+            if (!isImageIdTheSame(image, latestImage)) {
                 if (attachedClustersStoppedOrDeleted(stack)) {
                     upgradeResponse = upgradeable(image, latestImage, stack);
                 } else {
                     upgradeResponse = upgradeableAfterAction(image, latestImage, stack, "Please stop connected DataHub clusters before upgrade.");
+
                 }
             } else {
-                upgradeResponse = notUpgradable(image);
+                upgradeResponse = notUpgradable(image,
+                        String.format("According to the image catalog, the current image %s is already the latest version.", image.getImageId()));
             }
         } else {
-            upgradeResponse = notUpgradable(image);
+            upgradeResponse = notUpgradableWithValidationResult(image, repairResult.getError());
         }
         return upgradeResponse;
+    }
+
+    private boolean isImageIdTheSame(Image currentImage, StatedImage latestImage) {
+        return Objects.equals(currentImage.getImageId(), latestImage.getImage().getUuid());
     }
 
     private boolean attachedClustersStoppedOrDeleted(Stack stack) {
@@ -166,7 +182,7 @@ public class UpgradeService {
 
     private UpgradeOptionV4Response upgradeable(Image image, StatedImage latestImage, Stack stack)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        UpgradeOptionV4Response response = notUpgradable(image);
+        UpgradeOptionV4Response response = createUpgradeBaseWithCurrent(image);
         ImageInfoV4Response upgradeImageInfo = new ImageInfoV4Response(
                 latestImage.getImage().getImageSetsByProvider().get(stack.getPlatformVariant().toLowerCase()).get(stack.getRegion()),
                 latestImage.getImage().getUuid(),
@@ -174,6 +190,7 @@ public class UpgradeService {
                 latestImage.getImage().getCreated()
         );
         response.setUpgrade(upgradeImageInfo);
+        LOGGER.info("Datalake upgrade option evaulation finished, image found with image id {}", response.getUpgrade().getImageId());
         return response;
     }
 
@@ -190,20 +207,27 @@ public class UpgradeService {
         return response;
     }
 
-    private UpgradeOptionV4Response notUpgradable(Image image) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        return notUpgradable(image, null);
+    private UpgradeOptionV4Response notUpgradableWithValidationResult(Image image, RepairValidation validationResult)
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        return notUpgradable(image, validationResult.getValidationErrors().stream().collect(Collectors.joining("; ")));
     }
 
-    private UpgradeOptionV4Response notUpgradable(Image image, String reason) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    private UpgradeOptionV4Response createUpgradeBaseWithCurrent(Image image) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         ImageInfoV4Response currentImageInfo = new ImageInfoV4Response(
                 image.getImageName(),
                 image.getImageId(),
                 image.getImageCatalogName(),
                 imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId()).getImage().getCreated());
-        UpgradeOptionV4Response upgradeOptionV4Response = new UpgradeOptionV4Response();
-        upgradeOptionV4Response.setCurrent(currentImageInfo);
-        upgradeOptionV4Response.setReason(reason);
-        return upgradeOptionV4Response;
+        UpgradeOptionV4Response response = new UpgradeOptionV4Response();
+        response.setCurrent(currentImageInfo);
+        return response;
+    }
+
+    private UpgradeOptionV4Response notUpgradable(Image image, String reason) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        UpgradeOptionV4Response response = createUpgradeBaseWithCurrent(image);
+        response.setReason(reason);
+        LOGGER.error("Datalake upgrade option evaulation finished with error, reason: {}", response.getReason());
+        return response;
     }
 
     private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> getImageFilter(Image image, Stack stack) {

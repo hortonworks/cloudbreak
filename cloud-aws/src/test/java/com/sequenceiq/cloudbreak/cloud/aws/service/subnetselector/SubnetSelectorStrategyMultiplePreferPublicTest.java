@@ -12,13 +12,12 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-
-import javax.ws.rs.BadRequestException;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,6 +30,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SubnetSelectorStrategyMultiplePreferPublicTest {
@@ -63,11 +63,11 @@ public class SubnetSelectorStrategyMultiplePreferPublicTest {
                 .withPublicSubnet(AZ_B)
                 .build();
 
-        List<CloudSubnet> chosenSubnets = underTest.selectInternal(subnets);
+        SubnetSelectionResult chosenSubnets = underTest.selectInternal(subnets);
 
-        assertThat(chosenSubnets, hasSize(2));
-        assertEquals(2, subnetHelper.countDifferentAZs(chosenSubnets));
-        assertThat(chosenSubnets, hasItem(allOf(hasProperty("availabilityZone", is(AZ_A)), hasProperty("id", is(SUBNET_1)))));
+        assertThat(chosenSubnets.getResult(), hasSize(2));
+        assertEquals(2, subnetHelper.countDifferentAZs(chosenSubnets.getResult()));
+        assertThat(chosenSubnets.getResult(), hasItem(allOf(hasProperty("availabilityZone", is(AZ_A)), hasProperty("id", is(SUBNET_1)))));
     }
 
     @Test
@@ -78,10 +78,10 @@ public class SubnetSelectorStrategyMultiplePreferPublicTest {
                 .withPublicSubnet(AZ_C)
                 .build();
 
-        List<CloudSubnet> chosenSubnets = underTest.selectInternal(subnets);
+        SubnetSelectionResult chosenSubnets = underTest.selectInternal(subnets);
 
-        assertThat(chosenSubnets, hasSize(3));
-        assertEquals(3, subnetHelper.countDifferentAZs(chosenSubnets));
+        assertThat(chosenSubnets.getResult(), hasSize(3));
+        assertEquals(3, subnetHelper.countDifferentAZs(chosenSubnets.getResult()));
     }
 
     @Test
@@ -93,10 +93,10 @@ public class SubnetSelectorStrategyMultiplePreferPublicTest {
                 .withPublicSubnet(AZ_D)
                 .build();
 
-        List<CloudSubnet> chosenSubnets = underTest.selectInternal(subnets);
+        SubnetSelectionResult chosenSubnets = underTest.selectInternal(subnets);
 
-        assertThat(chosenSubnets, hasSize(3));
-        assertEquals(3, subnetHelper.countDifferentAZs(chosenSubnets));
+        assertThat(chosenSubnets.getResult(), hasSize(3));
+        assertEquals(3, subnetHelper.countDifferentAZs(chosenSubnets.getResult()));
     }
 
     @Test
@@ -107,11 +107,11 @@ public class SubnetSelectorStrategyMultiplePreferPublicTest {
                 .withPublicSubnet(AZ_B)
                 .build();
 
-        List<CloudSubnet> chosenSubnets = underTest.selectInternal(subnets);
+        SubnetSelectionResult chosenSubnets = underTest.selectInternal(subnets);
 
-        assertThat(chosenSubnets, hasSize(2));
-        assertThat(chosenSubnets, hasItem(hasProperty("availabilityZone", is(AZ_A))));
-        assertThat(chosenSubnets, hasItem(allOf(hasProperty("availabilityZone", is(AZ_B)), hasProperty("privateSubnet", is(false)))));
+        assertThat(chosenSubnets.getResult(), hasSize(2));
+        assertThat(chosenSubnets.getResult(), hasItem(hasProperty("availabilityZone", is(AZ_A))));
+        assertThat(chosenSubnets.getResult(), hasItem(allOf(hasProperty("availabilityZone", is(AZ_B)), hasProperty("privateSubnet", is(false)))));
     }
 
     @Test
@@ -122,11 +122,11 @@ public class SubnetSelectorStrategyMultiplePreferPublicTest {
                 .withPublicSubnetNoPublicIp(AZ_B)
                 .build();
 
-        List<CloudSubnet> chosenSubnets = underTest.selectInternal(subnets);
+        SubnetSelectionResult chosenSubnets = underTest.selectInternal(subnets);
 
-        assertThat(chosenSubnets, hasSize(2));
-        assertThat(chosenSubnets, hasItem(hasProperty("availabilityZone", is(AZ_A))));
-        assertThat(chosenSubnets, hasItem(allOf(hasProperty("availabilityZone", is(AZ_B)), hasProperty("privateSubnet", is(true)))));
+        assertThat(chosenSubnets.getResult(), hasSize(2));
+        assertThat(chosenSubnets.getResult(), hasItem(hasProperty("availabilityZone", is(AZ_A))));
+        assertThat(chosenSubnets.getResult(), hasItem(allOf(hasProperty("availabilityZone", is(AZ_B)), hasProperty("privateSubnet", is(true)))));
     }
 
     @Test
@@ -136,10 +136,10 @@ public class SubnetSelectorStrategyMultiplePreferPublicTest {
                 .withPrivateSubnet(AZ_B)
                 .build();
 
-        List<CloudSubnet> chosenSubnets = underTest.selectInternal(subnets);
+        SubnetSelectionResult chosenSubnets = underTest.selectInternal(subnets);
 
-        assertThat(chosenSubnets, hasSize(2));
-        assertEquals(2, subnetHelper.countDifferentAZs(chosenSubnets));
+        assertThat(chosenSubnets.getResult(), hasSize(2));
+        assertEquals(2, subnetHelper.countDifferentAZs(chosenSubnets.getResult()));
     }
 
     @Test
@@ -149,57 +149,61 @@ public class SubnetSelectorStrategyMultiplePreferPublicTest {
                 .withPrivateSubnet(AZ_B)
                 .build();
 
-        List<CloudSubnet> chosenSubnets = underTest.selectInternal(subnets);
+        SubnetSelectionResult chosenSubnets = underTest.selectInternal(subnets);
 
-        assertThat(chosenSubnets, hasSize(2));
-        assertEquals(2, subnetHelper.countDifferentAZs(chosenSubnets));
+        assertThat(chosenSubnets.getResult(), hasSize(2));
+        assertEquals(2, subnetHelper.countDifferentAZs(chosenSubnets.getResult()));
     }
 
     @Test
-    public void testWhenTwoPublicSameAzThenThrowsBadRequest() {
+    public void testWhenTwoPublicSameAzThenErrorMessage() {
         List<CloudSubnet> subnets = new SubnetBuilder()
                 .withPublicSubnet(AZ_A)
                 .withPublicSubnet(AZ_A)
                 .build();
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Acceptable subnets are in 1 different AZs, but subnets in 2 different AZs required.");
 
-        underTest.selectInternal(subnets);
+        SubnetSelectionResult chosenSubnets = underTest.selectInternal(subnets);
+
+        assertTrue(chosenSubnets.hasError());
+        assertEquals("Acceptable subnets are in 1 different AZs, but subnets in 2 different AZs required.", chosenSubnets.getErrorMessage());
     }
 
     @Test
-    public void testWhenOnePublicOnePrivateSameAzThenThrowsBadRequest() {
+    public void testWhenOnePublicOnePrivateSameAzThenErrorMessage() {
         List<CloudSubnet> subnets = new SubnetBuilder()
                 .withPublicSubnet(AZ_A)
                 .withPrivateSubnet(AZ_A)
                 .build();
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Acceptable subnets are in 1 different AZs, but subnets in 2 different AZs required.");
 
-        underTest.selectInternal(subnets);
+        SubnetSelectionResult result = underTest.selectInternal(subnets);
+
+        assertTrue(result.hasError());
+        assertEquals("Acceptable subnets are in 1 different AZs, but subnets in 2 different AZs required.", result.getErrorMessage());
     }
 
     @Test
-    public void testWhenTwoPublicSubnetsWithNoPublicIpThenThrowsBadRequest() {
+    public void testWhenTwoPublicSubnetsWithNoPublicIpThenErrorMessage() {
         List<CloudSubnet> subnets = new SubnetBuilder()
                 .withPublicSubnet(AZ_A)
                 .withPublicSubnetNoPublicIp(AZ_B)
                 .build();
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Acceptable subnets are in 1 different AZs, but subnets in 2 different AZs required.");
 
-        underTest.selectInternal(subnets);
+        SubnetSelectionResult result = underTest.selectInternal(subnets);
+
+        assertTrue(result.hasError());
+        assertEquals("Acceptable subnets are in 1 different AZs, but subnets in 2 different AZs required.", result.getErrorMessage());
     }
 
     @Test
-    public void testWhenPublicSubnetWithNoPublicIpThenThrowsBadRequest() {
+    public void testWhenPublicSubnetWithNoPublicIpThenErrorMessage() {
         List<CloudSubnet> subnets = new SubnetBuilder()
                 .withPublicSubnetNoPublicIp(AZ_A)
                 .build();
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Acceptable subnets are in 0 different AZs, but subnets in 2 different AZs required.");
 
-        underTest.selectInternal(subnets);
+        SubnetSelectionResult result = underTest.selectInternal(subnets);
+
+        assertTrue(result.hasError());
+        assertEquals("Acceptable subnets are in 0 different AZs, but subnets in 2 different AZs required.", result.getErrorMessage());
     }
 
     @Test

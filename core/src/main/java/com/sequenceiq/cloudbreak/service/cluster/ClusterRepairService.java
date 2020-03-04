@@ -144,14 +144,8 @@ public class ClusterRepairService {
         return triggerRepairOrThrowBadRequest(stackId, repairStart, removeOnly, nodeIds);
     }
 
-    public boolean canRepairAll(Stack stack) {
-        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
-                repair(ManualClusterRepairMode.DRY_RUN, stack.getId(), Set.of(), NOT_DELETE_VOLUMES);
-        boolean repairable = repairStart.isSuccess();
-        if (!repairable) {
-            LOGGER.info("Stack {} is not repairable. {}", stack.getId(), repairStart.getError().getValidationErrors());
-        }
-        return repairable;
+    public Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairWithDryRun(Long stackId) {
+        return repair(ManualClusterRepairMode.DRY_RUN, stackId, Set.of(), false);
     }
 
     public Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> checkRepairAll(Stack stack) {

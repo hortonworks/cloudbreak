@@ -7,11 +7,10 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-
-import javax.ws.rs.BadRequestException;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -24,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SubnetSelectorStrategySinglePreferPrivateTest {
@@ -50,10 +50,10 @@ public class SubnetSelectorStrategySinglePreferPrivateTest {
                 .withPrivateSubnet()
                 .build();
 
-        List<CloudSubnet> chosenSubnets = underTest.selectInternal(subnets);
+        SubnetSelectionResult chosenSubnets = underTest.selectInternal(subnets);
 
-        assertThat(chosenSubnets, hasSize(1));
-        assertThat(chosenSubnets, hasItem(hasProperty("privateSubnet", is(true))));
+        assertThat(chosenSubnets.getResult(), hasSize(1));
+        assertThat(chosenSubnets.getResult(), hasItem(hasProperty("privateSubnet", is(true))));
     }
 
     @Test
@@ -62,10 +62,10 @@ public class SubnetSelectorStrategySinglePreferPrivateTest {
                 .withPublicSubnet()
                 .build();
 
-        List<CloudSubnet> chosenSubnets = underTest.selectInternal(subnets);
+        SubnetSelectionResult chosenSubnets = underTest.selectInternal(subnets);
 
-        assertThat(chosenSubnets, hasSize(1));
-        assertThat(chosenSubnets, hasItem(hasProperty("privateSubnet", is(false))));
+        assertThat(chosenSubnets.getResult(), hasSize(1));
+        assertThat(chosenSubnets.getResult(), hasItem(hasProperty("privateSubnet", is(false))));
     }
 
     @Test
@@ -75,21 +75,22 @@ public class SubnetSelectorStrategySinglePreferPrivateTest {
                 .withPublicSubnet()
                 .build();
 
-        List<CloudSubnet> chosenSubnets = underTest.selectInternal(subnets);
+        SubnetSelectionResult chosenSubnets = underTest.selectInternal(subnets);
 
-        assertThat(chosenSubnets, hasSize(1));
-        assertThat(chosenSubnets, hasItem(hasProperty("privateSubnet", is(true))));
+        assertThat(chosenSubnets.getResult(), hasSize(1));
+        assertThat(chosenSubnets.getResult(), hasItem(hasProperty("privateSubnet", is(true))));
     }
 
     @Test
-    public void testWhenPublicSubnetWithNoPublicIpThenThrowsBadRequest() {
+    public void testWhenPublicSubnetWithNoPublicIpThenErrorMessage() {
         List<CloudSubnet> subnets = new SubnetBuilder()
                 .withPublicSubnetNoPublicIp(AZ_A)
                 .build();
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("No suitable subnet found as there were neither private nor any suitable public subnets in 'subnet-1'.");
 
-        underTest.selectInternal(subnets);
+        SubnetSelectionResult result = underTest.selectInternal(subnets);
+
+        assertTrue(result.hasError());
+        assertEquals("No suitable subnet found as there were neither private nor any suitable public subnets in 'subnet-1'.", result.getErrorMessage());
     }
 
     @Test

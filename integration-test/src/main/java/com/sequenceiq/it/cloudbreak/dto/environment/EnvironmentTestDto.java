@@ -232,7 +232,7 @@ public class EnvironmentTestDto
             getRequest().setParentEnvironmentName(parentEnvDto.getName());
             order = ORDER - 1;
         }
-        return this;
+        return withNetwork();
     }
 
     public Collection<SimpleEnvironmentResponse> getResponseSimpleEnvSet() {

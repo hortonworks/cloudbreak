@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.network.service;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -13,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -30,9 +30,16 @@ public class SubnetIdProvider {
             LOGGER.debug("Check failed, returning null");
             return null;
         }
-        List<CloudSubnet> selectedSubnets = cloudPlatformConnectors.get(new CloudPlatformVariant(cloudPlatform.name(), cloudPlatform.name()))
+        SubnetSelectionResult subnetSelectionResult = cloudPlatformConnectors.get(new CloudPlatformVariant(cloudPlatform.name(), cloudPlatform.name()))
                 .networkConnector()
                 .selectSubnets(new ArrayList<>(network.getSubnetMetas().values()), SubnetSelectionParameters.builder().withTunnel(tunnel).build());
-        return selectedSubnets.get(0).getId();
+        CloudSubnet selectedSubnet = subnetSelectionResult.hasResult()
+                ? subnetSelectionResult.getResult().get(0)
+                : fallback(network);
+        return selectedSubnet.getId();
+    }
+
+    private CloudSubnet fallback(NetworkDto network) {
+        return network.getSubnetMetas().values().iterator().next();
     }
 }
