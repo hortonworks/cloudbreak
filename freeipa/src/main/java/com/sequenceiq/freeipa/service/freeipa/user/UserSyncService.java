@@ -103,7 +103,7 @@ public class UserSyncService {
         LOGGER.debug("Synchronizing users in account {} for environmentCrns {}, userCrns {}, and machineUserCrns {}",
                 accountId, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
 
-        List<Stack> stacks = stackService.getMultipleByEnvironmentCrnAndAccountId(environmentCrnFilter, accountId);
+        List<Stack> stacks = stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(environmentCrnFilter, accountId);
         LOGGER.debug("Found {} stacks", stacks.size());
         if (stacks.isEmpty()) {
             throw new NotFoundException(String.format("No matching FreeIPA stacks found for account %s with environment crn filter %s",
