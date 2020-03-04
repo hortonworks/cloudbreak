@@ -63,11 +63,11 @@ public class StackService {
                 .or(() -> childEnvironmentService.findParentByEnvironmentCrnAndAccountId(environmentCrn, accountId));
     }
 
-    public List<Stack> getMultipleByEnvironmentCrnAndAccountId(Collection<String> environmentCrns, String accountId) {
+    public List<Stack> getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(Collection<String> environmentCrns, String accountId) {
         if (environmentCrns.isEmpty()) {
             return getAllByAccountId(accountId);
         } else {
-            return stackRepository.findMultipleByEnvironmentCrnAndAccountId(environmentCrns, accountId);
+            return stackRepository.findMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(environmentCrns, accountId);
         }
     }
 
