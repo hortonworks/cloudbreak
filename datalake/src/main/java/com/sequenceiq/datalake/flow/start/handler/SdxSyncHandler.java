@@ -33,22 +33,16 @@ import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
 @Component
-public class SdxSyncHandler implements EventHandler<SdxSyncWaitRequest> {
+public class SdxSyncHandler extends ExceptionCatcherEventHandler<SdxSyncWaitRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxSyncHandler.class);
 
     private static final int SLEEP_TIME = 5;
 
     private static final int ATTEMPT = 40;
-
-    @Inject
-    private EventBus eventBus;
 
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
@@ -68,7 +62,12 @@ public class SdxSyncHandler implements EventHandler<SdxSyncWaitRequest> {
     }
 
     @Override
-    public void accept(Event<SdxSyncWaitRequest> event) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+        return new SdxStartFailedEvent(resourceId, null, e);
+    }
+
+    @Override
+    protected void doAccept(HandlerEvent event) {
         SdxSyncWaitRequest waitRequest = event.getData();
         Long sdxId = waitRequest.getResourceId();
         String userId = waitRequest.getUserId();
@@ -92,7 +91,7 @@ public class SdxSyncHandler implements EventHandler<SdxSyncWaitRequest> {
             LOGGER.info("Sync polling failed for stack: {}", sdxId);
             response = new SdxStartFailedEvent(sdxId, userId, exception);
         }
-        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
+        sendEvent(response, event);
     }
 
     private StackV4Response pollingSync(SdxCluster sdxCluster) {
