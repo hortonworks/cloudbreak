@@ -76,7 +76,7 @@ public class PasswordService {
         LOGGER.debug("setting password for user {} in account {}", userCrn, accountId);
         freeIpaPasswordValidator.validate(password);
 
-        List<Stack> stacks = stackService.getMultipleByEnvironmentCrnAndAccountId(environmentCrnFilter, accountId);
+        List<Stack> stacks = stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(environmentCrnFilter, accountId);
 
         if (stacks.isEmpty()) {
             LOGGER.warn("No stacks found for accountId {}", accountId);

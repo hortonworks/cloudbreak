@@ -38,8 +38,11 @@ public interface StackRepository extends JpaRepository<Stack, Long> {
     @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn AND s.terminated = -1")
     Optional<Stack> findByEnvironmentCrnAndAccountId(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
 
-    @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn IN :environmentCrns AND s.terminated = -1")
-    List<Stack> findMultipleByEnvironmentCrnAndAccountId(@Param("environmentCrns") Collection<String> environmentCrns, @Param("accountId") String accountId);
+    @Query("SELECT s FROM Stack s LEFT JOIN ChildEnvironment c ON c.stack.id = s.id WHERE s.accountId = :accountId "
+            + "AND (s.environmentCrn IN :environmentCrns OR c.environmentCrn IN :environmentCrns) AND s.terminated = -1")
+    List<Stack> findMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(
+            @Param("environmentCrns") Collection<String> environmentCrns,
+            @Param("accountId") String accountId);
 
     @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn AND s.terminated = -1")
     List<Stack> findAllByEnvironmentCrnAndAccountId(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
