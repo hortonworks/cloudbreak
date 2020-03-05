@@ -101,42 +101,42 @@ public class CmHostGroupRoleConfigProviderProcessor {
                     // noop
                     break;
                 default:
-                    LOGGER.debug("Cloning config group {} into {} host groups: {}", configGroupName, groupCount, configsByHostGroup.keySet());
-
-                    // "clone" config group for each host group
-                    Map<String, ApiClusterTemplateRoleConfigGroup> clonesByHostGroup = configsByHostGroup.keySet().stream()
-                            .map(hostGroupName -> Pair.of(hostGroupName, copyForHostGroup(configGroup, hostGroupName)))
-                            .collect(toMap(Pair::getKey, Pair::getValue));
-
-                    // add host group-specific configs to clones
-                    configsByHostGroup.forEach((hostGroupName, newConfigs) ->
-                            templateProcessor.mergeRoleConfigs(clonesByHostGroup.get(hostGroupName), newConfigs));
-
-                    // remove original from service
-                    ApiClusterTemplateService service = serviceByRCG.get(configGroupName);
-                    service.getRoleConfigGroups().removeIf(group -> Objects.equals(group.getRefName(), configGroupName));
-
-                    // remove original from instantiator
-                    if (instantiatorRoleConfigGroups != null) {
-                        instantiatorRoleConfigGroups.removeIf(groupInfo -> Objects.equals(groupInfo.getRcgRefName(), configGroupName));
-                    }
-
-                    // add clones to service
-                    service.getRoleConfigGroups().addAll(clonesByHostGroup.values());
-
-                    // add clones to instantiator
-                    clonesByHostGroup.values()
-                            .forEach(group -> instantiator.addRoleConfigGroupsItem(
-                                    new ApiClusterTemplateRoleConfigGroupInfo().rcgRefName(group.getRefName())));
-
-                    // replace references in host groups
-                    for (ApiClusterTemplateHostTemplate hostTemplate : hostTemplates) {
-                        ApiClusterTemplateRoleConfigGroup rcgForHostGroup = clonesByHostGroup.get(hostTemplate.getRefName());
-                        if (rcgForHostGroup != null) {
-                            hostTemplate.getRoleConfigGroupsRefNames().remove(configGroupName);
-                            hostTemplate.getRoleConfigGroupsRefNames().add(rcgForHostGroup.getRefName());
-                        }
-                    }
+//                    LOGGER.debug("Cloning config group {} into {} host groups: {}", configGroupName, groupCount, configsByHostGroup.keySet());
+//
+//                    // "clone" config group for each host group
+//                    Map<String, ApiClusterTemplateRoleConfigGroup> clonesByHostGroup = configsByHostGroup.keySet().stream()
+//                            .map(hostGroupName -> Pair.of(hostGroupName, copyForHostGroup(configGroup, hostGroupName)))
+//                            .collect(toMap(Pair::getKey, Pair::getValue));
+//
+//                    // add host group-specific configs to clones
+//                    configsByHostGroup.forEach((hostGroupName, newConfigs) ->
+//                            templateProcessor.mergeRoleConfigs(clonesByHostGroup.get(hostGroupName), newConfigs));
+//
+//                    // remove original from service
+//                    ApiClusterTemplateService service = serviceByRCG.get(configGroupName);
+//                    service.getRoleConfigGroups().removeIf(group -> Objects.equals(group.getRefName(), configGroupName));
+//
+//                    // remove original from instantiator
+//                    if (instantiatorRoleConfigGroups != null) {
+//                        instantiatorRoleConfigGroups.removeIf(groupInfo -> Objects.equals(groupInfo.getRcgRefName(), configGroupName));
+//                    }
+//
+//                    // add clones to service
+//                    service.getRoleConfigGroups().addAll(clonesByHostGroup.values());
+//
+//                    // add clones to instantiator
+//                    clonesByHostGroup.values()
+//                            .forEach(group -> instantiator.addRoleConfigGroupsItem(
+//                                    new ApiClusterTemplateRoleConfigGroupInfo().rcgRefName(group.getRefName())));
+//
+//                    // replace references in host groups
+//                    for (ApiClusterTemplateHostTemplate hostTemplate : hostTemplates) {
+//                        ApiClusterTemplateRoleConfigGroup rcgForHostGroup = clonesByHostGroup.get(hostTemplate.getRefName());
+//                        if (rcgForHostGroup != null) {
+//                            hostTemplate.getRoleConfigGroupsRefNames().remove(configGroupName);
+//                            hostTemplate.getRoleConfigGroupsRefNames().add(rcgForHostGroup.getRefName());
+//                        }
+//                    }
 
                     break;
             }
