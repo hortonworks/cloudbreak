@@ -138,6 +138,7 @@ cb:
     cf.template.newdb.path: templates/aws-cf-dbstack.ftl
     default.inbound.security.group:
     vpc:
+    credential.cache.ttl: 60
   arm:
     network.template.path: templates/arm-network.ftl
     app.creation.template:
