@@ -23,4 +23,5 @@ dependencies {
   implementation     group: 'org.bouncycastle',                 name: 'bcprov-jdk15on',              version: bouncycastleVersion
   implementation     group: 'org.bouncycastle',                 name: 'bcpkix-jdk15on',              version: bouncycastleVersion
   testImplementation group: 'org.mockito',                      name: 'mockito-core',                version: mockitoVersion
+  testCompile        group: 'junit',                            name: 'junit',                       version: junitVersion
 }

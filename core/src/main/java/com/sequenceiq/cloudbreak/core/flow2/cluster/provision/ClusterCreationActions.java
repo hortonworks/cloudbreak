@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -16,6 +18,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.job.StackJobAdapter;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -40,7 +43,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServ
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartClusterManagerServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupFreeIpaEvent;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.statuschecker.service.JobService;
 
 @Configuration
@@ -107,11 +112,33 @@ public class ClusterCreationActions {
         };
     }
 
+    @Bean(name = "CLEANUP_FREEIPA_STATE")
+    public Action<?, ?> cleanupFreeIpaAction() {
+        return new AbstractStackCreationAction<>(HostMetadataSetupSuccess.class) {
+
+            @Inject
+            private InstanceMetaDataService instanceMetaDataService;
+
+            @Override
+            protected void doExecute(StackContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) throws Exception {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.findNotTerminatedForStack(context.getStack().getId());
+                Set<String> hostNames = instanceMetaData.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
+                Set<String> ips = instanceMetaData.stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toSet());
+                return new CleanupFreeIpaEvent(context.getStack().getId(), hostNames, ips);
+            }
+        };
+    }
+
     @Bean(name = "BOOTSTRAPPING_PUBLIC_ENDPOINT_STATE")
     public Action<?, ?> bootStrappingPublicEndpointAction() {
-        return new AbstractStackCreationAction<>(HostMetadataSetupSuccess.class) {
+        return new AbstractStackCreationAction<>(StackEvent.class) {
             @Override
-            protected void doExecute(StackContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 clusterCreationService.bootstrapPublicEndpoints(context.getStack());
                 sendEvent(context);
             }

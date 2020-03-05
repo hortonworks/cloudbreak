@@ -83,7 +83,7 @@ public class FreeIpaCleanupActions {
         return new AbstractFreeIpaCleanupAction<>(RemoveHostsResponse.class) {
             @Override
             protected void doExecute(FreeIpaContext context, RemoveHostsResponse payload, Map<Object, Object> variables) {
-                if (payload.getHosts() == null || payload.getHosts().isEmpty()) {
+                if ((payload.getHosts() == null || payload.getHosts().isEmpty()) && (payload.getIps() == null || payload.getIps().isEmpty())) {
                     LOGGER.info("Host is empty, skipping removing hosts");
                     RemoveDnsResponse response =
                             new RemoveDnsResponse(payload, Collections.emptySet(), Collections.emptyMap());
@@ -160,12 +160,13 @@ public class FreeIpaCleanupActions {
             @Override
             protected void doExecute(FreeIpaContext context, RemoveRolesResponse payload, Map<Object, Object> variables) {
                 CleanupEvent cleanupEvent = new CleanupEvent(FreeIpaCleanupEvent.CLEANUP_FINISHED_EVENT.event(), payload.getResourceId(), payload.getUsers(),
-                        payload.getHosts(), payload.getRoles(), payload.getAccountId(), payload.getOperationId(), payload.getClusterName(),
+                        payload.getHosts(), payload.getRoles(), payload.getIps(), payload.getAccountId(), payload.getOperationId(), payload.getClusterName(),
                         payload.getEnvironmentCrn());
                 SuccessDetails successDetails = new SuccessDetails(payload.getEnvironmentCrn());
                 successDetails.getAdditionalDetails().put("Hosts", payload.getHosts() == null ? List.of() : new ArrayList<>(payload.getHosts()));
                 successDetails.getAdditionalDetails().put("Users", payload.getUsers() == null ? List.of() : new ArrayList<>(payload.getUsers()));
                 successDetails.getAdditionalDetails().put("Roles", payload.getRoles() == null ? List.of() : new ArrayList<>(payload.getRoles()));
+                successDetails.getAdditionalDetails().put("IPs", payload.getIps() == null ? List.of() : new ArrayList<>(payload.getIps()));
                 operationService.completeOperation(payload.getAccountId(), payload.getOperationId(), List.of(successDetails), Collections.emptyList());
                 LOGGER.info("Cleanup successfully finished with: " + successDetails);
                 sendEvent(context, cleanupEvent);

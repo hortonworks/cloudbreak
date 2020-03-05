@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesReq
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupFreeIpaEvent;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
@@ -289,14 +290,34 @@ public class StackUpscaleActions {
         };
     }
 
+    @Bean(name = "CLEANUP_FREEIPA_UPSCALE_STATE")
+    public Action<?, ?> cleanupFreeIpaAction() {
+        return new AbstractStackUpscaleAction<>(ExtendHostMetadataResult.class) {
+
+            @Inject
+            private InstanceMetaDataService instanceMetaDataService;
+
+            @Override
+            protected void doExecute(StackScalingFlowContext context, ExtendHostMetadataResult payload, Map<Object, Object> variables) throws Exception {
+                Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.findNotTerminatedForStack(context.getStack().getId());
+                Set<String> ips = payload.getRequest().getUpscaleCandidateAddresses();
+                Set<String> hostNames = instanceMetaData.stream()
+                        .filter(im -> ips.contains(im.getPrivateIp()))
+                        .map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
+                CleanupFreeIpaEvent cleanupFreeIpaEvent = new CleanupFreeIpaEvent(context.getStack().getId(), hostNames, ips);
+                sendEvent(context, cleanupFreeIpaEvent);
+            }
+        };
+    }
+
     @Bean(name = "EXTEND_HOST_METADATA_FINISHED_STATE")
     public Action<?, ?> finishExtendHostMetadata() {
-        return new AbstractStackUpscaleAction<>(ExtendHostMetadataResult.class) {
+        return new AbstractStackUpscaleAction<>(CleanupFreeIpaEvent.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, ExtendHostMetadataResult payload, Map<Object, Object> variables) {
+            protected void doExecute(StackScalingFlowContext context, CleanupFreeIpaEvent payload, Map<Object, Object> variables) {
                 final Stack stack = context.getStack();
                 stackUpscaleService.finishExtendHostMetadata(stack);
-                final Set<String> newAddresses = payload.getRequest().getUpscaleCandidateAddresses();
+                final Set<String> newAddresses = payload.getIps();
                 final Map<String, String> newAddressesByFqdn = stack.getNotDeletedInstanceMetaDataSet().stream()
                         .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
                         .collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, InstanceMetaData::getPublicIpWrapper));

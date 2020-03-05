@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.freeipa;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -60,12 +61,12 @@ public class FreeIpaCleanupService {
     @Inject
     private EnvironmentConfigProvider environmentConfigProvider;
 
-    public void cleanup(Stack stack, boolean hostOnly, Set<String> hostNames) {
+    public void cleanup(Stack stack, boolean hostOnly, Set<String> hostNames, Set<String> ips) {
         Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         boolean childEnvironment = environmentConfigProvider.isChildEnvironment(stack.getEnvironmentCrn());
 
         if (kerberosDetailService.keytabsShouldBeUpdated(stack.cloudPlatform(), childEnvironment, kerberosConfig)) {
-            OperationStatus operationStatus = sendCleanupRequest(stack, hostOnly, hostNames);
+            OperationStatus operationStatus = sendCleanupRequest(stack, hostOnly, hostNames, ips);
             pollCleanupOperation(operationStatus);
         }
     }
@@ -83,12 +84,11 @@ public class FreeIpaCleanupService {
         }
     }
 
-    private OperationStatus sendCleanupRequest(Stack stack, boolean hostOnly, Set<String> hostNames) {
+    private OperationStatus sendCleanupRequest(Stack stack, boolean hostOnly, Set<String> hostNames, Set<String> ips) {
         try {
-            Set<String> fqdns = stack.getInstanceMetaDataAsList().stream().map(InstanceMetaData::getDiscoveryFQDN).filter(s -> StringUtils.isNotBlank(s))
-                    .collect(Collectors.toSet());
             CleanupRequest cleanupRequest = new CleanupRequest();
-            cleanupRequest.setHosts(hostNames == null ? fqdns : hostNames);
+            cleanupRequest.setHosts(hostNames == null ? collectDataFromInstanceMetaDataList(stack, InstanceMetaData::getDiscoveryFQDN) : hostNames);
+            cleanupRequest.setIps(ips == null ? collectDataFromInstanceMetaDataList(stack, InstanceMetaData::getPrivateIp) : ips);
             cleanupRequest.setEnvironmentCrn(stack.getEnvironmentCrn());
             if (!hostOnly) {
                 cleanupRequest.setClusterName(stack.getName());
@@ -104,5 +104,10 @@ public class FreeIpaCleanupService {
             LOGGER.error("Couldn't start cleanup", e);
             throw new FreeIpaOperationFailedException("Couldn't start cleanup", e);
         }
+    }
+
+    private Set<String> collectDataFromInstanceMetaDataList(Stack stack, Function<InstanceMetaData, String> instanceMetaDataStringFunction) {
+        return stack.getInstanceMetaDataAsList().stream().map(instanceMetaDataStringFunction).filter(s -> StringUtils.isNotBlank(s))
+                .collect(Collectors.toSet());
     }
 }

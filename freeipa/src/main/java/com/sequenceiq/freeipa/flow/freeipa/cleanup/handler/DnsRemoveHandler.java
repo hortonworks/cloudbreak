@@ -48,7 +48,7 @@ public class DnsRemoveHandler implements EventHandler<RemoveDnsRequest> {
         try {
             FreeIpa freeIpa = freeIpaService.findByStackId(request.getResourceId());
             Pair<Set<String>, Map<String, String>> removeDnsResult =
-                    cleanupService.removeDnsEntries(request.getResourceId(), request.getHosts(), freeIpa.getDomain());
+                    cleanupService.removeDnsEntries(request.getResourceId(), request.getHosts(), request.getIps(), freeIpa.getDomain());
             RemoveDnsResponse response = new RemoveDnsResponse(request, removeDnsResult.getFirst(), removeDnsResult.getSecond());
             eventBus.notify(response.getDnsCleanupFailed().isEmpty()
                             ? EventSelectorUtil.selector(RemoveDnsResponse.class) : EventSelectorUtil.failureSelector(RemoveDnsResponse.class),
