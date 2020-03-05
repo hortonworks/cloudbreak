@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -82,9 +81,6 @@ public class StackStatusCheckerJobTest {
 
     @Mock
     private ClusterService clusterService;
-
-    @Mock
-    private ClusterOperationService clusterOperationService;
 
     @Mock
     private ClusterApi clusterApi;
@@ -204,7 +200,7 @@ public class StackStatusCheckerJobTest {
         setupForCM();
         underTest.executeInternal(jobExecutionContext);
 
-        verify(clusterOperationService, times(0)).reportHealthChange(anyString(), anySet(), anySet());
+        verify(clusterService, times(0)).reportHealthChange(anyString(), anySet(), anySet());
         verify(instanceStateQuery, times(1)).getCloudVmInstanceStatuses(any(), any(), any());
     }
 
@@ -216,7 +212,7 @@ public class StackStatusCheckerJobTest {
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         underTest.executeInternal(jobExecutionContext);
 
-        verify(clusterOperationService, times(1)).reportHealthChange(any(), anySet(), anySet());
+        verify(clusterService, times(1)).reportHealthChange(any(), anySet(), anySet());
         verify(instanceStateQuery, times(1)).getCloudVmInstanceStatuses(any(), any(), any());
     }
 }

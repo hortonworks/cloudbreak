@@ -53,6 +53,4 @@ public interface FlowLogService {
     Set<FlowLog> findAllByCloudbreakNodeId(String cloudbreakNodeId);
 
     List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long id);
-
-    List<FlowLog> findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(Long id);
 }

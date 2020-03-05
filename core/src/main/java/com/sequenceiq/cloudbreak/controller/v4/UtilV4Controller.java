@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.cluster.RepositoryConfigValidationService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
-import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseProvider;
 import com.sequenceiq.cloudbreak.workspace.authorization.UmsWorkspaceAuthorizationService;
 import com.sequenceiq.common.api.util.versionchecker.ClientVersionUtil;
@@ -69,7 +69,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     private UmsWorkspaceAuthorizationService umsAuthorizationService;
 
     @Inject
-    private StackOperationService stackOperationService;
+    private StackService stackService;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -131,7 +131,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Override
     public Response renewCertificate(RenewCertificateV4Request renewCertificateV4Request) {
-        stackOperationService.renewCertificate(renewCertificateV4Request.getStackName());
+        stackService.renewCertificate(renewCertificateV4Request.getStackName());
         return Response.ok().build();
     }
 }

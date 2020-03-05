@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 
@@ -21,7 +22,7 @@ public class ProperTerminationFlowEventChainFactory implements FlowEventChainFac
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(TerminationEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(new TerminationEvent(ClusterTerminationEvent.PROPER_TERMINATION_EVENT.event(), event.getResourceId(), event.getForced()));
+        flowEventChain.add(new StackEvent(ClusterTerminationEvent.PROPER_TERMINATION_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new TerminationEvent(StackTerminationEvent.TERMINATION_EVENT.event(), event.getResourceId(), event.getForced()));
         return flowEventChain;
     }
