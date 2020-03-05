@@ -49,10 +49,10 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.projection.HostGroupRepairView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
@@ -177,11 +177,10 @@ public class ClusterServiceTest {
         InstanceMetaData host2 = getHost("host2", "group2", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
         when(instanceMetaDataService.findHostInStack(eq(stack.getId()), eq("host2"))).thenReturn(Optional.of(host2));
 
-        when(hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), host1.getInstanceGroup().getGroupName()))
+        when(hostGroupService.getRepairViewByClusterIdAndName(stack.getCluster().getId(), host1.getInstanceGroup().getGroupName()))
                 .thenReturn(Optional.of(getHostGroup(host1, RecoveryMode.AUTO)));
-        when(hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), host2.getInstanceGroup().getGroupName()))
+        when(hostGroupService.getRepairViewByClusterIdAndName(stack.getCluster().getId(), host2.getInstanceGroup().getGroupName()))
                 .thenReturn(Optional.of(getHostGroup(host2, RecoveryMode.MANUAL)));
-
         when(instanceMetaDataService.findNotTerminatedForStack(eq(stack.getId()))).thenReturn(new HashSet<>(Arrays.asList(host1, host2)));
 
         underTest.reportHealthChange(STACK_CRN, Set.of("host1", "host2"), Set.of());
@@ -204,7 +203,7 @@ public class ClusterServiceTest {
     public void shouldNotTriggerSync() {
         String hostFQDN = "host2Name.stopped";
         InstanceMetaData instanceMd = getHost(hostFQDN, "master", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
-        when(hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), instanceMd.getInstanceGroup().getGroupName()))
+        when(hostGroupService.getRepairViewByClusterIdAndName(stack.getCluster().getId(), instanceMd.getInstanceGroup().getGroupName()))
                 .thenReturn(Optional.of(getHostGroup(instanceMd, RecoveryMode.MANUAL)));
         when(instanceMetaDataService.findHostInStack(eq(stack.getId()), eq(hostFQDN))).thenReturn(Optional.of(instanceMd));
 
@@ -225,7 +224,7 @@ public class ClusterServiceTest {
         when(stackService.findByCrn(STACK_CRN)).thenReturn(stack);
         InstanceMetaData host1 = getHost("host1", "master", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
         when(instanceMetaDataService.findHostInStack(eq(stack.getId()), eq("host1"))).thenReturn(Optional.of(host1));
-        when(hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), host1.getInstanceGroup().getGroupName()))
+        when(hostGroupService.getRepairViewByClusterIdAndName(stack.getCluster().getId(), host1.getInstanceGroup().getGroupName()))
                 .thenReturn(Optional.of(getHostGroup(host1, RecoveryMode.AUTO)));
 
         RDSConfig rdsConfig = new RDSConfig();
@@ -274,10 +273,29 @@ public class ClusterServiceTest {
         return instanceMetaData;
     }
 
-    private HostGroup getHostGroup(InstanceMetaData instanceMetaData, RecoveryMode recoveryMode) {
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName(instanceMetaData.getInstanceGroupName());
-        hostGroup.setRecoveryMode(recoveryMode);
-        return hostGroup;
+    private HostGroupRepairView getHostGroup(InstanceMetaData instanceMetaData, RecoveryMode recoveryMode) {
+        return new HostGroupRepairViewImpl(instanceMetaData.getInstanceGroupName(), recoveryMode);
+    }
+
+    private static class HostGroupRepairViewImpl implements HostGroupRepairView {
+
+        private RecoveryMode recoveryMode;
+
+        private String name;
+
+        HostGroupRepairViewImpl(String name, RecoveryMode recoveryMode) {
+            this.name = name;
+            this.recoveryMode = recoveryMode;
+        }
+
+        @Override
+        public RecoveryMode getRecoveryMode() {
+            return recoveryMode;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
     }
 }
