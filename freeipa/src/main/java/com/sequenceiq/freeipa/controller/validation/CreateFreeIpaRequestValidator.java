@@ -19,7 +19,7 @@ import com.sequenceiq.freeipa.util.CrnService;
 @Component
 public class CreateFreeIpaRequestValidator implements Validator<CreateFreeIpaRequest> {
 
-    static final String FREEIPA_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.FREEIPA).getInternalCrnForServiceAsString();
+    static final String INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     @Inject
     private StackService stackService;
@@ -45,7 +45,7 @@ public class CreateFreeIpaRequestValidator implements Validator<CreateFreeIpaReq
         } else {
             int nodesPerInstanceGroup = subject.getInstanceGroups().get(0).getNodeCount();
             if ((nodesPerInstanceGroup > 1 || subject.getInstanceGroups().size() > 1) &&
-                    !entitlementService.freeIpaHaEnabled(FREEIPA_INTERNAL_ACTOR_CRN, accountId)) {
+                    !entitlementService.freeIpaHaEnabled(INTERNAL_ACTOR_CRN, accountId)) {
                 validationBuilder.error("The FreeIPA HA capability is disabled.");
             }
             if (subject.getInstanceGroups().stream().filter(ig -> ig.getNodeCount() != nodesPerInstanceGroup || ig.getNodeCount() < 1).count() > 0) {
