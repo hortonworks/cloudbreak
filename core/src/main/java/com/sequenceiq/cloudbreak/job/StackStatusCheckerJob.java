@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.job;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
@@ -139,11 +140,12 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     private void reportHealthAndSyncInstances(Stack stack, Collection<InstanceMetaData> runningInstances, Collection<InstanceMetaData> failedInstances,
             Set<String> newHealtyHostNames, InstanceSyncState defaultState) {
-        Set<String> failedNodeNames = failedInstances.stream()
+        Set<String> newFailedNodeNames = failedInstances.stream()
+                .filter(i -> !Set.of(SERVICES_UNHEALTHY, STOPPED).contains(i.getInstanceStatus()))
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(toSet());
-        clusterService.reportHealthChange(stack.getResourceCrn(), failedNodeNames, newHealtyHostNames);
-        if (failedNodeNames.size() > 0) {
+        clusterService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNames, newHealtyHostNames);
+        if (failedInstances.size() > 0) {
             clusterService.updateClusterStatusByStackId(stack.getId(), Status.AMBIGUOUS);
         } else if (EnumSet.of(Status.AMBIGUOUS, Status.STOPPED).contains(stack.getCluster().getStatus())) {
             clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);

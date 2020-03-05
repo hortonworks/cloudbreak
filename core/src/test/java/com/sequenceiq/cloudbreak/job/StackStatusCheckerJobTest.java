@@ -21,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.handler.InstanceStateQuery;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
@@ -193,6 +194,7 @@ public class StackStatusCheckerJobTest {
         when(environmentServiceCrnEndpoints.credentialV1Endpoint()).thenReturn(credentialEndpoint);
         when(clusterStatusService.getStatus(anyBoolean())).thenReturn(clusterStatusResult);
         when(instanceMetaDataService.findNotTerminatedForStack(anyLong())).thenReturn(Set.of(instanceMetaData));
+        when(instanceMetaData.getInstanceStatus()).thenReturn(InstanceStatus.SERVICES_HEALTHY);
     }
 
     @Test
