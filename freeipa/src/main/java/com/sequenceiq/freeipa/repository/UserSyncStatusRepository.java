@@ -18,4 +18,8 @@ public interface UserSyncStatusRepository extends BaseCrudRepository<UserSyncSta
 
     @CheckPermission(action = ResourceAction.READ)
     Optional<UserSyncStatus> getByStack(Stack stack);
+
+    @Override
+    @CheckPermission(action = ResourceAction.READ)
+    <S extends UserSyncStatus> S save(S entity);
 }
