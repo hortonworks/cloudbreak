@@ -13,10 +13,8 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
-import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -86,8 +84,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject(action = AuthorizationResourceAction.WRITE)
-    public DetailedEnvironmentResponse post(@ResourceObject @Valid EnvironmentRequest request) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE)
+    public DetailedEnvironmentResponse post(@Valid EnvironmentRequest request) {
         EnvironmentCreationDto environmentCreationDto = environmentApiConverter.initCreationDto(request);
         EnvironmentDto envDto = environmentCreationService.create(environmentCreationDto);
         return environmentApiConverter.dtoToDetailedResponse(envDto);
@@ -128,7 +126,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
-    public SimpleEnvironmentResponse deleteByCrn(String crn, boolean forced) {
+    public SimpleEnvironmentResponse deleteByCrn(@ResourceCrn String crn, boolean forced) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         EnvironmentDto environmentDto = environmentDeletionService.deleteByCrnAndAccountId(crn, accountId, actualUserCrn, forced);
@@ -158,16 +156,16 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject(action = AuthorizationResourceAction.WRITE)
-    public DetailedEnvironmentResponse editByName(String environmentName, @ResourceObject @NotNull EnvironmentEditRequest request) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    public DetailedEnvironmentResponse editByName(String environmentName, @NotNull EnvironmentEditRequest request) {
         EnvironmentEditDto editDto = environmentApiConverter.initEditDto(request);
         EnvironmentDto result = environmentModificationService.editByName(environmentName, editDto);
         return environmentApiConverter.dtoToDetailedResponse(result);
     }
 
     @Override
-    @CheckPermissionByResourceObject(action = AuthorizationResourceAction.WRITE)
-    public DetailedEnvironmentResponse editByCrn(String crn, @ResourceObject @NotNull EnvironmentEditRequest request) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    public DetailedEnvironmentResponse editByCrn(String crn, @NotNull EnvironmentEditRequest request) {
         EnvironmentEditDto editDto = environmentApiConverter.initEditDto(request);
         EnvironmentDto result = environmentModificationService.editByCrn(crn, editDto);
         return environmentApiConverter.dtoToDetailedResponse(result);
@@ -184,9 +182,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject(action = AuthorizationResourceAction.WRITE)
-    public DetailedEnvironmentResponse changeCredentialByEnvironmentName(String environmentName,
-            @ResourceObject @Valid EnvironmentChangeCredentialRequest request) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    public DetailedEnvironmentResponse changeCredentialByEnvironmentName(String environmentName, @Valid EnvironmentChangeCredentialRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentChangeCredentialDto dto = environmentApiConverter.convertEnvironmentChangeCredentialDto(request);
         EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentName(accountId, environmentName, dto);
@@ -194,9 +191,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject(action = AuthorizationResourceAction.WRITE)
-    public DetailedEnvironmentResponse changeCredentialByEnvironmentCrn(String crn,
-            @ResourceObject @Valid EnvironmentChangeCredentialRequest request) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    public DetailedEnvironmentResponse changeCredentialByEnvironmentCrn(String crn, @Valid EnvironmentChangeCredentialRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentCrn(accountId, crn,
                 environmentApiConverter.convertEnvironmentChangeCredentialDto(request));
@@ -211,7 +207,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
-    public void postStartByCrn(String crn) {
+    public void postStartByCrn(@ResourceCrn String crn) {
         environmentStartService.startByCrn(crn);
     }
 
@@ -223,7 +219,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
-    public void postStopByCrn(String crn) {
+    public void postStopByCrn(@ResourceCrn String crn) {
         environmentStopService.stopByCrn(crn);
     }
 
@@ -240,7 +236,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
-    public Object getCreateEnvironmentForCliByCrn(String crn) {
+    public Object getCreateEnvironmentForCliByCrn(@ResourceCrn String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
         if (!AWS.equalsIgnoreCase(environmentDto.getCloudPlatform())) {
@@ -250,8 +246,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject(action = AuthorizationResourceAction.READ)
-    public Object getCreateEnvironmentForCli(@ResourceObject EnvironmentRequest environmentRequest) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    public Object getCreateEnvironmentForCli(EnvironmentRequest environmentRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByNameForAccountId(environmentRequest.getCredentialName(), accountId);
         if (!AWS.equalsIgnoreCase(credential.getCloudPlatform())) {

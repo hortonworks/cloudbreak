@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -105,7 +104,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .given(CredentialTestDto.class)
                 .init(EnvironmentTestDto.class)
                 .when(environmentTestClient.create(), RunningParameter.key(forbiddenKey))
-                .expect(ForbiddenException.class, RunningParameter.key(forbiddenKey))
+                .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
                 .validate();
     }
 
