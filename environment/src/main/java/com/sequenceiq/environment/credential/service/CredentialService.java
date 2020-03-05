@@ -172,13 +172,8 @@ public class CredentialService extends AbstractCredentialService implements Reso
         credential.setAccountId(accountId);
         Credential created = repository.save(credentialAdapter.verify(credential, accountId).getCredential());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
-        Crn credentialOwnerCrn = Crn.builder().setAccountId(accountId)
-                .setResource("CredentialOwner")
-                .setResourceType(Crn.ResourceType.RESOURCE_ROLE)
-                .setService(Crn.Service.IAM)
-                .setPartition(Crn.Partition.CDP)
-                .build();
-        grpcUmsClient.assignResourceRole(creatorUserCrn, credentialCrn, credentialOwnerCrn.toString(), MDCUtils.getRequestId());
+        String credentialOwnerCrn = grpcUmsClient.getBuiltInCredentialOwnerResourceRoleCrn();
+        grpcUmsClient.assignResourceRole(creatorUserCrn, credentialCrn, credentialOwnerCrn, MDCUtils.getRequestId());
         return created;
     }
 

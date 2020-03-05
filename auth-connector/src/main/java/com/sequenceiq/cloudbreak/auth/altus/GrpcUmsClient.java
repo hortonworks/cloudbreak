@@ -51,6 +51,8 @@ public class GrpcUmsClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcUmsClient.class);
 
+    private static final String ACCOUNT_IN_IAM_CRNS = "altus";
+
     @Inject
     private UmsConfig umsConfig;
 
@@ -626,13 +628,31 @@ public class GrpcUmsClient {
      * Partition and region is hard coded right now, if it will change use the same as the user crn
      */
     public String getBuiltInDatabusRoleCrn() {
-        Crn databusCrn = Crn.builder()
-                .setPartition(Crn.Partition.ALTUS)
-                .setAccountId("altus")
-                .setService(Crn.Service.IAM)
-                .setResourceType(Crn.ResourceType.ROLE)
-                .setResource("DbusUploader")
+        return getRoleCrn("DbusUploader").toString();
+    }
+
+    public String getBuiltInCredentialOwnerResourceRoleCrn() {
+        return getResourceRoleCrn("CredentialOwner").toString();
+    }
+
+    public Crn getResourceRoleCrn(String resourceRoleName) {
+        return getBaseIamCrnBuilder()
+                .setResourceType(Crn.ResourceType.RESOURCE_ROLE)
+                .setResource(resourceRoleName)
                 .build();
-        return databusCrn.toString();
+    }
+
+    public Crn getRoleCrn(String roleName) {
+        return getBaseIamCrnBuilder()
+                .setResourceType(Crn.ResourceType.ROLE)
+                .setResource(roleName)
+                .build();
+    }
+
+    private Crn.Builder getBaseIamCrnBuilder() {
+        return Crn.builder()
+                .setPartition(Crn.Partition.ALTUS)
+                .setAccountId(ACCOUNT_IN_IAM_CRNS)
+                .setService(Crn.Service.IAM);
     }
 }
