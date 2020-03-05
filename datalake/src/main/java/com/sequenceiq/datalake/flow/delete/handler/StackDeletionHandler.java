@@ -18,13 +18,10 @@ import com.sequenceiq.datalake.flow.delete.event.StackDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.StackDeletionWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
 @Component
-public class StackDeletionHandler implements EventHandler<StackDeletionWaitRequest> {
+public class StackDeletionHandler extends ExceptionCatcherEventHandler<StackDeletionWaitRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDeletionHandler.class);
 
@@ -35,9 +32,6 @@ public class StackDeletionHandler implements EventHandler<StackDeletionWaitReque
     private int durationInMinutes;
 
     @Inject
-    private EventBus eventBus;
-
-    @Inject
     private ProvisionerService provisionerService;
 
     @Override
@@ -46,7 +40,12 @@ public class StackDeletionHandler implements EventHandler<StackDeletionWaitReque
     }
 
     @Override
-    public void accept(Event<StackDeletionWaitRequest> event) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+        return new SdxDeletionFailedEvent(resourceId, null, e);
+    }
+
+    @Override
+    protected void doAccept(HandlerEvent event) {
         StackDeletionWaitRequest stackDeletionWaitRequest = event.getData();
         Long sdxId = stackDeletionWaitRequest.getResourceId();
         String userId = stackDeletionWaitRequest.getUserId();
@@ -67,6 +66,6 @@ public class StackDeletionHandler implements EventHandler<StackDeletionWaitReque
             LOGGER.info("Deletion polling failed for stack: {}", sdxId);
             response = new SdxDeletionFailedEvent(sdxId, userId, exception);
         }
-        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
+        sendEvent(response, event);
     }
 }
