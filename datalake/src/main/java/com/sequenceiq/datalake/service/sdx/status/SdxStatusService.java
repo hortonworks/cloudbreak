@@ -14,10 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -45,6 +45,19 @@ public class SdxStatusService {
 
     @Inject
     private Clock clock;
+
+    public void setStatusForDatalakeAndNotify(DatalakeStatusEnum status, String statusReason, SdxCluster sdxCluster) {
+        setStatusForDatalake(status, statusReason, sdxCluster);
+        sdxNotificationService.send(status.getDefaultResourceEvent(), sdxCluster);
+    }
+
+    public SdxCluster setStatusForDatalakeAndNotify(DatalakeStatusEnum status, String statusReason, Long datalakeId) {
+        return sdxClusterRepository.findById(datalakeId).map(cluster -> {
+            setStatusForDatalake(status, statusReason, cluster);
+            sdxNotificationService.send(status.getDefaultResourceEvent(), cluster);
+            return cluster;
+        }).orElseThrow(() -> new NotFoundException("SdxCluster was not found with ID: " + datalakeId));
+    }
 
     public void setStatusForDatalakeAndNotify(DatalakeStatusEnum status, ResourceEvent event, String statusReason, SdxCluster sdxCluster) {
         setStatusForDatalake(status, statusReason, sdxCluster);

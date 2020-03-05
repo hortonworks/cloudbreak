@@ -18,7 +18,6 @@ import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
@@ -70,7 +69,6 @@ public class DatabaseService {
                 sdxCluster.setDatabaseCrn(dbResourceCrn);
                 sdxClusterRepository.save(sdxCluster);
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_CREATION_IN_PROGRESS,
-                        ResourceEvent.SDX_RDS_CREATION_STARTED,
                         "External database creation in progress", sdxCluster);
             } catch (BadRequestException badRequestException) {
                 LOGGER.error("Redbeams create request failed, bad request", badRequestException);
@@ -89,7 +87,6 @@ public class DatabaseService {
         try {
             DatabaseServerV4Response resp = databaseServerV4Endpoint.deleteByCrn(sdxCluster.getDatabaseCrn(), forced);
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
-                    ResourceEvent.SDX_RDS_DELETION_STARTED,
                     "External database deletion in progress", sdxCluster);
             waitAndGetDatabase(sdxCluster, resp.getCrn(), SdxDatabaseOperation.DELETION, false);
         } catch (NotFoundException notFoundException) {

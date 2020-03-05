@@ -35,18 +35,30 @@ public class CloudbreakFlowService {
         sdxClusterRepository.save(sdxCluster);
     }
 
-    public boolean isLastKnownFlowRunning(SdxCluster sdxCluster) {
+    public FlowState getLastKnownFlowState(SdxCluster sdxCluster) {
         try {
             String actualCbFlowChainId = sdxCluster.getLastCbFlowChainId();
             if (actualCbFlowChainId != null) {
-                return flowEndpoint.hasFlowRunningByChainId(sdxCluster.getLastCbFlowChainId()).getHasActiveFlow();
+                LOGGER.info("Check if flow is running: {}", actualCbFlowChainId);
+                Boolean hasActiveFlow = flowEndpoint.hasFlowRunningByChainId(sdxCluster.getLastCbFlowChainId()).getHasActiveFlow();
+                if (hasActiveFlow) {
+                    return FlowState.RUNNING;
+                } else {
+                    return FlowState.FINISHED;
+                }
+            } else  {
+                return FlowState.UNKNOWN;
             }
         } catch (NotFoundException e) {
             LOGGER.error("Flow chain id or resource {} not found in CB: {}, so there is no active flow!", sdxCluster.getClusterName(), e.getMessage());
+            return FlowState.UNKNOWN;
         } catch (Exception e) {
             LOGGER.error("Exception occured during checking if there is a flow for cluster {} in CB: {}", sdxCluster.getClusterName(), e.getMessage());
-            return true;
+            return FlowState.UNKNOWN;
         }
-        return false;
+    }
+
+    public enum FlowState {
+        RUNNING, FINISHED, UNKNOWN
     }
 }

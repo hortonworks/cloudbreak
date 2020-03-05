@@ -17,7 +17,6 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
@@ -141,7 +140,7 @@ public class SdxStartActions {
             protected void doExecute(SdxContext context, SdxStartSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("SDX start finalized: {}", payload.getResourceId());
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
-                        ResourceEvent.SDX_START_FINISHED, "Datalake is running", payload.getResourceId());
+                        "Datalake is running", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_START_FINISHED, sdxCluster);
                 sendEvent(context, SDX_START_FINALIZED_EVENT.event(), payload);
             }
@@ -171,8 +170,7 @@ public class SdxStartActions {
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(failedStatus,
-                        ResourceEvent.SDX_START_FAILED, statusReason, payload.getResourceId());
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, statusReason, payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_START_FAILED, sdxCluster);
                 sendEvent(context, SDX_START_FAILED_HANDLED_EVENT.event(), payload);
             }

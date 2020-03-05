@@ -13,7 +13,6 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
@@ -80,7 +79,6 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
     }
 
     private void setStackCreatedStatus(Long datalakeId) {
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_FINISHED,
-                ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED, "Datalake stack created", datalakeId);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_FINISHED, "Datalake stack created", datalakeId);
     }
 }

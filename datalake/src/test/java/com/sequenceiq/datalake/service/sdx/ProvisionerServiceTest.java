@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -42,10 +44,10 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
@@ -63,10 +65,6 @@ class ProvisionerServiceTest {
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
 
     private static final AtomicLong CLUSTER_ID = new AtomicLong(10000L);
-
-    private static final boolean HAS_RUNNING_FLOW = true;
-
-    private static final boolean NO_RUNNING_FLOW = false;
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
@@ -94,6 +92,7 @@ class ProvisionerServiceTest {
         long clusterId = CLUSTER_ID.incrementAndGet();
         SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
         StackV4Response stackV4Response = new StackV4Response();
+        when(stackV4Endpoint.get(anyLong(), nullable(String.class), nullable(Set.class))).thenThrow(new NotFoundException());
         when(stackV4Endpoint.post(anyLong(), any(StackV4Request.class))).thenReturn(stackV4Response);
         when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
 
@@ -134,8 +133,7 @@ class ProvisionerServiceTest {
         Assertions.assertThrows(PollerStoppedException.class, () -> underTest.waitCloudbreakClusterCreation(clusterId, pollingConfig));
 
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS,
-                        ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, "Datalake stack creation in progress", sdxCluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
     }
 
     @Test
@@ -152,8 +150,7 @@ class ProvisionerServiceTest {
                 .waitCloudbreakClusterCreation(clusterId, pollingConfig), "Stack creation failed");
 
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS,
-                        ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, "Datalake stack creation in progress", sdxCluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
     }
 
     @Test
@@ -165,22 +162,20 @@ class ProvisionerServiceTest {
         ClusterV4Response cluster = new ClusterV4Response();
         cluster.setStatus(Status.AVAILABLE);
         stackV4Response.setCluster(cluster);
-        when(cloudbreakFlowService.isLastKnownFlowRunning(sdxCluster))
-                .thenReturn(HAS_RUNNING_FLOW)
-                .thenReturn(NO_RUNNING_FLOW);
+        when(cloudbreakFlowService.getLastKnownFlowState(sdxCluster))
+                .thenReturn(FlowState.RUNNING)
+                .thenReturn(FlowState.FINISHED);
         when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet())).thenReturn(stackV4Response);
         when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 1000, TimeUnit.MILLISECONDS);
 
         underTest.waitCloudbreakClusterCreation(clusterId, pollingConfig);
 
-        verify(cloudbreakFlowService, times(2)).isLastKnownFlowRunning(sdxCluster);
+        verify(cloudbreakFlowService, times(2)).getLastKnownFlowState(sdxCluster);
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS,
-                        ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, "Datalake stack creation in progress", sdxCluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_FINISHED,
-                        ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED, "Stack created for Datalake", sdxCluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_FINISHED, "Stack created for Datalake", sdxCluster);
     }
 
     @Test
@@ -266,8 +261,7 @@ class ProvisionerServiceTest {
         underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig);
 
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETED,
-                        ResourceEvent.SDX_CLUSTER_DELETION_FINISHED, "Datalake stack deleted", sdxCluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETED, "Datalake stack deleted", sdxCluster);
     }
 
     private DatabaseServerStatusV4Response getDatabaseServerResponse() {

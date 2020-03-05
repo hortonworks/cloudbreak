@@ -13,16 +13,15 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionWaitRequest;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
 @Component
 public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletionWaitRequest> {
@@ -82,7 +81,6 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
     }
 
     private void setDeletedStatus(SdxCluster cluster) {
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETED,
-                ResourceEvent.SDX_RDS_DELETION_FINISHED, "Datalake External RDS deleted", cluster);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETED, "Datalake External RDS deleted", cluster);
     }
 }
