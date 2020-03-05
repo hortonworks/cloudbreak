@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEve
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.ADD_INSTANCES_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.ADD_INSTANCES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.ADD_INSTANCES_FINISHED_FAILURE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.CLEANUP_FREEIPA_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.CLEANUP_FREEIPA_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.CLUSTER_PROXY_RE_REGISTRATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.EXTEND_METADATA_EVENT;
@@ -16,6 +18,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEve
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.ADD_INSTANCES_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.ADD_INSTANCES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.BOOTSTRAP_NEW_NODES_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.CLEANUP_FREEIPA_UPSCALE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.EXTEND_HOST_METADATA_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.EXTEND_HOST_METADATA_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.EXTEND_METADATA_FINISHED_STATE;
@@ -58,8 +61,10 @@ public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleSt
                     .failureEvent(CLUSTER_PROXY_RE_REGISTRATION_FAILED_EVENT)
                     .from(BOOTSTRAP_NEW_NODES_STATE).to(EXTEND_HOST_METADATA_STATE).event(StackUpscaleEvent.EXTEND_HOST_METADATA_EVENT)
                                     .failureEvent(StackUpscaleEvent.BOOTSTRAP_NEW_NODES_FAILURE_EVENT)
-                    .from(EXTEND_HOST_METADATA_STATE).to(EXTEND_HOST_METADATA_FINISHED_STATE).event(StackUpscaleEvent.EXTEND_HOST_METADATA_FINISHED_EVENT)
+                    .from(EXTEND_HOST_METADATA_STATE).to(CLEANUP_FREEIPA_UPSCALE_STATE).event(StackUpscaleEvent.EXTEND_HOST_METADATA_FINISHED_EVENT)
                                     .failureEvent(StackUpscaleEvent.EXTEND_HOST_METADATA_FAILURE_EVENT)
+                    .from(CLEANUP_FREEIPA_UPSCALE_STATE).to(EXTEND_HOST_METADATA_FINISHED_STATE).event(CLEANUP_FREEIPA_FINISHED_EVENT)
+                                    .failureEvent(CLEANUP_FREEIPA_FAILED_EVENT)
                     .from(EXTEND_HOST_METADATA_FINISHED_STATE).to(FINAL_STATE).event(UPSCALE_FINALIZED_EVENT)
                                     .failureEvent(StackUpscaleEvent.EXTEND_HOST_METADATA_FINISHED_FAILURE_EVENT)
                     .build();

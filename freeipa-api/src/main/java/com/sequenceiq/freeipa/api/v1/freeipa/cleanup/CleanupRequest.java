@@ -27,6 +27,8 @@ public class CleanupRequest {
 
     private Set<String> roles;
 
+    private Set<String> ips;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -67,6 +69,14 @@ public class CleanupRequest {
         this.roles = roles;
     }
 
+    public Set<String> getIps() {
+        return ips;
+    }
+
+    public void setIps(Set<String> ips) {
+        this.ips = ips;
+    }
+
     @Override
     public String toString() {
         return "CleanupRequest{"
@@ -75,6 +85,7 @@ public class CleanupRequest {
                 + ", users=" + users
                 + ", hosts=" + hosts
                 + ", roles=" + roles
+                + ", ips=" + ips
                 + '}';
     }
 }

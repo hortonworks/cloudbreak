@@ -87,7 +87,7 @@ public class CleanupService {
         Operation operation =
                 operationService.startOperation(accountId, OperationType.CLEANUP, Set.of(environmentCrn), Collections.emptySet());
         CleanupEvent cleanupEvent = new CleanupEvent(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), stack.getId(), request.getUsers(),
-                request.getHosts(), request.getRoles(), accountId, operation.getOperationId(), request.getClusterName(), environmentCrn);
+                request.getHosts(), request.getRoles(), request.getIps(), accountId, operation.getOperationId(), request.getClusterName(), environmentCrn);
         flowManager.notify(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), cleanupEvent);
         return operationToOperationStatusConverter.convert(operation);
     }
@@ -112,19 +112,39 @@ public class CleanupService {
         return Pair.of(certCleanupSuccess, certCleanupFailed);
     }
 
-    public Pair<Set<String>, Map<String, String>> removeDnsEntries(Long stackId, Set<String> hosts, String domain) throws FreeIpaClientException {
+    public Pair<Set<String>, Map<String, String>> removeDnsEntries(Long stackId, Set<String> hosts, Set<String> ips, String domain)
+            throws FreeIpaClientException {
         FreeIpaClient client = getFreeIpaClient(stackId);
         Set<String> dnsCleanupSuccess = new HashSet<>();
         Map<String, String> dnsCleanupFailed = new HashMap<>();
         Set<String> allDnsZoneName = client.findAllDnsZone().stream().map(DnsZoneList::getIdnsname).collect(Collectors.toSet());
         for (String zone : allDnsZoneName) {
+            removeHostNameRelatedDnsRecords(hosts, domain, client, dnsCleanupSuccess, dnsCleanupFailed, zone);
+            removeIpRelatedRecords(ips, client, dnsCleanupSuccess, dnsCleanupFailed, zone);
+        }
+        return Pair.of(dnsCleanupSuccess, dnsCleanupFailed);
+    }
+
+    private void removeIpRelatedRecords(Set<String> ips, FreeIpaClient client, Set<String> dnsCleanupSuccess, Map<String, String> dnsCleanupFailed,
+            String zone) throws FreeIpaClientException {
+        if (ips != null && !ips.isEmpty()) {
+            Set<DnsRecord> allDnsRecordInZone = client.findAllDnsRecordInZone(zone);
+            for (String ip : ips) {
+                allDnsRecordInZone.stream().filter(record -> record.isIpRelatedRecord(ip, zone))
+                        .forEach(record -> deleteRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, ip, record));
+            }
+        }
+    }
+
+    private void removeHostNameRelatedDnsRecords(Set<String> hosts, String domain, FreeIpaClient client, Set<String> dnsCleanupSuccess,
+            Map<String, String> dnsCleanupFailed, String zone) throws FreeIpaClientException {
+        if (hosts != null && !hosts.isEmpty()) {
             Set<DnsRecord> allDnsRecordInZone = client.findAllDnsRecordInZone(zone);
             for (String host : hosts) {
                 allDnsRecordInZone.stream().filter(record -> record.isHostRelatedRecord(host, domain))
                         .forEach(record -> deleteRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, host, record));
             }
         }
-        return Pair.of(dnsCleanupSuccess, dnsCleanupFailed);
     }
 
     private void deleteRecord(FreeIpaClient client, Set<String> dnsCleanupSuccess, Map<String, String> dnsCleanupFailed, String zone, String host,

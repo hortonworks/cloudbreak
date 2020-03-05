@@ -95,7 +95,7 @@ public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCrea
 
     @Override
     public StackCreationEvent[] getInitEvents() {
-        return new StackCreationEvent[] {
+        return new StackCreationEvent[]{
                 START_CREATION_EVENT
         };
     }

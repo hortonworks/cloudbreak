@@ -92,7 +92,7 @@ public class TerminationService {
 
     private void cleanupFreeIpa(Boolean forcedTermination, Stack stack) {
         try {
-            freeIpaCleanupService.cleanup(stack, false, null);
+            freeIpaCleanupService.cleanup(stack, false, null, null);
         } catch (Exception e) {
             LOGGER.error("Failed to cleanup", e);
             if (!forcedTermination) {

@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.client.model;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -61,6 +63,25 @@ public class DnsRecord {
             return ptrrecord.contains(StringUtils.appendIfMissing(fqdn, "."));
         }
         return false;
+    }
+
+    public boolean isIpRelatedRecord(String ip, String zone) {
+        if (isARecord()) {
+            return arecord.stream().anyMatch(record -> record.equals(ip));
+        } else if (isPtrRecord()) {
+            return isIpRelatedPtrRecord(ip, zone);
+        } else {
+            return false;
+        }
+    }
+
+    private boolean isIpRelatedPtrRecord(String ip, String zone) {
+        String ipStart = StringUtils.removeEnd(zone, ".in-addr.arpa.");
+        String reversedIp = idnsname + '.' + ipStart;
+        List<String> ipParts = Arrays.asList(reversedIp.split("\\."));
+        Collections.reverse(ipParts);
+        String recordIp = StringUtils.joinWith(".", ipParts.toArray(new String[ipParts.size()]));
+        return ip.equals(recordIp);
     }
 
     public boolean isARecord() {
