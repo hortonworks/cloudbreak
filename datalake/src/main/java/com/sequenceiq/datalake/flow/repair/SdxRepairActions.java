@@ -62,7 +62,7 @@ public class SdxRepairActions {
             @Override
             protected void doExecute(SdxContext context, SdxRepairStartEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Start repair flow for Datalake: {}", payload.getResourceId());
-                repairService.startSdxRepair(payload.getResourceId(), payload.getRepairRequest());
+                repairService.startSdxRepair(payload.getResourceId(), payload.getRepairSettings());
                 sendEvent(context, SDX_REPAIR_IN_PROGRESS_EVENT.event(), payload);
             }
 

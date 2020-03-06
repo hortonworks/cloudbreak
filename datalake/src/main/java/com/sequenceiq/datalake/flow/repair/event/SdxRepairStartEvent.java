@@ -1,15 +1,15 @@
 package com.sequenceiq.datalake.flow.repair.event;
 
 import com.sequenceiq.datalake.flow.SdxEvent;
-import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.datalake.settings.SdxRepairSettings;
 
 public class SdxRepairStartEvent extends SdxEvent {
 
-    private SdxRepairRequest repairRequest;
+    private SdxRepairSettings repairSettings;
 
-    public SdxRepairStartEvent(String selector, Long sdxId, String userId, SdxRepairRequest repairRequest) {
+    public SdxRepairStartEvent(String selector, Long sdxId, String userId, SdxRepairSettings repairSettings) {
         super(selector, sdxId, userId);
-        this.repairRequest = repairRequest;
+        this.repairSettings = repairSettings;
     }
 
     @Override
@@ -17,11 +17,11 @@ public class SdxRepairStartEvent extends SdxEvent {
         return "SdxRepairStartEvent";
     }
 
-    public SdxRepairRequest getRepairRequest() {
-        return repairRequest;
+    public SdxRepairSettings getRepairSettings() {
+        return repairSettings;
     }
 
-    public void setRepairRequest(SdxRepairRequest repairRequest) {
-        this.repairRequest = repairRequest;
+    public void setRepairSettings(SdxRepairSettings repairSettings) {
+        this.repairSettings = repairSettings;
     }
 }
