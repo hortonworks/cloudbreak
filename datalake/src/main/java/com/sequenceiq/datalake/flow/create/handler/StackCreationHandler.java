@@ -21,6 +21,7 @@ import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
 @Component
 public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCreationWaitRequest> {

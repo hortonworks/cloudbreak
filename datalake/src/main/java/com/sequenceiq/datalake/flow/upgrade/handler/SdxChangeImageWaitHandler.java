@@ -18,22 +18,16 @@ import com.sequenceiq.datalake.flow.upgrade.event.SdxImageChangedEvent;
 import com.sequenceiq.datalake.flow.upgrade.event.SdxUpgradeFailedEvent;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxUpgradeService;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
 @Component
-public class SdxChangeImageWaitHandler implements EventHandler<SdxChangeImageWaitRequest> {
+public class SdxChangeImageWaitHandler extends ExceptionCatcherEventHandler<SdxChangeImageWaitRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxChangeImageWaitHandler.class);
 
     private static final int SLEEP_TIME_IN_SEC = 20;
 
     private static final int DURATION_IN_MINUTES = 60;
-
-    @Inject
-    private EventBus eventBus;
 
     @Inject
     private SdxUpgradeService upgradeService;
@@ -44,7 +38,12 @@ public class SdxChangeImageWaitHandler implements EventHandler<SdxChangeImageWai
     }
 
     @Override
-    public void accept(Event<SdxChangeImageWaitRequest> event) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+        return new SdxUpgradeFailedEvent(resourceId, null, e);
+    }
+
+    @Override
+    protected void doAccept(HandlerEvent event) {
         SdxChangeImageWaitRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
@@ -73,6 +72,6 @@ public class SdxChangeImageWaitHandler implements EventHandler<SdxChangeImageWai
             LOGGER.info("Change image polling failed for cluster: {}", sdxId);
             response = new SdxUpgradeFailedEvent(sdxId, userId, exception);
         }
-        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
+        sendEvent(response, event);
     }
 }

@@ -11,26 +11,18 @@ import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.datalake.flow.SdxEvent;
-import com.sequenceiq.datalake.flow.start.event.SdxStartFailedEvent;
 import com.sequenceiq.datalake.flow.stop.SdxStopEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStopAllDatahubRequest;
+import com.sequenceiq.datalake.flow.stop.event.SdxStopFailedEvent;
 import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
 @Component
-public class SdxStopAllDatahubHandler implements EventHandler<SdxStopAllDatahubRequest> {
-
-    public static final int SLEEP_TIME_IN_SEC = 20;
+public class SdxStopAllDatahubHandler extends ExceptionCatcherEventHandler<SdxStopAllDatahubRequest> {
 
     public static final int DURATION_IN_MINUTES = 40;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxStopAllDatahubHandler.class);
-
-    @Inject
-    private EventBus eventBus;
 
     @Inject
     private SdxStopService sdxStopService;
@@ -41,7 +33,12 @@ public class SdxStopAllDatahubHandler implements EventHandler<SdxStopAllDatahubR
     }
 
     @Override
-    public void accept(Event<SdxStopAllDatahubRequest> event) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+        return new SdxStopFailedEvent(resourceId, null, e);
+    }
+
+    @Override
+    protected void doAccept(HandlerEvent event) {
         SdxStopAllDatahubRequest stopAllDatahubRequest = event.getData();
         Long sdxId = stopAllDatahubRequest.getResourceId();
         String userId = stopAllDatahubRequest.getUserId();
@@ -52,15 +49,15 @@ public class SdxStopAllDatahubHandler implements EventHandler<SdxStopAllDatahubR
             response = new SdxEvent(SdxStopEvent.SDX_STOP_IN_PROGRESS_EVENT.event(), sdxId, userId);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Polling exited before timeout. Cause ", userBreakException);
-            response = new SdxStartFailedEvent(sdxId, userId, userBreakException);
+            response = new SdxStopFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Poller stopped for stack: " + sdxId, pollerStoppedException);
-            response = new SdxStartFailedEvent(sdxId, userId,
+            response = new SdxStopFailedEvent(sdxId, userId,
                     new PollerStoppedException("Datalake start timed out after " + DURATION_IN_MINUTES + " minutes", pollerStoppedException));
         } catch (PollerException exception) {
             LOGGER.info("Polling failed for stack: {}", sdxId);
-            response = new SdxStartFailedEvent(sdxId, userId, exception);
+            response = new SdxStopFailedEvent(sdxId, userId, exception);
         }
-        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
+        sendEvent(response, event);
     }
 }
