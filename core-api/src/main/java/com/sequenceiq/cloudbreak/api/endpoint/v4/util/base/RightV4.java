@@ -7,8 +7,8 @@ public enum RightV4 {
     DISTROX_WRITE(RightsConstants.DATAHUB_RESOURCE, RightsConstants.WRITE_ACTION),
     SDX_READ(RightsConstants.DATALAKE_RESOURCE, RightsConstants.READ_ACTION),
     SDX_WRITE(RightsConstants.DATALAKE_RESOURCE, RightsConstants.WRITE_ACTION),
-    ENVIRONMENT_READ(RightsConstants.ENVIRONMENT_RESOURCE, RightsConstants.READ_ACTION),
-    ENVIRONMENT_WRITE(RightsConstants.ENVIRONMENT_RESOURCE, RightsConstants.WRITE_ACTION);
+    ENVIRONMENT_READ(RightsConstants.ENVIRONMENTS_RESOURCE, RightsConstants.READ_ACTION),
+    ENVIRONMENT_WRITE(RightsConstants.ENVIRONMENTS_RESOURCE, RightsConstants.WRITE_ACTION);
 
     private String resource;
 

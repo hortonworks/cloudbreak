@@ -30,7 +30,7 @@ public class UmsAuthorizationService {
     private GrpcUmsClient umsClient;
 
     public void checkRightOfUser(String userCrn, AuthorizationResourceType resourceType, AuthorizationResourceAction action) {
-        String right = RightUtils.getRight(resourceType, action);
+        String right = RightUtils.getResourceIndependentRight(resourceType, action);
         String unauthorizedMessage = String.format("You have no right to perform %s. This requires one of these roles: %s. "
                         + "You can request access through IAM service from an administrator.",
                 right, "PowerUser");
@@ -57,12 +57,12 @@ public class UmsAuthorizationService {
     }
 
     private boolean hasRightOfUser(String userCrn, AuthorizationResourceType resourceType, AuthorizationResourceAction action) {
-        return umsClient.checkRight(userCrn, userCrn, RightUtils.getRight(resourceType, action), getRequestId());
+        return umsClient.checkRight(userCrn, userCrn, RightUtils.getResourceIndependentRight(resourceType, action), getRequestId());
     }
 
     public void checkRightOfUserOnResource(String userCrn, AuthorizationResourceType resource,
             AuthorizationResourceAction action, String resourceCrn) {
-        String right = RightUtils.getRight(resource, action);
+        String right = RightUtils.getResourceDependentRight(resource, action);
         String unauthorizedMessage = String.format("You have no right to perform %s. This requires one of these roles: %s. "
                         + "You can request access through IAM service from an administrator.",
                 right, "PowerUser");
@@ -71,7 +71,7 @@ public class UmsAuthorizationService {
 
     public void checkRightOfUserOnResources(String userCrn, AuthorizationResourceType resource,
             AuthorizationResourceAction action, Collection<String> resourceCrns) {
-        String right = RightUtils.getRight(resource, action);
+        String right = RightUtils.getResourceDependentRight(resource, action);
         String unauthorizedMessage = String.format("You have no right to perform %s. This requires one of these roles: %s. "
                         + "You can request access through IAM service from an administrator.",
                 right, "PowerUser");
@@ -80,7 +80,7 @@ public class UmsAuthorizationService {
 
     private void checkRightOfUserOnResource(String userCrn, AuthorizationResourceType resource, AuthorizationResourceAction action,
             String resourceCrn, String unauthorizedMessage) {
-        if (!umsClient.checkRight(userCrn, userCrn, RightUtils.getRight(resource, action), resourceCrn, getRequestId())) {
+        if (!umsClient.checkRight(userCrn, userCrn, RightUtils.getResourceDependentRight(resource, action), resourceCrn, getRequestId())) {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }
@@ -89,7 +89,7 @@ public class UmsAuthorizationService {
     private void checkRightOfUserOnResources(String userCrn, AuthorizationResourceType resource, AuthorizationResourceAction action,
             Collection<String> resourceCrns, String unauthorizedMessage) {
         Map<String, String> resourceCrnRightMap = resourceCrns.stream().distinct().collect(
-                Collectors.toMap(resourceCrn -> resourceCrn, resourceCrn -> RightUtils.getRight(resource, action)));
+                Collectors.toMap(resourceCrn -> resourceCrn, resourceCrn -> RightUtils.getResourceDependentRight(resource, action)));
         if (!umsClient.hasRights(userCrn, userCrn, resourceCrnRightMap, getRequestId()).stream().allMatch(Boolean::booleanValue)) {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);

@@ -8,35 +8,32 @@ import org.apache.commons.lang3.StringUtils;
 import com.sequenceiq.authorization.RightsConstants;
 
 public enum AuthorizationResourceType {
-    DATALAKE("Datalake cluster", RightsConstants.DATALAKE_RESOURCE),
-    ENVIRONMENT("Environment", RightsConstants.ENVIRONMENT_RESOURCE),
-    CREDENTIAL("Credential", RightsConstants.CREDENTIAL_RESOURCE),
-    DATAHUB("Datahub cluster", RightsConstants.DATAHUB_RESOURCE);
+    DATALAKE(RightsConstants.DATALAKE_RESOURCE, RightsConstants.DATALAKE_RESOURCE),
+    ENVIRONMENT(RightsConstants.ENVIRONMENTS_RESOURCE, RightsConstants.ENVIRONMENTS_RESOURCE),
+    CREDENTIAL(RightsConstants.CREDENTIAL_RESOURCE, RightsConstants.CREDENTIALS_RESOURCE),
+    DATAHUB(RightsConstants.DATAHUB_RESOURCE, RightsConstants.DATAHUB_RESOURCE);
 
-    private final String readableName;
+    private final String resourceDependentAuthorizationName;
 
-    private final String authorizationName;
+    private final String resourceIndependentAuthorizationName;
 
-    AuthorizationResourceType(String readableName, String authorizationName) {
-        this.readableName = readableName;
-        this.authorizationName = authorizationName;
+    AuthorizationResourceType(String resourceDependentAuthorizationName, String resourceIndependentAuthorizationName) {
+        this.resourceDependentAuthorizationName = resourceDependentAuthorizationName;
+        this.resourceIndependentAuthorizationName = resourceIndependentAuthorizationName;
     }
 
-    public String getReadableName() {
-        return readableName;
+    public String getResourceDependentAuthorizationName() {
+        return resourceDependentAuthorizationName;
     }
 
-    public String getShortName() {
-        return authorizationName.toLowerCase();
-    }
-
-    public String getAuthorizationName() {
-        return authorizationName;
+    public String getResourceIndependentAuthorizationName() {
+        return resourceIndependentAuthorizationName;
     }
 
     public static Optional<AuthorizationResourceType> getByName(String name) {
         return Arrays.stream(AuthorizationResourceType.values())
-                .filter(resource -> StringUtils.equals(resource.getAuthorizationName(), name))
+                .filter(resource -> StringUtils.equals(resource.getResourceDependentAuthorizationName(), name) ||
+                        StringUtils.equals(resource.getResourceIndependentAuthorizationName(), name))
                 .findAny();
     }
 }

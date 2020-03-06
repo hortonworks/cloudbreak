@@ -2,9 +2,11 @@ package com.sequenceiq.authorization;
 
 public class RightsConstants {
 
-    public static final String ENVIRONMENT_RESOURCE = "environments";
+    public static final String ENVIRONMENTS_RESOURCE = "environments";
 
     public static final String CREDENTIAL_RESOURCE = "credential";
+
+    public static final String CREDENTIALS_RESOURCE = "credentials";
 
     public static final String DATALAKE_RESOURCE = "datalake";
 

@@ -8,11 +8,11 @@ public class RightUtilsTest {
 
     @Test
     public void testGetNonDatahubRight() {
-        assertEquals("environments/write", RightUtils.getRight(AuthorizationResourceType.ENVIRONMENT, AuthorizationResourceAction.WRITE));
+        assertEquals("environments/write", RightUtils.getResourceDependentRight(AuthorizationResourceType.ENVIRONMENT, AuthorizationResourceAction.WRITE));
     }
 
     @Test
     public void testGetDatahubRight() {
-        assertEquals("datahub/write", RightUtils.getRight(AuthorizationResourceType.DATAHUB, AuthorizationResourceAction.WRITE));
+        assertEquals("datahub/write", RightUtils.getResourceDependentRight(AuthorizationResourceType.DATAHUB, AuthorizationResourceAction.WRITE));
     }
 }

@@ -26,10 +26,11 @@ public class EnvironmentAccessChecker {
 
     private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
-    private static final String ACCESS_ENVIRONMENT_RIGHT = RightUtils.getRight(AuthorizationResourceType.ENVIRONMENT,
+    private static final String ACCESS_ENVIRONMENT_RIGHT = RightUtils.getResourceDependentRight(AuthorizationResourceType.ENVIRONMENT,
             AuthorizationResourceAction.ACCESS_ENVIRONMENT);
 
-    private static final String ADMIN_FREEIPA_RIGHT = RightUtils.getRight(AuthorizationResourceType.ENVIRONMENT, AuthorizationResourceAction.ADMIN_FREEIPA);
+    private static final String ADMIN_FREEIPA_RIGHT = RightUtils.getResourceDependentRight(AuthorizationResourceType.ENVIRONMENT,
+            AuthorizationResourceAction.ADMIN_FREEIPA);
 
     private final GrpcUmsClient grpcUmsClient;
 

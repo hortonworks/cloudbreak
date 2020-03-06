@@ -69,10 +69,11 @@ class EnvironmentAccessCheckerTest {
         List<AuthorizationProto.RightCheck> capturedRightChecks = argumentCaptor.getValue();
         assertEquals(2, capturedRightChecks.size());
         AuthorizationProto.RightCheck hasAccess = capturedRightChecks.get(0);
-        assertEquals(RightUtils.getRight(AuthorizationResourceType.ENVIRONMENT, AuthorizationResourceAction.ACCESS_ENVIRONMENT), hasAccess.getRight());
+        assertEquals(RightUtils.getResourceDependentRight(AuthorizationResourceType.ENVIRONMENT, AuthorizationResourceAction.ACCESS_ENVIRONMENT),
+                hasAccess.getRight());
         assertEquals(ENV_CRN, hasAccess.getResource());
         AuthorizationProto.RightCheck isAdmin = capturedRightChecks.get(1);
-        assertEquals(RightUtils.getRight(AuthorizationResourceType.ENVIRONMENT, AuthorizationResourceAction.ADMIN_FREEIPA), isAdmin.getRight());
+        assertEquals(RightUtils.getResourceDependentRight(AuthorizationResourceType.ENVIRONMENT, AuthorizationResourceAction.ADMIN_FREEIPA), isAdmin.getRight());
     }
 
     @Test

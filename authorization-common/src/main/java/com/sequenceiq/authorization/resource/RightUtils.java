@@ -5,7 +5,11 @@ public class RightUtils {
     private RightUtils() {
     }
 
-    public static String getRight(AuthorizationResourceType resource, AuthorizationResourceAction action) {
-        return resource.getAuthorizationName() + "/" + action.getAuthorizationName();
+    public static String getResourceDependentRight(AuthorizationResourceType resource, AuthorizationResourceAction action) {
+        return resource.getResourceDependentAuthorizationName() + "/" + action.getAuthorizationName();
+    }
+
+    public static String getResourceIndependentRight(AuthorizationResourceType resource, AuthorizationResourceAction action) {
+        return resource.getResourceIndependentAuthorizationName() + "/" + action.getAuthorizationName();
     }
 }

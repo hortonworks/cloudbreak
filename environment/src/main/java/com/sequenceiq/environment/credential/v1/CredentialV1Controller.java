@@ -15,6 +15,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.annotation.ResourceObject;
@@ -59,8 +60,9 @@ public class CredentialV1Controller extends NotificationController implements Cr
         this.credentialDeleteService = credentialDeleteService;
     }
 
+    // TODO authz of list methods
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @DisableCheckPermissions
     public CredentialResponses list() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return new CredentialResponses(
