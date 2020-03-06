@@ -19,12 +19,13 @@ public abstract class SubnetSelectorStrategy {
     public SubnetSelectionResult select(List<CloudSubnet> subnetMetas) {
         LOGGER.debug("Subnet selection with strategy '{}'", getType());
         Optional<String> errorMessage = quickValidate(subnetMetas);
-        if (errorMessage.isPresent()) {
+        if (errorMessage.isEmpty()) {
+            SubnetSelectionResult selectionResult = selectInternal(subnetMetas);
+            logResult(selectionResult);
+            return selectionResult;
+        } else {
             return new SubnetSelectionResult(errorMessage.get());
         }
-        SubnetSelectionResult selectionResult = selectInternal(subnetMetas);
-        logResult(selectionResult);
-        return selectionResult;
     }
 
     protected abstract SubnetSelectionResult selectInternal(List<CloudSubnet> subnets);

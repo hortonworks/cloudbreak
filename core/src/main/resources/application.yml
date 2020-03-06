@@ -169,6 +169,7 @@ cb:
     default.inbound.security.group:
     vpc:
     externaldatabase.retentionperiod: 0
+    credential.cache.ttl: 60
 
   azure:
     host.name.prefix.length: 255

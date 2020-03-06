@@ -26,7 +26,8 @@ public class SubnetIdProvider {
 
     public String provide(NetworkDto network, Tunnel tunnel, CloudPlatform cloudPlatform) {
         LOGGER.debug("Choosing subnet, network: {},  platform: {}, tunnel: {}", network, cloudPlatform, tunnel);
-        if (network == null || network.getSubnetIds() == null || network.getSubnetIds().isEmpty() || network.getCbSubnets().isEmpty()) {
+        if (network == null || network.getSubnetIds() == null || network.getSubnetIds().isEmpty() || network.getCbSubnets() == null
+                || network.getCbSubnets().isEmpty()) {
             LOGGER.debug("Check failed, returning null");
             return null;
         }
@@ -40,6 +41,8 @@ public class SubnetIdProvider {
     }
 
     private CloudSubnet fallback(NetworkDto network) {
-        return network.getSubnetMetas().values().iterator().next();
+        CloudSubnet chosenSubnet = network.getSubnetMetas().values().iterator().next();
+        LOGGER.debug("Choosing subnet, fallback strategy: '{}'", chosenSubnet.getId());
+        return chosenSubnet;
     }
 }
