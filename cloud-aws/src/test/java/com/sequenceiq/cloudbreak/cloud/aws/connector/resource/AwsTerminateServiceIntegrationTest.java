@@ -52,7 +52,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AwsTerminateServiceTest {
+public class AwsTerminateServiceIntegrationTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
 
