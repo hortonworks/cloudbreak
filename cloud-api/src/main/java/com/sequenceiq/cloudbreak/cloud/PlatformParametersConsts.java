@@ -20,6 +20,8 @@ public class PlatformParametersConsts {
 
     public static final String REGIONS_SUPPORTED = "regionsSupported";
 
+    public static final String CLOUDWATCH_CREATE_PARAMETER = "createCloudWatchAlarm";
+
     private PlatformParametersConsts() {
 
     }

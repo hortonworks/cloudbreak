@@ -97,6 +97,9 @@ public class AwsLaunchService {
     @Inject
     private AwsTaggingService awsTaggingService;
 
+    @Inject
+    private AwsCloudWatchService awsCloudWatchService;
+
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
         createKeyPair(ac, stack);
@@ -162,6 +165,8 @@ public class AwsLaunchService {
         awsComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentType, threshold, instances, networkResources);
 
         awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
+
+        awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, stack, regionName, credentialView);
 
         return awsResourceConnector.check(ac, instances);
     }

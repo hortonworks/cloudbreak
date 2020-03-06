@@ -82,6 +82,9 @@ public class AwsTerminateService {
     @Inject
     private AwsElasticIpService awsElasticIpService;
 
+    @Inject
+    private AwsCloudWatchService awsCloudWatchService;
+
     public List<CloudResourceStatus> terminate(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
         LOGGER.debug("Deleting stack: {}", ac.getCloudContext().getId());
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
@@ -90,6 +93,7 @@ public class AwsTerminateService {
         AmazonEC2Client amazonEC2Client = authenticatedContextView.getAmazonEC2Client();
         AmazonCloudFormationClient amazonCloudFormationClient = awsClient.createCloudFormationClient(credentialView, regionName);
 
+        awsCloudWatchService.deleteCloudWatchAlarmsForSystemFailures(stack, regionName, credentialView);
         waitAndDeleteCloudformationStack(ac, stack, resources, amazonCloudFormationClient);
         awsComputeResourceService.deleteComputeResources(ac, stack, resources);
         cleanupEncryptedResources(ac, resources, regionName, amazonEC2Client);

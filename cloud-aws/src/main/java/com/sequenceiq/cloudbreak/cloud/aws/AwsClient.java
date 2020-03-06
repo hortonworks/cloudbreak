@@ -22,6 +22,7 @@ import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.retry.PredefinedRetryPolicies;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.ec2.AmazonEC2Client;
@@ -97,6 +98,14 @@ public class AwsClient {
 
     public AmazonEC2Client getAmazonEC2Client(BasicAWSCredentials basicAWSCredentials) {
         return new AmazonEC2Client(basicAWSCredentials);
+    }
+
+    public AmazonCloudWatchClient createCloudWatchClient(AwsCredentialView awsCredential, String regionName) {
+        AmazonCloudWatchClient client = isRoleAssumeRequired(awsCredential) ?
+                new AmazonCloudWatchClient(createAwsSessionCredentialProvider(awsCredential)) :
+                new AmazonCloudWatchClient(createAwsCredentials(awsCredential));
+        client.setRegion(RegionUtils.getRegion(regionName));
+        return client;
     }
 
     public AWSSecurityTokenService createAwsSecurityTokenService(AwsCredentialView awsCredential) {
