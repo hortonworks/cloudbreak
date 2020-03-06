@@ -57,12 +57,22 @@ public class DefaultCostTaggingService implements CostTagging {
     public Map<String, String> mergeTags(CDPTagMergeRequest request) {
         LOGGER.debug("About to merge tag(s)...");
         Map<String, String> result = new HashMap<>();
-        result.putAll(request.getRequestTags());
-        for (String key : request.getEnvironmentTags().keySet()) {
-            addTagIfNotPresented(result, request, key);
+        for (Map.Entry<String, String> entry : request.getRequestTags().entrySet()) {
+            if (!keyOrValueIsEmpty(entry.getKey(), entry.getValue())) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+        for (Map.Entry<String, String> entry : request.getEnvironmentTags().entrySet()) {
+            if (!keyOrValueIsEmpty(entry.getKey(), entry.getValue())) {
+                addTagIfNotPresented(result, request, entry.getKey());
+            }
         }
         LOGGER.debug("The following requested tag(s) will be applied prepared: {}", result);
         return result;
+    }
+
+    private boolean keyOrValueIsEmpty(String key, String value) {
+        return (key == null || key.isBlank()) || (value == null || value.isBlank());
     }
 
     private void addTagIfNotPresented(Map<String, String> result, CDPTagMergeRequest request, String key) {
@@ -83,7 +93,9 @@ public class DefaultCostTaggingService implements CostTagging {
 
     private void addAccountTag(Map<String, String> result, String key, String value, String platform) {
         LOGGER.debug("Adding account tag with key {} and value {}.", key, value);
-        result.put(transform(key, platform), transform(value, platform));
+        if (!keyOrValueIsEmpty(key, value)) {
+            result.put(transform(key, platform), transform(value, platform));
+        }
     }
 
     private String transform(String value, String platform) {

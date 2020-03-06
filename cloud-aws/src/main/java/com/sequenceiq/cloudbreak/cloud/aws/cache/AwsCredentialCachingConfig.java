@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.cache;
 
 import java.lang.reflect.Method;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.interceptor.SimpleKey;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +17,10 @@ public class AwsCredentialCachingConfig extends AbstractCacheDefinition {
 
     public static final String TEMPORARY_AWS_CREDENTIAL_VERIFIER_CACHE = "temporary_aws_credential_verifier";
 
-    private static final long TTL_IN_SECONDS = 5L;
-
     private static final long MAX_ENTRIES = 1000L;
+
+    @Value("${cb.aws.credential.cache.ttl}")
+    private long ttlInSeconds;
 
     @Override
     public String getName() {
@@ -32,7 +34,7 @@ public class AwsCredentialCachingConfig extends AbstractCacheDefinition {
 
     @Override
     public long getTimeToLiveSeconds() {
-        return TTL_IN_SECONDS;
+        return ttlInSeconds;
     }
 
     @Override
