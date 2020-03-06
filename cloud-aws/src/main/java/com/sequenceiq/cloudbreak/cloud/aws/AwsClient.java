@@ -132,6 +132,10 @@ public class AwsClient {
         return new AmazonCloudFormationRetryClient(createCloudFormationClient(awsCredential, regionName), retry);
     }
 
+    public AmazonCloudFormationRetryClient createCloudFormationRetryClient(AmazonCloudFormationClient amazonCloudFormationClient) {
+        return new AmazonCloudFormationRetryClient(amazonCloudFormationClient, retry);
+    }
+
     public AmazonAutoScalingClient createAutoScalingClient(AwsCredentialView awsCredential, String regionName) {
         AmazonAutoScalingClient client = isRoleAssumeRequired(awsCredential) ?
                 new AmazonAutoScalingClient(createAwsSessionCredentialProvider(awsCredential)) :
