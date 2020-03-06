@@ -31,8 +31,8 @@ public class InstanceTemplateV4TestDto extends AbstractCloudbreakTestDto<Instanc
     }
 
     public InstanceTemplateV4TestDto valid() {
-        return getCloudProvider().template(withRootVolume(getTestContext().given(RootVolumeV4TestDto.class))
-                .withAttachedVolume(getTestContext().init(VolumeV4TestDto.class)));
+        return getCloudProvider().template(withRootVolume(getTestContext().given(RootVolumeV4TestDto.class, getCloudPlatform()))
+                .withAttachedVolume(getTestContext().init(VolumeV4TestDto.class, getCloudPlatform())));
     }
 
     public InstanceTemplateV4TestDto withAttachedVolumes(Set<VolumeV4Request> volumes) {

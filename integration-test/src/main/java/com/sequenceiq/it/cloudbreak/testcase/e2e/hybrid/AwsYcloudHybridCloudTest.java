@@ -4,20 +4,24 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
-import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
-import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.ImageValidatorE2ETest;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.BasicSdxTests;
+import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
+import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import net.schmizz.sshj.userauth.UserAuthException;
@@ -27,9 +31,10 @@ import org.testng.annotations.Test;
 import javax.inject.Inject;
 import java.io.IOException;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static org.testng.Assert.fail;
 
-public class AwsYcloudHybridCloudTest extends ImageValidatorE2ETest {
+public class AwsYcloudHybridCloudTest extends BasicSdxTests {
 
     private static final CloudPlatform CHILD_CLOUD_PLATFORM = CloudPlatform.YARN;
 
@@ -45,6 +50,10 @@ public class AwsYcloudHybridCloudTest extends ImageValidatorE2ETest {
 
     private static final String MOCK_UMS_PASSWORD_INVALID = "Invalid password";
 
+    private static final String MASTER_INSTANCE_TEMPLATE_ID = "InstanceGroupTestDtomaster";
+
+    private static final String IDBROKER_INSTANCE_TEMPLATE_ID = "InstanceGroupTestDtoidbroker";
+
     private static final int SSH_PORT = 22;
 
     private static final int SSH_CONNECT_TIMEOUT = 120000;
@@ -53,7 +62,7 @@ public class AwsYcloudHybridCloudTest extends ImageValidatorE2ETest {
     private String hybridCloudSecurityGroupID;
 
     @Inject
-    private DistroXTestClient distroXTestClient;
+    private SdxTestClient sdxTestClient;
 
     @Inject
     private CredentialTestClient credentialTestClient;
@@ -64,27 +73,36 @@ public class AwsYcloudHybridCloudTest extends ImageValidatorE2ETest {
     @Inject
     private BlueprintTestClient blueprintTestClient;
 
+    @Inject
+    private WaitUtil waitUtil;
+
+    @Inject
+    private CommonCloudProperties commonCloudProperties;
+
     @Override
     protected void setupTest(TestContext testContext) {
-        testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
+        if (!CloudPlatform.AWS.name().equals(commonCloudProperties.getCloudProvider())) {
+            fail(String.format("%s cloud provider is not supported for this test case!", commonCloudProperties.getCloudProvider()));
+        }
 
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        //Use a pre-prepared security group which allows inbound connections from ycloud
+        //Use a pre-prepared security group what allows inbound connections from ycloud
         testContext.given(EnvironmentTestDto.class)
             .withDefaultSecurityGroupId(hybridCloudSecurityGroupID)
             .withSecurityGroupIdForKnox(hybridCloudSecurityGroupID);
         createEnvironmentWithNetworkAndFreeIPA(testContext);
 
         testContext.given(CHILD_ENVIRONMENT_CREDENTIAL_KEY, CredentialTestDto.class, CHILD_CLOUD_PLATFORM)
-            .when(credentialTestClient.create())
+            .when(credentialTestClient.create(), RunningParameter.key(CHILD_ENVIRONMENT_CREDENTIAL_KEY))
             .given(CHILD_ENVIRONMENT_NETWORK_KEY, EnvironmentNetworkTestDto.class, CHILD_CLOUD_PLATFORM)
+                .withNetworkCIDR(null)
             .given(CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class, CHILD_CLOUD_PLATFORM)
                 .withCredentialName(testContext.get(CHILD_ENVIRONMENT_CREDENTIAL_KEY).getName())
                 .withParentEnvironment()
                 .withNetwork(CHILD_ENVIRONMENT_NETWORK_KEY)
-            .when(environmentTestClient.create())
-            .await(EnvironmentStatus.AVAILABLE)
+            .when(environmentTestClient.create(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
+            .await(EnvironmentStatus.AVAILABLE, RunningParameter.key(CHILD_ENVIRONMENT_KEY))
             .when(environmentTestClient.describe(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
             .given(BlueprintTestDto.class, CHILD_CLOUD_PLATFORM)
                 .when(blueprintTestClient.listV4());
@@ -93,26 +111,31 @@ public class AwsYcloudHybridCloudTest extends ImageValidatorE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak with parent-child environments ",
-            when = "a valid DistroX create request is sent to the child environment ",
-            then = "DistroX cluster is created and instances are accessible via ssh by valid username and password ",
+            when = "a valid SDX create request is sent to the child environment ",
+            then = "SDX is created and instances are accessible via ssh by valid username and password ",
             and = "instances are not accessible via ssh by invalid username and password"
     )
-    public void testCreateDistroXOnChildEnvironment(TestContext testContext) {
-        testContext
-                .given(DistroXInstanceTemplateTestDto.class, CHILD_CLOUD_PLATFORM)
-                .given(DistroXTestDto.class, CHILD_CLOUD_PLATFORM)
-                    .withEnvironmentKey(CHILD_ENVIRONMENT_KEY)
-                .when(distroXTestClient.create())
-                .await(STACK_AVAILABLE)
-                .then((context, distrox, client) -> {
-                    for (InstanceGroupV4Response ig : distrox.getResponse().getInstanceGroups()) {
+    public void testCreateSdxOnChildEnvironment(TestContext testContext) {
+        String sdxInternal = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
+
+        testContext.given(InstanceTemplateV4TestDto.class, CHILD_CLOUD_PLATFORM)
+                .given(MASTER_INSTANCE_TEMPLATE_ID, InstanceTemplateV4TestDto.class, CHILD_CLOUD_PLATFORM)
+                .given(IDBROKER_INSTANCE_TEMPLATE_ID, InstanceTemplateV4TestDto.class, CHILD_CLOUD_PLATFORM)
+                .given(sdxInternal, SdxInternalTestDto.class, CHILD_CLOUD_PLATFORM)
+                    .withEnvironmentKey(RunningParameter.key(CHILD_ENVIRONMENT_KEY))
+                .when(sdxTestClient.createInternal(), key(sdxInternal))
+                .awaitForFlow(key(sdxInternal))
+                .await(SdxClusterStatusResponse.RUNNING)
+                .then((tc, testDto, client) -> waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState()))
+                .then((tc, dto, client) -> {
+                    for (InstanceGroupV4Response ig : dto.getResponse().getStackV4Response().getInstanceGroups()) {
                         for (InstanceMetaDataV4Response i : ig.getMetadata()) {
                             String ip = i.getPublicIp();
                             testShhAuthenticationSuccessfull(ip);
                             testShhAuthenticationFailure(ip);
                         }
                     }
-                    return distrox;
+                    return dto;
                 })
                 .validate();
     }
@@ -139,10 +162,5 @@ public class AwsYcloudHybridCloudTest extends ImageValidatorE2ETest {
         client.setConnectTimeout(SSH_CONNECT_TIMEOUT);
 
         return client;
-    }
-
-    @Override
-    protected String getImageId(TestContext testContext) {
-        return testContext.get(DistroXTestDto.class).getResponse().getImage().getId();
     }
 }

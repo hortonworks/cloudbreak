@@ -3,8 +3,11 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.yarn;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.YarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
@@ -17,6 +20,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYar
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
@@ -36,10 +40,17 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
+
+import java.util.List;
+
+import static java.lang.String.format;
 
 @Component
 public class YarnCloudProvider extends AbstractCloudProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(YarnCloudProvider.class);
 
     @Inject
     private YarnProperties yarnProperties;
@@ -182,7 +193,32 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        return throwNotImplementedException();
+        if (yarnProperties.getBaseimage().getImageId() == null || yarnProperties.getBaseimage().getImageId().isEmpty()) {
+            try {
+                List<BaseImageV4Response> images = cloudbreakClient
+                        .getCloudbreakClient()
+                        .imageCatalogV4Endpoint()
+                        .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
+                                CloudPlatform.AWS.name()).getBaseImages();
+
+                BaseImageV4Response baseImage = images.get(images.size() - 1);
+                Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
+                Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
+                Log.log(LOGGER, format(" Selected Base Image Date: %s | ID: %s | Description: %s ", baseImage.getDate(),
+                        baseImage.getUuid(), baseImage.getDescription()));
+                yarnProperties.getBaseimage().setImageId(baseImage.getUuid());
+
+                return baseImage.getUuid();
+            } catch (Exception e) {
+                LOGGER.error("Cannot fetch base images of {} image catalog, because of {}", imageCatalogTestDto.getRequest().getName(), e);
+                throw new TestFailException(" Cannot fetch base images of " + imageCatalogTestDto.getRequest().getName() + " image catalog, because of " + e);
+            }
+        } else {
+            Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
+            Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
+            Log.log(LOGGER, format(" Image ID for SDX create: %s ", yarnProperties.getBaseimage().getImageId()));
+            return yarnProperties.getBaseimage().getImageId();
+        }
     }
 
     private <T> T throwNotImplementedException() {

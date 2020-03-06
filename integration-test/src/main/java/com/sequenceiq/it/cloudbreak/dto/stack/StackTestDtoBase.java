@@ -124,14 +124,13 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
 
     public StackTestDtoBase<T> withEnvironment(Class<EnvironmentTestDto> environmentTestDtoClass) {
         EnvironmentTestDto env = getTestContext().get(environmentTestDtoClass);
-        if (env == null) {
-            throw new IllegalArgumentException("Environment is not given");
+        if (env != null) {
+            if (env.getResponse() == null) {
+                throw new IllegalArgumentException("Environment is not created, or GET response is not included");
+            }
+            String crn = env.getResponse().getCrn();
+            getRequest().setEnvironmentCrn(crn);
         }
-        if (env.getResponse() == null) {
-            throw new IllegalArgumentException("Environment is not created, or GET response is not included");
-        }
-        String crn = env.getResponse().getCrn();
-        getRequest().setEnvironmentCrn(crn);
         return this;
     }
 

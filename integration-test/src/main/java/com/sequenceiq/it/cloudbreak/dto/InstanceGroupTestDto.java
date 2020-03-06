@@ -49,7 +49,7 @@ public class InstanceGroupTestDto extends AbstractCloudbreakTestDto<InstanceGrou
                 .withSecurityGroup(getTestContext().init(SecurityGroupTestDto.class))
                 .withType(hostGroupType.getInstanceGroupType())
                 .withName(hostGroupType.getName())
-                .withTemplate(getTestContext().given("InstanceGroupTestDto" + hostGroupType.getName(), InstanceTemplateV4TestDto.class));
+                .withTemplate(getTestContext().given("InstanceGroupTestDto" + hostGroupType.getName(), InstanceTemplateV4TestDto.class, getCloudPlatform()));
     }
 
     public static InstanceGroupTestDto hostGroup(TestContext testContext, HostGroupType hostGroupType) {
