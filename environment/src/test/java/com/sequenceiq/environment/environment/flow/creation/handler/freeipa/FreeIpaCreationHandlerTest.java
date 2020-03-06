@@ -1,30 +1,48 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
+import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.EnumSource.Mode;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.environment.configuration.SupportedPlatforms;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.EnvironmentTags;
+import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
+import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.v1.TelemetryApiConverter;
@@ -33,13 +51,16 @@ import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 import reactor.bus.Event;
+import reactor.bus.Event.Headers;
 
 @ExtendWith(MockitoExtension.class)
 public class FreeIpaCreationHandlerTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaCreationHandlerTest.class);
 
     private static final long ENVIRONMENT_ID = 1L;
 
@@ -48,6 +69,8 @@ public class FreeIpaCreationHandlerTest {
     private static final String ENVIRONMENT_CRN = "envCrn";
 
     private static final String YARN_NETWORK_CIDR = "172.27.0.0/16";
+
+    private static final Set<PollingResult> UNSUCCESSFUL_POLLING_RESULTS = Set.of(PollingResult.FAILURE, PollingResult.EXIT, PollingResult.TIMEOUT);
 
     @Mock
     private EventSender eventSender;
@@ -104,8 +127,8 @@ public class FreeIpaCreationHandlerTest {
         Environment environment = anEnvironmentWithParent();
 
         ArgumentCaptor<AddDnsZoneForSubnetsRequest> addDnsZoneForSubnetsRequestArgumentCaptor = ArgumentCaptor.forClass(AddDnsZoneForSubnetsRequest.class);
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(of(environment));
-        when(freeIpaService.describe(PARENT_ENVIRONMENT_CRN)).thenReturn(of(describeFreeIpaResponse));
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        when(freeIpaService.describe(PARENT_ENVIRONMENT_CRN)).thenReturn(Optional.of(describeFreeIpaResponse));
 
         victim.accept(new Event<>(environmentDto));
 
@@ -113,7 +136,7 @@ public class FreeIpaCreationHandlerTest {
                 = ArgumentCaptor.forClass(AttachChildEnvironmentRequest.class);
         verify(dnsV1Endpoint).addDnsZoneForSubnets(addDnsZoneForSubnetsRequestArgumentCaptor.capture());
         verify(freeIpaService).attachChildEnvironment(attachChildEnvironmentRequestArgumentCaptor.capture());
-        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
+        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Headers.class));
 
         assertEquals(PARENT_ENVIRONMENT_CRN, addDnsZoneForSubnetsRequestArgumentCaptor.getValue().getEnvironmentCrn());
         assertEquals(Collections.singletonList(YARN_NETWORK_CIDR), addDnsZoneForSubnetsRequestArgumentCaptor.getValue().getSubnets());
@@ -126,14 +149,14 @@ public class FreeIpaCreationHandlerTest {
         EnvironmentDto environmentDto = aYarnEnvironmentDtoWithParentEnvironment();
         Environment environment = anEnvironmentWithParent();
 
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(of(environment));
-        when(freeIpaService.describe(PARENT_ENVIRONMENT_CRN)).thenReturn(empty());
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        when(freeIpaService.describe(PARENT_ENVIRONMENT_CRN)).thenReturn(Optional.empty());
 
         victim.accept(new Event<>(environmentDto));
 
         verify(dnsV1Endpoint, never()).addDnsZoneForSubnets(any(AddDnsZoneForSubnetsRequest.class));
         verify(freeIpaService, never()).attachChildEnvironment(any(AttachChildEnvironmentRequest.class));
-        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
+        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Headers.class));
     }
 
     @Test
@@ -141,13 +164,53 @@ public class FreeIpaCreationHandlerTest {
         EnvironmentDto environmentDto = aNonYarnEnvironmentDtoWithParentEnvironment();
         Environment environment = anEnvironmentWithParent();
 
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(of(environment));
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
 
         victim.accept(new Event<>(environmentDto));
 
         verify(dnsV1Endpoint, never()).addDnsZoneForSubnets(any(AddDnsZoneForSubnetsRequest.class));
         verify(freeIpaService, never()).attachChildEnvironment(any(AttachChildEnvironmentRequest.class));
-        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
+        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Headers.class));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = PollingResult.class, names = "SUCCESS", mode = Mode.EXCLUDE)
+    public void testIfFreeIpaPollingServiceReturnsWithUnsuccessfulResultThenCreationFailedEventShouldBeSent(PollingResult pollingResult) {
+        EnvironmentDto environmentDto = someEnvironmentWithFreeIpaCreation();
+        Environment environment = mock(Environment.class);
+
+        when(environment.getCloudPlatform()).thenReturn(environmentDto.getCloudPlatform());
+        when(environment.isCreateFreeIpa()).thenReturn(environmentDto.getFreeIpaCreation().getCreate());
+
+        Pair<PollingResult, Exception> result = mock(Pair.class);
+
+        when(result.getKey()).thenReturn(pollingResult);
+
+        when(environmentService.findEnvironmentById(environmentDto.getId())).thenReturn(Optional.of(environment));
+        when(supportedPlatforms.supportedPlatformForFreeIpa(environmentDto.getCloudPlatform())).thenReturn(true);
+        when(connectors.getDefault(any())).thenReturn(mock(CloudConnector.class));
+        when(freeIpaPollingService.pollWithTimeout(
+                any(FreeIpaCreationRetrievalTask.class),
+                any(FreeIpaPollerObject.class),
+                anyLong(),
+                anyInt(),
+                anyInt()))
+                .thenReturn(result);
+
+        victim.accept(new Event<>(environmentDto));
+
+        verify(eventSender).sendEvent(any(EnvCreationFailureEvent.class), any(Headers.class));
+
+        verify(environmentService, times(1)).findEnvironmentById(anyLong());
+        verify(environmentService, times(1)).findEnvironmentById(environmentDto.getId());
+        verify(supportedPlatforms, times(1)).supportedPlatformForFreeIpa(anyString());
+        verify(supportedPlatforms, times(1)).supportedPlatformForFreeIpa(environmentDto.getCloudPlatform());
+        verify(freeIpaPollingService, times(1)).pollWithTimeout(
+                any(FreeIpaCreationRetrievalTask.class),
+                any(FreeIpaPollerObject.class),
+                anyLong(),
+                anyInt(),
+                anyInt());
     }
 
     private EnvironmentDto aYarnEnvironmentDtoWithParentEnvironment() {
@@ -163,6 +226,21 @@ public class FreeIpaCreationHandlerTest {
         return environmentDto;
     }
 
+    private EnvironmentDto someEnvironmentWithFreeIpaCreation() {
+        EnvironmentDto dto = new EnvironmentDto();
+
+        dto.setId(ENVIRONMENT_ID);
+        dto.setResourceCrn(ENVIRONMENT_CRN);
+        dto.setCloudPlatform(CloudPlatform.AWS.name());
+        dto.setTags(new EnvironmentTags(emptyMap(), emptyMap()));
+        dto.setAuthentication(AuthenticationDto.builder().build());
+        dto.setRegions(Set.of(createRegion("someWhereOverTheRainbow")));
+        dto.setFreeIpaCreation(FreeIpaCreationDto.builder().withCreate(true).build());
+        dto.setNetwork(NetworkDto.builder().withNetworkCidr(YARN_NETWORK_CIDR).build());
+
+        return dto;
+    }
+
     private EnvironmentDto aNonYarnEnvironmentDtoWithParentEnvironment() {
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setId(ENVIRONMENT_ID);
@@ -170,6 +248,13 @@ public class FreeIpaCreationHandlerTest {
         environmentDto.setCloudPlatform(CloudPlatform.AWS.name());
 
         return environmentDto;
+    }
+
+    private Region createRegion(String name) {
+        Region region = new Region();
+        region.setName(name);
+        region.setDisplayName(name);
+        return region;
     }
 
     private Environment anEnvironmentWithParent() {

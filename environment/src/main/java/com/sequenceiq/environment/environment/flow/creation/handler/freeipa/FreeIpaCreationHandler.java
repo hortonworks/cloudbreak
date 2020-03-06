@@ -52,6 +52,7 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneNetwork;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementRequest;
@@ -60,7 +61,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.Securit
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 
 import reactor.bus.Event;
 
@@ -313,7 +313,12 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         if (SUCCESS == pollWithTimeout.getKey()) {
             eventSender().sendEvent(getNextStepObject(environment), environmentDtoEvent.getHeaders());
         } else {
-            throw new FreeIpaOperationFailedException(pollWithTimeout.getValue().getMessage());
+            LOGGER.info("FreeIPA creation polling has stopped due to the unsuccessful state/result: {}", pollWithTimeout.getKey());
+            Optional.ofNullable(pollWithTimeout.getValue()).ifPresentOrElse(e -> {
+                throw new FreeIpaOperationFailedException(e.getMessage());
+            }, () -> {
+                throw new FreeIpaOperationFailedException("Polling result was: " + pollWithTimeout.getKey());
+            });
         }
     }
 
