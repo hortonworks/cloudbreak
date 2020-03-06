@@ -455,6 +455,9 @@ public class ClusterService {
         if (!Sets.intersection(failedNodes, newHealthyNodes).isEmpty()) {
             throw new BadRequestException("Failed nodes " + failedNodes + " and healthy nodes " + newHealthyNodes + " should not have common items.");
         }
+        if (failedNodes.isEmpty() && newHealthyNodes.isEmpty()) {
+            return;
+        }
         try {
             transactionService.required(() -> {
                 Stack stack = stackService.findByCrn(crn);
@@ -477,13 +480,10 @@ public class ClusterService {
         Map<String, InstanceMetaData> failedMetaData = new HashMap<>();
         for (String failedNode : failedNodes) {
             instanceMetaDataService.findHostInStack(stack.getId(), failedNode).ifPresentOrElse(instanceMetaData -> {
-                hostGroupService.getByClusterIdAndName(cluster.getId(), instanceMetaData.getInstanceGroupName()).ifPresent(hostGroup -> {
+                hostGroupService.getRepairViewByClusterIdAndName(cluster.getId(), instanceMetaData.getInstanceGroupName()).ifPresent(hostGroup -> {
                     if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
                         validateRepair(stack, instanceMetaData);
-                    }
-                    String hostGroupName = hostGroup.getName();
-                    if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
-                        prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryMetadata, failedNode, instanceMetaData, hostGroupName);
+                        prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryMetadata, failedNode, instanceMetaData, hostGroup.getName());
                     } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
                         failedMetaData.put(failedNode, instanceMetaData);
                     }

@@ -1,14 +1,17 @@
 package com.sequenceiq.cloudbreak.service.hostgroup;
 
-import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.domain.projection.HostGroupRepairView;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 
 @Service
 public class HostGroupService {
@@ -30,6 +33,10 @@ public class HostGroupService {
 
     public Optional<HostGroup> getByClusterIdAndName(Long clusterId, String instanceGroupName) {
         return hostGroupRepository.findHostGroupInClusterByNameWithInstanceMetadas(clusterId, instanceGroupName);
+    }
+
+    public Optional<HostGroupRepairView> getRepairViewByClusterIdAndName(Long clusterId, String instanceGroupName) {
+        return hostGroupRepository.findHostGroupRepairViewInClusterByName(clusterId, instanceGroupName);
     }
 
     public Set<HostGroup> findHostGroupsInCluster(Long clusterId) {

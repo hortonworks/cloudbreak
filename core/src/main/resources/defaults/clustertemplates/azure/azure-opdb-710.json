@@ -1,11 +1,12 @@
 {
-  "name": "7.1.0 - Operational Database for Azure",
+  "name": "7.1.0 - Operational Database with SQL for Azure",
   "description": "",
   "type": "OPERATIONALDATABASE",
+  "featureState": "RELEASED",
   "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.1.0 - Operational Database: Apache HBase"
+      "blueprintName": "7.1.0 - Operational Database: Apache HBase, Phoenix"
     },
     "instanceGroups": [
       {
