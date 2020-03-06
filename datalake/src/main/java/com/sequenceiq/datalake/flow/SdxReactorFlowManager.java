@@ -11,10 +11,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
@@ -28,6 +25,7 @@ import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.datalake.flow.upgrade.event.SdxUpgradeStartEvent;
+import com.sequenceiq.datalake.settings.SdxRepairSettings;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.Flow2Handler;
@@ -63,13 +61,10 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerSdxRepairFlow(Long sdxId, SdxRepairRequest repairRequest) {
-        if (StringUtils.isNotBlank(repairRequest.getHostGroupName()) && CollectionUtils.isNotEmpty(repairRequest.getHostGroupNames())) {
-            throw new BadRequestException("Please send only one hostGroupName in the 'hostGroupName' field " +
-                    "or multiple hostGroups in the 'hostGroupNames' fields");
-        }
+        SdxRepairSettings settings = SdxRepairSettings.from(repairRequest);
         String selector = SDX_REPAIR_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(selector, new SdxRepairStartEvent(selector, sdxId, userId, repairRequest));
+        return notify(selector, new SdxRepairStartEvent(selector, sdxId, userId, settings));
     }
 
     public FlowIdentifier triggerDatalakeUpgradeFlow(Long sdxId, UpgradeOptionV4Response upgradeOption) {

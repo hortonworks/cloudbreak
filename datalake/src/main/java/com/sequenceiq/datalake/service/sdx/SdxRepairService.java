@@ -5,14 +5,12 @@ import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowStat
 import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
 
 import java.util.Collections;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -38,6 +36,7 @@ import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.datalake.settings.SdxRepairSettings;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
@@ -79,7 +78,7 @@ public class SdxRepairService {
         return sdxReactorFlowManager.triggerSdxRepairFlow(cluster.getId(), clusterRepairRequest);
     }
 
-    public void startSdxRepair(Long id, SdxRepairRequest repairRequest) {
+    public void startSdxRepair(Long id, SdxRepairSettings repairRequest) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             startRepairInCb(sdxCluster, repairRequest);
         }, () -> {
@@ -87,7 +86,7 @@ public class SdxRepairService {
         });
     }
 
-    protected void startRepairInCb(SdxCluster sdxCluster, SdxRepairRequest repairRequest) {
+    protected void startRepairInCb(SdxCluster sdxCluster, SdxRepairSettings repairRequest) {
         try {
             LOGGER.info("Triggering repair flow for cluster {} with hostgroups {}", sdxCluster.getClusterName(), repairRequest.getHostGroupNames());
             FlowIdentifier flowIdentifier = stackV4Endpoint.repairCluster(0L, sdxCluster.getClusterName(), createRepairRequest(repairRequest));
@@ -105,15 +104,9 @@ public class SdxRepairService {
         }
     }
 
-    private ClusterRepairV4Request createRepairRequest(SdxRepairRequest sdxRepairRequest) {
+    private ClusterRepairV4Request createRepairRequest(SdxRepairSettings sdxRepairSettings) {
         ClusterRepairV4Request repairRequest = new ClusterRepairV4Request();
-        List<String> hostGroupNames;
-        if (StringUtils.isNotBlank(sdxRepairRequest.getHostGroupName())) {
-            hostGroupNames = List.of(sdxRepairRequest.getHostGroupName());
-        } else {
-            hostGroupNames = sdxRepairRequest.getHostGroupNames();
-        }
-        repairRequest.setHostGroups(hostGroupNames);
+        repairRequest.setHostGroups(sdxRepairSettings.getHostGroupNames());
         return repairRequest;
     }
 

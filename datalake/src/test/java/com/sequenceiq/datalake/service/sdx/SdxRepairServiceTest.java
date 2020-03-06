@@ -32,6 +32,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.datalake.settings.SdxRepairSettings;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,8 +73,10 @@ public class SdxRepairServiceTest {
         cluster.setClusterName(CLUSTER_NAME);
         SdxRepairRequest sdxRepairRequest = new SdxRepairRequest();
         sdxRepairRequest.setHostGroupNames(List.of("master"));
+        SdxRepairSettings sdxRepairSettings = SdxRepairSettings.from(sdxRepairRequest);
+
         doNothing().when(cloudbreakFlowService).saveLastCloudbreakFlowChainId(any(), any());
-        underTest.startRepairInCb(cluster, sdxRepairRequest);
+        underTest.startRepairInCb(cluster, sdxRepairSettings);
         verify(stackV4Endpoint).repairCluster(eq(0L), eq(CLUSTER_NAME), captor.capture());
         assertEquals("master", captor.getValue().getHostGroups().get(0));
         verify(sdxStatusService, times(1))
