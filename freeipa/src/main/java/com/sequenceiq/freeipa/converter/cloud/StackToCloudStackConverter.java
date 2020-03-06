@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.converter.cloud;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.CLOUDWATCH_CREATE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED;
@@ -20,6 +21,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
@@ -75,6 +77,9 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     @Inject
     private ImageConverter imageConverter;
 
+    @Value("${freeipa.aws.cloudwatch.enabled:true}")
+    private boolean enableCloudwatch;
+
     @Override
     public CloudStack convert(Stack stack) {
         return convert(stack, Collections.emptySet());
@@ -96,8 +101,9 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         Network network = buildNetwork(stack);
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stack.getStackAuthentication());
 
-        return new CloudStack(instanceGroups, network, image, Collections.emptyMap(), getUserDefinedTags(stack), stack.getTemplate(),
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
+        return new CloudStack(instanceGroups, network, image, Map.of(CLOUDWATCH_CREATE_PARAMETER, Boolean.toString(enableCloudwatch)),
+                getUserDefinedTags(stack), stack.getTemplate(), instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), null);
     }
 
     public CloudInstance buildInstance(InstanceMetaData instanceMetaData, Template template,

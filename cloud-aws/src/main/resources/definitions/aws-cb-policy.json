@@ -11,6 +11,17 @@
       ]
     },
     {
+      "Sid": "CloudWatchMetric",
+      "Action": [
+        "cloudwatch:PutMetricAlarm",
+        "cloudwatch:DeleteAlarms"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "*"
+      ]
+    },
+    {
       "Sid": "DynamoDBFull",
       "Action": [
         "dynamodb:*"

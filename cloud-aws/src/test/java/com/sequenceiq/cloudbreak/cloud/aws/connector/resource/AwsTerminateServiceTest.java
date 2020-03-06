@@ -110,6 +110,9 @@ public class AwsTerminateServiceTest {
     private AwsElasticIpService awsElasticIpService;
 
     @Mock
+    private AwsCloudWatchService awsCloudWatchService;
+
+    @Mock
     private AwsComputeResourceService awsComputeResourceService;
 
     @Mock
