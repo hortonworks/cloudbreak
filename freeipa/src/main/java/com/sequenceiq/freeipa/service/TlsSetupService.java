@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.service;
 
 
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Set;
@@ -52,7 +54,7 @@ public class TlsSetupService {
     @Inject
     private StackRepository stackRepository;
 
-    public void setupTls(Long stackId) throws CloudbreakException {
+    public void setupTls(Long stackId, InstanceMetaData gwInstance) throws CloudbreakException {
         try {
             SavingX509TrustManager x509TrustManager = new SavingX509TrustManager();
             TrustManager[] trustManagers = {x509TrustManager};
@@ -60,8 +62,7 @@ public class TlsSetupService {
             sslContext.init(null, trustManagers, new SecureRandom());
             Client client = RestClientUtil.createClient(sslContext, false);
             Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataRepository.findAllInStack(stackId);
-            InstanceMetaData instanceMetaData = instanceMetaDataSet.iterator().next();
-            String ip = instanceMetaData.getPublicIpWrapper();
+            String ip = gwInstance.getPublicIpWrapper();
             Stack stack = stackRepository.findById(stackId).get();
             Integer gatewayPort = stack.getGatewayport();
             LOGGER.debug("Trying to fetch the server's certificate: {}:{}", ip, gatewayPort);
@@ -72,12 +73,18 @@ public class TlsSetupService {
             nginxTarget.path("/").request().get().close();
             X509Certificate[] chain = x509TrustManager.getChain();
             String serverCert = PkiUtil.convert(chain[0]);
-            instanceMetaData.setServerCert(BaseEncoding.base64().encode(serverCert.getBytes()));
-            instanceMetaDataRepository.save(instanceMetaData);
+            InstanceMetaData metaData = getInstanceMetaData(gwInstance);
+            metaData.setServerCert(BaseEncoding.base64().encode(serverCert.getBytes()));
+            instanceMetaDataRepository.save(metaData);
         } catch (Exception e) {
             throw new CloudbreakException("Failed to retrieve the server's certificate from Nginx."
                     + " Please check your security group is open enough and Management Console can access your VPC and subnet"
                     + " Please also Make sure your Subnets can route to the internet and you have public DNS and IP options enabled", e);
         }
+    }
+
+    private InstanceMetaData getInstanceMetaData(InstanceMetaData gwInstance) {
+        return instanceMetaDataRepository.findById(gwInstance.getId())
+                .orElseThrow(notFound("Instance metadata", gwInstance.getId()));
     }
 }
