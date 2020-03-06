@@ -50,7 +50,7 @@ class SubnetIdProviderTest {
                 .withCbSubnets(Map.of("AZ-a", new CloudSubnet()))
                 .withSubnetMetas(Map.of("AZ-a", new CloudSubnet()))
                 .build();
-        NetworkConnector networkConnector = setupConnectorWithSelectionResult(List.of(new CloudSubnet()));
+        NetworkConnector networkConnector = setupConnectorWithSelectionResult(List.of(new CloudSubnet("id", "name")));
         Tunnel tunnel = Tunnel.DIRECT;
 
         String provide = underTest.provide(networkDto, tunnel, CloudPlatform.AWS);
@@ -103,6 +103,9 @@ class SubnetIdProviderTest {
     void testProvideShouldReturnAnySubnetWhenResultIsEmptyAndNoError() {
         setupConnectorWithSelectionResult(List.of());
         NetworkDto networkDto = NetworkDto.builder()
+                .withCbSubnets(Map.of(
+                        "AZ-a", new CloudSubnet("id-1", "name-1"),
+                        "AZ-b", new CloudSubnet("id-2", "name-2")))
                 .withSubnetMetas(Map.of(
                         "AZ-a", new CloudSubnet("id-1", "name-1"),
                         "AZ-b", new CloudSubnet("id-2", "name-2")

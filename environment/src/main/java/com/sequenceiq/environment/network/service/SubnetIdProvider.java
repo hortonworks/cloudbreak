@@ -26,7 +26,8 @@ public class SubnetIdProvider {
 
     public String provide(NetworkDto network, Tunnel tunnel, CloudPlatform cloudPlatform) {
         LOGGER.debug("Choosing subnet, network: {},  platform: {}, tunnel: {}", network, cloudPlatform, tunnel);
-        if (network == null || network.getSubnetIds() == null || network.getSubnetIds().isEmpty() || network.getCbSubnets().isEmpty()) {
+        if (network == null || network.getSubnetIds() == null || network.getSubnetIds().isEmpty() || network.getCbSubnets() == null
+                || network.getCbSubnets().isEmpty()) {
             LOGGER.debug("Check failed, returning null");
             return null;
         }
