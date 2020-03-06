@@ -13,8 +13,4 @@ import com.sequenceiq.freeipa.entity.UserSyncStatus;
 public interface UserSyncStatusRepository extends CrudRepository<UserSyncStatus, Long> {
 
     Optional<UserSyncStatus> getByStack(Stack stack);
-
-    @Override
-    @CheckPermission(action = ResourceAction.READ)
-    <S extends UserSyncStatus> S save(S entity);
 }
