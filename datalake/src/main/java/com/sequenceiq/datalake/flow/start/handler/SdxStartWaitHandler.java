@@ -17,22 +17,16 @@ import com.sequenceiq.datalake.flow.start.event.SdxStartSuccessEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.start.SdxStartService;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
 @Component
-public class SdxStartWaitHandler implements EventHandler<SdxStartWaitRequest> {
+public class SdxStartWaitHandler extends ExceptionCatcherEventHandler<SdxStartWaitRequest> {
 
     public static final int SLEEP_TIME_IN_SEC = 20;
 
     public static final int DURATION_IN_MINUTES = 40;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxStartWaitHandler.class);
-
-    @Inject
-    private EventBus eventBus;
 
     @Inject
     private SdxStartService sdxStartService;
@@ -43,7 +37,12 @@ public class SdxStartWaitHandler implements EventHandler<SdxStartWaitRequest> {
     }
 
     @Override
-    public void accept(Event<SdxStartWaitRequest> event) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+        return new SdxStartFailedEvent(resourceId, null, e);
+    }
+
+    @Override
+    protected void doAccept(HandlerEvent event) {
         SdxStartWaitRequest waitRequest = event.getData();
         Long sdxId = waitRequest.getResourceId();
         String userId = waitRequest.getUserId();
@@ -64,6 +63,6 @@ public class SdxStartWaitHandler implements EventHandler<SdxStartWaitRequest> {
             LOGGER.info("Start polling failed for stack: {}", sdxId);
             response = new SdxStartFailedEvent(sdxId, userId, exception);
         }
-        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
+        sendEvent(response, event);
     }
 }
