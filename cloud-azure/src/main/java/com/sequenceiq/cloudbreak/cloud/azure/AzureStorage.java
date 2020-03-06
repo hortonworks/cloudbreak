@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.microsoft.azure.CloudException;
+import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azure.management.storage.StorageAccounts;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -142,7 +143,7 @@ public class AzureStorage {
 
     private String getPersistentStorageName(String persistentStorageName, AzureCredentialView acv, String region) {
         String subscriptionIdPart = acv.getSubscriptionId().replaceAll("-", "").toLowerCase();
-        String regionInitials = WordUtils.initials(region, ' ').toLowerCase();
+        String regionInitials = WordUtils.initials(Region.findByLabelOrName(region).label(), ' ').toLowerCase();
         String result = String.format("%s%s%s", persistentStorageName, regionInitials, subscriptionIdPart);
         if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
             result = result.substring(0, MAX_LENGTH_OF_RESOURCE_NAME);
