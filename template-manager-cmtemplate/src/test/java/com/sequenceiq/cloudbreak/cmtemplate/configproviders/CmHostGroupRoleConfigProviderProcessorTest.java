@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,48 +122,6 @@ public class CmHostGroupRoleConfigProviderProcessorTest {
         assertEquals("/hadoopfs/root1/nodemanager", workerNM.get(0).getValue());
         assertEquals("yarn_nodemanager_log_dirs", workerNM.get(1).getName());
         assertEquals("/hadoopfs/root1/nodemanager/log", workerNM.get(1).getValue());
-    }
-
-    @Test
-    public void clonesBaseRoleConfigForHostGroups() {
-        HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
-        HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
-        HostgroupView compute = new HostgroupView("compute", 3, InstanceGroupType.CORE, 2);
-        setup("input/clouderamanager-3hg-same-DN-role.bp", Builder.builder().withHostgroupViews(Set.of(master, worker, compute)));
-
-        underTest.process(templateProcessor, templatePreparator);
-
-        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = mapRoleConfigs();
-        assertNull(roleConfigs.get("hdfs-DATANODE-BASE"));
-        assertEquals(List.of(config("dfs_data_dir_list", "/hadoopfs/fs1/datanode,/hadoopfs/fs2/datanode")),
-                roleConfigs.get("hdfs-DATANODE-worker"));
-        assertEquals(List.of(config("dfs_data_dir_list", "/hadoopfs/fs1/datanode,/hadoopfs/fs2/datanode,/hadoopfs/fs3/datanode")),
-                roleConfigs.get("hdfs-DATANODE-compute"));
-    }
-
-    @Test
-    public void retainsExistingConfigsInEachClone() {
-        HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
-        HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
-        HostgroupView compute = new HostgroupView("compute", 3, InstanceGroupType.CORE, 2);
-        setup("input/clouderamanager-3hg-same-DN-role.bp", Builder.builder().withHostgroupViews(Set.of(master, worker, compute)));
-
-        ApiClusterTemplateConfig existingConfig = config("existing_config", "some_Value");
-
-        templateProcessor.getServiceByType("HDFS").ifPresent(
-                service -> service.getRoleConfigGroups().stream()
-                        .filter(rcg -> "hdfs-DATANODE-BASE".equals(rcg.getRefName()))
-                        .forEach(rcg -> rcg.addConfigsItem(existingConfig))
-        );
-
-        underTest.process(templateProcessor, templatePreparator);
-
-        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = mapRoleConfigs();
-        assertNull(roleConfigs.get("hdfs-DATANODE-BASE"));
-        assertEquals(Set.of(existingConfig, config("dfs_data_dir_list", "/hadoopfs/fs1/datanode,/hadoopfs/fs2/datanode")),
-                Set.copyOf(roleConfigs.get("hdfs-DATANODE-worker")));
-        assertEquals(Set.of(existingConfig, config("dfs_data_dir_list", "/hadoopfs/fs1/datanode,/hadoopfs/fs2/datanode,/hadoopfs/fs3/datanode")),
-                Set.copyOf(roleConfigs.get("hdfs-DATANODE-compute")));
     }
 
     @Test
