@@ -114,23 +114,19 @@ public class UserSyncService {
         Operation operation = operationService
                 .startOperation(accountId, OperationType.USER_SYNC, environmentCrns, union(userCrnFilter, machineUserCrnFilter));
 
-        String operationId = operation.getOperationId();
-        OperationState operationState = operation.getStatus();
-        LOGGER.info("Starting operation [{}] with status [{}]", operationId, operationState);
+        LOGGER.info("Starting operation [{}] with status [{}]", operation.getOperationId(), operation.getStatus());
 
-        if (operationState == OperationState.RUNNING) {
-            tryWithOperationCleanup(operationId, accountId, () -> {
-                boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
-                if (fullSync) {
-                    long currentTime = Instant.now().toEpochMilli();
-                    stacks.forEach(stack -> {
-                        UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
-                        userSyncStatus.setLastFullSyncStartTime(currentTime);
-                        userSyncStatusService.save(userSyncStatus);
-                    });
-                }
-                asyncSynchronizeUsers(operation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter, fullSync);
-            });
+        if (operation.getStatus() == OperationState.RUNNING) {
+            boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
+            if (fullSync) {
+                long currentTime = Instant.now().toEpochMilli();
+                stacks.forEach(stack -> {
+                    UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
+                    userSyncStatus.setLastFullSyncStartTime(currentTime);
+                    userSyncStatusService.save(userSyncStatus);
+                });
+            }
+            asyncSynchronizeUsers(operation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter, fullSync);
         }
 
         return operation;
@@ -145,26 +141,9 @@ public class UserSyncService {
 
     }
 
-    private void tryWithOperationCleanup(String operationId, String accountId, Runnable runnable) {
-        try {
-            runnable.run();
-        } catch (Throwable t) {
-            try {
-                LOGGER.error("Operation {} in account {} failed. Attempting to mark failure in database then re-throwing.",
-                        operationId, accountId, t);
-                operationService.failOperation(accountId, operationId,
-                        "User sync operation failed: " + t.getLocalizedMessage());
-            } catch (Exception e) {
-                LOGGER.error("Failed to mark operation {} in account {} as failed in database.", operationId, accountId, e);
-            } finally {
-                throw t;
-            }
-        }
-    }
-
     private void internalSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter, boolean fullSync) {
-        tryWithOperationCleanup(operationId, accountId, () -> {
+        try {
             Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
 
             Optional<String> requestId = MDCUtils.getRequestId();
@@ -203,7 +182,11 @@ public class UserSyncService {
                 }
             });
             operationService.completeOperation(accountId, operationId, success, failure);
-        });
+        } catch (RuntimeException e) {
+            LOGGER.error("User sync operation {} failed with error:", operationId, e);
+            operationService.failOperation(accountId, operationId, e.getLocalizedMessage());
+            throw e;
+        }
     }
 
     private Future<SyncStatusDetail> asyncSynchronizeStack(Stack stack, UmsUsersState umsUsersState, UmsEventGenerationIds umsEventGenerationIds,
