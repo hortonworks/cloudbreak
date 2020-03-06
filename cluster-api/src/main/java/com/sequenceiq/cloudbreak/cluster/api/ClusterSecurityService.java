@@ -18,6 +18,8 @@ public interface ClusterSecurityService {
 
     void setupLdapAndSSO(String primaryGatewayPublicAddress, LdapView ldapConfig, VirtualGroupRequest virtualGroupRequest) throws CloudbreakException;
 
+    void setupMonitoringUser() throws CloudbreakException;
+
     String getCloudbreakClusterUserName();
 
     String getCloudbreakClusterPassword();

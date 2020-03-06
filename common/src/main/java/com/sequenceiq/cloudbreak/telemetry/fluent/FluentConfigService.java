@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
@@ -42,12 +43,12 @@ public class FluentConfigService {
         this.adlsGen2ConfigGenerator = adlsGen2ConfigGenerator;
     }
 
-    public FluentConfigView createFluentConfigs(FluentClusterDetails clusterDetails,
+    public FluentConfigView createFluentConfigs(TelemetryClusterDetails clusterDetails,
             boolean databusEnabled, boolean meteringEnabled, Telemetry telemetry) {
         return createFluentConfigs(clusterDetails, databusEnabled, meteringEnabled, telemetry, null);
     }
 
-    public FluentConfigView createFluentConfigs(FluentClusterDetails clusterDetails,
+    public FluentConfigView createFluentConfigs(TelemetryClusterDetails clusterDetails,
             boolean databusEnabled, boolean meteringEnabled, Telemetry telemetry,
             List<AnonymizationRule> anonymizationRules) {
         final FluentConfigView.Builder builder = new FluentConfigView.Builder();

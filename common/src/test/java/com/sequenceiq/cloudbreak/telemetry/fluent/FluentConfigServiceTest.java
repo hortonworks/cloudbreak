@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
@@ -22,8 +23,8 @@ public class FluentConfigServiceTest {
 
     private static final String PLATFORM_DEFAULT = "AWS";
 
-    private static final FluentClusterDetails DEFAULT_FLUENT_CLUSTER_DETAILS =
-            FluentClusterDetails.Builder.builder().withType(CLUSTER_TYPE_DEFAULT).withPlatform(PLATFORM_DEFAULT).build();
+    private static final TelemetryClusterDetails DEFAULT_FLUENT_CLUSTER_DETAILS =
+            TelemetryClusterDetails.Builder.builder().withType(CLUSTER_TYPE_DEFAULT).withPlatform(PLATFORM_DEFAULT).build();
 
     private FluentConfigService underTest;
 

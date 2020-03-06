@@ -28,7 +28,7 @@ public class TelemetryConverterTest {
     @BeforeEach
     public void setUp() {
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, false, "", null);
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true);
+        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true, false);
         underTest = new TelemetryConverter(telemetryConfiguration, true);
     }
 

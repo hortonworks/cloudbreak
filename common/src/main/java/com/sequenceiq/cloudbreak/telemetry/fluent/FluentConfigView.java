@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
+import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfigView;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
@@ -38,7 +39,7 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private final boolean meteringEnabled;
 
-    private final FluentClusterDetails clusterDetails;
+    private final TelemetryClusterDetails clusterDetails;
 
     private final String user;
 
@@ -127,7 +128,7 @@ public class FluentConfigView implements TelemetryConfigView {
         return region;
     }
 
-    public FluentClusterDetails getClusterDetails() {
+    public TelemetryClusterDetails getClusterDetails() {
         return clusterDetails;
     }
 
@@ -250,7 +251,7 @@ public class FluentConfigView implements TelemetryConfigView {
 
         private boolean meteringEnabled;
 
-        private FluentClusterDetails clusterDetails;
+        private TelemetryClusterDetails clusterDetails;
 
         private String user;
 
@@ -402,7 +403,7 @@ public class FluentConfigView implements TelemetryConfigView {
             return this;
         }
 
-        public Builder withClusterDetails(FluentClusterDetails clusterDetails) {
+        public Builder withClusterDetails(TelemetryClusterDetails clusterDetails) {
             this.clusterDetails = clusterDetails;
             return this;
         }

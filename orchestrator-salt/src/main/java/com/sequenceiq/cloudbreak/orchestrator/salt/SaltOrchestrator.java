@@ -206,6 +206,22 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
+    public void installAndStartMonitoring(List<GatewayConfig> allGateway, Set<Node> nodes, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
+        Set<String> serverHostname = Sets.newHashSet(primaryGateway.getHostname());
+        try (SaltConnector sc = createSaltConnector(primaryGateway)) {
+            StateAllRunner stateAllJobRunner = new StateAllRunner(serverHostname, nodes, "monitoring.init");
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateAllJobRunner);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel);
+            saltJobRunBootstrapRunner.call();
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during cluster monitoring start", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    @Override
     public void stopTelemetryAgent(List<GatewayConfig> allGateway, Set<Node> nodes, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);

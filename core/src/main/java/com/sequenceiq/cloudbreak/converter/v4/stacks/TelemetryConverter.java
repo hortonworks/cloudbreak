@@ -47,6 +47,8 @@ public class TelemetryConverter {
 
     private final boolean meteringEnabled;
 
+    private final boolean monitoringEnabled;
+
     private final boolean clusterLogsCollection;
 
     private final boolean useSharedAltusCredential;
@@ -59,6 +61,7 @@ public class TelemetryConverter {
         this.databusEndpoint = configuration.getAltusDatabusConfiguration().getAltusDatabusEndpoint();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
         this.meteringEnabled = configuration.isMeteringEnabled();
+        this.monitoringEnabled = configuration.isMonitoringEnabled();
         this.clusterLogsCollection = configuration.isClusterLogsCollection();
     }
 
@@ -83,7 +86,6 @@ public class TelemetryConverter {
         if (request != null) {
             Logging logging = createLoggingFromRequest(request);
             WorkloadAnalytics workloadAnalytics = createWorkloadAnalyticsFromRequest(request);
-            telemetry = new Telemetry();
             telemetry.setLogging(logging);
             telemetry.setWorkloadAnalytics(workloadAnalytics);
             setWorkloadAnalyticsFeature(telemetry, features);
@@ -91,7 +93,12 @@ public class TelemetryConverter {
             setUseSharedAltusCredential(features);
             telemetry.setFluentAttributes(request.getFluentAttributes());
         }
+        if (monitoringEnabled) {
+            LOGGER.debug("Cluster level monitoring feature is enabled");
+            features.addMonitoring(true);
+        }
         setMeteringFeature(type, features);
+
         if (StringUtils.isNotEmpty(databusEndpoint)) {
             LOGGER.debug("Setting databus endpoint: {}", databusEndpoint);
             telemetry.setDatabusEndpoint(databusEndpoint);

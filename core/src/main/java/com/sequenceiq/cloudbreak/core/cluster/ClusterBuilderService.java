@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.cluster.flow.telemetry.ClusterMonitoringEngine;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
@@ -88,6 +89,9 @@ public class ClusterBuilderService {
 
     @Inject
     private RecipeEngine recipeEngine;
+
+    @Inject
+    private ClusterMonitoringEngine clusterMonitoringEngine;
 
     @Inject
     private BlueprintUtils blueprintUtils;
@@ -154,6 +158,10 @@ public class ClusterBuilderService {
         String sdxStackCrn = sdxStack
                 .map(Stack::getResourceCrn)
                 .orElse(null);
+        if (telemetry.isMonitoringFeatureEnabled()) {
+            connector.clusterSecurityService().setupMonitoringUser();
+            clusterMonitoringEngine.installAndStartMonitoring(stack, telemetry);
+        }
 
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
         String template = connector.clusterSetupService().prepareTemplate(instanceMetaDataByHostGroup,

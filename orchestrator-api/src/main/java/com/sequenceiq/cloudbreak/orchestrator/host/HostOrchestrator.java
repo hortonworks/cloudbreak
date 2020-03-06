@@ -84,6 +84,9 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void stopTelemetryAgent(List<GatewayConfig> allGateway, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException;
 
+    void installAndStartMonitoring(List<GatewayConfig> allGateway, Set<Node> nodes, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException;
+
     void stopClusterManagerAgent(GatewayConfig gatewayConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel, boolean adJoinable, boolean ipaJoinable)
             throws CloudbreakOrchestratorFailedException;
 
