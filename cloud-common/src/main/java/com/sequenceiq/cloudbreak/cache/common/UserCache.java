@@ -7,7 +7,7 @@ public class UserCache extends AbstractCacheDefinition {
 
     private static final long MAX_ENTRIES = 1000L;
 
-    private static final long TTL_IN_SECONDS = 5L;
+    private static final long TTL_IN_SECONDS = 60L;
 
     @Override
     protected String getName() {

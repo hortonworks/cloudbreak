@@ -40,6 +40,8 @@ public class SubnetIdProvider {
     }
 
     private CloudSubnet fallback(NetworkDto network) {
-        return network.getSubnetMetas().values().iterator().next();
+        CloudSubnet chosenSubnet = network.getSubnetMetas().values().iterator().next();
+        LOGGER.debug("Choosing subnet, fallback strategy: '{}'", chosenSubnet.getId());
+        return chosenSubnet;
     }
 }
