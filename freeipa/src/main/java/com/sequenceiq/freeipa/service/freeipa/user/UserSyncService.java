@@ -29,8 +29,10 @@ import org.springframework.util.CollectionUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
@@ -66,6 +68,8 @@ import com.sequenceiq.freeipa.service.freeipa.user.kerberos.KrbKeySetEncoder;
 public class UserSyncService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserSyncService.class);
+
+    private static final String INTERNAL_USER_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     @VisibleForTesting
     @Value("${freeipa.usersync.max-subjects-per-request}")
@@ -119,24 +123,26 @@ public class UserSyncService {
         LOGGER.info("Starting operation [{}] with status [{}]", operationId, operationState);
 
         if (operationState == OperationState.RUNNING) {
-            tryWithOperationCleanup(operationId, accountId, () -> {
-                boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
-                if (fullSync) {
-                    long currentTime = Instant.now().toEpochMilli();
-                    stacks.forEach(stack -> {
-                        UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
-                        userSyncStatus.setLastFullSyncStartTime(currentTime);
-                        userSyncStatusService.save(userSyncStatus);
-                    });
-                }
-                asyncSynchronizeUsers(operation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter, fullSync);
-            });
+            tryWithOperationCleanup(operationId, accountId, () ->
+                ThreadBasedUserCrnProvider.doAs(INTERNAL_USER_CRN, () -> {
+                    boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
+                    if (fullSync) {
+                        long currentTime = Instant.now().toEpochMilli();
+                        stacks.forEach(stack -> {
+                            UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
+                            userSyncStatus.setLastFullSyncStartTime(currentTime);
+                            userSyncStatusService.save(userSyncStatus);
+                        });
+                    }
+                    asyncSynchronizeUsers(operation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter, fullSync);
+                }));
         }
 
         return operation;
     }
 
-    private void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks,
+    @VisibleForTesting
+    void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter, boolean fullSync) {
 
         MDCBuilder.addFlowId(operationId);
