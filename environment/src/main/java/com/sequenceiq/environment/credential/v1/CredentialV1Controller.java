@@ -10,15 +10,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
-import com.sequenceiq.authorization.annotation.ResourceName;
-import com.sequenceiq.authorization.annotation.ResourceNameList;
-import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -71,15 +64,15 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.READ)
-    public CredentialResponse getByName(@ResourceName String credentialName) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    public CredentialResponse getByName(String credentialName) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByNameForAccountId(credentialName, accountId);
         return credentialConverter.convert(credential);
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public CredentialResponse getByEnvironmentCrn(@ResourceCrn String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
@@ -87,15 +80,15 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.READ)
-    public CredentialResponse getByEnvironmentName(@ResourceName String environmentName) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    public CredentialResponse getByEnvironmentName(String environmentName) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByEnvironmentNameAndAccountId(environmentName, accountId);
         return credentialConverter.convert(credential);
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public CredentialResponse getByResourceCrn(@ResourceCrn String credentialCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return credentialConverter.convert(credentialService.getByCrnForAccountId(credentialCrn, accountId));
@@ -112,8 +105,8 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.WRITE)
-    public CredentialResponse deleteByName(@ResourceName String name) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    public CredentialResponse deleteByName(String name) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential deleted = credentialDeleteService.deleteByName(name, accountId);
         notify(ResourceEvent.CREDENTIAL_DELETED);
@@ -121,7 +114,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
     public CredentialResponse deleteByResourceCrn(@ResourceCrn String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential deleted = credentialDeleteService.deleteByCrn(crn, accountId);
@@ -130,8 +123,8 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByResourceNameList(action = AuthorizationResourceAction.WRITE)
-    public CredentialResponses deleteMultiple(@ResourceNameList Set<String> names) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    public CredentialResponses deleteMultiple(Set<String> names) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Set<Credential> credentials = credentialDeleteService.deleteMultiple(names, accountId);
         notify(ResourceEvent.CREDENTIAL_DELETED);
@@ -139,8 +132,8 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByResourceObject(action = AuthorizationResourceAction.WRITE)
-    public CredentialResponse put(@ResourceObject @Valid CredentialRequest credentialRequest) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    public CredentialResponse put(@Valid CredentialRequest credentialRequest) {
         Credential credential = credentialConverter.convert(credentialRequest);
         credential = credentialService.updateByAccountId(credential, ThreadBasedUserCrnProvider.getAccountId());
         notify(ResourceEvent.CREDENTIAL_MODIFIED);
@@ -191,8 +184,8 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.READ)
-    public CredentialResponse verifyByName(@ResourceName String name) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    public CredentialResponse verifyByName(String name) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByNameForAccountId(name, accountId);
         Credential verifiedCredential = credentialService.verify(credential);
@@ -200,7 +193,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public CredentialResponse verifyByCrn(@ResourceCrn String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByCrnForAccountId(crn, accountId);
