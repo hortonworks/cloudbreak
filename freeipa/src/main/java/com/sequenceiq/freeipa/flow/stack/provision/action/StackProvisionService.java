@@ -132,7 +132,7 @@ public class StackProvisionService {
         Set<InstanceMetaData> instanceMetaDataSet =
                 stack.getInstanceGroups().stream().flatMap(instanceGroup -> instanceGroup.getAllInstanceMetaData().stream()).collect(Collectors.toSet());
         for (InstanceMetaData gwInstance : instanceMetaDataSet) {
-            tlsSetupService.setupTls(stack.getId());
+            tlsSetupService.setupTls(stack.getId(), gwInstance);
         }
     }
 
